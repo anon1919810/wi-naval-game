@@ -1,0 +1,122 @@
+[
+  {
+    "check": "All required semantic names exist",
+    "passed": true
+  },
+  {
+    "check": "Hull dimensions: X=27.2 Y=213.4 Z=15.0 metres",
+    "passed": true
+  },
+  {
+    "check": "Metres and waterline root",
+    "passed": true
+  },
+  {
+    "check": "Hull keel -9.9 m; main deck +5.1 m",
+    "passed": true
+  },
+  {
+    "check": "Fore-to-aft layout A B Foremast F1 F2 Q F3 Mainmast X",
+    "passed": true
+  },
+  {
+    "check": "B is superfiring above A",
+    "passed": true
+  },
+  {
+    "check": "F1/F2 closer than F2/F3",
+    "passed": true
+  },
+  {
+    "check": "Funnel 2 circular section",
+    "passed": true
+  },
+  {
+    "check": "Funnels 1 and 3 elliptical",
+    "passed": true
+  },
+  {
+    "check": "Port: exactly 8 secondary guns on correct side",
+    "passed": true
+  },
+  {
+    "check": "Starboard: exactly 8 secondary guns on correct side",
+    "passed": true
+  },
+  {
+    "check": "Mast_Fore: three tripod legs",
+    "passed": true
+  },
+  {
+    "check": "Mast_Main: three tripod legs",
+    "passed": true
+  },
+  {
+    "check": "Sternwalk is aft of X and inside full length envelope",
+    "passed": true
+  },
+  {
+    "check": "A: pitch and barrels inherit turret, barbette is fixed",
+    "passed": true
+  },
+  {
+    "check": "A: front trunnion",
+    "passed": true
+  },
+  {
+    "check": "A: yaw/elevation move gun but preserve mount and barbette",
+    "passed": true
+  },
+  {
+    "check": "B: pitch and barrels inherit turret, barbette is fixed",
+    "passed": true
+  },
+  {
+    "check": "B: front trunnion",
+    "passed": true
+  },
+  {
+    "check": "B: yaw/elevation move gun but preserve mount and barbette",
+    "passed": true
+  },
+  {
+    "check": "Q: pitch and barrels inherit turret, barbette is fixed",
+    "passed": true
+  },
+  {
+    "check": "Q: front trunnion",
+    "passed": true
+  },
+  {
+    "check": "Q: yaw/elevation move gun but preserve mount and barbette",
+    "passed": true
+  },
+  {
+    "check": "X: pitch and barrels inherit turret, barbette is fixed",
+    "passed": true
+  },
+  {
+    "check": "X: front trunnion",
+    "passed": true
+  },
+  {
+    "check": "X: yaw/elevation move gun but preserve mount and barbette",
+    "passed": true
+  },
+  {
+    "check": "All exported meshes have applied unit scale",
+    "passed": true
+  },
+  {
+    "check": "No auto-generated .001 duplicate names",
+    "passed": true
+  },
+  {
+    "check": "Stowed nets and support booms exist on both sides",
+    "passed": true
+  },
+  {
+    "check": "Resting main-gun centre lines clear funnels and superstructures",
+    "passed": true
+  }
+]

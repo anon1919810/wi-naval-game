@@ -1,0 +1,7 @@
+{
+  "status": "passed",
+  "method": "Independent exact trapezoids of linearly interpolated full waterline breadth",
+  "exact_area_m2": 4610.402,
+  "generated_area_m2": 4610.4,
+  "tolerance_for_report_rounding_m2": 0.06
+}

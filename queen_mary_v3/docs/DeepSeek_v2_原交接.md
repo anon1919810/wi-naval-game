@@ -1,0 +1,454 @@
+# 交接文件 · HMS Queen Mary 灰盒资产（给 GPT6）
+
+> 交接日期：2026-09-17 · 交接人：长崎素世（WorkBuddy 会话）· 接收方：GPT6
+> 本文件自包含：不需要上一轮对话即可接手。读完 0–2 节即可开始工作。
+
+## 0. 一句话摘要
+
+一艘**一战英国战列巡洋舰「玛丽王后号」**的游戏灰盒资产，用一份 Python 脚本在 Blender 里程序化生成，
+带两层自动验证（几何不变量阻塞构建／史实假设只报警）。当前状态：**全部检查通过、可重复生成**，
+下一步是等真实图纸（横剖型线图、带日期照片）收口形制，以及在 Unity 里重跑导入验证。
+
+**目标状态**：1913 年 9 月服役原状。**使用场景**：中距 50–200 m 观察，同屏 10–30 艘。
+**性质**：灰盒（greybox），**不是**经过考证的精确复原——`historically_certified: false` 写在数据里。
+
+## 1. 资产在哪里
+
+资产根目录（下称 `$ROOT`）：
+
+```
+C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\
+```
+
+`$ROOT` 下有 4 项：`queen_mary\`（资产本体）、`参考素材\`（3 张待核实参考图）、
+`HMS_Queen_Mary_Greybox.zip`（v1 打包件）、`HMS_Queen_Mary_精修素材清单.md`（需求清单，已加 v2 状态块）。
+
+### `$ROOT\queen_mary\` 文件清单
+
+| 文件 | 性质 | 说明 |
+|---|---|---|
+| `queen_mary.py` | **要改的**（1472 行） | 唯一生成脚本。自包含：只用 Blender 自带 bpy/bmesh/mathutils + 标准库 |
+| `verify_blender.py` | **要改的**（612 行） | 场景验证：26 项几何不变量 + 13 项史实假设，写 `verification.json` |
+| `verify_fbx.py` | **要改的**（106 行） | FBX 往返验证：语义模块、层级、包围盒、枢轴链、装饰合并，写 `fbx_verification.json` |
+| `rebuild.ps1` | **要改的**（58 行） | 一键重建+验收。几何层失败即中止，史实层只打印警告 |
+| `README.md` | 文档 | v2 完整说明（结构、模块合同、布局表、数据出处、未决项） |
+| `HMS_Queen_Mary_1913_Greybox.blend` | 产物 | Blender 源场景，内嵌脚本文本。sha256 `f525bb76…e6984` |
+| `HMS_Queen_Mary_1913_Greybox.fbx` | 产物 | Unity 导入件。sha256 `08f01f31d8bea8ccf985241bf29c33604d99e52a8b3467f12284411fec25bd44` |
+| `object_manifest.json` | 证据 | 每个对象的角色／父子／原点／尺寸／世界包围盒 + 模块预算 + 全船事实表 |
+| `verification.json` | 证据 | 场景验证结果（含 `layer` / `blocking` / `source` / `status` 字段） |
+| `fbx_verification.json` | 证据 | FBX 往返结果 |
+| `firing_arcs.json` | **游戏数据** | 由几何扫描算出的四座炮塔射界（可重算） |
+| `damage_model.json` | **游戏数据** | 17 个语义命中区域、防护厚度、系统图（弹药库→炮塔、锅炉→主机→轴、烟囱排烟源、舵机→舵、火控→四塔） |
+| `hydrostatics.json` | **游戏数据** | 型值表积分出的排水体积／水线面／浮心，并与公开满载排水量对比（当前 −2.27%） |
+| `buoyancy_compartments.json` | **游戏数据** | 14 个可进水舱室的体积、形心、渗透率、可进水体积（合计 7,176 m³ = 浸水体积 23.4%） |
+| `ship_contract.json` | **游戏数据** | 嵌套契约（给人看/给工具用）：模块名分组、炮塔枢轴/耳轴/炮口/初始偏航/仰角限值 |
+| `ship_contract.unity.json` | **游戏数据** | 同一份契约的扁平版，**给 Unity `JsonUtility` 直接读**（字典拍平成 `module_roles`/`file_refs`） |
+| `build_result.json` | 证据 | 构建状态、Blender 版本、`geometry_sha256`、同进程二次生成比对 |
+| `objects.csv` / `created_objects.txt` | 证据 | 对象的表格版／纯文本版 |
+| `Overview/Starboard/Top/Bow/Stern_Detail/Stern_Aft.png` | 产物 | 六个预览视角（Workbench 渲染）。侧视、俯视船头在右 |
+| `_diagnose_hidden.py` | 诊断工具 | 检查内部模块是否真被船壳遮住（一次性调查用，保留备用） |
+| `_v1_backup/` | **只读备份** | v1 的脚本＋验证＋清单＋README，回退用 |
+| `unity_verification.json` | **已失效证据** | 记录的是 **v1** 的 FBX（`sourceFbxSha256` 与当前不符）。v2 的由 Unity 侧校验器重写 |
+
+`$ROOT\unity_integration\`：**Unity 接线包（2026-09-17 新增）**——不是资产本体，是准备贴进 Unity 工程的东西。
+`Assets/` 下三个 C# ＋ `sync_to_unity.ps1`（一键同步）＋ `README.md`（接入步骤与踩坑）。
+详见第 14 节。
+
+`$ROOT\参考素材\`：3 张图，**都不可作为确定证据**——01 总布置线图（日期待核实）、
+02 历史照片（舰名与日期未核实，只能作一般层次参考）、03 彩图（标注 1916-05，只借用共同轮廓）。
+
+## 2. 坐标系与尺度（硬约定，改动前先读）
+
+| 项目 | 约定 |
+|---|---|
+| 单位 | 1 Blender 单位 = 1 m，所有物体 scale = 1 |
+| Blender 轴向 | +X 右舷、+Y 舰艏、+Z 向上、Z=0 水线 |
+| 根原点 | `Queen_Mary`，位于船长中点／中线／水线交点 |
+| 主尺度（规定值，精确） | 长 213.4 × 宽 27.2 × 型深 15.0 m（Y −106.7…+106.7，X ±13.6，Z −9.9…+5.1） |
+| 主甲板 / 艏楼 / 艉楼 | +5.1 / 6.85→7.50（舷弧）/ 5.10→5.72（舷弧） |
+| 排水量 / 航速 | 27,200 t 正常、32,160 t 满载；28 节（试航 28.35） |
+| Unity 导入后 | 船体世界尺寸 X 27.2 × Y 15.0 × Z 213.4，船头朝 +Z，龙骨 Y≈−9.9，主甲板 Y≈+5.1 |
+
+## 3. 生成脚本的架构（改代码前必读）
+
+核心思想：**一个型值表驱动整艘船**，附件不许手填坐标。
+
+```
+OFFSETS  每站一行 (y, 甲板半宽, 水线半宽, 龙骨 z, 平板龙骨半宽)，22 站
+   ├─ halfbeam_at(y, z)    任意站位/高度的半宽 —— 一切贴体附件的唯一吸附依据
+   ├─ deck_halfbeam(y)     甲板边线
+   ├─ forecastle_z(y) / quarterdeck_z(y)   带舷弧的甲板高度
+   └─ keel_at(y)           龙骨线
+```
+
+**换真实型线不需要改代码**：把 `hull_offsets.json` 放进 `queen_mary\` 即可覆盖内置表：
+
+```json
+{"sources": "图纸编号/页码", "stations": [[y, 甲板半宽, 水线半宽, 龙骨z, 平板半宽], ...]}
+```
+
+产物里 `offsets_source` 会显示当前用的是 `builtin_estimate` 还是外部文件。
+
+主要函数（按调用顺序）：`load_offsets → reset_scene → make_materials → make_hull → make_decks
+→ make_superstructure → make_turret×4 → make_casemates → make_funnels → make_mast×2
+→ make_sternwalk → make_nets → make_underwater_gear → make_armour → make_damage_modules
+→ make_fire_control → make_fx_anchors → asset_manifest → preview_setup → export_fbx`。
+
+网格只用 `from_pydata` 造（`loft_rings_mesh` / `lathe_mesh` / `rod_mesh` / `frustum_mesh` /
+`box_mesh` + `MeshBuilder` 合并小件），**不调用 `bpy.ops.mesh.primitive_*`**，避免上下文依赖。
+
+调参入口集中在文件顶部：`OFFSETS`、`TURRETS`、`FUNNELS`、`CASEMATE_YS`、`CASEMATE_PLACEMENT`、
+`DAMAGE_VOLUMES`、`BELT_YS`、`ARMOUR_DECKS`、`SHIP`（事实表）、`SOURCES`（出处）。
+
+日常命令（在 `queen_mary\` 下）：
+
+```powershell
+.\rebuild.ps1                          # 重建 + 渲染 + 三层验证
+.\rebuild.ps1 -SkipRender              # 只重建模型与清单，保留旧预览图
+& "<blender>" --background --factory-startup --python queen_mary.py -- --out "$PWD" --check-repeat
+```
+
+`--check-repeat` 会在同进程里重建两次并比对几何 sha256，是"可复现"的自证。
+
+## 4. 模块合同（战斗系统接线用）
+
+**保持独立、逐个可寻址**（禁止合并）：
+
+| 类别 | 对象 |
+|---|---|
+| 船体／甲板 | `Hull`、`Forecastle`、`Quarterdeck` |
+| 上层建筑 | `Superstructure`（组）+ `Bridge`、`Bridge_Upper`、`Bridge_Wings`、`Bridge_Visor`、`Conning_Tower`、`B_Superfiring_Deckhouse`、`Aft_Deckhouse`、`Aft_Platform` |
+| 主炮（16 个可动节点） | `Turret_A/B/Q/X`（水平枢轴）→ `Elevation_*`（俯仰枢轴，前部耳轴 local y=4.0）→ `Barrel_*_Port/Starboard`（原点即各自耳轴，炮口在局部 +Y 12.4 m） |
+| 炮座 | `Barbette_A/B/Q/X`（固定，含 `armour_mm_above_deck/below_deck`） |
+| 烟囱／桅杆 | `Funnel_1/2/3` + `Funnel_*_Uptake`、`Mast_Fore`、`Mast_Main` |
+| 副炮 16 门 | `Casemate_Port_1..8`、`Casemate_Starboard_1..8`（原点在炮廓口，局部 +Y 指向舷外，可各自转向） |
+| 舰艉／网具 | `Sternwalk`、`Torpedo_Net_Port/Starboard_Stowed` |
+| 装甲 10 件 | `Armour_Belt_229mm`、`Armour_Upper_Belt_152mm`、`Armour_Belt_Taper_*`、`Armour_Deck_64mm/25mm`、`Armour_Bulkhead_Fwd/Aft` |
+| 损伤体量 14 个 | `Magazine_A/B/Q/X`、`Boiler_Room_1..7`、`Engine_Room_1/2`、`Steering_Gear` |
+| 其他 | `Rudder`、`Propeller_Shafts`、`Rangefinder_CT`、`FX_Anchors`（6 个挂点） |
+
+**只合并装饰（纯外观、无战斗语义）5 个**：`Casemate_Openings_Port/Starboard`、`Sternwalk_Rails`、
+`Torpedo_Net_Port/Starboard_Mesh`。
+
+接线要点：
+
+- 炮塔旋转：Blender 里绕局部 Z；A/B 初始 0°（朝艏），Q/X 初始 180°（朝艉）。
+  抬炮绕 `Elevation_*` 局部 +X 正转。**导入 Unity 后要记录初始局部旋转再叠加命令**，
+  不要清零模型内部旋转（README 里有现成 C# 片段）。
+- 每个对象都带自定义属性：`component_role`（角色）、`component_id`、`dimensions_status`，
+  战斗模块另有 `volume_defined`、`hit_zone`、`source`、`armour_mm` 等。
+- 对象预算：**可渲染网格 ≤ 65、总对象 ≤ 110**（验证会拦）。装甲与内部体量在 Unity 里应放到
+  **仅碰撞层**（关 MeshRenderer 或用碰撞代理），它们不该占 draw call。
+- 特效挂点：`FX_Funnel_*_Smoke`（三座烟囱顶端同高 +22.0 m）、`FX_Mast_Fore/Main_Top`、`FX_Standard_Aft`。
+- 当前实测：98 个对象（82 网格、9,660 三角面），可动模块 16、战斗模块 47、装饰 5。
+
+## 5. 本轮（v2）做了什么
+
+| # | 改动 | 原因 |
+|---|---|---|
+| 1 | 舰体改**型值表驱动**（`OFFSETS` 22 站 + 外部覆盖入口） | v1 全船共用一个缩放截面，做不出进流段／去流段，艏艉收成刀锋 |
+| 2 | **巡洋舰式尾**：尾部甲板保持宽度（Y=−100 处半宽 6.2，艉端 2.2） | 本舰是宽尾＋舰尾步廊，v1 的刀锋尾不符合形制 |
+| 3 | **舰尾步廊由 `halfbeam_at()` 派生**（舷外 1.3 m） | v1 手填绝对坐标，外缘超出船体 2.29 m、艉端悬空；现在这类错误不可能再发生 |
+| 4 | 甲板拆成 `Forecastle` / `Quarterdeck` 两个模块，带舷弧 | v1 是单层平板，侧视像一块砖 |
+| 5 | 内部空锚点→**14 个体量 + 10 件装甲**，全部带出处 | v1 是 8 个零尺寸空对象，战斗系统无从下手 |
+| 6 | **验证拆两层**：20 项几何不变量（阻塞）+ 12 项史实假设（只报警） | v1 把灰盒设定写成断言，方案本身错也全绿 |
+| 7 | 装饰件合并、战斗模块全保留 | 按用户要求"保留部分模块化" |
+| 8 | 新增 `fit_module()`：体量自动夹进船体壳内 | 方块角点会戳出曲面船壳 |
+| 9 | 新增 `firing_arcs.json`：射界由几何扫描算出 | 射界是玩法数据，手填不可靠；现已自动产出 |
+| 10 | 副炮层高改成开关 `CASEMATE_PLACEMENT` | 史料那句话有两种读法，不替用户定案 |
+
+对象数 169→98、网格 150→82、面数 6,232→9,660（舰体更细但依然极轻）。
+
+**新几何不变量立刻抓到 4 个真缺陷**（都已修）：艏部渐变装甲板在船宽不足处超宽 2 mm；
+测距仪悬空 0.6 m；主桅底座留了 v1 的 0.15 m 余量；锅炉舱／机舱／弹药库的方块角点戳出船壳。
+
+### 5b. 战斗数据层（同日 20:36 追加）
+
+脚本现在另外产出四个游戏侧数据文件（见第 1 节表格）。要点：
+
+- **系统图**是数据，也写在对象上（每个模块带 `system_links` / `hit_zone` / `exposure` 属性）。
+  每条链接标 `published`（系统存在性有出处）或 `estimate`（配对关系是估算）。
+- **静水力是型线估算的独立校验**：浸水体积 30,663.7 m³ → 31,430 t，对公开满载 32,160 t 差 **−2.27%**；
+  LCB +1.58 m、VCB −3.89 m、水线面 3,073.6 m²。这条已固化成 assumption 层检查——**改动型值会立刻报警**。
+- **进水数据**：可进水体积 7,176 m³（占浸水体积 23.4%），只有体积与形心，**还没有水密分割和稳性计算**。
+- **契约就是给 Unity 用的字段来源**，同一份数据出两个文件：
+  `ship_contract.json`（嵌套、给人看）与 **`ship_contract.unity.json`（扁平、给 `JsonUtility` 读）**。
+  后者把 `module_names_by_role` / `files` 两个字典拍成 `module_roles` / `file_refs` 数组，
+  因为 `JsonUtility` 不支持字典；外加 `mesh_count` 供 Unity 侧核对网格数。
+  **两个文件同一次构建产出，不可能互相漂移。** 不要再从 `object_manifest.json` 里手抄字段。
+- 新增 9 项检查（8 几何 + 1 史实）：其中「Floodable compartments do not overlap」当场抓到两个机舱
+  有 1 m 重叠（已修）；另有两条专为 Unity 侧而设 —— **契约里的 98 个名字必须逐个在场景里存在**，
+  以及**扁平契约里不得残留嵌套字典、对象数与网格数必须与场景一致**。
+  当前总计 **41 项检查，0 失败**。
+
+## 6. 验证体系与排查顺序
+
+`verification.json` 结构：
+
+```json
+{"status":"passed","counts":{"geometry":28,"assumption":13,"failing_blocking":0},
+ "checks":[{"check":"…","passed":true,"layer":"geometry|assumption",
+            "blocking":true,"source":"wiki","status":"matches_source","evidence":{}}]}
+```
+
+- **geometry（阻塞，26 项）**：语义名齐全、主尺度与包络、单位与原点、模块顺序、**附件不得超出船体包络**
+  （逐顶点对 `halfbeam_at` 判定 + 每角色舷外允差）、**结构不得悬空**、甲板模块必须落在甲板函数上、
+  内部体量必须在壳内、炮塔枢轴链与运动、静置炮管净空、副炮每舷 8 门且原点在船体表面、
+  装饰已合并而战斗模块独立、对象预算；以及**派生数据层**：四个数据文件存在、弹药库↔炮塔↔指挥仪
+  链路齐全、7 个锅炉舱与三座烟囱的排烟源齐全、可进水舱室互不重叠、静水力已算出、
+  `ship_contract.json` 与场景一致。
+- **assumption（非阻塞，13 项）**：每条史实断言带 `source` 与 `status`
+  （`matches_source` / `user_spec_only` / `conflicts_with_source`）。
+  **它们不会因为"通过"而变成考证结论**——这是 v1 的教训。
+  其中一条是**型线校验**：积分排水量 31,430 t vs 公开满载 32,160 t（−2.27%），阈值 ±15%。
+
+失败时按此顺序排查：① `build_result.json` 有无 traceback（脚本本身报错）→ ② `verification.json` 里
+`layer=geometry` 且 `passed=false` 的那条及其 `evidence`（通常直接给出对象名和数值）→
+③ 改 `queen_mary.py` 后**必须完整重建**（`-SkipRender` 会保留旧预览图，别把旧图当结果）→
+④ 若改的是导出／轴向，重跑 `verify_fbx.py`。
+
+## 7. 射界数据 `firing_arcs.json`
+
+生成方式：以炮管中心线为样本，对障碍物（烟囱、上层建筑、桅杆、甲板、其他炮塔）**包围盒**做净空测试，
+要求 0.30 m；5° 一档扫 0–355°、仰角 0/5/10/15/20°，输出每档可射角度区间。
+
+**角度零位 = 该炮塔的静置朝向**（A/B 朝艏，Q/X 朝艉，见 `rest_yaw_deg`）。当前 0° 仰角的可射比例：
+A 0.76、B 0.79、Q 0.85、X 0.90。定性上符合史实：**A/B 不能向艉射**（被上层建筑挡住）、
+**Q 不能向前射**（中置炮塔被舰桥与前部结构挡住）、X 高仰角下接近全向。
+
+它是**保守近似**（不是弹道或爆风模型），换型线或移动部件后会重新算，不要手改这个文件。
+
+## 8. 数据与出处体系
+
+`queen_mary.py` 顶部 `SOURCES` 定义全部出处；任何非显然数字都带 `source` 字段，
+`estimate` 表示灰盒估算、**不可当史实引用**。已编码的 1913 年事实：
+
+- 主炮：4 × 双联 343 mm（13.5″/45 Mk V），每炮 110 发、全舰 880 发，1,400 lb 弹、760 m/s、20° 时 21,708 m。
+- 副炮：16 × 102 mm（4″/50 Mk VII），单层甲板每舷 8 门，6–8 发/分、每炮 150 发、15° 时 10,400 m。
+- 动力：42 台 Yarrow 锅炉分 **7 个锅炉舱**、2 个主机舱、4 轴；设计 75,000 shp、试航 83,350 shp。
+- 装甲：主带 9″（229 mm）KC、上带 6″、舱壁 4″、炮座 9″/8″、炮塔面 9″／顶 64–83 mm、司令塔 10″、烟道 38 mm。
+  煤 3,660 t + 油 1,190 t，续航 5,610 nm @10 kt。
+- 火控：Pollen Argo Clock Mk IV；司令塔顶 9 英尺测距仪（2.74 m 基线）已建模为 `Rangefinder_CT`；
+  每座炮塔各一台 9 英尺测距仪，B 与 X 另有辅助控制位。
+- 1913 原状：**无高射炮**（1914-10 起才加 2 门）、防雷网在位（战争中期拆除）、
+  指挥仪仰角上限 15°21′（棱镜 1916 年才装）。
+- 舰尾步廊：本舰是英国第一艘装舰尾步廊的战列巡洋舰，属识别特征。
+- 鱼雷：2 具 21 英寸水下舷侧发射管（**尚未建模，见下**）。
+
+内部舱室的位置与尺寸**都是估算**，只保证落在船体壳内（脚本自动夹紧并记录 `clamped_to_hull`）。
+装甲厚度是公开数据，装甲覆盖范围是估算。
+
+## 9. 已知不确定项（只能靠素材收口）
+
+| # | 不确定项 | 现状 | 最小解法 |
+|---|---|---|---|
+| 1 | **舰体型线** | `OFFSETS` 是估算 | 拿到横剖型线图 → 写 `hull_offsets.json`，其余全部自动跟随 |
+| 2 | **副炮层高** | 开关 `CASEMATE_PLACEMENT`，默认 `between_decks`（主甲板上、艏楼甲板之下）；另一档 `on_forecastle` 会抬到艏楼甲板并自动补舷墙 | 一张带日期的照片／图纸定案。（史料原文"大部分装在艏楼甲板的炮廓内"有两种读法；"前部炮廓进浪、后加围板"这条记载反而支持低处布置） |
+| 3 | **桅杆形制** | 现为两座三脚桅（用户要求），验证里标 `user_spec_only` | `worldwar1.co.uk` 记本舰原为单桅杆桅、后改三脚桅 → 需带日期照片 |
+| 4 | **纵向站位** | 炮塔／烟囱／桅杆站位、艏楼艉楼分界（Y=−18）均为估算 | 高分辨率总布置图（侧视+俯视+各层甲板，带尺寸注记） |
+| 5 | **炮廓内部、网具、桅顶细节** | 仍是简化表达 | 局部照片；或不收口（中距观察下影响小） |
+| 6 | **鱼雷发射管** | 未建模 | 2 × 21″ 水下舷侧管；水下不可见，可只做数据 + 命中体 |
+| 7 | **LOD 链** | 未做 | 中距 50–200 m 需要 LOD0≤25 节点、LOD1≤10、LOD2≤4、LOD3 剪影 |
+
+## 10. 下一步优先级
+
+1. **在 Unity 里重跑导入验证**（`unity_verification.json` 是 v1 的，已失效）。确认对象数 98、
+   船体尺寸 X 27.2 × Y 15.0 × Z 213.4、炮塔枢轴符号与轴向。
+2. **Unity 侧接线**（数据已备好，不要再手抄字段）：
+   - 读 `ship_contract.json`（扁平、`JsonUtility` 友好）建 `ShipDefinition` ScriptableObject；
+   - 构建期校验「契约里的模块名集合 ⊆ Prefab 节点名」，缺一个就 fail fast；
+   - 建议加一个 `AssetPostprocessor` 强制记录在案的导入设置（Scale Factor 1、Use File Scale、
+     Bake Axis Conversion、Preserve Hierarchy），别让它被人悄悄改掉。
+3. **LOD 链 + 碰撞代理**（离线可做）：按 50–200 m／10–30 艘把对象预算真正落地——
+   LOD1 合并装饰与细小件、LOD2 只留炮塔可动、LOD3 剪影；碰撞代理用简化的船体/上层建筑凸包，
+   炮弹、选中、遮挡都要它。装甲与内部体量走仅碰撞层。
+4. **射界精度升级**（离线可做）：把障碍物从包围盒换成真实网格 BVH，输出更紧的射界，
+   并额外输出**盲区**给 AI 用。
+5. **回归基线**（离线可做）：把 `geometry_sha256`、主尺度、模块名集合、关键 z 值固化成
+   `baseline.json`，每次重建自动比对，非预期变化立刻报警。
+6. **用现有图纸做粗测校核**（离线可做，但**只作校核不作证据**）：`$ROOT\参考素材\` 里的
+   总布置线图与 1916 彩图（另有高分辨率版）都带比例尺和俯视图，可以量出炮塔／烟囱的纵向站位比例、
+   艉廊范围，与模型当前值对照。适合作为「估算是否离谱」的体检，不能替代考证图纸。
+7. **需要素材才能做的**：型线图（→ `hull_offsets.json`）、带日期照片（定副炮层高与桅杆形制）、
+   高分辨率总布置图（校正纵向站位）。详见第 9 节。
+
+## 11. 环境陷阱（本机实测，能省你半小时）
+
+- Blender 是 **Microsoft Store/MSIX** 安装。`C:\Program Files\WindowsApps\...\blender.exe`
+  **读不到也调不动**。唯一入口：`%LOCALAPPDATA%\Microsoft\WindowsApps\blender-launcher.exe`。
+- **这个别名是异步的**：立即返回、stdout 与 exit code 全空，真 Blender 还在后台跑。
+  连发两次会读到**上一轮**的产物（症状：改了脚本，证据却是旧格式）。
+  **正解**：用 PowerShell 同步跑 —— `& $blender --background ... *> $log`（`&` 会等进程结束并给
+  `$LASTEXITCODE`），构建类命令配一个「轮询产物文件」的循环（产物时间戳 ≥ 起始时刻）。
+  让脚本自己把结论写文件，别依赖启动器 stdout。
+- `Add-Type` 被沙箱拦（不能拿 System.Drawing 裁图）；从 Bash 调 `powershell.exe` 也被拦。
+- Bash 里 `A && B && nohup C & disown` 会把**整条链**后台化；等待循环过长会触发前台超时自动转后台，
+  分不清是哪一轮的产物 → **一次调用只做一件事**（启动／轮询／读结果分开）。
+- 渲染是 Workbench + MATERIAL 着色，快但只是预览；材质槽在 URP 里要另指定
+  `Universal Render Pipeline/Lit` 灰色材质，**Blender 节点材质不算已验证的 URP Shader**。
+
+## 12. 验收基线（检测漂移用）
+
+| 指标 | 当前值 |
+|---|---|
+| `build_result.json.geometry_sha256` | `49e786f049c25783785df858c8cf8a50fa917f08e065bd7e2eadef47386b648c` |
+| `repeat_generation_passed` | `true` |
+| Blender 版本 | 4.5.14 LTS（脚本用 3.x/4.x 共用 API，但未逐版本验证） |
+| 场景验证 | 41 项（28 geometry + 13 assumption），0 失败 |
+| FBX 验证 | 通过，18 项检查，98 对象／82 网格，最大位置误差 1.81e-5 m，Hull 有符号体积 +54,500.6 m³ |
+| **Unity 验证（真机）** | **通过**，Unity 2022.3.62f3c1 + **URP 14.0.12**，98 transform／82 mesh，舰艏 +Z，向上 +Y，全部材质槽用 URP/Lit |
+| FBX sha256 | `1dcfdf2647e0790c57c796b615a80dcd797feb17eb8e2124066b3fbc13cba576` |
+| Blend sha256 | `cbec87a041278c071390497a7557f60de26d06bb2d4267acbb95174b5b4ab084` |
+| 静水力 | 浸水体积 30,663.7 m³，排水量 31,430 t（对公开满载 −2.27%），LCB +1.58 m，VCB −3.89 m |
+| v2 首版基线（对照） | `geometry_sha256 = ab491e53…`（机舱重叠修复前的版本） |
+| v1 基线（对照） | `geometry_sha256 = c994bcb4e003b29616a5394fd29753bf9f3dfb0c31580ba5f6f59f7230564438` |
+
+若重建后 `geometry_sha256` 与上表不同：先确认是有意改动；无意变动说明脚本有非确定性，
+用 `--check-repeat` 复现，重点查遍历顺序／浮点累积／`dict` 顺序。
+
+## 13. 其他记录位置
+
+- 需求清单与素材状态：`$ROOT\HMS_Queen_Mary_精修素材清单.md`（顶部有 v2 状态块）
+- 本轮详细工作日志：`C:\Users\杨睿\WorkBuddy\2026-09-17-17-33-38\.workbuddy\memory\2026-09-17.md`
+- 跨项目环境经验：`C:\Users\杨睿\.workbuddy\MEMORY.md`（含 Blender Store 版调用坑）
+- 可复用流程技能：`C:\Users\杨睿\.workbuddy\skills\blender-procedural-asset\SKILL.md`
+- v1 原件与回退：`$ROOT\queen_mary\_v1_backup\`（脚本、验证、manifest、README 齐备）
+
+## 14. Unity 接线包（2026-09-17 新增，`$ROOT\unity_integration\`）
+
+引擎侧目前**还没有海战工程**（本机唯一 Unity 工程是 `D:\Unity\Projects\ThinkingFactory`，属另一个项目）。
+这一包是为了"工程一建好就能一键接入"而准备的。
+
+| 文件 | 作用 |
+|---|---|
+| `Assets/Scripts/Naval/ShipContract.cs` | 运行时契约类，字段名与 `ship_contract.unity.json` 逐字对应；`Load(shipId)` |
+| `Assets/Editor/ShipModelImportSettings.cs` | `AssetPostprocessor` 钉死导入设置（路径含 `/resources/ships/`） |
+| `Assets/Editor/ShipAssetValidator.cs` | 菜单 `Tools/Naval/Validate ship asset`：契约×模型校验，写回 `unity_verification.json` |
+| `sync_to_unity.ps1 -ProjectPath <工程>` | 一键把代码与资产同步进工程（路径全部从 `$PSScriptRoot` 推导，脚本内无中文路径） |
+| `README.md` | 接入步骤、每条导入设置的理由、纪律清单、批处理用法 |
+
+设计要点（**接手时别把它们改掉**）：
+
+- **断言结果，不断言设置。** 舰艏方向由 `Barbette_A − Barbette_X` 判定必须 ≈ +Z；向上由
+  `Rangefinder_CT − Steering_Gear` 判定必须 ≈ +Y；`Steering_Gear` 必须在 y < 0（水线即 y = 0）。
+  导入设置那个开关可以被任何人改，结果不会骗人。
+- **偏航/俯仰的正负号是实测的，不是猜的。** `ProbeAxis()` 对枢轴节点的 ±X/±Y/±Z 逐个试，
+  找出真正在转炮口的那个轴，并记录"正方向 = 向右舷 / 向上"的符号。
+  原因：Blender 用 `axis_up='Y'` 导出会把轴向转换烘进节点，**局部 +Y 未必是舰体竖直轴**，
+  照直觉写 `Euler(0, yaw, 0)` 很可能转反，而画面上不一定立刻看得出来。
+- **第一次跑完要把测到的符号填回 `BaselineYawSign` / `BaselinePitchSign`**（现在都是 0 = 只报告）。
+  填完它们才变成阻塞断言，以后任何改动轴向的行为都会立刻红。
+- 导入设置三条不可动的理由：`isReadable=true`（运行时要在 mesh 上查询）、`weldVertices=false`
+  （硬边靠不共享顶点，焊接会焊平而 **Blender 端验证发现不了**）、`optimizeMesh*=false` +
+  `meshCompression=Off`（顶点顺序与数据必须可预测，否则对象计数与 sha256 基线失去意义）。
+- **刻意不设 `bakeAxisConversion`**：它会改根节点旋转，使实测轴向全部失效。
+
+**已完成的验证（2026-09-17 21:30，Unity 2022.3.62f3c1 真机）**
+
+工程：`D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval`（注意 Hub 的"位置+名字"会多套一层目录；
+模板是 **Built-in 3D Core**，不是 URP）。编辑器在 `D:\Unity\Editor\2022.3.62f3c1\Editor\Unity.exe`。
+
+三个 `.cs` **编译零错误**，验证器通过：98 transform／82 mesh（与契约逐个对上）、
+主尺度 27.2×15.0×213.4、龙骨 −9.9、主甲板 +5.1、舵机 −2.5、根缩放 1、
+**舰艏 +Z、向上 +Y**、契约 98 个名字无缺失、Hull 有符号体积 +54,500.6 m³。
+偏航/俯仰/绕序三个符号已实测并**冻结**进 `ShipAssetValidator.cs` 顶部。
+
+**★ 本轮最重要的发现：导出的 FBX 曾经舰艏朝 −Z（Unity 的"后方"）。**
+尺寸检查完全看不出来（船体纵向对称），后果是 `transform.forward` 指着舰艉、
+所有静置偏航差 180°。用不对称标记件探针测出的确切映射是：
+
+```
+Unity = (-x, z, -y)       Blender +Y(舰艏) -> Unity -Z，Blender +X(右舷) -> Unity -X
+```
+
+这是一次反射（det = −1），所以**船没有镜像**，等价于"整船绕竖轴转 180°"。
+修法：`queen_mary.py` 的 `export_fbx()` 在导出时把根节点绕竖直轴转 `EXPORT_YAW_DEG = 180°`
+（转完复原，所以 `geometry_sha256` 不变），出货 FBX 里舰艏指向 −Y，到 Unity 就落在 +Z。
+**`verify_fbx.py` 读同一个常量、对期望坐标施加同一偏转**，两边不会漂。
+
+两点必须记住：
+
+1. **`axis_forward` / `axis_up` 这两个导出开关在 Unity 侧没有效果。** 实测把它从 `'-Z'` 改成
+   `'Z'`，FBX 哈希变了而 Unity 里的朝向一字不差 —— Unity 的导入器忽略文件头声明的 front 轴。
+   **朝向只能在几何上拧。**
+2. **"向上"不能用「司令塔顶 − 舵机」判**：两者纵向相隔 143 m，坐标差被纵轴主导，
+   会得出"向上是 −Z"的假结论（我第一版就是这么写错的）。要用 **Hull 的甲板 vs 龙骨**。
+
+**可以不开界面跑验证**（这条让闭环真正自动化了）：
+
+```bash
+"D:/Unity/Editor/2022.3.62f3c1/Editor/Unity.exe" -batchmode -quit \
+  -projectPath "<工程根>" -executeMethod Naval.EditorTools.ShipAssetValidator.ValidateBatch \
+  -logFile "<日志>"
+```
+前提：没有 `Temp/UnityLockfile`。退 0＝通过、1＝失败，报告写回资产目录。
+⚠️ **别在 2 分钟内连起两个 Unity 进程**：会撞上许可证 IPC 握手失败
+（`No ULF license found`），批处理**静默什么都不做就退出**——没有编译错误、没有 `[Naval]` 输出、
+报告也不生成。**判据：日志里有没有 `[Naval]` 那一行。**
+
+**轴向复核工具（换船时重跑）**：`queen_mary/probe_axis_convention.py`（Blender 侧塞入 5 个
+不对称标记件、按资产同款参数导出）＋ `unity_integration/Assets/Editor/AxisProbe.cs`
+（菜单 `Tools/Naval/Probe axis convention`），结果写 `_axis_probe_unity.txt`。
+船体左右对称，**任何对船本身的检查都判不出左右舷**，所以换新船时值得重跑一次。
+
+**渲染管线：已切到 URP 14.0.12**（原模板是 Built-in 3D Core）。
+包从**国内源 `packages.unity.cn`** 解析，不需要梯子；版本号照抄同机同版本 Unity 另一个工程
+实际解析到的值。切换由 `UrpSetup.cs` 一条命令完成（`Tools > Naval > Set up URP`）：
+
+1. 建 `Assets/Settings/QueenMary_UniversalRenderer.asset` + `QueenMary_URP.asset`，
+   设 `GraphicsSettings.defaultRenderPipeline`（各质量档为 null 时继承它，所以只设默认就够）。
+2. 按**契约的 `materials` 表**建 6 个 URP/Lit 材质到 `Assets/Materials/Naval/`。
+   灰度值的唯一来源是 Blender 的 `MATERIAL_SPECS`，Unity 不再各写一份。
+   两边都是**线性**值，直接搬运，不做 sRGB 转换；`_Smoothness = 1 - roughness`。
+3. 重导 FBX，让 `ShipMaterialRemap.cs` 按材质名把槽重映射到 URP 材质。
+
+**这一块有两条静默陷阱**（都已在代码里处理，接手时别改回去）：
+
+- **材质会静默变品红**：FBX 内嵌材质走 Built-in Standard shader，URP 下整船品红，
+  而几何/层级/坐标全对 —— 其它检查一条都不会响。所以 `ShipMaterialRemap` 找不到材质时
+  **打警告并列出缺失名字**；验证器另有一条兜底：每个材质槽的 shader 名必须以
+  `Universal Render Pipeline/` 开头，否则阻塞失败。当前实测
+  `shadersInUse = ["Universal Render Pipeline/Lit"]`、非 URP 槽 0 个。
+- **renderer data 不会被自动补资源**：`UniversalRenderPipelineAsset.Create(rendererData)`
+  内部只对**管线自己**调 `ReloadAllNullIn`。官方流程还多做一步
+  `rendererData.postProcessData = PostProcessData.GetDefaultPostProcessData()`（该方法 internal，
+  但内部就是一句 `LoadAssetAtPath(packagePath + "/Runtime/Data/PostProcessData.asset")`，
+  用公开 API 复刻即可）。
+- ⚠️ **别拿 `ResourceReloader.ReloadAllNullIn` 的返回值当完整性判据**：它的语义是
+  「**有没有东西被重载**」（源码注释 `True if something have been reloaded`），
+  第二次跑必然返回 false —— 当判据会造成**永久误报**。完整性要查具体字段
+  （`rendererData.shaders.blitPS` 等是否非空）。
+
+**渲染校验图（2026-09-17 23:07 新增，`ShipPreviewRender.cs`）**
+
+`Tools > Naval > Render URP check images`（批处理 `Naval.EditorTools.ShipPreviewRender.RenderBatch`）
+开临时相机+灯渲五个视角（Overview / Starboard / Top / Bow / Stern_Aft），存 `queen_mary/unity_preview/`，
+并**逐像素检查**（报告写 `unity_render_check.json`）：
+
+| 判据 | 阈值 | 抓什么 |
+|---|---|---|
+| 品红像素占比 | < 2% | 材质 shader 不对。判据是「红蓝都高且明显高于绿」——灰色船体 r≈g≈b，永不误报 |
+| 舰船像素占比 | > 1% | 管线配错 → 全黑/只剩背景 |
+| 包围盒完整入画 | 必须 | 相机太近把船切了（会自动往后拉 8 次） |
+
+实测结果：**5 个视角全通过，品红 0.000%，舰船占比 1.1–15.7%，灰度 13–20 级**
+（级数多才说明确实按部位用了不同材质）。报告另记两条**只报告不断言**的事实：
+`bowOnScreen`（舰艏在画面哪一侧，正对视角给 `head-on`）与 `greyLevels`。
+
+**这里有个值得记住的教训**：第一版侧视图偏暗，我**把艉部的钝端看成了舰艏**；
+是俯视图（艏尖艉宽，形状本身就是判据）＋报告里的 `bowOnScreen=right` 一起纠正了我。
+**数值事实比眼睛可靠** —— 这也是为什么这条要写进报告而不是靠人看图。
+
+两个实现坑：① 批处理里**不能新建场景**（当前是"未保存的未命名场景"时 Unity 会拒绝开附加场景，
+`Cannot create a new scene additively with an untitled scene unsaved`），改成把临时物件放进当前场景、
+finally 里销毁并还原渲染设置；② **正交相机的自动取景要放 `orthographicSize` 而不是距离**
+（正交下距离不影响构图，拉 8 次也没用），且正俯视的 `LookAt` 上方向不能取 +Y（与视线平行会退化），
+取 -X 才能让船长横放在画面里、舰艏落在右侧。
+
+**尚未做的**：LOD 链、碰撞代理、`ShipDefinition` ScriptableObject。
+
+## 15. 给 GPT6 的三条原则
+
+1. **不要把灰盒设定写成史实断言**。新加的历史结论要么有 `source`，要么标 `user_spec_only`。
+2. **不要手填绝对坐标**。任何贴体附件都从 `halfbeam_at(y, z)` 派生；这条规则是 v1 悬空舰尾步廊的教训。
+3. **改完必须重建 + 跑验证**，并把 `geometry_sha256` 的变化写进交接记录；不要以"我记得改过"结案。

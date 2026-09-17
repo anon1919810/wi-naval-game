@@ -1,0 +1,66 @@
+{
+    "unityVersion": "2022.3.62f3c1",
+    "status": "passed",
+    "shipId": "HMS_Queen_Mary_1913",
+    "assetVersion": "v2",
+    "sourceFbxPath": "Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Greybox.fbx",
+    "sourceFbxSha256": "1dcfdf2647e0790c57c796b615a80dcd797feb17eb8e2124066b3fbc13cba576",
+    "transformCount": 98,
+    "meshCount": 82,
+    "contractObjectCount": 98,
+    "contractMeshCount": 82,
+    "extraNodeNames": [],
+    "hullSizeMetres": {
+        "x": 27.20003318786621,
+        "y": 15.000012397766114,
+        "z": 213.39999389648438
+    },
+    "hullMinMetres": {
+        "x": -13.600016593933106,
+        "y": -9.900006294250489,
+        "z": -106.69999694824219
+    },
+    "hullMaxMetres": {
+        "x": 13.600016593933106,
+        "y": 5.100006103515625,
+        "z": 106.69999694824219
+    },
+    "bowDirection": {
+        "x": 1.5098196115559404e-7,
+        "y": 0.013536226004362107,
+        "z": 0.9999083280563355
+    },
+    "hullKeelY_m": -9.900006294250489,
+    "hullDeckY_m": 5.100006103515625,
+    "upIsPositiveY": true,
+    "steeringGearY_m": -2.5000076293945314,
+    "hullSignedVolumeM3": 54500.55859375,
+    "hullWindingSign": 1,
+    "rootEuler": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "rootScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+    },
+    "yawAxisLocalInNode": "Z",
+    "unityLocalYawSign": 1,
+    "elevationAxisLocalInNode": "X",
+    "unityLocalPitchSign": 1,
+    "yawAroundShipVertical": true,
+    "positiveCommandTurnsStarboard": true,
+    "elevationRaisesBarrel": true,
+    "shadersInUse": [
+        "Universal Render Pipeline/Lit"
+    ],
+    "renderersWithNonUrpShader": 0,
+    "materialsWithoutUrpShader": [],
+    "missingContractNames": [],
+    "checksFailed": [],
+    "notes": [
+        "材质 shader：Universal Render Pipeline/Lit"
+    ]
+}

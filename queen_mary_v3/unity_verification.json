@@ -1,0 +1,91 @@
+{
+    "unityVersion": "2022.3.62f3c1",
+    "status": "passed",
+    "sourceFbxSha256": "7edc13a63e8fd632dfc2e6479a52f1c01b59ccc55aecb6678b3921292fad2d1e",
+    "hullSizeMetres": {
+        "x": 27.20003318786621,
+        "y": 15.000012397766114,
+        "z": 213.39999389648438
+    },
+    "hullMinMetres": {
+        "x": -13.600016593933106,
+        "y": -9.900006294250489,
+        "z": -106.69999694824219
+    },
+    "hullMaxMetres": {
+        "x": 13.600016593933106,
+        "y": 5.100006103515625,
+        "z": 106.69999694824219
+    },
+    "bowDirection": {
+        "x": 1.509835243496127e-7,
+        "y": 0.012755191884934903,
+        "z": 0.9999186992645264
+    },
+    "shipLocalUpInUnity": {
+        "x": -1.4210854715202005e-14,
+        "y": 1.0,
+        "z": -1.1920928955078126e-7
+    },
+    "shipLocalRightInUnity": {
+        "x": -1.0,
+        "y": 0.0,
+        "z": 1.5099580252808665e-7
+    },
+    "rootEuler": {
+        "x": 270.0,
+        "y": 180.0,
+        "z": 0.0
+    },
+    "rootScale": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0
+    },
+    "meshCount": 85,
+    "yawAroundShipVertical": true,
+    "positiveCommandTurnsStarboard": true,
+    "elevationRaisesBarrel": true,
+    "unityLocalYawSign": 1,
+    "unityLocalPitchSign": 1,
+    "failures": [],
+    "completedUtc": "2026-09-17T16:15:21.2303282Z",
+    "semanticModulesChecked": 101,
+    "articulatedTurretsChecked": 4,
+    "starboardDirection": {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "turretAxes": [
+        {
+            "turret": "A",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        },
+        {
+            "turret": "B",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        },
+        {
+            "turret": "Q",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        },
+        {
+            "turret": "X",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        }
+    ],
+    "latestDeepSeekContractParsed": true
+}

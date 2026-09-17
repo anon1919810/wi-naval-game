@@ -1,0 +1,36 @@
+unity=2022.3.62f3c1
+probe=Assets/_AxisProbe/AxisProbe.fbx
+AxisProbe(Clone) x=0.000 y=0.000 z=0.000
+MARK_BOW x=0.000 y=5.000 z=-90.000
+MARK_PORT x=12.000 y=5.000 z=-40.000
+MARK_STARBOARD x=-12.000 y=5.000 z=-40.000
+MARK_STERN x=0.000 y=5.000 z=90.000
+MARK_TOP x=0.000 y=14.000 z=-40.000
+--- Blender reference (C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary\_axis_probe_blender.json) ---
+{
+  "MARK_BOW": [
+    0.0,
+    90.0,
+    5.0
+  ],
+  "MARK_STERN": [
+    0.0,
+    -90.0,
+    5.0
+  ],
+  "MARK_STARBOARD": [
+    12.0,
+    40.0,
+    5.0
+  ],
+  "MARK_PORT": [
+    -12.0,
+    40.0,
+    5.0
+  ],
+  "MARK_TOP": [
+    0.0,
+    40.0,
+    14.0
+  ]
+}

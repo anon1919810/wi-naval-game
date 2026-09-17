@@ -1,0 +1,17 @@
+{
+  "method": "moulded sections integrated over the offsets table (Simpson in y)",
+  "design_waterline_z_m": 0.0,
+  "keel_z_m": -9.9,
+  "immersed_volume_m3": 30663.7,
+  "waterplane_area_m2": 3073.6,
+  "lcb_y_m": 1.575,
+  "vcb_z_m": -3.89,
+  "displacement_t_at_1_025": 31430.3,
+  "published_displacement_t": {
+    "normal": 27200,
+    "deep_load": 32160
+  },
+  "displacement_delta_pct": -2.27,
+  "note": "moulded volume; excludes shell plating, appendages and openings. Compare with the deep-load displacement because the keel sits at the deep-load draught. A large gap means the estimated sections are too full or too fine.",
+  "source": "Asset author estimate for this greybox; no source yet | Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+}

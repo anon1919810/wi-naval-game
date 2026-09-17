@@ -1,0 +1,75 @@
+{
+    "unityVersion": "2022.3.62f3c1",
+    "status": "passed",
+    "renderPipeline": "UniversalRenderPipelineAsset",
+    "renderPipelineAsset": "QueenMary_URP",
+    "shadersSeen": "Universal Render Pipeline/Lit",
+    "viewsRendered": 5,
+    "checksFailed": [],
+    "notes": [
+        "模型包围盒：中心 (0.0, 15.1, 0.0)，尺寸 32.1 × 50.1 × 213.4 m",
+        "舰艏在画面中的位置：Overview=right、Starboard=right、Top=right、Bow=head-on、Stern_Aft=right"
+    ],
+    "views": [
+        {
+            "name": "Overview",
+            "file": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\queen_mary\\unity_preview\\Overview.png",
+            "magentaPixels": 0,
+            "magentaFraction": 0.0,
+            "shipFraction": 0.027221137657761575,
+            "meanLuminance": 0.18111346662044526,
+            "greyLevels": "17 级灰",
+            "fullyFramed": true,
+            "bowOnScreen": "right",
+            "cameraDistance_m": 243.68910217285157
+        },
+        {
+            "name": "Starboard",
+            "file": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\queen_mary\\unity_preview\\Starboard.png",
+            "magentaPixels": 0,
+            "magentaFraction": 0.0,
+            "shipFraction": 0.12912869453430177,
+            "meanLuminance": 0.19712232053279878,
+            "greyLevels": "19 级灰",
+            "fullyFramed": true,
+            "bowOnScreen": "right",
+            "cameraDistance_m": 443.0710754394531
+        },
+        {
+            "name": "Top",
+            "file": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\queen_mary\\unity_preview\\Top.png",
+            "magentaPixels": 0,
+            "magentaFraction": 0.0,
+            "shipFraction": 0.1569553017616272,
+            "meanLuminance": 0.22092679142951966,
+            "greyLevels": "13 级灰",
+            "fullyFramed": true,
+            "bowOnScreen": "right",
+            "cameraDistance_m": 443.0710754394531
+        },
+        {
+            "name": "Bow",
+            "file": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\queen_mary\\unity_preview\\Bow.png",
+            "magentaPixels": 0,
+            "magentaFraction": 0.0,
+            "shipFraction": 0.010600043460726738,
+            "meanLuminance": 0.17933547496795655,
+            "greyLevels": "20 级灰",
+            "fullyFramed": true,
+            "bowOnScreen": "head-on",
+            "cameraDistance_m": 277.41998291015627
+        },
+        {
+            "name": "Stern_Aft",
+            "file": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\queen_mary\\unity_preview\\Stern_Aft.png",
+            "magentaPixels": 0,
+            "magentaFraction": 0.0,
+            "shipFraction": 0.010820312425494194,
+            "meanLuminance": 0.17861823737621308,
+            "greyLevels": "20 级灰",
+            "fullyFramed": true,
+            "bowOnScreen": "right",
+            "cameraDistance_m": 277.41998291015627
+        }
+    ]
+}

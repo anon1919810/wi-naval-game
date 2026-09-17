@@ -1,0 +1,117 @@
+{
+  "status": "passed",
+  "max_position_or_bounds_error_m": 1.811981201171875e-05,
+  "hull_signed_volume_m3": 54500.6,
+  "object_count": 98,
+  "mesh_count": 82,
+  "checks": [
+    {
+      "check": "Every exported semantic object survives the FBX round trip",
+      "passed": true,
+      "evidence": {
+        "missing": []
+      }
+    },
+    {
+      "check": "No preview cameras or lights exported",
+      "passed": true
+    },
+    {
+      "check": "No extra objects in the FBX",
+      "passed": true,
+      "evidence": {
+        "imported": 98,
+        "manifest": 98
+      }
+    },
+    {
+      "check": "Parent-child hierarchy preserved",
+      "passed": true
+    },
+    {
+      "check": "All world origins and mesh bounds preserved within 0.1 mm",
+      "passed": true,
+      "evidence": {
+        "max_error_m": 1.811981201171875e-05,
+        "export_yaw_deg": 180.0
+      }
+    },
+    {
+      "check": "Hull remains 27.2 x 213.4 x 15 metres",
+      "passed": true,
+      "evidence": {
+        "dimensions": [
+          27.200001,
+          213.399994,
+          15.0
+        ]
+      }
+    },
+    {
+      "check": "Hull volume is positive, so the normals still face outwards",
+      "passed": true,
+      "evidence": {
+        "signed_volume_m3": 54500.6
+      }
+    },
+    {
+      "check": "Shipped FBX faces the way Unity expects (bow maps to +Z)",
+      "passed": true,
+      "evidence": {
+        "bow_direction_in_fbx": [
+          -0.0,
+          -0.9999,
+          0.0135
+        ],
+        "export_yaw_deg": 180.0,
+        "note": "Blender +Y maps to Unity -Z, so the bow has to point -Y in the file"
+      }
+    },
+    {
+      "check": "All 56 combat and structure modules survive",
+      "passed": true,
+      "evidence": {
+        "missing": []
+      }
+    },
+    {
+      "check": "Decoration is still merged after export",
+      "passed": true,
+      "evidence": {
+        "loose": []
+      }
+    },
+    {
+      "check": "A: pivot chain intact (turret -> elevation -> barrel)",
+      "passed": true
+    },
+    {
+      "check": "A: FBX yaw and pitch move the barrel and preserve the turret origin",
+      "passed": true
+    },
+    {
+      "check": "B: pivot chain intact (turret -> elevation -> barrel)",
+      "passed": true
+    },
+    {
+      "check": "B: FBX yaw and pitch move the barrel and preserve the turret origin",
+      "passed": true
+    },
+    {
+      "check": "Q: pivot chain intact (turret -> elevation -> barrel)",
+      "passed": true
+    },
+    {
+      "check": "Q: FBX yaw and pitch move the barrel and preserve the turret origin",
+      "passed": true
+    },
+    {
+      "check": "X: pivot chain intact (turret -> elevation -> barrel)",
+      "passed": true
+    },
+    {
+      "check": "X: FBX yaw and pitch move the barrel and preserve the turret origin",
+      "passed": true
+    }
+  ]
+}

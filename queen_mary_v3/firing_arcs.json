@@ -1,0 +1,281 @@
+{
+  "method": "barrel centre line sampled against obstacle bounding boxes",
+  "accuracy": "conservative approximation; not a ballistics or blast model",
+  "clearance_required_m": 0.3,
+  "increment_deg": 5,
+  "note": "Other turrets, barbettes and barrels are included at rest; own mount is excluded. Only port barrel is sampled. Thin visual rigging/rails are excluded. Not a simultaneous turret collision or firing safety model.",
+  "turrets": {
+    "A": {
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 0.0,
+      "by_elevation": {
+        "0": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              130
+            ],
+            [
+              215,
+              355
+            ]
+          ],
+          "clear_fraction": 0.778
+        },
+        "5": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              130
+            ],
+            [
+              215,
+              355
+            ]
+          ],
+          "clear_fraction": 0.778
+        },
+        "10": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              130
+            ],
+            [
+              215,
+              355
+            ]
+          ],
+          "clear_fraction": 0.778
+        },
+        "15": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              130
+            ],
+            [
+              215,
+              355
+            ]
+          ],
+          "clear_fraction": 0.778
+        },
+        "20": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              140
+            ],
+            [
+              205,
+              355
+            ]
+          ],
+          "clear_fraction": 0.833
+        }
+      }
+    },
+    "B": {
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 0.0,
+      "by_elevation": {
+        "0": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              135
+            ],
+            [
+              215,
+              355
+            ]
+          ],
+          "clear_fraction": 0.792
+        },
+        "5": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              140
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.847
+        },
+        "10": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              140
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.847
+        },
+        "15": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              140
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.847
+        },
+        "20": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              140
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.847
+        }
+      }
+    },
+    "Q": {
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 180.0,
+      "by_elevation": {
+        "0": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              140
+            ],
+            [
+              205,
+              355
+            ]
+          ],
+          "clear_fraction": 0.833
+        },
+        "5": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              150
+            ],
+            [
+              195,
+              355
+            ]
+          ],
+          "clear_fraction": 0.889
+        },
+        "10": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              150
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.875
+        },
+        "15": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              150
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.875
+        },
+        "20": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              150
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.875
+        }
+      }
+    },
+    "X": {
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 180.0,
+      "by_elevation": {
+        "0": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              155
+            ],
+            [
+              200,
+              355
+            ]
+          ],
+          "clear_fraction": 0.889
+        },
+        "5": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              145
+            ],
+            [
+              205,
+              355
+            ]
+          ],
+          "clear_fraction": 0.847
+        },
+        "10": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              355
+            ]
+          ],
+          "clear_fraction": 1.0
+        },
+        "15": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              355
+            ]
+          ],
+          "clear_fraction": 1.0
+        },
+        "20": {
+          "allowed_yaw_intervals_deg": [
+            [
+              0,
+              355
+            ]
+          ],
+          "clear_fraction": 1.0
+        }
+      }
+    }
+  }
+}

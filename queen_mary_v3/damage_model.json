@@ -1,0 +1,458 @@
+{
+  "method": "semantic hit zones, armour coverage and system graph derived from module data",
+  "accuracy": "hit zones are exact for this asset; armour extents and system pairings are estimates",
+  "hit_zones": {
+    "barbette": [
+      "Barbette_A",
+      "Barbette_B",
+      "Barbette_Q",
+      "Barbette_X"
+    ],
+    "bulkhead_armour": [
+      "Armour_Bulkhead_Aft",
+      "Armour_Bulkhead_Fwd"
+    ],
+    "casemate_battery": [
+      "Casemate_Openings_Port",
+      "Casemate_Openings_Starboard",
+      "Casemate_Port_1",
+      "Casemate_Port_2",
+      "Casemate_Port_3",
+      "Casemate_Port_4",
+      "Casemate_Port_5",
+      "Casemate_Port_6",
+      "Casemate_Port_7",
+      "Casemate_Port_8",
+      "Casemate_Starboard_1",
+      "Casemate_Starboard_2",
+      "Casemate_Starboard_3",
+      "Casemate_Starboard_4",
+      "Casemate_Starboard_5",
+      "Casemate_Starboard_6",
+      "Casemate_Starboard_7",
+      "Casemate_Starboard_8"
+    ],
+    "control": [
+      "Bridge",
+      "Conning_Tower"
+    ],
+    "deck_armour": [
+      "Armour_Deck_25mm",
+      "Armour_Deck_64mm"
+    ],
+    "fire_control": [
+      "Rangefinder_CT"
+    ],
+    "gun_barrel": [
+      "Barrel_A_Port",
+      "Barrel_A_Starboard",
+      "Barrel_B_Port",
+      "Barrel_B_Starboard",
+      "Barrel_Q_Port",
+      "Barrel_Q_Starboard",
+      "Barrel_X_Port",
+      "Barrel_X_Starboard"
+    ],
+    "hull_envelope": [
+      "Forecastle",
+      "Hull",
+      "Quarterdeck",
+      "Sternwalk",
+      "Sternwalk_Rails",
+      "Torpedo_Net_Port_Mesh",
+      "Torpedo_Net_Starboard_Mesh"
+    ],
+    "machinery_space": [
+      "Boiler_Room_1",
+      "Boiler_Room_2",
+      "Boiler_Room_3",
+      "Boiler_Room_4",
+      "Boiler_Room_5",
+      "Boiler_Room_6",
+      "Boiler_Room_7",
+      "Engine_Room_1",
+      "Engine_Room_2"
+    ],
+    "magazine": [
+      "Magazine_A",
+      "Magazine_B",
+      "Magazine_Q",
+      "Magazine_X"
+    ],
+    "mast": [
+      "Mast_Fore",
+      "Mast_Main"
+    ],
+    "shafting": [
+      "Propeller_Shafts"
+    ],
+    "side_armour": [
+      "Armour_Belt_229mm",
+      "Armour_Belt_Taper_102mm_Aft",
+      "Armour_Belt_Taper_102mm_Fwd",
+      "Armour_Upper_Belt_152mm"
+    ],
+    "steering_gear": [
+      "Rudder",
+      "Steering_Gear"
+    ],
+    "superstructure": [
+      "Aft_Deckhouse",
+      "Aft_Platform",
+      "B_Superfiring_Deckhouse",
+      "Bridge_Upper",
+      "Bridge_Visor",
+      "Bridge_Wings"
+    ],
+    "turret_body": [
+      "Turret_A",
+      "Turret_B",
+      "Turret_Q",
+      "Turret_X"
+    ],
+    "uptake": [
+      "Funnel_1",
+      "Funnel_1_Uptake",
+      "Funnel_2",
+      "Funnel_2_Uptake",
+      "Funnel_3",
+      "Funnel_3_Uptake"
+    ]
+  },
+  "armoured_modules": [
+    {
+      "module": "Magazine_A",
+      "role": "magazine",
+      "hit_zone": "magazine",
+      "side_protection_mm": 102,
+      "deck_protection_mm": 64,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Magazine_B",
+      "role": "magazine",
+      "hit_zone": "magazine",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 64,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Magazine_Q",
+      "role": "magazine",
+      "hit_zone": "magazine",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 64,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Magazine_X",
+      "role": "magazine",
+      "hit_zone": "magazine",
+      "side_protection_mm": 102,
+      "deck_protection_mm": 64,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_1",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_2",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_3",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_4",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_5",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_6",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Boiler_Room_7",
+      "role": "boiler_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Engine_Room_1",
+      "role": "engine_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Engine_Room_2",
+      "role": "engine_room",
+      "hit_zone": "machinery_space",
+      "side_protection_mm": 229,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour"
+    },
+    {
+      "module": "Steering_Gear",
+      "role": "steering_gear",
+      "hit_zone": "steering_gear",
+      "side_protection_mm": 102,
+      "deck_protection_mm": 25,
+      "bulkhead_protection_mm": 102.0,
+      "extent_status": "estimated",
+      "source": "Asset author estimate for this greybox; no source yet"
+    }
+  ],
+  "systems": {
+    "gunnery": [
+      {
+        "source": "Magazine_A",
+        "relation": "feeds_feed_hoist_of",
+        "target": "Turret_A",
+        "status": "published",
+        "note": "turret letter matches its magazine"
+      },
+      {
+        "source": "Magazine_B",
+        "relation": "feeds_feed_hoist_of",
+        "target": "Turret_B",
+        "status": "published",
+        "note": ""
+      },
+      {
+        "source": "Magazine_Q",
+        "relation": "feeds_feed_hoist_of",
+        "target": "Turret_Q",
+        "status": "published",
+        "note": ""
+      },
+      {
+        "source": "Magazine_X",
+        "relation": "feeds_feed_hoist_of",
+        "target": "Turret_X",
+        "status": "published",
+        "note": ""
+      }
+    ],
+    "propulsion": [
+      {
+        "source": "Boiler_Room_1",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_1",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Boiler_Room_2",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_1",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Boiler_Room_3",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_1",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Boiler_Room_4",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_2",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Boiler_Room_5",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_2",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Boiler_Room_6",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_2",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Boiler_Room_7",
+        "relation": "supplies_steam_to",
+        "target": "Engine_Room_2",
+        "status": "estimate",
+        "note": "grouping is estimated"
+      },
+      {
+        "source": "Engine_Room_1",
+        "relation": "turns",
+        "target": "Propeller_Shafts",
+        "status": "published",
+        "note": "4 shafts in 2 engine rooms"
+      },
+      {
+        "source": "Engine_Room_2",
+        "relation": "turns",
+        "target": "Propeller_Shafts",
+        "status": "published",
+        "note": "4 shafts in 2 engine rooms"
+      },
+      {
+        "source": "Funnel_1",
+        "relation": "exhausts",
+        "target": "Boiler_Room_1",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      },
+      {
+        "source": "Funnel_1",
+        "relation": "exhausts",
+        "target": "Boiler_Room_2",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      },
+      {
+        "source": "Funnel_2",
+        "relation": "exhausts",
+        "target": "Boiler_Room_3",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      },
+      {
+        "source": "Funnel_2",
+        "relation": "exhausts",
+        "target": "Boiler_Room_4",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      },
+      {
+        "source": "Funnel_3",
+        "relation": "exhausts",
+        "target": "Boiler_Room_5",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      },
+      {
+        "source": "Funnel_3",
+        "relation": "exhausts",
+        "target": "Boiler_Room_6",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      },
+      {
+        "source": "Funnel_3",
+        "relation": "exhausts",
+        "target": "Boiler_Room_7",
+        "status": "estimate",
+        "note": "smoke source pairing is estimated"
+      }
+    ],
+    "steering": [
+      {
+        "source": "Steering_Gear",
+        "relation": "actuates",
+        "target": "Rudder",
+        "status": "published",
+        "note": "rudder aft, steering gear below the quarterdeck"
+      }
+    ],
+    "fire_control": [
+      {
+        "source": "Rangefinder_CT",
+        "relation": "provides_fire_control_to",
+        "target": "Turret_A",
+        "status": "published",
+        "note": "director on the conning tower, 15 deg 21 min limit in 1913"
+      },
+      {
+        "source": "Rangefinder_CT",
+        "relation": "provides_fire_control_to",
+        "target": "Turret_B",
+        "status": "published",
+        "note": "director on the conning tower, 15 deg 21 min limit in 1913"
+      },
+      {
+        "source": "Rangefinder_CT",
+        "relation": "provides_fire_control_to",
+        "target": "Turret_Q",
+        "status": "published",
+        "note": "director on the conning tower, 15 deg 21 min limit in 1913"
+      },
+      {
+        "source": "Rangefinder_CT",
+        "relation": "provides_fire_control_to",
+        "target": "Turret_X",
+        "status": "published",
+        "note": "director on the conning tower, 15 deg 21 min limit in 1913"
+      }
+    ]
+  },
+  "catastrophic_risk": [
+    "Magazine_A/B/Q/X: penetration to the magazine is what destroyed the ship at Jutland (wiki: shells from Derfflinger, magazines exploded)",
+    "Steering_Gear: single steering gear, no redundancy"
+  ],
+  "notes": [
+    "Damage volumes are collision-only: keep them off the render layer.",
+    "Q turret has a restricted arc and sits between the boiler room groups - a hit there can take out machinery as well as gunnery.",
+    "Engine room and boiler room grouping is estimated, not sourced."
+  ]
+}

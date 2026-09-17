@@ -1,0 +1,28 @@
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# Unity 工程产物（Library 动辄几百 MB，不进仓库）
+**/Library/
+**/Temp/
+**/Logs/
+**/obj/
+**/UserSettings/
+**/MemoryCaptures/
+**/Build/
+**/Builds/
+.vs/
+.vsconfig
+*.csproj
+*.sln
+*.unityproj
+*.userprefs
+
+# 系统
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# 临时日志（会话里的一次性校验输出）
+/_*.log

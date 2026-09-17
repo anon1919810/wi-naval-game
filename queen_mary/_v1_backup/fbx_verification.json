@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "max_position_or_bounds_error_m": 1.742362976075995e-05,
+  "checks": [
+    {
+      "check": "Every exported semantic object survives FBX round trip",
+      "passed": true
+    },
+    {
+      "check": "No preview cameras or lights exported",
+      "passed": true
+    },
+    {
+      "check": "No extra objects in FBX",
+      "passed": true
+    },
+    {
+      "check": "Parent-child hierarchy preserved",
+      "passed": true
+    },
+    {
+      "check": "All world origins and mesh bounds preserved within 0.1 mm",
+      "passed": true
+    },
+    {
+      "check": "Hull remains 27.2 x 213.4 x 15 metres",
+      "passed": true
+    },
+    {
+      "check": "A: FBX yaw/pitch hierarchy moves barrel and preserves turret origin",
+      "passed": true
+    },
+    {
+      "check": "B: FBX yaw/pitch hierarchy moves barrel and preserves turret origin",
+      "passed": true
+    },
+    {
+      "check": "Q: FBX yaw/pitch hierarchy moves barrel and preserves turret origin",
+      "passed": true
+    },
+    {
+      "check": "X: FBX yaw/pitch hierarchy moves barrel and preserves turret origin",
+      "passed": true
+    }
+  ]
+}

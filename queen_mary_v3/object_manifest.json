@@ -1,0 +1,4528 @@
+{
+  "ship": {
+    "ship_id": "HMS_Queen_Mary_1913",
+    "asset_version": "v3",
+    "length_m": 213.4,
+    "beam_m": 27.2,
+    "draft_m": 9.9,
+    "main_deck_z_m": 5.1,
+    "forecastle_z_m": 7.5,
+    "quarterdeck_z_m": 5.72,
+    "displacement_normal_t": 27200,
+    "displacement_full_t": 32160,
+    "speed_knots": 28.0,
+    "speed_trials_knots": 28.35,
+    "shp_design": 75000,
+    "shp_trials": 83350,
+    "boilers": 42,
+    "boiler_rooms": 7,
+    "shafts": 4,
+    "main_gun_calibre_mm": 343,
+    "main_gun_barrels": 8,
+    "main_turrets": "A/B/Q/X",
+    "secondary_gun_calibre_mm": 102,
+    "secondary_guns": 16,
+    "torpedo_tubes": 2,
+    "torpedo_tube_inches": 21,
+    "max_elevation_director_deg": 15.35,
+    "max_elevation_mount_deg": 20.0,
+    "min_elevation_mount_deg": -3.0,
+    "main_rounds_per_gun": 110,
+    "main_rounds_total": 880,
+    "shell_weight_lb": 1400,
+    "muzzle_velocity_mps": 760,
+    "max_range_main_m": 21708,
+    "max_range_secondary_m": 10400,
+    "secondary_rpm": "6-8",
+    "configuration": "early_photo_refinement_on_deepseek_v2",
+    "historically_certified": false
+  },
+  "references": {
+    "early_photos": "User supplied stern dock photo marked 18-3-13 and broadside photograph; pole-mast interpretation, precise fit provisional",
+    "wiki": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+    "mq": "MaritimeQuest: HMS Queen Mary data page - dimensions, armament as built",
+    "ww1": "worldwar1.co.uk: Queen Mary class battlecruiser - funnel and mast notes",
+    "navalenc": "naval-encyclopedia.com: Lion class battlecruisers (1910) - modification notes",
+    "rmg": "Royal Museums Greenwich collection index for Queen Mary (1912)",
+    "user": "User greybox specification for this asset (not historical certification)",
+    "estimate": "Asset author estimate for this greybox; no source yet"
+  },
+  "offsets_source": "builtin_estimate",
+  "casemate_placement": "between_decks",
+  "blender": "4.5.14 LTS",
+  "started_utc": "2026-09-17T15:39:31.504470+00:00",
+  "geometry_sha256": "5b248d11c70438dbc2cfbb33e30ffce4d3d346714dc8ee3390d948e4d37a4037",
+  "repeat_generation_passed": true,
+  "object_count": 101,
+  "mesh_count": 85,
+  "triangles": 31164,
+  "modules": {
+    "object_count": 101,
+    "mesh_count": 85,
+    "triangles": 31164,
+    "role_counts": {
+      "armour_belt": 4,
+      "armour_bulkhead": 2,
+      "armour_deck": 2,
+      "barbette": 4,
+      "boiler_room": 7,
+      "bridge": 1,
+      "casemate_opening": 2,
+      "conning_tower": 1,
+      "deck_detail": 1,
+      "deck_fitting": 1,
+      "engine_room": 2,
+      "fire_control": 1,
+      "forecastle_deck": 1,
+      "funnel": 3,
+      "funnel_uptake": 3,
+      "fx_anchor": 6,
+      "fx_group": 1,
+      "group": 1,
+      "gun_elevation": 4,
+      "hull": 1,
+      "magazine": 4,
+      "main_gun_barrel": 8,
+      "main_turret": 4,
+      "module_group": 1,
+      "pole_mast": 2,
+      "propulsion_underwater": 1,
+      "quarterdeck": 1,
+      "rigging": 1,
+      "rudder": 1,
+      "secondary_gun": 16,
+      "ship_root": 1,
+      "steering_gear": 1,
+      "sternwalk": 1,
+      "sternwalk_rail": 1,
+      "stowed_net": 2,
+      "stowed_net_mesh": 2,
+      "structure": 6
+    },
+    "movable_modules": [
+      "Barrel_A_Port",
+      "Barrel_A_Starboard",
+      "Barrel_B_Port",
+      "Barrel_B_Starboard",
+      "Barrel_Q_Port",
+      "Barrel_Q_Starboard",
+      "Barrel_X_Port",
+      "Barrel_X_Starboard",
+      "Elevation_A",
+      "Elevation_B",
+      "Elevation_Q",
+      "Elevation_X",
+      "Turret_A",
+      "Turret_B",
+      "Turret_Q",
+      "Turret_X"
+    ],
+    "decoration_objects": [
+      "Casemate_Openings_Port",
+      "Casemate_Openings_Starboard",
+      "Deck_Fittings",
+      "Deck_Visual_Details",
+      "Rigging_Stays",
+      "Sternwalk_Rails",
+      "Torpedo_Net_Port_Mesh",
+      "Torpedo_Net_Starboard_Mesh"
+    ],
+    "combat_modules": [
+      "Armour_Belt_229mm",
+      "Armour_Belt_Taper_102mm_Aft",
+      "Armour_Belt_Taper_102mm_Fwd",
+      "Armour_Bulkhead_Aft",
+      "Armour_Bulkhead_Fwd",
+      "Armour_Deck_25mm",
+      "Armour_Deck_64mm",
+      "Armour_Upper_Belt_152mm",
+      "Barbette_A",
+      "Barbette_B",
+      "Barbette_Q",
+      "Barbette_X",
+      "Boiler_Room_1",
+      "Boiler_Room_2",
+      "Boiler_Room_3",
+      "Boiler_Room_4",
+      "Boiler_Room_5",
+      "Boiler_Room_6",
+      "Boiler_Room_7",
+      "Casemate_Port_1",
+      "Casemate_Port_2",
+      "Casemate_Port_3",
+      "Casemate_Port_4",
+      "Casemate_Port_5",
+      "Casemate_Port_6",
+      "Casemate_Port_7",
+      "Casemate_Port_8",
+      "Casemate_Starboard_1",
+      "Casemate_Starboard_2",
+      "Casemate_Starboard_3",
+      "Casemate_Starboard_4",
+      "Casemate_Starboard_5",
+      "Casemate_Starboard_6",
+      "Casemate_Starboard_7",
+      "Casemate_Starboard_8",
+      "Engine_Room_1",
+      "Engine_Room_2",
+      "Funnel_1",
+      "Funnel_2",
+      "Funnel_3",
+      "Magazine_A",
+      "Magazine_B",
+      "Magazine_Q",
+      "Magazine_X",
+      "Rangefinder_CT",
+      "Rudder",
+      "Steering_Gear"
+    ],
+    "module_contract": "Hull, decks, superstructure parts, barbettes, turrets, elevation pivots, barrels, funnels, masts, secondary guns, nets, sternwalk, armour, damage volumes and fire control are separately addressable objects. Only decoration is merged."
+  },
+  "derived_files": [
+    "damage_model.json",
+    "hydrostatics.json",
+    "buoyancy_compartments.json",
+    "ship_contract.json",
+    "ship_contract.unity.json"
+  ],
+  "hydrostatics_summary": {
+    "immersed_volume_m3": 30663.7,
+    "waterplane_area_m2": 4610.4,
+    "lcb_y_m": 1.575,
+    "vcb_z_m": -3.89,
+    "displacement_t_at_1_025": 31430.3,
+    "displacement_delta_pct": -2.27
+  },
+  "objects": [
+    {
+      "name": "Aft_Deckhouse",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "structure",
+      "location_local_m": [
+        0.0,
+        -41.0,
+        7.296845
+      ],
+      "origin_world_m": [
+        0.0,
+        -41.0,
+        7.296845
+      ],
+      "dimensions_local_axes_m": [
+        12.4,
+        23.0,
+        4.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -6.2,
+          -52.5,
+          5.296845
+        ],
+        "max": [
+          6.2,
+          -29.5,
+          9.296845
+        ]
+      },
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Aft_Platform",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "structure",
+      "location_local_m": [
+        0.0,
+        -42.0,
+        9.476846
+      ],
+      "origin_world_m": [
+        0.0,
+        -42.0,
+        9.476846
+      ],
+      "dimensions_local_axes_m": [
+        15.0,
+        24.0,
+        0.35
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.5,
+          -54.0,
+          9.301846
+        ],
+        "max": [
+          7.5,
+          -30.0,
+          9.651846
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Armour_Belt_229mm",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        26.870113,
+        95.0,
+        3.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.435057,
+          -65.0,
+          -1.4
+        ],
+        "max": [
+          13.435057,
+          30.0,
+          1.6
+        ]
+      },
+      "vertices": 56,
+      "triangles": 104
+    },
+    {
+      "name": "Armour_Belt_Taper_102mm_Aft",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        19.033155,
+        25.0,
+        2.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -9.516578,
+          -103.0,
+          -1.4
+        ],
+        "max": [
+          9.516578,
+          -78.0,
+          1.4
+        ]
+      },
+      "vertices": 40,
+      "triangles": 72
+    },
+    {
+      "name": "Armour_Belt_Taper_102mm_Fwd",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        26.056166,
+        52.5,
+        2.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.028083,
+          50.0,
+          -1.4
+        ],
+        "max": [
+          13.028083,
+          102.5,
+          1.4
+        ]
+      },
+      "vertices": 56,
+      "triangles": 104
+    },
+    {
+      "name": "Armour_Bulkhead_Aft",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_bulkhead",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        21.8174,
+        0.100006,
+        14.741154
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -10.9087,
+          -68.050003,
+          -9.641154
+        ],
+        "max": [
+          10.9087,
+          -67.949997,
+          5.1
+        ]
+      },
+      "vertices": 48,
+      "triangles": 92
+    },
+    {
+      "name": "Armour_Bulkhead_Fwd",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_bulkhead",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        24.949245,
+        0.099998,
+        14.960125
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -12.474623,
+          45.950001,
+          -9.860125
+        ],
+        "max": [
+          12.474623,
+          46.049999,
+          5.1
+        ]
+      },
+      "vertices": 48,
+      "triangles": 92
+    },
+    {
+      "name": "Armour_Deck_25mm",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_deck",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        21.030966,
+        190.0,
+        0.025
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -10.515483,
+          -95.0,
+          -4.6
+        ],
+        "max": [
+          10.515483,
+          95.0,
+          -4.575
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Armour_Deck_64mm",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_deck",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        25.859514,
+        205.5,
+        0.064
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -12.929757,
+          -103.0,
+          -1.6
+        ],
+        "max": [
+          12.929757,
+          102.5,
+          -1.536
+        ]
+      },
+      "vertices": 76,
+      "triangles": 148
+    },
+    {
+      "name": "Armour_Upper_Belt_152mm",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        27.054092,
+        95.0,
+        2.4
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.527046,
+          -65.0,
+          1.6
+        ],
+        "max": [
+          13.527046,
+          30.0,
+          4.0
+        ]
+      },
+      "vertices": 56,
+      "triangles": 104
+    },
+    {
+      "name": "B_Superfiring_Deckhouse",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "structure",
+      "location_local_m": [
+        0.0,
+        46.0,
+        9.126052
+      ],
+      "origin_world_m": [
+        0.0,
+        46.0,
+        9.126052
+      ],
+      "dimensions_local_axes_m": [
+        11.8,
+        14.0,
+        3.747895
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -5.9,
+          39.0,
+          7.252104
+        ],
+        "max": [
+          5.9,
+          53.0,
+          11.0
+        ]
+      },
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Barbette_A",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "location_local_m": [
+        0.0,
+        60.0,
+        7.823658
+      ],
+      "origin_world_m": [
+        0.0,
+        60.0,
+        7.823658
+      ],
+      "dimensions_local_axes_m": [
+        9.8,
+        9.8,
+        1.02
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.9,
+          55.099998,
+          7.313658
+        ],
+        "max": [
+          4.9,
+          64.900002,
+          8.333658
+        ]
+      },
+      "vertices": 64,
+      "triangles": 124
+    },
+    {
+      "name": "Barbette_B",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "location_local_m": [
+        0.0,
+        46.0,
+        11.51
+      ],
+      "origin_world_m": [
+        0.0,
+        46.0,
+        11.51
+      ],
+      "dimensions_local_axes_m": [
+        9.8,
+        9.8,
+        1.02
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.9,
+          41.099998,
+          11.0
+        ],
+        "max": [
+          4.9,
+          50.900002,
+          12.02
+        ]
+      },
+      "vertices": 64,
+      "triangles": 124
+    },
+    {
+      "name": "Barbette_Q",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "location_local_m": [
+        0.0,
+        -6.0,
+        7.480476
+      ],
+      "origin_world_m": [
+        0.0,
+        -6.0,
+        7.480476
+      ],
+      "dimensions_local_axes_m": [
+        9.8,
+        9.8,
+        1.02
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.9,
+          -10.9,
+          6.970476
+        ],
+        "max": [
+          4.9,
+          -1.1,
+          7.990476
+        ]
+      },
+      "vertices": 64,
+      "triangles": 124
+    },
+    {
+      "name": "Barbette_X",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "location_local_m": [
+        0.0,
+        -68.0,
+        6.090874
+      ],
+      "origin_world_m": [
+        0.0,
+        -68.0,
+        6.090874
+      ],
+      "dimensions_local_axes_m": [
+        9.8,
+        9.8,
+        1.22
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.9,
+          -72.900002,
+          5.480874
+        ],
+        "max": [
+          4.9,
+          -63.099998,
+          6.700874
+        ]
+      },
+      "vertices": 64,
+      "triangles": 124
+    },
+    {
+      "name": "Barrel_A_Port",
+      "type": "MESH",
+      "parent": "Elevation_A",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        -1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        -1.25,
+        64.0,
+        9.813658
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -1.79,
+          63.849998,
+          9.273658
+        ],
+        "max": [
+          -0.71,
+          76.400002,
+          10.353658
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_A_Starboard",
+      "type": "MESH",
+      "parent": "Elevation_A",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        1.25,
+        64.0,
+        9.813658
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          0.71,
+          63.849998,
+          9.273658
+        ],
+        "max": [
+          1.79,
+          76.400002,
+          10.353658
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_B_Port",
+      "type": "MESH",
+      "parent": "Elevation_B",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        -1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        -1.25,
+        50.0,
+        13.5
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -1.79,
+          49.849998,
+          12.96
+        ],
+        "max": [
+          -0.71,
+          62.400002,
+          14.04
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_B_Starboard",
+      "type": "MESH",
+      "parent": "Elevation_B",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        1.25,
+        50.0,
+        13.5
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          0.71,
+          49.849998,
+          12.96
+        ],
+        "max": [
+          1.79,
+          62.400002,
+          14.04
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_Q_Port",
+      "type": "MESH",
+      "parent": "Elevation_Q",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        -1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        1.25,
+        -10.0,
+        9.470476
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          0.71,
+          -22.4,
+          8.930476
+        ],
+        "max": [
+          1.79,
+          -9.85,
+          10.010476
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_Q_Starboard",
+      "type": "MESH",
+      "parent": "Elevation_Q",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        -1.25,
+        -10.0,
+        9.470476
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -1.79,
+          -22.4,
+          8.930476
+        ],
+        "max": [
+          -0.71,
+          -9.85,
+          10.010476
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_X_Port",
+      "type": "MESH",
+      "parent": "Elevation_X",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        -1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        1.25,
+        -72.0,
+        8.180874
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          0.71,
+          -84.400002,
+          7.640874
+        ],
+        "max": [
+          1.79,
+          -71.849998,
+          8.720874
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_X_Starboard",
+      "type": "MESH",
+      "parent": "Elevation_X",
+      "role": "main_gun_barrel",
+      "location_local_m": [
+        1.25,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        -1.25,
+        -72.0,
+        8.180874
+      ],
+      "dimensions_local_axes_m": [
+        1.08,
+        12.549999,
+        1.08
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -1.79,
+          -84.400002,
+          7.640874
+        ],
+        "max": [
+          -0.71,
+          -71.849998,
+          8.720874
+        ]
+      },
+      "vertices": 144,
+      "triangles": 284
+    },
+    {
+      "name": "Boiler_Room_1",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        33.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        33.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.0,
+          28.5,
+          -7.0
+        ],
+        "max": [
+          7.0,
+          37.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_2",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        23.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        23.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.0,
+          18.5,
+          -7.0
+        ],
+        "max": [
+          7.0,
+          27.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_3",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        13.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        13.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.0,
+          8.5,
+          -7.0
+        ],
+        "max": [
+          7.0,
+          17.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_4",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        3.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        3.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.0,
+          -1.5,
+          -7.0
+        ],
+        "max": [
+          7.0,
+          7.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_5",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        -15.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        -15.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.0,
+          -19.5,
+          -7.0
+        ],
+        "max": [
+          7.0,
+          -10.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_6",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        -25.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        -25.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        13.959547,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -6.979774,
+          -29.5,
+          -7.0
+        ],
+        "max": [
+          6.979774,
+          -20.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_7",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "location_local_m": [
+        0.0,
+        -35.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        -35.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        13.707741,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -6.85387,
+          -39.5,
+          -7.0
+        ],
+        "max": [
+          6.85387,
+          -30.5,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Bridge",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "bridge",
+      "location_local_m": [
+        0.0,
+        32.0,
+        10.286626
+      ],
+      "origin_world_m": [
+        0.0,
+        32.0,
+        10.286626
+      ],
+      "dimensions_local_axes_m": [
+        12.4,
+        12.0,
+        6.2
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -6.2,
+          26.0,
+          7.186626
+        ],
+        "max": [
+          6.2,
+          38.0,
+          13.386625
+        ]
+      },
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Bridge_Upper",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "structure",
+      "location_local_m": [
+        0.0,
+        31.0,
+        14.786626
+      ],
+      "origin_world_m": [
+        0.0,
+        31.0,
+        14.786626
+      ],
+      "dimensions_local_axes_m": [
+        8.6,
+        7.0,
+        2.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.3,
+          27.5,
+          13.386626
+        ],
+        "max": [
+          4.3,
+          34.5,
+          16.186626
+        ]
+      },
+      "vertices": 56,
+      "triangles": 108
+    },
+    {
+      "name": "Bridge_Visor",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "structure",
+      "location_local_m": [
+        0.0,
+        31.0,
+        16.361626
+      ],
+      "origin_world_m": [
+        0.0,
+        31.0,
+        16.361626
+      ],
+      "dimensions_local_axes_m": [
+        10.2,
+        8.0,
+        0.35
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -5.1,
+          27.0,
+          16.186626
+        ],
+        "max": [
+          5.1,
+          35.0,
+          16.536625
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Bridge_Wings",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "structure",
+      "location_local_m": [
+        0.0,
+        31.5,
+        13.446627
+      ],
+      "origin_world_m": [
+        0.0,
+        31.5,
+        13.446627
+      ],
+      "dimensions_local_axes_m": [
+        17.0,
+        5.0,
+        0.55
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -8.5,
+          29.0,
+          13.171627
+        ],
+        "max": [
+          8.5,
+          34.0,
+          13.721626
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Casemate_Openings_Port",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "casemate_opening",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        1.608334,
+        44.650002,
+        1.395
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.635,
+          10.675,
+          5.63
+        ],
+        "max": [
+          -12.026667,
+          55.325001,
+          7.025
+        ]
+      },
+      "vertices": 128,
+      "triangles": 192
+    },
+    {
+      "name": "Casemate_Openings_Starboard",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "casemate_opening",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        1.608334,
+        44.650002,
+        1.395
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.026667,
+          10.675,
+          5.63
+        ],
+        "max": [
+          13.635,
+          55.325001,
+          7.025
+        ]
+      },
+      "vertices": 128,
+      "triangles": 192
+    },
+    {
+      "name": "Casemate_Port_1",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -12.986667,
+        54.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -12.986667,
+        54.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -15.436666,
+          53.810001,
+          6.06
+        ],
+        "max": [
+          -12.036667,
+          54.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_2",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.235,
+        48.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.235,
+        48.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -15.684999,
+          47.810001,
+          6.06
+        ],
+        "max": [
+          -12.285,
+          48.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_3",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.34,
+        42.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.34,
+        42.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -15.79,
+          41.810001,
+          6.06
+        ],
+        "max": [
+          -12.39,
+          42.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_4",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.445,
+        36.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.445,
+        36.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -15.895,
+          35.810001,
+          6.06
+        ],
+        "max": [
+          -12.495,
+          36.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_5",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.55,
+        30.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.55,
+        30.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -16.0,
+          29.809999,
+          6.06
+        ],
+        "max": [
+          -12.6,
+          30.190001,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_6",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.565,
+        24.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.565,
+        24.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -16.014999,
+          23.809999,
+          6.06
+        ],
+        "max": [
+          -12.615,
+          24.190001,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_7",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.58,
+        18.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.58,
+        18.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -16.030001,
+          17.809999,
+          6.06
+        ],
+        "max": [
+          -12.63,
+          18.190001,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_8",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        -13.595,
+        12.0,
+        6.25
+      ],
+      "origin_world_m": [
+        -13.595,
+        12.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          -16.045,
+          11.81,
+          6.06
+        ],
+        "max": [
+          -12.645,
+          12.19,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_1",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        12.986667,
+        54.0,
+        6.25
+      ],
+      "origin_world_m": [
+        12.986667,
+        54.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.036667,
+          53.810001,
+          6.06
+        ],
+        "max": [
+          15.436666,
+          54.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_2",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.235,
+        48.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.235,
+        48.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.285,
+          47.810001,
+          6.06
+        ],
+        "max": [
+          15.684999,
+          48.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_3",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.34,
+        42.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.34,
+        42.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.39,
+          41.810001,
+          6.06
+        ],
+        "max": [
+          15.79,
+          42.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_4",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.445,
+        36.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.445,
+        36.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.495,
+          35.810001,
+          6.06
+        ],
+        "max": [
+          15.895,
+          36.189999,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_5",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.55,
+        30.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.55,
+        30.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.6,
+          29.809999,
+          6.06
+        ],
+        "max": [
+          16.0,
+          30.190001,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_6",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.565,
+        24.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.565,
+        24.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.615,
+          23.809999,
+          6.06
+        ],
+        "max": [
+          16.014999,
+          24.190001,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_7",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.58,
+        18.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.58,
+        18.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.63,
+          17.809999,
+          6.06
+        ],
+        "max": [
+          16.030001,
+          18.190001,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_8",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "location_local_m": [
+        13.595,
+        12.0,
+        6.25
+      ],
+      "origin_world_m": [
+        13.595,
+        12.0,
+        6.25
+      ],
+      "dimensions_local_axes_m": [
+        0.38,
+        3.4,
+        0.38
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        -90.000003
+      ],
+      "bounds_world_m": {
+        "min": [
+          12.645,
+          11.81,
+          6.06
+        ],
+        "max": [
+          16.045,
+          12.19,
+          6.44
+        ]
+      },
+      "vertices": 60,
+      "triangles": 116
+    },
+    {
+      "name": "Conning_Tower",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "conning_tower",
+      "location_local_m": [
+        0.0,
+        37.0,
+        11.398582
+      ],
+      "origin_world_m": [
+        0.0,
+        37.0,
+        11.398582
+      ],
+      "dimensions_local_axes_m": [
+        6.0,
+        6.0,
+        8.376088
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -3.0,
+          34.0,
+          7.210537
+        ],
+        "max": [
+          3.0,
+          40.0,
+          15.586626
+        ]
+      },
+      "vertices": 48,
+      "triangles": 92
+    },
+    {
+      "name": "Damage_Modules",
+      "type": "EMPTY",
+      "parent": "Queen_Mary",
+      "role": "module_group",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Deck_Fittings",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "deck_fitting",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        10.8,
+        143.620789,
+        3.124389
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -5.4,
+          -49.599998,
+          7.392457
+        ],
+        "max": [
+          5.4,
+          94.020782,
+          10.516846
+        ]
+      },
+      "vertices": 608,
+      "triangles": 1088
+    },
+    {
+      "name": "Deck_Visual_Details",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "deck_detail",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        27.122854,
+        207.054657,
+        12.108306
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.561427,
+          -104.034637,
+          3.08832
+        ],
+        "max": [
+          13.561427,
+          103.020027,
+          15.196627
+        ]
+      },
+      "vertices": 5408,
+      "triangles": 9188
+    },
+    {
+      "name": "Elevation_A",
+      "type": "EMPTY",
+      "parent": "Turret_A",
+      "role": "gun_elevation",
+      "location_local_m": [
+        0.0,
+        4.0,
+        1.5
+      ],
+      "origin_world_m": [
+        0.0,
+        64.0,
+        9.813658
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Elevation_B",
+      "type": "EMPTY",
+      "parent": "Turret_B",
+      "role": "gun_elevation",
+      "location_local_m": [
+        0.0,
+        4.0,
+        1.5
+      ],
+      "origin_world_m": [
+        0.0,
+        50.0,
+        13.5
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Elevation_Q",
+      "type": "EMPTY",
+      "parent": "Turret_Q",
+      "role": "gun_elevation",
+      "location_local_m": [
+        0.0,
+        4.0,
+        1.5
+      ],
+      "origin_world_m": [
+        0.0,
+        -10.0,
+        9.470476
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Elevation_X",
+      "type": "EMPTY",
+      "parent": "Turret_X",
+      "role": "gun_elevation",
+      "location_local_m": [
+        0.0,
+        4.0,
+        1.5
+      ],
+      "origin_world_m": [
+        0.0,
+        -72.0,
+        8.180874
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Engine_Room_1",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "engine_room",
+      "location_local_m": [
+        0.0,
+        -47.0,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        -47.0,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        13.169647,
+        14.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -6.584824,
+          -54.0,
+          -7.0
+        ],
+        "max": [
+          6.584824,
+          -40.0,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Engine_Room_2",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "engine_room",
+      "location_local_m": [
+        0.0,
+        -60.5,
+        -4.0
+      ],
+      "origin_world_m": [
+        0.0,
+        -60.5,
+        -4.0
+      ],
+      "dimensions_local_axes_m": [
+        11.61348,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -5.80674,
+          -65.0,
+          -7.0
+        ],
+        "max": [
+          5.80674,
+          -56.0,
+          -1.0
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "FX_Anchors",
+      "type": "EMPTY",
+      "parent": "Queen_Mary",
+      "role": "fx_group",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FX_Funnel_1_Smoke",
+      "type": "EMPTY",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "location_local_m": [
+        0.0,
+        23.0,
+        22.0
+      ],
+      "origin_world_m": [
+        0.0,
+        23.0,
+        22.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FX_Funnel_2_Smoke",
+      "type": "EMPTY",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "location_local_m": [
+        0.0,
+        7.0,
+        22.0
+      ],
+      "origin_world_m": [
+        0.0,
+        7.0,
+        22.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FX_Funnel_3_Smoke",
+      "type": "EMPTY",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "location_local_m": [
+        0.0,
+        -27.0,
+        22.0
+      ],
+      "origin_world_m": [
+        0.0,
+        -27.0,
+        22.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FX_Mast_Fore_Top",
+      "type": "EMPTY",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "location_local_m": [
+        0.0,
+        32.0,
+        40.186626
+      ],
+      "origin_world_m": [
+        0.0,
+        32.0,
+        40.186626
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FX_Mast_Main_Top",
+      "type": "EMPTY",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "location_local_m": [
+        0.0,
+        -38.0,
+        28.296844
+      ],
+      "origin_world_m": [
+        0.0,
+        -38.0,
+        28.296844
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "FX_Standard_Aft",
+      "type": "EMPTY",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "location_local_m": [
+        0.0,
+        -90.0,
+        5.969265
+      ],
+      "origin_world_m": [
+        0.0,
+        -90.0,
+        5.969265
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Forecastle",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "forecastle_deck",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        27.200001,
+        124.699997,
+        2.45
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.6,
+          -18.0,
+          5.05
+        ],
+        "max": [
+          13.6,
+          106.699997,
+          7.5
+        ]
+      },
+      "vertices": 184,
+      "triangles": 364
+    },
+    {
+      "name": "Funnel_1",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "funnel",
+      "location_local_m": [
+        0.0,
+        23.0,
+        9.591805
+      ],
+      "origin_world_m": [
+        0.0,
+        23.0,
+        9.591805
+      ],
+      "dimensions_local_axes_m": [
+        5.0715,
+        7.866,
+        12.428195
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -2.53575,
+          19.066999,
+          9.571805
+        ],
+        "max": [
+          2.53575,
+          26.933001,
+          22.0
+        ]
+      },
+      "vertices": 1196,
+      "triangles": 2056
+    },
+    {
+      "name": "Funnel_1_Uptake",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "funnel_uptake",
+      "location_local_m": [
+        0.0,
+        23.0,
+        8.366806
+      ],
+      "origin_world_m": [
+        0.0,
+        23.0,
+        8.366806
+      ],
+      "dimensions_local_axes_m": [
+        5.88,
+        9.88,
+        2.45
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -2.94,
+          18.059999,
+          7.141806
+        ],
+        "max": [
+          2.94,
+          27.940001,
+          9.591806
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Funnel_2",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "funnel",
+      "location_local_m": [
+        0.0,
+        7.0,
+        9.504365
+      ],
+      "origin_world_m": [
+        0.0,
+        7.0,
+        9.504365
+      ],
+      "dimensions_local_axes_m": [
+        7.245,
+        7.245,
+        12.515635
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -3.6225,
+          3.3775,
+          9.484365
+        ],
+        "max": [
+          3.6225,
+          10.622499,
+          22.0
+        ]
+      },
+      "vertices": 1196,
+      "triangles": 2056
+    },
+    {
+      "name": "Funnel_2_Uptake",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "funnel_uptake",
+      "location_local_m": [
+        0.0,
+        7.0,
+        8.279365
+      ],
+      "origin_world_m": [
+        0.0,
+        7.0,
+        8.279365
+      ],
+      "dimensions_local_axes_m": [
+        8.4,
+        9.1,
+        2.45
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.2,
+          2.45,
+          7.054365
+        ],
+        "max": [
+          4.2,
+          11.55,
+          9.504365
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Funnel_3",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "funnel",
+      "location_local_m": [
+        0.0,
+        -27.0,
+        7.638667
+      ],
+      "origin_world_m": [
+        0.0,
+        -27.0,
+        7.638667
+      ],
+      "dimensions_local_axes_m": [
+        5.0715,
+        7.866,
+        14.381333
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -2.53575,
+          -30.933001,
+          7.618667
+        ],
+        "max": [
+          2.53575,
+          -23.066999,
+          22.0
+        ]
+      },
+      "vertices": 1196,
+      "triangles": 2056
+    },
+    {
+      "name": "Funnel_3_Uptake",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "funnel_uptake",
+      "location_local_m": [
+        0.0,
+        -27.0,
+        6.413667
+      ],
+      "origin_world_m": [
+        0.0,
+        -27.0,
+        6.413667
+      ],
+      "dimensions_local_axes_m": [
+        5.88,
+        9.88,
+        2.45
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -2.94,
+          -31.940001,
+          5.188667
+        ],
+        "max": [
+          2.94,
+          -22.059999,
+          7.638667
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Hull",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "hull",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        27.200001,
+        213.399994,
+        15.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.6,
+          -106.699997,
+          -9.9
+        ],
+        "max": [
+          13.6,
+          106.699997,
+          5.1
+        ]
+      },
+      "vertices": 528,
+      "triangles": 1052
+    },
+    {
+      "name": "Magazine_A",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "location_local_m": [
+        0.0,
+        60.0,
+        -4.6
+      ],
+      "origin_world_m": [
+        0.0,
+        60.0,
+        -4.6
+      ],
+      "dimensions_local_axes_m": [
+        9.0,
+        7.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.5,
+          56.5,
+          -7.6
+        ],
+        "max": [
+          4.5,
+          63.5,
+          -1.6
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Magazine_B",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "location_local_m": [
+        0.0,
+        46.0,
+        -4.6
+      ],
+      "origin_world_m": [
+        0.0,
+        46.0,
+        -4.6
+      ],
+      "dimensions_local_axes_m": [
+        9.0,
+        7.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.5,
+          42.5,
+          -7.6
+        ],
+        "max": [
+          4.5,
+          49.5,
+          -1.6
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Magazine_Q",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "location_local_m": [
+        0.0,
+        -6.0,
+        -4.6
+      ],
+      "origin_world_m": [
+        0.0,
+        -6.0,
+        -4.6
+      ],
+      "dimensions_local_axes_m": [
+        9.0,
+        7.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.5,
+          -9.5,
+          -7.6
+        ],
+        "max": [
+          4.5,
+          -2.5,
+          -1.6
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Magazine_X",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "location_local_m": [
+        0.0,
+        -71.0,
+        -4.4
+      ],
+      "origin_world_m": [
+        0.0,
+        -71.0,
+        -4.4
+      ],
+      "dimensions_local_axes_m": [
+        8.558217,
+        9.0,
+        6.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.279109,
+          -75.5,
+          -7.4
+        ],
+        "max": [
+          4.279109,
+          -66.5,
+          -1.4
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Mast_Fore",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "pole_mast",
+      "location_local_m": [
+        0.0,
+        32.0,
+        16.186626
+      ],
+      "origin_world_m": [
+        0.0,
+        32.0,
+        16.186626
+      ],
+      "dimensions_local_axes_m": [
+        9.999998,
+        2.4,
+        24.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -5.0,
+          30.799999,
+          16.186626
+        ],
+        "max": [
+          4.999998,
+          33.200001,
+          40.186626
+        ]
+      },
+      "vertices": 136,
+      "triangles": 252
+    },
+    {
+      "name": "Mast_Main",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "pole_mast",
+      "location_local_m": [
+        0.0,
+        -38.0,
+        9.296845
+      ],
+      "origin_world_m": [
+        0.0,
+        -38.0,
+        9.296845
+      ],
+      "dimensions_local_axes_m": [
+        5.599999,
+        0.48,
+        19.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -2.8,
+          -38.240002,
+          9.296845
+        ],
+        "max": [
+          2.799999,
+          -37.759998,
+          28.296844
+        ]
+      },
+      "vertices": 80,
+      "triangles": 148
+    },
+    {
+      "name": "Propeller_Shafts",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "propulsion_underwater",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        15.040559,
+        33.523018,
+        4.991831
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.520279,
+          -101.5,
+          -7.020279
+        ],
+        "max": [
+          7.520279,
+          -67.976982,
+          -2.028448
+        ]
+      },
+      "vertices": 496,
+      "triangles": 880
+    },
+    {
+      "name": "Quarterdeck",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "quarterdeck",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        27.200001,
+        88.699997,
+        0.67
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -13.6,
+          -106.699997,
+          5.05
+        ],
+        "max": [
+          13.6,
+          -18.0,
+          5.72
+        ]
+      },
+      "vertices": 44,
+      "triangles": 84
+    },
+    {
+      "name": "Queen_Mary",
+      "type": "EMPTY",
+      "parent": null,
+      "role": "ship_root",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Rangefinder_CT",
+      "type": "MESH",
+      "parent": "Superstructure",
+      "role": "fire_control",
+      "location_local_m": [
+        0.0,
+        37.0,
+        16.486626
+      ],
+      "origin_world_m": [
+        0.0,
+        37.0,
+        16.486626
+      ],
+      "dimensions_local_axes_m": [
+        3.6,
+        3.0,
+        1.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -1.8,
+          35.5,
+          15.586626
+        ],
+        "max": [
+          1.8,
+          38.5,
+          17.386625
+        ]
+      },
+      "vertices": 32,
+      "triangles": 56
+    },
+    {
+      "name": "Rigging_Stays",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "rigging",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        20.050634,
+        91.049438,
+        33.918324
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -10.02532,
+          -50.023575,
+          5.290806
+        ],
+        "max": [
+          10.025314,
+          41.025864,
+          39.209129
+        ]
+      },
+      "vertices": 120,
+      "triangles": 196
+    },
+    {
+      "name": "Rudder",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "rudder",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.42,
+        5.599998,
+        6.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -0.21,
+          -106.400002,
+          -8.0
+        ],
+        "max": [
+          0.21,
+          -100.800003,
+          -1.2
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Steering_Gear",
+      "type": "MESH",
+      "parent": "Damage_Modules",
+      "role": "steering_gear",
+      "location_local_m": [
+        0.0,
+        -96.0,
+        -2.5
+      ],
+      "origin_world_m": [
+        0.0,
+        -96.0,
+        -2.5
+      ],
+      "dimensions_local_axes_m": [
+        4.242221,
+        6.0,
+        2.5
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -2.121111,
+          -99.0,
+          -3.75
+        ],
+        "max": [
+          2.121111,
+          -93.0,
+          -1.25
+        ]
+      },
+      "vertices": 8,
+      "triangles": 12
+    },
+    {
+      "name": "Sternwalk",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "sternwalk",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        14.436597,
+        8.5,
+        0.36
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.218298,
+          -106.5,
+          3.061962
+        ],
+        "max": [
+          7.218298,
+          -98.0,
+          3.421962
+        ]
+      },
+      "vertices": 48,
+      "triangles": 92
+    },
+    {
+      "name": "Sternwalk_Rails",
+      "type": "MESH",
+      "parent": "Sternwalk",
+      "role": "sternwalk_rail",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        14.566597,
+        8.630005,
+        1.99
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -7.283298,
+          -106.565002,
+          3.421962
+        ],
+        "max": [
+          7.283298,
+          -97.934998,
+          5.411962
+        ]
+      },
+      "vertices": 544,
+      "triangles": 948
+    },
+    {
+      "name": "Superstructure",
+      "type": "EMPTY",
+      "parent": "Queen_Mary",
+      "role": "group",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Torpedo_Net_Port_Mesh",
+      "type": "MESH",
+      "parent": "Torpedo_Net_Port_Stowed",
+      "role": "stowed_net_mesh",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        4.028254,
+        156.04776,
+        3.225074
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -14.136289,
+          -80.025681,
+          1.587463
+        ],
+        "max": [
+          -10.108035,
+          76.022079,
+          4.812537
+        ]
+      },
+      "vertices": 320,
+      "triangles": 560
+    },
+    {
+      "name": "Torpedo_Net_Port_Stowed",
+      "type": "EMPTY",
+      "parent": "Queen_Mary",
+      "role": "stowed_net",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Torpedo_Net_Starboard_Mesh",
+      "type": "MESH",
+      "parent": "Torpedo_Net_Starboard_Stowed",
+      "role": "stowed_net_mesh",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        4.028254,
+        156.04776,
+        3.225074
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          10.108035,
+          -80.025681,
+          1.587463
+        ],
+        "max": [
+          14.136289,
+          76.022079,
+          4.812537
+        ]
+      },
+      "vertices": 320,
+      "triangles": 560
+    },
+    {
+      "name": "Torpedo_Net_Starboard_Stowed",
+      "type": "EMPTY",
+      "parent": "Queen_Mary",
+      "role": "stowed_net",
+      "location_local_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "origin_world_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_local_axes_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Turret_A",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "location_local_m": [
+        0.0,
+        60.0,
+        8.313658
+      ],
+      "origin_world_m": [
+        0.0,
+        60.0,
+        8.313658
+      ],
+      "dimensions_local_axes_m": [
+        9.787213,
+        9.092039,
+        3.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.893607,
+          55.700001,
+          8.313658
+        ],
+        "max": [
+          4.893607,
+          64.792038,
+          12.113658
+        ]
+      },
+      "vertices": 376,
+      "triangles": 728
+    },
+    {
+      "name": "Turret_B",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "location_local_m": [
+        0.0,
+        46.0,
+        12.0
+      ],
+      "origin_world_m": [
+        0.0,
+        46.0,
+        12.0
+      ],
+      "dimensions_local_axes_m": [
+        9.787213,
+        9.092039,
+        3.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.893607,
+          41.700001,
+          12.0
+        ],
+        "max": [
+          4.893607,
+          50.792038,
+          15.8
+        ]
+      },
+      "vertices": 376,
+      "triangles": 728
+    },
+    {
+      "name": "Turret_Q",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "location_local_m": [
+        0.0,
+        -6.0,
+        7.970476
+      ],
+      "origin_world_m": [
+        0.0,
+        -6.0,
+        7.970476
+      ],
+      "dimensions_local_axes_m": [
+        9.787213,
+        9.092039,
+        3.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        180.000005
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.893607,
+          -10.792039,
+          7.970476
+        ],
+        "max": [
+          4.893607,
+          -1.7,
+          11.770475
+        ]
+      },
+      "vertices": 376,
+      "triangles": 728
+    },
+    {
+      "name": "Turret_X",
+      "type": "MESH",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "location_local_m": [
+        0.0,
+        -68.0,
+        6.680874
+      ],
+      "origin_world_m": [
+        0.0,
+        -68.0,
+        6.680874
+      ],
+      "dimensions_local_axes_m": [
+        9.787213,
+        9.092039,
+        3.8
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_local_deg": [
+        0.0,
+        0.0,
+        180.000005
+      ],
+      "bounds_world_m": {
+        "min": [
+          -4.893607,
+          -72.792038,
+          6.680874
+        ],
+        "max": [
+          4.893607,
+          -63.700001,
+          10.480874
+        ]
+      },
+      "vertices": 376,
+      "triangles": 728
+    }
+  ],
+  "estimation_notes": [
+    "Hull sections come from the OFFSETS table and stay estimates until a lines plan is supplied.",
+    "A cruiser stern keeps deck breadth aft so attachments derive from the hull.",
+    "Pole masts follow the latest user correction and early photographs; exact dated fit remains provisional.",
+    "Sixteen forecastle casemates retain the user-specified 8-per-side arrangement; exact stations are estimates.",
+    "Casemate axis height is a switch because the sources do not settle it.",
+    "Armour thicknesses are published; armour extents and internal volumes are estimates.",
+    "1916-labelled reference used for arrangement only."
+  ]
+}

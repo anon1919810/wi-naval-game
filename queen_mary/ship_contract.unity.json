@@ -1,0 +1,537 @@
+{
+  "ship_id": "HMS_Queen_Mary_1913",
+  "asset_version": "v2",
+  "configuration": "user_spec_greybox_v2",
+  "historically_certified": false,
+  "length_m": 213.4,
+  "beam_m": 27.2,
+  "draft_m": 9.9,
+  "main_deck_z_m": 5.1,
+  "forecastle_z_m": 7.5,
+  "main_gun_calibre_mm": 343,
+  "secondary_gun_calibre_mm": 102,
+  "speed_knots": 28.0,
+  "boilers": 42,
+  "boiler_rooms": 7,
+  "shafts": 4,
+  "torpedo_tubes": 2,
+  "object_count": 98,
+  "mesh_count": 82,
+  "offsets_source": "builtin_estimate",
+  "casemate_placement": "between_decks",
+  "turrets": [
+    {
+      "key": "A",
+      "turret": "Turret_A",
+      "pivot": "Elevation_A",
+      "barbette": "Barbette_A",
+      "barrels": [
+        "Barrel_A_Port",
+        "Barrel_A_Starboard"
+      ],
+      "base_z_m": 8.314,
+      "rest_yaw_deg": 0.0,
+      "trunnion_local_y_m": 4.0,
+      "barrel_end_local_y_m": 12.4,
+      "turret_height_m": 3.1,
+      "min_elevation_deg": -3.0,
+      "max_elevation_deg": 20.0,
+      "director_elevation_limit_deg": 15.35
+    },
+    {
+      "key": "B",
+      "turret": "Turret_B",
+      "pivot": "Elevation_B",
+      "barbette": "Barbette_B",
+      "barrels": [
+        "Barrel_B_Port",
+        "Barrel_B_Starboard"
+      ],
+      "base_z_m": 12.0,
+      "rest_yaw_deg": 0.0,
+      "trunnion_local_y_m": 4.0,
+      "barrel_end_local_y_m": 12.4,
+      "turret_height_m": 3.1,
+      "min_elevation_deg": -3.0,
+      "max_elevation_deg": 20.0,
+      "director_elevation_limit_deg": 15.35
+    },
+    {
+      "key": "Q",
+      "turret": "Turret_Q",
+      "pivot": "Elevation_Q",
+      "barbette": "Barbette_Q",
+      "barrels": [
+        "Barrel_Q_Port",
+        "Barrel_Q_Starboard"
+      ],
+      "base_z_m": 7.97,
+      "rest_yaw_deg": 180.0,
+      "trunnion_local_y_m": 4.0,
+      "barrel_end_local_y_m": 12.4,
+      "turret_height_m": 3.1,
+      "min_elevation_deg": -3.0,
+      "max_elevation_deg": 20.0,
+      "director_elevation_limit_deg": 15.35
+    },
+    {
+      "key": "X",
+      "turret": "Turret_X",
+      "pivot": "Elevation_X",
+      "barbette": "Barbette_X",
+      "barrels": [
+        "Barrel_X_Port",
+        "Barrel_X_Starboard"
+      ],
+      "base_z_m": 6.681,
+      "rest_yaw_deg": 180.0,
+      "trunnion_local_y_m": 4.0,
+      "barrel_end_local_y_m": 12.4,
+      "turret_height_m": 3.1,
+      "min_elevation_deg": -3.0,
+      "max_elevation_deg": 20.0,
+      "director_elevation_limit_deg": 15.35
+    }
+  ],
+  "secondary_guns": [
+    {
+      "name": "Casemate_Port_1",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_2",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_3",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_4",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_5",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_6",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_7",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Port_8",
+      "side": "Port",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_1",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_2",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_3",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_4",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_5",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_6",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_7",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    },
+    {
+      "name": "Casemate_Starboard_8",
+      "side": "Starboard",
+      "axis_z_m": 6.25
+    }
+  ],
+  "materials": [
+    {
+      "name": "HullGrey",
+      "base_color": [
+        0.34,
+        0.34,
+        0.34
+      ],
+      "roughness": 0.85,
+      "metallic": 0.0
+    },
+    {
+      "name": "DeckGrey",
+      "base_color": [
+        0.47,
+        0.47,
+        0.47
+      ],
+      "roughness": 0.85,
+      "metallic": 0.0
+    },
+    {
+      "name": "StructureGrey",
+      "base_color": [
+        0.56,
+        0.56,
+        0.56
+      ],
+      "roughness": 0.85,
+      "metallic": 0.0
+    },
+    {
+      "name": "DarkGrey",
+      "base_color": [
+        0.2,
+        0.2,
+        0.2
+      ],
+      "roughness": 0.85,
+      "metallic": 0.0
+    },
+    {
+      "name": "Black",
+      "base_color": [
+        0.065,
+        0.065,
+        0.065
+      ],
+      "roughness": 0.85,
+      "metallic": 0.0
+    },
+    {
+      "name": "UnderwaterGrey",
+      "base_color": [
+        0.245,
+        0.245,
+        0.245
+      ],
+      "roughness": 0.85,
+      "metallic": 0.0
+    }
+  ],
+  "notes": [
+    "Generated by queen_mary.py together with the asset. Do not hand edit.",
+    "firing_arcs.json is regenerated by verify_blender.py after each build."
+  ],
+  "module_roles": [
+    {
+      "role": "armour_belt",
+      "names": [
+        "Armour_Belt_229mm",
+        "Armour_Belt_Taper_102mm_Aft",
+        "Armour_Belt_Taper_102mm_Fwd",
+        "Armour_Upper_Belt_152mm"
+      ]
+    },
+    {
+      "role": "armour_bulkhead",
+      "names": [
+        "Armour_Bulkhead_Aft",
+        "Armour_Bulkhead_Fwd"
+      ]
+    },
+    {
+      "role": "armour_deck",
+      "names": [
+        "Armour_Deck_25mm",
+        "Armour_Deck_64mm"
+      ]
+    },
+    {
+      "role": "barbette",
+      "names": [
+        "Barbette_A",
+        "Barbette_B",
+        "Barbette_Q",
+        "Barbette_X"
+      ]
+    },
+    {
+      "role": "boiler_room",
+      "names": [
+        "Boiler_Room_1",
+        "Boiler_Room_2",
+        "Boiler_Room_3",
+        "Boiler_Room_4",
+        "Boiler_Room_5",
+        "Boiler_Room_6",
+        "Boiler_Room_7"
+      ]
+    },
+    {
+      "role": "bridge",
+      "names": [
+        "Bridge"
+      ]
+    },
+    {
+      "role": "casemate_opening",
+      "names": [
+        "Casemate_Openings_Port",
+        "Casemate_Openings_Starboard"
+      ]
+    },
+    {
+      "role": "conning_tower",
+      "names": [
+        "Conning_Tower"
+      ]
+    },
+    {
+      "role": "engine_room",
+      "names": [
+        "Engine_Room_1",
+        "Engine_Room_2"
+      ]
+    },
+    {
+      "role": "fire_control",
+      "names": [
+        "Rangefinder_CT"
+      ]
+    },
+    {
+      "role": "forecastle_deck",
+      "names": [
+        "Forecastle"
+      ]
+    },
+    {
+      "role": "funnel",
+      "names": [
+        "Funnel_1",
+        "Funnel_2",
+        "Funnel_3"
+      ]
+    },
+    {
+      "role": "funnel_uptake",
+      "names": [
+        "Funnel_1_Uptake",
+        "Funnel_2_Uptake",
+        "Funnel_3_Uptake"
+      ]
+    },
+    {
+      "role": "fx_anchor",
+      "names": [
+        "FX_Funnel_1_Smoke",
+        "FX_Funnel_2_Smoke",
+        "FX_Funnel_3_Smoke",
+        "FX_Mast_Fore_Top",
+        "FX_Mast_Main_Top",
+        "FX_Standard_Aft"
+      ]
+    },
+    {
+      "role": "fx_group",
+      "names": [
+        "FX_Anchors"
+      ]
+    },
+    {
+      "role": "group",
+      "names": [
+        "Superstructure"
+      ]
+    },
+    {
+      "role": "gun_elevation",
+      "names": [
+        "Elevation_A",
+        "Elevation_B",
+        "Elevation_Q",
+        "Elevation_X"
+      ]
+    },
+    {
+      "role": "hull",
+      "names": [
+        "Hull"
+      ]
+    },
+    {
+      "role": "magazine",
+      "names": [
+        "Magazine_A",
+        "Magazine_B",
+        "Magazine_Q",
+        "Magazine_X"
+      ]
+    },
+    {
+      "role": "main_gun_barrel",
+      "names": [
+        "Barrel_A_Port",
+        "Barrel_A_Starboard",
+        "Barrel_B_Port",
+        "Barrel_B_Starboard",
+        "Barrel_Q_Port",
+        "Barrel_Q_Starboard",
+        "Barrel_X_Port",
+        "Barrel_X_Starboard"
+      ]
+    },
+    {
+      "role": "main_turret",
+      "names": [
+        "Turret_A",
+        "Turret_B",
+        "Turret_Q",
+        "Turret_X"
+      ]
+    },
+    {
+      "role": "module_group",
+      "names": [
+        "Damage_Modules"
+      ]
+    },
+    {
+      "role": "propulsion_underwater",
+      "names": [
+        "Propeller_Shafts"
+      ]
+    },
+    {
+      "role": "quarterdeck",
+      "names": [
+        "Quarterdeck"
+      ]
+    },
+    {
+      "role": "rudder",
+      "names": [
+        "Rudder"
+      ]
+    },
+    {
+      "role": "secondary_gun",
+      "names": [
+        "Casemate_Port_1",
+        "Casemate_Port_2",
+        "Casemate_Port_3",
+        "Casemate_Port_4",
+        "Casemate_Port_5",
+        "Casemate_Port_6",
+        "Casemate_Port_7",
+        "Casemate_Port_8",
+        "Casemate_Starboard_1",
+        "Casemate_Starboard_2",
+        "Casemate_Starboard_3",
+        "Casemate_Starboard_4",
+        "Casemate_Starboard_5",
+        "Casemate_Starboard_6",
+        "Casemate_Starboard_7",
+        "Casemate_Starboard_8"
+      ]
+    },
+    {
+      "role": "ship_root",
+      "names": [
+        "Queen_Mary"
+      ]
+    },
+    {
+      "role": "steering_gear",
+      "names": [
+        "Steering_Gear"
+      ]
+    },
+    {
+      "role": "sternwalk",
+      "names": [
+        "Sternwalk"
+      ]
+    },
+    {
+      "role": "sternwalk_rail",
+      "names": [
+        "Sternwalk_Rails"
+      ]
+    },
+    {
+      "role": "stowed_net",
+      "names": [
+        "Torpedo_Net_Port_Stowed",
+        "Torpedo_Net_Starboard_Stowed"
+      ]
+    },
+    {
+      "role": "stowed_net_mesh",
+      "names": [
+        "Torpedo_Net_Port_Mesh",
+        "Torpedo_Net_Starboard_Mesh"
+      ]
+    },
+    {
+      "role": "structure",
+      "names": [
+        "Aft_Deckhouse",
+        "Aft_Platform",
+        "B_Superfiring_Deckhouse",
+        "Bridge_Upper",
+        "Bridge_Visor",
+        "Bridge_Wings"
+      ]
+    },
+    {
+      "role": "tripod_mast",
+      "names": [
+        "Mast_Fore",
+        "Mast_Main"
+      ]
+    }
+  ],
+  "file_refs": [
+    {
+      "key": "manifest",
+      "path": "object_manifest.json"
+    },
+    {
+      "key": "damage_model",
+      "path": "damage_model.json"
+    },
+    {
+      "key": "hydrostatics",
+      "path": "hydrostatics.json"
+    },
+    {
+      "key": "firing_arcs",
+      "path": "firing_arcs.json"
+    },
+    {
+      "key": "fbx",
+      "path": "HMS_Queen_Mary_1913_Greybox.fbx"
+    }
+  ],
+  "unity_note": "Read this file with JsonUtility. The nested dictionaries of ship_contract.json are exposed as module_roles and file_refs."
+}

@@ -1,0 +1,489 @@
+{
+  "status": "passed",
+  "counts": {
+    "total": 41,
+    "geometry": 28,
+    "assumption": 13,
+    "failing_blocking": 0,
+    "failing_assumption": 0
+  },
+  "warnings": [],
+  "checks": [
+    {
+      "check": "All required semantic module names exist",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "missing": [],
+        "required_count": 82
+      }
+    },
+    {
+      "check": "Hull dimensions are 27.2 x 213.4 x 15.0 metres",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "dimensions": [
+          27.200001,
+          213.399994,
+          15.0
+        ]
+      }
+    },
+    {
+      "check": "Hull envelope is Y -106.7..+106.7 and X +-13.6",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "min": [
+          -13.6,
+          -106.699997,
+          -9.9
+        ],
+        "max": [
+          13.6,
+          106.699997,
+          5.1
+        ]
+      }
+    },
+    {
+      "check": "Metres, waterline root, no object scale",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true
+    },
+    {
+      "check": "Hull keel -9.9 m and main deck +5.1 m",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "keel_z": -9.9,
+        "deck_z": 5.1
+      }
+    },
+    {
+      "check": "Module order fore to aft is A B foremast F1 F2 Q F3 mainmast X",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "Turret_A": 60.0,
+        "Turret_B": 46.0,
+        "Mast_Fore": 32.0,
+        "Funnel_1": 23.0,
+        "Funnel_2": 7.0,
+        "Turret_Q": -6.0,
+        "Funnel_3": -27.0,
+        "Mast_Main": -38.0,
+        "Turret_X": -68.0
+      }
+    },
+    {
+      "check": "B turret superfires above A",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "B_z": 12.0,
+        "A_z": 8.314
+      }
+    },
+    {
+      "check": "All three funnel tops level at 22.0 m",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "evidence": [
+        22.0,
+        22.0,
+        22.0
+      ],
+      "source": "worldwar1.co.uk: Queen Mary class battlecruiser - funnel and mast notes",
+      "status": "matches_source"
+    },
+    {
+      "check": "Every attachment stays inside the hull envelope plus its allowance",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true
+    },
+    {
+      "check": "Every structure is supported by a deck or by the module below it",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "all supported"
+    },
+    {
+      "check": "Casemate guns sit on the hull surface at the configured axis height",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "all on surface",
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "axis height unverified"
+    },
+    {
+      "check": "Turret bases sit on their deck and trunnions stay at the designed height",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "all on deck"
+    },
+    {
+      "check": "Internal damage volumes fit inside the hull shell",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "all inside"
+    },
+    {
+      "check": "Turret module integrity: pivot chain, front trunnion, individual barrels",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "all four turrets intact"
+    },
+    {
+      "check": "Yaw and elevation move the barrels and leave mount and barbette fixed",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "all four turrets articulate"
+    },
+    {
+      "check": "Port: exactly 8 secondary guns on the correct side",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "count": 8
+      },
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "16 on one deck per source"
+    },
+    {
+      "check": "Starboard: exactly 8 secondary guns on the correct side",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "count": 8
+      },
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "16 on one deck per source"
+    },
+    {
+      "check": "Decoration is merged and combat modules stay separate",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "decoration": [
+          "Casemate_Openings_Port",
+          "Casemate_Openings_Starboard",
+          "Sternwalk_Rails",
+          "Torpedo_Net_Port_Mesh",
+          "Torpedo_Net_Starboard_Mesh"
+        ],
+        "loose_parts": [],
+        "movable_modules": 16,
+        "module_contract": "per-module objects, decoration merged"
+      }
+    },
+    {
+      "check": "Ship stays inside the object budget for 10-30 ships on screen",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "render_meshes": 60,
+        "internal_volume_meshes": 22,
+        "exported_objects_total": 98,
+        "preview_objects_excluded": 6,
+        "note": "internal volumes and armour belong on a collision-only layer in Unity, so they must not cost draw calls"
+      }
+    },
+    {
+      "check": "Damage modules carry a volume and provenance; 7 boiler rooms exist",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": "complete"
+    },
+    {
+      "check": "Resting barrels clear funnels, masts and superstructure",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "worst": {
+          "turret": "Q",
+          "clearance_m": 0.948,
+          "nearest": "Funnel_3"
+        },
+        "all": [
+          {
+            "turret": "A",
+            "clearance_m": 2.314,
+            "nearest": "Forecastle"
+          },
+          {
+            "turret": "B",
+            "clearance_m": 1.386,
+            "nearest": "Turret_A"
+          },
+          {
+            "turret": "Q",
+            "clearance_m": 0.948,
+            "nearest": "Funnel_3"
+          },
+          {
+            "turret": "X",
+            "clearance_m": 2.461,
+            "nearest": "Quarterdeck"
+          }
+        ]
+      }
+    },
+    {
+      "check": "Firing arcs derived from geometry and written to firing_arcs.json",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "evidence": {
+        "file": "firing_arcs.json",
+        "clear_fraction_at_0deg": {
+          "A": 0.764,
+          "B": 0.792,
+          "Q": 0.847,
+          "X": 0.903
+        }
+      },
+      "status": "derived, needs review against gunnery sources"
+    },
+    {
+      "check": "Derived game data files were written next to the asset",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": [
+        "buoyancy_compartments.json",
+        "damage_model.json",
+        "hydrostatics.json",
+        "ship_contract.json",
+        "ship_contract.unity.json"
+      ]
+    },
+    {
+      "check": "Every turret is linked to its magazine and to the director",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "feed_hoists": {
+          "Magazine_A": "Turret_A",
+          "Magazine_B": "Turret_B",
+          "Magazine_Q": "Turret_Q",
+          "Magazine_X": "Turret_X"
+        },
+        "director_links": 4
+      }
+    },
+    {
+      "check": "Seven boiler rooms feed the engine rooms and every funnel has a smoke source",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "boiler_rooms_linked": 7,
+        "funnel_smoke_sources": {
+          "Funnel_1": [
+            "Boiler_Room_1",
+            "Boiler_Room_2"
+          ],
+          "Funnel_2": [
+            "Boiler_Room_3",
+            "Boiler_Room_4"
+          ],
+          "Funnel_3": [
+            "Boiler_Room_5",
+            "Boiler_Room_6",
+            "Boiler_Room_7"
+          ]
+        }
+      }
+    },
+    {
+      "check": "Floodable compartments do not overlap each other",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "compartments": 14,
+        "overlaps": []
+      }
+    },
+    {
+      "check": "Hydrostatics were integrated from the offsets table",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "immersed_volume_m3": 30663.7,
+        "waterplane_area_m2": 3073.6,
+        "lcb_y_m": 1.575,
+        "vcb_z_m": -3.89,
+        "displacement_t_at_1_025": 31430.3,
+        "displacement_delta_pct": -2.27
+      }
+    },
+    {
+      "check": "Ship contract agrees with the manifest",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "contract_objects": 98,
+        "exported_objects": 98,
+        "turrets": 4,
+        "secondary_guns": 16
+      }
+    },
+    {
+      "check": "Every name in the contract resolves to a scene object",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "names_checked": 98
+      }
+    },
+    {
+      "check": "Unity contract stays readable by JsonUtility",
+      "passed": true,
+      "layer": "geometry",
+      "blocking": true,
+      "evidence": {
+        "nested_dictionaries": "none",
+        "object_count": 98,
+        "mesh_count": 82,
+        "scene": {
+          "objects": 98,
+          "meshes": 82
+        },
+        "note": "JsonUtility cannot deserialise dictionaries; module_roles and file_refs carry that data as arrays"
+      }
+    },
+    {
+      "check": "Estimated sections are consistent with the published deep-load displacement",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "evidence": {
+        "computed_t": 31430.3,
+        "published_deep_load_t": 32160,
+        "delta_pct": -2.27,
+        "floodable_share_pct": 23.4
+      },
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "sections are still an estimate; this is an independent cross-check"
+    },
+    {
+      "check": "Mast_Fore: merged tripod module records three legs",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "User greybox specification for this asset (not historical certification) | worldwar1.co.uk: Queen Mary class battlecruiser - funnel and mast notes",
+      "status": "user_spec_only: ww1 reports a pole mast as built, altered to tripod later"
+    },
+    {
+      "check": "Mast_Main: merged tripod module records three legs",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "User greybox specification for this asset (not historical certification) | worldwar1.co.uk: Queen Mary class battlecruiser - funnel and mast notes",
+      "status": "user_spec_only: ww1 reports a pole mast as built, altered to tripod later"
+    },
+    {
+      "check": "Two tripod masts are a user requirement, not a certified fit",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "User greybox specification for this asset (not historical certification)",
+      "status": "conflicts_with_source: needs a dated photo"
+    },
+    {
+      "check": "Funnel 2 circular, funnels 1 and 3 elliptical",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "worldwar1.co.uk: Queen Mary class battlecruiser - funnel and mast notes",
+      "status": "matches_source"
+    },
+    {
+      "check": "Funnel 1 and 2 are closer together than 2 and 3",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "evidence": {
+        "spacing_m": [
+          16.0,
+          34.0
+        ]
+      },
+      "source": "User greybox specification for this asset (not historical certification)",
+      "status": "user_spec_only"
+    },
+    {
+      "check": "Sternwalk is present and derived from the hull surface",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "matches_source"
+    },
+    {
+      "check": "Torpedo nets are stowed as fitted in the target 1913 configuration",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "MaritimeQuest: HMS Queen Mary data page - dimensions, armament as built",
+      "status": "as built, removed later in the war"
+    },
+    {
+      "check": "Principal dimensions and displacement match the published figures",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "evidence": {
+        "normal_t": 27200,
+        "deep_t": 32160,
+        "speed_kn": 28.0
+      },
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "matches_source"
+    },
+    {
+      "check": "Director elevation limit 15 deg 21 min recorded for the 1913 fit",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "matches_source"
+    },
+    {
+      "check": "No anti-aircraft armament in the 1913 configuration",
+      "passed": true,
+      "layer": "assumption",
+      "blocking": false,
+      "source": "Wikipedia: HMS Queen Mary (1912) - general characteristics, armament, armour",
+      "status": "matches_source: AA was fitted from October 1914"
+    }
+  ]
+}
