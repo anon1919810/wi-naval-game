@@ -127,11 +127,11 @@ namespace Naval.EditorTools
                 failures.Add("工程没有指定渲染管线（GraphicsSettings.defaultRenderPipeline 为空）——" +
                              "先跑 Tools > Naval > Set up URP");
 
-            string fbxPath = ResolveFbxPath(notes);
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+            string modelPath = ResolveModelPath(notes);
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(modelPath);
             if (model == null)
             {
-                failures.Add("找不到模型 " + fbxPath);
+                failures.Add("找不到模型 " + modelPath);
                 return Finish(report, failures, notes, null);
             }
 
@@ -408,6 +408,23 @@ namespace Naval.EditorTools
             Vector3 s = cam.WorldToViewportPoint(stern.position);
             if (Mathf.Abs(b.x - s.x) < 0.05f) return "head-on";
             return b.x > s.x ? "right" : "left";
+        }
+
+        /// <summary>
+        /// 优先渲染**构建好的预制体**（它才是游戏里真正会出现的那个东西），
+        /// 没有预制体才退回 FBX。这样"关掉仅碰撞件之后船看着还正常吗"能被像素验到。
+        /// 读不到契约就退回默认名 —— 但**会记一条提示**，不静默。
+        /// </summary>
+        private static string ResolveModelPath(List<string> notes)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ShipRuntimeBuilder.PrefabPath);
+            if (prefab != null)
+            {
+                notes.Add("渲染对象是构建好的预制体：" + ShipRuntimeBuilder.PrefabPath);
+                return ShipRuntimeBuilder.PrefabPath;
+            }
+            notes.Add("还没有预制体（先跑 Build runtime ship），退回渲染原始 FBX");
+            return ResolveFbxPath(notes);
         }
 
         /// <summary>

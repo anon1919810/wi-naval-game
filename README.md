@@ -35,15 +35,27 @@ cd "...\queen_mary_v3\unity"
 .\sync_to_unity.ps1 -ProjectPath "D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval"
 ```
 
-Unity 侧三道门（都能用 `-batchmode -executeMethod` 跑，不用开界面）：
+Unity 侧四道门（都能用 `-batchmode -executeMethod` 跑，不用开界面）：
 
 | 菜单 | 批处理入口 | 验什么 |
 |---|---|---|
 | Set up URP | `Naval.EditorTools.UrpSetup.SetUpBatch` | 建 URP 管线资产、按契约建材质、重导模型 |
-| Validate ship asset | `Naval.EditorTools.ShipAssetValidator.ValidateBatch` | 契约 101 名、轴向、URP 材质、炮塔枢轴 |
-| Render URP check images | `Naval.EditorTools.ShipPreviewRender.RenderBatch` | 逐像素查品红/黑屏，出五张校验图 |
+| Build runtime ship | `Naval.EditorTools.ShipRuntimeBuilder.BuildBatch` | 仅碰撞件关渲染、舱室挂数据与碰撞体、生成预制体与 ShipDefinition |
+| Validate ship asset | `Naval.EditorTools.ShipAssetValidator.ValidateBatch` | 契约 101 名、轴向、右舷、URP 材质、炮塔枢轴 |
+| Render URP check images | `Naval.EditorTools.ShipPreviewRender.RenderBatch` | 逐像素查品红/黑屏，出五张校验图（优先渲预制体） |
 
-当前状态：**三道门全绿**（`unity_verification_urp.json`、`unity_render_check.json`）。
+当前状态：**四道门全绿**（`ship_runtime_build.json`、`unity_verification_urp.json`、`unity_render_check.json`）。
+
+### 运行时船体做了什么
+
+85 个网格里有 **24 个在船壳内部、永远看不见**（8 件装甲 + 13 个舱室 + 3 件水下件）——构建时
+**关掉它们的 MeshRenderer**、加上 **trigger 盒碰撞体**，并把 `buoyancy_compartments.json` 的
+体积/渗透率/可进水体积挂到舱室对象上（`ShipCompartment`）。结果：每艘船 draw call 从 85 降到 61，
+同时"这一炮打中哪个舱、进不进水"有了世界里的答案。产物是
+`Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` + `ShipDefinition` 资产。
+
+> 碰撞体一律用**盒体 + trigger**，不用网格碰撞体：15 艘船 × 24 个网格碰撞体会压垮物理；
+> trigger 则避免船与船互相卡住。射线检测记得传 `QueryTriggerInteraction.Collide`。
 
 ## 改动约定（谁改了什么）
 

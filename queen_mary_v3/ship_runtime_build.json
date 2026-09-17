@@ -1,0 +1,29 @@
+{
+    "status": "passed",
+    "shipId": "HMS_Queen_Mary_1913",
+    "prefabPath": "Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab",
+    "definitionPath": "Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Definition.asset",
+    "objectCount": 101,
+    "meshCount": 85,
+    "renderersDisabled": 24,
+    "collidersAdded": 24,
+    "compartments": 13,
+    "compartmentsWithBuoyancyData": 13,
+    "collisionOnlyRoles": [
+        "armour_belt",
+        "armour_bulkhead",
+        "armour_deck",
+        "boiler_room",
+        "engine_room",
+        "magazine",
+        "steering_gear",
+        "propulsion_underwater",
+        "rudder"
+    ],
+    "unusedRoles": [],
+    "checksFailed": [],
+    "notes": [
+        "预制体已生成：Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab",
+        "ShipDefinition 已更新：Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Definition.asset"
+    ]
+}
