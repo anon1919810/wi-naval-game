@@ -53,6 +53,42 @@
     "yawAroundShipVertical": true,
     "positiveCommandTurnsStarboard": true,
     "elevationRaisesBarrel": true,
+    "starboardDirection": {
+        "x": 1.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "contractNamesChecked": 137,
+    "turretAxes": [
+        {
+            "turret": "A",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        },
+        {
+            "turret": "B",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        },
+        {
+            "turret": "Q",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        },
+        {
+            "turret": "X",
+            "yawAxis": "Z",
+            "yawSign": 1,
+            "pitchAxis": "X",
+            "pitchSign": 1
+        }
+    ],
     "shadersInUse": [
         "Universal Render Pipeline/Lit"
     ],

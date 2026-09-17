@@ -4,10 +4,13 @@ param(
 
 # 把资产与 Unity 侧代码同步进工程。路径全部从 $PSScriptRoot 推导，
 # 不在脚本里写中文绝对路径（.ps1 含非 ASCII 路径会因编码问题静默出错）。
+#
+# 本脚本位于 <资产目录>\unity\ 下，所以**资产目录就是它的上一级** ——
+# 融合之后只有一个家（queen_mary_v3/unity），不要再写死某个版本目录名。
 
 $ErrorActionPreference = 'Stop'
 $here = $PSScriptRoot
-$assetDir = Join-Path (Split-Path $here -Parent) 'queen_mary'
+$assetDir = Split-Path $here -Parent
 $shipId = 'HMS_Queen_Mary_1913'
 
 if (-not (Test-Path $ProjectPath)) { throw "工程不存在：$ProjectPath" }

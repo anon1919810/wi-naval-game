@@ -101,6 +101,23 @@ namespace Naval
 
         public const string Folder = "Ships";
 
+        /// <summary>契约里指定的 FBX 文件名。取不到时的兜底（不至于整个校验崩掉）。</summary>
+        public const string FallbackFbxName = "HMS_Queen_Mary_1913_Greybox.fbx";
+
+        /// <summary>
+        /// 从契约的 file_refs 里取 FBX 文件名。**不要在代码里硬编码这个名字** ——
+        /// v2 叫 *_Greybox.fbx、v3 叫 *_Refined_v3.fbx，写死的话换一代资产就失效
+        /// （v3 的交接文档里明确点出了这个坑）。契约既然写了，就读它。
+        /// </summary>
+        public string FbxFileName()
+        {
+            if (file_refs != null)
+                foreach (var f in file_refs)
+                    if (f != null && f.key == "fbx" && !string.IsNullOrEmpty(f.path))
+                        return f.path;
+            return FallbackFbxName;
+        }
+
         public static string RelativePath(string shipId) =>
             Folder + "/" + shipId + "/ship_contract.unity.json";
 
