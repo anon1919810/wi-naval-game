@@ -7,8 +7,61 @@
 - **用途场景**：中距 50–200 m 观察，同屏 10–30 艘
 - **当前资产版本**：**v3**（`queen_mary_v3/`），101 对象 / 85 网格 / 31,164 三角面
 
+## 文档与资料索引
+
 > 本仓库于 2026-09-18 建立。**此前的历史无法重建**，仓库从那一刻开始记录；
 > v2 的目录按原样保留，作为只读历史。
+
+### 先读哪一份
+
+| 你想做什么 | 读这个 |
+|---|---|
+| 接手干活 | 本文（根 `README.md`） |
+| 搞清楚 Unity 侧怎么做 | `queen_mary_v3/unity/README_集成.md` |
+| 看历史交接（v2 视角） | `交接文件_GPT6_2026-09-17.md`（开头有 v3 指针） |
+| 看 v3 那一侧的接续说明 | `queen_mary_v3/交接_v3.md` |
+| 查素材与待补图 | `HMS_Queen_Mary_精修素材清单.md` |
+
+### 交接与说明文档
+
+| 路径 | 状态 |
+|---|---|
+| `README.md` | **当前入口**：目录地图 / 跑法 / 改动约定 |
+| `交接文件_GPT6_2026-09-17.md` | 历史：v2 的交接（架构约定与踩坑仍有效） |
+| `queen_mary_v3/交接_v3.md` | v3 的接续说明（另一条产线写的） |
+| `queen_mary_v3/unity/README_集成.md` | Unity 集成：URP / 契约 / 轴向 / 材质 / 像素校验 |
+| `queen_mary_v3/docs/DeepSeek_v2_原交接.md`、`…_原说明.md` | 归档：v2 文档的副本 |
+| `queen_mary_v3/docs/legacy_codex_unity/README.md` | 归档：另一套并行实现的留档说明（**不要拷进工程**） |
+| `queen_mary_v3/参考素材/素材说明.md` | 三张参考图的说明 |
+
+### 资产、代码与工程
+
+| 路径 | 内容 |
+|---|---|
+| `queen_mary_v3/` | **当前资产 v3**：`.blend` / `.fbx` / 七份 JSON / `.py` / `rebuild.ps1` |
+| `queen_mary_v3/unity/` | **唯一的 Unity 集成家**：Editor 工具、契约类、同步脚本 |
+| `queen_mary/` | 只读历史：v2（98 对象）与其 45 项验证链 |
+| `参考素材/`、`queen_mary_v3/参考素材/` | 三张参考图，**都不可作为确定证据** |
+| `D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval` | Unity 工程（URP 14.0.12，2022.3.62f3c1） |
+| `C:\Users\杨睿\Documents\Codex\2026-09-17\shi\outputs` | 另一条产线的原始输出（zip + 各版本目录） |
+
+### 校验证据（全部由机器生成，别手改）
+
+| 文件 | 谁产出 | 验什么 |
+|---|---|---|
+| `queen_mary_v3/verification.json` | Blender | 45 项（32 几何 + 13 史实） |
+| `queen_mary_v3/fbx_verification.json` | Blender | 18 项 FBX 往返 |
+| `queen_mary_v3/integration_verification.json` | Codex | v2 → v3 的基线继承与哈希 |
+| `queen_mary_v3/ship_runtime_build.json` | Unity 构建器 | 关渲染 24 / 碰撞体 24 / 舱室 13 |
+| `queen_mary_v3/unity_verification_urp.json` | Unity 校验器 | 契约 137 名 / 轴向 / 右舷 / URP 材质 |
+| `queen_mary_v3/unity_render_check.json` | Unity 渲染校验 | 像素级：品红 / 黑屏 / 取景 |
+| `queen_mary_v3/unity_verification.json` | Codex 的导入检查器 | 导入（另一套，别与上面那份混） |
+| `queen_mary_v3/checksums_sha256.json` | Codex | 全目录哈希清单 |
+
+### 预览图
+
+- **Blender 侧 8 张**：`queen_mary_v3/{Overview,Whole_200m,Detail_50m,Starboard,Top,Bow,Stern_Aft,Stern_Detail}.png`
+- **Unity / URP 侧 5 张**：`queen_mary_v3/unity_preview/{Overview,Starboard,Top,Bow,Stern_Aft}.png`
 
 ## 目录地图（融合后只有一个家）
 
