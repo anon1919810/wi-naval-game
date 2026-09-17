@@ -30,31 +30,39 @@ cd "C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3
 **若脚本执行策略被拦，用下面这组等价命令**（在 Git Bash 里跑即可）：
 
 ```bash
-SRC="C:/Users/杨睿/Desktop/HMS_Queen_Mary_建模成果_2026-09-17"
+SRC="C:/Users/杨睿/Desktop/HMS_Queen_Mary_建模成果_2026-09-17"; V="$SRC/queen_mary_v3"
 P="D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval"
-mkdir -p "$P/Assets/Scripts/Naval" "$P/Assets/Editor" "$P/Assets/Resources/Ships/HMS_Queen_Mary_1913"
-cp -f "$SRC/queen_mary_v3/unity/Scripts/Naval/ShipContract.cs" "$P/Assets/Scripts/Naval/"
-cp -f "$SRC/queen_mary_v3/unity/Editor/ShipModelImportSettings.cs" "$P/Assets/Editor/"
-cp -f "$SRC/queen_mary_v3/unity/Editor/ShipAssetValidator.cs" "$P/Assets/Editor/"
-cp -f "$SRC/queen_mary_v3/HMS_Queen_Mary_1913_Refined_v3.fbx" "$P/Assets/Resources/Ships/HMS_Queen_Mary_1913/"
-for f in ship_contract.unity.json object_manifest.json damage_model.json hydrostatics.json \
-         buoyancy_compartments.json firing_arcs.json ship_contract.json; do
-  cp -f "$SRC/queen_mary_v3/$f" "$P/Assets/Resources/Ships/HMS_Queen_Mary_1913/"
-done
+S="$P/Assets/Resources/Ships/HMS_Queen_Mary_1913"
+
+mkdir -p "$S" "$P/Assets/Scripts/Naval" "$P/Assets/Editor"
+cp -f "$V/unity/Scripts/"*.cs "$P/Assets/Scripts/Naval/"   # 整目录拷，不维护白名单
+cp -f "$V/unity/Editor/"*.cs  "$P/Assets/Editor/"
+
+# FBX 名与数据清单从契约读，别硬编码（v2 叫 *_Greybox、v3 叫 *_Refined_v3）
+"C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe" -c "
+import json, shutil, os
+V=r'$V'; S=r'$S'
+c=json.load(open(os.path.join(V,'ship_contract.unity.json'),encoding='utf-8'))
+names=[r['path'] for r in c['file_refs']]+['ship_contract.unity.json','ship_contract.json','buoyancy_compartments.json']
+for n in sorted(set(names)):
+    src=os.path.join(V,n)
+    print(('已拷贝 ' if os.path.exists(src) else '缺失! ')+n)
+    if os.path.exists(src): shutil.copy2(src,S)
+"
 ```
 
-同步三件事：
+同步三类东西：
 
 | 来源 | 目标 | 内容 |
 |---|---|---|
-| `Assets/Scripts/Naval/ShipContract.cs` | `Assets/Scripts/Naval/` | 运行时契约类（JsonUtility 直接可读） |
-| `Assets/Editor/ShipModelImportSettings.cs` | `Assets/Editor/` | 导入设置钉死（AssetPostprocessor） |
-| `Assets/Editor/ShipAssetValidator.cs` | `Assets/Editor/` | 契约×模型校验 + 轴向实测 + URP 材质兜底 |
-| `Assets/Editor/UrpSetup.cs` | `Assets/Editor/` | URP 管线资产 + 按契约建材质（见第六节） |
-| `Assets/Editor/ShipMaterialRemap.cs` | `Assets/Editor/` | 把 FBX 材质槽按名重映射到 URP 材质 |
-| `Assets/Editor/AxisProbe.cs` | `Assets/Editor/` | 轴映射探针读取端（见第五节） |
-| `Assets/Editor/ShipPreviewRender.cs` | `Assets/Editor/` | URP 渲染校验图 + 像素检查（见第七节） |
-| 上一级目录的 `*.fbx` `*.json` | `Assets/Resources/Ships/HMS_Queen_Mary_1913/` | FBX ＋ 全部数据文件 |
+| `unity/Scripts/*.cs` | `Assets/Scripts/Naval/` | `ShipContract.cs`（契约类）、`ShipDefinition.cs`、`ShipCompartment.cs` |
+| `unity/Editor/*.cs` | `Assets/Editor/` | 导入设置钉死、契约×模型校验、轴向探针、URP 装配、材质重映射、渲染校验、运行时船体构建、LOD 构建 |
+| 上一级的 `*.fbx` `*.json` | `Assets/Resources/Ships/HMS_Queen_Mary_1913/` | FBX ＋ 契约 ＋ 构建所需的全部数据文件 |
+
+> **别在同步脚本里维护 `.cs` 白名单**——整目录按扩展名拷。白名单必然漂（加一个工具就忘一次），
+> 上一版的脚本就是这么坏的：融合后目录结构变了，它还指着 `Assets/…` 的老路径，
+> 而 FBX 名还写死 `*_Greybox.fbx`，**照跑直接抛错**。
+> 现在 FBX 名从契约的 `file_refs.fbx` 读、`.cs` 整目录拷。
 
 ### 3. 验证
 
@@ -256,8 +264,64 @@ unity_render_check.json
    拉 8 次也没用（Top 视图就是这么挂的）。另外正俯视的 `LookAt` 上方向不能取 +Y（与视线平行
    会退化），取 -X 才能让船长横放在画面里、且舰艏落在右侧。
 
-## 八、还没做的
+## 八、运行时船体（仅碰撞层 · 损伤舱室 · LOD 链 · ShipDefinition）
 
-- `ShipDefinition` ScriptableObject（把契约资产化，供 Inspector 引用）
-- 损伤模块的碰撞代理生成、LOD 链（LOD0–3）、命中区域与 `damage_model.json` 的装配
-- 装甲与内部模块走"仅碰撞、不渲染"层（它们在契约里已单独成组，不用渲染网格）
+> 菜单 **Tools → Naval → Build runtime ship**　或批处理 `Naval.EditorTools.ShipRuntimeBuilder.BuildBatch`
+
+一条命令做四件事，产物是 `Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` 与
+`Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Definition.asset`。
+
+### 1. 仅碰撞层
+
+85 个网格里有 **24 个在船壳内部、永远看不见**（8 件装甲 + 13 个舱室 + 3 件水下件）。
+构建时关掉它们的 `MeshRenderer`，只留碰撞体。每艘船 draw call **85 → 61**。
+
+> 角色名单是 C# 常量，但会**和契约交叉检查**：角色一旦改名，构建立刻失败，
+> 而不是悄悄失效（否则换代时这 24 个部件会无声恢复成"继续渲染"）。
+
+### 2. 损伤舱室 → 碰撞体
+
+13 个舱室各加一个 **trigger 盒碰撞体**，并挂 `ShipCompartment`
+（体积 / 渗透率 / 可进水体积，全部取自 `buoyancy_compartments.json`），带 `Flood()` 与
+`FloodedVolumeM3()`。命中 → 扣血 → 若在水线以下则按渗透率进水 → 交给静水力算横倾与失速。
+
+> **用盒体 trigger，不要网格碰撞体**：15 艘 × 24 个网格碰撞体会压垮物理；trigger 也避免
+> 船与船互相卡住。代价是射线检测要传 `QueryTriggerInteraction.Collide`。
+
+### 3. LOD 链（LOD0–3）
+
+| 档 | 屏幕高度 | 内容 | 渲染器 | 三角形 |
+|---|---|---|---|---|
+| LOD0 | > 0.20 | 原样全细节 | 61（45 静态 + 16 炮塔链） | 29,264 |
+| LOD1 | > 0.08 | 静态本体按**材质**合并 | 17 | 29,264 |
+| LOD2 | > 0.03 | 再丢小件（索具 / 网 / 甲板小配件 / 炮廓凹口…） | 17 | 16,344（−44%） |
+| LOD3 | > 0.01 | 扁平剪影，**本档关掉炮塔链** | 1 | 4,990（−83%） |
+
+两条硬约束：
+
+1. **炮塔链（16 个渲染器）在 LOD0/1/2 里始终保留**——它们要转，合进静态网格就永远转不了。
+   LOD1/2 的渲染器下限就是它。
+2. **按材质合并，不是按对象**：子网格数 = 材质数（6），才是"1 渲染器 ≈ 6 次 draw call"。
+
+**踩过的坑（已修 + 已加断言）**：炮塔渲染器原先没有列进任何 LOD 档，而 LODGroup 只开关
+"列在档里"的渲染器 —— 于是它们在任何距离都画，LOD3 的剪影里又有一份炮塔几何，
+远档变成重复绘制 + 共面 z-fighting，**不报任何错**。现在炮塔列进 LOD0/1/2、只在 LOD3 缺席，
+并断言：**凡是被合进 LOD 网格的渲染器，必须至少出现在一个 LOD 档里**。
+
+**屏幕高度阈值 0.20 / 0.08 / 0.03 / 0.01 是默认值，要对着真实相机调**——它决定切换距离。
+
+### 4. ShipDefinition（ScriptableObject）
+
+把散落的东西收拢成一个可 Inspector 引用的资产：契约原文、预制体、材质集合、主尺度、
+排水量、**四座炮塔各自的节点名与枢轴、射界限制**、舱室清单、LOD 距离。
+由构建器生成，**不要手填**（手填必然与契约漂）。
+
+## 九、还没做的
+
+- **LOD2 / LOD3 的像素证据**：渲染校验五个视角都在近距离，报告也不记录生效档位。
+  要补就加一个远距视角，或让报告报出各视角实际用的 LOD。
+- **射界精度升级**：障碍物从包围盒换成真实网格 BVH，并额外输出**盲区**给 AI。
+- **多舰性能压测**：15 艘同屏的真实帧率，得在真机上量。
+- **需要素材才能收口的**：型线图、带日期照片（副炮层高与桅杆形制）——见
+  `HMS_Queen_Mary_精修素材清单.md`。
+- 鱼雷发射管（2 × 21″ 水下舷侧管）：水下不可见，可只做数据 + 命中体。

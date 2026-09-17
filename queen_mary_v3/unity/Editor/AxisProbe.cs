@@ -26,10 +26,10 @@ namespace Naval.EditorTools
         private const string ProbeFbx = "Assets/_AxisProbe/AxisProbeModel.fbx";
 
         private const string BlenderReference =
-            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary\_axis_probe_blender.json";
+            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\_axis_probe_blender.json";
 
         private const string OutputPath =
-            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary\_axis_probe_unity.txt";
+            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\_axis_probe_unity.txt";
 
         [MenuItem("Tools/Naval/Probe axis convention")]
         public static void ProbeMenu() { Report(Probe()); }
@@ -46,7 +46,7 @@ namespace Naval.EditorTools
             if (asset == null)
             {
                 Debug.LogError("[Naval] 找不到探针模型 " + ProbeFbx +
-                               "，先跑 queen_mary/probe_axis_convention.py --out <工程>/Assets/_AxisProbe");
+                               "，先跑 queen_mary_v3/probe_axis_convention.py --out <工程>/Assets/_AxisProbe");
                 return null;
             }
 

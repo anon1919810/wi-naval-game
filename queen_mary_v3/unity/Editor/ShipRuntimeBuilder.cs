@@ -67,6 +67,7 @@ namespace Naval.EditorTools
             public int compartmentsWithBuoyancyData;
             public string[] collisionOnlyRoles;
             public string[] unusedRoles;
+            public string[] lodSummary;
             public string[] checksFailed;
             public string[] notes;
         }
@@ -240,6 +241,14 @@ namespace Naval.EditorTools
                         report.compartments++;
                     }
                 }
+
+                // --- LOD 链：静态本体合并，炮塔链留在组外 ------------------------
+                var lod = ShipLodBuilder.Build(instance, contract, roleByName);
+                failures.AddRange(lod.Failures);
+                notes.AddRange(lod.Notes);
+                report.lodSummary = lod.Summary.ToArray();
+                notes.Add(string.Format("渲染器数：LOD0 {0} → LOD1/2 {1}（炮塔链占 {2}，下限就在这）",
+                    lod.Lod0Renderers, lod.Lod1Renderers, lod.Lod1Renderers - 1));
 
                 // --- 存预制体 --------------------------------------------------
                 EnsureFolder(PrefabDir);

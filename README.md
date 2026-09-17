@@ -67,7 +67,7 @@
 
 | 路径 | 是什么 |
 |---|---|
-| **`queen_mary_v3/`** | **当前资产**：`.blend` / `.fbx` / 七份 JSON / 预览图 / `rebuild.ps1` / `verify_*.py` |
+| **`queen_mary_v3/`** | **当前资产**：`.blend` / `.fbx` / 七份 JSON / 预览图 / `rebuild.ps1` / `verify_*.py` / `probe_axis_convention.py`（轴映射探针，自包含） |
 | **`queen_mary_v3/unity/`** | **唯一的 Unity 集成家**：Editor 工具、契约类、同步脚本、`README_集成.md` |
 | `queen_mary_v3/docs/legacy_codex_unity/` | 归档：另一条产线写的并行实现（**不要拷进工程**） |
 | `queen_mary/` | 只读历史：v2 资产（98 对象）与其 45 项验证链 |
@@ -93,7 +93,7 @@ Unity 侧四道门（都能用 `-batchmode -executeMethod` 跑，不用开界面
 | 菜单 | 批处理入口 | 验什么 |
 |---|---|---|
 | Set up URP | `Naval.EditorTools.UrpSetup.SetUpBatch` | 建 URP 管线资产、按契约建材质、重导模型 |
-| Build runtime ship | `Naval.EditorTools.ShipRuntimeBuilder.BuildBatch` | 仅碰撞件关渲染、舱室挂数据与碰撞体、生成预制体与 ShipDefinition |
+| Build runtime ship | `Naval.EditorTools.ShipRuntimeBuilder.BuildBatch` | 仅碰撞件关渲染、舱室挂数据与碰撞体、生成 LOD 链、存预制体与 ShipDefinition |
 | Validate ship asset | `Naval.EditorTools.ShipAssetValidator.ValidateBatch` | 契约 101 名、轴向、右舷、URP 材质、炮塔枢轴 |
 | Render URP check images | `Naval.EditorTools.ShipPreviewRender.RenderBatch` | 逐像素查品红/黑屏，出五张校验图（优先渲预制体） |
 
@@ -109,6 +109,39 @@ Unity 侧四道门（都能用 `-batchmode -executeMethod` 跑，不用开界面
 
 > 碰撞体一律用**盒体 + trigger**，不用网格碰撞体：15 艘船 × 24 个网格碰撞体会压垮物理；
 > trigger 则避免船与船互相卡住。射线检测记得传 `QueryTriggerInteraction.Collide`。
+
+### LOD 链做了什么
+
+静态本体生成四档 LOD（三份合并网格资产存在 `Assets/Meshes/Ships/`，挂进 `LODGroup`）：
+
+| 档 | 屏幕高度 | 内容 | 渲染器 | 三角形 |
+|---|---|---|---|---|
+| LOD0 | > 0.20 | 原样全细节 | 61（45 静态 + 16 炮塔链） | 29,264 |
+| LOD1 | > 0.08 | 静态本体按**材质**合并 | 17（1 合并 + 16 炮塔链） | 29,264 |
+| LOD2 | > 0.03 | 再丢小件（索具 / 网 / 甲板小配件 / 炮廓凹口…） | 17 | 16,344（−44%） |
+| LOD3 | > 0.01 | 扁平剪影，**本档关掉炮塔链** | 1 | 4,990（−83%） |
+
+两条硬约束：
+
+1. **炮塔链（16 个渲染器）在 LOD0/1/2 里始终保留**——它们要转，一旦被合进静态网格就永远转不了。
+   所以 LOD1/2 的渲染器下限就是 17。
+2. **按材质合并，不是按对象**：合并后子网格数 = 材质数（6），于是"1 渲染器 + 6 子网格 ≈ 6 次
+   draw call"；按对象合会让子网格数等于对象数，等于白做。
+
+> **一个踩过的坑（已修，并已加断言）**：炮塔渲染器原先**没有列进任何 LOD 档**。LODGroup 只开关
+> "列在档里"的渲染器，所以它们在任何距离都会画；而 LOD3 的剪影里又含一份炮塔几何 ——
+> 远档就成了"剪影里的冻结炮塔 + 真实炮塔仍在画" = 重复绘制 + 共面 z-fighting，而且**不报任何错**。
+> 现在炮塔渲染器列进 LOD0/1/2 档、只在 LOD3 缺席；并加了一条断言：
+> **凡是被合进 LOD 网格的渲染器，必须至少出现在一个 LOD 档里**，否则构建直接失败。
+
+**屏幕高度阈值 0.20 / 0.08 / 0.03 / 0.01 是默认值，要对着真实相机调**——这批数字决定了切换距离。
+
+### 已知的验证缺口（别当成"四档都验过了"）
+
+渲染校验的五个视角都在**近距离**，因此 **LOD2 / LOD3 这两档没有被像素校验覆盖**，
+报告也不记录"本次生效的是哪一档"。要补有两条路：加一个远距视角，或在报告里报出各视角
+实际生效的 LOD 档。在那之前，LOD 链的结构性正确（档位、三角形数、渲染器归属）有断言保证，
+**但"远看像不像那艘船"还没有像素证据**。
 
 ## 改动约定（谁改了什么）
 
