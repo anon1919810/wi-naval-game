@@ -81,9 +81,10 @@ namespace Naval
         public ShipCameraRig cameraRig;
         public ShipGameplayHUD hud;
         public ShipMouseGroupAim groupAim;
+        public ShipTargetShip target;
         public string commandHint =
-            "Mouse L/R: rotate VIEW + turrets (same bearing) · U/D: elevation\n" +
-            "RMB: look up/down · Space/LMB fire · Tab camera · F1 debug HUD";
+            "Cursor locked · Mouse L/R rotate view+turrets · U/D elevation\n" +
+            "Esc free cursor · Click Game view re-lock · Space fire · Tab camera · F1 debug";
 
         Texture2D _tex;
         GUIStyle _center;
@@ -98,12 +99,12 @@ namespace Naval
             if (groupAim == null) groupAim = FindObjectOfType<ShipMouseGroupAim>();
             if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
             if (cameraRig != null && groupAim != null) cameraRig.aim = groupAim;
+            if (target == null) target = FindObjectOfType<ShipTargetShip>();
             if (hud == null) hud = GetComponent<ShipGameplayHUD>();
             if (hud != null) hud.debugPanelVisible = false;
-            // Always overwrite serialized stale hints from older scenes.
             commandHint =
                 "Cursor locked · Mouse L/R rotate view+turrets · U/D elevation\n" +
-                "Esc free cursor · Click Game view re-lock · Space/LMB fire · Tab camera · F1 debug";
+                "Esc free cursor · Click Game view re-lock · Space fire at TARGET · Tab · R reset · T drift · F1";
             if (_tex == null)
             {
                 _tex = new Texture2D(1, 1);
@@ -182,19 +183,20 @@ namespace Naval
             string status = "";
             if (cameraRig != null)
                 status += "Cam " + cameraRig.mode + "  lodBias " + QualitySettings.lodBias.ToString("0.##") + "\n";
-            if (floater != null) status += "Float: " + floater.StatusText + "\n";
-            if (systems != null) status += "Sys: " + systems.StatusText() + "\n";
+            if (floater != null) status += "You: " + floater.StatusText + "\n";
+            if (systems != null) status += "You sys: " + systems.StatusText() + "\n";
             if (groupAim != null)
             {
                 status += string.Format("Aim world yaw {0:0}°  pitch {1:0.0}°  cursor {2}\n",
                     groupAim.aimWorldYawDeg, groupAim.aimPitchDeg, Cursor.lockState);
+                if (!string.IsNullOrEmpty(groupAim.LastFireSummary))
+                    status += "Fire: " + groupAim.LastFireSummary + "\n";
             }
-            if (!string.IsNullOrEmpty(groupAim != null ? groupAim.LastFireSummary : null))
-                status += "Fire: " + groupAim.LastFireSummary + "\n";
+            if (target != null) status += "TARGET: " + target.StatusText + "\n";
             if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
                 status += "Hit: " + battery.LastHitSummary;
             if (!string.IsNullOrEmpty(status))
-                GUI.Label(new Rect(Screen.width - 560f, 12f, 548f, 130f), status, _small);
+                GUI.Label(new Rect(Screen.width - 560f, 12f, 548f, 150f), status, _small);
         }
 
         void DrawCross(float x, float y, float size, float thick, Color color)
@@ -215,6 +217,7 @@ namespace Naval
         public ShipSystemsState systems;
         public ShipGameplayHUD hud;
         public ShipAimUI aimUi;
+        public ShipTargetShip target;
 
         void Start()
         {
@@ -222,6 +225,7 @@ namespace Naval
             if (systems == null) systems = FindObjectOfType<ShipSystemsState>();
             if (hud == null) hud = FindObjectOfType<ShipGameplayHUD>();
             if (aimUi == null) aimUi = FindObjectOfType<ShipAimUI>();
+            if (target == null && aimUi != null) target = aimUi.target;
         }
 
         void Update()
@@ -230,7 +234,22 @@ namespace Naval
             {
                 if (floater != null) floater.ResetFlooding();
                 if (systems != null) systems.ResetSystems();
-                Debug.Log("[Naval] Reset flood + systems");
+                if (target != null) target.ResetTarget();
+                else
+                {
+                    var t = FindObjectOfType<ShipTargetShip>();
+                    if (t != null) t.ResetTarget();
+                }
+                Debug.Log("[Naval] Reset flood + systems (player + target)");
+            }
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                var t = target != null ? target : FindObjectOfType<ShipTargetShip>();
+                if (t != null)
+                {
+                    t.drift = !t.drift;
+                    Debug.Log("[Naval] Target drift " + t.drift);
+                }
             }
             if (Input.GetKeyDown(KeyCode.F1))
             {

@@ -142,6 +142,50 @@ namespace Naval.EditorTools
             shell.hud = hud;
             shell.aimUi = aim;
 
+            // T11 — second Queen Mary as target barge (same prefab).
+            var targetGo = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            targetGo.name = ShipId + "_Target";
+            targetGo.transform.position = new Vector3(420f, 0f, 280f);
+            targetGo.transform.rotation = Quaternion.Euler(0f, 210f, 0f);
+            var targetFloater = targetGo.GetComponent<ShipFloatPrototype>();
+            if (targetFloater == null) targetFloater = targetGo.AddComponent<ShipFloatPrototype>();
+            var targetSystems = targetGo.GetComponent<ShipSystemsState>();
+            if (targetSystems == null) targetSystems = targetGo.AddComponent<ShipSystemsState>();
+            var targetBattery = targetGo.GetComponent<ShipGunBattery>();
+            if (targetBattery == null) targetBattery = targetGo.AddComponent<ShipGunBattery>();
+            targetBattery.enabled = false;
+            foreach (var tc in targetGo.GetComponentsInChildren<ShipTurretController>(true))
+                tc.inputEnabled = false;
+            var tSel = targetGo.GetComponent<ShipTurretSelector>();
+            if (tSel != null) Object.DestroyImmediate(tSel);
+
+            var marker = targetGo.GetComponent<ShipTargetShip>();
+            if (marker == null) marker = targetGo.AddComponent<ShipTargetShip>();
+            marker.displayName = "Target Queen Mary";
+            marker.drift = false;
+            marker.driftSpeedMps = 6f;
+            marker.floater = targetFloater;
+            marker.systems = targetSystems;
+            marker.battery = targetBattery;
+
+            var tLabel = targetGo.GetComponent<ShipTargetLabel>();
+            if (tLabel == null) tLabel = targetGo.AddComponent<ShipTargetLabel>();
+            tLabel.target = marker;
+            tLabel.cam = cam;
+
+            var tBat = targetGo.GetComponent<ShipTargetBattery>();
+            if (tBat == null) tBat = targetGo.AddComponent<ShipTargetBattery>();
+            tBat.target = marker;
+            tBat.playerRoot = ship.transform;
+            tBat.enabledFire = false;
+
+            aim.target = marker;
+            shell.target = marker;
+            rig.fleetTargets = new[] { ship.transform, targetGo.transform };
+            aim.commandHint =
+                "Cursor locked · Mouse L/R rotate view+turrets · Space fire at TARGET\n" +
+                "Esc free cursor · Click Game view re-lock · Tab camera · R reset both · T drift · F1 debug";
+
             EnsureFolder("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[]
@@ -149,15 +193,15 @@ namespace Naval.EditorTools
                 new EditorBuildSettingsScene(ScenePath, true)
             };
 
-            // Persist quality note for tactical/fleet bias.
             var note = "Gameplay lab built " + System.DateTime.UtcNow.ToString("o") +
-                       "\nTactical lodBias=1 profile tactical_50_200m; Fleet lodBias=1 profile fleet_1_2km" +
-                       "\nCompare with lod_profiles.json; camera Tab switches modes.\n";
+                       "\nPlayer " + ship.name + " @origin; Target " + targetGo.name + " @ (420,0,280)" +
+                       "\nT11: same-prefab target, penetration hits target compartments.\n";
             File.WriteAllText(Path.Combine(Application.dataPath, "../GameplayLab_Note.txt"), note);
 
             return "OK scene " + ScenePath + " ship " + ship.name +
+                   " target " + targetGo.name +
                    " turrets " + controllers.Length +
-                   " float/flood + battery + camera rig + HUD";
+                   " float/flood + battery + camera rig + HUD + target label";
         }
 
         static Transform FindDeep(Transform root, string name)
