@@ -19,6 +19,7 @@
 | `ShipRuntimeAcceptance.RebuildAndTestBatch` | 两次构建 + 真实碰撞/舱室/12 张 LOD 图验证 |
 | `ShipDeliveryChecks.RunBatch` | 契约/轴向/材质检查 + 五张通常视角 |
 | `ShipBenchmarkBuilder.BuildBatch` | 构建 15 舰离屏基准播放器 |
+| `ShipGameplayLabBuilder.BuildBatch` | 生成可玩 GameplayLab 场景（T5/T6/T7 原型） |
 
 以上类均位于 `Naval.EditorTools` 命名空间；批处理参数为 `-executeMethod Naval.EditorTools.<入口>`。
 报告落点可用 `-shipReportDirectory <目录>` 设置，未传参时为当前工作目录的 `ShipAcceptance/`。

@@ -1,0 +1,305 @@
+{
+  "method": "barrel centre line sampled against obstacle bounding boxes",
+  "accuracy": "conservative approximation; not a ballistics or blast model",
+  "clearance_required_m": 0.3,
+  "increment_deg": 5,
+  "note": "Other turrets, barbettes and barrels are included at rest; own mount is excluded. Only port barrel is sampled. Thin visual rigging/rails are excluded. Not a simultaneous turret collision or firing safety model.",
+  "turrets": [
+    {
+      "key": "A",
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 0.0,
+      "by_elevation": [
+        {
+          "elevation_deg": 0.0,
+          "clear_fraction": 0.778,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 130.0
+            },
+            {
+              "a": 215.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 5.0,
+          "clear_fraction": 0.778,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 130.0
+            },
+            {
+              "a": 215.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 10.0,
+          "clear_fraction": 0.778,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 130.0
+            },
+            {
+              "a": 215.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 15.0,
+          "clear_fraction": 0.778,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 130.0
+            },
+            {
+              "a": 215.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 20.0,
+          "clear_fraction": 0.833,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 140.0
+            },
+            {
+              "a": 205.0,
+              "b": 355.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "B",
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 0.0,
+      "by_elevation": [
+        {
+          "elevation_deg": 0.0,
+          "clear_fraction": 0.792,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 135.0
+            },
+            {
+              "a": 215.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 5.0,
+          "clear_fraction": 0.847,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 140.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 10.0,
+          "clear_fraction": 0.847,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 140.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 15.0,
+          "clear_fraction": 0.847,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 140.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 20.0,
+          "clear_fraction": 0.847,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 140.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "Q",
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 180.0,
+      "by_elevation": [
+        {
+          "elevation_deg": 0.0,
+          "clear_fraction": 0.833,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 140.0
+            },
+            {
+              "a": 205.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 5.0,
+          "clear_fraction": 0.875,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 150.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 10.0,
+          "clear_fraction": 0.875,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 150.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 15.0,
+          "clear_fraction": 0.875,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 150.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 20.0,
+          "clear_fraction": 0.861,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 145.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "X",
+      "zero_bearing": "forward +Y, as built",
+      "rest_yaw_deg": 180.0,
+      "by_elevation": [
+        {
+          "elevation_deg": 0.0,
+          "clear_fraction": 0.889,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 155.0
+            },
+            {
+              "a": 200.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 5.0,
+          "clear_fraction": 0.847,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 145.0
+            },
+            {
+              "a": 205.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 10.0,
+          "clear_fraction": 1.0,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 15.0,
+          "clear_fraction": 1.0,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 355.0
+            }
+          ]
+        },
+        {
+          "elevation_deg": 20.0,
+          "clear_fraction": 1.0,
+          "intervals": [
+            {
+              "a": 0.0,
+              "b": 355.0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

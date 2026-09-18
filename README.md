@@ -15,6 +15,7 @@
 - [LOD 双相机剖面配置](queen_mary_v3/lod_profiles.json)（战术 50–200 m / 舰队 1–2 km）
 - [精修与 LOD 研究报告](../research/queen-mary-refine-lod/REPORT.md)（位于仓库根 `research/`，不在本 worktree 内）
 - [compose 特性规格](docs/compose/spec/model-refine-lod.md)
+- [Gameplay Lab：T5 进水 / T6 炮塔射界 / T7 相机 LOD](queen_mary_v3/GAMEPLAY_LAB.md)
 - [最初交接与历史记录](交接文件_GPT6_2026-09-17.md)
 - [v3 建模交接](queen_mary_v3/交接_v3.md)
 - [精修素材清单](HMS_Queen_Mary_精修素材清单.md)
