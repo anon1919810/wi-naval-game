@@ -95,8 +95,9 @@ namespace Naval
             if (battery == null) battery = FindObjectOfType<ShipGunBattery>();
             if (floater == null) floater = FindObjectOfType<ShipFloatPrototype>();
             if (systems == null) systems = FindObjectOfType<ShipSystemsState>();
-            if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
             if (groupAim == null) groupAim = FindObjectOfType<ShipMouseGroupAim>();
+            if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
+            if (cameraRig != null && groupAim != null) cameraRig.aim = groupAim;
             if (hud == null) hud = GetComponent<ShipGameplayHUD>();
             if (hud != null && groupAim != null) hud.debugPanelVisible = false;
             if (_tex == null)
