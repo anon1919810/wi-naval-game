@@ -80,6 +80,8 @@ $dataNames.Add('ship_contract.unity.json')
 $dataNames.Add('ship_contract.json')
 $dataNames.Add('buoyancy_compartments.json')
 $dataNames.Add('lod_profiles.json')
+$dataNames.Add('firing_arcs.json')
+$dataNames.Add('firing_arcs.unity.json')
 
 $copied = @()
 $missing = @()
