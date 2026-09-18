@@ -4,30 +4,38 @@ using UnityEngine;
 namespace Naval
 {
     /// <summary>
-    /// T12 — Mouse drives ALL player main turrets at once (same yaw/pitch command).
-    /// Fire (Space / LMB) only fires turrets whose firing arc is CLEAR; blocked turrets are skipped.
-    /// Right-mouse is reserved for camera orbit and does not aim turrets.
+    /// T12/T13 — Mouse sets ONE world bearing (0 = ship bow +Z) and pitch.
+    /// Each turret converts that to its own command angle:
+    ///   yawCommand = worldAimYaw - rest_yaw_deg
+    /// so barrels converge on the same compass direction instead of rotating
+    /// identically from each rest pose (which looked centre-symmetric).
+    /// Fire: only turrets whose firing-arc CLEAR will shoot.
     /// </summary>
     [AddComponentMenu("Naval/Ship Mouse Group Aim")]
     public sealed class ShipMouseGroupAim : MonoBehaviour
     {
         public ShipTurretController[] turrets;
-        public float mouseSensitivity = 0.22f;
+        public float mouseSensitivity = 0.28f;
         public bool invertPitch = false;
-        [Tooltip("Skip aiming while RMB held (camera orbit).")]
-        public bool pauseWhileOrbit = true;
+
+        [Tooltip("World aim yaw in degrees, 0 = ship bow (+Z). Mouse X adjusts this.")]
+        public float aimWorldYawDeg = 0f;
+        [Tooltip("Shared elevation command for all turrets.")]
+        public float aimPitchDeg = 4f;
+        public float minPitchDeg = -3f;
+        public float maxPitchDeg = 20f;
 
         public string LastFireSummary { get; private set; } = "";
         public int LastFiredCount { get; private set; }
         public int LastSkippedCount { get; private set; }
 
-        ShipGunBattery _battery;
+        ShipContractData _contract;
+        ShipFiringArcsData _arcs;
 
         void Start()
         {
             if (turrets == null || turrets.Length == 0)
                 turrets = FindObjectsOfType<ShipTurretController>();
-            // Group aim owns all turrets; disable per-turret keyboard/fire keys.
             foreach (var t in turrets)
             {
                 if (t == null) continue;
@@ -35,8 +43,9 @@ namespace Naval
                 t.useIndividualKeys = false;
                 t.acceptFireKey = false;
             }
-            _battery = GetComponent<ShipGunBattery>();
-            if (_battery == null) _battery = FindObjectOfType<ShipGunBattery>();
+            try { _contract = ShipContractData.Load("HMS_Queen_Mary_1913"); } catch { _contract = null; }
+            _arcs = ShipFiringArcsData.Load("HMS_Queen_Mary_1913");
+            ApplyWorldAimToTurrets();
         }
 
         void Update()
@@ -44,33 +53,62 @@ namespace Naval
             if (turrets == null || turrets.Length == 0)
                 turrets = FindObjectsOfType<ShipTurretController>();
 
-            bool orbiting = Input.GetMouseButton(1);
-            if (!(pauseWhileOrbit && orbiting))
-            {
-                float dx = Input.GetAxis("Mouse X") * mouseSensitivity;
-                float dy = Input.GetAxis("Mouse Y") * mouseSensitivity * (invertPitch ? 1f : -1f);
-                foreach (var t in turrets)
-                {
-                    if (t == null) continue;
-                    t.yawCommandDeg += dx;
-                    t.pitchCommandDeg += dy;
-                }
-            }
+            // Mouse aims turrets only. Camera third-person is ship-locked (RMB orbit only in chase/fleet).
+            aimWorldYawDeg += Input.GetAxis("Mouse X") * mouseSensitivity;
+            aimWorldYawDeg = Normalize360(aimWorldYawDeg);
+            float dy = Input.GetAxis("Mouse Y") * mouseSensitivity * (invertPitch ? 1f : -1f);
+            aimPitchDeg = Mathf.Clamp(aimPitchDeg + dy, minPitchDeg, maxPitchDeg);
 
-            foreach (var t in turrets)
-            {
-                if (t == null) continue;
-                t.SyncExternalCommands();
-            }
+            ApplyWorldAimToTurrets();
 
             if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
                 FireAllClear();
         }
 
-        /// <summary>Fire every turret that is not in a firing-arc blind zone.</summary>
+        public float RestYawDeg(string turretKey)
+        {
+            if (_contract != null)
+            {
+                try
+                {
+                    var t = _contract.Turret(turretKey);
+                    if (t != null) return t.rest_yaw_deg;
+                }
+                catch { }
+            }
+            if (_arcs != null)
+            {
+                var at = _arcs.Turret(turretKey);
+                if (at != null) return at.rest_yaw_deg;
+            }
+            // A/B forward, Q/X aft (as-built).
+            return (turretKey == "Q" || turretKey == "X") ? 180f : 0f;
+        }
+
+        void ApplyWorldAimToTurrets()
+        {
+            foreach (var t in turrets)
+            {
+                if (t == null) continue;
+                float rest = RestYawDeg(t.turretKey);
+                // command relative to rest so world bearing = rest + command
+                t.yawCommandDeg = Normalize360(aimWorldYawDeg - rest);
+                t.pitchCommandDeg = aimPitchDeg;
+                t.SyncExternalCommands();
+            }
+        }
+
+        public static float Normalize360(float deg)
+        {
+            float v = deg % 360f;
+            if (v < 0f) v += 360f;
+            return v;
+        }
+
         public void FireAllClear()
         {
             if (turrets == null || turrets.Length == 0) return;
+            ApplyWorldAimToTurrets();
             var sb = new StringBuilder();
             int fired = 0, skipped = 0;
             foreach (var t in turrets)
@@ -80,7 +118,9 @@ namespace Naval
                 if (!t.ArcClear)
                 {
                     skipped++;
-                    t.SetFireBlockReason("blind zone — not fired");
+                    t.SetFireBlockReason(string.Format(
+                        "blind zone — cmd yaw {0:0}° (rest {1:0}°)",
+                        t.yawCommandDeg, RestYawDeg(t.turretKey)));
                     sb.Append(t.turretKey).Append("=SKIP ");
                     continue;
                 }
@@ -98,7 +138,9 @@ namespace Naval
             }
             LastFiredCount = fired;
             LastSkippedCount = skipped;
-            LastFireSummary = string.Format("fired {0}/4 · skipped {1} · {2}", fired, skipped, sb.ToString().Trim());
+            LastFireSummary = string.Format(
+                "world yaw {0:0}° · fired {1}/4 · skipped {2} · {3}",
+                aimWorldYawDeg, fired, skipped, sb.ToString().Trim());
             Debug.Log("[Naval] Group fire: " + LastFireSummary);
         }
     }

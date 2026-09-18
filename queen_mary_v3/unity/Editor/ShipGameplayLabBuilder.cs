@@ -95,6 +95,10 @@ namespace Naval.EditorTools
             var rig = camGo.AddComponent<ShipCameraRig>();
             rig.target = ship.transform;
             rig.cam = cam;
+            rig.mode = ShipCameraRig.CameraMode.ShipThirdPerson;
+            rig.thirdPersonLocalOffset = new Vector3(0f, 32f, -42f);
+            rig.thirdPersonLookLocal = new Vector3(0f, 8f, 90f);
+            rig.thirdPersonLodBias = 1f;
             rig.tacticalDistance = 140f;
             rig.tacticalLodBias = 1f;
             rig.fleetDistance = 1700f;

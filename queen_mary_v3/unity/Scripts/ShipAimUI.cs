@@ -82,8 +82,8 @@ namespace Naval
         public ShipGameplayHUD hud;
         public ShipMouseGroupAim groupAim;
         public string commandHint =
-            "Mouse aim ALL turrets · Space/LMB fire (blind zone skips)\n" +
-            "RMB orbit camera · Tab camera mode · R reset · F1 HUD";
+            "Mouse L/R: world bearing (all turrets follow same compass) · U/D: elevation\n" +
+            "Space/LMB fire (blind-zone turrets skip) · Tab camera · R reset · F1 HUD";
 
         Texture2D _tex;
         GUIStyle _center;
@@ -179,6 +179,9 @@ namespace Naval
             if (systems != null) status += "Sys: " + systems.StatusText() + "\n";
             if (groupAim != null && !string.IsNullOrEmpty(groupAim.LastFireSummary))
                 status += "Fire: " + groupAim.LastFireSummary + "\n";
+            else if (groupAim != null)
+                status += string.Format("Aim world yaw {0:0}°  pitch {1:0.0}°\n",
+                    groupAim.aimWorldYawDeg, groupAim.aimPitchDeg);
             if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
                 status += "Hit: " + battery.LastHitSummary;
             if (!string.IsNullOrEmpty(status))
