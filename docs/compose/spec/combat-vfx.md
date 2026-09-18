@@ -60,7 +60,7 @@ Unity **无第一方「海战专用材质包」**；Asset Store 有第三方海�
 
 ## Tasks
 
-- [ ] T1: `ShipCombatVfx.cs` 粒子/曳光/音效占位 API — acceptance: 类可编译；Ensure 后场上有 VFX 根节点 (covers: S2.2)
-- [ ] T2: `ShipGunBattery` 接入 muzzle/tracer/impact/splash — acceptance: 开火时代码路径调用 VFX；miss→splash，hit→impact (covers: S2.1, S2.3)
-- [ ] T3: LabBuilder 两舰挂 VFX + AimUI/靶船损伤提示 — acceptance: 构建场景含 VFX；HUD 显示命中结果 (covers: S2.1, S2.3)
+- [x] T1: `ShipCombatVfx.cs` 粒子/曳光/音效占位 API — acceptance: 类可编译；Ensure 后场上有 VFX 根节点 (covers: S2.2)
+- [x] T2: `ShipGunBattery` 接入 muzzle/tracer/impact/splash — acceptance: 开火时代码路径调用 VFX；miss→splash，hit→impact (covers: S2.1, S2.3)
+- [x] T3: LabBuilder 两舰挂 VFX + AimUI/靶船损伤提示 — acceptance: 构建场景含 VFX；HUD 显示命中结果 (covers: S2.1, S2.3)
 - [ ] T4: Unity 编译 + 文档 — acceptance: 0 error CS；`GAMEPLAY_LAB.md` 更新操作/特效说明 (covers: S2.4; depends: T1-T3)

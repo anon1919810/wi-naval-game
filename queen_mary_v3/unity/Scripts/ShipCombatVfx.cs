@@ -33,7 +33,7 @@ namespace Naval
         public float tracerTime = 0.22f;
         public float tracerWidth = 0.12f;
         public float maxTracerVisualLength = 900f;
-        public int maxConcurrentTracers = 4;
+        public int maxConcurrentTracers = 16;
         public Color tracerColor = new Color(1f, 0.75f, 0.2f, 0.85f);
 
         [Header("Muzzle")]
@@ -128,8 +128,7 @@ namespace Naval
                 lr.SetPosition(i, p);
             }
 
-            if (_liveTracers.Count == 0)
-                PlayMuzzle(origin, dir);
+            PlayMuzzle(origin, dir);
             PlayClip(fireClip);
 
             var mover = go.AddComponent<ShipVfxTimedDespawn>();
