@@ -126,9 +126,11 @@ namespace Naval
         {
             float a = Normalize360(iv.a);
             float b = Normalize360(iv.b);
+            // Prototype slop: geometric scan is conservative and quantised at 5°.
+            const float slop = 2.5f;
             if (Mathf.Approximately(a, b)) return true;
-            if (a <= b) return yaw01 >= a - 1e-3f && yaw01 <= b + 1e-3f;
-            return yaw01 >= a - 1e-3f || yaw01 <= b + 1e-3f;
+            if (a <= b) return yaw01 >= a - slop && yaw01 <= b + slop;
+            return yaw01 >= a - slop || yaw01 <= b + slop;
         }
     }
 }

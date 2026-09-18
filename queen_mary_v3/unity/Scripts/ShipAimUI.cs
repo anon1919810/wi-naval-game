@@ -141,6 +141,7 @@ namespace Naval
                     line.Append(t.turretKey).Append(t.ArcClear ? "✓ " : "✗ ");
                     if (!t.ArcClear) anyBlocked = true;
                 }
+                line.Append("  (cmd=world-rest)");
                 arcTxt = line.ToString();
             }
             else

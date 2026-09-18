@@ -65,6 +65,9 @@ namespace Naval
 
         void Start()
         {
+            if (cam == null) cam = GetComponentInChildren<Camera>();
+            if (cam == null) cam = Camera.main;
+            if (aim == null) aim = FindObjectOfType<ShipMouseGroupAim>();
             if (target == null)
             {
                 var lod = FindObjectOfType<LODGroup>();
