@@ -15,7 +15,7 @@ namespace Naval
     public sealed class ShipMouseGroupAim : MonoBehaviour
     {
         public ShipTurretController[] turrets;
-        public float mouseSensitivity = 0.28f;
+        public float mouseSensitivity = 0.45f;
         public bool invertPitch = false;
 
         [Tooltip("World aim yaw in degrees, 0 = ship bow (+Z). Mouse X adjusts this.")]
@@ -29,11 +29,27 @@ namespace Naval
         public int LastFiredCount { get; private set; }
         public int LastSkippedCount { get; private set; }
 
+        [Tooltip("Lock and hide the cursor so Mouse X/Y keep giving relative motion (Game view edge no longer caps yaw).")]
+        public bool lockCursorOnStart = true;
+
         ShipContractData _contract;
         ShipFiringArcsData _arcs;
 
+        public static void LockGameCursor()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        public static void UnlockGameCursor()
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
         void Start()
         {
+            if (lockCursorOnStart) LockGameCursor();
             if (turrets == null || turrets.Length == 0)
                 turrets = FindObjectsOfType<ShipTurretController>();
             foreach (var t in turrets)
@@ -53,7 +69,25 @@ namespace Naval
             if (turrets == null || turrets.Length == 0)
                 turrets = FindObjectsOfType<ShipTurretController>();
 
-            // Mouse aims turrets only. Camera third-person is ship-locked (RMB orbit only in chase/fleet).
+            // Esc releases the cursor; click Game view to re-lock (this click does not fire).
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                UnlockGameCursor();
+                return;
+            }
+            bool cursorFree = Cursor.lockState != CursorLockMode.Locked;
+            if (cursorFree && Input.GetMouseButtonDown(0))
+            {
+                LockGameCursor();
+                return;
+            }
+            if (cursorFree)
+            {
+                // No aim/fire while the cursor is free — deltas are unreliable at window edges.
+                ApplyWorldAimToTurrets();
+                return;
+            }
+
             aimWorldYawDeg += Input.GetAxis("Mouse X") * mouseSensitivity;
             aimWorldYawDeg = Normalize360(aimWorldYawDeg);
             float dy = Input.GetAxis("Mouse Y") * mouseSensitivity * (invertPitch ? 1f : -1f);

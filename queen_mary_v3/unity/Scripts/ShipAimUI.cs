@@ -99,7 +99,11 @@ namespace Naval
             if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
             if (cameraRig != null && groupAim != null) cameraRig.aim = groupAim;
             if (hud == null) hud = GetComponent<ShipGameplayHUD>();
-            if (hud != null && groupAim != null) hud.debugPanelVisible = false;
+            if (hud != null) hud.debugPanelVisible = false;
+            // Always overwrite serialized stale hints from older scenes.
+            commandHint =
+                "Cursor locked · Mouse L/R rotate view+turrets · U/D elevation\n" +
+                "Esc free cursor · Click Game view re-lock · Space/LMB fire · Tab camera · F1 debug";
             if (_tex == null)
             {
                 _tex = new Texture2D(1, 1);
@@ -180,11 +184,13 @@ namespace Naval
                 status += "Cam " + cameraRig.mode + "  lodBias " + QualitySettings.lodBias.ToString("0.##") + "\n";
             if (floater != null) status += "Float: " + floater.StatusText + "\n";
             if (systems != null) status += "Sys: " + systems.StatusText() + "\n";
-            if (groupAim != null && !string.IsNullOrEmpty(groupAim.LastFireSummary))
+            if (groupAim != null)
+            {
+                status += string.Format("Aim world yaw {0:0}°  pitch {1:0.0}°  cursor {2}\n",
+                    groupAim.aimWorldYawDeg, groupAim.aimPitchDeg, Cursor.lockState);
+            }
+            if (!string.IsNullOrEmpty(groupAim != null ? groupAim.LastFireSummary : null))
                 status += "Fire: " + groupAim.LastFireSummary + "\n";
-            else if (groupAim != null)
-                status += string.Format("Aim world yaw {0:0}°  pitch {1:0.0}°\n",
-                    groupAim.aimWorldYawDeg, groupAim.aimPitchDeg);
             if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
                 status += "Hit: " + battery.LastHitSummary;
             if (!string.IsNullOrEmpty(status))
