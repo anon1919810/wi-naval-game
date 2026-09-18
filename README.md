@@ -9,6 +9,7 @@
 本轮不改变 Blender 舰船几何和已确认的单杆桅。
 
 - [本轮详细成果、实测帧时间与限制](queen_mary_v3/运行时验收_2026-09-18.md)
+- [独立复核：LOD 自动档成因、帧时间可信度](queen_mary_v3/复核_2026-09-18.md)
 - [Unity 集成和复现命令](queen_mary_v3/unity/README_集成.md)
 - [最初交接与历史记录](交接文件_GPT6_2026-09-17.md)
 - [v3 建模交接](queen_mary_v3/交接_v3.md)
@@ -48,6 +49,7 @@ Blender Store 启动器可能无输出，构建脚本核对新完成记录与文
 | `unity_verification_urp.json` | 契约命名、1:1 尺度、舰艏 +Z、右舷 +X、炮塔轴与材质通过 |
 | `unity_render_check.json` | 五张通常视角，品红、空白和取景检查通过 |
 | `fleet_benchmark/fleet_benchmark.json` | 15 舰、1080p、五档离屏采样；限制见详细成果 |
+| `fleet_benchmark_recheck_20260918/results2/fleet_benchmark.json` | 复核复跑：lodBias / 质量档位 / 逐船 LOD 比例入档，档位分布三次一致 |
 | `integration_verification.json` / `unity_verification.json` | 上一轮继承与导入记录，保留历史用途；新鲜度以本轮报告为准 |
 
 ## 改动约定
