@@ -1,0 +1,143 @@
+{
+    "status": "passed",
+    "builtUtc": "2026-09-18T00:12:25.4539649Z",
+    "unityVersion": "2022.3.62f3c1",
+    "compartments": 14,
+    "hullColliders": 1,
+    "colliderRays": 6,
+    "failures": [],
+    "images": [
+        {
+            "view": "side",
+            "file": "side_LOD0.png",
+            "lod": 0,
+            "pixels": 108386,
+            "triangles": 29264,
+            "renderers": 61,
+            "submeshes": 91,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "side",
+            "file": "side_LOD1.png",
+            "lod": 1,
+            "pixels": 108386,
+            "triangles": 29264,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "side",
+            "file": "side_LOD2.png",
+            "lod": 2,
+            "pixels": 107446,
+            "triangles": 16344,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.9913272857666016,
+            "intersectionOverUnion": 0.9913272857666016
+        },
+        {
+            "view": "side",
+            "file": "side_LOD3.png",
+            "lod": 3,
+            "pixels": 107446,
+            "triangles": 14488,
+            "renderers": 1,
+            "submeshes": 1,
+            "coverageAgainstLod0": 0.9913272857666016,
+            "intersectionOverUnion": 0.9913272857666016
+        },
+        {
+            "view": "top",
+            "file": "top_LOD0.png",
+            "lod": 0,
+            "pixels": 98106,
+            "triangles": 29264,
+            "renderers": 61,
+            "submeshes": 91,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "top",
+            "file": "top_LOD1.png",
+            "lod": 1,
+            "pixels": 98106,
+            "triangles": 29264,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "top",
+            "file": "top_LOD2.png",
+            "lod": 2,
+            "pixels": 95138,
+            "triangles": 16344,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.969747006893158,
+            "intersectionOverUnion": 0.969747006893158
+        },
+        {
+            "view": "top",
+            "file": "top_LOD3.png",
+            "lod": 3,
+            "pixels": 94754,
+            "triangles": 14488,
+            "renderers": 1,
+            "submeshes": 1,
+            "coverageAgainstLod0": 0.9658328890800476,
+            "intersectionOverUnion": 0.9658328890800476
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD0.png",
+            "lod": 0,
+            "pixels": 88976,
+            "triangles": 29264,
+            "renderers": 61,
+            "submeshes": 91,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD1.png",
+            "lod": 1,
+            "pixels": 88976,
+            "triangles": 29264,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD2.png",
+            "lod": 2,
+            "pixels": 88333,
+            "triangles": 16344,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.9927733540534973,
+            "intersectionOverUnion": 0.9927733540534973
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD3.png",
+            "lod": 3,
+            "pixels": 88322,
+            "triangles": 14488,
+            "renderers": 1,
+            "submeshes": 1,
+            "coverageAgainstLod0": 0.9926496744155884,
+            "intersectionOverUnion": 0.9926496744155884
+        }
+    ]
+}

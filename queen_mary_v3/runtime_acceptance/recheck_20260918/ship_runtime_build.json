@@ -1,0 +1,40 @@
+{
+    "status": "passed",
+    "shipId": "HMS_Queen_Mary_1913",
+    "prefabPath": "Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab",
+    "definitionPath": "Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Definition.asset",
+    "objectCount": 101,
+    "meshCount": 85,
+    "renderersDisabled": 24,
+    "collidersAdded": 25,
+    "hullProxyColliders": 1,
+    "builtUtc": "2026-09-18T00:12:25.2023078Z",
+    "compartments": 14,
+    "compartmentsWithBuoyancyData": 14,
+    "collisionOnlyRoles": [
+        "armour_belt",
+        "armour_bulkhead",
+        "armour_deck",
+        "boiler_room",
+        "engine_room",
+        "magazine",
+        "steering_gear",
+        "propulsion_underwater",
+        "rudder"
+    ],
+    "unusedRoles": [],
+    "lodSummary": [
+        "LOD0  原样：61 个渲染器（45 静态 + 16 炮塔链）/ 29264 三角形",
+        "LOD1  静态本体按材质合并：17 渲染器 · 本体 6 子网格 · 29264 三角形（屏幕高度比例 0.08）",
+        "LOD2  再丢小件：17 渲染器 · 本体 6 子网格 · 16344 三角形",
+        "LOD3  扁平剪影（炮塔冻结）：1 渲染器 · 1 子网格 · 14488 三角形（本档关掉 16 个炮塔渲染器）"
+    ],
+    "checksFailed": [],
+    "notes": [
+        "炮塔链（16 个渲染器）保留独立变换并列入 LOD0/1/2 —— 它们要转，合进静态网格就废了。所以 LOD1/2 的渲染器下限就是它。",
+        "屏幕高度阈值 0.20 / 0.08 / 0.03 / 0.01 是默认值，**要对着真实相机调**。",
+        "渲染器数：LOD0 61 → LOD1/2 17（炮塔链占 16，下限就在这）",
+        "预制体已生成：Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab",
+        "ShipDefinition 已更新：Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Definition.asset"
+    ]
+}

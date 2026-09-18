@@ -19,6 +19,9 @@ __pycache__/
 *.unityproj
 *.userprefs
 
+# 独立播放器构建产物（80 MB 级）。报告 / 截图 / CSV 进仓库，播放器本体不进。
+**/player/
+
 # 系统
 Thumbs.db
 desktop.ini

@@ -11,8 +11,8 @@ namespace Naval.EditorTools
     /// 把导入好的模型变成**能跑的船**：仅碰撞件关掉渲染、舱室挂上数据与碰撞体，
     /// 存成预制体，并生成 ShipDefinition 资产。
     ///
-    /// 为什么需要这一步（一句话）：85 个网格里有 24 个在船壳内部、永远看不见，
-    /// 现在却照样在渲染 —— 每艘船白扔 28% 的 draw call，还有戳出船壳的风险。
+    /// 为什么需要这一步（一句话）：85 个网格里有 24 个用于损伤或水下结构代理，
+    /// 现在却照样在渲染 —— 减少了 24 个渲染器；实际 draw call 取决于材质与渲染通道，还有戳出船壳的风险。
     ///
     /// 用法：菜单 Tools/Naval/Build runtime ship
     ///      批处理 -executeMethod Naval.EditorTools.ShipRuntimeBuilder.BuildBatch
@@ -33,11 +33,8 @@ namespace Naval.EditorTools
         private const string DefinitionPath = ShipFolder + "/" + ShipId + "_Definition.asset";
         private const string MaterialDir = "Assets/Materials/Naval";
 
-        private const string ReportPath =
-            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\ship_runtime_build.json";
-
-        /// <summary>
-        /// 只参与碰撞、不参与渲染的角色。这些部件都在船壳内部，永远看不见。
+/// <summary>
+        /// 只参与碰撞、不参与渲染的角色。这些部件当前用作系统代理；本构建面向水面观察。
         /// **这个分类要对契约里的角色名负责**：下面有交叉检查，角色一旦改名会立刻报错而不是静默漏掉。
         /// </summary>
         private static readonly string[] CollisionOnlyRoles =
@@ -48,7 +45,7 @@ namespace Naval.EditorTools
         };
 
         /// <summary>其中真正算"损伤舱室"的角色（要挂 ShipCompartment 与进水数据）。</summary>
-        private static readonly string[] CompartmentRoles = { "boiler_room", "engine_room", "magazine" };
+        private static readonly string[] CompartmentRoles = { "boiler_room", "engine_room", "magazine", "steering_gear" };
 
         // ---------------------------------------------------------------- report
 
@@ -63,6 +60,8 @@ namespace Naval.EditorTools
             public int meshCount;
             public int renderersDisabled;
             public int collidersAdded;
+            public int hullProxyColliders;
+            public string builtUtc;
             public int compartments;
             public int compartmentsWithBuoyancyData;
             public string[] collisionOnlyRoles;
@@ -117,7 +116,7 @@ namespace Naval.EditorTools
         {
             var failures = new List<string>();
             var notes = new List<string>();
-            var report = new Report { shipId = ShipId, collisionOnlyRoles = CollisionOnlyRoles };
+            var report = new Report { shipId = ShipId, collisionOnlyRoles = CollisionOnlyRoles, builtUtc = DateTime.UtcNow.ToString("o") };
 
             string projectRoot = Directory.GetParent(Application.dataPath).FullName;
 
@@ -195,7 +194,7 @@ namespace Naval.EditorTools
                     var renderer = child.GetComponent<Renderer>();
                     if (renderer != null) { renderer.enabled = false; report.renderersDisabled++; }
 
-                    // 2) 加碰撞体。用**盒体**而不是网格碰撞体：15 艘船 × 24 个网格碰撞体会压垮物理；
+                    // 2) 加碰撞体。用**盒体**而不是网格碰撞体：当前舱室代理本身就是盒状，不需要逐面碰撞；
                     //    做成 trigger 是为了不让船与船互相卡住（射线检测记得传 QueryTriggerInteraction.Collide）。
                     var filter = child.GetComponent<MeshFilter>();
                     var collider = child.gameObject.AddComponent<BoxCollider>();
@@ -242,7 +241,7 @@ namespace Naval.EditorTools
                     }
                 }
 
-                // --- LOD 链：静态本体合并，炮塔链留在组外 ------------------------
+                // --- LOD 链：静态本体合并，炮塔链保留独立变换 ------------------------
                 var lod = ShipLodBuilder.Build(instance, contract, roleByName);
                 failures.AddRange(lod.Failures);
                 notes.AddRange(lod.Notes);
@@ -250,6 +249,11 @@ namespace Naval.EditorTools
                 notes.Add(string.Format("渲染器数：LOD0 {0} → LOD1/2 {1}（炮塔链占 {2}，下限就在这）",
                     lod.Lod0Renderers, lod.Lod1Renderers, lod.Lod1Renderers - 1));
 
+                if (failures.Count > 0) return Finish(report, failures, notes);
+                ShipHullProxyBuilder.Build(instance);
+                report.hullProxyColliders = 1;
+                report.collidersAdded++;
+                AssetDatabase.SaveAssets();
                 // --- 存预制体 --------------------------------------------------
                 EnsureFolder(PrefabDir);
                 var prefab = PrefabUtility.SaveAsPrefabAsset(instance, PrefabPath);
@@ -359,9 +363,10 @@ namespace Naval.EditorTools
 
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(ReportPath));
-                File.WriteAllText(ReportPath, JsonUtility.ToJson(report, true), new UTF8Encoding(false));
-                Debug.Log("[Naval] 构建报告已写入 " + ReportPath);
+                Directory.CreateDirectory(ShipRuntimeAcceptance.OutputDirectory);
+                string path = Path.Combine(ShipRuntimeAcceptance.OutputDirectory, "ship_runtime_build.json");
+                File.WriteAllText(path, JsonUtility.ToJson(report, true), new UTF8Encoding(false));
+                Debug.Log("[Naval] 构建报告已写入 " + path);
             }
             catch (Exception e) { Debug.LogError("[Naval] 报告写入失败：" + e.Message); }
 

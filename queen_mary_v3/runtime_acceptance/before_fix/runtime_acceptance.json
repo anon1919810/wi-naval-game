@@ -1,0 +1,163 @@
+{
+    "status": "failed",
+    "builtUtc": "2026-09-17T18:16:04.3725127Z",
+    "unityVersion": "2022.3.62f3c1",
+    "compartments": 13,
+    "hullColliders": 0,
+    "colliderRays": 0,
+    "failures": [
+        "Contract omits the buoyancy document needed to assemble compartments",
+        "Expected 14 floodable compartments; found 13",
+        "Steering_Gear cannot consume its floodable-volume data",
+        "No hull-level query proxy",
+        "LOD1 contains a missing or disabled renderer: _LOD1_Body",
+        "LOD2 contains a missing or disabled renderer: _LOD2_Body",
+        "LOD3 contains a missing or disabled renderer: _LOD3_Silhouette",
+        "side_LOD1.png lost ship silhouette; IoU=0.05239607",
+        "side_LOD2.png lost ship silhouette; IoU=0.05239607",
+        "side_LOD3.png is mostly empty",
+        "side_LOD3.png lost ship silhouette; IoU=0",
+        "top_LOD1.png lost ship silhouette; IoU=0.09524392",
+        "top_LOD2.png lost ship silhouette; IoU=0.09524392",
+        "top_LOD3.png is mostly empty",
+        "top_LOD3.png lost ship silhouette; IoU=0",
+        "overview_LOD1.png lost ship silhouette; IoU=0.09172136",
+        "overview_LOD2.png lost ship silhouette; IoU=0.09172136",
+        "overview_LOD3.png is mostly empty",
+        "overview_LOD3.png lost ship silhouette; IoU=0"
+    ],
+    "images": [
+        {
+            "view": "side",
+            "file": "side_LOD0.png",
+            "lod": 0,
+            "pixels": 108386,
+            "triangles": 29264,
+            "renderers": 61,
+            "submeshes": 91,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "side",
+            "file": "side_LOD1.png",
+            "lod": 1,
+            "pixels": 5679,
+            "triangles": 29264,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.05239606648683548,
+            "intersectionOverUnion": 0.05239606648683548
+        },
+        {
+            "view": "side",
+            "file": "side_LOD2.png",
+            "lod": 2,
+            "pixels": 5679,
+            "triangles": 16344,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.05239606648683548,
+            "intersectionOverUnion": 0.05239606648683548
+        },
+        {
+            "view": "side",
+            "file": "side_LOD3.png",
+            "lod": 3,
+            "pixels": 0,
+            "triangles": 4990,
+            "renderers": 1,
+            "submeshes": 1,
+            "coverageAgainstLod0": 0.0,
+            "intersectionOverUnion": 0.0
+        },
+        {
+            "view": "top",
+            "file": "top_LOD0.png",
+            "lod": 0,
+            "pixels": 98106,
+            "triangles": 29264,
+            "renderers": 61,
+            "submeshes": 91,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "top",
+            "file": "top_LOD1.png",
+            "lod": 1,
+            "pixels": 9344,
+            "triangles": 29264,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.0952439233660698,
+            "intersectionOverUnion": 0.0952439233660698
+        },
+        {
+            "view": "top",
+            "file": "top_LOD2.png",
+            "lod": 2,
+            "pixels": 9344,
+            "triangles": 16344,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.0952439233660698,
+            "intersectionOverUnion": 0.0952439233660698
+        },
+        {
+            "view": "top",
+            "file": "top_LOD3.png",
+            "lod": 3,
+            "pixels": 0,
+            "triangles": 4990,
+            "renderers": 1,
+            "submeshes": 1,
+            "coverageAgainstLod0": 0.0,
+            "intersectionOverUnion": 0.0
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD0.png",
+            "lod": 0,
+            "pixels": 88976,
+            "triangles": 29264,
+            "renderers": 61,
+            "submeshes": 91,
+            "coverageAgainstLod0": 1.0,
+            "intersectionOverUnion": 1.0
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD1.png",
+            "lod": 1,
+            "pixels": 8161,
+            "triangles": 29264,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.09172136336565018,
+            "intersectionOverUnion": 0.09172136336565018
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD2.png",
+            "lod": 2,
+            "pixels": 8161,
+            "triangles": 16344,
+            "renderers": 17,
+            "submeshes": 34,
+            "coverageAgainstLod0": 0.09172136336565018,
+            "intersectionOverUnion": 0.09172136336565018
+        },
+        {
+            "view": "overview",
+            "file": "overview_LOD3.png",
+            "lod": 3,
+            "pixels": 0,
+            "triangles": 4990,
+            "renderers": 1,
+            "submeshes": 1,
+            "coverageAgainstLod0": 0.0,
+            "intersectionOverUnion": 0.0
+        }
+    ]
+}

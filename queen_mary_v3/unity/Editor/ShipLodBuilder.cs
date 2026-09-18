@@ -11,9 +11,9 @@ namespace Naval.EditorTools
     /// 给船体静态本体生成 LOD 链（把几十个网格按材质合并成 1 个渲染器）。
     ///
     /// 两条硬约束：
-    ///  ① **炮塔链留在 LODGroup 之外**（Turret → Elevation → Barrel，16 个对象）。
+    ///  ① **炮塔链保留独立变换，列入 LOD0/1/2**（Turret → Elevation → Barrel，16 个对象）。
     ///     它们要转，一旦被合进 LOD 的静态网格就永远转不了了。
-    ///     LODGroup 只管静态本体，这是船舶/载具 LOD 的常规做法。
+    ///     LODGroup 管理全部可见渲染器，炮塔层级不变。
     ///  ② **按材质合并**，不是按对象。合并后子网格数 = 材质数（本船 6），
     ///     所以是"1 个渲染器 + 6 个子网格 ≈ 6 次 draw call"，而不是 49 个子网格。
     ///     如果按对象合，子网格数就等于对象数，等于白做。
@@ -60,7 +60,7 @@ namespace Naval.EditorTools
                 return result;
             }
 
-            // 炮塔链的名字：这些必须留在 LOD 组外
+            // 炮塔链的名字：这些不能合入静态本体
             var turretChain = new HashSet<string>();
             foreach (var t in contract.turrets)
             {
@@ -113,19 +113,23 @@ namespace Naval.EditorTools
             // --- LOD3：连炮塔一起合并的扁平剪影 ---------------------------------
             var allRenderers = new List<MeshRenderer>(staticRenderers);
             allRenderers.AddRange(turretRenderers);
+            var silhouetteSkip = new HashSet<string>(droppable);
+            foreach (var mr in staticRenderers)
+                if (roleByName.TryGetValue(mr.name, out var role) &&
+                    (role == "secondary_gun" || role == "boat" || role == "ventilator"))
+                    silhouetteSkip.Add(mr.name);
             Material[] materials3;
-            Mesh silhouette = MergeByMaterial(allRenderers, rootInverse, null, out materials3);
+            Mesh silhouette = MergeByMaterial(allRenderers, rootInverse, silhouetteSkip, out materials3);
             Material flat = materials3.Length > 0 ? materials3[0] : null;
             if (silhouette != null && flat != null)
             {
-                // 剪影只用一种材质 → 1 个子网格 → 1 次 draw call
-                var flatMesh = new Mesh();
-                flatMesh.indexFormat = IndexFormat.UInt32;
-                flatMesh.CombineMeshes(new[]
-                {
-                    new CombineInstance { mesh = silhouette, subMeshIndex = 0, transform = Matrix4x4.identity }
-                }, false, true);
-                flatMesh.name = "silhouette";
+                // Every material submesh contributes geometry to the one-material silhouette.
+                var parts = new CombineInstance[silhouette.subMeshCount];
+                for (int s = 0; s < parts.Length; s++)
+                    parts[s] = new CombineInstance { mesh = silhouette, subMeshIndex = s, transform = Matrix4x4.identity };
+                var flatMesh = new Mesh { indexFormat = IndexFormat.UInt32, name = "silhouette" };
+                flatMesh.CombineMeshes(parts, true, true);
+                UnityEngine.Object.DestroyImmediate(silhouette);
                 silhouette = flatMesh;
             }
 
@@ -207,21 +211,21 @@ namespace Naval.EditorTools
             result.Lod1Renderers = 1 + turretRenderers.Count;
             result.Summary.Add(string.Format("LOD0  原样：{0} 个渲染器（{1} 静态 + {2} 炮塔链）/ {3} 三角形",
                 result.Lod0Renderers, staticRenderers.Count, turretRenderers.Count, tri0));
-            result.Summary.Add(string.Format("LOD1  静态本体按材质合并：{0} 渲染器 · {1} 子网格 · {2} 三角形（{3} m）",
+            result.Summary.Add(string.Format("LOD1  静态本体按材质合并：{0} 渲染器 · 本体 {1} 子网格 · {2} 三角形（屏幕高度比例 {3}）",
                 1 + turretRenderers.Count, materials.Length, tri1 + TurretTriangles(turretRenderers), ScreenHeights[1]));
-            result.Summary.Add(string.Format("LOD2  再丢小件：{0} 渲染器 · {1} 子网格 · {2} 三角形",
+            result.Summary.Add(string.Format("LOD2  再丢小件：{0} 渲染器 · 本体 {1} 子网格 · {2} 三角形",
                 1 + turretRenderers.Count, materials2.Length, tri2 + TurretTriangles(turretRenderers)));
             result.Summary.Add(string.Format("LOD3  扁平剪影（炮塔冻结）：1 渲染器 · 1 子网格 · {0} 三角形（本档关掉 {1} 个炮塔渲染器）",
                 tri3, turretRenderers.Count));
 
-            result.Notes.Add("炮塔链（" + turretRenderers.Count + " 个渲染器）留在 LODGroup 之外 —— " +
+            result.Notes.Add("炮塔链（" + turretRenderers.Count + " 个渲染器）保留独立变换并列入 LOD0/1/2 —— " +
                              "它们要转，合进静态网格就废了。所以 LOD1/2 的渲染器下限就是它。");
             result.Notes.Add("屏幕高度阈值 " + string.Join(" / ", Array.ConvertAll(ScreenHeights, h => h.ToString("0.00"))) +
                              " 是默认值，**要对着真实相机调**。");
 
             if (lod2 != null && tri2 >= tri1)
                 result.Failures.Add("LOD2 的三角形数没有比 LOD1 少 —— 小件剔除没生效（角色名对不上？）");
-            if (tri3 >= tri2)
+            if (tri3 >= tri2 + TurretTriangles(turretRenderers))
                 result.Failures.Add("LOD3 的三角形数没有比 LOD2 少，剪影档没意义");
 
             return result;
@@ -317,26 +321,24 @@ namespace Naval.EditorTools
             // 远处的船不需要往场景里投阴影：省一整个 shadow pass
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
-            renderer.enabled = false;   // 由 LODGroup 开关
+            renderer.enabled = true;    // LODGroup culls levels; it does not enable disabled renderers.
             return go;
         }
 
         /// <summary>把合并网格存成资产（预制体引用不到内存里的网格）。</summary>
         private static Mesh SaveMesh(Mesh mesh, string suffix)
         {
-            try
+            string path = MeshDir + "/HMS_Queen_Mary_1913" + suffix + ".asset";
+            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (existing != null)
             {
-                string path = MeshDir + "/HMS_Queen_Mary_1913" + suffix + ".asset";
-                var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-                if (existing != null) AssetDatabase.DeleteAsset(path);
-                AssetDatabase.CreateAsset(mesh, path);
-                return AssetDatabase.LoadAssetAtPath<Mesh>(path);
+                // Preserve GUIDs and references on repeat builds; let save errors fail the build.
+                EditorUtility.CopySerialized(mesh, existing);
+                EditorUtility.SetDirty(existing);
+                return existing;
             }
-            catch (Exception e)
-            {
-                Debug.LogWarning("[Naval] 合并网格存盘失败（将用内存网格，预制体里可能丢引用）：" + e.Message);
-                return null;
-            }
+            AssetDatabase.CreateAsset(mesh, path);
+            return mesh;
         }
 
         private static void EnsureFolder(string path)

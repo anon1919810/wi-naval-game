@@ -40,10 +40,8 @@ namespace Naval.EditorTools
         // v2 与 v3 的文件名不同，写死会在换一代资产时静默对不上。
 
         /// <summary>图片与报告的落点：v3 资产目录。换机器/换代只改这两行。</summary>
-        private const string OutputDir =
-            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\unity_preview";
-        private const string ReportPath =
-            @"C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\unity_render_check.json";
+        private static string OutputDir => Path.Combine(ShipRuntimeAcceptance.OutputDirectory, "unity_preview");
+        private static string ReportPath => Path.Combine(ShipRuntimeAcceptance.OutputDirectory, "unity_render_check.json");
 
         private const int Width = 1280;
         private const int Height = 720;
@@ -96,6 +94,8 @@ namespace Naval.EditorTools
                     : "失败 " + report.checksFailed.Length + " 项：\n - " +
                       string.Join("\n - ", report.checksFailed), "好");
         }
+
+        public static bool RenderForPipeline() => RenderAll().status == "passed";
 
         public static void RenderBatch()
         {
@@ -316,6 +316,7 @@ namespace Naval.EditorTools
             File.WriteAllBytes(file, shot.EncodeToPNG());
 
             var pixels = shot.GetPixels32();
+            Color measuredBackground = pixels[0]; // Readback already includes color-space conversion.
             int magenta = 0, shipPixels = 0;
             double luminance = 0;
             var greys = new HashSet<int>();
@@ -323,8 +324,8 @@ namespace Naval.EditorTools
             {
                 float r = p.r / 255f, g = p.g / 255f, bl = p.b / 255f;
                 if (r > 0.35f && bl > 0.35f && r - g > 0.25f && bl - g > 0.25f) magenta++;
-                if (Mathf.Abs(r - Background.r) > 0.02f || Mathf.Abs(g - Background.g) > 0.02f ||
-                    Mathf.Abs(bl - Background.b) > 0.02f)
+                if (Mathf.Abs(r - measuredBackground.r) > 0.02f || Mathf.Abs(g - measuredBackground.g) > 0.02f ||
+                    Mathf.Abs(bl - measuredBackground.b) > 0.02f)
                 {
                     shipPixels++;
                     greys.Add(Mathf.RoundToInt(((r + g + bl) / 3f) * 31f));
@@ -337,7 +338,7 @@ namespace Naval.EditorTools
             result = new ViewResult
             {
                 name = view.name,
-                file = file,
+                file = "unity_preview/" + view.name + ".png",
                 magentaPixels = magenta,
                 magentaFraction = (float)magenta / total,
                 shipFraction = (float)shipPixels / total,

@@ -1,0 +1,376 @@
+{
+    "status": "completed",
+    "startedUtc": "2026-09-18T00:29:46.3448324Z",
+    "completedUtc": "2026-09-18T00:30:36.9909470Z",
+    "unityVersion": "2022.3.62f3c1",
+    "cpu": "AMD Ryzen 7 8845H w/ Radeon 780M Graphics",
+    "gpu": "AMD Radeon 780M Graphics",
+    "graphicsApi": "Direct3D11",
+    "scope": "Standalone URP 1920x1080 offscreen rendering. Camera.Render plus synchronous one-pixel GPU readback each frame prevents hidden-window render skipping. CPU/GPU work is deliberately serialized and includes synchronization overhead; this is not interactive game FPS. Flat sea, fixed camera, 15 stationary ships; no AI/combat/waves/dynamic rigidbody contacts. Forced LODs use the same camera.",
+    "shipCount": 15,
+    "width": 1920,
+    "height": 1080,
+    "vSyncCount": 0,
+    "targetFrameRate": -1,
+    "developmentBuild": false,
+    "frameTimingEnabled": true,
+    "lodBias": 2.0,
+    "maximumLodLevel": 0,
+    "qualityLevel": 5,
+    "stages": [
+        {
+            "mode": "automatic",
+            "screenshot": "automatic.png",
+            "shipsInFrustum": 15,
+            "hullColliders": 15,
+            "compartmentColliders": 360,
+            "shipPixels": 26813,
+            "gpuCompletedFrames": 2885,
+            "estimatedLodCounts": [
+                15,
+                0,
+                0,
+                0,
+                0
+            ],
+            "lodRelatives": [
+                0.285174161195755,
+                0.29453393816947939,
+                0.3039073050022125,
+                0.3131715953350067,
+                0.3221783936023712,
+                0.26087138056755068,
+                0.267978698015213,
+                0.274980366230011,
+                0.28178608417510989,
+                0.28829336166381838,
+                0.23727178573608399,
+                0.24258165061473847,
+                0.2477385252714157,
+                0.25268054008483889,
+                0.2573406398296356
+            ],
+            "estimatedTriangles": 438960,
+            "estimatedSubmeshes": 1365,
+            "frame": {
+                "samples": 2885,
+                "medianMs": 2.761600073426962,
+                "p95Ms": 3.2369999680668117,
+                "p99Ms": 3.4803999587893488,
+                "meanMs": 2.7732308851506568,
+                "available": true
+            },
+            "cpu": {
+                "samples": 2885,
+                "medianMs": 2.7612,
+                "p95Ms": 3.2378,
+                "p99Ms": 3.4883,
+                "meanMs": 2.7730502946273818,
+                "available": true
+            },
+            "gpu": {
+                "samples": 2489,
+                "medianMs": 1.73952,
+                "p95Ms": 2.29409,
+                "p99Ms": 2.49343,
+                "meanMs": 14352.977010787465,
+                "available": true
+            },
+            "synchronizedRender": {
+                "samples": 2885,
+                "medianMs": 2.5596,
+                "p95Ms": 3.0083,
+                "p99Ms": 3.2628000000000005,
+                "meanMs": 2.5795544887348429,
+                "available": true
+            },
+            "fpsFromMeanFrameTime": 360.59024344295616,
+            "width": 1920,
+            "height": 1080
+        },
+        {
+            "mode": "forced_LOD0",
+            "screenshot": "forced_LOD0.png",
+            "shipsInFrustum": 15,
+            "hullColliders": 15,
+            "compartmentColliders": 360,
+            "shipPixels": 26813,
+            "gpuCompletedFrames": 2864,
+            "estimatedLodCounts": [
+                15,
+                0,
+                0,
+                0,
+                0
+            ],
+            "lodRelatives": [
+                0.285174161195755,
+                0.29453393816947939,
+                0.3039073050022125,
+                0.3131715953350067,
+                0.3221783936023712,
+                0.26087138056755068,
+                0.267978698015213,
+                0.274980366230011,
+                0.28178608417510989,
+                0.28829336166381838,
+                0.23727178573608399,
+                0.24258165061473847,
+                0.2477385252714157,
+                0.25268054008483889,
+                0.2573406398296356
+            ],
+            "estimatedTriangles": 438960,
+            "estimatedSubmeshes": 1365,
+            "frame": {
+                "samples": 2864,
+                "medianMs": 2.797099994495511,
+                "p95Ms": 3.240700112655759,
+                "p99Ms": 3.4950999543070795,
+                "meanMs": 2.7934690649938567,
+                "available": true
+            },
+            "cpu": {
+                "samples": 2864,
+                "medianMs": 2.7979,
+                "p95Ms": 3.2423,
+                "p99Ms": 3.5047,
+                "meanMs": 2.7930051326815588,
+                "available": true
+            },
+            "gpu": {
+                "samples": 2613,
+                "medianMs": 1.74195,
+                "p95Ms": 2.30611,
+                "p99Ms": 2.49742,
+                "meanMs": 1.822441014159967,
+                "available": true
+            },
+            "synchronizedRender": {
+                "samples": 2864,
+                "medianMs": 2.5964,
+                "p95Ms": 3.0133,
+                "p99Ms": 3.2710000000000005,
+                "meanMs": 2.5994437500000004,
+                "available": true
+            },
+            "fpsFromMeanFrameTime": 357.97783212687889,
+            "width": 1920,
+            "height": 1080
+        },
+        {
+            "mode": "forced_LOD1",
+            "screenshot": "forced_LOD1.png",
+            "shipsInFrustum": 15,
+            "hullColliders": 15,
+            "compartmentColliders": 360,
+            "shipPixels": 26813,
+            "gpuCompletedFrames": 3062,
+            "estimatedLodCounts": [
+                0,
+                15,
+                0,
+                0,
+                0
+            ],
+            "lodRelatives": [
+                0.285174161195755,
+                0.29453393816947939,
+                0.3039073050022125,
+                0.3131715953350067,
+                0.3221783936023712,
+                0.26087138056755068,
+                0.267978698015213,
+                0.274980366230011,
+                0.28178608417510989,
+                0.28829336166381838,
+                0.23727178573608399,
+                0.24258165061473847,
+                0.2477385252714157,
+                0.25268054008483889,
+                0.2573406398296356
+            ],
+            "estimatedTriangles": 438960,
+            "estimatedSubmeshes": 510,
+            "frame": {
+                "samples": 3062,
+                "medianMs": 2.5895999278873207,
+                "p95Ms": 3.0650999397039415,
+                "p99Ms": 3.321700030937791,
+                "meanMs": 2.6127922267772889,
+                "available": true
+            },
+            "cpu": {
+                "samples": 3062,
+                "medianMs": 2.5888,
+                "p95Ms": 3.0632,
+                "p99Ms": 3.3316,
+                "meanMs": 2.612879588504241,
+                "available": true
+            },
+            "gpu": {
+                "samples": 2791,
+                "medianMs": 1.69933,
+                "p95Ms": 2.18429,
+                "p99Ms": 2.37788,
+                "meanMs": 1.7544789251164484,
+                "available": true
+            },
+            "synchronizedRender": {
+                "samples": 3062,
+                "medianMs": 2.4069000000000004,
+                "p95Ms": 2.8425000000000004,
+                "p99Ms": 3.1043000000000005,
+                "meanMs": 2.4280542782495106,
+                "available": true
+            },
+            "fpsFromMeanFrameTime": 382.7323082759764,
+            "width": 1920,
+            "height": 1080
+        },
+        {
+            "mode": "forced_LOD2",
+            "screenshot": "forced_LOD2.png",
+            "shipsInFrustum": 15,
+            "hullColliders": 15,
+            "compartmentColliders": 360,
+            "shipPixels": 26610,
+            "gpuCompletedFrames": 3440,
+            "estimatedLodCounts": [
+                0,
+                0,
+                15,
+                0,
+                0
+            ],
+            "lodRelatives": [
+                0.285174161195755,
+                0.29453393816947939,
+                0.3039073050022125,
+                0.3131715953350067,
+                0.3221783936023712,
+                0.26087138056755068,
+                0.267978698015213,
+                0.274980366230011,
+                0.28178608417510989,
+                0.28829336166381838,
+                0.23727178573608399,
+                0.24258165061473847,
+                0.2477385252714157,
+                0.25268054008483889,
+                0.2573406398296356
+            ],
+            "estimatedTriangles": 245160,
+            "estimatedSubmeshes": 510,
+            "frame": {
+                "samples": 3440,
+                "medianMs": 2.307299990206957,
+                "p95Ms": 2.754499902948737,
+                "p99Ms": 3.0338000506162645,
+                "meanMs": 2.3256286639289738,
+                "available": true
+            },
+            "cpu": {
+                "samples": 3440,
+                "medianMs": 2.3067,
+                "p95Ms": 2.7569,
+                "p99Ms": 3.0374,
+                "meanMs": 2.3255231686046549,
+                "available": true
+            },
+            "gpu": {
+                "samples": 3165,
+                "medianMs": 1.51603,
+                "p95Ms": 1.84454,
+                "p99Ms": 2.1137,
+                "meanMs": 1.5177465308056899,
+                "available": true
+            },
+            "synchronizedRender": {
+                "samples": 3440,
+                "medianMs": 2.1421,
+                "p95Ms": 2.5404,
+                "p99Ms": 2.8265000000000004,
+                "meanMs": 2.164177732558143,
+                "available": true
+            },
+            "fpsFromMeanFrameTime": 429.99126021717316,
+            "width": 1920,
+            "height": 1080
+        },
+        {
+            "mode": "forced_LOD3",
+            "screenshot": "forced_LOD3.png",
+            "shipsInFrustum": 15,
+            "hullColliders": 15,
+            "compartmentColliders": 360,
+            "shipPixels": 26593,
+            "gpuCompletedFrames": 4079,
+            "estimatedLodCounts": [
+                0,
+                0,
+                0,
+                15,
+                0
+            ],
+            "lodRelatives": [
+                0.285174161195755,
+                0.29453393816947939,
+                0.3039073050022125,
+                0.3131715953350067,
+                0.3221783936023712,
+                0.26087138056755068,
+                0.267978698015213,
+                0.274980366230011,
+                0.28178608417510989,
+                0.28829336166381838,
+                0.23727178573608399,
+                0.24258165061473847,
+                0.2477385252714157,
+                0.25268054008483889,
+                0.2573406398296356
+            ],
+            "estimatedTriangles": 217320,
+            "estimatedSubmeshes": 15,
+            "frame": {
+                "samples": 4079,
+                "medianMs": 1.9570998847484589,
+                "p95Ms": 2.3268999066203834,
+                "p99Ms": 2.5667999871075155,
+                "meanMs": 1.9612905858943049,
+                "available": true
+            },
+            "cpu": {
+                "samples": 4079,
+                "medianMs": 1.9545,
+                "p95Ms": 2.3288,
+                "p99Ms": 2.5692,
+                "meanMs": 1.9611690120127537,
+                "available": true
+            },
+            "gpu": {
+                "samples": 3698,
+                "medianMs": 1.4859,
+                "p95Ms": 1.72898,
+                "p99Ms": 1.88273,
+                "meanMs": 1.4944986992969192,
+                "available": true
+            },
+            "synchronizedRender": {
+                "samples": 4079,
+                "medianMs": 1.8135000000000002,
+                "p95Ms": 2.1339,
+                "p99Ms": 2.3234,
+                "meanMs": 1.8120582005393462,
+                "available": true
+            },
+            "fpsFromMeanFrameTime": 509.8683526000928,
+            "width": 1920,
+            "height": 1080
+        }
+    ],
+    "failures": [],
+    "notes": [
+        "自动档 15 艘船全部落在同一个 LOD 档（屏幕高度比例 0.237–0.322，档位阈值 0.20/0.08/0.03/0.01，lodBias 2，质量档位 5）。编队纵深仅数百米、相机在 1.4–1.9 km，故这一阶段只测到单一细节层级；要掉进下一档需退到 2288 m 以外。LOD 的实际收益请看 forced_LOD* 阶段。"
+    ]
+}

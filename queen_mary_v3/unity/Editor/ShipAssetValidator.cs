@@ -38,8 +38,7 @@ namespace Naval.EditorTools
         /// 用 `_urp` 后缀而不是 `unity_verification.json`：后者是 v3 那边另一套导入工具的产物，
         /// 别互相覆盖 —— 两份证据讲的是不同的事（那边验导入，这边验契约/轴向/材质）。
         /// </summary>
-        private const string ReportPath =
-            "C:/Users/杨睿/Desktop/HMS_Queen_Mary_建模成果_2026-09-17/queen_mary_v3/unity_verification_urp.json";
+        private static string ReportPath => Path.Combine(ShipRuntimeAcceptance.OutputDirectory, "unity_verification_urp.json");
 
         private const float ExpectLengthM = 213.4f;
         private const float ExpectBeamM = 27.2f;
@@ -136,6 +135,8 @@ namespace Naval.EditorTools
                   string.Join("\n - ", report.checksFailed);
             EditorUtility.DisplayDialog("玛丽王后号 · 资产验证", summary, "好");
         }
+
+        public static bool ValidateForPipeline() => Validate().status == "passed";
 
         public static void ValidateBatch()
         {
