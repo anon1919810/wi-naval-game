@@ -12,6 +12,7 @@ namespace Naval
         public ShipGunBattery battery;
         public LODGroup lodGroup;
         public ShipSystemsState systems;
+        public bool debugPanelVisible = true;
 
         string _lastHit = "";
         GUIStyle _style;
@@ -35,6 +36,7 @@ namespace Naval
 
         void OnGUI()
         {
+            if (!debugPanelVisible) return;
             if (_style == null)
             {
                 _style = new GUIStyle(GUI.skin.label) { fontSize = 14, richText = false };
@@ -100,7 +102,7 @@ namespace Naval
                 }
             }
 
-            GUILayout.Label("Keys: A/Q or arrows+mouse axes on active turret; B=IJKL; Space/LMB fire; R reset flood", _style);
+            GUILayout.Label("Keys: 1-4 select turret · arrows aim · Space/LMB fire · R reset · F1 HUD", _style);
             GUILayout.EndArea();
         }
     }

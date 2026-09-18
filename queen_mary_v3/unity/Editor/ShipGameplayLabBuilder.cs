@@ -70,8 +70,17 @@ namespace Naval.EditorTools
                 ctrl.turretKey = key;
                 ctrl.yawNode = yaw;
                 ctrl.pitchNode = FindDeep(ship.transform, "Elevation_" + key);
+                ctrl.inputEnabled = key == "A";
                 controllers[i] = ctrl;
             }
+
+            var selector = ship.GetComponent<ShipTurretSelector>();
+            if (selector == null) selector = ship.AddComponent<ShipTurretSelector>();
+            selector.turrets = controllers;
+            selector.selectedKey = "A";
+
+            var systems = ship.GetComponent<ShipSystemsState>();
+            if (systems == null) ship.AddComponent<ShipSystemsState>();
 
             var camGo = new GameObject("GameplayCamera");
             var cam = camGo.AddComponent<Camera>();
@@ -100,6 +109,21 @@ namespace Naval.EditorTools
             hud.cameraRig = rig;
             hud.battery = battery;
             hud.lodGroup = ship.GetComponentInChildren<LODGroup>();
+            hud.systems = ship.GetComponent<ShipSystemsState>();
+
+            var aim = hudGo.AddComponent<ShipAimUI>();
+            aim.selector = selector;
+            aim.battery = battery;
+            aim.floater = floater;
+            aim.systems = hud.systems;
+            aim.cameraRig = rig;
+            aim.hud = hud;
+
+            var shell = hudGo.AddComponent<ShipInputShell>();
+            shell.floater = floater;
+            shell.systems = hud.systems;
+            shell.hud = hud;
+            shell.aimUi = aim;
 
             EnsureFolder("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);

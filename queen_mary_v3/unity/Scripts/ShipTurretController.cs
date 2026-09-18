@@ -26,6 +26,9 @@ namespace Naval
         [Tooltip("Block Fire when current yaw is outside firing_arcs intervals.")]
         public bool gateFireOnArcs = true;
 
+        [Tooltip("When false, this turret ignores aim/fire input (selector drives this).")]
+        public bool inputEnabled = true;
+
         Quaternion _restYaw = Quaternion.identity;
         Quaternion _restPitch = Quaternion.identity;
         bool _restCaptured;
@@ -116,18 +119,16 @@ namespace Naval
             EnsureBinding();
             CaptureRestIfNeeded();
 
-            float yawIn = 0f, pitchIn = 0f;
-            if (turretKey == "A" || turretKey == "Q")
+            // Always refresh arc gate; only the selected turret consumes player input.
+            ArcClear = _arcs == null || _arcs.IsYawClear(turretKey, yawCommandDeg, pitchCommandDeg);
+            if (!inputEnabled)
             {
-                yawIn = Input.GetAxisRaw("Horizontal");
-                pitchIn = Input.GetAxisRaw("Vertical");
+                Apply();
+                return;
             }
-            else if (turretKey == "B" || turretKey == "X")
-            {
-                // Secondary keys: B uses IKJL-like, X uses numpad-ish alternatives via axes.
-                yawIn = (Input.GetKey(KeyCode.L) ? 1f : 0f) - (Input.GetKey(KeyCode.J) ? 1f : 0f);
-                pitchIn = (Input.GetKey(KeyCode.I) ? 1f : 0f) - (Input.GetKey(KeyCode.K) ? 1f : 0f);
-            }
+
+            float yawIn = Input.GetAxisRaw("Horizontal");
+            float pitchIn = Input.GetAxisRaw("Vertical");
 
             yawCommandDeg += yawIn * yawRateDegPerSec * Time.deltaTime;
             pitchCommandDeg += pitchIn * pitchRateDegPerSec * Time.deltaTime;
