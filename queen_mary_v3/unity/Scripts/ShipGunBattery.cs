@@ -112,7 +112,7 @@ namespace Naval
             }
 
             Vector3 end = found ? best.point : origin + dir * shellRangeM;
-            SpawnTracer(origin, end);
+            // Single VFX tracer path — do not also spawn legacy LineRenderer (double streaks).
             var vfx = ShipCombatVfx.FindOrGlobal();
             vfx.PlayTracer(origin, end, dir, found);
 

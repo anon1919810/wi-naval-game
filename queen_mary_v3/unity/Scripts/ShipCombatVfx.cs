@@ -31,17 +31,19 @@ namespace Naval
         }
 
         [Header("Tracer")]
-        public float tracerTime = 0.45f;
-        public float tracerWidth = 0.55f;
-        public Color tracerColor = new Color(1f, 0.82f, 0.25f, 0.95f);
+        public float tracerTime = 0.22f;
+        public float tracerWidth = 0.12f;
+        public float maxTracerVisualLength = 900f;
+        public int maxConcurrentTracers = 4;
+        public Color tracerColor = new Color(1f, 0.75f, 0.2f, 0.85f);
 
         [Header("Muzzle")]
-        public float muzzleLife = 0.22f;
-        public float muzzleScale = 4.5f;
+        public float muzzleLife = 0.08f;
+        public float muzzleScale = 0.35f;
 
         [Header("Impact / splash")]
-        public float impactLife = 0.7f;
-        public float splashLife = 0.9f;
+        public float impactLife = 0.45f;
+        public float splashLife = 0.55f;
 
         [Header("Placeholder audio (optional)")]
         public AudioClip fireClip;
