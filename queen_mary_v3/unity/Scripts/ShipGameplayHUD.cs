@@ -11,6 +11,7 @@ namespace Naval
         public ShipCameraRig cameraRig;
         public ShipGunBattery battery;
         public LODGroup lodGroup;
+        public ShipSystemsState systems;
 
         string _lastHit = "";
         GUIStyle _style;
@@ -20,6 +21,7 @@ namespace Naval
             if (floater == null) floater = FindObjectOfType<ShipFloatPrototype>();
             if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
             if (battery == null) battery = FindObjectOfType<ShipGunBattery>();
+            if (systems == null) systems = FindObjectOfType<ShipSystemsState>();
             if (lodGroup == null && floater != null) lodGroup = floater.GetComponentInChildren<LODGroup>();
             if (turrets == null || turrets.Length == 0)
                 turrets = FindObjectsOfType<ShipTurretController>();
@@ -41,7 +43,7 @@ namespace Naval
 
             float w = 640f;
             GUILayout.BeginArea(new Rect(12, 12, w, Screen.height - 24));
-            GUILayout.Label("WI Naval · Gameplay Lab (T5 flood / T6 turrets / T7 camera+LOD)", _style);
+            GUILayout.Label("WI Naval · Gameplay Lab (T5 flood / T6 turrets / T7 camera+LOD / T9 penetration)", _style);
 
             if (cameraRig != null)
             {
@@ -79,6 +81,8 @@ namespace Naval
 
             if (floater != null)
                 GUILayout.Label("Float: " + floater.StatusText, _style);
+            if (systems != null)
+                GUILayout.Label("Systems: " + systems.StatusText(), _style);
             if (!string.IsNullOrEmpty(_lastHit))
                 GUILayout.Label("Last hit: " + _lastHit, _style);
 

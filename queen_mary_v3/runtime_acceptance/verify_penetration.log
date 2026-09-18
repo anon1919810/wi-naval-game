@@ -1,0 +1,4 @@
+﻿penetration_tables_ok
+main@2km pen=430mm belt=229 -> Penetrated
+main@20km pen=107mm belt=229 -> NoPenetration
+sec@2km pen=55mm belt=229 super=10

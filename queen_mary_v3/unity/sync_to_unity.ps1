@@ -82,6 +82,8 @@ $dataNames.Add('buoyancy_compartments.json')
 $dataNames.Add('lod_profiles.json')
 $dataNames.Add('firing_arcs.json')
 $dataNames.Add('firing_arcs.unity.json')
+$dataNames.Add('penetration_main.json')
+$dataNames.Add('armour_zones.json')
 
 $copied = @()
 $missing = @()

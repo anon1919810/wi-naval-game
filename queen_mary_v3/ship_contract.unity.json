@@ -555,6 +555,18 @@
       "path": "lod_profiles.json"
     },
     {
+      "key": "firing_arcs_unity",
+      "path": "firing_arcs.unity.json"
+    },
+    {
+      "key": "penetration",
+      "path": "penetration_main.json"
+    },
+    {
+      "key": "armour_zones",
+      "path": "armour_zones.json"
+    },
+    {
       "key": "fbx",
       "path": "HMS_Queen_Mary_1913_Refined_v3.fbx"
     }

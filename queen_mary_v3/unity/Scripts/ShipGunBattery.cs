@@ -4,8 +4,8 @@ using UnityEngine;
 namespace Naval
 {
     /// <summary>
-    /// T5 — Prototype gun battery: raycast shells from turret barrels, flood ShipCompartment.
-    /// Not a ballistic simulation. QueryTriggerInteraction.Collide is required for hull/compartment triggers.
+    /// T5/T9 — Gun battery: raycast shells, evaluate penetration vs armour zones,
+    /// flood compartments and update ShipSystemsState. Not a ballistic simulation.
     /// </summary>
     [AddComponentMenu("Naval/Ship Gun Battery")]
     public sealed class ShipGunBattery : MonoBehaviour
@@ -16,19 +16,37 @@ namespace Naval
         public float tracerWidth = 0.35f;
         public float tracerSeconds = 0.35f;
         public bool alsoHitMeshColliders = true;
+        [Tooltip("When true, flood volume and systems come from penetration tables.")]
+        public bool usePenetration = true;
 
         public string LastError { get; private set; }
         public string LastHitSummary { get; private set; }
+        public ShipPenHit LastPenHit { get; private set; }
+
         readonly List<LineRenderer> _tracers = new List<LineRenderer>();
 
         ShipContractData _contract;
+        ShipPenetrationFile _pen;
+        ShipArmourZonesFile _zones;
+        ShipSystemsState _systems;
+        string _lastGunId = "main_343mm";
 
         void Start()
         {
             try { _contract = ShipContractData.Load(shipId); } catch { _contract = null; }
+            _pen = ShipPenetrationFile.Load(shipId);
+            _zones = ShipArmourZonesFile.Load(shipId);
+            _systems = GetComponent<ShipSystemsState>();
+            if (_systems == null) _systems = GetComponentInParent<ShipSystemsState>();
+            if (_systems == null) _systems = gameObject.AddComponent<ShipSystemsState>();
         }
 
-        /// <summary>Fire both barrels of a turret. Returns true if at least one ray was cast.</summary>
+        void EnsureTables()
+        {
+            if (_pen == null) _pen = ShipPenetrationFile.Load(shipId);
+            if (_zones == null) _zones = ShipArmourZonesFile.Load(shipId);
+        }
+
         public bool FireTurret(string key, Transform yawNode, Transform pitchNode)
         {
             if (pitchNode == null)
@@ -36,6 +54,8 @@ namespace Naval
                 LastError = "pitch node null";
                 return false;
             }
+
+            _lastGunId = ShipPenetration.GunIdForTurret(key);
 
             var barrels = new List<Transform>();
             foreach (Transform child in pitchNode)
@@ -63,9 +83,14 @@ namespace Naval
         public bool FireBarrel(Transform barrel)
         {
             if (barrel == null) return false;
+            EnsureTables();
+            if (_systems == null)
+            {
+                _systems = GetComponent<ShipSystemsState>();
+                if (_systems == null) _systems = GetComponentInParent<ShipSystemsState>();
+                if (_systems == null) _systems = gameObject.AddComponent<ShipSystemsState>();
+            }
 
-            // Barrel local +Y is muzzle direction in asset space; after Unity import the mesh
-            // still has origin at trunnion and muzzle along local +Y of the barrel object.
             Vector3 origin = barrel.position;
             Vector3 dir = barrel.up;
             if (dir.sqrMagnitude < 1e-6f) dir = barrel.forward;
@@ -80,7 +105,6 @@ namespace Naval
             {
                 if (h.transform.IsChildOf(transform) || h.transform == transform)
                 {
-                    // Ignore self-hit on own hull/trigger when muzzle starts inside proxy.
                     if (h.distance < 25f) continue;
                 }
                 best = h;
@@ -94,11 +118,54 @@ namespace Naval
             if (!found)
             {
                 LastHitSummary = "miss";
+                LastPenHit = new ShipPenHit { outcome = ShipPenOutcome.Miss, systemNote = "miss" };
                 return false;
             }
 
             var compartment = best.collider.GetComponentInParent<ShipCompartment>();
             string targetName = best.collider.name;
+            float rangeM = best.distance;
+            float incidenceCos = Mathf.Abs(Vector3.Dot(best.normal, dir));
+
+            if (usePenetration)
+            {
+                var penHit = ShipPenetration.Evaluate(
+                    _pen, _zones, _lastGunId, rangeM, targetName, compartment, incidenceCos);
+                LastPenHit = penHit;
+
+                if (penHit.outcome == ShipPenOutcome.NoPenetration)
+                {
+                    LastHitSummary = penHit.Summary();
+                    return true;
+                }
+
+                if (compartment != null && penHit.floodM3 > 0f)
+                {
+                    compartment.Flood(penHit.floodM3);
+                    if (penHit.outcome == ShipPenOutcome.Penetrated)
+                        _systems.ApplyRole(penHit.role);
+                    var floater = best.collider.GetComponentInParent<ShipFloatPrototype>();
+                    if (floater != null) floater.RebuildFromCompartments();
+                    LastHitSummary = penHit.Summary() + " | " + _systems.StatusText();
+                    return true;
+                }
+
+                if (penHit.floodM3 > 0f)
+                {
+                    var anyFloat = best.collider.GetComponentInParent<ShipFloatPrototype>();
+                    if (anyFloat != null)
+                    {
+                        anyFloat.RegisterSurfaceHit(best.point);
+                        LastHitSummary = penHit.Summary() + " | surface flood proxy";
+                        return true;
+                    }
+                }
+
+                LastHitSummary = penHit.Summary();
+                return true;
+            }
+
+            // Legacy path: fixed flood volume, no penetration gate.
             if (compartment != null)
             {
                 compartment.Flood(floodVolumePerHitM3);
@@ -110,10 +177,9 @@ namespace Naval
                 return true;
             }
 
-            // Mesh hull / armour / proxy hit — counts as struck but no compartment data.
             LastHitSummary = "struck " + targetName + " (no ShipCompartment)";
-            var anyFloat = best.collider.GetComponentInParent<ShipFloatPrototype>();
-            if (anyFloat != null) anyFloat.RegisterSurfaceHit(best.point);
+            var anyFloat2 = best.collider.GetComponentInParent<ShipFloatPrototype>();
+            if (anyFloat2 != null) anyFloat2.RegisterSurfaceHit(best.point);
             return true;
         }
 

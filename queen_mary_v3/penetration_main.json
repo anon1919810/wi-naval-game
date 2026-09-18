@@ -1,0 +1,51 @@
+{
+  "asset": "HMS_Queen_Mary_1913",
+  "note": "Prototype penetration tables for gameplay. Curves are greybox estimates shaped to published 13.5in/45 and 4in/50 trends — NOT historically certified firing tables. Obliquity/richochet not modelled; first version is broadside-normal.",
+  "accuracy": "estimate_curve",
+  "historically_certified": false,
+  "guns": [
+    {
+      "id": "main_343mm",
+      "calibre_mm": 343,
+      "label": "13.5in/45 Mk V",
+      "muzzle_velocity_mps": 760,
+      "shell_weight_lb": 1400,
+      "max_range_m": 21708,
+      "source": "wiki + estimate_curve",
+      "samples_m": [0, 2000, 4000, 6000, 8000, 10000, 14000, 18000, 21000],
+      "penetration_mm": [520, 430, 350, 290, 240, 200, 150, 120, 100]
+    },
+    {
+      "id": "secondary_102mm",
+      "calibre_mm": 102,
+      "label": "4in/50 Mk VII",
+      "muzzle_velocity_mps": 870,
+      "shell_weight_lb": 35,
+      "max_range_m": 10400,
+      "source": "wiki + estimate_curve",
+      "samples_m": [0, 2000, 4000, 6000, 8000, 10400],
+      "penetration_mm": [80, 55, 40, 28, 18, 12]
+    }
+  ],
+  "thresholds": {
+    "penetrate_ratio": 1.0,
+    "partial_ratio": 0.5,
+    "note": "pen/armour >= penetrate_ratio => full; >= partial_ratio => partial; else shatter/no pen"
+  },
+  "flood_m3": {
+    "magazine": 400,
+    "boiler_room": 200,
+    "engine_room": 250,
+    "steering_gear": 120,
+    "hull_generic": 150,
+    "partial": 40,
+    "no_penetration": 0
+  },
+  "system_effects": {
+    "magazine": { "status": "critical", "speed_factor": 0.75, "steer_factor": 1.0 },
+    "boiler_room": { "status": "degraded", "speed_per_room": 0.08, "min_speed_factor": 0.4 },
+    "engine_room": { "status": "degraded", "speed_per_room": 0.15, "min_speed_factor": 0.25 },
+    "steering_gear": { "status": "steering_damaged", "steer_factor": 0.25 },
+    "superstructure": { "status": "struck", "speed_factor": 1.0 }
+  }
+}
