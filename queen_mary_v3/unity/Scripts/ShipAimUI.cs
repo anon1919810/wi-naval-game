@@ -100,6 +100,7 @@ namespace Naval
             if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
             if (cameraRig != null && groupAim != null) cameraRig.aim = groupAim;
             if (target == null) target = FindObjectOfType<ShipTargetShip>();
+            if (target == null) target = ShipLabRuntime.EnsureTargetShip();
             if (hud == null) hud = GetComponent<ShipGameplayHUD>();
             if (hud != null) hud.debugPanelVisible = false;
             commandHint =

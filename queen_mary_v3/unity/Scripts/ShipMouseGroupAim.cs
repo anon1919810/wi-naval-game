@@ -61,6 +61,7 @@ namespace Naval
             }
             try { _contract = ShipContractData.Load("HMS_Queen_Mary_1913"); } catch { _contract = null; }
             _arcs = ShipFiringArcsData.Load("HMS_Queen_Mary_1913");
+            ShipLabRuntime.EnsureTargetShip();
             ApplyWorldAimToTurrets();
         }
 
