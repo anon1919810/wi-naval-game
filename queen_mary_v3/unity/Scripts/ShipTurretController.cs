@@ -29,6 +29,12 @@ namespace Naval
         [Tooltip("When false, this turret ignores aim/fire input (selector drives this).")]
         public bool inputEnabled = true;
 
+        [Tooltip("Legacy keyboard aim on this turret. Off when mouse group-aim owns all turrets.")]
+        public bool useIndividualKeys = false;
+
+        [Tooltip("When false, Space/LMB on this controller is ignored (group aim fires instead).")]
+        public bool acceptFireKey = false;
+
         Quaternion _restYaw = Quaternion.identity;
         Quaternion _restPitch = Quaternion.identity;
         bool _restCaptured;
@@ -38,6 +44,11 @@ namespace Naval
 
         public bool ArcClear { get; private set; }
         public string LastFireBlockReason { get; private set; }
+
+        public void SetFireBlockReason(string reason)
+        {
+            LastFireBlockReason = reason ?? "";
+        }
 
         void Awake()
         {
@@ -119,7 +130,6 @@ namespace Naval
             EnsureBinding();
             CaptureRestIfNeeded();
 
-            // Always refresh arc gate; only the selected turret consumes player input.
             ArcClear = _arcs == null || _arcs.IsYawClear(turretKey, yawCommandDeg, pitchCommandDeg);
             if (!inputEnabled)
             {
@@ -127,12 +137,37 @@ namespace Naval
                 return;
             }
 
-            float yawIn = Input.GetAxisRaw("Horizontal");
-            float pitchIn = Input.GetAxisRaw("Vertical");
+            if (useIndividualKeys)
+            {
+                float yawIn = Input.GetAxisRaw("Horizontal");
+                float pitchIn = Input.GetAxisRaw("Vertical");
+                yawCommandDeg += yawIn * yawRateDegPerSec * Time.deltaTime;
+                pitchCommandDeg += pitchIn * pitchRateDegPerSec * Time.deltaTime;
 
-            yawCommandDeg += yawIn * yawRateDegPerSec * Time.deltaTime;
-            pitchCommandDeg += pitchIn * pitchRateDegPerSec * Time.deltaTime;
+                if (_contract != null)
+                {
+                    try
+                    {
+                        var t = _contract.Turret(turretKey);
+                        if (t != null)
+                            pitchCommandDeg = Mathf.Clamp(pitchCommandDeg, t.min_elevation_deg, t.max_elevation_deg);
+                    }
+                    catch { }
+                }
 
+                ArcClear = _arcs == null || _arcs.IsYawClear(turretKey, yawCommandDeg, pitchCommandDeg);
+                if (acceptFireKey && (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0)))
+                    TryFire();
+            }
+
+            Apply();
+        }
+
+        /// <summary>Group-aim entry: command angles are already set; refresh gate + apply.</summary>
+        public void SyncExternalCommands()
+        {
+            EnsureBinding();
+            CaptureRestIfNeeded();
             if (_contract != null)
             {
                 try
@@ -143,12 +178,8 @@ namespace Naval
                 }
                 catch { }
             }
-
             ArcClear = _arcs == null || _arcs.IsYawClear(turretKey, yawCommandDeg, pitchCommandDeg);
             Apply();
-
-            if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
-                TryFire();
         }
 
         void Apply()

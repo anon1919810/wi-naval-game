@@ -1,40 +1,27 @@
-# Gameplay Lab · T5/T6/T7/T9/T10 原型
+# Gameplay Lab · 鼠标群炮塔控制（T12）
 
-场景：Unity 工程 `Assets/Scenes/GameplayLab.unity`（由 `Tools/Naval/Build gameplay lab` 生成）。
+场景：`Assets/Scenes/GameplayLab.unity`
 
-## 已实现
+## 操作（本分支）
 
-| 任务 | 组件 | 行为 |
-|---|---|---|
-| T5 命中进水 | `ShipGunBattery` + `ShipCompartment` + `ShipFloatPrototype` | Space/LMB 射线 → 舱室进水 → 吃水/纵倾原型 |
-| T6 炮塔+射界 | `ShipTurretController` + `ShipFiringArcs` | rest 上叠加命令角；射界外禁止开火 |
-| T7 相机+LOD | `ShipCameraRig` + HUD | Tab 战术/舰队；显示 relH 与估计 LOD |
-| T9 穿深 | `ShipPenetration` + JSON 表 + `ShipSystemsState` | 距离→穿深 vs 装甲；穿透才进水并累计系统 |
-| T10 操作壳 | `ShipAimUI` + `ShipTurretSelector` + `ShipInputShell` | 准星、仅选中塔吃输入、重置、命令条 |
-
-## 操作（无需 Inspector）
-
-| 键 | 作用 |
+| 输入 | 作用 |
 |---|---|
-| **1 / 2 / 3 / 4** | 选中炮塔 A / B / Q / X（仅选中塔接受瞄准与开火） |
-| **[ / ]** | 循环切换炮塔 |
-| **方向键** | 选中塔 yaw/pitch |
-| **Space / 左键** | 开火（射界 + 穿深判定） |
-| **Tab** | 战术 ↔ 舰队相机 |
-| **右键拖动** | 环绕相机；**+/-** 缩放 |
-| **R** | 重置进水 + 系统状态 |
-| **F1** | 显示/隐藏左上调试 HUD |
+| **鼠标移动** | **同时驱动 A/B/Q/X 四座主炮塔**（相同 yaw/pitch 命令） |
+| **Space / 左键** | **齐射**：仅对射界 CLEAR 的塔开火；盲区塔自动跳过（显示 SKIP） |
+| **右键拖动** | 环绕相机（此时**不**转炮塔） |
+| **Tab** | 战术 / 舰队相机 |
+| **R** | 重置进水与系统 |
+| **F1** | 调试 HUD |
 
-屏幕中央：准星 + 当前塔 ARC CLEAR/BLOCKED；右上：相机/浮态/系统/最后命中；底部：命令条。
+准星下方显示：`Turrets ALL · A✓ B✓ Q✗ X✓`（✗ = 射击盲区，开火时跳过）。
+
+## 实现要点
+
+- `ShipMouseGroupAim`：鼠标增量写入所有 `ShipTurretController.yawCommandDeg/pitchCommandDeg`
+- `ShipTurretController`：`useIndividualKeys=false`、`acceptFireKey=false`（不再单塔抢输入）
+- `FireAllClear()`：`ArcClear` 为 false 的塔只记 `SKIP`，不调用 `TryFire`
+- 射界数据仍来自 `firing_arcs.unity.json`（保守几何扫描）
 
 ## 验证
 
-- `verify_penetration.py` / `verify_firing_arcs_runtime.py`
-- Unity `ShipGameplayLabBuilder.BuildBatch` 编译与场景生成
-- **非完整仿真**：穿深 estimate、正对近似；无装填/弹药；无 AI
-
-## 运行
-
-1. 打开 `D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval`
-2. 打开 `Assets/Scenes/GameplayLab.unity`
-3. Play：按 **1** 选 A 塔 → 方向键瞄准 → **Space** 开火 → 看准星下方 ARC 与右上命中/系统状态
+Unity `ShipGameplayLabBuilder.BuildBatch` 应输出 OK 且 **0 error CS**，并在场景中挂上 `ShipMouseGroupAim`。

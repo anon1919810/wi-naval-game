@@ -1,12 +1,11 @@
-using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace Naval
 {
     /// <summary>
-    /// T10 — Selects the active main turret so only one controller consumes fire/aim input.
-    /// Keys: Alpha1=A, Alpha2=B, Alpha3=Q, Alpha4=X, or Q/E cycle (Q conflicts with turret Q —
-    /// use 1-4 primarily; Tab is reserved for camera).
+    /// T10/T12 — Optional turret highlight. Solo mode gates input to one turret;
+    /// default (soloMode=false) keeps all turrets live for mouse group-aim.
     /// </summary>
     [AddComponentMenu("Naval/Ship Turret Selector")]
     public sealed class ShipTurretSelector : MonoBehaviour
@@ -15,6 +14,8 @@ namespace Naval
 
         public string selectedKey = "A";
         public ShipTurretController[] turrets;
+        [Tooltip("If true, only the selected turret is live. Group mouse-aim uses false.")]
+        public bool soloMode = false;
 
         public ShipTurretController Selected
         {
@@ -64,15 +65,12 @@ namespace Naval
             foreach (var t in turrets)
             {
                 if (t == null) continue;
-                t.inputEnabled = (t.turretKey == selectedKey);
+                t.inputEnabled = soloMode ? (t.turretKey == selectedKey) : true;
             }
         }
     }
 
-    /// <summary>
-    /// T10 — Screen crosshair + compact command legend + aim/fire status.
-    /// Does not require Inspector wiring when placed on the HUD object.
-    /// </summary>
+    /// <summary>T10/T12 — Crosshair + per-turret arc status + command bar.</summary>
     [AddComponentMenu("Naval/Ship Aim UI")]
     public sealed class ShipAimUI : MonoBehaviour
     {
@@ -82,6 +80,10 @@ namespace Naval
         public ShipSystemsState systems;
         public ShipCameraRig cameraRig;
         public ShipGameplayHUD hud;
+        public ShipMouseGroupAim groupAim;
+        public string commandHint =
+            "Mouse aim ALL turrets · Space/LMB fire (blind zone skips)\n" +
+            "RMB orbit camera · Tab camera mode · R reset · F1 HUD";
 
         Texture2D _tex;
         GUIStyle _center;
@@ -95,6 +97,7 @@ namespace Naval
             if (systems == null) systems = FindObjectOfType<ShipSystemsState>();
             if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
             if (hud == null) hud = GetComponent<ShipGameplayHUD>();
+            if (groupAim == null) groupAim = FindObjectOfType<ShipMouseGroupAim>();
             if (_tex == null)
             {
                 _tex = new Texture2D(1, 1);
@@ -126,40 +129,60 @@ namespace Naval
             DrawCross(cx, cy, 18f, 2f, new Color(1f, 1f, 1f, 0.85f));
             DrawCross(cx, cy, 6f, 2f, new Color(1f, 0.75f, 0.2f, 0.95f));
 
-            var sel = selector != null ? selector.Selected : null;
-            string key = selector != null ? selector.selectedKey : "-";
-            bool arc = sel == null || sel.ArcClear;
-            string arcTxt = arc ? "ARC CLEAR" : "ARC BLOCKED";
-            Color arcCol = arc ? new Color(0.45f, 0.95f, 0.45f) : new Color(1f, 0.35f, 0.3f);
+            bool anyBlocked = false;
+            string arcTxt;
+            if (groupAim != null && groupAim.turrets != null)
+            {
+                var line = new StringBuilder("Turrets ALL · ");
+                foreach (var t in groupAim.turrets)
+                {
+                    if (t == null) continue;
+                    line.Append(t.turretKey).Append(t.ArcClear ? "✓ " : "✗ ");
+                    if (!t.ArcClear) anyBlocked = true;
+                }
+                arcTxt = line.ToString();
+            }
+            else
+            {
+                var sel = selector != null ? selector.Selected : null;
+                bool arc = sel == null || sel.ArcClear;
+                anyBlocked = !arc;
+                arcTxt = "Turret " + (selector != null ? selector.selectedKey : "-") +
+                         " · " + (arc ? "ARC CLEAR" : "ARC BLOCKED");
+            }
 
+            Color arcCol = anyBlocked
+                ? new Color(1f, 0.55f, 0.3f)
+                : new Color(0.45f, 0.95f, 0.45f);
             var prev = _center.normal.textColor;
             _center.normal.textColor = arcCol;
-            GUI.Label(new Rect(cx - 160f, cy + 28f, 320f, 28f), "Turret " + key + " · " + arcTxt, _center);
+            GUI.Label(new Rect(cx - 240f, cy + 28f, 480f, 28f), arcTxt, _center);
             _center.normal.textColor = prev;
 
-            string block = sel != null && !string.IsNullOrEmpty(sel.LastFireBlockReason)
-                ? sel.LastFireBlockReason : "";
+            string block = "";
+            if (groupAim != null && !string.IsNullOrEmpty(groupAim.LastFireSummary))
+                block = groupAim.LastFireSummary;
+            else if (selector != null && selector.Selected != null &&
+                     !string.IsNullOrEmpty(selector.Selected.LastFireBlockReason))
+                block = selector.Selected.LastFireBlockReason;
             if (!string.IsNullOrEmpty(block))
-                GUI.Label(new Rect(cx - 200f, cy + 54f, 400f, 20f), block, _small);
+                GUI.Label(new Rect(cx - 280f, cy + 54f, 560f, 20f), block, _small);
 
-            // Bottom command bar
             float barH = 52f;
-            GUI.Box(new Rect(12f, Screen.height - barH - 12f, 720f, barH), "");
-            GUI.Label(new Rect(20f, Screen.height - barH - 6f, 700f, 44f),
-                "1-4 / [ ]  select turret   ·   Arrows aim selected   ·   Space/LMB fire\n" +
-                "Tab camera   ·   RMB orbit  +/- zoom   ·   R reset flood+systems   ·   F1 toggle HUD",
-                _small);
+            GUI.Box(new Rect(12f, Screen.height - barH - 12f, 760f, barH), "");
+            GUI.Label(new Rect(20f, Screen.height - barH - 6f, 740f, 44f), commandHint, _small);
 
-            // Top-right compact status
             string status = "";
             if (cameraRig != null)
                 status += "Cam " + cameraRig.mode + "  lodBias " + QualitySettings.lodBias.ToString("0.##") + "\n";
-            if (floater != null) status += floater.StatusText + "\n";
-            if (systems != null) status += systems.StatusText() + "\n";
+            if (floater != null) status += "Float: " + floater.StatusText + "\n";
+            if (systems != null) status += "Sys: " + systems.StatusText() + "\n";
+            if (groupAim != null && !string.IsNullOrEmpty(groupAim.LastFireSummary))
+                status += "Fire: " + groupAim.LastFireSummary + "\n";
             if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
                 status += "Hit: " + battery.LastHitSummary;
             if (!string.IsNullOrEmpty(status))
-                GUI.Label(new Rect(Screen.width - 520f, 12f, 508f, 110f), status, _small);
+                GUI.Label(new Rect(Screen.width - 560f, 12f, 548f, 130f), status, _small);
         }
 
         void DrawCross(float x, float y, float size, float thick, Color color)
@@ -172,9 +195,7 @@ namespace Naval
         }
     }
 
-    /// <summary>
-    /// T10 — Global shell commands: reset flooding/systems, toggle debug HUD.
-    /// </summary>
+    /// <summary>T10 — Reset flood/systems, toggle debug HUD.</summary>
     [AddComponentMenu("Naval/Ship Input Shell")]
     public sealed class ShipInputShell : MonoBehaviour
     {

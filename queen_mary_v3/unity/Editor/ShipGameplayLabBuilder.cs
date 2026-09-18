@@ -70,7 +70,9 @@ namespace Naval.EditorTools
                 ctrl.turretKey = key;
                 ctrl.yawNode = yaw;
                 ctrl.pitchNode = FindDeep(ship.transform, "Elevation_" + key);
-                ctrl.inputEnabled = key == "A";
+                ctrl.inputEnabled = true;
+                ctrl.useIndividualKeys = false;
+                ctrl.acceptFireKey = false;
                 controllers[i] = ctrl;
             }
 
@@ -78,6 +80,8 @@ namespace Naval.EditorTools
             if (selector == null) selector = ship.AddComponent<ShipTurretSelector>();
             selector.turrets = controllers;
             selector.selectedKey = "A";
+            // Group mouse aim drives all four; selector no longer gates input.
+            foreach (var c in controllers) if (c != null) c.inputEnabled = true;
 
             var systems = ship.GetComponent<ShipSystemsState>();
             if (systems == null) ship.AddComponent<ShipSystemsState>();
@@ -118,6 +122,11 @@ namespace Naval.EditorTools
             aim.systems = hud.systems;
             aim.cameraRig = rig;
             aim.hud = hud;
+            aim.groupAim = ship.AddComponent<ShipMouseGroupAim>();
+            aim.groupAim.turrets = controllers;
+            aim.commandHint =
+                "Mouse aim ALL turrets · Space/LMB fire (blind-zone turrets skip)\n" +
+                "RMB orbit camera · Tab camera mode · R reset · F1 HUD";
 
             var shell = hudGo.AddComponent<ShipInputShell>();
             shell.floater = floater;
