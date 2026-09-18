@@ -85,6 +85,7 @@ namespace Naval.EditorTools
 
             var systems = ship.GetComponent<ShipSystemsState>();
             if (systems == null) ship.AddComponent<ShipSystemsState>();
+            ShipCombatVfx.EnsureOn(ship);
 
             var camGo = new GameObject("GameplayCamera");
             var cam = camGo.AddComponent<Camera>();
@@ -165,6 +166,7 @@ namespace Naval.EditorTools
             marker.floater = targetFloater;
             marker.systems = targetSystems;
             marker.battery = targetBattery;
+            ShipCombatVfx.EnsureOn(targetGo);
 
             var tLabel = targetGo.GetComponent<ShipTargetLabel>();
             if (tLabel == null) tLabel = targetGo.AddComponent<ShipTargetLabel>();

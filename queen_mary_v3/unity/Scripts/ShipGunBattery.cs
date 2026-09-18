@@ -113,11 +113,14 @@ namespace Naval
 
             Vector3 end = found ? best.point : origin + dir * shellRangeM;
             SpawnTracer(origin, end);
+            var vfx = ShipCombatVfx.FindOrGlobal();
+            vfx.PlayTracer(origin, end, dir, found);
 
             if (!found)
             {
                 LastHitSummary = "miss";
                 LastPenHit = new ShipPenHit { outcome = ShipPenOutcome.Miss, systemNote = "miss" };
+                if (end.y > -1f) vfx.PlaySplash(new Vector3(end.x, Mathf.Max(0f, end.y), end.z));
                 return false;
             }
 
@@ -131,6 +134,7 @@ namespace Naval
                 var penHit = ShipPenetration.Evaluate(
                     _pen, _zones, _lastGunId, rangeM, targetName, compartment, incidenceCos);
                 LastPenHit = penHit;
+                vfx.PlayImpact(best.point, penHit.outcome);
 
                 if (penHit.outcome == ShipPenOutcome.NoPenetration)
                 {
@@ -165,6 +169,7 @@ namespace Naval
             }
 
             // Legacy path: fixed flood volume, no penetration gate.
+            vfx.PlayImpact(best.point, compartment != null ? ShipPenOutcome.Penetrated : ShipPenOutcome.Partial);
             if (compartment != null)
             {
                 compartment.Flood(floodVolumePerHitM3);
