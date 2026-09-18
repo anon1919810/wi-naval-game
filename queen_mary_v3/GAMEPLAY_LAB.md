@@ -1,40 +1,52 @@
-# Gameplay Lab · T5/T6/T7/T9/T10 原型
+# Gameplay Lab · T5–T11 原型
 
-场景：Unity 工程 `Assets/Scenes/GameplayLab.unity`（由 `Tools/Naval/Build gameplay lab` 生成）。
+场景：`Assets/Scenes/GameplayLab.unity`（`Tools/Naval/Build gameplay lab` 生成）。
 
-## 已实现
+## 布局（T11）
 
-| 任务 | 组件 | 行为 |
-|---|---|---|
-| T5 命中进水 | `ShipGunBattery` + `ShipCompartment` + `ShipFloatPrototype` | Space/LMB 射线 → 舱室进水 → 吃水/纵倾原型 |
-| T6 炮塔+射界 | `ShipTurretController` + `ShipFiringArcs` | rest 上叠加命令角；射界外禁止开火 |
-| T7 相机+LOD | `ShipCameraRig` + HUD | Tab 战术/舰队；显示 relH 与估计 LOD |
-| T9 穿深 | `ShipPenetration` + JSON 表 + `ShipSystemsState` | 距离→穿深 vs 装甲；穿透才进水并累计系统 |
-| T10 操作壳 | `ShipAimUI` + `ShipTurretSelector` + `ShipInputShell` | 准星、仅选中塔吃输入、重置、命令条 |
+| 实例 | 名称 | 位置 | 说明 |
+|---|---|---|---|
+| 玩家舰 | `HMS_Queen_Mary_1913` | 原点 | 可选塔开火 |
+| 靶船 | `HMS_Queen_Mary_1913_Target` | (420, 0, 280)，朝向约 210° | **同一预制体**；炮塔输入全关；穿深/进水算在这艘船上 |
 
-## 操作（无需 Inspector）
+## 操作
 
 | 键 | 作用 |
 |---|---|
-| **1 / 2 / 3 / 4** | 选中炮塔 A / B / Q / X（仅选中塔接受瞄准与开火） |
-| **[ / ]** | 循环切换炮塔 |
-| **方向键** | 选中塔 yaw/pitch |
-| **Space / 左键** | 开火（射界 + 穿深判定） |
-| **Tab** | 战术 ↔ 舰队相机 |
-| **右键拖动** | 环绕相机；**+/-** 缩放 |
-| **R** | 重置进水 + 系统状态 |
-| **F1** | 显示/隐藏左上调试 HUD |
+| **1–4 / [ ]** | 选炮塔 A/B/Q/X |
+| **方向键** | 瞄准选中塔 |
+| **Space / 左键** | 开火（射界门控 + 穿深 → 目标舰舱室） |
+| **Tab** | 战术 / 舰队相机（舰队会框住两舰） |
+| **右键 / +−** | 环绕 / 缩放 |
+| **R** | 重置玩家+靶船进水与系统 |
+| **T** | 靶船慢速直航开关（约 6 m/s 沿舰艏 +Z） |
+| **F1** | 调试 HUD |
 
-屏幕中央：准星 + 当前塔 ARC CLEAR/BLOCKED；右上：相机/浮态/系统/最后命中；底部：命令条。
+屏幕：中央准星与 ARC；右上 **You / TARGET** 状态；靶船上方黄字标签。
+
+## 玩法循环
+
+1. Play → 默认 A 塔  
+2. 转向靶船方向（侧向约数百米）  
+3. Space 开火 → `Last hit` 看 `Penetrated` / `NoPenetration`  
+4. TARGET 行观察靶船进水与系统损伤  
+5. Tab 拉远看两舰剪影与 LOD  
+
+## 已实现对照
+
+| 任务 | 要点 |
+|---|---|
+| T5–T7 | 进水原型、炮塔+射界、相机+LOD |
+| T9 | 穿深表 vs 装甲，穿透才进水 + `ShipSystemsState` |
+| T10 | 准星、炮塔选择、输入壳 |
+| T11 | 同模靶船、标签、双船重置、可选漂移 |
 
 ## 验证
 
-- `verify_penetration.py` / `verify_firing_arcs_runtime.py`
-- Unity `ShipGameplayLabBuilder.BuildBatch` 编译与场景生成
-- **非完整仿真**：穿深 estimate、正对近似；无装填/弹药；无 AI
+- 离线：`verify_penetration.py`、`verify_firing_arcs_runtime.py`
+- Unity：`ShipGameplayLabBuilder.BuildBatch` 场景含 **player + target**
+- 非完整仿真：无智能 AI（`ShipTargetBattery` 默认关）、无装填、穿深为 estimate
 
-## 运行
+## 靶船返击（可选）
 
-1. 打开 `D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval`
-2. 打开 `Assets/Scenes/GameplayLab.unity`
-3. Play：按 **1** 选 A 塔 → 方向键瞄准 → **Space** 开火 → 看准星下方 ARC 与右上命中/系统状态
+靶船上有 `ShipTargetBattery`：`enabledFire=true` 时按间隔用 X 塔向玩家方向打一轮。默认关闭。

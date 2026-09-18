@@ -82,6 +82,10 @@ namespace Naval
         public ShipSystemsState systems;
         public ShipCameraRig cameraRig;
         public ShipGameplayHUD hud;
+        public ShipTargetShip target;
+        public string commandHint =
+            "1-4 select turret · arrows aim · Space/LMB fire\n" +
+            "Tab camera · R reset · F1 HUD";
 
         Texture2D _tex;
         GUIStyle _center;
@@ -145,21 +149,19 @@ namespace Naval
             // Bottom command bar
             float barH = 52f;
             GUI.Box(new Rect(12f, Screen.height - barH - 12f, 720f, barH), "");
-            GUI.Label(new Rect(20f, Screen.height - barH - 6f, 700f, 44f),
-                "1-4 / [ ]  select turret   ·   Arrows aim selected   ·   Space/LMB fire\n" +
-                "Tab camera   ·   RMB orbit  +/- zoom   ·   R reset flood+systems   ·   F1 toggle HUD",
-                _small);
+            GUI.Label(new Rect(20f, Screen.height - barH - 6f, 700f, 44f), commandHint, _small);
 
             // Top-right compact status
             string status = "";
             if (cameraRig != null)
                 status += "Cam " + cameraRig.mode + "  lodBias " + QualitySettings.lodBias.ToString("0.##") + "\n";
-            if (floater != null) status += floater.StatusText + "\n";
-            if (systems != null) status += systems.StatusText() + "\n";
+            if (floater != null) status += "You: " + floater.StatusText + "\n";
+            if (systems != null) status += "You sys: " + systems.StatusText() + "\n";
+            if (target != null) status += "TARGET: " + target.StatusText + "\n";
             if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
                 status += "Hit: " + battery.LastHitSummary;
             if (!string.IsNullOrEmpty(status))
-                GUI.Label(new Rect(Screen.width - 520f, 12f, 508f, 110f), status, _small);
+                GUI.Label(new Rect(Screen.width - 560f, 12f, 548f, 140f), status, _small);
         }
 
         void DrawCross(float x, float y, float size, float thick, Color color)
@@ -182,6 +184,7 @@ namespace Naval
         public ShipSystemsState systems;
         public ShipGameplayHUD hud;
         public ShipAimUI aimUi;
+        public ShipTargetShip target;
 
         void Start()
         {
@@ -189,6 +192,7 @@ namespace Naval
             if (systems == null) systems = FindObjectOfType<ShipSystemsState>();
             if (hud == null) hud = FindObjectOfType<ShipGameplayHUD>();
             if (aimUi == null) aimUi = FindObjectOfType<ShipAimUI>();
+            if (target == null && aimUi != null) target = aimUi.target;
         }
 
         void Update()
@@ -197,7 +201,22 @@ namespace Naval
             {
                 if (floater != null) floater.ResetFlooding();
                 if (systems != null) systems.ResetSystems();
-                Debug.Log("[Naval] Reset flood + systems");
+                if (target != null) target.ResetTarget();
+                else
+                {
+                    var t = FindObjectOfType<ShipTargetShip>();
+                    if (t != null) t.ResetTarget();
+                }
+                Debug.Log("[Naval] Reset flood + systems (player + target)");
+            }
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                var t = target != null ? target : FindObjectOfType<ShipTargetShip>();
+                if (t != null)
+                {
+                    t.drift = !t.drift;
+                    Debug.Log("[Naval] Target drift " + t.drift);
+                }
             }
             if (Input.GetKeyDown(KeyCode.F1))
             {
