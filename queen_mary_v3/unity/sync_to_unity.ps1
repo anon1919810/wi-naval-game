@@ -79,6 +79,7 @@ if (-not $fbxName) { throw "资产目录里没有任何 .fbx" }
 $dataNames.Add('ship_contract.unity.json')
 $dataNames.Add('ship_contract.json')
 $dataNames.Add('buoyancy_compartments.json')
+$dataNames.Add('lod_profiles.json')
 
 $copied = @()
 $missing = @()

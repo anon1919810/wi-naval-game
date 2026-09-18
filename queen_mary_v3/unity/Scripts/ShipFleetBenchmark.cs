@@ -59,6 +59,11 @@ namespace Naval
             /// <summary>LOD 选择受质量档位影响：不记下来，estimatedLodCounts 就没法复现。</summary>
             public double lodBias;
             public int maximumLodLevel, qualityLevel;
+            public string lodProfileId;
+            public float[] lodScreenHeights;
+            public float lodRecommendedBias;
+            public float lodGroupSizeUsed;
+            public string lodFormula;
             public List<Stage> stages = new List<Stage>();
             public List<string> failures = new List<string>();
             public List<string> notes = new List<string>();
@@ -75,6 +80,24 @@ namespace Naval
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = -1;
             Screen.SetResolution(1920, 1080, FullScreenMode.Windowed);
+
+            string profileId = "";
+            float[] profileHeights = null;
+            float profileBias = 0f;
+            string formula = "relH = lodGroupSize * lodBias / (2 * distance * tan(fov/2))";
+            var profiles = ShipLodProfiles.Load("HMS_Queen_Mary_1913");
+            if (profiles != null)
+            {
+                if (!string.IsNullOrEmpty(profiles.formula)) formula = profiles.formula;
+                var profile = profiles.Resolve(null);
+                if (profile != null)
+                {
+                    profileId = profile.id;
+                    profileHeights = profile.ScreenHeightsOrFallback();
+                    profileBias = profile.recommendedLodBias;
+                }
+            }
+
             var r = new Report {
                 status = "running", startedUtc = DateTime.UtcNow.ToString("o"), unityVersion = Application.unityVersion,
                 cpu = SystemInfo.processorType, gpu = SystemInfo.graphicsDeviceName, graphicsApi = SystemInfo.graphicsDeviceType.ToString(),
@@ -82,7 +105,11 @@ namespace Naval
                 developmentBuild = Debug.isDebugBuild, frameTimingEnabled = FrameTimingManager.IsFeatureEnabled(),
                 lodBias = QualitySettings.lodBias, maximumLodLevel = QualitySettings.maximumLODLevel,
                 qualityLevel = QualitySettings.GetQualityLevel(),
-                scope = "Standalone URP 1920x1080 offscreen rendering. Camera.Render plus synchronous one-pixel GPU readback each frame prevents hidden-window render skipping. CPU/GPU work is deliberately serialized and includes synchronization overhead; this is not interactive game FPS. Flat sea, fixed camera, 15 stationary ships; no AI/combat/waves/dynamic rigidbody contacts. Forced LODs use the same camera."
+                lodProfileId = profileId,
+                lodScreenHeights = profileHeights,
+                lodRecommendedBias = profileBias,
+                lodFormula = formula,
+                scope = "Standalone URP 1920x1080 offscreen rendering. Camera.Render plus synchronous one-pixel GPU readback each frame prevents hidden-window render skipping. CPU/GPU work is deliberately serialized and includes synchronization overhead; this is not interactive game FPS. Flat sea, fixed camera, 15 stationary ships; no AI/combat/waves/dynamic rigidbody contacts. Forced LODs use the same camera. LOD thresholds come from lod_profiles.json when present; QualitySettings.lodBias still multiplies effective thresholds."
             };
             if (!SystemInfo.supportsAsyncGPUReadback) r.failures.Add("GPU readback is unsupported; timing cannot be trusted");
             renderTarget = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32);
@@ -97,6 +124,11 @@ namespace Naval
                     ship.name = "QueenMary_" + groups.Count.ToString("00");
                     groups.Add(ship.GetComponent<LODGroup>());
                 }
+            if (groups.Count > 0 && groups[0] != null)
+            {
+                groups[0].RecalculateBounds();
+                r.lodGroupSizeUsed = groups[0].size;
+            }
             // Ship meshes retain their below-waterline hull; an opaque flat sea hides it as gameplay would.
             Physics.SyncTransforms();
             yield return null;
@@ -201,7 +233,9 @@ namespace Naval
                     }
                     r.notes.Add("自动档 15 艘船全部落在同一个 LOD 档（屏幕高度比例 " + min.ToString("0.000") + "–" + max.ToString("0.000") +
                         "，档位阈值 " + string.Join("/", thresholds.ToArray()) + "，lodBias " + r.lodBias.ToString("0.##") +
-                        "，质量档位 " + r.qualityLevel + "）。编队纵深仅数百米、相机在 1.4–1.9 km，故这一阶段只测到单一细节层级；" +
+                        "，质量档位 " + r.qualityLevel + "，剖面 " + (string.IsNullOrEmpty(r.lodProfileId) ? "none" : r.lodProfileId) +
+                        "，LODGroup.size " + r.lodGroupSizeUsed.ToString("0.00") + " m（局部包围，非舰长）" +
+                        "，公式 " + r.lodFormula + "）。编队纵深仅数百米、相机在 1.4–1.9 km，故这一阶段只测到单一细节层级；" +
                         "要掉进下一档需退到 " + next + " 以外。LOD 的实际收益请看 forced_LOD* 阶段。");
                     Debug.Log("[Naval] fleet benchmark note: " + r.notes[r.notes.Count - 1]);
                 }

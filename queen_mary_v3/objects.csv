@@ -71,8 +71,8 @@ FX_Standard_Aft,EMPTY,FX_Anchors,fx_anchor,0.0,-90.0,5.969265,0.0,0.0,0.0
 Forecastle,MESH,Queen_Mary,forecastle_deck,0.0,0.0,0.0,27.200001,124.699997,2.45
 Funnel_1,MESH,Queen_Mary,funnel,0.0,23.0,9.591805,5.0715,7.866,12.428195
 Funnel_1_Uptake,MESH,Superstructure,funnel_uptake,0.0,23.0,8.366806,5.88,9.88,2.45
-Funnel_2,MESH,Queen_Mary,funnel,0.0,7.0,9.504365,7.245,7.245,12.515635
-Funnel_2_Uptake,MESH,Superstructure,funnel_uptake,0.0,7.0,8.279365,8.4,9.1,2.45
+Funnel_2,MESH,Queen_Mary,funnel,0.0,7.0,9.504365,7.385799,7.385799,12.515635
+Funnel_2_Uptake,MESH,Superstructure,funnel_uptake,0.0,7.0,8.279365,8.52,9.23,2.45
 Funnel_3,MESH,Queen_Mary,funnel,0.0,-27.0,7.638667,5.0715,7.866,14.381333
 Funnel_3_Uptake,MESH,Superstructure,funnel_uptake,0.0,-27.0,6.413667,5.88,9.88,2.45
 Hull,MESH,Queen_Mary,hull,0.0,0.0,0.0,27.200001,213.399994,15.0

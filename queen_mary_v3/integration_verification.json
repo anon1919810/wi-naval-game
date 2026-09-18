@@ -1,4 +1,5 @@
 {
+  "_note": "Historical DeepSeek-baseline integration record. Current geometry hash after feature/model-refine-lod is 9d6d6a765993487ef4e0112ea217cad8e48642a51dab8482a31e2a36189df7c0 — see LOD精修_2026-09-18.md and build_result.json. Do not treat this file's hash as current.",
   "baseline": "Desktop Queen Mary assets modified by DeepSeek; full working snapshot retained separately",
   "baseline_files_sha256": {
     "queen_mary.py": "1851b98bfe4fcc37f3afa42c5356994e25100ef96a11b8452e68d1c9fec8323c",

@@ -6,11 +6,15 @@
 ## 当前状态 · 2026-09-18
 
 已完成本轮交接中的运行时缺口：船体碰撞代理、14 个舱室数据、LOD0–3 实际图像验收和 15 艘同屏离屏渲染基准。修复了远档船体不显示、剪影丢几何及重复构建网格引用问题。
-本轮不改变 Blender 舰船几何和已确认的单杆桅。
+**feature/model-refine-lod（2026-09-18）**：灰盒可见层精修 + LOD 双剖面配置；`geometry_sha256` 已变为 `9d6d6a765993487ef4e0112ea217cad8e48642a51dab8482a31e2a36189df7c0`（上一基线 `5b248d11…` 见历史验收文档）。LOD 阈值改为读取 `queen_mary_v3/lod_profiles.json`。
 
-- [本轮详细成果、实测帧时间与限制](queen_mary_v3/运行时验收_2026-09-18.md)
-- [独立复核：LOD 自动档成因、帧时间可信度](queen_mary_v3/复核_2026-09-18.md)
+- [本轮详细成果、实测帧时间与限制](queen_mary_v3/运行时验收_2026-09-18.md)（**历史记录**：几何与旧阈值以 2026-09-18 上午验收为准）
+- [本分支 LOD/精修订正说明](queen_mary_v3/LOD精修_2026-09-18.md)
+- [独立复核：LOD 自动档成因、帧时间可信度](queen_mary_v3/复核_2026-09-18.md)（历史）
 - [Unity 集成和复现命令](queen_mary_v3/unity/README_集成.md)
+- [LOD 双相机剖面配置](queen_mary_v3/lod_profiles.json)（战术 50–200 m / 舰队 1–2 km）
+- [精修与 LOD 研究报告](../research/queen-mary-refine-lod/REPORT.md)（位于仓库根 `research/`，不在本 worktree 内）
+- [compose 特性规格](docs/compose/spec/model-refine-lod.md)
 - [最初交接与历史记录](交接文件_GPT6_2026-09-17.md)
 - [v3 建模交接](queen_mary_v3/交接_v3.md)
 - [精修素材清单](HMS_Queen_Mary_精修素材清单.md)
@@ -56,4 +60,5 @@ Blender Store 启动器可能无输出，构建脚本核对新完成记录与文
 
 保留数据驱动、模块命名、炮塔和炮管独立枢轴；不要把模型细节合并到不可独立驱动的层级。贴体结构从船体型值派生。旧版资产、历史交接与原始资料保留对照。
 新增历史判断应带来源或标为估算。内部舱室、水下件当前作为系统代理关闭渲染；不能据此声称它们在所有视角都不可见。
-下一阶段：真实游戏相机与 LOD 切换、火控/遮挡射界与转塔联动、取得型线图后的尺度校正。
+下一阶段：真实游戏相机与 LOD 切换（阈值见 `lod_profiles.json` 双剖面）、火控/遮挡射界与转塔联动、取得型线图后的尺度校正。
+LOD 生效阈值 = 剖面 `screenHeights` × 质量档 `lodBias`；`LODGroup.size` 用实测包围尺寸，不是舰长 213.4 m。1913 灰盒可见层精修（中烟囱圆形识别、上层建筑块面、副炮层带/步廊）见 `queen_mary.py` 与研究 `research/queen-mary-refine-lod/REPORT.md`。

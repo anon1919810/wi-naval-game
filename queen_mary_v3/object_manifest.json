@@ -50,16 +50,16 @@
   "offsets_source": "builtin_estimate",
   "casemate_placement": "between_decks",
   "blender": "4.5.14 LTS",
-  "started_utc": "2026-09-17T18:19:17.246153+00:00",
-  "geometry_sha256": "5b248d11c70438dbc2cfbb33e30ffce4d3d346714dc8ee3390d948e4d37a4037",
+  "started_utc": "2026-09-18T01:58:06.729740+00:00",
+  "geometry_sha256": "9d6d6a765993487ef4e0112ea217cad8e48642a51dab8482a31e2a36189df7c0",
   "repeat_generation_passed": true,
   "object_count": 101,
   "mesh_count": 85,
-  "triangles": 31164,
+  "triangles": 31988,
   "modules": {
     "object_count": 101,
     "mesh_count": 85,
-    "triangles": 31164,
+    "triangles": 31988,
     "role_counts": {
       "armour_belt": 4,
       "armour_bulkhead": 2,
@@ -2697,8 +2697,8 @@
           15.196627
         ]
       },
-      "vertices": 5408,
-      "triangles": 9188
+      "vertices": 5424,
+      "triangles": 9212
     },
     {
       "name": "Elevation_A",
@@ -3282,8 +3282,8 @@
         9.504365
       ],
       "dimensions_local_axes_m": [
-        7.245,
-        7.245,
+        7.385799,
+        7.385799,
         12.515635
       ],
       "scale": [
@@ -3298,18 +3298,18 @@
       ],
       "bounds_world_m": {
         "min": [
-          -3.6225,
-          3.3775,
+          -3.692899,
+          3.307101,
           9.484365
         ],
         "max": [
-          3.6225,
-          10.622499,
+          3.692899,
+          10.6929,
           22.0
         ]
       },
-      "vertices": 1196,
-      "triangles": 2056
+      "vertices": 1676,
+      "triangles": 2856
     },
     {
       "name": "Funnel_2_Uptake",
@@ -3327,8 +3327,8 @@
         8.279365
       ],
       "dimensions_local_axes_m": [
-        8.4,
-        9.1,
+        8.52,
+        9.23,
         2.45
       ],
       "scale": [
@@ -3343,13 +3343,13 @@
       ],
       "bounds_world_m": {
         "min": [
-          -4.2,
-          2.45,
+          -4.26,
+          2.385,
           7.054365
         ],
         "max": [
-          4.2,
-          11.55,
+          4.26,
+          11.615,
           9.504365
         ]
       },

@@ -8,7 +8,7 @@
     "renderersDisabled": 24,
     "collidersAdded": 25,
     "hullProxyColliders": 1,
-    "builtUtc": "2026-09-17T18:37:04.8960611Z",
+    "builtUtc": "2026-09-18T02:00:43.8982709Z",
     "compartments": 14,
     "compartmentsWithBuoyancyData": 14,
     "collisionOnlyRoles": [
@@ -24,15 +24,25 @@
     ],
     "unusedRoles": [],
     "lodSummary": [
-        "LOD0  原样：61 个渲染器（45 静态 + 16 炮塔链）/ 29264 三角形",
-        "LOD1  静态本体按材质合并：17 渲染器 · 本体 6 子网格 · 29264 三角形（屏幕高度比例 0.08）",
-        "LOD2  再丢小件：17 渲染器 · 本体 6 子网格 · 16344 三角形",
-        "LOD3  扁平剪影（炮塔冻结）：1 渲染器 · 1 子网格 · 14488 三角形（本档关掉 16 个炮塔渲染器）"
+        "LOD0  原样：61 个渲染器（45 静态 + 16 炮塔链）/ 30088 三角形",
+        "LOD1  静态本体按材质合并：17 渲染器 · 本体 6 子网格 · 30088 三角形（屏幕高度比例 0.18）",
+        "LOD2  再丢小件：17 渲染器 · 本体 6 子网格 · 17144 三角形",
+        "LOD3  扁平剪影（炮塔冻结）：1 渲染器 · 1 子网格 · 15288 三角形（本档关掉 16 个炮塔渲染器）"
     ],
+    "lodProfileId": "tactical_50_200m",
+    "lodScreenHeights": [
+        0.44999998807907107,
+        0.18000000715255738,
+        0.05999999865889549,
+        0.019999999552965165
+    ],
+    "lodRecommendedBias": 1.0,
+    "lodGroupSizeMeasured": 213.39999389648438,
     "checksFailed": [],
     "notes": [
+        "LOD 剖面：tactical_50_200m（源 lod_profiles.json）",
         "炮塔链（16 个渲染器）保留独立变换并列入 LOD0/1/2 —— 它们要转，合进静态网格就废了。所以 LOD1/2 的渲染器下限就是它。",
-        "屏幕高度阈值 0.20 / 0.08 / 0.03 / 0.01 是默认值，**要对着真实相机调**。",
+        "LOD 剖面 tactical_50_200m，屏幕高度阈值 0.45 / 0.18 / 0.06 / 0.02，recommendedLodBias 1，实测 LODGroup.size 213.40 m（局部包围尺寸，不是舰长）。阈值来自 lod_profiles.json；与质量档 lodBias 相乘后才是生效值。",
         "渲染器数：LOD0 61 → LOD1/2 17（炮塔链占 16，下限就在这）",
         "预制体已生成：Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab",
         "ShipDefinition 已更新：Assets/Resources/Ships/HMS_Queen_Mary_1913/HMS_Queen_Mary_1913_Definition.asset"

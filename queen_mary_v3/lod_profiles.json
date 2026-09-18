@@ -1,0 +1,36 @@
+{
+  "ship_id": "HMS_Queen_Mary_1913",
+  "default_profile": "tactical_50_200m",
+  "formula": "relH = lodGroupSize * lodBias / (2 * distance * tan(fovDeg/2 * pi/180))",
+  "notes": [
+    "screenHeights are authoring values for LOD.screenRelativeTransitionHeight [0-1]",
+    "recommendedLodBias is the intended QualitySettings.lodBias when using this profile",
+    "Do not treat LODGroup.size as an assumed deck height; always measure after RecalculateBounds",
+    "On this asset Unity RecalculateBounds yields lodGroupSizeMeasured ≈ 213.4 m (longest bounds axis = length). Use the measured value in relH.",
+    "Quality settings may still multiply thresholds via lodBias; record both in reports",
+    "Research basis: research/queen-mary-refine-lod/REPORT.md (2026-09-18); numbers are project calibration, not engine standards"
+  ],
+  "profiles": [
+    {
+      "id": "tactical_50_200m",
+      "description": "Tactical mid-range observation 50-200 m; keep silhouette massing (hull, 3 funnels, 4 turret blocks, superstructure, pole mast, sternwalk).",
+      "screenHeights": [0.45, 0.18, 0.06, 0.02],
+      "recommendedLodBias": 1.0,
+      "expectedAt": [
+        { "distance_m": 50, "fov_deg": 50, "expectedLod": 0 },
+        { "distance_m": 200, "fov_deg": 50, "expectedLod": 0 },
+        { "distance_m": 400, "fov_deg": 50, "expectedLod": 0 }
+      ]
+    },
+    {
+      "id": "fleet_1_2km",
+      "description": "Fleet-scale camera ~1-2 km; automatic LOD must be able to span levels when size/bias/fov are known.",
+      "screenHeights": [0.40, 0.18, 0.07, 0.025],
+      "recommendedLodBias": 1.0,
+      "expectedAt": [
+        { "distance_m": 1700, "fov_deg": 50, "expectedLod": 2 },
+        { "distance_m": 2500, "fov_deg": 50, "expectedLod": 2 }
+      ]
+    }
+  ]
+}

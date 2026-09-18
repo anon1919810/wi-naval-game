@@ -29,8 +29,11 @@ namespace Naval.EditorTools
     {
         private const string MeshDir = "Assets/Meshes/Ships";
 
-        /// <summary>各档的屏幕高度阈值（占屏幕高度比例）。**要对着真实相机调**，这里只是默认值。</summary>
-        private static readonly float[] ScreenHeights = { 0.20f, 0.08f, 0.03f, 0.01f };
+        /// <summary>
+        /// 各档的屏幕高度阈值（占屏幕高度比例）。由 lod_profiles.json 决定；
+        /// 文件缺失时才退回历史默认值。**不要在业务代码里再写死一份。**
+        /// </summary>
+        private static float[] ScreenHeights = ShipLodProfile.DefaultHeights();
 
         /// <summary>LOD2 起可以丢掉的"小件"角色：远看只有几个像素，却是可观的对象数。</summary>
         private static readonly string[] DroppableRoles =
@@ -47,11 +50,19 @@ namespace Naval.EditorTools
             public readonly List<string> Notes = new List<string>();
             public int Lod0Renderers;
             public int Lod1Renderers;
+            public string LodProfileId = "";
+            public float[] LodScreenHeights;
+            public float LodRecommendedBias;
+            public float LodGroupSizeMeasured = -1f;
         }
 
-        /// <summary>在 root 下挂 LODGroup 并生成合并网格。root 是实例化出来的船（尚未存成预制体）。</summary>
+        /// <summary>
+        /// 在 root 下挂 LODGroup 并生成合并网格。root 是实例化出来的船（尚未存成预制体）。
+        /// profile 可为空：构建方应先 LoadProfiles 并 Resolve；空则用默认高度并在 Notes 说明。
+        /// </summary>
         public static Result Build(GameObject root, ShipContractData contract,
-                                   Dictionary<string, string> roleByName)
+                                   Dictionary<string, string> roleByName,
+                                   ShipLodProfile profile = null)
         {
             var result = new Result();
             if (root == null || contract == null)
@@ -59,6 +70,14 @@ namespace Naval.EditorTools
                 result.Failures.Add("LOD：root 或契约为空");
                 return result;
             }
+
+            ScreenHeights = profile != null
+                ? profile.ScreenHeightsOrFallback()
+                : ShipLodProfile.DefaultHeights();
+            result.LodProfileId = profile != null ? profile.id : "legacy_default";
+            result.LodScreenHeights = ScreenHeights;
+            // Missing profile: report bias as -1 (unknown) rather than 0 (would zero relH if used).
+            result.LodRecommendedBias = profile != null ? profile.recommendedLodBias : -1f;
 
             // 炮塔链的名字：这些不能合入静态本体
             var turretChain = new HashSet<string>();
@@ -173,6 +192,7 @@ namespace Naval.EditorTools
                 levels.Add(new LOD(ScreenHeights[3], new Renderer[] { lod3Go.GetComponent<MeshRenderer>() }));
             group.SetLODs(levels.ToArray());
             group.RecalculateBounds();
+            result.LodGroupSizeMeasured = group.size;
 
             // 不变量：凡是被合进某个 LOD 网格的渲染器，必须至少出现在一个 LOD 档里。
             // 违反 = 原件在所有距离上都会和合并网格一起画（重复绘制 + z-fighting）。
@@ -220,8 +240,11 @@ namespace Naval.EditorTools
 
             result.Notes.Add("炮塔链（" + turretRenderers.Count + " 个渲染器）保留独立变换并列入 LOD0/1/2 —— " +
                              "它们要转，合进静态网格就废了。所以 LOD1/2 的渲染器下限就是它。");
-            result.Notes.Add("屏幕高度阈值 " + string.Join(" / ", Array.ConvertAll(ScreenHeights, h => h.ToString("0.00"))) +
-                             " 是默认值，**要对着真实相机调**。");
+            result.Notes.Add("LOD 剖面 " + result.LodProfileId +
+                             "，屏幕高度阈值 " + string.Join(" / ", Array.ConvertAll(ScreenHeights, h => h.ToString("0.00"))) +
+                             "，recommendedLodBias " + result.LodRecommendedBias.ToString("0.##") +
+                             "，实测 LODGroup.size " + result.LodGroupSizeMeasured.ToString("0.00") +
+                             " m（局部包围尺寸，不是舰长）。阈值来自 lod_profiles.json；与质量档 lodBias 相乘后才是生效值。");
 
             if (lod2 != null && tri2 >= tri1)
                 result.Failures.Add("LOD2 的三角形数没有比 LOD1 少 —— 小件剔除没生效（角色名对不上？）");

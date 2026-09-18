@@ -420,6 +420,7 @@
     "hydrostatics": "hydrostatics.json",
     "firing_arcs": "firing_arcs.json",
     "buoyancy_compartments": "buoyancy_compartments.json",
+    "lod_profiles": "lod_profiles.json",
     "fbx": "HMS_Queen_Mary_1913_Refined_v3.fbx"
   },
   "notes": [

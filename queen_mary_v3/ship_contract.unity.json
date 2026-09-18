@@ -551,6 +551,10 @@
       "path": "buoyancy_compartments.json"
     },
     {
+      "key": "lod_profiles",
+      "path": "lod_profiles.json"
+    },
+    {
       "key": "fbx",
       "path": "HMS_Queen_Mary_1913_Refined_v3.fbx"
     }

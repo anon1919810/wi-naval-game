@@ -51,6 +51,14 @@ namespace Naval
 
         public TurretBinding[] turrets;
 
+        [Tooltip("lod_profiles.json（JsonUtility 可读）")]
+        public TextAsset lodProfiles;
+        public string lodProfileId;
+        public float[] lodScreenHeights;
+        public float lodRecommendedBias;
+        [Tooltip("构建时 RecalculateBounds 后的 LODGroup.size；局部包围尺寸，不是舰长")]
+        public float lodGroupSizeMeasured;
+
         public string builtUtc;
 
         [TextArea(2, 6)]

@@ -171,11 +171,11 @@
               150
             ],
             [
-              195,
+              200,
               355
             ]
           ],
-          "clear_fraction": 0.889
+          "clear_fraction": 0.875
         },
         "10": {
           "allowed_yaw_intervals_deg": [
@@ -207,14 +207,14 @@
           "allowed_yaw_intervals_deg": [
             [
               0,
-              150
+              145
             ],
             [
               200,
               355
             ]
           ],
-          "clear_fraction": 0.875
+          "clear_fraction": 0.861
         }
       }
     },

@@ -27,8 +27,9 @@
 
 - 模型 1:1，Unity +X 右舷、+Y 向上、+Z 舰艏，水线 Y=0。舰长 213.4 m、舰宽 27.2 m、吃水 9.9 m。
 - 四炮塔的偏航实测为节点局部 +Z，正角转右舷；俯仰实测为节点局部 +X，正角抬炮口。不要按 Unity 世界轴猜测子节点的局部轴。
-- FBX 名称与 JSON 引用从 `ship_contract.unity.json` 读取，现已包含 `buoyancy_compartments`。
+- FBX 名称与 JSON 引用从 `ship_contract.unity.json` 读取，现已包含 `buoyancy_compartments` 与 `lod_profiles`。
 - 预制体路径 `Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab`，定义位于 `Assets/Resources/Ships/HMS_Queen_Mary_1913/`。
+- **LOD 阈值**来自 `lod_profiles.json`（默认 `tactical_50_200m`，另有 `fleet_1_2km`）。`ShipLodBuilder` 不写死阈值；`ship_runtime_build.json` 与 `ShipDefinition` 记录 `lodProfileId` / `lodScreenHeights` / `lodRecommendedBias` / `lodGroupSizeMeasured`。生效阈值 = 作者阈值 × `QualitySettings.lodBias`。批处理可加 `-lodProfile fleet_1_2km` 切换剖面。
 - 14 个 `ShipCompartment` 挂上体积、渗透率和可进水体积。它们是系统参数载体，尚未实现完整动态浮力/损管。
 - 24 个内部/水下代理关闭 MeshRenderer 并使用盒 trigger；另有 `Hull_Collision_Proxy` 粗凸包 trigger。选中/粗筛射线须使用 `QueryTriggerInteraction.Collide`，可按父节点区分船体代理与部件。
 - 炮塔链在 LOD0/1/2 中保持独立变换；LOD3 为冻结的静态远景。合并网格按材质，不能把 renderer 数或子网格数写成实测 draw call。

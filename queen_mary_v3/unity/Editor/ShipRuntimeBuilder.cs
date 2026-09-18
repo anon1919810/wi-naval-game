@@ -67,6 +67,10 @@ namespace Naval.EditorTools
             public string[] collisionOnlyRoles;
             public string[] unusedRoles;
             public string[] lodSummary;
+            public string lodProfileId;
+            public float[] lodScreenHeights;
+            public float lodRecommendedBias;
+            public float lodGroupSizeMeasured;
             public string[] checksFailed;
             public string[] notes;
         }
@@ -103,9 +107,14 @@ namespace Naval.EditorTools
 
         public static void BuildBatch()
         {
-            var report = Build();
+            string lodProfileId = null;
+            var args = Environment.GetCommandLineArgs();
+            for (int i = 0; i + 1 < args.Length; i++)
+                if (args[i] == "-lodProfile") lodProfileId = args[i + 1];
+            var report = Build(lodProfileId);
             Debug.Log("[Naval] 运行时船体构建：" + report.status + "（关渲染 " + report.renderersDisabled +
-                      "，碰撞体 " + report.collidersAdded + "，舱室 " + report.compartments + "）");
+                      "，碰撞体 " + report.collidersAdded + "，舱室 " + report.compartments +
+                      "，LOD 剖面 " + report.lodProfileId + "）");
             if (Application.isBatchMode) EditorApplication.Exit(
                 report.status == "passed" ? 0 : 1);
         }
@@ -114,11 +123,36 @@ namespace Naval.EditorTools
 
         public static Report Build()
         {
+            return Build(null);
+        }
+
+        /// <summary>lodProfileId 为空时读 lod_profiles.json 的 default_profile。</summary>
+        public static Report Build(string lodProfileId)
+        {
             var failures = new List<string>();
             var notes = new List<string>();
             var report = new Report { shipId = ShipId, collisionOnlyRoles = CollisionOnlyRoles, builtUtc = DateTime.UtcNow.ToString("o") };
 
             string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+
+            ShipLodProfiles lodProfiles = null;
+            ShipLodProfile lodProfile = null;
+            string lodPath = Path.Combine(projectRoot, ShipFolder + "/" + ShipLodProfiles.FileName);
+            if (File.Exists(lodPath))
+            {
+                lodProfiles = ShipLodProfiles.Parse(File.ReadAllText(lodPath, Encoding.UTF8));
+                if (lodProfiles != null)
+                {
+                    lodProfile = lodProfiles.Resolve(lodProfileId);
+                    report.lodProfileId = lodProfile != null ? lodProfile.id : "";
+                    notes.Add("LOD 剖面：" + report.lodProfileId + "（源 " + ShipLodProfiles.FileName + "）");
+                }
+                else notes.Add(ShipLodProfiles.FileName + " 解析失败，LOD 将退回历史默认阈值");
+            }
+            else
+            {
+                notes.Add("缺少 " + ShipFolder + "/" + ShipLodProfiles.FileName + "，LOD 使用历史默认阈值");
+            }
 
             // --- 契约 ---------------------------------------------------------
             string contractFull = Path.Combine(projectRoot, ContractPath);
@@ -242,10 +276,14 @@ namespace Naval.EditorTools
                 }
 
                 // --- LOD 链：静态本体合并，炮塔链保留独立变换 ------------------------
-                var lod = ShipLodBuilder.Build(instance, contract, roleByName);
+                var lod = ShipLodBuilder.Build(instance, contract, roleByName, lodProfile);
                 failures.AddRange(lod.Failures);
                 notes.AddRange(lod.Notes);
                 report.lodSummary = lod.Summary.ToArray();
+                report.lodProfileId = lod.LodProfileId;
+                report.lodScreenHeights = lod.LodScreenHeights;
+                report.lodRecommendedBias = lod.LodRecommendedBias;
+                report.lodGroupSizeMeasured = lod.LodGroupSizeMeasured;
                 notes.Add(string.Format("渲染器数：LOD0 {0} → LOD1/2 {1}（炮塔链占 {2}，下限就在这）",
                     lod.Lod0Renderers, lod.Lod1Renderers, lod.Lod1Renderers - 1));
 
@@ -279,7 +317,7 @@ namespace Naval.EditorTools
             report.definitionPath = DefinitionPath;
             try
             {
-                WriteDefinition(contract);
+                WriteDefinition(contract, lodProfile, report.lodGroupSizeMeasured);
                 notes.Add("ShipDefinition 已更新：" + DefinitionPath);
             }
             catch (Exception e)
@@ -295,7 +333,7 @@ namespace Naval.EditorTools
 
         // -------------------------------------------------------------- helpers
 
-        private static void WriteDefinition(ShipContractData contract)
+        private static void WriteDefinition(ShipContractData contract, ShipLodProfile lodProfile, float lodGroupSizeMeasured)
         {
             string projectRoot = Directory.GetParent(Application.dataPath).FullName;
 
@@ -315,6 +353,15 @@ namespace Naval.EditorTools
             definition.draftM = contract.draft_m;
             definition.objectCount = contract.object_count;
             definition.meshCount = contract.mesh_count;
+
+            definition.lodProfiles = AssetDatabase.LoadAssetAtPath<TextAsset>(
+                ShipFolder + "/" + ShipLodProfiles.FileName);
+            definition.lodProfileId = lodProfile != null ? lodProfile.id : "";
+            definition.lodScreenHeights = lodProfile != null
+                ? lodProfile.ScreenHeightsOrFallback()
+                : ShipLodProfile.DefaultHeights();
+            definition.lodRecommendedBias = lodProfile != null ? lodProfile.recommendedLodBias : 0f;
+            definition.lodGroupSizeMeasured = lodGroupSizeMeasured;
 
             var materials = new List<Material>();
             foreach (var guid in AssetDatabase.FindAssets("t:Material", new[] { MaterialDir }))
@@ -341,7 +388,9 @@ namespace Naval.EditorTools
             definition.turrets = bindings.ToArray();
 
             definition.builtUtc = DateTime.UtcNow.ToString("s") + "Z";
-            definition.notes = "由 ShipRuntimeBuilder 生成，不要手填。仅碰撞件已关渲染，舱室已挂数据与 trigger 碰撞体。";
+            definition.notes = "由 ShipRuntimeBuilder 生成，不要手填。LOD 剖面 " + definition.lodProfileId +
+                               "；LODGroup.size 实测 " + definition.lodGroupSizeMeasured.ToString("0.00") +
+                               "（局部包围，非舰长）。仅碰撞件已关渲染，舱室已挂数据与 trigger 碰撞体。";
 
             EditorUtility.SetDirty(definition);
             AssetDatabase.SaveAssets();

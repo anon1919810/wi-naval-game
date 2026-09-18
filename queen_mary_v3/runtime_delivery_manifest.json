@@ -1,8 +1,10 @@
 {
-  "status": "passed",
+  "status": "historical",
   "published_utc": "2026-09-17T18:44:36.445117+00:00",
-  "geometry_unchanged_from_desktop_baseline": true,
-  "geometry_sha256": "5b248d11c70438dbc2cfbb33e30ffce4d3d346714dc8ee3390d948e4d37a4037",
+  "superseded_by": "feature/model-refine-lod — see queen_mary_v3/LOD精修_2026-09-18.md and build_result.json",
+  "geometry_unchanged_from_desktop_baseline": false,
+  "geometry_sha256_at_publication": "5b248d11c70438dbc2cfbb33e30ffce4d3d346714dc8ee3390d948e4d37a4037",
+  "geometry_sha256_current": "9d6d6a765993487ef4e0112ea217cad8e48642a51dab8482a31e2a36189df7c0",
   "source_fbx_sha256": "c4dcd3976d5d8bfe3c739e8ccd97b9610b14e2102de466a85396e44ea1c89217",
   "blender_script_sha256": "0adc6b0315aa306b36375566d72e51ad6c30fdb293b0e7f51aa4c904a13ace54",
   "unitypackage_asset_count": 220,
@@ -10,6 +12,15 @@
   "unitypackage_obsolete_fbx_absent": true,
   "copied_files_verified": 238,
   "backup": "PreRuntimeAcceptance_20260918_024424.zip",
+  "current_evidence": [
+    "build_result.json",
+    "verification.json",
+    "fbx_verification.json",
+    "lod_profiles.json",
+    "runtime_acceptance/ship_runtime_build.json",
+    "runtime_acceptance/verify_lod_profiles.log",
+    "LOD精修_2026-09-18.md"
+  ],
   "evidence": [
     "verification.json",
     "fbx_verification.json",
@@ -23,6 +34,7 @@
   "limits": [
     "Far LOD3 freezes turrets; dynamic firing-arc/occlusion integration remains future work.",
     "Fleet timing includes explicit offscreen draw and GPU completion overhead; not full-game FPS.",
-    "History and hull offsets retain their prior estimated status."
+    "History and hull offsets retain their prior estimated status.",
+    "fleet_benchmark json on disk may predate lod_profiles fields until benchmark is re-run."
   ]
 }
