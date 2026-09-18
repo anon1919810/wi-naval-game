@@ -145,8 +145,9 @@ namespace Naval.EditorTools
             // T11 — second Queen Mary as target barge (same prefab).
             var targetGo = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
             targetGo.name = ShipId + "_Target";
-            targetGo.transform.position = new Vector3(420f, 0f, 280f);
-            targetGo.transform.rotation = Quaternion.Euler(0f, 210f, 0f);
+            // Ahead and slightly starboard so default third-person (look along bow) sees the target.
+            targetGo.transform.position = new Vector3(60f, 0f, 520f);
+            targetGo.transform.rotation = Quaternion.Euler(0f, 190f, 0f);
             var targetFloater = targetGo.GetComponent<ShipFloatPrototype>();
             if (targetFloater == null) targetFloater = targetGo.AddComponent<ShipFloatPrototype>();
             var targetSystems = targetGo.GetComponent<ShipSystemsState>();
@@ -194,8 +195,8 @@ namespace Naval.EditorTools
             };
 
             var note = "Gameplay lab built " + System.DateTime.UtcNow.ToString("o") +
-                       "\nPlayer " + ship.name + " @origin; Target " + targetGo.name + " @ (420,0,280)" +
-                       "\nT11: same-prefab target, penetration hits target compartments.\n";
+                       "\nPlayer " + ship.name + " @origin; Target " + targetGo.name + " @ (60,0,520)" +
+                       "\nT11+T12: same-prefab target + mouse world-bearing group fire.\n";
             File.WriteAllText(Path.Combine(Application.dataPath, "../GameplayLab_Note.txt"), note);
 
             return "OK scene " + ScenePath + " ship " + ship.name +
