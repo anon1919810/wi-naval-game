@@ -92,8 +92,7 @@ namespace Naval
             }
 
             Vector3 origin = barrel.position;
-            Vector3 dir = barrel.up;
-            if (dir.sqrMagnitude < 1e-6f) dir = barrel.forward;
+            Vector3 dir = ResolveFireDirection(barrel);
 
             var hits = Physics.RaycastAll(origin, dir, shellRangeM,
                 ~0, QueryTriggerInteraction.Collide);
@@ -198,6 +197,28 @@ namespace Naval
             lr.endColor = new Color(1f, 0.4f, 0.1f, 0.2f);
             _tracers.Add(lr);
             Destroy(go, tracerSeconds);
+        }
+
+        /// <summary>
+        /// Prefer the group-aim world bearing (matches crosshair/camera).
+        /// Fallback: barrel local up (legacy asset space).
+        /// </summary>
+        Vector3 ResolveFireDirection(Transform barrel)
+        {
+            var aim = GetComponent<ShipMouseGroupAim>();
+            if (aim == null) aim = GetComponentInParent<ShipMouseGroupAim>();
+            if (aim == null) aim = FindObjectOfType<ShipMouseGroupAim>();
+            if (aim != null)
+            {
+                float shipYaw = transform.eulerAngles.y;
+                float worldYaw = shipYaw + aim.aimWorldYawDeg;
+                // pitch positive = elevate barrels; Unity X rotation looks down when positive for forward —
+                // use negative pitch so +elevation points up.
+                Vector3 d = Quaternion.Euler(-aim.aimPitchDeg, worldYaw, 0f) * Vector3.forward;
+                if (d.sqrMagnitude > 1e-6f) return d.normalized;
+            }
+            Vector3 up = barrel.up;
+            return up.sqrMagnitude > 1e-6f ? up : barrel.forward;
         }
     }
 }

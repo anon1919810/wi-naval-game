@@ -3,18 +3,13 @@ using UnityEngine;
 
 namespace Naval
 {
-    /// <summary>
-    /// T10/T12 — Optional turret highlight. Solo mode gates input to one turret;
-    /// default (soloMode=false) keeps all turrets live for mouse group-aim.
-    /// </summary>
+    /// <summary>T10/T12 — Turret highlight only; does not draw UI.</summary>
     [AddComponentMenu("Naval/Ship Turret Selector")]
     public sealed class ShipTurretSelector : MonoBehaviour
     {
         public static readonly string[] DefaultOrder = { "A", "B", "Q", "X" };
-
         public string selectedKey = "A";
         public ShipTurretController[] turrets;
-        [Tooltip("If true, only the selected turret is live. Group mouse-aim uses false.")]
         public bool soloMode = false;
 
         public ShipTurretController Selected
@@ -39,24 +34,11 @@ namespace Naval
         {
             if (turrets == null || turrets.Length == 0)
                 turrets = FindObjectsOfType<ShipTurretController>();
-
             if (Input.GetKeyDown(KeyCode.Alpha1)) selectedKey = "A";
             if (Input.GetKeyDown(KeyCode.Alpha2)) selectedKey = "B";
             if (Input.GetKeyDown(KeyCode.Alpha3)) selectedKey = "Q";
             if (Input.GetKeyDown(KeyCode.Alpha4)) selectedKey = "X";
-            if (Input.GetKeyDown(KeyCode.LeftBracket)) Cycle(-1);
-            if (Input.GetKeyDown(KeyCode.RightBracket)) Cycle(1);
-
             ApplySelection();
-        }
-
-        void Cycle(int dir)
-        {
-            var order = DefaultOrder;
-            int idx = System.Array.IndexOf(order, selectedKey);
-            if (idx < 0) idx = 0;
-            idx = (idx + dir + order.Length) % order.Length;
-            selectedKey = order[idx];
         }
 
         void ApplySelection()
@@ -70,7 +52,10 @@ namespace Naval
         }
     }
 
-    /// <summary>T10/T12 — Crosshair + per-turret arc status + command bar.</summary>
+    /// <summary>
+    /// Clean combat HUD: small crosshair, corner panels only — no text over the ship.
+    /// F1 toggles extra debug lines.
+    /// </summary>
     [AddComponentMenu("Naval/Ship Aim UI")]
     public sealed class ShipAimUI : MonoBehaviour
     {
@@ -82,16 +67,19 @@ namespace Naval
         public ShipGameplayHUD hud;
         public ShipMouseGroupAim groupAim;
         public ShipTargetShip target;
-        public string commandHint =
-            "Cursor locked · Mouse L/R rotate view+turrets · U/D elevation\n" +
-            "Esc free cursor · Click Game view re-lock · Space fire · Tab camera · F1 debug";
+        public bool showControlHint = true;
+        public float controlHintSeconds = 12f;
 
         Texture2D _tex;
-        GUIStyle _center;
-        GUIStyle _small;
+        GUIStyle _label;
+        GUIStyle _labelDim;
+        GUIStyle _cross;
+        float _playTime;
+        bool _debug;
 
         void Start()
         {
+            _playTime = 0f;
             if (selector == null) selector = FindObjectOfType<ShipTurretSelector>();
             if (battery == null) battery = FindObjectOfType<ShipGunBattery>();
             if (floater == null) floater = FindObjectOfType<ShipFloatPrototype>();
@@ -101,11 +89,7 @@ namespace Naval
             if (cameraRig != null && groupAim != null) cameraRig.aim = groupAim;
             if (target == null) target = FindObjectOfType<ShipTargetShip>();
             if (target == null) target = ShipLabRuntime.EnsureTargetShip();
-            if (hud == null) hud = GetComponent<ShipGameplayHUD>();
             if (hud != null) hud.debugPanelVisible = false;
-            commandHint =
-                "Cursor locked · Mouse L/R rotate view+turrets · U/D elevation\n" +
-                "Esc free cursor · Click Game view re-lock · Space fire at TARGET · Tab · R reset · T drift · F1";
             if (_tex == null)
             {
                 _tex = new Texture2D(1, 1);
@@ -114,103 +98,105 @@ namespace Naval
             }
         }
 
-        void OnGUI()
+        void Update()
         {
-            if (_center == null)
-            {
-                _center = new GUIStyle(GUI.skin.label)
-                {
-                    alignment = TextAnchor.MiddleCenter,
-                    fontSize = 22,
-                    fontStyle = FontStyle.Bold,
-                };
-                _center.normal.textColor = Color.white;
-            }
-            if (_small == null)
-            {
-                _small = new GUIStyle(GUI.skin.label) { fontSize = 12 };
-                _small.normal.textColor = new Color(0.9f, 0.92f, 0.95f, 0.95f);
-            }
-
-            float cx = Screen.width * 0.5f;
-            float cy = Screen.height * 0.5f;
-            DrawCross(cx, cy, 18f, 2f, new Color(1f, 1f, 1f, 0.85f));
-            DrawCross(cx, cy, 6f, 2f, new Color(1f, 0.75f, 0.2f, 0.95f));
-
-            bool anyBlocked = false;
-            string arcTxt;
-            if (groupAim != null && groupAim.turrets != null)
-            {
-                var line = new StringBuilder("Turrets ALL · ");
-                foreach (var t in groupAim.turrets)
-                {
-                    if (t == null) continue;
-                    line.Append(t.turretKey).Append(t.ArcClear ? "✓ " : "✗ ");
-                    if (!t.ArcClear) anyBlocked = true;
-                }
-                line.Append("  (cmd=world-rest)");
-                arcTxt = line.ToString();
-            }
-            else
-            {
-                var sel = selector != null ? selector.Selected : null;
-                bool arc = sel == null || sel.ArcClear;
-                anyBlocked = !arc;
-                arcTxt = "Turret " + (selector != null ? selector.selectedKey : "-") +
-                         " · " + (arc ? "ARC CLEAR" : "ARC BLOCKED");
-            }
-
-            Color arcCol = anyBlocked
-                ? new Color(1f, 0.55f, 0.3f)
-                : new Color(0.45f, 0.95f, 0.45f);
-            var prev = _center.normal.textColor;
-            _center.normal.textColor = arcCol;
-            GUI.Label(new Rect(cx - 240f, cy + 28f, 480f, 28f), arcTxt, _center);
-            _center.normal.textColor = prev;
-
-            string block = "";
-            if (groupAim != null && !string.IsNullOrEmpty(groupAim.LastFireSummary))
-                block = groupAim.LastFireSummary;
-            else if (selector != null && selector.Selected != null &&
-                     !string.IsNullOrEmpty(selector.Selected.LastFireBlockReason))
-                block = selector.Selected.LastFireBlockReason;
-            if (!string.IsNullOrEmpty(block))
-                GUI.Label(new Rect(cx - 280f, cy + 54f, 560f, 20f), block, _small);
-
-            float barH = 52f;
-            GUI.Box(new Rect(12f, Screen.height - barH - 12f, 760f, barH), "");
-            GUI.Label(new Rect(20f, Screen.height - barH - 6f, 740f, 44f), commandHint, _small);
-
-            string status = "";
-            if (cameraRig != null)
-                status += "Cam " + cameraRig.mode + "  lodBias " + QualitySettings.lodBias.ToString("0.##") + "\n";
-            if (floater != null) status += "You: " + floater.StatusText + "\n";
-            if (systems != null) status += "You sys: " + systems.StatusText() + "\n";
-            if (groupAim != null)
-            {
-                status += string.Format("Aim world yaw {0:0}°  pitch {1:0.0}°  cursor {2}\n",
-                    groupAim.aimWorldYawDeg, groupAim.aimPitchDeg, Cursor.lockState);
-                if (!string.IsNullOrEmpty(groupAim.LastFireSummary))
-                    status += "Fire: " + groupAim.LastFireSummary + "\n";
-            }
-            if (target != null) status += "TARGET: " + target.StatusText + "\n";
-            if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
-                status += "Hit: " + battery.LastHitSummary;
-            if (!string.IsNullOrEmpty(status))
-                GUI.Label(new Rect(Screen.width - 560f, 12f, 548f, 150f), status, _small);
+            _playTime += Time.deltaTime;
+            if (Input.GetKeyDown(KeyCode.F1)) _debug = !_debug;
         }
 
-        void DrawCross(float x, float y, float size, float thick, Color color)
+        void OnGUI()
         {
+            EnsureStyles();
+            float w = Screen.width;
+            float h = Screen.height;
+            float cx = w * 0.5f;
+            float cy = h * 0.5f;
+
+            DrawCrosshair(cx, cy);
+
+            // --- Top-left: guns + aim + hit (never over ship midline) ---
+            var sb = new StringBuilder();
+            if (groupAim != null)
+            {
+                sb.Append("方位 ").Append(groupAim.aimWorldYawDeg.ToString("0")).Append("°  仰角 ")
+                  .Append(groupAim.aimPitchDeg.ToString("0.0")).Append("°\n");
+                if (groupAim.turrets != null)
+                {
+                    sb.Append("炮塔 ");
+                    foreach (var t in groupAim.turrets)
+                    {
+                        if (t == null) continue;
+                        sb.Append(t.turretKey).Append(t.ArcClear ? "·可射  " : "·盲区  ");
+                    }
+                    sb.Append('\n');
+                }
+                if (!string.IsNullOrEmpty(groupAim.LastFireSummary))
+                    sb.Append(groupAim.LastFireSummary).Append('\n');
+            }
+            if (battery != null && !string.IsNullOrEmpty(battery.LastHitSummary))
+                sb.Append("命中：").Append(battery.LastHitSummary);
+
+            GUI.Label(new Rect(16f, 12f, 420f, 90f), sb.ToString(), _label);
+
+            // --- Top-right: self + target (compact) ---
+            var rt = new StringBuilder();
+            if (floater != null) rt.Append("我方 ").Append(floater.StatusText).Append('\n');
+            if (systems != null) rt.Append(systems.StatusText()).Append('\n');
+            if (target != null) rt.Append("靶船 ").Append(target.StatusText);
+            GUI.Label(new Rect(w - 430f, 12f, 414f, 100f), rt.ToString(), _labelDim);
+
+            // --- Bottom: controls (auto-hide) ---
+            if (showControlHint && _playTime < controlHintSeconds)
+            {
+                float barH = 36f;
+                GUI.color = new Color(0f, 0f, 0f, 0.45f);
+                GUI.DrawTexture(new Rect(0f, h - barH, w, barH), _tex);
+                GUI.color = Color.white;
+                string hint =
+                    "鼠标 转视角/炮塔   空格/左键 开火   Esc 释放鼠标   点游戏窗锁定   Tab 相机   R 重置   F1 调试";
+                GUI.Label(new Rect(0f, h - barH + 8f, w, barH), hint, _labelDim);
+            }
+
+            if (_debug && groupAim != null)
+            {
+                GUI.Label(new Rect(16f, 100f, 480f, 80f),
+                    "DEBUG aim yaw " + groupAim.aimWorldYawDeg.ToString("0.0") +
+                    " pitch " + groupAim.aimPitchDeg.ToString("0.0") +
+                    "\ncursor " + Cursor.lockState +
+                    "\n" + (groupAim.LastFireSummary ?? ""), _labelDim);
+            }
+        }
+
+        void EnsureStyles()
+        {
+            if (_label == null)
+            {
+                _label = new GUIStyle(GUI.skin.label) { fontSize = 13, richText = false };
+                _label.normal.textColor = Color.white;
+            }
+            if (_labelDim == null)
+            {
+                _labelDim = new GUIStyle(GUI.skin.label) { fontSize = 12, richText = false };
+                _labelDim.normal.textColor = new Color(0.85f, 0.9f, 0.95f, 0.85f);
+            }
+        }
+
+        void DrawCrosshair(float cx, float cy)
+        {
+            const float arm = 9f;
+            const float thick = 1.5f;
+            var c = new Color(1f, 1f, 1f, 0.75f);
             var prev = GUI.color;
-            GUI.color = color;
-            GUI.DrawTexture(new Rect(x - size, y - thick * 0.5f, size * 2f, thick), _tex);
-            GUI.DrawTexture(new Rect(x - thick * 0.5f, y - size, thick, size * 2f), _tex);
+            GUI.color = c;
+            GUI.DrawTexture(new Rect(cx - arm, cy - thick * 0.5f, arm * 2f, thick), _tex);
+            GUI.DrawTexture(new Rect(cx - thick * 0.5f, cy - arm, thick, arm * 2f), _tex);
+            GUI.color = new Color(1f, 0.8f, 0.2f, 0.9f);
+            GUI.DrawTexture(new Rect(cx - 1.5f, cy - 1.5f, 3f, 3f), _tex);
             GUI.color = prev;
         }
     }
 
-    /// <summary>T10 — Reset flood/systems, toggle debug HUD.</summary>
+    /// <summary>Global shell: reset flood/systems, target drift, cursor helpers.</summary>
     [AddComponentMenu("Naval/Ship Input Shell")]
     public sealed class ShipInputShell : MonoBehaviour
     {
@@ -241,21 +227,14 @@ namespace Naval
                     var t = FindObjectOfType<ShipTargetShip>();
                     if (t != null) t.ResetTarget();
                 }
-                Debug.Log("[Naval] Reset flood + systems (player + target)");
             }
             if (Input.GetKeyDown(KeyCode.T))
             {
                 var t = target != null ? target : FindObjectOfType<ShipTargetShip>();
-                if (t != null)
-                {
-                    t.drift = !t.drift;
-                    Debug.Log("[Naval] Target drift " + t.drift);
-                }
+                if (t != null) t.drift = !t.drift;
             }
-            if (Input.GetKeyDown(KeyCode.F1))
-            {
-                if (hud != null) hud.debugPanelVisible = !hud.debugPanelVisible;
-            }
+            if (Input.GetKeyDown(KeyCode.F1) && hud != null)
+                hud.debugPanelVisible = !hud.debugPanelVisible;
         }
     }
 }

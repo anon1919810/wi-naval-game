@@ -36,6 +36,7 @@ namespace Naval
 
         void OnGUI()
         {
+            // AimUI owns the visible HUD; this panel is debug-only (F1 / explicit flag).
             if (!debugPanelVisible) return;
             if (_style == null)
             {
