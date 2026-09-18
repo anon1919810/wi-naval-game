@@ -132,9 +132,6 @@ namespace Naval.EditorTools
             aim.groupAim.turrets = controllers;
             rig.aim = aim.groupAim;
             hud.debugPanelVisible = false;
-            aim.commandHint =
-                "Mouse L/R: rotate view + all turrets (same bearing) · U/D: elevation\n" +
-                "RMB vertical look · Space/LMB fire (blind zone skips) · Tab camera · F1 debug";
 
             var shell = hudGo.AddComponent<ShipInputShell>();
             shell.floater = floater;
@@ -183,9 +180,6 @@ namespace Naval.EditorTools
             aim.target = marker;
             shell.target = marker;
             rig.fleetTargets = new[] { ship.transform, targetGo.transform };
-            aim.commandHint =
-                "Cursor locked · Mouse L/R rotate view+turrets · Space fire at TARGET\n" +
-                "Esc free cursor · Click Game view re-lock · Tab camera · R reset both · T drift · F1 debug";
 
             EnsureFolder("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
