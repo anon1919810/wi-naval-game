@@ -82,8 +82,8 @@ namespace Naval
         public ShipGameplayHUD hud;
         public ShipMouseGroupAim groupAim;
         public string commandHint =
-            "Mouse L/R: world bearing (all turrets follow same compass) · U/D: elevation\n" +
-            "Space/LMB fire (blind-zone turrets skip) · Tab camera · R reset · F1 HUD";
+            "Mouse L/R: rotate VIEW + turrets (same bearing) · U/D: elevation\n" +
+            "RMB: look up/down · Space/LMB fire · Tab camera · F1 debug HUD";
 
         Texture2D _tex;
         GUIStyle _center;
@@ -96,8 +96,9 @@ namespace Naval
             if (floater == null) floater = FindObjectOfType<ShipFloatPrototype>();
             if (systems == null) systems = FindObjectOfType<ShipSystemsState>();
             if (cameraRig == null) cameraRig = FindObjectOfType<ShipCameraRig>();
-            if (hud == null) hud = GetComponent<ShipGameplayHUD>();
             if (groupAim == null) groupAim = FindObjectOfType<ShipMouseGroupAim>();
+            if (hud == null) hud = GetComponent<ShipGameplayHUD>();
+            if (hud != null && groupAim != null) hud.debugPanelVisible = false;
             if (_tex == null)
             {
                 _tex = new Texture2D(1, 1);

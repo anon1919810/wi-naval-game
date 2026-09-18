@@ -19,13 +19,22 @@ namespace Naval
         public Transform target;
         public Camera cam;
         public CameraMode mode = CameraMode.ShipThirdPerson;
+        [Tooltip("Optional: third-person yaw follows this world aim (mouse-aim).")]
+        public ShipMouseGroupAim aim;
 
         [Header("Third person (ship-centred)")]
-        [Tooltip("Local offset from ship root: up and slightly aft, looking over the bow.")]
-        public Vector3 thirdPersonLocalOffset = new Vector3(0f, 32f, -42f);
-        [Tooltip("Look-at offset in ship local space (ahead of centre).")]
-        public Vector3 thirdPersonLookLocal = new Vector3(0f, 8f, 90f);
+        [Tooltip("Camera orbits ship centre at this local height.")]
+        public float thirdPersonHeight = 34f;
+        [Tooltip("Distance behind the aim line / ship centre.")]
+        public float thirdPersonBack = 48f;
+        [Tooltip("Look-at height above waterline.")]
+        public float thirdPersonLookHeight = 10f;
+        [Tooltip("Look-at distance ahead along aim direction.")]
+        public float thirdPersonLookAhead = 120f;
         public float thirdPersonLodBias = 1f;
+        [Tooltip("If no aim component, use this extra yaw (ship-relative degrees).")]
+        public float thirdPersonFreeYaw = 0f;
+        public float thirdPersonPitchOffset = 0f;
 
         [Header("Tactical orbit 50-200 m")]
         public float tacticalDistance = 120f;
@@ -77,14 +86,17 @@ namespace Naval
                 ApplyMode(true);
             }
 
-            bool orbitAllowed = mode != CameraMode.ShipThirdPerson || !allowOrbitOutsideThirdPerson
-                ? mode != CameraMode.ShipThirdPerson
-                : false;
-            // RMB orbit only in non-third-person modes.
-            if (mode != CameraMode.ShipThirdPerson && Input.GetMouseButton(1))
+            // RMB: free orbit in chase/fleet; in third person RMB adjusts pitch only.
+            if (Input.GetMouseButton(1))
             {
-                _yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
-                _pitch = Mathf.Clamp(_pitch - Input.GetAxis("Mouse Y") * mouseSensitivity, 8f, 75f);
+                if (mode == CameraMode.ShipThirdPerson)
+                    thirdPersonPitchOffset = Mathf.Clamp(
+                        thirdPersonPitchOffset - Input.GetAxis("Mouse Y") * mouseSensitivity, -15f, 35f);
+                else
+                {
+                    _yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
+                    _pitch = Mathf.Clamp(_pitch - Input.GetAxis("Mouse Y") * mouseSensitivity, 8f, 75f);
+                }
             }
             if (Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadPlus)) Zoom(-1);
             if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus)) Zoom(1);
@@ -96,8 +108,8 @@ namespace Naval
         {
             if (mode == CameraMode.ShipThirdPerson)
             {
-                thirdPersonLocalOffset.z = Mathf.Clamp(thirdPersonLocalOffset.z + dir * 6f, -80f, -18f);
-                thirdPersonLocalOffset.y = Mathf.Clamp(thirdPersonLocalOffset.y + dir * 2f, 18f, 55f);
+                thirdPersonBack = Mathf.Clamp(thirdPersonBack + dir * 6f, 20f, 100f);
+                thirdPersonHeight = Mathf.Clamp(thirdPersonHeight + dir * 2f, 16f, 70f);
             }
             else if (mode == CameraMode.TacticalChase)
                 tacticalDistance = Mathf.Clamp(tacticalDistance + dir * 25f, 40f, 250f);
@@ -110,17 +122,32 @@ namespace Naval
             if (cam == null) return;
             Vector3 shipPos = target != null ? target.position : Vector3.zero;
             Quaternion shipRot = target != null ? target.rotation : Quaternion.identity;
+            float shipYaw = shipRot.eulerAngles.y;
 
             if (mode == CameraMode.ShipThirdPerson)
             {
-                // Locked to ship centre + upper superstructure; follows ship heading.
-                Vector3 pos = shipPos + shipRot * thirdPersonLocalOffset;
-                Vector3 look = shipPos + shipRot * thirdPersonLookLocal;
+                // Yaw follows gunnery aim (mouse) so you rotate the view by aiming.
+                float aimYaw = aim != null ? aim.aimWorldYawDeg : thirdPersonFreeYaw;
+                float yaw = shipYaw + aimYaw + thirdPersonPitchOffset * 0f;
+                Quaternion orbit = Quaternion.Euler(0f, yaw, 0f);
+
+                Vector3 pivot = shipPos + Vector3.up * thirdPersonHeight;
+                // Camera sits behind the aim line, looking forward along the same bearing.
+                Vector3 pos = shipPos + orbit * new Vector3(0f, thirdPersonHeight, -thirdPersonBack);
+                Vector3 look = shipPos + orbit * new Vector3(0f, thirdPersonLookHeight, thirdPersonLookAhead);
+
+                // Vertical tweak with RMB pitch offset.
+                if (Mathf.Abs(thirdPersonPitchOffset) > 0.01f)
+                {
+                    Quaternion pitchQ = Quaternion.Euler(thirdPersonPitchOffset, yaw, 0f);
+                    pos = shipPos + pitchQ * new Vector3(0f, 0f, -thirdPersonBack) + Vector3.up * thirdPersonHeight * 0.35f;
+                }
+
                 cam.transform.position = Vector3.Lerp(cam.transform.position, pos,
-                    1f - Mathf.Exp(-12f * Time.deltaTime));
+                    1f - Mathf.Exp(-10f * Time.deltaTime));
                 cam.transform.rotation = Quaternion.Slerp(cam.transform.rotation,
                     Quaternion.LookRotation(look - cam.transform.position, Vector3.up),
-                    1f - Mathf.Exp(-12f * Time.deltaTime));
+                    1f - Mathf.Exp(-10f * Time.deltaTime));
                 return;
             }
 

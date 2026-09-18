@@ -96,8 +96,10 @@ namespace Naval.EditorTools
             rig.target = ship.transform;
             rig.cam = cam;
             rig.mode = ShipCameraRig.CameraMode.ShipThirdPerson;
-            rig.thirdPersonLocalOffset = new Vector3(0f, 32f, -42f);
-            rig.thirdPersonLookLocal = new Vector3(0f, 8f, 90f);
+            rig.thirdPersonHeight = 34f;
+            rig.thirdPersonBack = 48f;
+            rig.thirdPersonLookHeight = 10f;
+            rig.thirdPersonLookAhead = 120f;
             rig.thirdPersonLodBias = 1f;
             rig.tacticalDistance = 140f;
             rig.tacticalLodBias = 1f;
@@ -128,9 +130,11 @@ namespace Naval.EditorTools
             aim.hud = hud;
             aim.groupAim = ship.AddComponent<ShipMouseGroupAim>();
             aim.groupAim.turrets = controllers;
+            rig.aim = aim.groupAim;
+            hud.debugPanelVisible = false;
             aim.commandHint =
-                "Mouse aim ALL turrets · Space/LMB fire (blind-zone turrets skip)\n" +
-                "RMB orbit camera · Tab camera mode · R reset · F1 HUD";
+                "Mouse L/R: rotate view + all turrets (same bearing) · U/D: elevation\n" +
+                "RMB vertical look · Space/LMB fire (blind zone skips) · Tab camera · F1 debug";
 
             var shell = hudGo.AddComponent<ShipInputShell>();
             shell.floater = floater;
