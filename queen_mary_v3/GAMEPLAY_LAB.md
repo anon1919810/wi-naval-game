@@ -2,6 +2,8 @@
 
 场景：`Assets/Scenes/GameplayLab.unity`（`Tools/Naval/Build gameplay lab` 生成）。
 
+完整交接见仓库根 **[交接_玩法原型_2026-09-19.md](../交接_玩法原型_2026-09-19.md)**。
+
 ## 布局
 
 | 实例 | 名称 | 位置 | 说明 |
