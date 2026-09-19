@@ -22,7 +22,7 @@ while ([DateTimeOffset]::UtcNow -lt $qmDeadline) {
     Start-Sleep -Milliseconds 500
 }
 if (-not $qmFresh) { throw 'No fresh Blender completion report. Check the selected Blender executable.' }
-foreach ($qmName in @('QueenMary_v4_Full.blend','QueenMary_v4_Cutaway.blend','QueenMary_v4_Exterior.fbx','QueenMary_v4_Interior.fbx')) {
+foreach ($qmName in @('QueenMary_v4_Full.blend','QueenMary_v4_Cutaway.blend','QueenMary_v4_Exterior.fbx','QueenMary_v4_Interior.fbx','QueenMary_v4_Gameplay.fbx')) {
     $qmFile = Get-Item -LiteralPath (Join-Path $PSScriptRoot $qmName)
     if ($qmFile.Length -lt 1024 -or $qmFile.LastWriteTimeUtc -lt $qmStarted.UtcDateTime) { throw "Missing or stale output: $qmName" }
 }

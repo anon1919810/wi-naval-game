@@ -187,8 +187,21 @@ namespace Naval.EditorTools
             report.unusedRoles = stale.ToArray();
 
             // --- 模型 ---------------------------------------------------------
+            // Prefer accepted v4 gameplay FBX (exterior + damage/armour proxies).
+            // Fall back to contract v3 name if v4 is not synced.
+            string v4Gameplay = "Assets/Resources/Ships/HMS_Queen_Mary_1913_v4/QueenMary_v4_Gameplay.fbx";
             string fbx = ShipFolder + "/" + contract.FbxFileName();
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>(fbx);
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(v4Gameplay);
+            if (model != null)
+            {
+                fbx = v4Gameplay;
+                notes.Add("Runtime visual source: v4 gameplay FBX (greybox swap).");
+            }
+            else
+            {
+                model = AssetDatabase.LoadAssetAtPath<GameObject>(fbx);
+                notes.Add("v4 gameplay FBX missing; using contract FBX " + fbx);
+            }
             if (model == null)
             {
                 failures.Add("找不到模型 " + fbx);

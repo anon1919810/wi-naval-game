@@ -1,7 +1,7 @@
 {
-  "started_utc": "2026-09-19T06:43:30.287538+00:00",
-  "asset_dir": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\outputs\\queen_mary_v4",
-  "blender": "4.5.3 LTS",
+  "started_utc": "2026-09-19T09:57:26.754991+00:00",
+  "asset_dir": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\.worktrees\\v4-accept-replace\\queen_mary_v4",
+  "blender": "4.5.14 LTS",
   "historically_certified": false,
   "unity_runtime_tested": false,
   "notes": [
@@ -11,23 +11,23 @@
   "files": {
     "QueenMary_v4_Full.blend": {
       "bytes": 11047616,
-      "mtime_ns": 1789799932131818100,
-      "sha256": "dda5e5a76a1c607652af4f46fdfe40881e127bfeba2ea6f9b7e9b4041ed3b624"
+      "mtime_ns": 1789811844841538500,
+      "sha256": "797f1050de88b6c5c1a3dedb126a0880cb9059a2edb843e305933d0e90ca204e"
     },
     "QueenMary_v4_Cutaway.blend": {
       "bytes": 8068103,
-      "mtime_ns": 1789799993672475200,
-      "sha256": "143a4188db1ce9e1b773c522808db33e60fc050a1d79cd49ed1c50bec9b9eb52"
+      "mtime_ns": 1789811844935657200,
+      "sha256": "a5a2127e357fc2fe8b0385e047cfe17660df2745e556c31a325dda474e5434b3"
     },
     "QueenMary_v4_Exterior.fbx": {
-      "bytes": 1804220,
-      "mtime_ns": 1789799932040439400,
-      "sha256": "5beec43cf7e1adc766e7f092978af0eaf19ba22a12fe99779f472af6ea08d364"
+      "bytes": 1805308,
+      "mtime_ns": 1789811844605422900,
+      "sha256": "1f37487ab744bdd285502acebea3ce2f1a0045a3228831836cec27b1b307fa52"
     },
     "QueenMary_v4_Interior.fbx": {
-      "bytes": 1783500,
-      "mtime_ns": 1789799932108263800,
-      "sha256": "047e43dadf99edbea54c39762791fd239a7825d3070bf1913f9b9b78d142c251"
+      "bytes": 1783740,
+      "mtime_ns": 1789811844674116700,
+      "sha256": "9be346417800ec8c81ea2ca4e64a46600ac40d9fd7a6098cf64a4cc90a34644d"
     }
   },
   "checks": [
@@ -52,7 +52,7 @@
       "passed": true,
       "evidence": {
         "exists": true,
-        "bytes": 1804220
+        "bytes": 1805308
       }
     },
     {
@@ -60,7 +60,7 @@
       "passed": true,
       "evidence": {
         "exists": true,
-        "bytes": 1783500
+        "bytes": 1783740
       }
     },
     {
@@ -467,7 +467,7 @@
       }
     }
   },
-  "completed_utc": "2026-09-19T06:43:32.474510+00:00",
+  "completed_utc": "2026-09-19T09:57:29.477896+00:00",
   "status": "passed",
   "passed_checks": 42,
   "total_checks": 42

@@ -1,0 +1,80 @@
+{
+    "status": "passed",
+    "runId": "20260919T095742Z",
+    "builtUtc": "2026-09-19T09:57:42.8679036Z",
+    "unityVersion": "2022.3.62f3c1",
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "checks": [
+        {
+            "id": "exterior_fbx_exists",
+            "passed": true,
+            "evidence": "Assets/Resources/Ships/HMS_Queen_Mary_1913_v4/QueenMary_v4_Exterior.fbx"
+        },
+        {
+            "id": "gameplay_fbx_exists",
+            "passed": true,
+            "evidence": "Assets/Resources/Ships/HMS_Queen_Mary_1913_v4/QueenMary_v4_Gameplay.fbx"
+        },
+        {
+            "id": "interior_fbx_exists",
+            "passed": true,
+            "evidence": "Assets/Resources/Ships/HMS_Queen_Mary_1913_v4/QueenMary_v4_Interior.fbx"
+        },
+        {
+            "id": "required_nodes",
+            "passed": true,
+            "evidence": "all present"
+        },
+        {
+            "id": "eight_muzzles",
+            "passed": true,
+            "evidence": "Muzzle_A_Port parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_A_Starboard parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_B_Port parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_B_Starboard parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_Q_Port parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_Q_Starboard parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_X_Port parentBarrel=1 local=(0.000, 12.400, 0.000); Muzzle_X_Starboard parentBarrel=1 local=(0.000, 12.400, 0.000); "
+        },
+        {
+            "id": "mesh_renderer_count",
+            "passed": true,
+            "evidence": "meshes=86"
+        },
+        {
+            "id": "length_along_z",
+            "passed": true,
+            "evidence": "213.40"
+        },
+        {
+            "id": "beam_or_extents_x",
+            "passed": true,
+            "evidence": "32.10"
+        },
+        {
+            "id": "height_y",
+            "passed": true,
+            "evidence": "50.09"
+        },
+        {
+            "id": "bow_plus_z",
+            "passed": true,
+            "evidence": "Barbette_A.z - Barbette_X.z = 128.00"
+        },
+        {
+            "id": "logic_module_names",
+            "passed": true,
+            "evidence": "found 5/5"
+        },
+        {
+            "id": "material_slots_present",
+            "passed": true,
+            "evidence": "DarkGrey,Black,HullGrey,StructureGrey,DeckGrey,UnderwaterGrey,Glass,Brass,Canvas"
+        },
+        {
+            "id": "material_manifest_synced",
+            "passed": true,
+            "evidence": "Assets/Resources/Ships/HMS_Queen_Mary_1913_v4/material_manifest.json"
+        }
+    ],
+    "notes": [
+        "bounds size=(32.10,50.09,213.40) center=(0.00, 15.14, 0.00)",
+        "non_urp_material_slots=0 (remap via UrpSetup/V4 if >0)"
+    ]
+}

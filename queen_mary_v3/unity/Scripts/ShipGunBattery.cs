@@ -92,6 +92,15 @@ namespace Naval
             }
 
             Vector3 origin = barrel.position;
+            // v4 Muzzle_* nodes sit at barrel local tip; prefer that transform when present.
+            foreach (Transform child in barrel)
+            {
+                if (child.name.StartsWith("Muzzle_"))
+                {
+                    origin = child.position;
+                    break;
+                }
+            }
             Vector3 dir = ResolveFireDirection(barrel);
 
             var hits = Physics.RaycastAll(origin, dir, shellRangeM,

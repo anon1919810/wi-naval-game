@@ -1977,18 +1977,28 @@ def create_cutaway():
     bpy.context.scene.camera=bpy.data.objects['Camera_Cutaway_Overview']
 
 
-def export_v4_fbx(interior=False):
+def export_v4_fbx(kind='exterior'):
+    """kind: exterior (presentation) | interior | gameplay (exterior+collision proxies)."""
     bpy.ops.object.select_all(action='DESELECT')
     for ob in bpy.data.objects:
         if not ob.get('export_asset'):continue
         cat=ob.get('asset_layer')
-        allowed=cat in ('01_Exterior','05_Functional_Anchors') if not interior else cat in ('02_Interior_Visual','05_Functional_Anchors')
+        if kind == 'interior':
+            allowed=cat in ('02_Interior_Visual','05_Functional_Anchors')
+        elif kind == 'gameplay':
+            allowed=cat in ('01_Exterior','05_Functional_Anchors','03_Damage_Proxies','04_Armour_Proxies')
+        else:
+            allowed=cat in ('01_Exterior','05_Functional_Anchors')
         if allowed:
             ob.hide_set(False);ob.select_set(True)
     root=bpy.data.objects['Queen_Mary'];bpy.context.view_layer.objects.active=root
     rest=root.matrix_world.copy();root.matrix_world=Matrix.Rotation(math.pi,4,'Z')@rest;bpy.context.view_layer.update()
+    filename = {
+        'interior': 'QueenMary_v4_Interior.fbx',
+        'gameplay': 'QueenMary_v4_Gameplay.fbx',
+    }.get(kind, 'QueenMary_v4_Exterior.fbx')
     try:
-        bpy.ops.export_scene.fbx(filepath=str(OUT/('QueenMary_v4_Interior.fbx' if interior else 'QueenMary_v4_Exterior.fbx')),
+        bpy.ops.export_scene.fbx(filepath=str(OUT/filename),
             use_selection=True,object_types={'MESH','EMPTY'},global_scale=1,apply_unit_scale=True,apply_scale_options='FBX_SCALE_UNITS',
             axis_forward='-Z',axis_up='Y',use_space_transform=True,bake_space_transform=False,use_mesh_modifiers=True,
             add_leaf_bones=False,bake_anim=False,path_mode='RELATIVE',embed_textures=False,use_custom_props=True)
@@ -2014,7 +2024,7 @@ def main():
         assign_uvs_and_collections()
         bpy.context.view_layer.update()
         verification=v4_validation();write_v4_manifest()
-        export_v4_fbx(False);export_v4_fbx(True)
+        export_v4_fbx('exterior');export_v4_fbx('interior');export_v4_fbx('gameplay')
         # Restore intended full-model visibility after selection/export.
         for ob in bpy.data.objects:
             if ob.get('asset_layer') in ('02_Interior_Visual','03_Damage_Proxies','04_Armour_Proxies'):

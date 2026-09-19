@@ -313,7 +313,7 @@ namespace Naval.EditorTools
             var perMaterial = new List<Mesh>();
             foreach (var mat in order)
             {
-                var partial = new Mesh();
+                var partial = new Mesh { indexFormat = IndexFormat.UInt32 };
                 partial.CombineMeshes(byMaterial[mat].ToArray(), true, true);
                 perMaterial.Add(partial);
             }

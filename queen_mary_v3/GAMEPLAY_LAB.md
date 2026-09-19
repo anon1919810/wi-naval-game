@@ -1,8 +1,11 @@
-# Gameplay Lab · T5–T16 合成
+# Gameplay Lab · v4 外观 + T5–T16
 
-场景：`Assets/Scenes/GameplayLab.unity`（`Tools/Naval/Build gameplay lab` 生成）。
+场景：`Assets/Scenes/GameplayLab.unity`。  
+**运行时可见模型**：`QueenMary_v4_Gameplay.fbx`（`ShipRuntimeBuilder` 自动选用；含损伤/装甲代理）。  
+验收报告：`runtime_acceptance/v4_unity_acceptance.json`（13/13 PASS）。  
+v3 灰盒 Prefab 构建源仍可用：移除 v4 gameplay FBX 后会回退契约中的 v3 FBX。
 
-完整交接见仓库根 **[交接_玩法原型_2026-09-19.md](../交接_玩法原型_2026-09-19.md)**。
+完整交接见 [交接_玩法原型_2026-09-19.md](../交接_玩法原型_2026-09-19.md) 与 spec `docs/compose/spec/v4-unity-accept-replace.md`。
 
 ## 布局
 
