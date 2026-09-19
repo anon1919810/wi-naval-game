@@ -1,6 +1,7 @@
 using NUnit.Framework;
 using Naval;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 public sealed class DamageOwnershipTests
 {
@@ -43,6 +44,7 @@ public sealed class DamageOwnershipTests
     [Test]
     public void Apply_WithoutIdentity_Fails()
     {
+        LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("no ShipIdentity"));
         var go = new GameObject("orphan");
         try
         {
@@ -87,6 +89,7 @@ public sealed class MovingShipFloodTests
             root.transform.rotation = Quaternion.Euler(0f, 45f, 0f);
             var id = root.AddComponent<ShipIdentity>();
             id.instanceId = "move_01";
+            root.AddComponent<ShipSystemsState>();
             var pose = new GameObject("FloatPose");
             pose.transform.SetParent(root.transform, false);
             var floater = root.AddComponent<ShipFloatPrototype>();

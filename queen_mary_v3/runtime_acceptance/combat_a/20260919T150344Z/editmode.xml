@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-19 15:03:57Z" end-time="2026-09-19 15:03:58Z" duration="0.0392934">
+  <test-suite type="TestSuite" id="1010" name="QueenMaryNaval" fullname="QueenMaryNaval" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-19 15:03:57Z" end-time="2026-09-19 15:03:58Z" duration="0.039293" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1015" name="Naval.EditMode.Tests.dll" fullname="D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval/Library/ScriptAssemblies/Naval.EditMode.Tests.dll" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-19 15:03:57Z" end-time="2026-09-19 15:03:58Z" duration="0.029646" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="43432" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestFixture" id="1011" name="PenetrationDataTests" fullname="PenetrationDataTests" classname="PenetrationDataTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-19 15:03:57Z" end-time="2026-09-19 15:03:58Z" duration="0.027499" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1013" name="EffectiveArmour_Grazing_DoesNotLoseResistance" fullname="PenetrationDataTests.EffectiveArmour_Grazing_DoesNotLoseResistance" methodname="EffectiveArmour_Grazing_DoesNotLoseResistance" classname="PenetrationDataTests" runstate="Runnable" seed="1354530770" result="Passed" start-time="2026-09-19 15:03:58Z" end-time="2026-09-19 15:03:58Z" duration="0.012489" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1014" name="HitPath_LayerBudget" fullname="PenetrationDataTests.HitPath_LayerBudget" methodname="HitPath_LayerBudget" classname="PenetrationDataTests" runstate="Runnable" seed="1721912682" result="Passed" start-time="2026-09-19 15:03:58Z" end-time="2026-09-19 15:03:58Z" duration="0.001987" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1012" name="Parse_MainGunTable_InterpolatesMonotonic" fullname="PenetrationDataTests.Parse_MainGunTable_InterpolatesMonotonic" methodname="Parse_MainGunTable_InterpolatesMonotonic" classname="PenetrationDataTests" runstate="Runnable" seed="713785281" result="Passed" start-time="2026-09-19 15:03:58Z" end-time="2026-09-19 15:03:58Z" duration="0.001797" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

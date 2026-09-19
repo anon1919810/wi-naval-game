@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Failed(Child)" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.0555494">
+  <test-suite type="TestSuite" id="1000" name="QueenMaryNaval" fullname="QueenMaryNaval" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.055549" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1010" name="Naval.PlayMode.Tests.dll" fullname="D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval/Library/ScriptAssemblies/Naval.PlayMode.Tests.dll" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.048653" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="46364" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1001" name="CompartmentCapacityTests" fullname="CompartmentCapacityTests" classname="CompartmentCapacityTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.026234" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1002" name="Flood_IsCappedByCapacity" fullname="CompartmentCapacityTests.Flood_IsCappedByCapacity" methodname="Flood_IsCappedByCapacity" classname="CompartmentCapacityTests" runstate="Runnable" seed="424256298" result="Passed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.014206" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1003" name="DamageOwnershipTests" fullname="DamageOwnershipTests" classname="DamageOwnershipTests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.008679" total="2" passed="1" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1005" name="Apply_WithoutIdentity_Fails" fullname="DamageOwnershipTests.Apply_WithoutIdentity_Fails" methodname="Apply_WithoutIdentity_Fails" classname="DamageOwnershipTests" runstate="Runnable" seed="952971660" result="Failed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.004620" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[Unhandled log message: '[Error] [Naval] Damage target has no ShipIdentity: orphan'. Use UnityEngine.TestTools.LogAssert.Expect]]></message>
+            <stack-trace><![CDATA[Naval.ShipDamageApplication:Apply (Naval.ShipCompartment,Naval.ShipPenHit) (at Assets/Scripts/Naval/ShipDamageApplication.cs:19)
+DamageOwnershipTests:Apply_WithoutIdentity_Fails () (at Assets/Tests/Naval/PlayMode/DamageOwnershipTests.cs:52)
+System.Reflection.MethodBase:Invoke (object,object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod (System.Reflection.MethodInfo,object,object[])
+NUnit.Framework.Internal.MethodWrapper:Invoke (object,object[])
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunNonAsyncTestMethod (NUnit.Framework.Internal.ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunTestMethod (NUnit.Framework.Internal.ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:Execute (NUnit.Framework.Internal.ITestExecutionContext)
+UnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)
+
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[[Naval] Damage target has no ShipIdentity: orphan
+]]></output>
+        </test-case>
+        <test-case id="1004" name="PenetratedTarget_DoesNotDamageShooterSystems" fullname="DamageOwnershipTests.PenetratedTarget_DoesNotDamageShooterSystems" methodname="PenetratedTarget_DoesNotDamageShooterSystems" classname="DamageOwnershipTests" runstate="Runnable" seed="732750912" result="Passed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.002834" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1006" name="ModuleDamageTests" fullname="ModuleDamageTests" classname="ModuleDamageTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.001477" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1007" name="RepeatedHit_CountsOneBoilerModule" fullname="ModuleDamageTests.RepeatedHit_CountsOneBoilerModule" methodname="RepeatedHit_CountsOneBoilerModule" classname="ModuleDamageTests" runstate="Runnable" seed="128088277" result="Passed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.000636" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1008" name="MovingShipFloodTests" fullname="MovingShipFloodTests" classname="MovingShipFloodTests" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.010271" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1009" name="Flooding_DoesNotMoveShipRoot" fullname="MovingShipFloodTests.Flooding_DoesNotMoveShipRoot" methodname="Flooding_DoesNotMoveShipRoot" classname="MovingShipFloodTests" runstate="Runnable" seed="1175896868" result="Failed" start-time="2026-09-19 15:16:23Z" end-time="2026-09-19 15:16:23Z" duration="0.009443" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+            <stack-trace><![CDATA[at MovingShipFloodTests.Flooding_DoesNotMoveShipRoot () [0x000fa] in D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Assets\Tests\Naval\PlayMode\DamageOwnershipTests.cs:102
+]]></stack-trace>
+          </failure>
+          <output><![CDATA[[Naval] Target identity move_01 missing ShipSystemsState
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
