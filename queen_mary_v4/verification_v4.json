@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "check": "hull_length_213_4m",
+      "passed": true,
+      "evidence": [
+        27.200000762939453,
+        213.39999389648438,
+        15.0
+      ]
+    },
+    {
+      "check": "hull_beam_27_2m",
+      "passed": true,
+      "evidence": [
+        27.200000762939453,
+        213.39999389648438,
+        15.0
+      ]
+    },
+    {
+      "check": "draft_9_9m",
+      "passed": true,
+      "evidence": "keel z"
+    },
+    {
+      "check": "four_independent_yaw_pivots",
+      "passed": true,
+      "evidence": [
+        "A",
+        "B",
+        "Q",
+        "X"
+      ]
+    },
+    {
+      "check": "eight_muzzles_at_barrel_tips",
+      "passed": true,
+      "evidence": 8
+    },
+    {
+      "check": "Q_between_funnels_2_3",
+      "passed": true,
+      "evidence": -6.0
+    },
+    {
+      "check": "round_middle_funnel",
+      "passed": true,
+      "evidence": [
+        7.0,
+        3.55,
+        3.55
+      ]
+    },
+    {
+      "check": "single_pole_masts",
+      "passed": true,
+      "evidence": 2
+    },
+    {
+      "check": "sixteen_secondary_guns",
+      "passed": true,
+      "evidence": 16
+    },
+    {
+      "check": "fourteen_interior_modules",
+      "passed": true,
+      "evidence": 14
+    },
+    {
+      "check": "sternwalk_present",
+      "passed": true,
+      "evidence": "Sternwalk"
+    },
+    {
+      "check": "finite_geometry",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "exterior_mesh_budget",
+      "passed": true,
+      "evidence": 64
+    }
+  ],
+  "historically_certified": false
+}

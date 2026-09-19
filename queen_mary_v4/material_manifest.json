@@ -1,0 +1,196 @@
+{
+  "materials": [
+    {
+      "name": "HullGrey",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.28999999165534973,
+        0.33500000834465027,
+        0.3499999940395355,
+        1.0
+      ],
+      "metallic": 0.12,
+      "smoothness": 0.31999999999999995,
+      "textures": {
+        "BaseColor": "textures/HullGrey_BaseColor.png",
+        "Normal": "textures/HullGrey_Normal.png",
+        "MetallicSmoothness": "textures/HullGrey_MetallicSmoothness.png"
+      }
+    },
+    {
+      "name": "StructureGrey",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.3799999952316284,
+        0.42500001192092896,
+        0.4300000071525574,
+        1.0
+      ],
+      "metallic": 0.08,
+      "smoothness": 0.37,
+      "textures": {
+        "BaseColor": "textures/StructureGrey_BaseColor.png",
+        "Normal": "textures/StructureGrey_Normal.png",
+        "MetallicSmoothness": "textures/StructureGrey_MetallicSmoothness.png"
+      }
+    },
+    {
+      "name": "UnderwaterGrey",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.1899999976158142,
+        0.04500000178813934,
+        0.03099999949336052,
+        1.0
+      ],
+      "metallic": 0.03,
+      "smoothness": 0.18000000000000005,
+      "textures": {
+        "BaseColor": "textures/UnderwaterGrey_BaseColor.png",
+        "Normal": "textures/UnderwaterGrey_Normal.png",
+        "MetallicSmoothness": "textures/UnderwaterGrey_MetallicSmoothness.png"
+      }
+    },
+    {
+      "name": "DeckGrey",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.38999998569488525,
+        0.28999999165534973,
+        0.18000000715255737,
+        1.0
+      ],
+      "metallic": 0,
+      "smoothness": 0.26,
+      "textures": {
+        "BaseColor": "textures/DeckGrey_BaseColor.png",
+        "Normal": "textures/DeckGrey_Normal.png",
+        "MetallicSmoothness": "textures/DeckGrey_MetallicSmoothness.png"
+      }
+    },
+    {
+      "name": "DarkGrey",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.10499999672174454,
+        0.12999999523162842,
+        0.14000000059604645,
+        1.0
+      ],
+      "metallic": 0.4,
+      "smoothness": 0.44999999999999996,
+      "textures": {
+        "BaseColor": "textures/DarkGrey_BaseColor.png",
+        "Normal": "textures/DarkGrey_Normal.png",
+        "MetallicSmoothness": "textures/DarkGrey_MetallicSmoothness.png"
+      }
+    },
+    {
+      "name": "Black",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.01600000075995922,
+        0.023000000044703484,
+        0.02500000037252903,
+        1.0
+      ],
+      "metallic": 0.1,
+      "smoothness": 0.26,
+      "textures": {}
+    },
+    {
+      "name": "Brass",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.47999998927116394,
+        0.28999999165534973,
+        0.10000000149011612,
+        1.0
+      ],
+      "metallic": 0.82,
+      "smoothness": 0.65,
+      "textures": {}
+    },
+    {
+      "name": "InteriorPaint",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.6200000047683716,
+        0.6399999856948853,
+        0.5699999928474426,
+        1.0
+      ],
+      "metallic": 0.05,
+      "smoothness": 0.24,
+      "textures": {}
+    },
+    {
+      "name": "Machinery",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.11999999731779099,
+        0.1899999976158142,
+        0.20000000298023224,
+        1.0
+      ],
+      "metallic": 0.5,
+      "smoothness": 0.54,
+      "textures": {}
+    },
+    {
+      "name": "ChargeCases",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.28999999165534973,
+        0.20000000298023224,
+        0.11500000208616257,
+        1.0
+      ],
+      "metallic": 0.08,
+      "smoothness": 0.24,
+      "textures": {}
+    },
+    {
+      "name": "CutEdge",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.6000000238418579,
+        0.28999999165534973,
+        0.07500000298023224,
+        1.0
+      ],
+      "metallic": 0.15,
+      "smoothness": 0.36,
+      "textures": {}
+    },
+    {
+      "name": "Glass",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.054999999701976776,
+        0.11500000208616257,
+        0.14000000059604645,
+        1.0
+      ],
+      "metallic": 0.35,
+      "smoothness": 0.8,
+      "textures": {}
+    },
+    {
+      "name": "Canvas",
+      "shader": "Universal Render Pipeline/Lit",
+      "base_color": [
+        0.49000000953674316,
+        0.46000000834465027,
+        0.3700000047683716,
+        1.0
+      ],
+      "metallic": 0,
+      "smoothness": 0.09999999999999998,
+      "textures": {}
+    }
+  ],
+  "normal_convention": "OpenGL tangent space",
+  "metallic_channel": "R",
+  "smoothness_channel": "A"
+}

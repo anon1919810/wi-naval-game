@@ -1,0 +1,474 @@
+{
+  "started_utc": "2026-09-19T06:43:30.287538+00:00",
+  "asset_dir": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\outputs\\queen_mary_v4",
+  "blender": "4.5.3 LTS",
+  "historically_certified": false,
+  "unity_runtime_tested": false,
+  "notes": [
+    "Bounds use Blender world coordinates; Unity orientation is not asserted.",
+    "The duplicate-object check detects naming pollution, not a second regeneration."
+  ],
+  "files": {
+    "QueenMary_v4_Full.blend": {
+      "bytes": 11047616,
+      "mtime_ns": 1789799932131818100,
+      "sha256": "dda5e5a76a1c607652af4f46fdfe40881e127bfeba2ea6f9b7e9b4041ed3b624"
+    },
+    "QueenMary_v4_Cutaway.blend": {
+      "bytes": 8068103,
+      "mtime_ns": 1789799993672475200,
+      "sha256": "143a4188db1ce9e1b773c522808db33e60fc050a1d79cd49ed1c50bec9b9eb52"
+    },
+    "QueenMary_v4_Exterior.fbx": {
+      "bytes": 1804220,
+      "mtime_ns": 1789799932040439400,
+      "sha256": "5beec43cf7e1adc766e7f092978af0eaf19ba22a12fe99779f472af6ea08d364"
+    },
+    "QueenMary_v4_Interior.fbx": {
+      "bytes": 1783500,
+      "mtime_ns": 1789799932108263800,
+      "sha256": "047e43dadf99edbea54c39762791fd239a7825d3070bf1913f9b9b78d142c251"
+    }
+  },
+  "checks": [
+    {
+      "check": "file.QueenMary_v4_Full.blend",
+      "passed": true,
+      "evidence": {
+        "exists": true,
+        "bytes": 11047616
+      }
+    },
+    {
+      "check": "file.QueenMary_v4_Cutaway.blend",
+      "passed": true,
+      "evidence": {
+        "exists": true,
+        "bytes": 8068103
+      }
+    },
+    {
+      "check": "file.QueenMary_v4_Exterior.fbx",
+      "passed": true,
+      "evidence": {
+        "exists": true,
+        "bytes": 1804220
+      }
+    },
+    {
+      "check": "file.QueenMary_v4_Interior.fbx",
+      "passed": true,
+      "evidence": {
+        "exists": true,
+        "bytes": 1783500
+      }
+    },
+    {
+      "check": "full.metre_units",
+      "passed": true,
+      "evidence": 1.0
+    },
+    {
+      "check": "full.hull_length_beam_draft",
+      "passed": true,
+      "evidence": {
+        "min_m": [
+          -13.600000381469727,
+          -106.69999694824219,
+          -9.899999618530273
+        ],
+        "max_m": [
+          13.600000381469727,
+          106.69999694824219,
+          5.099999904632568
+        ],
+        "size_m": [
+          27.200000762939453,
+          213.39999389648438,
+          14.999999523162842
+        ]
+      }
+    },
+    {
+      "check": "full.draft_metadata",
+      "passed": true,
+      "evidence": 9.9
+    },
+    {
+      "check": "full.no_accidental_numbered_objects",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.collections_match_layer_tags",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.interior_and_proxies_hidden",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.exterior_mesh_budget",
+      "passed": true,
+      "evidence": {
+        "all_exterior_meshes": 64,
+        "render_enabled": 64
+      }
+    },
+    {
+      "check": "full.interior_fifteen_meshes",
+      "passed": true,
+      "evidence": 15
+    },
+    {
+      "check": "full.finite_nonempty_meshes",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.valid_uvs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.material_assignments",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.four_turrets_eight_muzzles",
+      "passed": true,
+      "evidence": {
+        "turrets": [
+          "Turret_A",
+          "Turret_B",
+          "Turret_Q",
+          "Turret_X"
+        ],
+        "muzzles": [
+          "Muzzle_A_Port",
+          "Muzzle_A_Starboard",
+          "Muzzle_B_Port",
+          "Muzzle_B_Starboard",
+          "Muzzle_Q_Port",
+          "Muzzle_Q_Starboard",
+          "Muzzle_X_Port",
+          "Muzzle_X_Starboard"
+        ]
+      }
+    },
+    {
+      "check": "full.muzzle_parent_chains_and_tips",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.fourteen_modules_and_equipment",
+      "passed": true,
+      "evidence": {
+        "modules": [
+          "Interior_Boiler_Room_1",
+          "Interior_Boiler_Room_2",
+          "Interior_Boiler_Room_3",
+          "Interior_Boiler_Room_4",
+          "Interior_Boiler_Room_5",
+          "Interior_Boiler_Room_6",
+          "Interior_Boiler_Room_7",
+          "Interior_Engine_Room_1",
+          "Interior_Engine_Room_2",
+          "Interior_Magazine_A",
+          "Interior_Magazine_B",
+          "Interior_Magazine_Q",
+          "Interior_Magazine_X",
+          "Interior_Steering_Gear"
+        ],
+        "equipment": [
+          "Equipment_Boiler_Room_1",
+          "Equipment_Boiler_Room_2",
+          "Equipment_Boiler_Room_3",
+          "Equipment_Boiler_Room_4",
+          "Equipment_Boiler_Room_5",
+          "Equipment_Boiler_Room_6",
+          "Equipment_Boiler_Room_7",
+          "Equipment_Engine_Room_1",
+          "Equipment_Engine_Room_2",
+          "Equipment_Magazine_A",
+          "Equipment_Magazine_B",
+          "Equipment_Magazine_Q",
+          "Equipment_Magazine_X",
+          "Equipment_Steering_Gear"
+        ]
+      }
+    },
+    {
+      "check": "full.interior_identity_and_layer_links",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.texture_nodes_assigned",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "full.images_available",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.mesh_names_and_count",
+      "passed": true,
+      "evidence": {
+        "mesh_count": 64,
+        "expected_count": 64,
+        "missing": [],
+        "unexpected": []
+      }
+    },
+    {
+      "check": "fbx_exterior.module_identity_preserved",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.metre_scale_dimensions_preserved",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.no_damage_or_armour_proxy_meshes",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.finite_nonempty_meshes",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.valid_uvs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.material_assignments",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_exterior.four_turrets_eight_muzzles",
+      "passed": true,
+      "evidence": {
+        "turrets": [
+          "Turret_A",
+          "Turret_B",
+          "Turret_Q",
+          "Turret_X"
+        ],
+        "muzzles": [
+          "Muzzle_A_Port",
+          "Muzzle_A_Starboard",
+          "Muzzle_B_Port",
+          "Muzzle_B_Starboard",
+          "Muzzle_Q_Port",
+          "Muzzle_Q_Starboard",
+          "Muzzle_X_Port",
+          "Muzzle_X_Starboard"
+        ]
+      }
+    },
+    {
+      "check": "fbx_exterior.muzzle_parent_chains_and_tips",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.mesh_names_and_count",
+      "passed": true,
+      "evidence": {
+        "mesh_count": 15,
+        "expected_count": 15,
+        "missing": [],
+        "unexpected": []
+      }
+    },
+    {
+      "check": "fbx_interior.module_identity_preserved",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.metre_scale_dimensions_preserved",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.no_damage_or_armour_proxy_meshes",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.finite_nonempty_meshes",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.valid_uvs",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.material_assignments",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "fbx_interior.fourteen_modules_and_equipment",
+      "passed": true,
+      "evidence": {
+        "modules": [
+          "Interior_Boiler_Room_1",
+          "Interior_Boiler_Room_2",
+          "Interior_Boiler_Room_3",
+          "Interior_Boiler_Room_4",
+          "Interior_Boiler_Room_5",
+          "Interior_Boiler_Room_6",
+          "Interior_Boiler_Room_7",
+          "Interior_Engine_Room_1",
+          "Interior_Engine_Room_2",
+          "Interior_Magazine_A",
+          "Interior_Magazine_B",
+          "Interior_Magazine_Q",
+          "Interior_Magazine_X",
+          "Interior_Steering_Gear"
+        ],
+        "equipment": [
+          "Equipment_Boiler_Room_1",
+          "Equipment_Boiler_Room_2",
+          "Equipment_Boiler_Room_3",
+          "Equipment_Boiler_Room_4",
+          "Equipment_Boiler_Room_5",
+          "Equipment_Boiler_Room_6",
+          "Equipment_Boiler_Room_7",
+          "Equipment_Engine_Room_1",
+          "Equipment_Engine_Room_2",
+          "Equipment_Magazine_A",
+          "Equipment_Magazine_B",
+          "Equipment_Magazine_Q",
+          "Equipment_Magazine_X",
+          "Equipment_Steering_Gear"
+        ]
+      }
+    },
+    {
+      "check": "fbx_interior.interior_identity_and_layer_links",
+      "passed": true,
+      "evidence": []
+    },
+    {
+      "check": "cutaway.half_hull",
+      "passed": true,
+      "evidence": {
+        "min_m": [
+          -13.600000381469727,
+          -106.69999694824219,
+          -9.899999618530273
+        ],
+        "max_m": [
+          0.0,
+          106.69999694824219,
+          5.099999904632568
+        ],
+        "size_m": [
+          13.600000381469727,
+          213.39999389648438,
+          14.999999523162842
+        ]
+      }
+    },
+    {
+      "check": "cutaway.interior_equipment_visible",
+      "passed": true,
+      "evidence": {
+        "count": 14,
+        "hidden": []
+      }
+    },
+    {
+      "check": "cutaway.functional_proxies_hidden",
+      "passed": true,
+      "evidence": []
+    }
+  ],
+  "measurements": {
+    "full": {
+      "mesh_count": 101,
+      "triangles_base_mesh": 185932,
+      "bounds_blender_world": {
+        "min_m": [
+          -16.049386978149414,
+          -106.69999694824219,
+          -9.899999618530273
+        ],
+        "max_m": [
+          16.049386978149414,
+          106.69999694824219,
+          40.18662643432617
+        ],
+        "size_m": [
+          32.09877395629883,
+          213.39999389648438,
+          50.086626052856445
+        ]
+      }
+    },
+    "fbx_exterior": {
+      "mesh_count": 64,
+      "triangles_base_mesh": 83676,
+      "bounds_blender_world": {
+        "min_m": [
+          -16.049388885498047,
+          -106.69999694824219,
+          -9.900007247924805
+        ],
+        "max_m": [
+          16.04938507080078,
+          106.69999694824219,
+          40.18663024902344
+        ],
+        "size_m": [
+          32.09877395629883,
+          213.39999389648438,
+          50.08663749694824
+        ]
+      }
+    },
+    "fbx_interior": {
+      "mesh_count": 15,
+      "triangles_base_mesh": 97160,
+      "bounds_blender_world": {
+        "min_m": [
+          -13.364869117736816,
+          -98.33333587646484,
+          -9.793608665466309
+        ],
+        "max_m": [
+          13.364869117736816,
+          99.08000183105469,
+          12.000007629394531
+        ],
+        "size_m": [
+          26.729738235473633,
+          197.41333770751953,
+          21.79361629486084
+        ]
+      }
+    }
+  },
+  "completed_utc": "2026-09-19T06:43:32.474510+00:00",
+  "status": "passed",
+  "passed_checks": 42,
+  "total_checks": 42
+}

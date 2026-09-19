@@ -1,0 +1,2527 @@
+{
+  "asset": "Queen_Mary_v4",
+  "objects": [
+    {
+      "name": "Aft_Deckhouse",
+      "parent": "Superstructure",
+      "role": "structure",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -41.0,
+        7.296845436096191
+      ],
+      "dimensions_m": [
+        12.399999618530273,
+        23.0,
+        4.0
+      ],
+      "triangles": 108
+    },
+    {
+      "name": "Aft_Platform",
+      "parent": "Superstructure",
+      "role": "structure",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -42.0,
+        9.476845741271973
+      ],
+      "dimensions_m": [
+        15.0,
+        24.0,
+        0.3499999940395355
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Armour_Belt_229mm",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        26.86969566345215,
+        114.0,
+        3.0
+      ],
+      "triangles": 936
+    },
+    {
+      "name": "Armour_Belt_Taper_102mm_Aft",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        21.40156364440918,
+        35.53571319580078,
+        2.799999952316284
+      ],
+      "triangles": 328
+    },
+    {
+      "name": "Armour_Belt_Taper_102mm_Fwd",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        26.16312599182129,
+        55.900001525878906,
+        2.799999952316284
+      ],
+      "triangles": 504
+    },
+    {
+      "name": "Armour_Bulkhead_Aft",
+      "parent": "Queen_Mary",
+      "role": "armour_bulkhead",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        21.862712860107422,
+        0.100006103515625,
+        14.828777313232422
+      ],
+      "triangles": 260
+    },
+    {
+      "name": "Armour_Bulkhead_Fwd",
+      "parent": "Queen_Mary",
+      "role": "armour_bulkhead",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        25.011404037475586,
+        0.09999847412109375,
+        14.966928482055664
+      ],
+      "triangles": 260
+    },
+    {
+      "name": "Armour_Deck_25mm",
+      "parent": "Queen_Mary",
+      "role": "armour_deck",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        21.075204849243164,
+        193.33334350585938,
+        0.02500009536743164
+      ],
+      "triangles": 812
+    },
+    {
+      "name": "Armour_Deck_64mm",
+      "parent": "Queen_Mary",
+      "role": "armour_deck",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        25.916893005371094,
+        208.14999389648438,
+        0.06400001049041748
+      ],
+      "triangles": 892
+    },
+    {
+      "name": "Armour_Upper_Belt_152mm",
+      "parent": "Queen_Mary",
+      "role": "armour_belt",
+      "layer": "04_Armour_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        27.051931381225586,
+        114.0,
+        2.4000000953674316
+      ],
+      "triangles": 936
+    },
+    {
+      "name": "B_Superfiring_Deckhouse",
+      "parent": "Superstructure",
+      "role": "structure",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        46.0,
+        9.126051902770996
+      ],
+      "dimensions_m": [
+        11.800000190734863,
+        14.0,
+        3.7478952407836914
+      ],
+      "triangles": 108
+    },
+    {
+      "name": "Barbette_A",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        60.0,
+        7.823657989501953
+      ],
+      "dimensions_m": [
+        9.800000190734863,
+        9.800000190734863,
+        1.0199999809265137
+      ],
+      "triangles": 124
+    },
+    {
+      "name": "Barbette_B",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        46.0,
+        11.510000228881836
+      ],
+      "dimensions_m": [
+        9.800000190734863,
+        9.800000190734863,
+        1.0199999809265137
+      ],
+      "triangles": 124
+    },
+    {
+      "name": "Barbette_Q",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -6.0,
+        7.480475902557373
+      ],
+      "dimensions_m": [
+        9.800000190734863,
+        9.800000190734863,
+        1.0199999809265137
+      ],
+      "triangles": 124
+    },
+    {
+      "name": "Barbette_X",
+      "parent": "Queen_Mary",
+      "role": "barbette",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -68.0,
+        6.090873718261719
+      ],
+      "dimensions_m": [
+        9.800000190734863,
+        9.800000190734863,
+        1.2200000286102295
+      ],
+      "triangles": 124
+    },
+    {
+      "name": "Barrel_A_Port",
+      "parent": "Elevation_A",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -1.25,
+        64.0,
+        9.813657760620117
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_A_Starboard",
+      "parent": "Elevation_A",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        1.25,
+        64.0,
+        9.813657760620117
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_B_Port",
+      "parent": "Elevation_B",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -1.25,
+        50.0,
+        13.5
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_B_Starboard",
+      "parent": "Elevation_B",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        1.25,
+        50.0,
+        13.5
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_Q_Port",
+      "parent": "Elevation_Q",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        1.2500003576278687,
+        -10.0,
+        9.470476150512695
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_Q_Starboard",
+      "parent": "Elevation_Q",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -1.2499996423721313,
+        -10.0,
+        9.470476150512695
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_X_Port",
+      "parent": "Elevation_X",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        1.2500003576278687,
+        -72.0,
+        8.18087387084961
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Barrel_X_Starboard",
+      "parent": "Elevation_X",
+      "role": "main_gun_barrel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -1.2499996423721313,
+        -72.0,
+        8.18087387084961
+      ],
+      "dimensions_m": [
+        1.0800000429153442,
+        12.549999237060547,
+        1.0800000429153442
+      ],
+      "triangles": 284
+    },
+    {
+      "name": "Boiler_Room_1",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        33.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_2",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        23.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_3",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        13.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_4",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        3.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_5",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -15.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        14.0,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_6",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -25.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        13.998254776000977,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Boiler_Room_7",
+      "parent": "Damage_Modules",
+      "role": "boiler_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -35.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        13.864386558532715,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Bridge",
+      "parent": "Superstructure",
+      "role": "bridge",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        32.0,
+        7.186626434326172
+      ],
+      "dimensions_m": [
+        12.399999618530273,
+        11.800000190734863,
+        2.9000000953674316
+      ],
+      "triangles": 188
+    },
+    {
+      "name": "Bridge_Upper",
+      "parent": "Superstructure",
+      "role": "structure",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        31.0,
+        14.786625862121582
+      ],
+      "dimensions_m": [
+        8.600000381469727,
+        7.0,
+        2.799999952316284
+      ],
+      "triangles": 108
+    },
+    {
+      "name": "Bridge_Visor",
+      "parent": "Superstructure",
+      "role": "structure",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        31.0,
+        16.36162567138672
+      ],
+      "dimensions_m": [
+        10.199999809265137,
+        8.0,
+        0.3499999940395355
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Bridge_Wings",
+      "parent": "Superstructure",
+      "role": "structure",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        31.5,
+        13.446626663208008
+      ],
+      "dimensions_m": [
+        17.0,
+        5.0,
+        0.550000011920929
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Casemate_Openings_Port",
+      "parent": "Queen_Mary",
+      "role": "casemate_opening",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        1.5415468215942383,
+        44.650001525878906,
+        1.3949999809265137
+      ],
+      "triangles": 192
+    },
+    {
+      "name": "Casemate_Openings_Starboard",
+      "parent": "Queen_Mary",
+      "role": "casemate_opening",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        1.5415468215942383,
+        44.650001525878906,
+        1.3949999809265137
+      ],
+      "triangles": 192
+    },
+    {
+      "name": "Casemate_Port_1",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.057840347290039,
+        54.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_2",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.252758026123047,
+        48.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_3",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.392569541931152,
+        42.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_4",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.495561599731445,
+        36.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_5",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.550000190734863,
+        30.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_6",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.573662757873535,
+        24.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_7",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.590800285339355,
+        18.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Port_8",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        -13.599387168884277,
+        12.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_1",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.057840347290039,
+        54.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_2",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.252758026123047,
+        48.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_3",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.392569541931152,
+        42.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_4",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.495561599731445,
+        36.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_5",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.550000190734863,
+        30.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_6",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.573662757873535,
+        24.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_7",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.590800285339355,
+        18.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Casemate_Starboard_8",
+      "parent": "Queen_Mary",
+      "role": "secondary_gun",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        13.599387168884277,
+        12.0,
+        6.25
+      ],
+      "dimensions_m": [
+        0.3799999952316284,
+        3.4000000953674316,
+        0.3799999952316284
+      ],
+      "triangles": 116
+    },
+    {
+      "name": "Conning_Tower",
+      "parent": "Superstructure",
+      "role": "conning_tower",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        37.0,
+        11.398581504821777
+      ],
+      "dimensions_m": [
+        6.0,
+        6.0,
+        8.37608814239502
+      ],
+      "triangles": 92
+    },
+    {
+      "name": "Damage_Modules",
+      "parent": "Queen_Mary",
+      "role": "module_group",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Deck_Fittings",
+      "parent": "Queen_Mary",
+      "role": "deck_fitting",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        10.800000190734863,
+        143.62078857421875,
+        3.1243886947631836
+      ],
+      "triangles": 1088
+    },
+    {
+      "name": "Deck_Visual_Details",
+      "parent": "Queen_Mary",
+      "role": "deck_detail",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        27.12490463256836,
+        207.0526885986328,
+        12.108305931091309
+      ],
+      "triangles": 16692
+    },
+    {
+      "name": "Elevation_A",
+      "parent": "Turret_A",
+      "role": "gun_elevation",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        64.0,
+        9.813657760620117
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Elevation_B",
+      "parent": "Turret_B",
+      "role": "gun_elevation",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        50.0,
+        13.5
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Elevation_Q",
+      "parent": "Turret_Q",
+      "role": "gun_elevation",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        3.4969110629390343e-07,
+        -10.0,
+        9.470476150512695
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Elevation_X",
+      "parent": "Turret_X",
+      "role": "gun_elevation",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        3.4969110629390343e-07,
+        -72.0,
+        8.18087387084961
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Engine_Room_1",
+      "parent": "Damage_Modules",
+      "role": "engine_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -47.0,
+        -4.0
+      ],
+      "dimensions_m": [
+        13.264320373535156,
+        14.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Engine_Room_2",
+      "parent": "Damage_Modules",
+      "role": "engine_room",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -60.5,
+        -4.0
+      ],
+      "dimensions_m": [
+        11.775829315185547,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Equipment_Boiler_Room_1",
+      "parent": "Interior_Boiler_Room_1",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_1",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.800000190734863,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Boiler_Room_2",
+      "parent": "Interior_Boiler_Room_2",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_2",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.800000190734863,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Boiler_Room_3",
+      "parent": "Interior_Boiler_Room_3",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_3",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.800000190734863,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Boiler_Room_4",
+      "parent": "Interior_Boiler_Room_4",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_4",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.800000190734863,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Boiler_Room_5",
+      "parent": "Interior_Boiler_Room_5",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_5",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.800000190734863,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Boiler_Room_6",
+      "parent": "Interior_Boiler_Room_6",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_6",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.79825496673584,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Boiler_Room_7",
+      "parent": "Interior_Boiler_Room_7",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_7",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.664386749267578,
+        8.75,
+        3.850001573562622
+      ],
+      "triangles": 4448
+    },
+    {
+      "name": "Equipment_Engine_Room_1",
+      "parent": "Interior_Engine_Room_1",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Engine_Room_1",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        13.06432056427002,
+        13.75,
+        3.2400007247924805
+      ],
+      "triangles": 2204
+    },
+    {
+      "name": "Equipment_Engine_Room_2",
+      "parent": "Interior_Engine_Room_2",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Engine_Room_2",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        11.57582950592041,
+        8.75,
+        3.2400004863739014
+      ],
+      "triangles": 2204
+    },
+    {
+      "name": "Equipment_Magazine_A",
+      "parent": "Interior_Magazine_A",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_A",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        8.800000190734863,
+        6.75,
+        15.833658218383789
+      ],
+      "triangles": 4692
+    },
+    {
+      "name": "Equipment_Magazine_B",
+      "parent": "Interior_Magazine_B",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_B",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        8.800000190734863,
+        6.75,
+        19.520000457763672
+      ],
+      "triangles": 4692
+    },
+    {
+      "name": "Equipment_Magazine_Q",
+      "parent": "Interior_Magazine_Q",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_Q",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        8.800000190734863,
+        6.75,
+        15.49047565460205
+      ],
+      "triangles": 4692
+    },
+    {
+      "name": "Equipment_Magazine_X",
+      "parent": "Interior_Magazine_X",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_X",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        8.642760276794434,
+        8.75,
+        14.000873565673828
+      ],
+      "triangles": 4692
+    },
+    {
+      "name": "Equipment_Steering_Gear",
+      "parent": "Interior_Steering_Gear",
+      "role": "interior_equipment",
+      "layer": "02_Interior_Visual",
+      "module_id": "Steering_Gear",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        5.1999993324279785,
+        5.75,
+        2.1700000762939453
+      ],
+      "triangles": 236
+    },
+    {
+      "name": "FX_Anchors",
+      "parent": "Queen_Mary",
+      "role": "fx_group",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "FX_Funnel_1_Smoke",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        23.0,
+        22.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "FX_Funnel_2_Smoke",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        7.0,
+        22.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "FX_Funnel_3_Smoke",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -27.0,
+        22.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "FX_Mast_Fore_Top",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        32.0,
+        40.18662643432617
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "FX_Mast_Main_Top",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -38.0,
+        28.296844482421875
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "FX_Standard_Aft",
+      "parent": "FX_Anchors",
+      "role": "fx_anchor",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -90.0,
+        5.969264984130859
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Forecastle",
+      "parent": "Queen_Mary",
+      "role": "forecastle_deck",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        27.200000762939453,
+        124.69999694824219,
+        2.4499998092651367
+      ],
+      "triangles": 852
+    },
+    {
+      "name": "Funnel_1",
+      "parent": "Queen_Mary",
+      "role": "funnel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        23.0,
+        9.591805458068848
+      ],
+      "dimensions_m": [
+        5.839999675750732,
+        7.878000259399414,
+        12.541650772094727
+      ],
+      "triangles": 2820
+    },
+    {
+      "name": "Funnel_1_Uptake",
+      "parent": "Superstructure",
+      "role": "funnel_uptake",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        23.0,
+        8.366806030273438
+      ],
+      "dimensions_m": [
+        5.880000114440918,
+        9.880000114440918,
+        2.450000047683716
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Funnel_2",
+      "parent": "Queen_Mary",
+      "role": "funnel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        7.0,
+        9.504364967346191
+      ],
+      "dimensions_m": [
+        8.039999961853027,
+        7.387899398803711,
+        12.541650772094727
+      ],
+      "triangles": 3620
+    },
+    {
+      "name": "Funnel_2_Uptake",
+      "parent": "Superstructure",
+      "role": "funnel_uptake",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        7.0,
+        8.279364585876465
+      ],
+      "dimensions_m": [
+        8.520000457763672,
+        9.229999542236328,
+        2.450000047683716
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Funnel_3",
+      "parent": "Queen_Mary",
+      "role": "funnel",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -27.0,
+        7.638667106628418
+      ],
+      "dimensions_m": [
+        5.839999675750732,
+        7.878000259399414,
+        14.381333351135254
+      ],
+      "triangles": 2900
+    },
+    {
+      "name": "Funnel_3_Uptake",
+      "parent": "Superstructure",
+      "role": "funnel_uptake",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -27.0,
+        6.41366720199585
+      ],
+      "dimensions_m": [
+        5.880000114440918,
+        9.880000114440918,
+        2.450000047683716
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Hull",
+      "parent": "Queen_Mary",
+      "role": "hull",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        27.200000762939453,
+        213.39999389648438,
+        15.0
+      ],
+      "triangles": 15308
+    },
+    {
+      "name": "Interior_Boiler_Room_1",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_1",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Boiler_Room_2",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_2",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Boiler_Room_3",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_3",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Boiler_Room_4",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_4",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Boiler_Room_5",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_5",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Boiler_Room_6",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_6",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Boiler_Room_7",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Boiler_Room_7",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Engine_Room_1",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Engine_Room_1",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Engine_Room_2",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Engine_Room_2",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Frames_Bulkheads",
+      "parent": "Interior_Visual",
+      "role": "interior_structure",
+      "layer": "02_Interior_Visual",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        26.729707717895508,
+        197.413330078125,
+        21.793601989746094
+      ],
+      "triangles": 42612
+    },
+    {
+      "name": "Interior_Magazine_A",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_A",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Magazine_B",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_B",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Magazine_Q",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_Q",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Magazine_X",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Magazine_X",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Steering_Gear",
+      "parent": "Interior_Visual",
+      "role": "interior_module",
+      "layer": "02_Interior_Visual",
+      "module_id": "Steering_Gear",
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Interior_Visual",
+      "parent": "Queen_Mary",
+      "role": "interior_group",
+      "layer": "02_Interior_Visual",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Magazine_A",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        60.0,
+        -4.599999904632568
+      ],
+      "dimensions_m": [
+        9.0,
+        7.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Magazine_B",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        46.0,
+        -4.599999904632568
+      ],
+      "dimensions_m": [
+        9.0,
+        7.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Magazine_Q",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -6.0,
+        -4.599999904632568
+      ],
+      "dimensions_m": [
+        9.0,
+        7.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Magazine_X",
+      "parent": "Damage_Modules",
+      "role": "magazine",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -71.0,
+        -4.400000095367432
+      ],
+      "dimensions_m": [
+        8.84276008605957,
+        9.0,
+        6.0
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Mast_Fore",
+      "parent": "Queen_Mary",
+      "role": "pole_mast",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        32.0,
+        16.186626434326172
+      ],
+      "dimensions_m": [
+        9.999998092651367,
+        2.4000000953674316,
+        24.0
+      ],
+      "triangles": 252
+    },
+    {
+      "name": "Mast_Main",
+      "parent": "Queen_Mary",
+      "role": "pole_mast",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -38.0,
+        9.296845436096191
+      ],
+      "dimensions_m": [
+        5.59999942779541,
+        0.47999998927116394,
+        19.0
+      ],
+      "triangles": 148
+    },
+    {
+      "name": "Muzzle_A_Port",
+      "parent": "Barrel_A_Port",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        -1.25,
+        76.4000015258789,
+        9.813657760620117
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_A_Starboard",
+      "parent": "Barrel_A_Starboard",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        1.25,
+        76.4000015258789,
+        9.813657760620117
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_B_Port",
+      "parent": "Barrel_B_Port",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        -1.25,
+        62.400001525878906,
+        13.5
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_B_Starboard",
+      "parent": "Barrel_B_Starboard",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        1.25,
+        62.400001525878906,
+        13.5
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_Q_Port",
+      "parent": "Barrel_Q_Port",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        1.2500014305114746,
+        -22.399999618530273,
+        9.470476150512695
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_Q_Starboard",
+      "parent": "Barrel_Q_Starboard",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        -1.2499985694885254,
+        -22.399999618530273,
+        9.470476150512695
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_X_Port",
+      "parent": "Barrel_X_Port",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        1.2500014305114746,
+        -84.4000015258789,
+        8.18087387084961
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Muzzle_X_Starboard",
+      "parent": "Barrel_X_Starboard",
+      "role": "muzzle",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        -1.2499985694885254,
+        -84.4000015258789,
+        8.18087387084961
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Presentation_Fittings",
+      "parent": "Queen_Mary",
+      "role": "decoration",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        26.848236083984375,
+        213.39999389648438,
+        14.496936798095703
+      ],
+      "triangles": 24052
+    },
+    {
+      "name": "Propeller_Shafts",
+      "parent": "Queen_Mary",
+      "role": "propulsion_underwater",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        15.899999618530273,
+        33.56855010986328,
+        5.421361923217773
+      ],
+      "triangles": 1872
+    },
+    {
+      "name": "Quarterdeck",
+      "parent": "Queen_Mary",
+      "role": "quarterdeck",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        27.200000762939453,
+        88.69999694824219,
+        0.6699995994567871
+      ],
+      "triangles": 396
+    },
+    {
+      "name": "Queen_Mary",
+      "parent": null,
+      "role": "ship_root",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Rangefinder_CT",
+      "parent": "Superstructure",
+      "role": "fire_control",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        37.0,
+        16.48662567138672
+      ],
+      "dimensions_m": [
+        3.5999999046325684,
+        3.0,
+        1.7999999523162842
+      ],
+      "triangles": 56
+    },
+    {
+      "name": "Rigging_Stays",
+      "parent": "Queen_Mary",
+      "role": "rigging",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        20.050634384155273,
+        91.0494384765625,
+        33.9183235168457
+      ],
+      "triangles": 196
+    },
+    {
+      "name": "Rudder",
+      "parent": "Queen_Mary",
+      "role": "rudder",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.41999998688697815,
+        5.599998474121094,
+        6.800000190734863
+      ],
+      "triangles": 108
+    },
+    {
+      "name": "Steering_Gear",
+      "parent": "Damage_Modules",
+      "role": "steering_gear",
+      "layer": "03_Damage_Proxies",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -96.0,
+        -2.5
+      ],
+      "dimensions_m": [
+        4.352526664733887,
+        6.0,
+        2.5
+      ],
+      "triangles": 12
+    },
+    {
+      "name": "Sternwalk",
+      "parent": "Queen_Mary",
+      "role": "sternwalk",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        14.543388366699219,
+        8.5,
+        0.3600001335144043
+      ],
+      "triangles": 92
+    },
+    {
+      "name": "Sternwalk_Rails",
+      "parent": "Sternwalk",
+      "role": "sternwalk_rail",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        14.673388481140137,
+        8.6300048828125,
+        1.989999771118164
+      ],
+      "triangles": 948
+    },
+    {
+      "name": "Superstructure",
+      "parent": "Queen_Mary",
+      "role": "group",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Torpedo_Net_Port_Mesh",
+      "parent": "Torpedo_Net_Port_Stowed",
+      "role": "stowed_net_mesh",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        4.016694068908691,
+        156.04769897460938,
+        3.2251007556915283
+      ],
+      "triangles": 560
+    },
+    {
+      "name": "Torpedo_Net_Port_Stowed",
+      "parent": "Queen_Mary",
+      "role": "stowed_net",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Torpedo_Net_Starboard_Mesh",
+      "parent": "Torpedo_Net_Starboard_Stowed",
+      "role": "stowed_net_mesh",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        4.016694068908691,
+        156.04769897460938,
+        3.2251007556915283
+      ],
+      "triangles": 560
+    },
+    {
+      "name": "Torpedo_Net_Starboard_Stowed",
+      "parent": "Queen_Mary",
+      "role": "stowed_net",
+      "layer": "05_Functional_Anchors",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "dimensions_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "triangles": 0
+    },
+    {
+      "name": "Turret_A",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        60.0,
+        8.313657760620117
+      ],
+      "dimensions_m": [
+        9.787213325500488,
+        9.177038192749023,
+        3.799999952316284
+      ],
+      "triangles": 1368
+    },
+    {
+      "name": "Turret_B",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        46.0,
+        12.0
+      ],
+      "dimensions_m": [
+        9.787213325500488,
+        9.177038192749023,
+        3.799999952316284
+      ],
+      "triangles": 1368
+    },
+    {
+      "name": "Turret_Q",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -6.0,
+        7.970475673675537
+      ],
+      "dimensions_m": [
+        9.787213325500488,
+        9.177038192749023,
+        3.799999952316284
+      ],
+      "triangles": 1368
+    },
+    {
+      "name": "Turret_X",
+      "parent": "Queen_Mary",
+      "role": "main_turret",
+      "layer": "01_Exterior",
+      "module_id": null,
+      "origin_m": [
+        0.0,
+        -68.0,
+        6.680873870849609
+      ],
+      "dimensions_m": [
+        9.787213325500488,
+        9.177038192749023,
+        3.799999952316284
+      ],
+      "triangles": 1368
+    }
+  ],
+  "total_triangles": 185932,
+  "historically_certified": false
+}

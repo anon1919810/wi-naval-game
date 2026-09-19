@@ -1,0 +1,8 @@
+{
+  "status": "complete",
+  "started_utc": "2026-09-19T06:38:49.815074+00:00",
+  "completed_utc": "2026-09-19T06:40:58.781153+00:00",
+  "blender": "4.5.3 LTS",
+  "historically_certified": false,
+  "geometry_checks": 13
+}

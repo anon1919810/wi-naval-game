@@ -1,0 +1,103 @@
+{
+  "historically_certified": false,
+  "modules": [
+    {
+      "module_id": "Magazine_A",
+      "visual_root": "Interior_Magazine_A",
+      "equipment_mesh": "Equipment_Magazine_A",
+      "role": "magazine",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Magazine_B",
+      "visual_root": "Interior_Magazine_B",
+      "equipment_mesh": "Equipment_Magazine_B",
+      "role": "magazine",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Magazine_Q",
+      "visual_root": "Interior_Magazine_Q",
+      "equipment_mesh": "Equipment_Magazine_Q",
+      "role": "magazine",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Magazine_X",
+      "visual_root": "Interior_Magazine_X",
+      "equipment_mesh": "Equipment_Magazine_X",
+      "role": "magazine",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_1",
+      "visual_root": "Interior_Boiler_Room_1",
+      "equipment_mesh": "Equipment_Boiler_Room_1",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_2",
+      "visual_root": "Interior_Boiler_Room_2",
+      "equipment_mesh": "Equipment_Boiler_Room_2",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_3",
+      "visual_root": "Interior_Boiler_Room_3",
+      "equipment_mesh": "Equipment_Boiler_Room_3",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_4",
+      "visual_root": "Interior_Boiler_Room_4",
+      "equipment_mesh": "Equipment_Boiler_Room_4",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_5",
+      "visual_root": "Interior_Boiler_Room_5",
+      "equipment_mesh": "Equipment_Boiler_Room_5",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_6",
+      "visual_root": "Interior_Boiler_Room_6",
+      "equipment_mesh": "Equipment_Boiler_Room_6",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Boiler_Room_7",
+      "visual_root": "Interior_Boiler_Room_7",
+      "equipment_mesh": "Equipment_Boiler_Room_7",
+      "role": "boiler_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Engine_Room_1",
+      "visual_root": "Interior_Engine_Room_1",
+      "equipment_mesh": "Equipment_Engine_Room_1",
+      "role": "engine_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Engine_Room_2",
+      "visual_root": "Interior_Engine_Room_2",
+      "equipment_mesh": "Equipment_Engine_Room_2",
+      "role": "engine_room",
+      "layout": "estimate"
+    },
+    {
+      "module_id": "Steering_Gear",
+      "visual_root": "Interior_Steering_Gear",
+      "equipment_mesh": "Equipment_Steering_Gear",
+      "role": "steering_gear",
+      "layout": "estimate"
+    }
+  ]
+}

@@ -1,0 +1,166 @@
+{
+  "asset": "HMS Queen Mary v4 modular presentation",
+  "source_baseline_commit": "f717c0c",
+  "packaged_utc": "2026-09-19T06:46:21.382547+00:00",
+  "historically_certified": false,
+  "unity_runtime_tested": false,
+  "blender": "4.5.3 LTS",
+  "files": {
+    "build_result.json": {
+      "bytes": 227,
+      "sha256": "2df8116499a7a1fb4f74f8134d12b976f40ea59670140a1cd81d4c8c14e67e24"
+    },
+    "build_started.json": {
+      "bytes": 51,
+      "sha256": "93ad39a8ecc50d862e66f5808d1ac79d759b19562aacc8951d4e27e54149ea3a"
+    },
+    "created_objects.txt": {
+      "bytes": 13967,
+      "sha256": "adb70fc5cf9900612b361914eb6480628379fe49d0202cc34fe266de0282da41"
+    },
+    "interior_modules.json": {
+      "bytes": 2954,
+      "sha256": "766e61d03ffd692571397c1831675ac148388d4467c701cdd6ce55e3e494f4ae"
+    },
+    "material_manifest.json": {
+      "bytes": 5091,
+      "sha256": "5ceaedbbca3112fec0e038687ebc447bf82ab2b0dd34ebf7739752a377cf18d0"
+    },
+    "object_manifest_v4.json": {
+      "bytes": 53855,
+      "sha256": "67f7dbfa9fea85defed48adeb1cbc9f52e90428c0da055be95ba3acae85dc8ba"
+    },
+    "QueenMary_v4_Cutaway.blend": {
+      "bytes": 8068103,
+      "sha256": "143a4188db1ce9e1b773c522808db33e60fc050a1d79cd49ed1c50bec9b9eb52"
+    },
+    "QueenMary_v4_Exterior.fbx": {
+      "bytes": 1804220,
+      "sha256": "5beec43cf7e1adc766e7f092978af0eaf19ba22a12fe99779f472af6ea08d364"
+    },
+    "QueenMary_v4_Full.blend": {
+      "bytes": 11047616,
+      "sha256": "dda5e5a76a1c607652af4f46fdfe40881e127bfeba2ea6f9b7e9b4041ed3b624"
+    },
+    "QueenMary_v4_Interior.fbx": {
+      "bytes": 1783500,
+      "sha256": "047e43dadf99edbea54c39762791fd239a7825d3070bf1913f9b9b78d142c251"
+    },
+    "queen_mary_v4.py": {
+      "bytes": 105566,
+      "sha256": "d74e4c62b675db17f7abaf4cb28800d5b4832056421b923a06b2d40c743f2b39"
+    },
+    "README_精修资产.md": {
+      "bytes": 6067,
+      "sha256": "9e4266f8f6225aa5e2bce8a5e714671e1d86e32eb2c8d4bbf631719e16ddfd0b"
+    },
+    "rebuild_v4.ps1": {
+      "bytes": 2126,
+      "sha256": "c6593e01ac168ff128e971ea77613a4f2e7f4b27410bf94e2a47e0a0cbf9c7ef"
+    },
+    "repeat_verification.json": {
+      "bytes": 273,
+      "sha256": "dcbe547a5933f56edaf5f523a36f9346f0e95a349138b402acde0bf004b41fe6"
+    },
+    "verification_v4.json": {
+      "bytes": 1665,
+      "sha256": "e5468c9168cb0abaa89fe979f63169b5578b03946a38b8e8b71433c993810a75"
+    },
+    "verification_v4_independent.json": {
+      "bytes": 11979,
+      "sha256": "3414a9b4152936169fdac947b2157c618f3c9e41a4ff6b4e286588bb88a08df2"
+    },
+    "verify_v4.py": {
+      "bytes": 17187,
+      "sha256": "fbedbd9e1d9dc7af5c348905fdd32c25d6cacb0f75e2db6e27722426f0deb026"
+    },
+    "previews/A_B_Bridge_Detail.png": {
+      "bytes": 2104158,
+      "sha256": "f521ef0dee8d1a20fac0944314f9d8ad65a6b60846ef1881ef1e9856d482a887"
+    },
+    "previews/Cutaway_Machinery.png": {
+      "bytes": 2277972,
+      "sha256": "31dec1db9d781b828abbe8305bb79da5f664f2caab2f8fea8b7afb9ebbfca9ce"
+    },
+    "previews/Cutaway_Magazine_A.png": {
+      "bytes": 2434268,
+      "sha256": "b1d8149be70f9e0e8e484622c8974feed32126442ba3db544bf807ad58cd99a8"
+    },
+    "previews/Cutaway_Overview.png": {
+      "bytes": 2374026,
+      "sha256": "0c06a283334ab6f6a8f44c1a7ddeba0b63112f0dff28b80c495ddfe57ad15012"
+    },
+    "previews/Exterior_Hero.png": {
+      "bytes": 2567870,
+      "sha256": "ccba12a3278734590ac39e70d17e1ca8ca0a98dc7f27eb62a35c038399e95a65"
+    },
+    "previews/Exterior_Profile.png": {
+      "bytes": 1536553,
+      "sha256": "3aa321a00065aa09baa2b8e4512f30d54a83bc8de28e1f9c217976b531781011"
+    },
+    "previews/Stern_Detail.png": {
+      "bytes": 1759733,
+      "sha256": "18f223b1b961c3d0c0cab8ed6cc05ade58f0a72f82e2b1b092f4770035b8b01f"
+    },
+    "textures/DarkGrey_BaseColor.png": {
+      "bytes": 34188,
+      "sha256": "18a8ed2e9ca08cc17012523e59217d72fda29f43b8d5c9b2def176886dece7b4"
+    },
+    "textures/DarkGrey_MetallicSmoothness.png": {
+      "bytes": 5734,
+      "sha256": "5ee5522291c2e356f7281ac2a9b87daf1ec8e179cfceb02f3a4d5a9ed3905441"
+    },
+    "textures/DarkGrey_Normal.png": {
+      "bytes": 9839,
+      "sha256": "e981493fd07cd6237de09a0e372d666af4034b5ac58dbc66938620c01c631748"
+    },
+    "textures/DeckGrey_BaseColor.png": {
+      "bytes": 76277,
+      "sha256": "cb971087ef602f648890d7ae88d288661e75271d68670bea7a0900c0e0170d54"
+    },
+    "textures/DeckGrey_MetallicSmoothness.png": {
+      "bytes": 5735,
+      "sha256": "1676fe4b615537d0ba0c774017b99c7e4dcebd3aaa8065d7db9cddf3923182e0"
+    },
+    "textures/DeckGrey_Normal.png": {
+      "bytes": 7669,
+      "sha256": "4a0f50bc27d935a80bb123ddb5bdbbc231c4e3dc305df4fcd9e19bf42707e399"
+    },
+    "textures/HullGrey_BaseColor.png": {
+      "bytes": 58504,
+      "sha256": "6c012c49d272c8b26b53c3c3fae51fa24194b847dec7098cf59494e3c3301973"
+    },
+    "textures/HullGrey_MetallicSmoothness.png": {
+      "bytes": 5734,
+      "sha256": "a6d950180174acdd3649e66eda219a1d0ad265fdc8cbec02615cf3356e565160"
+    },
+    "textures/HullGrey_Normal.png": {
+      "bytes": 9839,
+      "sha256": "e981493fd07cd6237de09a0e372d666af4034b5ac58dbc66938620c01c631748"
+    },
+    "textures/StructureGrey_BaseColor.png": {
+      "bytes": 57484,
+      "sha256": "20ece5137c1f87ac47fef6f7d5b42f79b12dd9cb9c9f801a7ac4f921e5bb1ec0"
+    },
+    "textures/StructureGrey_MetallicSmoothness.png": {
+      "bytes": 5734,
+      "sha256": "190abbcacdce9eb1f2dc66f195d2188144f22ca99978a0c55dfbdaed4298dda1"
+    },
+    "textures/StructureGrey_Normal.png": {
+      "bytes": 9839,
+      "sha256": "e981493fd07cd6237de09a0e372d666af4034b5ac58dbc66938620c01c631748"
+    },
+    "textures/UnderwaterGrey_BaseColor.png": {
+      "bytes": 5736,
+      "sha256": "aa894d05f1acc2e76f5c8a6e7d87b095dad110342a27daace94044c9da415ab7"
+    },
+    "textures/UnderwaterGrey_MetallicSmoothness.png": {
+      "bytes": 5734,
+      "sha256": "6df6a5714ef828f16f146bbb82a36372d73059f4e0e87840f55ed35298e5ce13"
+    },
+    "textures/UnderwaterGrey_Normal.png": {
+      "bytes": 9839,
+      "sha256": "e981493fd07cd6237de09a0e372d666af4034b5ac58dbc66938620c01c631748"
+    }
+  }
+}

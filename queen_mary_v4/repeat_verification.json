@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "geometry_signatures": [
+    "9e00a38088470148be603457de7d9b41c7ab9f79a00aac6fd1a247e7cea0266b",
+    "9e00a38088470148be603457de7d9b41c7ab9f79a00aac6fd1a247e7cea0266b"
+  ],
+  "method": "two runs in same Blender process, reopen Full.blend"
+}
