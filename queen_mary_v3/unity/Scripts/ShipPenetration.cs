@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Naval
@@ -238,16 +239,51 @@ namespace Naval
 
         public float SteerFactor => steeringHit ? 0.25f : 1f;
 
+        [NonSerialized] readonly HashSet<string> damagedModules = new HashSet<string>();
+
+        public IReadOnlyCollection<string> DamagedModules => damagedModules;
+
+        /// <summary>A04 — Deduplicate by module id; same module name on different ships is independent.</summary>
+        public void ApplyModule(string moduleId, string role)
+        {
+            if (string.IsNullOrEmpty(moduleId)) return;
+            if (!damagedModules.Add(moduleId))
+            {
+                // Already counted; flooding may still continue on the compartment itself.
+                return;
+            }
+            RecalculateFromModules();
+        }
+
+        /// <summary>Legacy role-only path for pre-identity callers; still records a synthetic module key.</summary>
         public void ApplyRole(string role)
         {
-            if (role == "boiler_room") { boilerRoomsHit = Mathf.Min(7, boilerRoomsHit + 1); status = "boiler_hit"; }
-            else if (role == "engine_room") { engineRoomsHit = Mathf.Min(2, engineRoomsHit + 1); status = "engine_hit"; }
-            else if (role == "magazine") { magazineHit = true; status = "magazine_critical"; }
-            else if (role == "steering_gear") { steeringHit = true; status = "steering_damaged"; }
+            ApplyModule(role + "#legacy", role);
+        }
+
+        void RecalculateFromModules()
+        {
+            int boilers = 0, engines = 0;
+            bool mag = false, steer = false;
+            string lastRole = "degraded";
+            foreach (var id in damagedModules)
+            {
+                string r = id;
+                if (r.StartsWith("Boiler_Room")) { boilers++; lastRole = "boiler_hit"; }
+                else if (r.StartsWith("Engine_Room")) { engines++; lastRole = "engine_hit"; }
+                else if (r.StartsWith("Magazine")) { mag = true; lastRole = "magazine_critical"; }
+                else if (r.Contains("Steering")) { steer = true; lastRole = "steering_damaged"; }
+            }
+            boilerRoomsHit = boilers;
+            engineRoomsHit = engines;
+            magazineHit = mag;
+            steeringHit = steer;
+            status = damagedModules.Count == 0 ? "intact" : lastRole;
         }
 
         public void ResetSystems()
         {
+            damagedModules.Clear();
             boilerRoomsHit = 0;
             engineRoomsHit = 0;
             magazineHit = false;
@@ -270,6 +306,18 @@ namespace Naval
             if (turretKey == "A" || turretKey == "B" || turretKey == "Q" || turretKey == "X")
                 return "main_343mm";
             return "secondary_102mm";
+        }
+
+        /// <summary>
+        /// A03 — Oblique armour effective thickness (estimate model). Cap 4× at grazing incidence.
+        /// </summary>
+        public static float EffectiveArmourMm(float armourMm, float incidenceCos)
+        {
+            if (float.IsNaN(armourMm) || float.IsInfinity(armourMm) || armourMm < 0f)
+                throw new ArgumentOutOfRangeException(nameof(armourMm));
+            if (float.IsNaN(incidenceCos) || float.IsInfinity(incidenceCos))
+                throw new ArgumentOutOfRangeException(nameof(incidenceCos));
+            return armourMm / Mathf.Clamp(Mathf.Abs(incidenceCos), 0.25f, 1f);
         }
 
         public static ShipPenHit Evaluate(
@@ -324,8 +372,7 @@ namespace Naval
             }
             hit.zoneId = zoneId;
 
-            if (incidenceCos > 0.05f)
-                armour = armour / Mathf.Clamp(incidenceCos, 0.25f, 1f);
+            armour = EffectiveArmourMm(armour, incidenceCos);
             hit.armourMm = armour;
 
             float penetrateRatio = penFile != null && penFile.thresholds != null

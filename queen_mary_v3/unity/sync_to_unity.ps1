@@ -47,6 +47,22 @@ if (-not (Test-Path $scriptsSrc)) { throw "找不到 Scripts 目录：$scriptsSr
 
 Copy-Item (Join-Path $scriptsSrc '*.cs') $destScripts -Force
 Copy-Item (Join-Path $editorSrc '*.cs') $destEditor -Force
+if (Test-Path (Join-Path $scriptsSrc 'Naval.Runtime.asmdef')) {
+    Copy-Item (Join-Path $scriptsSrc 'Naval.Runtime.asmdef') $destScripts -Force
+}
+$testsSrc = Join-Path $here 'Tests'
+if (Test-Path $testsSrc) {
+    $destTests = Join-Path $ProjectPath 'Assets/Tests/Naval'
+    foreach ($sub in @('EditMode','PlayMode')) {
+        $from = Join-Path $testsSrc $sub
+        $to = Join-Path $destTests $sub
+        if (Test-Path $from) {
+            New-Item -ItemType Directory -Path $to -Force | Out-Null
+            Copy-Item (Join-Path $from '*') $to -Force -Recurse
+        }
+    }
+    Write-Host "Synced tests to $destTests"
+}
 $editorCount = @(Get-ChildItem (Join-Path $editorSrc '*.cs')).Count
 $scriptCount = @(Get-ChildItem (Join-Path $scriptsSrc '*.cs')).Count
 Write-Host "已同步代码：Editor $editorCount 个 .cs / Scripts $scriptCount 个 .cs"

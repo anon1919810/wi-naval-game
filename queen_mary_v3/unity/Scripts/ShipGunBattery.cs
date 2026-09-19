@@ -109,9 +109,15 @@ namespace Naval
 
             RaycastHit best = default;
             bool found = false;
+            // Ignore hits on own ship instance (A02) instead of a 25 m distance heuristic.
+            var shooterId = GetComponentInParent<ShipIdentity>() ?? GetComponent<ShipIdentity>();
+
             foreach (var h in hits)
             {
-                if (h.transform.IsChildOf(transform) || h.transform == transform)
+                var hId = ShipIdentity.FromTransform(h.transform);
+                if (shooterId != null && hId != null && ShipIdentity.SameShip(shooterId, hId))
+                    continue;
+                if (shooterId == null && (h.transform.IsChildOf(transform) || h.transform == transform))
                 {
                     if (h.distance < 25f) continue;
                 }
@@ -151,29 +157,20 @@ namespace Naval
                     return true;
                 }
 
-                if (compartment != null && penHit.floodM3 > 0f)
+                if (compartment != null)
                 {
-                    compartment.Flood(penHit.floodM3);
-                    if (penHit.outcome == ShipPenOutcome.Penetrated)
-                        _systems.ApplyRole(penHit.role);
-                    var floater = best.collider.GetComponentInParent<ShipFloatPrototype>();
-                    if (floater != null) floater.RebuildFromCompartments();
-                    LastHitSummary = penHit.Summary() + " | " + _systems.StatusText();
-                    return true;
+                    bool applied = ShipDamageApplication.Apply(compartment, penHit);
+                    var tId = ShipIdentity.FromTransform(compartment.transform);
+                    var sId = GetComponent<ShipIdentity>();
+                    LastHitSummary = penHit.Summary() +
+                        (applied ? " applied" : " APPLY_FAIL") +
+                        " shooter=" + (sId != null ? sId.InstanceId : "?") +
+                        " target=" + (tId != null ? tId.InstanceId : "?");
+                    return applied;
                 }
 
-                if (penHit.floodM3 > 0f)
-                {
-                    var anyFloat = best.collider.GetComponentInParent<ShipFloatPrototype>();
-                    if (anyFloat != null)
-                    {
-                        anyFloat.RegisterSurfaceHit(best.point);
-                        LastHitSummary = penHit.Summary() + " | surface flood proxy";
-                        return true;
-                    }
-                }
-
-                LastHitSummary = penHit.Summary();
+                // Surface / armour mesh without compartment: A03 — do not invent module damage.
+                LastHitSummary = penHit.Summary() + " | surface_no_module";
                 return true;
             }
 

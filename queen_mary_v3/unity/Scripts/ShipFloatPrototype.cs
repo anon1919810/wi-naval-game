@@ -11,6 +11,8 @@ namespace Naval
     public sealed class ShipFloatPrototype : MonoBehaviour
     {
         public string shipId = "HMS_Queen_Mary_1913";
+        [Tooltip("A04 — Child that receives sinkage/list only; ship root keeps navigation pose.")]
+        public Transform floatPose;
 
         [Tooltip("Waterplane area m^2 from hydrostatics.json (default Queen Mary estimate).")]
         public float waterplaneAreaM2 = 4610.4f;
@@ -40,8 +42,9 @@ namespace Naval
         void CaptureInitial()
         {
             if (_captured) return;
-            _initialLocalPos = transform.localPosition;
-            _initialLocalRot = transform.localRotation;
+            var target = floatPose != null ? floatPose : transform;
+            _initialLocalPos = target.localPosition;
+            _initialLocalRot = target.localRotation;
             _captured = true;
         }
 
@@ -87,8 +90,9 @@ namespace Naval
             // Roll: flood on port (-X) should list port down = rotate about +Z.
             float rollDeg = Mathf.Clamp(rollMoment / area * 0.02f, -maxTrimDeg, maxTrimDeg);
 
-            transform.localPosition = _initialLocalPos + new Vector3(0f, -SinkageM, 0f);
-            transform.localRotation = _initialLocalRot *
+            var pose = floatPose != null ? floatPose : transform;
+            pose.localPosition = _initialLocalPos + new Vector3(0f, -SinkageM, 0f);
+            pose.localRotation = _initialLocalRot *
                 Quaternion.Euler(pitchDeg, 0f, rollDeg);
 
             StatusText = string.Format(

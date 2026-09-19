@@ -47,6 +47,10 @@ namespace Naval
             marker.floater = floater;
             marker.systems = systems;
             marker.battery = battery;
+            var tid = go.GetComponent<ShipIdentity>();
+            if (tid == null) tid = go.AddComponent<ShipIdentity>();
+            tid.definitionId = "HMS_Queen_Mary_1913";
+            tid.instanceId = "target_01";
 
             var cam = Camera.main;
             var label = go.GetComponent<ShipTargetLabel>();

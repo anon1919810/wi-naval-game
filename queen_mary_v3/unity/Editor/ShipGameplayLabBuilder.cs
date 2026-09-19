@@ -86,6 +86,18 @@ namespace Naval.EditorTools
             var systems = ship.GetComponent<ShipSystemsState>();
             if (systems == null) ship.AddComponent<ShipSystemsState>();
             ShipCombatVfx.EnsureOn(ship);
+            var shipId = ship.GetComponent<ShipIdentity>();
+            if (shipId == null) shipId = ship.AddComponent<ShipIdentity>();
+            shipId.definitionId = ShipId;
+            shipId.instanceId = "player_01";
+            var floatPose = ship.transform.Find("FloatPose");
+            if (floatPose == null)
+            {
+                var fp = new GameObject("FloatPose");
+                fp.transform.SetParent(ship.transform, false);
+                floatPose = fp.transform;
+            }
+            if (floater != null) floater.floatPose = floatPose;
 
             var camGo = new GameObject("GameplayCamera");
             var cam = camGo.AddComponent<Camera>();
@@ -167,6 +179,20 @@ namespace Naval.EditorTools
             marker.systems = targetSystems;
             marker.battery = targetBattery;
             ShipCombatVfx.EnsureOn(targetGo);
+            var tid = targetGo.GetComponent<ShipIdentity>();
+            if (tid == null) tid = targetGo.AddComponent<ShipIdentity>();
+            tid.definitionId = ShipId;
+            tid.instanceId = "target_01";
+            var tPose = targetGo.transform.Find("FloatPose");
+            if (tPose == null)
+            {
+                var tfp = new GameObject("FloatPose");
+                tfp.transform.SetParent(targetGo.transform, false);
+                tPose = tfp.transform;
+            }
+            if (targetFloater != null) targetFloater.floatPose = tPose;
+            var smoke = ship.GetComponent<ShipCombatSmokeRunner>();
+            if (smoke == null) ship.AddComponent<ShipCombatSmokeRunner>().autoRunOnStart = false;
 
             var tLabel = targetGo.GetComponent<ShipTargetLabel>();
             if (tLabel == null) tLabel = targetGo.AddComponent<ShipTargetLabel>();
