@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using Naval;
+using UnityEngine;
 
 public sealed class PenetrationDataTests
 {

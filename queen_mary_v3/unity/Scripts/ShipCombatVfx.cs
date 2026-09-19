@@ -30,15 +30,15 @@ namespace Naval
         }
 
         [Header("Tracer")]
-        public float tracerTime = 0.22f;
-        public float tracerWidth = 0.12f;
-        public float maxTracerVisualLength = 900f;
-        public int maxConcurrentTracers = 16;
-        public Color tracerColor = new Color(1f, 0.75f, 0.2f, 0.85f);
+        public float tracerTime = 0.12f;
+        public float tracerWidth = 0.06f;
+        public float maxTracerVisualLength = 250f;
+        public int maxConcurrentTracers = 8;
+        public Color tracerColor = new Color(1f, 0.8f, 0.3f, 0.55f);
 
         [Header("Muzzle")]
-        public float muzzleLife = 0.08f;
-        public float muzzleScale = 0.35f;
+        public float muzzleLife = 0.05f;
+        public float muzzleScale = 0.15f;
 
         [Header("Impact / splash")]
         public float impactLife = 0.45f;
@@ -96,6 +96,16 @@ namespace Naval
 
             Vector3 delta = end - origin;
             float dist = delta.magnitude;
+            // Clip to water plane impact if ray ended far above sea (avoid horizon lasers).
+            if (!willHit && end.y > 0.5f && dir.y < -0.001f)
+            {
+                float tWater = (0f - origin.y) / dir.y;
+                if (tWater > 2f && tWater < maxTracerVisualLength)
+                {
+                    end = origin + dir * tWater;
+                    dist = tWater;
+                }
+            }
             if (dist > maxTracerVisualLength)
             {
                 end = origin + delta.normalized * maxTracerVisualLength;
@@ -142,25 +152,24 @@ namespace Naval
             dir.Normalize();
             var go = new GameObject("MuzzleFlash");
             go.transform.SetParent(transform, false);
-            go.transform.position = origin + dir * 1.0f;
+            go.transform.position = origin + dir * 0.5f;
             go.transform.rotation = Quaternion.LookRotation(dir);
             var ps = go.AddComponent<ParticleSystem>();
             var main = ps.main;
             main.startLifetime = muzzleLife;
-            main.startSpeed = 3f;
-            main.startSize = new ParticleSystem.MinMaxCurve(muzzleScale * 0.4f, muzzleScale);
-            main.startColor = new Color(1f, 0.7f, 0.2f, 0.4f);
+            main.startSpeed = 1.5f;
+            main.startSize = new ParticleSystem.MinMaxCurve(muzzleScale * 0.3f, muzzleScale);
+            main.startColor = new Color(1f, 0.75f, 0.3f, 0.25f);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.loop = false;
             var emission = ps.emission;
             emission.rateOverTime = 0f;
-            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 5) });
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 3) });
             var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Cone;
-            shape.angle = 8f;
-            shape.radius = 0.12f;
-            AssignDefaultParticleMat(ps, new Color(1f, 0.65f, 0.2f, 0.35f));
-            go.AddComponent<ShipVfxTimedDespawn>().life = muzzleLife + 0.04f;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.05f;
+            AssignDefaultParticleMat(ps, new Color(1f, 0.7f, 0.25f, 0.2f));
+            go.AddComponent<ShipVfxTimedDespawn>().life = muzzleLife + 0.03f;
         }
 
         public void PlaySplash(Vector3 point)
