@@ -1,0 +1,110 @@
+{
+  "schema": "hullwright-armour-standard-1",
+  "_title": "British naval armour acceptance standards, pre-1908 / 1908 / 1912",
+  "_what_this_is": "皇家海军装甲板的**验收标准**：给定厚度的装甲板，必须挡住哪种弹、以多少英尺/秒命中。它是装甲**抗穿透能力**的一手锚点，不是厚度表。",
+  "_source": {
+    "material": "桌面资料《西北以西之海/英海军一战时期装甲信息》，共 6 张扫描图",
+    "files": {
+      "overview": "概览.png — 板极限概念、支撑修正、标准更新史（1908/1912/1922/1937/1946）",
+      "composition": "总图表.png — Appendix VIII：1888–1950 装甲成分变迁（Vickers 金相分析）",
+      "schedule_1912_a": "1912年（上）.png — OFFICIAL STANDARD SCHEDULE 1912，4in–13in",
+      "schedule_1912_b": "1912年（下）.png — 1912 表示续表 + 相对上一版的提升量",
+      "schedule_1908_a": "1908年（上）.png — pre-1908 验收（Krupp，橡木背衬）vs 1908 实验（无背衬）",
+      "schedule_1908_b": "1908年（下）.png — 未完读"
+    },
+    "watermark": "贴 @战列舰吧（中文海军爱好者社区）",
+    "provenance_note": "扫描件，原始出处未标。**属二手转录，非海军部原件**；引用时须保留此限制。",
+    "historically_certified": false
+  },
+
+  "_unit_note": "原表 Thickness 单位为磅/平方英尺（lb/ft²）。海军惯例 1 英寸装甲 = 40 lb/ft²，故 360 lb ≈ 9 in ≈ 229 mm。",
+
+  "acceptance_schedule_1912": {
+    "title": "OFFICIAL STANDARD SCHEDULE 1912 FOR NEW QUALITY ARMOUR — ALL AT NORMAL IMPACT",
+    "entries": [
+      { "thickness_lb_ft2": 520, "inches": 13.0, "mm": 330, "projectile": "12\" APC Mk IVA Shell 850 lb", "velocity_fs": 1820 },
+      { "thickness_lb_ft2": 520, "inches": 13.0, "mm": 330, "projectile": "13.5\" APC (Heavy) Mk IA 1400 lb", "velocity_fs": 1250 },
+      { "thickness_lb_ft2": 520, "inches": 13.0, "mm": 330, "projectile": "13.5\" APC (Heavy) Mk IA 1400 lb", "velocity_fs": 1180 },
+      { "thickness_lb_ft2": 520, "inches": 13.0, "mm": 330, "projectile": "13.5\" APC (Heavy) Mk IA 1400 lb", "velocity_fs": 1100, "remark": "Finally" },
+      { "thickness_lb_ft2": 480, "inches": 12.0, "mm": 305, "projectile": "12\" APC Mk IVA Shell 850 lb", "velocity_fs": 1770 },
+      { "thickness_lb_ft2": 480, "inches": 12.0, "mm": 305, "projectile": "13.5\" APC (Heavy) Mk IA 1400 lb", "velocity_fs": 1050, "remark": "Obtained on one sample, generally too high for proof of supplies" },
+      { "thickness_lb_ft2": 440, "inches": 11.0, "mm": 279, "projectile": "12\" APC Mk IA Shell 850 lb", "velocity_fs": 1730 },
+      { "thickness_lb_ft2": 400, "inches": 10.0, "mm": 254, "projectile": "12\" APC Mk IA Shell 850 lb", "velocity_fs": 1590 },
+      { "thickness_lb_ft2": 360, "inches": 9.0,  "mm": 229, "projectile": "12\" APC Mk IA Shell 850 lb", "velocity_fs": 1460 },
+      { "thickness_lb_ft2": 320, "inches": 8.0,  "mm": 203, "projectile": "9.2\" APC Shell 380 lb", "velocity_fs": 1690 },
+      { "thickness_lb_ft2": 320, "inches": 8.0,  "mm": 203, "projectile": "12\" APC Shell Mk IVA 850 lb", "velocity_fs": 1350 },
+      { "thickness_lb_ft2": 280, "inches": 7.0,  "mm": 178, "projectile": "9.2\" APC Shell 380 lb", "velocity_fs": 1470 },
+      { "thickness_lb_ft2": 280, "inches": 7.0,  "mm": 178, "projectile": "12\" APC Shell Mk IVA 850 lb", "velocity_fs": 1180 },
+      { "thickness_lb_ft2": 240, "inches": 6.0,  "mm": 152, "projectile": "9.2\" APC Shell 380 lb", "velocity_fs": 1320 },
+      { "thickness_lb_ft2": 200, "inches": 5.0,  "mm": 127, "projectile": "7.5\" CPC R.L. 200 lb", "velocity_fs": 1625 },
+      { "thickness_lb_ft2": 200, "inches": 5.0,  "mm": 127, "projectile": "7.5\" CPC Firth Mk IIIA 206 lb", "velocity_fs": 1475 },
+      { "thickness_lb_ft2": 160, "inches": 4.0,  "mm": 102, "projectile": "6\" CPC Had. Mk VIIIAQ 100 lb", "velocity_fs": 1260 },
+      { "thickness_lb_ft2": 120, "inches": 3.0,  "mm": 76,  "projectile": "6\" Common Had. Mk II", "velocity_fs": 1900, "remark": "Backed" },
+      { "thickness_lb_ft2": 120, "inches": 3.0,  "mm": 76,  "projectile": "6\" Common Had. Mk II", "velocity_fs": 1720, "remark": "Unbacked" },
+      { "thickness_lb_ft2": 80,  "inches": 2.0,  "mm": 51,  "projectile": "6\" Common Had. Mk II", "velocity_fs": 1420, "remark": "Backed" },
+      { "thickness_lb_ft2": 80,  "inches": 2.0,  "mm": 51,  "projectile": "6\" Common Had. Mk II", "velocity_fs": 1270, "remark": "Unbacked" }
+    ],
+    "improvement_over_previous_schedule_fs": {
+      "480": 50, "440": 30, "400": 80, "360": 120, "320": 50,
+      "280": 120, "240": 140, "200": 165, "160": 110
+    },
+    "caveat_verbatim": "These standards do not mean that every Plate passed its test as well as these figures seem to indicate, yet it must be remembered that these new velocities were agreed upon by the manufacturers and the Admiralty, and Plates were obviously capable of passing them."
+  },
+
+  "acceptance_schedule_pre1908_and_1908_experiments": {
+    "title": "PRE 1908 REQUIREMENTS FOR ACCEPTANCE (KRUPP ARMOUR BACKED WITH OAK)  /  1908 EXPERIMENTS (KRUPP ARMOUR UNBACKED BY OAK)",
+    "entries": [
+      { "thickness_lb_ft2": 480, "inches": 12.0, "mm": 305, "pre1908": { "projectile": "12\" A.P.Shot 714 lb", "velocity_fs": 1860 }, "experiment1908": { "projectile": "12\" A.P.C. Shell 850 lb", "velocity_fs": 1690 } },
+      { "thickness_lb_ft2": 480, "inches": 12.0, "mm": 305, "pre1908": { "projectile": "12\" A.P.Shot 850 lb (Later)", "velocity_fs": 1740 } },
+      { "thickness_lb_ft2": 440, "inches": 11.0, "mm": 279, "pre1908": { "projectile": "12\" A.P.Shot 714 lb", "velocity_fs": 1750 }, "experiment1908": { "projectile": "12\" A.P.C. Shell 850 lb", "velocity_fs": 1650 } },
+      { "thickness_lb_ft2": 440, "inches": 11.0, "mm": 279, "pre1908": { "projectile": "12\" A.P.Shot 850 lb (Later)", "velocity_fs": 1650 } },
+      { "thickness_lb_ft2": 400, "inches": 10.0, "mm": 254, "pre1908": { "projectile": "12\" A.P.Shot 850 lb", "velocity_fs": "1550–1600" }, "experiment1908": { "projectile": "12\" (850 lb)", "velocity_fs": 1510 } },
+      { "thickness_lb_ft2": 360, "inches": 9.0,  "mm": 229, "pre1908": { "projectile": "9.2\" A.P.Shot 380 lb", "velocity_fs": 1900 }, "experiment1908": { "projectile": "(same)", "velocity_fs": 1340 } },
+      { "thickness_lb_ft2": 320, "inches": 8.0,  "mm": 203, "pre1908": { "projectile": "9.2\" A.P. 380 lb", "velocity_fs": "1700–1750" }, "experiment1908": { "projectile": "9.2\" A.P.C. Shell 380 lb", "velocity_fs": 1640 } },
+      { "thickness_lb_ft2": 280, "inches": 7.0,  "mm": 178, "pre1908": { "projectile": "9.2\" A.P. 380 lb", "velocity_fs": "1500–1550" }, "experiment1908": { "projectile": "(same)", "velocity_fs": 1350 } },
+      { "thickness_lb_ft2": 240, "inches": 6.0,  "mm": 152, "pre1908": { "projectile": "6\" A.P.Shot Firth or Holtzer 100 lb", "velocity_fs": 1960 }, "experiment1908": { "projectile": "(same)", "velocity_fs": 1180 } },
+      { "thickness_lb_ft2": 200, "inches": 5.0,  "mm": 127, "pre1908": { "projectile": "6\" A.P. 100 lb", "velocity_fs": "1700–1750" }, "experiment1908": { "projectile": "7.5\" A.P.C. probable RA", "velocity_fs": 1460 } },
+      { "thickness_lb_ft2": 160, "inches": 4.0,  "mm": 102, "pre1908": { "projectile": "6\" A.P. 100 lb", "velocity_fs": 1380 }, "experiment1908": { "projectile": "6\" C.P.C. Mk VIIIA", "velocity_fs": 1150 } }
+    ],
+    "backing_note": "同一厚度、同一弹，橡木背衬（backed）比无背衬（unbacked）要求更高速度 —— 与概览所述『支撑修正（通常 15f/s）』一致。"
+  },
+
+  "armour_composition_reference": {
+    "_source": "总图表.png — Appendix VIII, Changes in the Armour System Composition from 1888 to 1950, Vickers, Sons & Company",
+    "relevant_to_queen_mary_1913": [
+      { "year": 1896, "type": "Krupp thin Plate Cemented K.C.", "C": "0.25–0.30", "Ni": "3.5–4.0", "Cr": "1.8–2.0", "remark": "Cementation 1.05 max. Carbon" },
+      { "year": 1897, "type": "Vickers 12in Harveyed K.C. / Vickers 6in K.C. / 1898 Vickers 9in K.C.", "C": "0.26–0.33", "Ni": "3.5–4.0", "Cr": "1.8–2.0" },
+      { "year": 1910, "type": "Vickers Standard Qual. Cemented 4892", "C": "0.50–0.55", "Ni": "3.79", "Cr": "1.9", "remark": "Standard Hard Face" },
+      { "year": 1911, "type": "Vickers Faced Hardened 9133", "C": "0.71", "Ni": "3.52", "Cr": "1.60", "remark": "Standard Soft Face" }
+    ],
+    "_note_for_project": "Queen Mary（1911 开工 / 1913 完工）属 Krupp Cemented 世代：Ni 约 3.5–4.0%、Cr 约 1.8–2.0%、C 约 0.26–0.55%。现代『非渗碳』装甲（1926 年 Armstrong Hi.Cr.Mo）尚未出现。"
+  },
+
+  "applicability_to_project": {
+    "ship": "HMS Queen Mary",
+    "built": "1911 laid down / 1913 completed",
+    "standard_in_force": "设计期适用 pre-1908/1908 表；1912 表于 1912 年生效，本舰部分板件可能按 1912 标准验收 —— **具体适用哪一版待考证**",
+    "zone_mapping_examples": [
+      { "zone": "belt_main",    "mm": 229, "lb_ft2": 360, "v1912_12inAPC850lb_fs": 1460, "v_pre1908_9.2inAP380lb_fs": 1900 },
+      { "zone": "upper_belt",   "mm": 152, "lb_ft2": 240, "v1912_9.2inAPC380lb_fs": 1320, "v_pre1908_6inAP100lb_fs": 1960 },
+      { "zone": "bulkhead",     "mm": 102, "lb_ft2": 160, "v1912_6inCPC100lb_fs": 1260,   "v_pre1908_6inAP100lb_fs": 1380 },
+      { "zone": "turret_face",  "mm": 229, "lb_ft2": 360, "v1912_12inAPC850lb_fs": 1460,  "v_pre1908_9.2inAP380lb_fs": 1900 },
+      { "zone": "barbette",     "mm": 229, "lb_ft2": 360, "v1912_12inAPC850lb_fs": 1460,  "v_pre1908_9.2inAP380lb_fs": 1900 },
+      { "zone": "conning_tower","mm": 254, "lb_ft2": 400, "v1912_12inAPC850lb_fs": 1590,  "v_pre1908_12inAP850lb_fs": "1550–1600" }
+    ]
+  },
+
+  "caveats_from_source_overview": [
+    "板极限 = 修正至标准厚度后的穿孔极限 + 支撑修正（通常仅 15 f/s，有时直接简化为穿孔极限）。",
+    "验收标准的更新只与**穿甲弹迭代**同步，而非与装甲迭代同步，故海军部给定标准值**不一定等于**该型装甲的平均板极限。装甲迭代后若标准未更新，实测平均板极限会**高于**标准值。",
+    "本表是**验收下限**，不是平均性能。把它当作『装甲刚好挡住』的边界使用，不要当作典型值。",
+    "标准历次重大更新：1908、1912、1922、1937、1946。"
+  ],
+
+  "how_to_use_in_hullwright": {
+    "purpose": "为穿深模型提供**外部校准锚点**。此前 penetration_main.json 只有 wiki 的 estimate_curve，无独立参照。",
+    "method": "任选一个基于速度的穿甲经验式（de Marre / Thompson F-formula 等），用本表反解系数，使模型在该厚度-速度点上复现『刚好穿透/不穿透』的边界。",
+    "verification": "拟合后必须在**未参与拟合的**表项上回测，容差需写入文档；不得只报拟合点误差。",
+    "status": "数据已录入；校准属 L4（武备/装甲细化），尚未开始。"
+  }
+}
