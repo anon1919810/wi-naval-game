@@ -6,22 +6,22 @@
  "values": {
   "waterplane_shape_p": 0.45315637712812495,
   "waterplane_inertia_coeff_C_I": 0.6081096565879495,
-  "displacement_volume_m3": 26108.030245000005,
-  "displacement_t": 26760.731001125005,
+  "displacement_volume_m3": 26126.849840000006,
+  "displacement_t": 26780.021086000004,
   "displacement_input_t": 26770.0,
-  "displacement_deviation_pct": -0.03462457555097238,
-  "awp_m2": 4459.576,
-  "tpc_t_per_cm": 45.710654,
-  "kb_m": 5.131875,
-  "bm_t_m": 7.946368686074447,
-  "il_m4": 12076334.946468392,
-  "bm_l_m": 462.5525109762408,
-  "mct1cm_t_m_per_cm": 601.7619504195479,
-  "km_m": 13.078243686074448,
+  "displacement_deviation_pct": 0.037434015689220355,
+  "awp_m2": 4613.504000000001,
+  "tpc_t_per_cm": 47.288416000000005,
+  "kb_m": 5.195625000000001,
+  "bm_t_m": 8.214726352771144,
+  "il_m4": 13370484.528391086,
+  "bm_l_m": 511.7526456603649,
+  "mct1cm_t_m_per_cm": 644.0200489474089,
+  "km_m": 13.410351352771144,
   "kg_m": 8.6,
-  "gm_m": 4.478243686074448,
+  "gm_m": 4.810351352771145,
   "roll_gyration_m": 10.298,
-  "roll_period_s": 9.763792853189342
+  "roll_period_s": 9.420718321915764
  },
  "shape_model": {
   "waterplane_coeff": 0.8,
@@ -30,52 +30,52 @@
  },
  "kg_sensitivity": [
   {
-   "kg_m": 8.5,
-   "gm_m": 4.5782436860744475,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 9.656571611427335,
+   "kg_m": 8.72,
+   "gm_m": 4.690351352771144,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 9.540469108651711,
    "stable": true
   },
   {
-   "kg_m": 9.15,
-   "gm_m": 3.928243686074447,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 10.424931439915834,
+   "kg_m": 9.39,
+   "gm_m": 4.020351352771144,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 10.30482007835036,
    "stable": true
   },
   {
-   "kg_m": 9.81,
-   "gm_m": 3.268243686074447,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 11.429183423756069,
+   "kg_m": 10.06,
+   "gm_m": 3.3503513527711437,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 11.288266164156658,
    "stable": true
   },
   {
-   "kg_m": 10.46,
-   "gm_m": 2.6182436860744467,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 12.769308681790333,
+   "kg_m": 10.73,
+   "gm_m": 2.680351352771144,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 12.620499807019163,
    "stable": true
   },
   {
-   "kg_m": 11.12,
-   "gm_m": 1.9582436860744483,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 14.765190364191382,
+   "kg_m": 11.4,
+   "gm_m": 2.010351352771144,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 14.572579551810259,
    "stable": true
   },
   {
-   "kg_m": 11.77,
-   "gm_m": 1.308243686074448,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 18.0645893860154,
+   "kg_m": 12.07,
+   "gm_m": 1.340351352771144,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 17.846912301710102,
    "stable": true
   },
   {
-   "kg_m": 12.42,
-   "gm_m": 0.6582436860744476,
-   "km_m": 13.078243686074448,
-   "roll_period_s": 25.467074986138325,
+   "kg_m": 12.74,
+   "gm_m": 0.670351352771144,
+   "km_m": 13.410351352771144,
+   "roll_period_s": 25.23603801805301,
    "stable": true
   }
  ],
@@ -174,14 +174,14 @@
   },
   {
    "key": "displacement_volume_m3",
-   "value": 26108.030245000005,
+   "value": 26126.849840000006,
    "formula": "∇ = Lwl · B · T · Cb",
    "source": "排水体积定义",
    "estimate": false
   },
   {
    "key": "displacement_t",
-   "value": 26760.731001125005,
+   "value": 26780.021086000004,
    "formula": "Δ = ∇ · ρ",
    "source": "ρ = 1.025 t/m³（海水）",
    "estimate": false
@@ -195,63 +195,63 @@
   },
   {
    "key": "displacement_deviation_pct",
-   "value": -0.03462457555097238,
+   "value": 0.037434015689220355,
    "formula": "(Δ_算 − Δ_给) / Δ_给 × 100",
    "source": "一致性检查",
    "estimate": false
   },
   {
    "key": "awp_m2",
-   "value": 4459.576,
+   "value": 4613.504000000001,
    "formula": "Awp = Cwp · Lwl · B",
    "source": "水线面面积定义",
    "estimate": false
   },
   {
    "key": "tpc_t_per_cm",
-   "value": 45.710654,
+   "value": 47.288416000000005,
    "formula": "TPC = Awp · ρ / 100",
    "source": "每厘米吃水吨数定义",
    "estimate": false
   },
   {
    "key": "kb_m",
-   "value": 5.131875,
+   "value": 5.195625000000001,
    "formula": "KB = T · (5/6 − Cb/(3·Cwp))",
    "source": "Morrish 近似；方箱 Cb=Cwp=1 时退化为 T/2",
    "estimate": false
   },
   {
    "key": "bm_t_m",
-   "value": 7.946368686074447,
+   "value": 8.214726352771144,
    "formula": "BM_T = C_I · B² / (12 · Cb · T)",
    "source": "由 I_T/∇ 导出；方箱 C_I=1 时退化为 B²/(12T)",
    "estimate": false
   },
   {
    "key": "il_m4",
-   "value": 12076334.946468392,
+   "value": 13370484.528391086,
    "formula": "I_L = √π·B·L³·Γ(p+1)/(16·Γ(p+5/2))",
    "source": "同一水线面形状模型的解析积分（方箱 = B·L³/12）",
    "estimate": false
   },
   {
    "key": "bm_l_m",
-   "value": 462.5525109762408,
+   "value": 511.7526456603649,
    "formula": "BM_L = I_L / ∇",
    "source": "纵稳心半径定义",
    "estimate": false
   },
   {
    "key": "mct1cm_t_m_per_cm",
-   "value": 601.7619504195479,
+   "value": 644.0200489474089,
    "formula": "MCT1cm = Δ · BM_L / (100 · L)",
    "source": "每厘米纵倾力矩",
    "estimate": false
   },
   {
    "key": "km_m",
-   "value": 13.078243686074448,
+   "value": 13.410351352771144,
    "formula": "KM = KB + BM_T",
    "source": "横稳心高定义",
    "estimate": false
@@ -265,7 +265,7 @@
   },
   {
    "key": "gm_m",
-   "value": 4.478243686074448,
+   "value": 4.810351352771145,
    "formula": "GM = KM − KG",
    "source": "初稳性高定义",
    "estimate": true
@@ -279,7 +279,7 @@
   },
   {
    "key": "roll_period_s",
-   "value": 9.763792853189342,
+   "value": 9.420718321915764,
    "formula": "T = 2π·k_xx / √(g·GM)",
    "source": "横摇固有周期（小角度）",
    "estimate": true

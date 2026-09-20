@@ -7,12 +7,12 @@
   "dates": { "laid_down": 1911, "launched": 1912, "completed": 1913 },
   "units": "SI",
   "hull": {
-    "lwl_m": 205.7,
+    "lwl_m": 212.8,
     "loa_m": 214.4,
     "beam_m": 27.1,
     "draught_normal_m": 8.5,
     "draught_deep_m": 9.9,
-    "block_coeff": 0.551,
+    "block_coeff": 0.533,
     "waterplane_coeff": 0.80,
     "displacement_normal_t": 26770,
     "displacement_deep_t": 31650,
@@ -20,20 +20,22 @@
     "kg_is_estimate": true,
     "roll_gyration_coeff": 0.38,
     "sources": {
-      "lwl_m": "Tyne Built Ships 675.0 ft ÷ 3.28084 = 205.7 m（很可能是两柱间长，口径待考证）",
+      "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
       "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
       "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
       "draught_normal_m": "Navypedia '8.50 mean'",
       "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
-      "block_coeff": "由来源反推：26770 t ÷ (205.7 × 27.1 × 8.5 × 1.025) = 0.551",
+      "block_coeff": "由来源反推：26770 ÷ (212.8 × 27.1 × 8.5 × 1.025) = 0.5328。注意此前填 0.551 是从**错误的 LWL 205.7** 反推的，属循环论证 —— LWL 修正后必须同步改这个值，否则排水量会虚高 3.4%",
+      "model_cross_check": "独立佐证：由 queen_mary_v4.py 的型值表放样出的模型船体，在自身设计水线 z=0（吃水 9.9 m = 实船满载吃水）上积分得 30943.9 m³ = 31717 t，对实船满载 31650 t 差 +0.213%；模型 Cb=0.5405 vs 实船满载 Cb=0.5408，差 0.06%。**说明该型值表对体积特性的估算是可信的。** 但注意：这只验证了体积/方形系数，**不验证形状分布**（不同分布可以给出相同体积而完全不同的 KB/BM/GZ）",
       "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
       "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
       "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
       "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测"
     },
     "known_open_items": [
-      "本项目契约 length_m=213.4（=700 ft）与本案例 lwl_m=205.7 口径不同，需考证",
-      "吨位单位未注明长吨/公吨；本项目内部按公吨处理"
+      "【已解决 2026-09-21】本项目契约 length_m=213.4（=700 ft 1 in，维基口径）与本案例 lwl_m 的关系：LWL=212.8 m（698 ft，worldwar1.co.uk）、LOA=214.4 m（703 ft 6 in）。契约的 213.4 介于两者，最可能是维基的「Length」字段口径（近似于水线长）。模型全长 213.4 与 LWL 212.8 差 0.3%，尺度可靠。",
+      "吨位单位未注明长吨/公吨；本项目内部按公吨处理。史料 26770/31650 与 26780/31486 并存，属来源间正常差异，各自标注即可，不强行调和。",
+      "形状细节仍是估算（生成脚本自述）。体积特性已与实船验证（差 0.21%），但 KB/BM/GZ 的形状分布**未**经外部验证 —— 需型线图才能定论。"
     ]
   }
 }
