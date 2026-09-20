@@ -1,0 +1,1 @@
+{"runId":"20260920T064657Z","utc":"2026-09-20T06:46:57.2817697Z","totalCases":282,"findings":["C1 speed600 angle0 outer0 penetrations=1 outer229=1 outer600=0 (monotone non-increasing expected)","C3 detonations contact=12 delay=11 dud=0 (dud expected 0)","C5 fragment_weight_violations=0","C6 boiler damage across 24 seeds: min=1.000 median=1.000 max=1.000"]}

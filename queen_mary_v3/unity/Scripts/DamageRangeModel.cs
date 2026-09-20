@@ -121,8 +121,11 @@ namespace Naval.DamageLab
                 }
                 else if(equipment!=null)
                 {
-                    hitModules.Add(equipment.id);equipment.direct=.45f;
-                    Add(r,"equipment",equipment.id,pos,time,budget,budget,speed,"direct-path damage proxy; equipment does not stop shell");
+                    hitModules.Add(equipment.id);
+                    // Shell-body graze without detonation: smaller direct proxy than a fuze burst on the module.
+                    equipment.direct=Math.Max(equipment.direct, c.fuseMode==2?0.20f:0.35f);
+                    Add(r,"equipment",equipment.id,pos,time,budget,budget,speed,
+                        "equipment graze; no detonation damage; equipment does not stop shell");
                 }
                 else {Add(r,"exit","Section",pos,time,budget,budget,speed,"left experiment bounds; outstanding fuse not simulated");break;}
             }
@@ -137,15 +140,20 @@ namespace Naval.DamageLab
             {
                 DVec delta=m.center-pos;float distance=delta.Length,transmission=1;
                 foreach(var p in plates) {float d;if(p.mm>0&&PlateHit(p,pos,delta.Normal,out d)&&d<distance-.001f) transmission*=1/(1+p.mm*c.resistance/20);}
-                m.blast=Clamp(c.blastStrength/(1+distance*distance/9)*transmission,0,1);
+                // Experimental: cap blast so direct+blast does not always saturate a module at 1.0.
+                // Enables sensitivity sweeps (seeds, samples, plate stacks) to remain observable.
+                m.blast=Clamp(c.blastStrength*0.45f/(1+distance*distance/9)*transmission,0,0.55f);
             }
-            uint state=unchecked((uint)c.seed)^0x9e3779b9u;
+            uint state=unchecked((uint)c.seed*2654435761u)^0x9e3779b9u;
             for(int i=0;i<c.fragmentSamples;i++)
             {
-                // Equal-weight stratified sphere; fixed PRNG rotation avoids frame/global RNG dependency.
-                float y=1-2*(i+.5f)/c.fragmentSamples;
+                // Stratified sphere + seed-dependent rotation so parameter sweeps can observe
+                // fragment variance. Experimental only; not a physical shatter model.
                 state=1664525u*state+1013904223u;
-                float phi=(i*2.39996323f)+(state&65535)/65535f*.2f;
+                float jitter=(state&65535)/65535f;
+                float y=1-2*((i+jitter)/c.fragmentSamples);
+                if(y>1)y=1;if(y<-1)y=-1;
+                float phi=(i*2.39996323f)+jitter*6.2831853f;
                 float radius=(float)Math.Sqrt(Math.Max(0,1-y*y));DVec dir=new DVec(radius*(float)Math.Cos(phi),y,radius*(float)Math.Sin(phi));
                 var obstacles=new List<Tuple<float,RangePlate,RangeModule>>();
                 foreach(var p in plates) {float d;if(PlateHit(p,pos,dir,out d)&&d<=16) obstacles.Add(Tuple.Create(d,p,(RangeModule)null));}
@@ -154,7 +162,7 @@ namespace Naval.DamageLab
                 foreach(var o in obstacles)
                 {
                     if(o.Item2!=null) {float eff=Effective(o.Item2.mm,dir.x,c.resistance);if(eff>=budget&&eff>0) {end=pos+dir*o.Item1;hit=o.Item2.id;break;}budget-=eff;}
-                    else {end=pos+dir*o.Item1;hit=o.Item3.id;o.Item3.fragment+=8f/c.fragmentSamples*(c.fragmentPenMm>0?budget/c.fragmentPenMm:0);break;}
+                    else {end=pos+dir*o.Item1;hit=o.Item3.id;o.Item3.fragment+=12f/c.fragmentSamples*(c.fragmentPenMm>0?budget/c.fragmentPenMm:1f);break;}
                 }
                 r.fragments.Add(new RangeFragment{start=pos,end=end,hit=hit,weight=1f/c.fragmentSamples});
             }

@@ -161,12 +161,15 @@ namespace Naval.DamageLab
             }
             Summarize(c5); report.campaigns.Add(c5);
 
-            // C6: seed reproducibility / module damage variance on default delayed shot
+            // C6: seed reproducibility + fragment-only variance (open detonation, no path graze).
             var c6 = new CampaignResult { name = "C6_seed_stability" };
             for (int seed = 0; seed < 24; seed++)
             {
                 var cfg = Base();
                 cfg.seed = seed;
+                cfg.outerMm = 0; cfg.innerMm = 0; cfg.rearMm = 0;
+                cfg.fuseMode = 0; // contact at origin — isolate blast/fragment from armour path
+                cfg.fragmentSamples = 128;
                 c6.rows.Add(Fire(c6.name, "seed" + seed, cfg));
             }
             Summarize(c6); report.campaigns.Add(c6);
@@ -255,11 +258,30 @@ namespace Naval.DamageLab
             if (c6 != null)
             {
                 var dam = new List<float>();
-                foreach (var r in c6.rows) dam.Add(r.boiler);
+                var unique = new HashSet<string>();
+                foreach (var r in c6.rows)
+                {
+                    dam.Add(r.boiler + r.engine + r.pump);
+                    unique.Add(r.boiler.ToString("F3") + "|" + r.engine.ToString("F3") + "|" + r.pump.ToString("F3"));
+                }
                 dam.Sort();
                 report.findings.Add(string.Format(CultureInfo.InvariantCulture,
-                    "C6 boiler damage across 24 seeds: min={0:F3} median={1:F3} max={2:F3}",
-                    dam[0], dam[dam.Count / 2], dam[dam.Count - 1]));
+                    "C6 module-damage-sum across 24 seeds: min={0:F3} median={1:F3} max={2:F3} unique_triples={3}",
+                    dam[0], dam[dam.Count / 2], dam[dam.Count - 1], unique.Count));
+                if (unique.Count <= 1)
+                    report.findings.Add("MODEL_GAP: seed variance masked — blast/direct likely still saturates modules");
+                else
+                    report.findings.Add("MODEL_OK: seed variance observable in module damage (sensitivity sweep viable)");
+            }
+
+            // Model-quality probes (not combat balance tables).
+            var c1b = report.campaigns.Find(c => c.name == "C1_armour_speed_angle");
+            if (c1b != null)
+            {
+                int detHeavy = 0;
+                foreach (var r in c1b.rows)
+                    if (r.boiler >= 0.999f && r.engine >= 0.999f) detHeavy++;
+                report.findings.Add("MODEL: C1 cases with both boiler+engine fully damaged: " + detHeavy + "/" + c1b.rows.Count);
             }
         }
 
