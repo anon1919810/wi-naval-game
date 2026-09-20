@@ -1,0 +1,75 @@
+{
+  "schema": "damage-range-layout-1",
+  "historically_certified": false,
+  "note": "Experimental section layout for the damage range lab. Not Queen Mary compartment certification.",
+  "bounds": { "launch_x": -8, "exit_x": 13, "plate_half_y": 4, "plate_half_z": 7 },
+  "plates": [
+    { "id": "Outer_Belt", "x": 0, "display_name": "外侧主装甲带" },
+    { "id": "Inner_Bulkhead", "x": 3, "display_name": "内侧舱壁" },
+    { "id": "Rear_Bulkhead", "x": 7, "display_name": "后舱壁" }
+  ],
+  "modules": [
+    { "id": "Boiler_Room_1", "center": [5, 0, 0], "size": [1.4, 3, 2.5], "display_name": "锅炉舱（试验）", "codex_note": "路径穿中段时优先受擦伤；爆炸近距时损伤易升" },
+    { "id": "Engine_Room_1", "center": [9, 0, 0], "size": [1.8, 2, 2.5], "display_name": "轮机舱（试验）", "codex_note": "位于后舱壁之后，厚后壁显著降低其爆炸伤" },
+    { "id": "Feed_Pump", "center": [5, -1, 4], "size": [1.3, 1.4, 1.5], "display_name": "给水泵（实验ID）", "codex_note": "非主舰契约 ID，用于检验破片是否打到偏置设备" }
+  ],
+  "codex_presets": [
+    {
+      "id": "baseline",
+      "title": "基线剖射",
+      "tag": "入门",
+      "teach": "默认三层装甲 + 延迟引信，观察穿深预算与起爆位置的关系。",
+      "config": { "outerMm": 180, "innerMm": 25, "rearMm": 40, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 1, "fuseDelay": 0.012, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    },
+    {
+      "id": "thick_plate",
+      "title": "厚板挡弹",
+      "tag": "装甲",
+      "teach": "600 mm 外带 + 哑弹：预算耗尽后停止，不起爆。",
+      "config": { "outerMm": 600, "innerMm": 25, "rearMm": 40, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 2, "fuseDelay": 0, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    },
+    {
+      "id": "open_walls",
+      "title": "无装甲对照",
+      "tag": "对照",
+      "teach": "三层阻力为 0：速度几乎不衰减，用于隔离爆炸/破片效应。",
+      "config": { "outerMm": 0, "innerMm": 0, "rearMm": 0, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 0, "fuseDelay": 0, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    },
+    {
+      "id": "contact_vs_delay",
+      "title": "接触 vs 延迟",
+      "tag": "引信",
+      "teach": "同装甲下对比：接触在装甲外起爆，延迟可打进内层再爆。用 Compare 栏对照。",
+      "config": { "outerMm": 180, "innerMm": 25, "rearMm": 40, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 1, "fuseDelay": 0.02, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 },
+      "compare_config": { "outerMm": 180, "innerMm": 25, "rearMm": 40, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 0, "fuseDelay": 0, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    },
+    {
+      "id": "oblique",
+      "title": "大着角",
+      "tag": "几何",
+      "teach": "30° 入射：等效装甲厚度上升，穿深预算更易耗尽。",
+      "config": { "outerMm": 180, "innerMm": 25, "rearMm": 40, "speed": 600, "referencePenMm": 400, "angleDeg": 30, "fuseMode": 1, "fuseDelay": 0.012, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    },
+    {
+      "id": "hard_material",
+      "title": "高阻力材料",
+      "tag": "材料",
+      "teach": "材料系数 1.5：同样板厚更难穿，用于灵敏度实验。",
+      "config": { "outerMm": 180, "innerMm": 25, "rearMm": 40, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 1, "fuseDelay": 0.012, "resistance": 1.5, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    },
+    {
+      "id": "fragment_rain",
+      "title": "破片雨",
+      "tag": "破片",
+      "teach": "开放起爆 + 512 样本：观察等权破片路径与模块命中分布（改 seed 看差异）。",
+      "config": { "outerMm": 0, "innerMm": 0, "rearMm": 0, "speed": 600, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 0, "fuseDelay": 0, "resistance": 1, "fragmentSamples": 512, "blastStrength": 0.5, "seed": 7 }
+    },
+    {
+      "id": "high_speed",
+      "title": "高速撞击",
+      "tag": "速度",
+      "teach": "800 m/s + 180 mm：速度平方代理下预算显著上升。",
+      "config": { "outerMm": 180, "innerMm": 25, "rearMm": 40, "speed": 800, "referencePenMm": 400, "angleDeg": 0, "fuseMode": 1, "fuseDelay": 0.012, "resistance": 1, "fragmentSamples": 192, "blastStrength": 1, "seed": 1913 }
+    }
+  ]
+}

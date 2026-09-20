@@ -72,11 +72,34 @@ namespace Naval.DamageLab
     /// Blast is a dimensionless distance/occlusion proxy. Fragments are weighted straight-ray samples.</summary>
     public static class RangeSolver
     {
-        public static List<RangePlate> Plates(RangeConfig c) { return new List<RangePlate>{new RangePlate("Outer_Belt",0,c.outerMm),new RangePlate("Inner_Bulkhead",3,c.innerMm),new RangePlate("Rear_Bulkhead",7,c.rearMm)}; }
-        public static List<RangeModule> Modules() { return new List<RangeModule>{
-            new RangeModule("Boiler_Room_1",new DVec(5,0,0),new DVec(1.4f,3,2.5f)),
-            new RangeModule("Engine_Room_1",new DVec(9,0,0),new DVec(1.8f,2,2.5f)),
-            new RangeModule("Feed_Pump",new DVec(5,-1,4),new DVec(1.3f,1.4f,1.5f))}; }
+        public static List<RangePlate> Plates(RangeConfig c)
+        {
+            var list = new List<RangePlate>();
+            var layout = RangeLayout.LoadFromResources();
+            if (layout != null && layout.plates != null && layout.plates.Length >= 3)
+            {
+                float[] mm = { c.outerMm, c.innerMm, c.rearMm };
+                for (int i = 0; i < layout.plates.Length && i < 3; i++)
+                {
+                    var p = layout.plates[i];
+                    list.Add(new RangePlate(p.id, p.x, mm[i]));
+                }
+                return list;
+            }
+            return new List<RangePlate>{new RangePlate("Outer_Belt",0,c.outerMm),new RangePlate("Inner_Bulkhead",3,c.innerMm),new RangePlate("Rear_Bulkhead",7,c.rearMm)};
+        }
+        public static List<RangeModule> Modules()
+        {
+            var layout = RangeLayout.LoadFromResources();
+            if (layout != null)
+            {
+                var mods = layout.BuildModules();
+                if (mods.Count > 0) return mods;
+            }
+            return new List<RangeModule>{
+                new RangeModule("Boiler_Room_1",new DVec(5,0,0),new DVec(1.4f,3,2.5f)),
+                new RangeModule("Engine_Room_1",new DVec(9,0,0),new DVec(1.8f,2,2.5f)),
+                new RangeModule("Feed_Pump",new DVec(5,-1,4),new DVec(1.3f,1.4f,1.5f))}; }
         public static float Clamp(float x,float a,float b) { return Math.Max(a,Math.Min(b,x)); }
         public static float Effective(float mm,float cos,float material) { return mm*material/Math.Max(.05f,Math.Abs(cos)); }
         // Interval parameter is world metres when direction is normalized.
