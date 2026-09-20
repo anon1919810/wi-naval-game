@@ -24,12 +24,12 @@
 
 ### 基线（2026-09-21，可直接信赖）
 
-- 最新提交 **`b5d4a3b`**（阶段 1.1 完成），工作区干净
-- 三套测试 **63 项全绿**：
+- 最新提交见 `git log -1`（阶段 1.1 + 5.0 已完成），工作区干净
+- 三套测试 **72 项全绿**：
   ```
   "$PY" tools/plimsoll/tests/test_hydrostatics.py    # 28
   "$PY" tools/plimsoll/tests/test_geometric.py       # 22
-  "$PY" tools/plimsoll/tests/test_offsets_import.py  # 13
+  "$PY" tools/plimsoll/tests/test_offsets_import.py  # 16
   ```
 - 跑主案例：`"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json --gz -o <out.json>`
 
@@ -107,6 +107,28 @@
 
 ## 阶段 5 · 工程化与可追溯
 
+- [x] **5.0 基准与静默隐患加固**（2026-09-21 完成 · 独立复核查出）
+  派子代理对全部源码做了一次只读复核，找出 4 项隐患 + 1 处假绿：
+  1. `hydrostatics_upright(hull, draught)` 的参数名骗人 —— 它要的是**船体坐标 z**，
+     传真实吃水会静默返回整只船体（体积 55229、I_T 归零、KB=8.85）而不报错。
+     → 改名 `waterline_z`，并加区间校验（keel ≤ z ≤ top）与「I_T 归零」校验。
+  2. `draught_m` 在型值表船体下恒为 0.0。→ 改为 `waterline_z − keel_z`（自龙骨的真实吃水），
+     另增 `waterline_z_m`。
+  3. **一处假绿**：`test_initial_slope_matches_gm` 里 `keel_z` 在等式两边同号相消，
+     把 keel_z 改成 0 甚至 12.3 照样过。→ 新增锚在**源数据绝对值**的断言
+     （龙骨 == 型值表第 4 列最小值 == −9.90），并保留原测试但标明它只是内部自洽校验。
+  4. `_waterline_halfbeam` 在水线落在定义域外时静默回 0 → I_T/BM 归零不报错；
+     且 docstring 与实现不符。→ 补齐退化情形（水线切在剖面顶点）与零值报错。
+  5. box/reference 测试的 keel_z 恒为 0，`−keel` 是恒等变换 → **基准错误天然不可见**。
+     → 新增 `TestDatumShift`：把解析方箱整体下移到 z∈[−5,15]、水线在 0，
+       用闭式解（KB=T/2、BM=B²/12T、GZ 闭式）验基准。
+
+  **变异验证**（证明新测试不是假绿）：把 `keel_z` 分别改成 0.0 / 12.3 / −8.0 ——
+  前两者被新断言与新区间校验抓住；**−8.0 只能被「锚源数据」那条抓住，
+  而「KB/吃水落在 0.40–0.70」抓不住**（比值 0.513 在区间内）。
+  这印证了复核的判断：光靠"数值在合理范围内"不够，必须锚在源数据的绝对值上。
+
+  测试数 63 → **72**，全绿。
 - [ ] **5.1 L1 输出补 trace**：目前 L0 每项都带 `formula`/`source`/`estimate`，L1 一项都没有。
   验收：测试断言 L1 的每个输出键都有 trace。
 - [ ] **5.2 包化**：模块间裸名互引（`import geometry`）只在当 cwd 时能跑。

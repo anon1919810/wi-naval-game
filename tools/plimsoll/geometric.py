@@ -44,6 +44,11 @@ def keel_z(hull):
     return min(z for _, poly in hull.stations for _, z in poly)
 
 
+def top_z(hull):
+    """船体最高点（自船体坐标原点量）。与 `keel_z` 一起界定合法水线范围。"""
+    return max(z for _, poly in hull.stations for _, z in poly)
+
+
 def properties_at_waterline(hull, phi_rad, d):
     """给定横倾角与水线截距，返回浮态量（无纵倾）。"""
     r = hull.integrate(phi_rad, d)
@@ -56,29 +61,43 @@ def solve_equilibrium(hull, phi_rad, target_volume, lo=None, hi=None, tol=1e-9):
     return d, hull.integrate(phi_rad, d)
 
 
-def hydrostatics_upright(hull, draught, rho=RHO_SEA):
-    """正浮（φ=0）静水力：体积、KB、水线面面积、I_T、BM_T、KM。
+def hydrostatics_upright(hull, waterline_z, rho=RHO_SEA):
+    """正浮（水线水平）静水力：体积、KB、水线面面积、I_T、BM_T、KM。
 
-    KB / KM 以**龙骨**为基准（见 `keel_z` 的说明）。
-    I_T 由水线面在 y 方向的分布积分：I_T = (2/3)∫ y³ dx —— 逐站取水线半宽，
-    再沿 x 积分。这与 L0 用 C_I·L·B³/12 是同一个量的两种算法。
+    **`waterline_z` 是「船体坐标里的 z」，不是吃水。**
+    型值表船体的水线在 z = 0、龙骨在 z ≈ −9.9，所以传 0.0 才对；
+    传"吃水 9.9"会静默取到整只船体（含水线以上），`I_T` 归零而**不报错** ——
+    这类静默错误已经踩过一次，故此处加了区间校验与零值校验。
+    真实吃水（自龙骨量）在返回值的 `draught_m` 里。
     """
-    r = hull.integrate(0.0, draught)
+    kz, tz = keel_z(hull), top_z(hull)
+    if not (kz <= waterline_z <= tz):
+        raise ValueError(
+            "waterline_z=%.3f 超出船体 z 范围 [%.3f, %.3f]。"
+            "注意此参数是【船体坐标 z】而非吃水；型值表船体的水线在 z=0、龙骨在 %.1f 附近。"
+            % (waterline_z, kz, tz, kz))
+
+    r = hull.integrate(0.0, waterline_z)
     vol = r["volume"]
     if vol <= 1e-12:
-        raise ValueError("水线 %.3f m 以下没有浸没体积，检查站位剖面" % draught)
+        raise ValueError("水线 z=%.3f 以下没有浸没体积，检查站位剖面" % waterline_z)
 
     xs = [x for x, _ in hull.stations]
     it_terms = []
     for x, poly in hull.stations:
-        half = _waterline_halfbeam(poly, draught)
+        half = _waterline_halfbeam(poly, waterline_z)
         it_terms.append((2.0 / 3.0) * half ** 3)
     it = _trapz(it_terms, xs)
+    if it <= 1e-9:
+        raise ValueError(
+            "水线 z=%.3f 与船体不相交（逐站半宽全为 0）→ I_T 归零，BM_T 会算成 0。"
+            "通常意味着水线落在剖面定义域之外。" % waterline_z)
 
-    kb = r["zb"] - keel_z(hull)
+    kb = r["zb"] - kz
     bm_t = it / vol
     return {
-        "draught_m": draught,
+        "waterline_z_m": waterline_z,
+        "draught_m": waterline_z - kz,     # 自龙骨量的真实吃水
         "volume_m3": vol,
         "displacement_t": vol * rho,
         "kb_m": kb,
@@ -87,7 +106,7 @@ def hydrostatics_upright(hull, draught, rho=RHO_SEA):
         "bm_t_m": bm_t,
         "km_m": kb + bm_t,
         "vcb_rel_waterline_m": r["zb"],
-        "keel_z_m": keel_z(hull),
+        "keel_z_m": kz,
     }
 
 
@@ -134,17 +153,32 @@ def _trapz(ys, xs):
     return total
 
 
-def _waterline_halfbeam(poly, z):
-    """正浮水线 z 处的半宽（取水线以下最宽处，即该 z 处截面的半宽）。"""
+def _waterline_halfbeam(poly, z, eps=1e-9):
+    """水线 z 处的半宽（= 该高度上剖面 y 跨度的一半）。
+
+    注意**不是**"水线以下最宽处"：水线高于舷侧时，该处的 y 跨度只会是甲板宽度。
+    实现同时收集两类点：
+      · 与多边形各边的交点；
+      · 恰好落在水线上的顶点（水线正好切在剖面顶/底时的退化情形，
+        此时严格穿越判据会把边全部跳过，必须靠顶点兜住）。
+    找不到任何交点时返回 0.0 —— 调用方 `hydrostatics_upright` 会据此报错，
+    不再让"水线与船体不相交"静默变成 I_T = 0。
+    """
     ys = []
+    for (y, zz) in poly:
+        if abs(zz - z) <= eps:
+            ys.append(y)
     n = len(poly)
     for i in range(n):
         y0, z0 = poly[i]
         y1, z1 = poly[(i + 1) % n]
-        if (z0 - z > 0) == (z1 - z > 0):
+        if (z0 - z > eps) == (z1 - z > eps):
+            continue                      # 同侧（含端点在线上），无穿越
+        dz = z1 - z0
+        if abs(dz) < 1e-15:
             continue
-        if abs(z1 - z0) < 1e-15:
-            continue
-        t = (z - z0) / (z1 - z0)
-        ys.append(abs(y0 + t * (y1 - y0)))
-    return max(ys) if ys else 0.0
+        t = (z - z0) / dz
+        ys.append(y0 + t * (y1 - y0))
+    if not ys:
+        return 0.0
+    return 0.5 * (max(ys) - min(ys))

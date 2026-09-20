@@ -25,12 +25,17 @@ import hydrostatics as H      # noqa: E402
 RHO = 1.025
 
 
-def make_box(L, B, T, depth, n=81):
-    """方箱：每站剖面都是 z∈[0,depth]、y∈[−B/2,B/2] 的矩形。"""
+def make_box(L, B, T, depth, n=81, bottom_z=0.0):
+    """方箱：每站剖面都是 z∈[bottom_z, bottom_z+depth]、y∈[−B/2,B/2] 的矩形。
+
+    `bottom_z` 用来把解析件整体下移 —— 这样龙骨不再位于 z=0，
+    "$z_B - \\text{keel}$" 才不是恒等变换，基准错误才有可能被测出来。
+    """
     st = []
     for i in range(n):
         x = -0.5 * L * math.cos(math.pi * i / (n - 1))
-        st.append((x, [(B / 2, 0.0), (B / 2, depth), (-B / 2, depth), (-B / 2, 0.0)]))
+        st.append((x, [(B / 2, bottom_z), (B / 2, bottom_z + depth),
+                       (-B / 2, bottom_z + depth), (-B / 2, bottom_z)]))
     return G.StationedHull(st, name="box")
 
 
@@ -163,6 +168,68 @@ class TestCrossCheckWithL0(unittest.TestCase):
         self.assertLess(diff, 0.0)          # L1 低于 Morrish
         self.assertAlmostEqual(diff, -1.88, delta=0.5,
                                msg="Morrish 偏差从 −1.88%% 变成 %.2f%%，需复查" % diff)
+
+
+class TestDatumShift(unittest.TestCase):
+    """基准校验：把解析件**整体下移**，验证 KB / 吃水 / GZ 仍然自龙骨量。
+
+    为什么必须单独测这个：`TestBoxAnalytic` 的方箱龙骨恰在 z=0，
+    于是 "$z_B - \\text{keel}$" 是恒等变换 —— **基准错误在它上面天然不可见**。
+    这是复核查出的盲区。这里把方箱下移到 z ∈ [−5, 0]、水线仍在 z=0，
+    就逼出了真实基准。
+
+    同时覆盖一个退化情形：水面正好切在剖面顶边（`_waterline_halfbeam`
+    必须靠"顶点在水线上"兜住，严格穿越判据会把边全跳过）。
+
+    箱子高度取 20 m（远高于水线）：**必须留出水线以上的舷侧**，否则倾斜后
+    没有舱容可补偿，等体积倾斜无解。箱顶恰好压在水线上是常见的建模错误。
+    """
+
+    L, B, T, SHIFT, DEPTH = 100.0, 10.0, 5.0, -5.0, 20.0
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hull = make_box(cls.L, cls.B, cls.T, cls.DEPTH, n=81, bottom_z=cls.SHIFT)
+
+    def test_volume_and_awp(self):
+        gh = M.hydrostatics_upright(self.hull, 0.0)
+        self.assertAlmostEqual(gh["volume_m3"], self.L * self.B * self.T, places=6)
+        self.assertAlmostEqual(gh["awp_m2"], self.L * self.B, places=6)
+
+    def test_datum_is_exposed_correctly(self):
+        gh = M.hydrostatics_upright(self.hull, 0.0)
+        self.assertAlmostEqual(gh["keel_z_m"], self.SHIFT, places=9)
+        self.assertAlmostEqual(gh["draught_m"], self.T, places=9)
+
+    def test_kb_is_measured_from_keel(self):
+        gh = M.hydrostatics_upright(self.hull, 0.0)
+        # 自龙骨量仍是 T/2 = 2.5；若漏掉换算会得到 z_B = −2.5（负数）
+        self.assertAlmostEqual(gh["kb_m"], self.T / 2, places=9)
+
+    def test_bm_and_km(self):
+        gh = M.hydrostatics_upright(self.hull, 0.0)
+        self.assertAlmostEqual(gh["bm_t_m"], self.B ** 2 / (12 * self.T), places=9)
+        self.assertAlmostEqual(gh["km_m"], self.T / 2 + self.B ** 2 / (12 * self.T), places=9)
+
+    def test_gz_matches_closed_form_after_shift(self):
+        """GZ 只依赖 KG 与浮心，与坐标平移无关 —— 下移后闭式解必须仍成立。"""
+        KG = 3.0
+        vol = self.L * self.B * self.T
+        bm = self.B ** 2 / (12 * self.T)
+        gm = bm + self.T / 2 - KG
+        for deg in (0, 5.0, 10.0, 20.0):
+            phi = math.radians(deg)
+            d, r = M.solve_equilibrium(self.hull, phi, vol)
+            gz = r["yb"] * math.cos(phi) + (r["zb"] - self.SHIFT - KG) * math.sin(phi)
+            exact = (gm * math.sin(phi)
+                     + (self.B ** 2 / (24 * self.T)) * math.sin(phi) ** 3 / math.cos(phi) ** 2)
+            self.assertAlmostEqual(gz, exact, places=5, msg="%d° 平移后闭式解不符" % deg)
+
+    def test_waterline_outside_hull_raises(self):
+        with self.assertRaises(ValueError):
+            M.hydrostatics_upright(self.hull, self.SHIFT + self.DEPTH + 1.0)   # 高于箱顶
+        with self.assertRaises(ValueError):
+            M.hydrostatics_upright(self.hull, self.SHIFT - 1.0)                # 低于龙骨
 
 
 class TestConvergence(unittest.TestCase):

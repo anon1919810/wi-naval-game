@@ -182,8 +182,46 @@ class TestGZOnRealOffsets(unittest.TestCase):
         for r in M.gz_curve(self.hull, self.kg, self.vol, [0, 15, 30]):
             self.assertAlmostEqual(r["volume_m3"], self.vol, places=0)
 
+    def test_keel_datum_matches_source_table(self):
+        """**基准必须锚在源数据的绝对值上**，不能由库自己反推。
+
+        这是补上一处"假绿"：原先 `test_initial_slope_matches_gm` 里 `keel_z` 在等式两边
+        同号相消，把 keel_z 改成 0.0 甚至 12.3 它照样过 —— 那只验证了内部自洽，
+        不是基准校验。这里改成断言"龙骨 = 型值表第 4 列的最小值 = −9.90"，
+        一个由**外部数据**给出的绝对值。
+        """
+        t = load_table()
+        deepest = min(row[3] for row in t)
+        self.assertAlmostEqual(deepest, -9.90, places=9)          # 源数据自身的绝对值
+        self.assertAlmostEqual(M.keel_z(self.hull), deepest, places=9)
+        self.assertAlmostEqual(M.top_z(self.hull), 5.10, places=9)  # 甲板 DECK_Z
+
+    def test_kb_positive_and_plausible_fraction_of_draught(self):
+        """KB 必须为正、且占总吃水的合理比例。基准一错，第一条立刻红。"""
+        gh = M.hydrostatics_upright(self.hull, self.d0)
+        self.assertGreater(gh["kb_m"], 0.0,
+                           "KB=%.3f 非正 —— 龙骨基准错了（忘了把水线基的 zb 换算成自龙骨）"
+                           % gh["kb_m"])
+        self.assertAlmostEqual(gh["draught_m"], self.d0 - M.keel_z(self.hull), places=9)
+        ratio = gh["kb_m"] / gh["draught_m"]
+        self.assertGreater(ratio, 0.40, "KB/T=%.3f 偏低，超出常见船型区间" % ratio)
+        self.assertLess(ratio, 0.70, "KB/T=%.3f 偏高，超出常见船型区间" % ratio)
+
+    def test_waterline_argument_is_z_not_draught(self):
+        """传"吃水"而非"船体坐标 z"时必须**报错**，不能静默返回整只船体。
+
+        这正是复核查出的静默隐患：原先传 9.9 会返回 55229 m³（含水线以上）、
+        I_T 归零、KB=8.85，一声不吭。
+        """
+        with self.assertRaises(ValueError):
+            M.hydrostatics_upright(self.hull, 9.9)      # 超出 z 上界 5.10
+        with self.assertRaises(ValueError):
+            M.hydrostatics_upright(self.hull, -20.0)    # 低于龙骨 −9.90
+
     def test_initial_slope_matches_gm(self):
-        """初始斜率 = GM。注意 zb 要按龙骨换算 —— 漏掉就正好差一个龙骨高度。"""
+        """初始斜率 = GM。**这是内部自洽校验**；基准本身由
+        `test_keel_datum_matches_source_table` 与
+        `test_kb_positive_and_plausible_fraction_of_draught` 守住。"""
         kz = M.keel_z(self.hull)
         phi = math.radians(0.01)
         d, r = M.solve_equilibrium(self.hull, phi, self.vol, tol=1e-12)
