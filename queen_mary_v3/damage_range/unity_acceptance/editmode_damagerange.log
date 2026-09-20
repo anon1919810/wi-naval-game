@@ -1,0 +1,1293 @@
+[Licensing::Module] Trying to connect to existing licensing client channel...
+[Licensing::IpcConnector] Channel LicenseClient-SYSTEM doesn't exist
+[Licensing::Module] Successfully launched the LicensingClient (PId: 68276)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-SYSTEM" at "2026-09-20T05:28:24.5751577Z"
+[Licensing::Client] Code 10 while verifying Licensing Client signature (process Id: 68276, path: "D:/Unity/Editor/2022.3.62f3c1/Editor/Data/Resources/Licensing/Client/Unity.Licensing.Client.exe")
+[Licensing::Module] LicensingClient has failed validation; ignoring
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.16.2+bdef8f5
+  Session Id:              7f9e024fc4d4473fa9da1845a5a4f925
+  Correlation Id:          04ae4177a2343c8a806518d89f1cdbce
+  External correlation Id: 5040132796707587833
+  Machine Id:              SkhLvcRj+6K2V1Dbx7P4MDUpE0o=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-SYSTEM" (connect: 0.85s, validation: 0.06s, handshake: 0.07s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-SYSTEM-notifications" at "2026-09-20T05:28:24.6975908Z"
+[Licensing::Module] Connected to LicensingClient (PId: 68276, launch time: 0.01, total connection time: 0.98s)
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Error: Code 500 while processing request (status: Unable to update licenses. Errors: No ULF license found.,Token not found in cache)
+[Licensing::Client] Error: Code 500 while updating license in client (status: Unable to update licenses. Errors: No ULF license found.,Token not found in cache)
+Built from '2022.3/china_unity/release' branch; Version is '2022.3.62f3c1 (1623fc0bbb97) revision 1451004'; Using compiler version '192829333'; Build Type 'Release'
+OS: 'Windows 11  (10.0.26200) 64bit CoreCountrySpecific' Language: 'zh' Physical Memory: 28476 MB
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Serial number assigned to: "ewogICJzdWJzR3JvdXAiIDogInVuaXR5IGVkaXRvciIsCiAgIm5hbWVzcGFjZSIgOiAidW5pdHlfZWRpdG9yIiwKICAidHlwZSIgOiAiRURJVE9SIiwKICAidGFnIiA6ICJVbml0eVBlcnNvbmFsXXXX"
+BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1, IsPro: 0
+[Licensing::Client] Successfully resolved entitlement details
+
+COMMAND LINE ARGUMENTS:
+D:\Unity\Editor\2022.3.62f3c1\Editor\Unity.exe
+-batchmode
+-projectPath
+D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval
+-runTests
+-testPlatform
+EditMode
+-testResults
+C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\damage_range\unity_acceptance\editmode_damagerange.xml
+-logFile
+C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\damage_range\unity_acceptance\editmode_damagerange.log
+Successfully changed project path to: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval
+D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gfx=262144"
+Player connection [58320]  Target information:
+
+Player connection [58320]  * "[IP] 26.36.103.252 [Port] 55504 [Flags] 2 [Guid] 3574464185 [EditorId] 3574464185 [Version] 1048832 [Id] WindowsEditor(7,yr�İ���) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [58320]  * "[IP] 10.69.255.82 [Port] 55504 [Flags] 2 [Guid] 3574464185 [EditorId] 3574464185 [Version] 1048832 [Id] WindowsEditor(7,yr�İ���) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [58320] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [58320] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+[Package Manager] UpmClient::Connect -- Connected to IPC stream "Upm-67776" after 0.3 seconds.
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 54 packages:
+  Packages from [https://packages.unity.cn]:
+    com.unity.collab-proxy@2.7.1 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.collab-proxy@2.7.1)
+    com.unity.textmeshpro@3.0.7 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.textmeshpro@3.0.7)
+    com.unity.test-framework@1.1.33 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.test-framework@1.1.33)
+    com.unity.timeline@1.7.7 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.timeline@1.7.7)
+    com.unity.visualscripting@1.9.4 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.visualscripting@1.9.4)
+    com.unity.ext.nunit@1.0.6 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.ext.nunit@1.0.6)
+    com.unity.mathematics@1.2.6 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.mathematics@1.2.6)
+    com.unity.burst@1.8.21 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.burst@1.8.21)
+    com.unity.ide.visualstudio@2.0.22 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.ide.visualstudio@2.0.22)
+    com.unity.ide.rider@3.0.36 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.ide.rider@3.0.36)
+    com.unity.ide.vscode@1.2.5 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.ide.vscode@1.2.5)
+    com.unity.editorcoroutines@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.editorcoroutines@1.0.0)
+    com.unity.performance.profile-analyzer@1.2.3 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.performance.profile-analyzer@1.2.3)
+    com.unity.testtools.codecoverage@1.2.6 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.testtools.codecoverage@1.2.6)
+    com.unity.searcher@4.9.2 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.searcher@4.9.2)
+    com.unity.settings-manager@2.1.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.settings-manager@2.1.0)
+  Built-in packages:
+    com.unity.feature.development@1.0.1 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.feature.development@1.0.1)
+    com.unity.render-pipelines.universal@14.0.12 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.render-pipelines.universal@14.0.12)
+    com.unity.ugui@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.ugui@1.0.0)
+    com.unity.modules.ai@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.ai@1.0.0)
+    com.unity.modules.androidjni@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.androidjni@1.0.0)
+    com.unity.modules.animation@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.animation@1.0.0)
+    com.unity.modules.assetbundle@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.assetbundle@1.0.0)
+    com.unity.modules.audio@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.audio@1.0.0)
+    com.unity.modules.cloth@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.cloth@1.0.0)
+    com.unity.modules.director@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.director@1.0.0)
+    com.unity.modules.imageconversion@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.imageconversion@1.0.0)
+    com.unity.modules.imgui@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.imgui@1.0.0)
+    com.unity.modules.jsonserialize@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.jsonserialize@1.0.0)
+    com.unity.modules.particlesystem@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.particlesystem@1.0.0)
+    com.unity.modules.physics@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.physics@1.0.0)
+    com.unity.modules.physics2d@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.physics2d@1.0.0)
+    com.unity.modules.screencapture@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.screencapture@1.0.0)
+    com.unity.modules.terrain@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.terrain@1.0.0)
+    com.unity.modules.terrainphysics@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.terrainphysics@1.0.0)
+    com.unity.modules.tilemap@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.tilemap@1.0.0)
+    com.unity.modules.ui@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.ui@1.0.0)
+    com.unity.modules.uielements@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.uielements@1.0.0)
+    com.unity.modules.umbra@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.umbra@1.0.0)
+    com.unity.modules.unityanalytics@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.unityanalytics@1.0.0)
+    com.unity.modules.unitywebrequest@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.unitywebrequest@1.0.0)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.unitywebrequestassetbundle@1.0.0)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.unitywebrequestaudio@1.0.0)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.unitywebrequesttexture@1.0.0)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.unitywebrequestwww@1.0.0)
+    com.unity.modules.vehicles@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.vehicles@1.0.0)
+    com.unity.modules.video@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.video@1.0.0)
+    com.unity.modules.vr@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.vr@1.0.0)
+    com.unity.modules.wind@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.wind@1.0.0)
+    com.unity.modules.xr@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.xr@1.0.0)
+    com.unity.modules.subsystems@1.0.0 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.modules.subsystems@1.0.0)
+    com.unity.render-pipelines.core@14.0.12 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.render-pipelines.core@14.0.12)
+    com.unity.shadergraph@14.0.12 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.shadergraph@14.0.12)
+    com.unity.render-pipelines.universal-config@14.0.10 (location: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\Library\PackageCache\com.unity.render-pipelines.universal-config@14.0.10)
+[Subsystems] No new subsystems found in resolved package list.
+Package Manager log level set to [2]
+[Package Manager] Done registering packages in 0.62 seconds
+Refreshing native plugins compatible for Editor in 14.29 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 2022.3.62f3c1 (1623fc0bbb97)
+[Subsystems] Discovering subsystems at path D:/Unity/Editor/2022.3.62f3c1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval/Assets
+GfxDevice: creating device client; threaded=0; jobified=0
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: AMD Radeon 780M Graphics (ID=0x1900)
+    Vendor:   ATI
+    VRAM:     14238 MB
+    Driver:   32.0.31041.1004
+[Licensing::Client] Successfully resolved entitlement details
+Initialize mono
+Mono path[0] = 'D:/Unity/Editor/2022.3.62f3c1/Editor/Data/Managed'
+Mono path[1] = 'D:/Unity/Editor/2022.3.62f3c1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'D:/Unity/Editor/2022.3.62f3c1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56776
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: D:/Unity/Editor/2022.3.62f3c1/Editor/Data/PlaybackEngines/WebGLSupport/UnityEditor.WebGL.Extensions.dll
+Register platform support module: D:/Unity/Editor/2022.3.62f3c1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+Registered in 0.006644 seconds.
+- Loaded All Assemblies, in  0.318 seconds
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.204 seconds
+Domain Reload Profiling: 522ms
+	BeginReloadAssembly (113ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (1ms)
+	RebuildCommonClasses (28ms)
+	RebuildNativeTypeToScriptingClass (8ms)
+	initialDomainReloadingComplete (46ms)
+	LoadAllAssembliesAndSetupDomain (123ms)
+		LoadAssemblies (114ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (120ms)
+			TypeCache.Refresh (118ms)
+				TypeCache.ScanAssembly (105ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (1ms)
+	FinalizeReload (204ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (169ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (7ms)
+			SetLoadedEditorAssemblies (4ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (2ms)
+			ProcessInitializeOnLoadAttributes (116ms)
+			ProcessInitializeOnLoadMethodAttributes (40ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:80
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: D:\Unity\Projects\QueenMaryNaval\QueenMaryNaval\
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/Ping'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/Ping application/grpc - - 200 - application/grpc 35.1478ms
+Starting: D:\Unity\Editor\2022.3.62f3c1\Editor\Data\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval
+DisplayProgressbar: Compiling Scripts
+info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
+      Request starting HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/ConfigurePostProcessors application/grpc -
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
+      Executing endpoint 'gRPC - /UnityILPP.PostProcessing/ConfigurePostProcessors'
+warn: Unity.ILPP.Runner.PostProcessingAssemblyLoadContext[0]
+      Assembly system.runtime.interopservices.windowsruntime has duplicate hint path. Ignoring "D:\Unity\Editor\2022.3.62f3c1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\Facades\System.Runtime.InteropServices.WindowsRuntime.dll" in favor of "D:\Unity\Editor\2022.3.62f3c1\Editor\Data\NetStandard\Extensions\2.0.0\System.Runtime.InteropServices.WindowsRuntime.dll"
+warn: Unity.ILPP.Runner.PostProcessingAssemblyLoadContext[0]
+      Assembly system.componentmodel.composition has duplicate hint path. Ignoring "D:\Unity\Editor\2022.3.62f3c1\Editor\Data\UnityReferenceAssemblies\unity-4.8-api\System.ComponentModel.Composition.dll" in favor of "D:\Unity\Editor\2022.3.62f3c1\Editor\Data\NetStandard\compat\2.1.0\shims\netfx\System.ComponentModel.Composition.dll"
+info: Unity.ILPP.Runner.PostProcessingAssemblyLoadContext[0]
+      Resolved Unity.Burst.Cecil, Version=0.11.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e with Library\PackageCache\com.unity.burst@1.8.21\Unity.Burst.CodeGen\Unity.Burst.Cecil.dll
+info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
+      Executed endpoint 'gRPC - /UnityILPP.PostProcessing/ConfigurePostProcessors'
+info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
+      Request finished HTTP/2 POST http://ilpp/UnityILPP.PostProcessing/ConfigurePostProcessors application/grpc - - 200 - application/grpc 49.2480ms
+ExitCode: 0 Duration: 0s254ms
+[346/633    0s] WriteResponseFile Library/Bee/artifacts/rsp/4747638433968585886.rsp
+[500/633    0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+*** Tundra build success (0.21 seconds), 2 items updated, 633 evaluated
+AssetDatabase: script compilation time: 0.755230s
+Begin MonoManager ReloadAssembly
+Total cache size 56876468
+Total cache size after purge 56876468
+- Loaded All Assemblies, in  0.588 seconds
+Refreshing native plugins compatible for Editor in 5.19 ms, found 3 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Refreshing native plugins compatible for Editor in 5.12 ms, found 3 plugins.
+Native extension for WindowsStandalone target not found
+Native extension for WebGL target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  2.322 seconds
+Domain Reload Profiling: 2910ms
+	BeginReloadAssembly (149ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (4ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (26ms)
+	RebuildCommonClasses (26ms)
+	RebuildNativeTypeToScriptingClass (8ms)
+	initialDomainReloadingComplete (21ms)
+	LoadAllAssembliesAndSetupDomain (383ms)
+		LoadAssemblies (292ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (187ms)
+			TypeCache.Refresh (162ms)
+				TypeCache.ScanAssembly (150ms)
+			ScanForSourceGeneratedMonoScriptInfo (16ms)
+			ResolveRequiredComponents (7ms)
+	FinalizeReload (2323ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (2159ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (6ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (59ms)
+			ProcessInitializeOnLoadAttributes (2027ms)
+			ProcessInitializeOnLoadMethodAttributes (60ms)
+			AfterProcessingInitializeOnLoad (2ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (8ms)
+Asset Pipeline Refresh (id=f4101ca0cdc502c4b94ec7039cf22db0): Total: 5.622 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=60 (actual=0, local cache=60, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=1829 ms
+		Asset DB Callback time: managed=34 ms, native=0 ms
+		Scripting: domain reloads=1, domain reload time=2967 ms, compile time=757 ms, other=32 ms
+		Project Asset Count: scripts=5906, non-scripts=1565
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokeBeforeRefreshCallbacks: 0.803ms
+	ApplyChangesToAssetFolders: 0.058ms
+	Scan: 180.700ms
+	OnSourceAssetsModified: 0.001ms
+	GetAllGuidsForCategorization: 1.093ms
+	CategorizeAssets: 146.350ms
+	ImportOutOfDateAssets: 2378.752ms (1588.074ms without children)
+		CompileScripts: 757.113ms
+		ReloadNativeAssets: 0.024ms
+		UnloadImportedAssets: 30.631ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 2.037ms
+		InitializingProgressBar: 0.000ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
+		OnDemandSchedulerStart: 0.871ms
+	PostProcessAllAssets: 34.929ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.000ms
+	UnloadStreamsBegin: 1.335ms
+	PersistCurrentRevisions: 0.167ms
+	UnloadStreamsEnd: 0.043ms
+	GenerateScriptTypeHashes: 2.624ms
+	Untracked: 2878.148ms
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.06 seconds
+Scanning for USB devices : 6.055ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-QueenMaryNaval
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+ProgressiveSceneManager::Cancel()
+Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 83 unused Assets / (0.8 MB). Loaded Objects now: 5564.
+Memory consumption went from 143.6 MB to 142.9 MB.
+Total: 4.808000 ms (FindLiveObjects: 0.386800 ms CreateObjectMapping: 0.081000 ms MarkObjects: 3.985700 ms  DeleteObjects: 0.353900 ms)
+
+D3D11 device created for Microsoft Media Foundation video decoding.
+[Project] Loading completed in 9.613 seconds
+	Project init time: 				8.050 seconds
+		Template init time: 		0.000 seconds
+		Package Manager init time: 		0.340 seconds
+		Asset Database init time: 		0.793 seconds
+		Global illumination init time: 	0.004 seconds
+		Assemblies load time: 			0.534 seconds
+		Unity extensions init time: 	0.006 seconds
+		Asset Database refresh time: 	0.000 seconds
+	Scene opening time: 			0.412 seconds
+##utp:{"type":"ProjectInfo","version":2,"phase":"Immediate","time":1789882113311,"processId":67776,"projectLoad":9.6127833,"projectInit":8.0501862,"templateInit":0.0,"packageManagerInit":0.340171,"assetDatabaseInit":0.7930172,"globalIlluminationInit":0.0036938,"assembliesLoad":0.5336861,"unityExtensionsInit":0.0060283,"assetDatabaseRefresh":0.0,"sceneOpening":0.4119573}
+##utp:{"type":"EditorInfo","version":2,"phase":"Immediate","time":1789882113311,"processId":67776,"editorVersion":"2022.3.62f3c1 (1623fc0bbb97)","branch":"2022.3/china_unity/release","buildType":"Release","platform":"Windows"}
+Running tests for EditMode
+Executing tests with settings: test mode = EditMode
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+UnityEditor.TestTools.TestRunner.CommandLineTest.Executer:InitializeAndExecuteRun (string[]) (at ./Library/PackageCache/com.unity.test-framework@1.1.33/UnityEditor.TestRunner/CommandLineTest/Executer.cs:47)
+UnityEditor.TestTools.TestRunner.CommandLineTest.TestStarter:UpdateWatch () (at ./Library/PackageCache/com.unity.test-framework@1.1.33/UnityEditor.TestRunner/CommandLineTest/TestStarter.cs:50)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions ()
+
+(Filename: ./Library/PackageCache/com.unity.test-framework@1.1.33/UnityEditor.TestRunner/CommandLineTest/Executer.cs Line: 47)
+
+Opening scene 'Assets/Scenes/DamageRange.unity'
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/DamageRange.unity'
+	Deserialize:            11.609 ms
+	Integration:            235.871 ms
+	Integration of assets:  0.110 ms
+	Thread Wait Time:       0.020 ms
+	Total Operation Time:   247.610 ms
+Unloading 2 unused Assets / (1.0 KB). Loaded Objects now: 6256.
+Memory consumption went from 142.8 MB to 142.8 MB.
+Total: 6.587700 ms (FindLiveObjects: 0.770800 ms CreateObjectMapping: 0.417900 ms MarkObjects: 5.372400 ms  DeleteObjects: 0.025600 ms)
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:107)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 107]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:108)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 108]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:109)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 109]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:110)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 110]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:111)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 111]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:116)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 116]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:116)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 116]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:116)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 116]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:121)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 121]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:127)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 127]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:121)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 121]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:127)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 127]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:121)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 121]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:127)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 127]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:129)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 129]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:130)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 130]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:131)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 131]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:107)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 107]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:108)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 108]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:109)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 109]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:110)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 110]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:111)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 111]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:116)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 116]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:116)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 116]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:116)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 116]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:117)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 117]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:121)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 121]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:127)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 127]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:121)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 121]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:127)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 127]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:121)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 121]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:124)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 124]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:127)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 127]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:129)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 129]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:130)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 130]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:Rebuild () (at Assets/Scripts/Naval/DamageRangeView.cs:131)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 131]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:DrawPaths () (at Assets/Scripts/Naval/DamageRangeView.cs:158)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 158]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:DrawPaths () (at Assets/Scripts/Naval/DamageRangeView.cs:158)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 158]
+
+Destroy may not be called from edit mode! Use DestroyImmediate instead.
+Destroying an object in edit mode destroys it permanently.
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.Object:Destroy (UnityEngine.Object)
+Naval.DamageLab.DamageRangeView:Solid (string,UnityEngine.PrimitiveType,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Color,UnityEngine.Transform) (at Assets/Scripts/Naval/DamageRangeView.cs:97)
+Naval.DamageLab.DamageRangeView:DrawPaths () (at Assets/Scripts/Naval/DamageRangeView.cs:158)
+Naval.DamageLab.DamageRangeView:Fire () (at Assets/Scripts/Naval/DamageRangeView.cs:144)
+Naval.DamageLab.DamageRangeView:Start () (at Assets/Scripts/Naval/DamageRangeView.cs:44)
+
+[Assets/Scripts/Naval/DamageRangeView.cs line 158]
+
+[UnityConnectServicesConfig] config is NOT valid, switching to default
+Created GICache directory at C:/Users/杨睿/AppData/LocalLow/Unity/Caches/GiCache. Took: 0.104s, timestamps: [9.637 - 9.741]
+gi::BakeBackendSwitch: switching bake backend from 3 to 1.
+[00:00:00] Builtin Sky manager started.
+[00:00:00] Finished 1 Bake Ambient Probe job (0.00s execute, 0.00s integrate, 0.08s wallclock)
+[00:00:00] Finished 1 Bake Ambient Probe job (0.00s execute, 0.00s integrate, 0.06s wallclock)
+DisplayProgressbar: Test Runner
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+Loaded scene 'Assets/Scenes/DamageRange.unity'
+	Deserialize:            10.832 ms
+	Integration:            216.413 ms
+	Integration of assets:  0.106 ms
+	Thread Wait Time:       0.015 ms
+	Total Operation Time:   227.365 ms
+Unloading 1 unused Assets / (0.5 KB). Loaded Objects now: 6316.
+Memory consumption went from 142.9 MB to 142.9 MB.
+Total: 6.055200 ms (FindLiveObjects: 0.428300 ms CreateObjectMapping: 0.225600 ms MarkObjects: 5.375800 ms  DeleteObjects: 0.025100 ms)
+
+Saving results to: C:\Users\杨睿\Desktop\HMS_Queen_Mary_建模成果_2026-09-17\queen_mary_v3\damage_range\unity_acceptance\editmode_damagerange.xml
+[PhysX] Initialized MultithreadedTaskDispatcher with 16 workers.
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+[Licensing::IpcConnector] LicenseClient-SYSTEM-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-SYSTEM channel disconnected successfully.

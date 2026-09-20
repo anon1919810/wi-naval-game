@@ -1,0 +1,1 @@
+200 serial shots, 192 fragments per shot, allocating full diagnostic reports. Total ms=56.9836; mean ms=0.284918. Not game FPS or GPU time.
