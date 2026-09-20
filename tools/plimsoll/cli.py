@@ -36,13 +36,47 @@ DISPLAY = [
 ]
 
 
+def _load_offsets_hull(a, deck_z):
+    """取型值表船体。
+
+    优先级：显式 `--offsets <file>` → 仓库里的 `hull_offsets.json`（真实型线接入点）
+    → 生成脚本的内建估算表。**返回值里必须带来源说明**，因为这三者的可信度不同。
+    """
+    import offsets as OF
+    here = os.path.dirname(os.path.abspath(__file__))
+    repo = os.path.dirname(os.path.dirname(here))
+
+    if a.offsets:
+        table, note = OF.load_offsets_json(a.offsets)
+        return OF.build_hull(table, deck_z=deck_z), "真实型线：%s（%s）" % (a.offsets, note or "无说明"), deck_z
+
+    for cand in (os.path.join(repo, "queen_mary_v4", "hull_offsets.json"),
+                 os.path.join(repo, "queen_mary_v3", "hull_offsets.json"),
+                 os.path.join(repo, "data", "hull_offsets.json")):
+        if os.path.isfile(cand):
+            table, note = OF.load_offsets_json(cand)
+            return OF.build_hull(table, deck_z=deck_z), "真实型线：%s（%s）" % (cand, note or "无说明"), deck_z
+
+    script = os.path.join(repo, "queen_mary_v4", "queen_mary_v4.py")
+    if not os.path.isfile(script):
+        raise SystemExit("ERROR: 既没有 hull_offsets.json，也找不到 %s" % script)
+    table = OF.parse_offsets_from_python(script)
+    return (OF.build_hull(table, deck_z=deck_z),
+            "**估算**型值表：%s 的内建 OFFSETS（非史实，生成脚本自述形状为 estimate）" % os.path.basename(script),
+            deck_z)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Plimsoll · 参数化静水力（L0）")
     ap.add_argument("ship", nargs="?", help="ship.json 路径")
     ap.add_argument("-o", "--out", help="写出 result.json")
     ap.add_argument("--selftest", action="store_true", help="只跑核心自检")
     ap.add_argument("--gz", action="store_true",
-                    help="额外输出大角稳性 GZ 曲线（L1 几何法；需 hull 有 Cb<Cwp）")
+                    help="额外输出大角稳性 GZ 曲线（L1 几何法）")
+    ap.add_argument("--hull", choices=["offsets", "reference"], default="offsets",
+                    help="GZ 用哪种船体：offsets=型值表船体（默认，真实几何）；"
+                         "reference=合成参照船体（与 L0 同源，仅供交叉验证）")
+    ap.add_argument("--offsets", help="指定 hull_offsets.json 路径；省略则按约定在仓库里找")
     a = ap.parse_args()
 
     if a.selftest or not a.ship:
@@ -102,21 +136,40 @@ def main() -> int:
     if a.gz:
         import geometry as GE
         import geometric as GM
+        import offsets as OF
+        import math as _m
         kg = hull.get("kg_m")
         if kg is None:
             print()
             print("跳过 GZ：需要 kg_m。")
         else:
-            L, B = hull["lwl_m"], hull["beam_m"]
-            T = hull.get("draught_normal_m") or hull.get("draught_m")
-            Cb, Cwp = hull["block_coeff"], hull.get("waterplane_coeff", 0.80)
-            depth = hull.get("depth_m", T * 1.6)
-            h = GE.make_reference_hull(L, B, T, Cb, Cwp, deck=depth)
-            vol = Cb * L * B * T
+            depth = hull.get("depth_m", 5.10)
             angles = [0, 5, 10, 15, 20, 30, 40, 50, 60]
+
+            if a.hull == "reference":
+                L, B = hull["lwl_m"], hull["beam_m"]
+                T = hull.get("draught_normal_m") or hull.get("draught_m")
+                Cb, Cwp = hull["block_coeff"], hull.get("waterplane_coeff", 0.80)
+                h = GE.make_reference_hull(L, B, T, Cb, Cwp, deck=depth)
+                vol = Cb * L * B * T
+                prov = "合成参照船体（与 L0 同源，仅供交叉验证）"
+                deck_z = depth
+            else:
+                h, prov, deck_z = _load_offsets_hull(a, depth)
+                vol = GM.hydrostatics_upright(h, 0.0)["volume_m3"]
+
             rows = GM.gz_curve(h, kg, vol, angles)
             print()
-            print("GZ 曲线（L1 几何法，等体积倾斜，甲板 %.1f m）：" % depth)
+            print("GZ 曲线（L1 几何法，等体积倾斜）")
+            print("  船体来源：%s" % prov)
+            print("  排水体积 %.1f m³   KG %.2f m   甲板 z=%.2f m" % (vol, kg, deck_z))
+
+            half = max(max(abs(y) for y, _ in poly) for _, poly in h.stations)
+            freeboard = deck_z
+            if half > 0:
+                limit = _m.degrees(_m.atan(freeboard / half))
+                print("  ⚠ 甲板浸没角约 %.1f° —— 超过它浸没剖面被主甲板截断，GZ 偏小，"
+                      "该角以上数值不应引用" % limit)
             print("  %-8s %-12s %s" % ("横倾", "复原力臂 m", "平衡水线 m"))
             for r in rows:
                 bar = "█" * int(max(0.0, r["gm_arm_m"]) * 8)
@@ -124,7 +177,7 @@ def main() -> int:
                       % ("%d°" % r["angle_deg"], r["gm_arm_m"], r["waterline_d_m"], bar))
             peak = max(rows, key=lambda r: r["gm_arm_m"])
             print("  最大复原力臂 %.4f m @ %d°" % (peak["gm_arm_m"], peak["angle_deg"]))
-            gz_block = rows
+            gz_block = {"hull_source": prov, "deck_z_m": deck_z, "rows": rows}
 
     if a.out:
         result = {
