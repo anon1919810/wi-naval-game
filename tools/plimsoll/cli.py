@@ -41,6 +41,8 @@ def main() -> int:
     ap.add_argument("ship", nargs="?", help="ship.json 路径")
     ap.add_argument("-o", "--out", help="写出 result.json")
     ap.add_argument("--selftest", action="store_true", help="只跑核心自检")
+    ap.add_argument("--gz", action="store_true",
+                    help="额外输出大角稳性 GZ 曲线（L1 几何法；需 hull 有 Cb<Cwp）")
     a = ap.parse_args()
 
     if a.selftest or not a.ship:
@@ -96,6 +98,34 @@ def main() -> int:
                  "OK" if r["stable"] else "不足（会翻）"))
     print("  ↑ GM 与 KG 是一一对应的；请用实测或 L2 重量分组把 KG 定下来。")
 
+    gz_block = None
+    if a.gz:
+        import geometry as GE
+        import geometric as GM
+        kg = hull.get("kg_m")
+        if kg is None:
+            print()
+            print("跳过 GZ：需要 kg_m。")
+        else:
+            L, B = hull["lwl_m"], hull["beam_m"]
+            T = hull.get("draught_normal_m") or hull.get("draught_m")
+            Cb, Cwp = hull["block_coeff"], hull.get("waterplane_coeff", 0.80)
+            depth = hull.get("depth_m", T * 1.6)
+            h = GE.make_reference_hull(L, B, T, Cb, Cwp, deck=depth)
+            vol = Cb * L * B * T
+            angles = [0, 5, 10, 15, 20, 30, 40, 50, 60]
+            rows = GM.gz_curve(h, kg, vol, angles)
+            print()
+            print("GZ 曲线（L1 几何法，等体积倾斜，甲板 %.1f m）：" % depth)
+            print("  %-8s %-12s %s" % ("横倾", "复原力臂 m", "平衡水线 m"))
+            for r in rows:
+                bar = "█" * int(max(0.0, r["gm_arm_m"]) * 8)
+                print("  %-8s %-12.4f %-12.3f %s"
+                      % ("%d°" % r["angle_deg"], r["gm_arm_m"], r["waterline_d_m"], bar))
+            peak = max(rows, key=lambda r: r["gm_arm_m"])
+            print("  最大复原力臂 %.4f m @ %d°" % (peak["gm_arm_m"], peak["angle_deg"]))
+            gz_block = rows
+
     if a.out:
         result = {
             "schema": "plimsoll-result-1",
@@ -105,6 +135,7 @@ def main() -> int:
             "values": out["values"],
             "shape_model": out["shape_model"],
             "kg_sensitivity": H.sensitivity_kg(hull, ks),
+            "gz_curve": gz_block,
             "trace": out["trace"],
             "warnings": out["warnings"],
         }
