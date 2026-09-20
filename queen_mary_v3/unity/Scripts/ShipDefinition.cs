@@ -56,7 +56,7 @@ namespace Naval
         public string lodProfileId;
         public float[] lodScreenHeights;
         public float lodRecommendedBias;
-        [Tooltip("构建时 RecalculateBounds 后的 LODGroup.size；局部包围尺寸，不是舰长")]
+        [Tooltip("构建时 RecalculateBounds 后的 LODGroup.size（实测值，不可硬编码）。本船实测 213.4 m，即包围盒最长轴 = 舰长；换船型或改包围盒后必须重新取。")]
         public float lodGroupSizeMeasured;
 
         public string builtUtc;

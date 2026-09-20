@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="31" result="Passed" total="31" passed="31" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:43Z" duration="2.2342301">
+  <test-suite type="TestSuite" id="1043" name="QueenMaryNaval" fullname="QueenMaryNaval" runstate="Runnable" testcasecount="31" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:43Z" duration="2.234230" total="31" passed="31" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="1081" name="Naval.EditMode.Tests.dll" fullname="D:/Unity/Projects/QueenMaryNaval/QueenMaryNaval/Library/ScriptAssemblies/Naval.EditMode.Tests.dll" runstate="Runnable" testcasecount="31" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:43Z" duration="2.219229" total="31" passed="31" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="24160" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestFixture" id="1044" name="DamageRangeP25Tests" fullname="DamageRangeP25Tests" classname="DamageRangeP25Tests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.031257" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1051" name="Events_StillMonotonic_WithTransit" fullname="DamageRangeP25Tests.Events_StillMonotonic_WithTransit" methodname="Events_StillMonotonic_WithTransit" classname="DamageRangeP25Tests" runstate="Runnable" seed="391413796" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.010021" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1048" name="Explosion_LocusClassified" fullname="DamageRangeP25Tests.Explosion_LocusClassified" methodname="Explosion_LocusClassified" classname="DamageRangeP25Tests" runstate="Runnable" seed="1150454854" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.003224" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1047" name="Fragments_CarryMassVelocityEnergy" fullname="DamageRangeP25Tests.Fragments_CarryMassVelocityEnergy" methodname="Fragments_CarryMassVelocityEnergy" classname="DamageRangeP25Tests" runstate="Runnable" seed="514455772" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.003919" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1049" name="InsideModule_BlastBonus_BoostsHost" fullname="DamageRangeP25Tests.InsideModule_BlastBonus_BoostsHost" methodname="InsideModule_BlastBonus_BoostsHost" classname="DamageRangeP25Tests" runstate="Runnable" seed="502198105" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.001616" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1046" name="PlateTransit_CanBeDisabled" fullname="DamageRangeP25Tests.PlateTransit_CanBeDisabled" methodname="PlateTransit_CanBeDisabled" classname="DamageRangeP25Tests" runstate="Runnable" seed="1913625356" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.000816" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1045" name="PlateTransit_EmittedWhenArmourPresent" fullname="DamageRangeP25Tests.PlateTransit_EmittedWhenArmourPresent" methodname="PlateTransit_EmittedWhenArmourPresent" classname="DamageRangeP25Tests" runstate="Runnable" seed="1119048213" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.000727" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1050" name="Seed_ChangesFragmentEnergyMix" fullname="DamageRangeP25Tests.Seed_ChangesFragmentEnergyMix" methodname="Seed_ChangesFragmentEnergyMix" classname="DamageRangeP25Tests" runstate="Runnable" seed="1312709568" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:40Z" duration="0.000767" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1052" name="DamageRangeSweepTests" fullname="DamageRangeSweepTests" classname="DamageRangeSweepTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:42Z" duration="1.815222" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1054" name="Sweep_AllFiresAreDeterministic" fullname="DamageRangeSweepTests.Sweep_AllFiresAreDeterministic" methodname="Sweep_AllFiresAreDeterministic" classname="DamageRangeSweepTests" runstate="Runnable" seed="699851486" result="Passed" start-time="2026-09-20 17:08:40Z" end-time="2026-09-20 17:08:41Z" duration="0.365119" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1056" name="Sweep_DudFuse_NeverDetonates" fullname="DamageRangeSweepTests.Sweep_DudFuse_NeverDetonates" methodname="Sweep_DudFuse_NeverDetonates" classname="DamageRangeSweepTests" runstate="Runnable" seed="491678454" result="Passed" start-time="2026-09-20 17:08:41Z" end-time="2026-09-20 17:08:41Z" duration="0.360879" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1057" name="Sweep_FragmentWeightsStayNearUnity" fullname="DamageRangeSweepTests.Sweep_FragmentWeightsStayNearUnity" methodname="Sweep_FragmentWeightsStayNearUnity" classname="DamageRangeSweepTests" runstate="Runnable" seed="519906912" result="Passed" start-time="2026-09-20 17:08:41Z" end-time="2026-09-20 17:08:41Z" duration="0.353813" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1053" name="Sweep_ProducesAllCampaignsWithCases" fullname="DamageRangeSweepTests.Sweep_ProducesAllCampaignsWithCases" methodname="Sweep_ProducesAllCampaignsWithCases" classname="DamageRangeSweepTests" runstate="Runnable" seed="1341218375" result="Passed" start-time="2026-09-20 17:08:41Z" end-time="2026-09-20 17:08:42Z" duration="0.355723" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1055" name="Sweep_ThickerArmour_DoesNotIncreasePenetrations" fullname="DamageRangeSweepTests.Sweep_ThickerArmour_DoesNotIncreasePenetrations" methodname="Sweep_ThickerArmour_DoesNotIncreasePenetrations" classname="DamageRangeSweepTests" runstate="Runnable" seed="805139260" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.377610" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1058" name="DamageRangeTests" fullname="DamageRangeTests" classname="DamageRangeTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.014652" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1067" name="BoxIntervalHandlesInsideOrigin" fullname="DamageRangeTests.BoxIntervalHandlesInsideOrigin" methodname="BoxIntervalHandlesInsideOrigin" classname="DamageRangeTests" runstate="Runnable" seed="1278247334" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.001240" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1068" name="ConfigSnapshotDoesNotChangeAfterFire" fullname="DamageRangeTests.ConfigSnapshotDoesNotChangeAfterFire" methodname="ConfigSnapshotDoesNotChangeAfterFire" classname="DamageRangeTests" runstate="Runnable" seed="1460079188" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.000792" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1066" name="EventsMonotonicAndDamageBounded" fullname="DamageRangeTests.EventsMonotonicAndDamageBounded" methodname="EventsMonotonicAndDamageBounded" classname="DamageRangeTests" runstate="Runnable" seed="1353235850" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.001265" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1064" name="FragmentsCarryUnitTotalWeight" fullname="DamageRangeTests.FragmentsCarryUnitTotalWeight" methodname="FragmentsCarryUnitTotalWeight" classname="DamageRangeTests" runstate="Runnable" seed="730496636" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.003074" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1062" name="FuseDelayControlsDetonationPosition" fullname="DamageRangeTests.FuseDelayControlsDetonationPosition" methodname="FuseDelayControlsDetonationPosition" classname="DamageRangeTests" runstate="Runnable" seed="1016716481" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.001126" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1065" name="InvalidConfigurationRejected" fullname="DamageRangeTests.InvalidConfigurationRejected" methodname="InvalidConfigurationRejected" classname="DamageRangeTests" runstate="Runnable" seed="1643653525" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.000826" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1063" name="PlateShieldingReducesBlast" fullname="DamageRangeTests.PlateShieldingReducesBlast" methodname="PlateShieldingReducesBlast" classname="DamageRangeTests" runstate="Runnable" seed="1136551068" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.000918" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1059" name="SameSeedSameReport" fullname="DamageRangeTests.SameSeedSameReport" methodname="SameSeedSameReport" classname="DamageRangeTests" runstate="Runnable" seed="1708138692" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.001361" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1060" name="ThickPlateStopsDud" fullname="DamageRangeTests.ThickPlateStopsDud" methodname="ThickPlateStopsDud" classname="DamageRangeTests" runstate="Runnable" seed="1700979523" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.000574" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1061" name="ZeroResistancePreservesSpeed" fullname="DamageRangeTests.ZeroResistancePreservesSpeed" methodname="ZeroResistancePreservesSpeed" classname="DamageRangeTests" runstate="Runnable" seed="675836822" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:42Z" duration="0.000351" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1069" name="LodProfileTests" fullname="LodProfileTests" classname="LodProfileTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:43Z" duration="0.349656" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1071" name="ExpectedAt_HoldsUnderRecommendedBias" fullname="LodProfileTests.ExpectedAt_HoldsUnderRecommendedBias" methodname="ExpectedAt_HoldsUnderRecommendedBias" classname="LodProfileTests" runstate="Runnable" seed="687379240" result="Passed" start-time="2026-09-20 17:08:42Z" end-time="2026-09-20 17:08:43Z" duration="0.346572" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1070" name="Profiles_LoadFromResources" fullname="LodProfileTests.Profiles_LoadFromResources" methodname="Profiles_LoadFromResources" classname="LodProfileTests" runstate="Runnable" seed="359692922" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.000959" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1072" name="RecommendedBias_MatchesProjectQualitySetting" fullname="LodProfileTests.RecommendedBias_MatchesProjectQualitySetting" methodname="RecommendedBias_MatchesProjectQualitySetting" classname="LodProfileTests" runstate="Runnable" seed="1699826345" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.001126" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1073" name="PenetrationDataTests" fullname="PenetrationDataTests" classname="PenetrationDataTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.003768" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1075" name="EffectiveArmour_Grazing_DoesNotLoseResistance" fullname="PenetrationDataTests.EffectiveArmour_Grazing_DoesNotLoseResistance" methodname="EffectiveArmour_Grazing_DoesNotLoseResistance" classname="PenetrationDataTests" runstate="Runnable" seed="497262091" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.000452" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1076" name="HitPath_LayerBudget" fullname="PenetrationDataTests.HitPath_LayerBudget" methodname="HitPath_LayerBudget" classname="PenetrationDataTests" runstate="Runnable" seed="1890440059" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.001515" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1074" name="Parse_MainGunTable_InterpolatesMonotonic" fullname="PenetrationDataTests.Parse_MainGunTable_InterpolatesMonotonic" methodname="Parse_MainGunTable_InterpolatesMonotonic" classname="PenetrationDataTests" runstate="Runnable" seed="668246180" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.000731" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1077" name="RangeLayoutTests" fullname="RangeLayoutTests" classname="RangeLayoutTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.002850" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1080" name="CodexPreset_ContactVsDelay_HasTwoConfigs" fullname="RangeLayoutTests.CodexPreset_ContactVsDelay_HasTwoConfigs" methodname="CodexPreset_ContactVsDelay_HasTwoConfigs" classname="RangeLayoutTests" runstate="Runnable" seed="794046294" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.001246" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1078" name="Layout_Json_ParsesPresetsAndModules" fullname="RangeLayoutTests.Layout_Json_ParsesPresetsAndModules" methodname="Layout_Json_ParsesPresetsAndModules" classname="RangeLayoutTests" runstate="Runnable" seed="479994929" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.000440" asserts="0">
+          <properties />
+        </test-case>
+        <test-case id="1079" name="Solver_UsesLayoutModules" fullname="RangeLayoutTests.Solver_UsesLayoutModules" methodname="Solver_UsesLayoutModules" classname="RangeLayoutTests" runstate="Runnable" seed="701568619" result="Passed" start-time="2026-09-20 17:08:43Z" end-time="2026-09-20 17:08:43Z" duration="0.000372" asserts="0">
+          <properties />
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

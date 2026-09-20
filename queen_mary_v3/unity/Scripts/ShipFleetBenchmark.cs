@@ -234,7 +234,7 @@ namespace Naval
                     r.notes.Add("自动档 15 艘船全部落在同一个 LOD 档（屏幕高度比例 " + min.ToString("0.000") + "–" + max.ToString("0.000") +
                         "，档位阈值 " + string.Join("/", thresholds.ToArray()) + "，lodBias " + r.lodBias.ToString("0.##") +
                         "，质量档位 " + r.qualityLevel + "，剖面 " + (string.IsNullOrEmpty(r.lodProfileId) ? "none" : r.lodProfileId) +
-                        "，LODGroup.size " + r.lodGroupSizeUsed.ToString("0.00") + " m（局部包围，非舰长）" +
+                        "，LODGroup.size " + r.lodGroupSizeUsed.ToString("0.00") + " m（RecalculateBounds 实测；本船 = 包围盒最长轴 = 舰长）" +
                         "，公式 " + r.lodFormula + "）。编队纵深仅数百米、相机在 1.4–1.9 km，故这一阶段只测到单一细节层级；" +
                         "要掉进下一档需退到 " + next + " 以外。LOD 的实际收益请看 forced_LOD* 阶段。");
                     Debug.Log("[Naval] fleet benchmark note: " + r.notes[r.notes.Count - 1]);

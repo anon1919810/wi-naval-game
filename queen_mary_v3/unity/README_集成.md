@@ -30,15 +30,18 @@
 - 四炮塔的偏航实测为节点局部 +Z，正角转右舷；俯仰实测为节点局部 +X，正角抬炮口。不要按 Unity 世界轴猜测子节点的局部轴。
 - FBX 名称与 JSON 引用从 `ship_contract.unity.json` 读取，现已包含 `buoyancy_compartments` 与 `lod_profiles`。
 - 预制体路径 `Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab`，定义位于 `Assets/Resources/Ships/HMS_Queen_Mary_1913/`。
-- **LOD 阈值**来自 `lod_profiles.json`（默认 `tactical_50_200m`，另有 `fleet_1_2km`）。`ShipLodBuilder` 不写死阈值；`ship_runtime_build.json` 与 `ShipDefinition` 记录 `lodProfileId` / `lodScreenHeights` / `lodRecommendedBias` / `lodGroupSizeMeasured`。生效阈值 = 作者阈值 × `QualitySettings.lodBias`。批处理可加 `-lodProfile fleet_1_2km` 切换剖面。
+- **LOD 阈值**来自 `lod_profiles.json`（默认 `tactical_50_200m`，另有 `fleet_1_2km`）。`ShipLodBuilder` 不写死阈值；`ship_runtime_build.json` 与 `ShipDefinition` 记录 `lodProfileId` / `lodScreenHeights` / `lodRecommendedBias` / `lodGroupSizeMeasured`。**生效阈值 = 作者阈值 × `QualitySettings.lodBias`**。批处理可加 `-lodProfile fleet_1_2km` 切换剖面。
+- **工程质量档的 `lodBias` 必须设为 1.0**，否则剖面的 `recommendedLodBias` 与实际生效值不一致，`expectedAt` 整表失效。该设置在 `ProjectSettings/QualitySettings.asset`（Unity 工程**不在本仓库内**，换机器/重建工程要手动确认）：Standalone 默认质量档位为索引 5，那一档须为 `lodBias: 1`（原本是 2）。`Tests/EditMode/LodProfileTests.cs` 会断言这一点，工程设置被改动时会直接变红。
+- `LODGroup.size` 取 `RecalculateBounds()` 后的实测值，本船为 **213.4 m = 包围盒最长轴 = 舰长**。不要硬编码，也不要想当然当成甲板高度；换船型必须重新取。
 - 14 个 `ShipCompartment` 挂上体积、渗透率和可进水体积。它们是系统参数载体，尚未实现完整动态浮力/损管。
 - 24 个内部/水下代理关闭 MeshRenderer 并使用盒 trigger；另有 `Hull_Collision_Proxy` 粗凸包 trigger。选中/粗筛射线须使用 `QueryTriggerInteraction.Collide`，可按父节点区分船体代理与部件。
 - 炮塔链在 LOD0/1/2 中保持独立变换；LOD3 为冻结的静态远景。合并网格按材质，不能把 renderer 数或子网格数写成实测 draw call。
 
 ## 验收与证据
 
-最新数量、LOD 成本、性能数据、截图和限制请读 [本轮验收](../运行时验收_2026-09-18.md)。
-LOD0/1/2/3 全舰三角形数为 29,264 / 29,264 / 16,344 / 14,488；渲染器数为 61 / 17 / 17 / 1。
+最新数量、LOD 成本、性能数据、截图和限制请读 [本轮验收](../运行时验收_2026-09-18.md)（v3 灰盒时期的记录）。
+**当前（v4 Gameplay 模型）** LOD0/1/2/3 全舰三角形数为 81,688 / 81,688 / 61,264 / 59,408；渲染器数为 62 / 17 / 17 / 1。
+以 `queen_mary_v3/runtime_acceptance/ship_runtime_build.json` 的 `lodSummary` 为准；数字随模型重建变化，不要抄本文件。
 旧 4,990 面剪影曾漏掉几何，旧近景截图也未覆盖远档；这些结论已被本轮真实图像验收替代。
 隐藏窗口会使屏幕绘制被跳过，不能直接报告此时的循环帧率。基准改为显式离屏绘制并等 GPU 完成，因此报告的是包含同步开销的资产渲染基准，不是整款游戏 FPS。
 

@@ -244,7 +244,8 @@ namespace Naval.EditorTools
                              "，屏幕高度阈值 " + string.Join(" / ", Array.ConvertAll(ScreenHeights, h => h.ToString("0.00"))) +
                              "，recommendedLodBias " + result.LodRecommendedBias.ToString("0.##") +
                              "，实测 LODGroup.size " + result.LodGroupSizeMeasured.ToString("0.00") +
-                             " m（局部包围尺寸，不是舰长）。阈值来自 lod_profiles.json；与质量档 lodBias 相乘后才是生效值。");
+                             " m（RecalculateBounds 实测；本船 = 包围盒最长轴 = 舰长，换船型要重新取）。" +
+                             "阈值来自 lod_profiles.json；与质量档 lodBias 相乘后才是生效值。");
 
             if (lod2 != null && tri2 >= tri1)
                 result.Failures.Add("LOD2 的三角形数没有比 LOD1 少 —— 小件剔除没生效（角色名对不上？）");
