@@ -1,0 +1,39 @@
+{
+  "schema": "hullwright-ship-1",
+  "_note": "HMS Queen Mary (1913) 案例。每个数值都带来源；推断值显式标注。",
+  "name": "HMS Queen Mary",
+  "country": "United Kingdom",
+  "type": "battlecruiser",
+  "dates": { "laid_down": 1911, "launched": 1912, "completed": 1913 },
+  "units": "SI",
+  "hull": {
+    "lwl_m": 205.7,
+    "loa_m": 214.4,
+    "beam_m": 27.1,
+    "draught_normal_m": 8.5,
+    "draught_deep_m": 9.9,
+    "block_coeff": 0.551,
+    "waterplane_coeff": 0.80,
+    "displacement_normal_t": 26770,
+    "displacement_deep_t": 31650,
+    "kg_m": 8.6,
+    "kg_is_estimate": true,
+    "roll_gyration_coeff": 0.38,
+    "sources": {
+      "lwl_m": "Tyne Built Ships 675.0 ft ÷ 3.28084 = 205.7 m（很可能是两柱间长，口径待考证）",
+      "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
+      "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
+      "draught_normal_m": "Navypedia '8.50 mean'",
+      "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
+      "block_coeff": "由来源反推：26770 t ÷ (205.7 × 27.1 × 8.5 × 1.025) = 0.551",
+      "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
+      "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
+      "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
+      "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测"
+    },
+    "known_open_items": [
+      "本项目契约 length_m=213.4（=700 ft）与本案例 lwl_m=205.7 口径不同，需考证",
+      "吨位单位未注明长吨/公吨；本项目内部按公吨处理"
+    ]
+  }
+}
