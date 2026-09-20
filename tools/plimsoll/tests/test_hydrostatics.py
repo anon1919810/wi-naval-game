@@ -1,8 +1,8 @@
-"""hullwright L0 单元测试
+"""Plimsoll L0 单元测试
 
 跑法：
-    python -m unittest discover -s tools/hullwright/tests -v
-或  python tools/hullwright/tests/test_hydrostatics.py
+    python -m unittest discover -s tools/plimsoll/tests -v
+或  python tools/plimsoll/tests/test_hydrostatics.py
 """
 
 import json

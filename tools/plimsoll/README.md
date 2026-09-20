@@ -1,4 +1,4 @@
-# hullwright
+# Plimsoll
 
 自研舰船设计与静水力计算核心。规格见 [`docs/sps-replacement/SPEC.md`](../../docs/sps-replacement/SPEC.md)。
 与 SpringSharp **无代码关系**；其界面仅作需求覆盖度检查表（参考图在 `docs/sps-reference/`）。
@@ -9,14 +9,14 @@
 PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
 
 # 算一艘船
-"$PY" tools/hullwright/cli.py tools/hullwright/cases/queen_mary_1913.json \
-        -o tools/hullwright/cases/queen_mary_1913.result.json
+"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json \
+        -o tools/plimsoll/cases/queen_mary_1913.result.json
 
 # 核心自检
-"$PY" tools/hullwright/cli.py --selftest
+"$PY" tools/plimsoll/cli.py --selftest
 
 # 单元测试（28 项）
-"$PY" tools/hullwright/tests/test_hydrostatics.py
+"$PY" tools/plimsoll/tests/test_hydrostatics.py
 ```
 
 输出：排水量、水线面面积、每厘米吃水吨数、KB、BM_T、KM、GM、横摇周期、

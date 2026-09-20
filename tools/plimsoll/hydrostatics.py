@@ -1,4 +1,4 @@
-"""hullwright · L0 参数化静水力核心
+"""Plimsoll · L0 参数化静水力核心
 
 设计纪律（见 docs/sps-replacement/SPEC.md）：
   - 纯函数：输入 dict → 输出 dict。不 import GUI / Unity / 网络库。
@@ -250,6 +250,6 @@ def _selfcheck_monotonic() -> None:
 if __name__ == "__main__":
     _selfcheck_box()
     _selfcheck_monotonic()
-    print("hullwright L0 自检通过：")
+    print("Plimsoll L0 自检通过：")
     print("  · 方箱退化 → 与解析值 T/2、B²/(12T)、B·L³/12 全精度一致")
     print("  · Cwp 单调 → C_I 单调递增")

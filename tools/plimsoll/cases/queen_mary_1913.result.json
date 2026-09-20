@@ -1,7 +1,7 @@
 {
- "schema": "hullwright-result-1",
+ "schema": "plimsoll-result-1",
  "ship": "HMS Queen Mary",
- "engine": "hullwright L0 (parametric hydrostatics)",
+ "engine": "plimsoll L0 (parametric hydrostatics)",
  "historically_certified": false,
  "values": {
   "waterplane_shape_p": 0.45315637712812495,

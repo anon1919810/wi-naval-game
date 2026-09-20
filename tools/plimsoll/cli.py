@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""hullwright CLI
+"""Plimsoll CLI
 
     python cli.py cases/queen_mary_1913.json              # 打印表格
     python cli.py cases/queen_mary_1913.json -o out.json  # 写 JSON
@@ -37,7 +37,7 @@ DISPLAY = [
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="hullwright · 参数化静水力（L0）")
+    ap = argparse.ArgumentParser(description="Plimsoll · 参数化静水力（L0）")
     ap.add_argument("ship", nargs="?", help="ship.json 路径")
     ap.add_argument("-o", "--out", help="写出 result.json")
     ap.add_argument("--selftest", action="store_true", help="只跑核心自检")
@@ -57,7 +57,7 @@ def main() -> int:
 
     name = ship.get("name", "(未命名)")
     print("=" * 62)
-    print("hullwright · %s" % name)
+    print("Plimsoll · %s" % name)
     print("=" * 62)
     print("水线面形状模型：f(x) = (1−(2x/L)²)^p，p = %.4f（由 Cwp=%.3f 反解）"
           % (out["shape_model"]["p"], out["shape_model"]["waterplane_coeff"]))
@@ -98,9 +98,9 @@ def main() -> int:
 
     if a.out:
         result = {
-            "schema": "hullwright-result-1",
+            "schema": "plimsoll-result-1",
             "ship": name,
-            "engine": "hullwright L0 (parametric hydrostatics)",
+            "engine": "plimsoll L0 (parametric hydrostatics)",
             "historically_certified": False,
             "values": out["values"],
             "shape_model": out["shape_model"],

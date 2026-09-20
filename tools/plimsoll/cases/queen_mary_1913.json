@@ -1,5 +1,5 @@
 {
-  "schema": "hullwright-ship-1",
+  "schema": "plimsoll-ship-1",
   "_note": "HMS Queen Mary (1913) 案例。每个数值都带来源；推断值显式标注。",
   "name": "HMS Queen Mary",
   "country": "United Kingdom",

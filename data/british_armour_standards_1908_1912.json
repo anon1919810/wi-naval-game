@@ -1,5 +1,5 @@
 {
-  "schema": "hullwright-armour-standard-1",
+  "schema": "plimsoll-armour-standard-1",
   "_title": "British naval armour acceptance standards, pre-1908 / 1908 / 1912",
   "_what_this_is": "皇家海军装甲板的**验收标准**：给定厚度的装甲板，必须挡住哪种弹、以多少英尺/秒命中。它是装甲**抗穿透能力**的一手锚点，不是厚度表。",
   "_source": {
@@ -101,7 +101,7 @@
     "标准历次重大更新：1908、1912、1922、1937、1946。"
   ],
 
-  "how_to_use_in_hullwright": {
+  "how_to_use_in_plimsoll": {
     "purpose": "为穿深模型提供**外部校准锚点**。此前 penetration_main.json 只有 wiki 的 estimate_curve，无独立参照。",
     "method": "任选一个基于速度的穿甲经验式（de Marre / Thompson F-formula 等），用本表反解系数，使模型在该厚度-速度点上复现『刚好穿透/不穿透』的边界。",
     "verification": "拟合后必须在**未参与拟合的**表项上回测，容差需写入文档；不得只报拟合点误差。",

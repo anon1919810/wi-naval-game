@@ -1,7 +1,24 @@
-# 舰船设计计算器 · 规格（代号 `hullwright`）
+# Plimsoll · 舰船设计计算器规格
 
 > 目标：做一个**可脚本化、可验证、比 SpringSharp 更准**的舰船设计与水动力计算核心。
 > 本文是需求与架构基线。参考界面图见 `docs/sps-reference/`。
+
+---
+
+## 0. 命名与代号
+
+| 对象 | 名称 | 说明 |
+|---|---|---|
+| **本软件** | **Plimsoll** | 载重线。船壳上那道刻线表示"不可逾越的载重限度"。取它是因为一个**设计校验工具**干的正是这件事。目录/包名小写 `plimsoll`，正文显示名 `Plimsoll` |
+| **所属游戏** | **《敌前转向》（Gefahrwend）** | 指 1916 年日德兰海战中舍尔执行的敌前转向（历史上称 *Gefechtskehrtwendung*，三次 180° 转向使公海舰队脱险）。游戏本体的名称与边界见仓库根 README |
+
+**命名架构**（新增模块时照此办理）：
+
+> **平台用历史意象命名，模块用方法命名。**
+
+于是 `plimsoll.hydrostatics`（静水力）、`plimsoll.bonjean`（Bonjean 曲线／几何法）、
+`plimsoll.stability`（大角稳性 GZ）、`plimsoll.damage`（破损稳性）。
+游戏侧同理：主标题用意象，战役与模式用术语。
 
 ---
 
@@ -44,7 +61,7 @@
 
 ```jsonc
 {
-  "schema": "hullwright-ship-1",
+  "schema": "plimsoll-ship-1",
   "name": "HMS Queen Mary",
   "country": "United Kingdom",
   "type": "battlecruiser",
@@ -78,7 +95,7 @@
 
 ```jsonc
 {
-  "schema": "hullwright-result-1",
+  "schema": "plimsoll-result-1",
   "ship": "HMS Queen Mary",
   "computed_utc": "...",
   "hydrostatics": { "displacement_t": ..., "awp_m2": ..., "tpc_t_per_cm": ...,
@@ -200,8 +217,8 @@ SpringSharp 只认 L/B/T/Cb，靠经验系数硬凑，**不知道船体长什么
 这直接对接游戏侧的 `ShipFloatPrototype` 与舱室进水系统。
 
 ### 6.3 可脚本化
-- CLI：`hullwright compute ship.json -o result.json`
-- 批量：`hullwright sweep cases/*.json -o table.csv`
+- CLI：`plimsoll compute ship.json -o result.json`
+- 批量：`plimsoll sweep cases/*.json -o table.csv`
 - 无 GUI 依赖，可在 CI 里跑
 
 ### 6.4 一切可溯源
@@ -244,7 +261,7 @@ SpringSharp 只认 L/B/T/Cb，靠经验系数硬凑，**不知道船体长什么
 ## 9. 工程约定
 
 - 语言：Python（核心，仅标准库 + 可选 numpy）；后续 Web 界面用 FastAPI + React。
-- 目录：`tools/hullwright/`（核心）、`tools/hullwright/cases/`（靶船 JSON）、
+- 目录：`tools/plimsoll/`（核心）、`tools/plimsoll/cases/`（靶船 JSON）、
   `docs/sps-reference/`（界面参考图）。
 - 命名：字段名与本文 §5 一致，便于和参考界面逐项对照。
 - 依赖：核心不得引入网络库；不得读环境变量以外的隐式配置。
