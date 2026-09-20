@@ -1,14 +1,14 @@
 # HMS Queen Mary · 一战舰船游戏资产
 
-当前**玩法运行时**资产位于 `queen_mary_v3/`：Blender 程序化灰盒，101 对象、85 网格、31,164 三角形，已接入 Unity URP（GameplayLab 仍用此版 Prefab）。
+当前**玩法运行时**模型为 v4：`Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` 由 `queen_mary_v4/QueenMary_v4_Gameplay.fbx` 构建（`unity/Editor/ShipRuntimeBuilder.cs:190-203`，找不到 v4 时才回退到契约里的 v3 FBX）。v3 灰盒（`queen_mary_v3/queen_mary.py`，101 对象、85 网格、31,164 三角形）保留为历史资产与**契约数据来源**——碰撞代理、14 个舱室、LOD 剖面等仍从 `queen_mary_v3/` 读取。
 
-**展示/剖视精修**位于 `queen_mary_v4/`（2026-09-19）：独立生成脚本、外观+内部 FBX、PBR 贴图与剖视副本；`historically_certified:false`，**未**替换 Lab Prefab，**未**做 v4 LOD / Unity 实机验收。详见 [queen_mary_v4/README_精修资产.md](queen_mary_v4/README_精修资产.md)。
+**展示/剖视精修**位于 `queen_mary_v4/`（2026-09-19）：独立生成脚本、外观+内部 FBX、PBR 贴图与剖视副本；`historically_certified:false`。v4 **已**替换 Lab Prefab（commit `fdae103`）、**已**建 v4 LOD、**已**通过 Unity 验收 13/13 —— 见 [queen_mary_v4/README_精修资产.md](queen_mary_v4/README_精修资产.md) 与 `queen_mary_v3/runtime_acceptance/v4_unity_acceptance.json`。
 
 观察与资源规划基准为 50–200 m、15 艘同屏；这不是硬性锁定游戏相机。
 
 ## 当前状态 · 2026-09-20
 
-- **main**：`2794c80` → https://github.com/anon1919810/wi-naval-game
+- **main**：最近一次玩法代码提交 `2794c80`（当前 HEAD 用 `git log -1` 查，文档提交会让 SHA 前进）→ https://github.com/anon1919810/wi-naval-game
 - **入口交接（3D/后续模型）**：[交接_3D协作与试验场_2026-09-20.md](交接_3D协作与试验场_2026-09-20.md)
 - 试验场：图鉴 UX + P2.5 破片/爆炸/穿板规则；EditMode 28/28；结果**不**直接作主战斗数值。
 - GameplayLab：v4 外观 + A 阶段战斗正确性；射击仍为即时射线（B 阶段未做）。
@@ -60,7 +60,8 @@ Blender Store 启动器可能无输出，构建脚本核对新完成记录与文
 |---|---|
 | `verification.json` | 32 项几何 + 13 项设定/假设一致性检查通过；不代表史实认证 |
 | `fbx_verification.json` | 18 项 FBX 往返通过 |
-| `ship_runtime_build.json` | 24 个隐藏的部件代理，24 盒 trigger + 1 船体凸 trigger，14 舱室 |
+| `ship_runtime_build.json` | 模型为 v4 Gameplay；24 个隐藏的部件代理，24 盒 trigger + 1 船体凸 trigger，14 舱室；LOD0 62 渲染器/81,688 三角 · LOD1 17/81,688 · LOD2 17/61,264 · LOD3 1/59,408 |
+| `runtime_acceptance/v4_unity_acceptance.json` | v4 三份 FBX 导入、节点、八炮口、材质等 13/13 通过（2026-09-19） |
 | `runtime_acceptance/runtime_acceptance.json` | 12 张实际 LOD 图、进水容量、6 方向命中及舷外不命中通过 |
 | `runtime_acceptance/repeat_build.txt` | 同进程重建两次，4 份生成网格 GUID 不变 |
 | `unity_verification_urp.json` | 契约命名、1:1 尺度、舰艏 +Z、右舷 +X、炮塔轴与材质通过 |
