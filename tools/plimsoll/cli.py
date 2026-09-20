@@ -143,33 +143,46 @@ def main() -> int:
             print()
             print("跳过 GZ：需要 kg_m。")
         else:
-            depth = hull.get("depth_m", 5.10)
             angles = [0, 5, 10, 15, 20, 30, 40, 50, 60]
 
             if a.hull == "reference":
+                # 参照船体的龙骨在 z=0，甲板高度必须自吃水推出来。
+                # 不要用 hull["depth_m"] —— 那是**型值表船体**的甲板高（水线在 z=0），
+                # 两种船体的坐标基准不同，混用会让甲板低于水线，GZ 直接算成负的。
                 L, B = hull["lwl_m"], hull["beam_m"]
                 T = hull.get("draught_normal_m") or hull.get("draught_m")
                 Cb, Cwp = hull["block_coeff"], hull.get("waterplane_coeff", 0.80)
-                h = GE.make_reference_hull(L, B, T, Cb, Cwp, deck=depth)
+                deck_z = T * 1.6
+                h = GE.make_reference_hull(L, B, T, Cb, Cwp, deck=deck_z)
                 vol = Cb * L * B * T
                 prov = "合成参照船体（与 L0 同源，仅供交叉验证）"
-                deck_z = depth
+                wl_z = T                      # 参照船体：龙骨在 0，设计水线在 T
             else:
-                h, prov, deck_z = _load_offsets_hull(a, depth)
+                deck_z = hull.get("depth_m", 5.10)
+                h, prov, deck_z = _load_offsets_hull(a, deck_z)
                 vol = GM.hydrostatics_upright(h, 0.0)["volume_m3"]
+                wl_z = 0.0                    # 型值表船体：设计水线就在 z=0
 
+            top_z = max(z for _, poly in h.stations for _, z in poly)
             rows = GM.gz_curve(h, kg, vol, angles)
+            deepest = max(r["waterline_d_m"] for r in rows)
+            if deepest > top_z - 0.01:
+                print()
+                print("  ⚠ 平衡水线 %.3f m 已超过船体顶端 %.3f m —— 该船体定义不足以承载此排水量，"
+                      "GZ 不可信。检查甲板高度（reference 用 T×1.6；offsets 用 DECK_Z）"
+                      % (deepest, top_z))
             print()
             print("GZ 曲线（L1 几何法，等体积倾斜）")
             print("  船体来源：%s" % prov)
             print("  排水体积 %.1f m³   KG %.2f m   甲板 z=%.2f m" % (vol, kg, deck_z))
 
             half = max(max(abs(y) for y, _ in poly) for _, poly in h.stations)
-            freeboard = deck_z
-            if half > 0:
+            freeboard = deck_z - wl_z
+            if half > 0 and freeboard > 0:
                 limit = _m.degrees(_m.atan(freeboard / half))
-                print("  ⚠ 甲板浸没角约 %.1f° —— 超过它浸没剖面被主甲板截断，GZ 偏小，"
-                      "该角以上数值不应引用" % limit)
+                print("  ⚠ 甲板浸没角约 %.1f°（干舷 %.2f m ÷ 半宽 %.2f m）——"
+                      "超过它浸没剖面被主甲板截断，GZ 偏小，该角以上数值不应引用"
+                      % (limit, freeboard, half))
             print("  %-8s %-12s %s" % ("横倾", "复原力臂 m", "平衡水线 m"))
             for r in rows:
                 bar = "█" * int(max(0.0, r["gm_arm_m"]) * 8)
