@@ -299,6 +299,7 @@ namespace Naval.DamageLab
             {
                 case "launch":return "出膛";
                 case "contact":return "接触引信";
+                case "plate_transit":return "穿板行程";
                 case "penetrated":return "穿透";
                 case "stopped":return "被挡停";
                 case "detonation":return "起爆";
@@ -382,6 +383,10 @@ namespace Naval.DamageLab
                 GUILayout.Label("等效装甲（当前角/材料）: 外带 "+EffectiveMm(config.outerMm).ToString("F0")+" · 内壁 "+EffectiveMm(config.innerMm).ToString("F0")+" · 后壁 "+EffectiveMm(config.rearMm).ToString("F0")+" mm",small);
 
                 GUILayout.Label("MODULE CARDS",stat);
+                float fragEnergySum=0;int fragHits=0;
+                if(report.fragments!=null)
+                    foreach(var f in report.fragments){fragEnergySum+=f.energyJ;if(f.hit!="escape"&&f.hit!="Section"&&f.hit!=null)fragHits++;}
+                GUILayout.Label(string.Format("破片: {0} 发 · 命中设备 {1} · 能量合计 {2:F0} J（实验代理）",report.fragments!=null?report.fragments.Count:0,fragHits,fragEnergySum),small);
                 foreach(var m in report.modules)
                 {
                     string note;moduleNotes.TryGetValue(m.id,out note);

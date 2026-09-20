@@ -22,12 +22,15 @@ namespace Naval.DamageLab
         public float angleDeg=0, fuseDelay=.012f;
         public int fuseMode=1, fragmentSamples=192, seed=1913;
         public float blastStrength=1, fragmentPenMm=30;
+        public float fragmentMassG=20f, fragmentVelocityMps=400f;
+        public float blastInsideBonus=1.8f;
+        public bool modelPlateTransit=true;
         public RangeConfig Copy() { return (RangeConfig)MemberwiseClone(); }
         public void Validate()
         {
-            float[] vals={outerMm,innerMm,rearMm,resistance,speed,referencePenMm,angleDeg,fuseDelay,blastStrength,fragmentPenMm};
+            float[] vals={outerMm,innerMm,rearMm,resistance,speed,referencePenMm,angleDeg,fuseDelay,blastStrength,fragmentPenMm,fragmentMassG,fragmentVelocityMps,blastInsideBonus};
             foreach(float v in vals) if(float.IsNaN(v)||float.IsInfinity(v)) throw new ArgumentException("Non-finite configuration");
-            if(outerMm<0||outerMm>2000||innerMm<0||innerMm>2000||rearMm<0||rearMm>2000||resistance<.1||resistance>4||speed<10||speed>1500||referencePenMm<=0||referencePenMm>3000||Math.Abs(angleDeg)>35||fuseDelay<0||fuseDelay>.2||fuseMode<0||fuseMode>2||fragmentSamples<16||fragmentSamples>2048||blastStrength<0||blastStrength>5||fragmentPenMm<0||fragmentPenMm>300) throw new ArgumentException("Configuration outside experiment bounds");
+            if(outerMm<0||outerMm>2000||innerMm<0||innerMm>2000||rearMm<0||rearMm>2000||resistance<.1||resistance>4||speed<10||speed>1500||referencePenMm<=0||referencePenMm>3000||Math.Abs(angleDeg)>35||fuseDelay<0||fuseDelay>.2||fuseMode<0||fuseMode>2||fragmentSamples<16||fragmentSamples>2048||blastStrength<0||blastStrength>5||fragmentPenMm<0||fragmentPenMm>300||fragmentMassG<1||fragmentMassG>500||fragmentVelocityMps<50||fragmentVelocityMps>2000||blastInsideBonus<1||blastInsideBonus>3) throw new ArgumentException("Configuration outside experiment bounds");
         }
     }
     [Serializable] public sealed class RangePlate
@@ -42,6 +45,7 @@ namespace Naval.DamageLab
     [Serializable] public sealed class RangeFragment
     {
         public DVec start,end; public float weight; public string hit;
+        public float massKg, speedMps, energyJ, contrib;
     }
     [Serializable] public sealed class RangeModule
     {
@@ -130,22 +134,28 @@ namespace Naval.DamageLab
                 foreach(var p in plates) { float d;if(!passed.Contains(p.id)&&PlateHit(p,pos,dir,out d)&&d>=0&&d<dist) {dist=d;next=p;equipment=null;} }
                 foreach(var m in r.modules) { float d;if(!hitModules.Contains(m.id)&&Box(pos,dir,m.center,m.size,out d)&&d<dist) {dist=d;equipment=m;next=null;} }
                 float arrival=time+dist/Math.Max(speed,.001f);
-                if(detTime<=arrival) {pos=pos+dir*((detTime-time)*speed);time=detTime;Detonate(r,plates,pos,time);break;}
+                if(detTime<=arrival) {pos=pos+dir*((detTime-time)*speed);time=detTime;Detonate(r,plates,pos,time,dir);break;}
                 pos=pos+dir*dist;time=arrival;
                 if(next!=null)
                 {
                     passed.Add(next.id);
-                    if(!armed&&c.fuseMode!=2) {armed=true;detTime=time+(c.fuseMode==0?0:c.fuseDelay);}
-                    if(c.fuseMode==0) {Add(r,"contact",next.id,pos,time,budget,budget,speed,"contact fuse");Detonate(r,plates,pos,time);break;}
+                    float platePathM = next.mm<=0?0f:(next.mm/1000f)/Math.Max(.05f,Math.Abs(dir.x));
+                    float transitSec = c.modelPlateTransit && speed>0.01f ? platePathM/speed : 0f;
+                    if(!armed&&c.fuseMode!=2) {armed=true;detTime=time+(c.fuseMode==0?0:c.fuseDelay+transitSec);}
+                    if(c.fuseMode==0) {Add(r,"contact",next.id,pos,time,budget,budget,speed,"contact fuse");Detonate(r,plates,pos,time,dir);break;}
                     float before=budget,eff=Effective(next.mm,dir.x,c.resistance);budget=Math.Max(0,budget-eff);
-                    speed=c.speed*(float)Math.Sqrt(budget/(c.referencePenMm*c.speed*c.speed/(600*600)));
-                    Add(r,budget<=0?"stopped":"penetrated",next.id,pos,time,before,budget,speed,"equivalent resistance "+eff.ToString("F1",CultureInfo.InvariantCulture)+" mm");
-                    if(budget<=0) {r.stopped=true;if(armed) {time=detTime;Detonate(r,plates,pos,time);} break;}
+                    float initialBudget=c.referencePenMm*c.speed*c.speed/(600*600);
+                    speed=c.speed*(float)Math.Sqrt(budget/Math.Max(initialBudget,1e-3f));
+                    if(c.modelPlateTransit&&transitSec>0)
+                        Add(r,"plate_transit",next.id,pos,time,budget,budget,speed,
+                            string.Format(CultureInfo.InvariantCulture,"in-plate path {0:F3} m ≈ {1:F4}s at local speed {2:F0}",platePathM,transitSec,speed));
+                    Add(r,budget<=0?"stopped":"penetrated",next.id,pos,time+ (c.modelPlateTransit?transitSec:0f),before,budget,speed,"equivalent resistance "+eff.ToString("F1",CultureInfo.InvariantCulture)+" mm");
+                    if(c.modelPlateTransit&&transitSec>0) time+=transitSec;
+                    if(budget<=0) {r.stopped=true;if(armed) {time=detTime;Detonate(r,plates,pos,time,dir);} break;}
                 }
                 else if(equipment!=null)
                 {
                     hitModules.Add(equipment.id);
-                    // Shell-body graze without detonation: smaller direct proxy than a fuze burst on the module.
                     equipment.direct=Math.Max(equipment.direct, c.fuseMode==2?0.20f:0.35f);
                     Add(r,"equipment",equipment.id,pos,time,budget,budget,speed,
                         "equipment graze; no detonation damage; equipment does not stop shell");
@@ -155,39 +165,71 @@ namespace Naval.DamageLab
             foreach(var m in r.modules) {m.damage=Clamp(m.direct+m.blast+m.fragment,0,1);m.state=m.damage>=.75f?"disabled":m.damage>=.15f?"damaged":"intact";}
             r.finalSpeed=speed;r.duration=time;return r;
         }
-        static void Detonate(RangeReport r,List<RangePlate> plates,DVec pos,float time)
+
+        static bool PointInBox(DVec p,DVec center,DVec size)
+        {
+            return Math.Abs(p.x-center.x)<=size.x*.5f+1e-3f
+                && Math.Abs(p.y-center.y)<=size.y*.5f+1e-3f
+                && Math.Abs(p.z-center.z)<=size.z*.5f+1e-3f;
+        }
+
+        static void Detonate(RangeReport r,List<RangePlate> plates,DVec pos,float time,DVec shellDir)
         {
             r.exploded=true;r.explosion=pos;var c=r.config;
-            Add(r,"detonation","Shell",pos,time,0,0,0,"dimensionless blast + weighted fragments; not explosive physics");
+            string locus="open_space";string hostModule=null;
+            foreach(var m in r.modules)
+                if(PointInBox(pos,m.center,m.size)) {locus="inside_module";hostModule=m.id;break;}
+            Add(r,"detonation",locus+(hostModule!=null?":"+hostModule:""),pos,time,0,0,0,
+                locus=="inside_module"
+                    ? "burst inside equipment box; interior blast bonus applies to host module"
+                    : "burst in open/structure space; distance+plate occlusion only");
             foreach(var m in r.modules)
             {
                 DVec delta=m.center-pos;float distance=delta.Length,transmission=1;
                 foreach(var p in plates) {float d;if(p.mm>0&&PlateHit(p,pos,delta.Normal,out d)&&d<distance-.001f) transmission*=1/(1+p.mm*c.resistance/20);}
-                // Experimental: cap blast so direct+blast does not always saturate a module at 1.0.
-                // Enables sensitivity sweeps (seeds, samples, plate stacks) to remain observable.
-                m.blast=Clamp(c.blastStrength*0.45f/(1+distance*distance/9)*transmission,0,0.55f);
+                float bonus=(locus=="inside_module"&&m.id==hostModule)?c.blastInsideBonus:1f;
+                m.blast=Clamp(c.blastStrength*0.45f*bonus/(1+distance*distance/9)*transmission,0,0.65f);
             }
             uint state=unchecked((uint)c.seed*2654435761u)^0x9e3779b9u;
+            float refMass=c.fragmentMassG/1000f;
+            float refVel=Math.Max(1f,c.fragmentVelocityMps);
+            float refEnergy=.5f*refMass*refVel*refVel;
             for(int i=0;i<c.fragmentSamples;i++)
             {
-                // Stratified sphere + seed-dependent rotation so parameter sweeps can observe
-                // fragment variance. Experimental only; not a physical shatter model.
                 state=1664525u*state+1013904223u;
                 float jitter=(state&65535)/65535f;
                 float y=1-2*((i+jitter)/c.fragmentSamples);
                 if(y>1)y=1;if(y<-1)y=-1;
                 float phi=(i*2.39996323f)+jitter*6.2831853f;
-                float radius=(float)Math.Sqrt(Math.Max(0,1-y*y));DVec dir=new DVec(radius*(float)Math.Cos(phi),y,radius*(float)Math.Sin(phi));
+                float radius=(float)Math.Sqrt(Math.Max(0,1-y*y));
+                DVec dir=new DVec(radius*(float)Math.Cos(phi),y,radius*(float)Math.Sin(phi));
+                // Mild forward bias for open-space bursts along the shell path (experimental).
+                if(locus!="inside_module"&&shellDir.Length>.1f)
+                    dir=(dir*0.75f+shellDir.Normal*0.35f).Normal;
+                state=1664525u*state+1013904223u;
+                float mJit=.25f+.75f*((state&65535)/65535f);
+                float vJit=.35f+.65f*(((state>>16)&65535)/65535f);
+                float massKg=refMass*mJit;
+                float speedMps=refVel*vJit;
+                float energyJ=.5f*massKg*speedMps*speedMps;
+                float energyNorm=refEnergy>1e-3f?energyJ/refEnergy:0f;
                 var obstacles=new List<Tuple<float,RangePlate,RangeModule>>();
                 foreach(var p in plates) {float d;if(PlateHit(p,pos,dir,out d)&&d<=16) obstacles.Add(Tuple.Create(d,p,(RangeModule)null));}
                 foreach(var m in r.modules) {float d;if(Box(pos,dir,m.center,m.size,out d)&&d<=16) obstacles.Add(Tuple.Create(d,(RangePlate)null,m));}
-                obstacles.Sort((a,b)=>a.Item1.CompareTo(b.Item1));float budget=c.fragmentPenMm;DVec end=pos+dir*16;string hit="escape";
+                obstacles.Sort((a,b)=>a.Item1.CompareTo(b.Item1));float budget=c.fragmentPenMm;DVec end=pos+dir*16;string hit="escape";float contrib=0;
                 foreach(var o in obstacles)
                 {
                     if(o.Item2!=null) {float eff=Effective(o.Item2.mm,dir.x,c.resistance);if(eff>=budget&&eff>0) {end=pos+dir*o.Item1;hit=o.Item2.id;break;}budget-=eff;}
-                    else {end=pos+dir*o.Item1;hit=o.Item3.id;o.Item3.fragment+=12f/c.fragmentSamples*(c.fragmentPenMm>0?budget/c.fragmentPenMm:1f);break;}
+                    else
+                    {
+                        end=pos+dir*o.Item1;hit=o.Item3.id;
+                        float remain=c.fragmentPenMm>0?budget/c.fragmentPenMm:0f;
+                        contrib=Clamp(energyNorm*remain,0f,.40f)/c.fragmentSamples;
+                        o.Item3.fragment+=contrib;
+                        break;
+                    }
                 }
-                r.fragments.Add(new RangeFragment{start=pos,end=end,hit=hit,weight=1f/c.fragmentSamples});
+                r.fragments.Add(new RangeFragment{start=pos,end=end,hit=hit,weight=1f/c.fragmentSamples,massKg=massKg,speedMps=speedMps,energyJ=energyJ,contrib=contrib});
             }
         }
     }
