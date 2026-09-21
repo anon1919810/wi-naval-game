@@ -20,6 +20,9 @@
 - **Bonjean 曲线**：站剖面面积 vs 水线高
 - **大角稳性 GZ**：**等体积倾斜** —— 每个横倾角下重解平衡水线，再按
   `GZ = y_B·cosφ + (z_B − KG)·sinφ` 求复原力臂
+- **自由液面 FSC（阶段 3）**：`freesurface.free_surface_correction` /
+  `geometric.gz_curve(..., free_surface_tanks=)` —— 矩形舱 `i=L·b³/12`，
+  `KG_eff=KG+FSC`；空/满舱不计
 
 ```bash
 PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
@@ -28,7 +31,9 @@ PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
         --gz -o tools/plimsoll/cases/queen_mary_1913.result.json
 "$PY" tools/plimsoll/cli.py --selftest
 "$PY" tools/plimsoll/tests/test_hydrostatics.py     # L0：28 项
-"$PY" tools/plimsoll/tests/test_geometric.py        # L1：22 项
+"$PY" tools/plimsoll/tests/test_geometric.py        # L1
+"$PY" tools/plimsoll/tests/test_offsets_import.py
+"$PY" tools/plimsoll/tests/test_freesurface.py      # 阶段 3 FSC
 ```
 
 ## Queen Mary 案例结果
@@ -86,7 +91,9 @@ GZ 曲线（KG = 8.6 m 为 estimate，甲板按 1.6T 假定）：
 | 参照船体 | `make_reference_hull` 是**合成**船体（与 L0 同源，用于交叉验证），**不是 Queen Mary 真实型线** |
 | 真实型线 | 待从 `queen_mary_v4` 的 FBX/blend 抽取站位剖面（下一步） |
 | 甲板以上形状 | 合成船体用直壁，故 >20.6° 的 GZ 不具代表性 |
-| 纵倾 | 目前只做横倾；纵倾平衡待后续 |
+| 纵倾平衡 | 在分支 `feature/plimsoll-trim-22`（本 README 基于 master 时可能尚未合入） |
+| 自由液面 FSC | **已实现（3.1/3.2）**：`freesurface.py` + `gz_curve(free_surface_tanks=)`；舱室须显式 L×b，游戏侧 compartment JSON 无此字段 |
+| 破损稳性 | **未做**（阶段 4）；依赖 FSC + 进水组合 |
 | 水线长口径 | **已解决**：LWL = 212.8 m（698 ft，worldwar1.co.uk 明写 "698 feet waterline"），LOA = 214.4 m。契约的 213.4 介于两者，最可能是维基「Length」字段口径。模型全长 213.4 与 LWL 212.8 差 0.3% |
 | 吨位单位 | 史料常混用长吨/公吨，核心内部按公吨 |
 
