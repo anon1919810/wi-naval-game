@@ -1,0 +1,96 @@
+{
+  "schema": "plimsoll-resistance-1",
+  "ship": "HMS Queen Mary (1913)",
+  "_note": "阻力 v0：只含**已算部分**。摩擦用 Schoenherr（Taylor 法口径）+ 0.4e-3 粗糙度；剩余阻力图谱（Gertler 1954 DTMB-806）**缺** → cr_from_table 为 None；cr_implied 是由试航真值**反解**的（QPC=0.55 为假定，无来源）。ν 取海水 15°C 1.19e-6。",
+  "inputs": {
+    "speed_kn": 28.1,
+    "shp_trial": 83000.0,
+    "wetted_surface_m2": 6407.873049363283,
+    "lwl_m": 213.4,
+    "nu_m2_s": 1.19e-06,
+    "rho_kg_m3": 1025.0,
+    "qpc_assumed": 0.55,
+    "sources": {
+      "S": "cases/queen_mary_1913_formcoeff.json（型线逐站积分）",
+      "L": "同上（水线长）",
+      "trial": "cases/queen_mary_1913_engines.json（Navypedia）"
+    }
+  },
+  "values": {
+    "rn": 2592339515.764706,
+    "cf_schoenherr": 0.00136112758259426,
+    "cf_total": 0.0017611275825942599,
+    "rf_kN": 1208.6134984170405,
+    "cf_ittc1957": 0.001364558624368952,
+    "pe_kw_at_trial": 34041.20500000001,
+    "r_total_kN": 2354.8350897632195,
+    "rr_kN": 1146.221591346179,
+    "cr_implied": 0.0016702133998409928,
+    "cr_from_table": null
+  },
+  "trace": [
+    {
+      "key": "cf",
+      "value": 0.00136112758259426,
+      "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+      "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+      "estimate": false
+    },
+    {
+      "key": "rn",
+      "value": 2592339515.764706,
+      "formula": "Rn = V·L / ν",
+      "source": "定义式（ν=1.190e-06 由调用方给出）",
+      "estimate": false
+    },
+    {
+      "key": "cf_total",
+      "value": 0.0017611275825942599,
+      "formula": "Cf,total = Cf + ΔCf",
+      "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+      "estimate": true
+    },
+    {
+      "key": "rf_n",
+      "value": 1208613.4984170406,
+      "formula": "Rf = ½·ρ·S·Cf,total·V²",
+      "source": "摩擦阻力定义式",
+      "estimate": false
+    },
+    {
+      "key": "pe_kw",
+      "value": 34041.20500000001,
+      "formula": "P_E = SHP × QPC × 0.7457",
+      "source": "试航 SHP=83000，QPC=0.55（**假定值，无来源**）",
+      "estimate": true
+    },
+    {
+      "key": "r_total_n",
+      "value": 2354835.0897632195,
+      "formula": "R_total = P_E / V",
+      "source": "由试航功率反推",
+      "estimate": false
+    },
+    {
+      "key": "rr_n",
+      "value": 1146221.591346179,
+      "formula": "Rr = R_total − Rf",
+      "source": "扣除已算出的摩擦阻力",
+      "estimate": true
+    },
+    {
+      "key": "cr_implied",
+      "value": 0.0016702133998409928,
+      "formula": "Cr = Rr / (½·ρ·S·V²)",
+      "source": "由试航真值反解",
+      "estimate": true
+    }
+  ],
+  "warnings": [
+    "Rn=2.592e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "QPC=0.55 是**假定值**（QM 无来源）：Cr 随 QPC 线性变化 —— QPC 每 ±0.05，Rr 约 ∓104 kN。结论须带此限界。",
+    "本结果是**反解**（真值推导），不是从图谱预测；用于校验将来的图谱插值结果。",
+    "缺 Taylor-Gertler 剩余阻力图谱（Gertler 1954 DTMB-806）：剩余阻力置空。**公开检索到的只有 OCR 乱码版本，不得照抄**；需从正规教材附录/报告数字化后再接入 cr_table。",
+    "当前只能给出摩擦阻力；若要看总阻力，请用 `implied_residual_from_trial()` 由试航真值反解。"
+  ]
+}

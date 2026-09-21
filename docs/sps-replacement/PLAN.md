@@ -26,8 +26,8 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **272 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （…test_hull 32 = Hull 页补齐 + **7.3 船型系数地基**；test_generic_ship 11 = 通用性契约）
+- 一键回归 **291 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （…test_hull 32；test_resistance 19 = **7.3 阻力 v0**；test_generic_ship 11 = 通用性契约）
   （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16；test_freeboard 16；
   test_weapons 17；test_engines 14 = Engines 页；test_generic_ship 11 = **通用性契约**）
 - **SPS 七页全部到 ◐ 以上**（2026-09-22）：Hull 基本齐 / Freeboard·Armour·Guns·Weapons·
@@ -310,8 +310,22 @@
   - 半进流角**口径不唯一**（艏端切线/B·10/B·4 各派不同）：实现为显式约定
     （默认离中线 Bwl/10，参数可调），取不到就返回 None，**不编造**。
   - 测试 21 → 32（test_hull）；变异验证：Cp 分母写错 4 项红、钝艏编造角度 1 项红。
-  - **待做**：Taylor-Gertler 图谱插值（四维：B/T、Cp、∇/L³、Fn）+ 摩擦按 Schoenherr
-    + 用试航真值 83,000 shp→28.1 kn 黑盒标定 + 误差带文档。
+  - **本轮完成（v0，只做能真算的）** `resistance.py` + `tools/gen_resistance_case.py`：
+    - Schoenherr 摩擦线 `Cf = 0.4631/(lg Rn)^2.6`（Taylor 法配套）；
+      QM @28.1 kn：Rn=2.59e9、**Cf=0.00136**（与 ITTC-1957 差 **−0.3%**，交叉校核通过），
+      含 0.4e-3 粗糙度附加 → **Rf ≈ 1,209 kN**。
+    - **由试航真值反解隐含剩余阻力**：83,000 shp × QPC 0.55 → R_total 2,355 kN、
+      Rr 1,146 kN、**Cr ≈ 0.00167**（合理量级 1e-3–4e-3，剩余占比 49%）。
+      已物化 `cases/queen_mary_1913_resistance.json`。
+    - **剩余阻力图谱接入位已就绪**：`residual_from_table()` 四维（Cp、B/T、∇/L³、Fn）
+      多线性插值已实现并有测试（对线性函数精确、越界只截断**不外推**）；
+      **缺表时返回 None + 警告**。
+  - **阻塞项（诚实记录）**：Gertler 1954 DTMB-806 的 Cr 图谱公开检索只有
+    **OCR 乱码版本**（教科书附录 Table A3.9 之类）——**照乱码抄数等于编数据**，
+    故暂不填表。需正规教材附录/原报告数字化后接入（数据进案例、核心不动）。
+  - 测试 19 项（两轮变异验证：摩擦线指数改错 5 项红、缺表返回 0 冒充 1 项红）。
+  - **下一步**：① 数字化 Gertler 图谱 → 插 cr_table；② 用反解的 Cr 校核图谱插值；
+    ③ 扫 QPC 敏感性（0.5–0.6）出误差带；④ Holtrop 对照（注意其 Cb 越界）。
 - [ ] **7.4 耐波性估算**：切片理论（最低优先级）。
 - [-] **7.5 Web 界面**：**搁置（2026-09-21 用户指令）**——SPS 覆盖度仅 ~13%，
   网站会把"只有 Hull 一页"固化成看起来完整的样子。`feature/plimsoll-web` 草稿保留不删；
