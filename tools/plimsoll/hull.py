@@ -174,6 +174,122 @@ def waterline_length(hull, z: float = 0.0, eps: float = 1e-6) -> dict:
     return {"values": {"lwl_at_z_m": length, "z_m": z}, "trace": trace, "warnings": warnings}
 
 
+def form_coefficients(hull, z: float = 0.0) -> dict:
+    """从型线真算船型系数（L1 几何法）——7.3 阻力模型的地基。
+
+    给出：排水体积 ∇、最大横剖面面积 Am、浮心纵向位置 LCB、
+    **Cb / Cp / Cm**。全部由逐站剖面在水线 z 以下积分得到，不查文献、不猜。
+
+    口径（必须写清，否则系数没有意义）：
+      Cp = ∇ / (Am · Lwl)      —— L 取**该水线处的水线长**（见 waterline_length）
+      Cm = Am / (Bwl · T)      —— Bwl 为该水线处的最大水线宽，T = z − 龙骨 z
+      Cb = ∇ / (Lwl · Bwl · T)
+    ⚠️ 型线的 z=0 是**它自己的设计水线**（QM 型线 = 满载吃水 9.9），
+      所以这里得到的系数是满载口径，与案例里正常吃水（8.5）的 Cb 不是一回事。
+    """
+    import geometry as GE
+    import geometric as GM
+
+    xs, areas, hbs = [], [], []
+    for x, poly in hull.stations:
+        sub = GE.clip_below_line(poly, 0.0, z)
+        a = abs(GE.polygon_area_moments(sub)[0]) if len(sub) >= 3 else 0.0
+        xs.append(float(x))
+        areas.append(a)
+        hbs.append(GM._waterline_halfbeam(poly, z))
+
+    vol = GM._trapz(areas, xs)
+    if vol <= 0:
+        raise ValueError("水线 z=%.3f 处排水体积为 0：船体或水线高有误" % z)
+    moment = GM._trapz([x * a for x, a in zip(xs, areas)], xs)
+    lcb_x = moment / vol
+
+    am = max(areas)
+    x_am = xs[areas.index(am)]
+    b_wl = 2.0 * max(hbs)
+    keel = min(zz for _, poly in hull.stations for _, zz in poly)
+    T = z - keel
+    L = waterline_length(hull, z)["values"]["lwl_at_z_m"]
+    if b_wl <= 0 or T <= 0 or L <= 0:
+        raise ValueError("无法定出 Bwl/T/Lwl（B=%.3f T=%.3f L=%.3f）" % (b_wl, T, L))
+
+    cb = vol / (L * b_wl * T)
+    cp = vol / (am * L)
+    cm = am / (b_wl * T)
+
+    trace = []
+    _T(trace, "volume_m3", vol, "∇ = ∫ A(x) dx（逐站剖面面积，梯形）", "型线积分")
+    _T(trace, "midship_area_m2", am, "Am = max A(x) @ x=%.2f" % x_am, "型线积分")
+    _T(trace, "lcb_x_m", lcb_x, "LCB = ∫ x·A(x) dx / ∇", "型线积分（船体 x 坐标）")
+    _T(trace, "beam_wl_m", b_wl, "Bwl = 2·max 水线半宽", "型线")
+    _T(trace, "draught_at_wl_m", T, "T = 水线 z − 龙骨 z", "型线")
+    _T(trace, "cb", cb, "Cb = ∇ / (Lwl·Bwl·T)", "定义式（L 取该水线长）")
+    _T(trace, "cp", cp, "Cp = ∇ / (Am·Lwl)", "定义式（L 取该水线长）")
+    _T(trace, "cm", cm, "Cm = Am / (Bwl·T)", "定义式")
+
+    return {
+        "values": {"volume_m3": vol, "midship_area_m2": am, "x_of_max_area_m": x_am,
+                   "lcb_x_m": lcb_x, "beam_wl_m": b_wl, "draught_at_wl_m": T,
+                   "lwl_m": L, "cb": cb, "cp": cp, "cm": cm},
+        "trace": trace,
+        "warnings": ["以上为 z=%.3f 处的系数（型线的设计水线口径），"
+                     "与案例『正常吃水』的系数口径不同。" % z],
+    }
+
+
+def half_angle_of_entrance(hull, z: float = 0.0, at_frac: float = 0.20) -> dict:
+    """半进流角 iE（度）—— 只给一个**显式约定**，不假装只有一个口径。
+
+    约定：在艏部水线上取「半宽 = at_frac × 最大半宽」的那一点，用相邻站中心差分求
+    dhb/dx，iE = atan(|dhb/dx|)。默认 at_frac = 0.20（≈ NavCad 等采用的
+    「离中线 Bwl/10」口径）。
+
+    ⚠️ 诚实前提：**半进流角没有统一定义**（艏端切线、B/10、B/4 各派都有），
+    不同口径的数不可直接互比。这里的值只在我们自己这条链里自洽。
+    ⚠️ 若水线在艏端**没有收拢**（型线被截断，首尾站仍有宽度）→ 取不到该点，
+    **返回 None + 警告**，不编一个角度出来。
+    """
+    import geometric as GM
+
+    xs = [float(x) for x, _ in hull.stations]
+    hb = [GM._waterline_halfbeam(poly, z) for _, poly in hull.stations]
+    hb_max = max(hb) if hb else 0.0
+    target = at_frac * hb_max
+
+    trace = []
+    warnings = []
+    if hb_max <= 0:
+        _T(trace, "iE_deg", None, "无半宽数据", "型线")
+        return {"values": {"iE_deg": None, "at_frac": at_frac}, "trace": trace,
+                "warnings": ["水线 z=%.3f 处无半宽：无法定半进流角。" % z]}
+
+    # 从艏端（x 最大）向内找第一个低于 target 的站，与相邻站线性定位
+    n = len(xs)
+    idx = None
+    for i in range(n - 1, -1, -1):
+        if hb[i] < target:
+            idx = i
+            break
+    if idx is None:
+        _T(trace, "iE_deg", None, "艏端未收拢，取不到 %.0f%% 半宽点" % (100 * at_frac), "型线")
+        warnings.append("艏端水线未收拢（首站半宽 %.2f m 已 ≥ 目标 %.2f m）："
+                        "型线在艏部被截断，半进流角无法确定 —— 不编造角度。"
+                        % (hb[-1], target))
+        return {"values": {"iE_deg": None, "at_frac": at_frac, "hb_max_m": hb_max},
+                "trace": trace, "warnings": warnings}
+
+    i = min(max(idx, 1), n - 2)
+    slope = (hb[i + 1] - hb[i - 1]) / (xs[i + 1] - xs[i - 1])
+    ie = math.degrees(math.atan(abs(slope)))
+    _T(trace, "iE_deg", ie,
+       "iE = atan(|dhb/dx|) @ 半宽=%.0f%%·半宽max (x≈%.1f)" % (100 * at_frac, xs[i]),
+       "型线差分（约定：离中线 Bwl/10 量法；**口径不唯一**）", True)
+    warnings.append("半进流角口径不唯一（艏端切线 / B/10 / B/4 各派不同），"
+                    "本值按 at_frac=%.2f 约定，跨来源比较前先对齐口径。" % at_frac)
+    return {"values": {"iE_deg": ie, "at_frac": at_frac, "hb_max_m": hb_max,
+                       "x_at_m": xs[i]}, "trace": trace, "warnings": warnings}
+
+
 def _submerged_girth(poly, tan_phi: float, d: float, eps: float = 1e-9) -> float:
     """湿周长：裁到水线以下的多边形周长，**扣除贴在水线上的闭合边**（那一段不湿）。
 

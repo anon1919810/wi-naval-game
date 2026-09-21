@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Hull 页三项补齐（湿面积 / 长宽比 / 自然航速）：解析对照 + 几何法交叉验证。"""
 import json
+import math
 import os
 import sys
 import unittest
@@ -113,6 +114,104 @@ class TestNaturalSpeed(unittest.TestCase):
                 self.assertIn("formula", t)
                 self.assertIn("source", t)
                 self.assertIn("estimate", t)
+
+
+def wedge_hull(n=21):
+    """楔形：半宽自艉 0 线性增到艏 B/2。
+    解析：∇ = B·T·L/2 = 2500，Am = 50，Cb = Cp = 0.5，Cm = 1.0，LCB = 66.67，
+          半进流角 = atan((B/2)/L) = atan(0.05) = 2.862°。"""
+    st = []
+    for i in range(n):
+        x = L * i / (n - 1)
+        hb = (B / 2.0) * (x / L)
+        st.append((x, [(-hb, -T), (hb, -T), (hb, DECK), (-hb, DECK)]))
+    return GE.StationedHull(st, name="wedge")
+
+
+def queen_mary_hull():
+    import offsets as OF
+    tbl, _src, dz = OF.load_offsets_payload(
+        os.path.join(PKG, "cases", "queen_mary_1913_offsets.json"))
+    return OF.build_hull(tbl, deck_z=dz)
+
+
+class TestFormCoefficients(unittest.TestCase):
+    """船型系数 Cb/Cp/Cm —— 7.3 阻力模型的地基，全部解析锚定。"""
+
+    def test_wedge_matches_analysis(self):
+        r = H.form_coefficients(wedge_hull())
+        v = r["values"]
+        self.assertAlmostEqual(v["volume_m3"], 2500.0, places=6)
+        self.assertAlmostEqual(v["midship_area_m2"], 50.0, places=6)
+        self.assertAlmostEqual(v["cb"], 0.5, places=6)
+        self.assertAlmostEqual(v["cp"], 0.5, places=6)
+        self.assertAlmostEqual(v["cm"], 1.0, places=6)
+        self.assertAlmostEqual(v["lcb_x_m"], 200.0 / 3.0, delta=0.2)
+
+    def test_box_is_unity(self):
+        r = H.form_coefficients(GE.StationedHull(box_hull(), name="box"))
+        v = r["values"]
+        self.assertAlmostEqual(v["cb"], 1.0, places=9)
+        self.assertAlmostEqual(v["cp"], 1.0, places=9)
+        self.assertAlmostEqual(v["cm"], 1.0, places=9)
+        self.assertAlmostEqual(v["volume_m3"], 5000.0, places=9)
+        self.assertAlmostEqual(v["lcb_x_m"], 50.0, places=9)
+
+    def test_cb_equals_cp_times_cm(self):
+        """Cb = Cp·Cm 是恒等式：两个形状都该成立（守系数定义不写错）。"""
+        for h in (wedge_hull(), GE.StationedHull(box_hull(), name="box")):
+            v = H.form_coefficients(h)["values"]
+            self.assertAlmostEqual(v["cb"], v["cp"] * v["cm"], places=9)
+
+    def test_empty_waterline_raises(self):
+        h = GE.StationedHull(box_hull(), name="box")
+        with self.assertRaises(ValueError):
+            H.form_coefficients(h, z=50.0)
+
+    def test_queen_mary_anchored(self):
+        """∇ = 30943.9 m³（案例记录的模型体积），Cb ≈ 0.5465。"""
+        v = H.form_coefficients(queen_mary_hull())["values"]
+        self.assertAlmostEqual(v["volume_m3"], 30943.9, delta=1.0)
+        self.assertAlmostEqual(v["cb"], 0.5465, delta=0.005)
+        self.assertAlmostEqual(v["cb"], v["cp"] * v["cm"], places=9)
+
+    def test_queen_mary_cm_is_low_and_documented(self):
+        """⚠️ 模型型线 Cm≈0.71，明显低于战舰常见 0.9+ —— 这是『形状分布未验证』的量化证据。
+        型线若被修正，本测试会提醒重新记录（锚值会说话）。"""
+        v = H.form_coefficients(queen_mary_hull())["values"]
+        self.assertTrue(0.6 < v["cm"] < 0.8,
+                        "Cm=%.3f 已不在记录区间：型线是否改过？请复查并重记。" % v["cm"])
+
+    def test_trace_discipline(self):
+        for t in H.form_coefficients(wedge_hull())["trace"]:
+            self.assertIn("formula", t)
+            self.assertIn("source", t)
+            self.assertIn("estimate", t)
+
+
+class TestHalfAngleOfEntrance(unittest.TestCase):
+    def test_wedge_exact(self):
+        """线性水线：iE = atan(0.05) = 2.862°（与 at_frac 无关，因为斜率恒定）。"""
+        r = H.half_angle_of_entrance(wedge_hull())
+        self.assertAlmostEqual(r["values"]["iE_deg"],
+                               math.degrees(math.atan(0.05)), places=6)
+
+    def test_blunt_cut_off_bow_gives_none(self):
+        """方箱艏端未收拢 → 取不到角度就返回 None，**不编造**（这是本函数最重要的行为）。"""
+        r = H.half_angle_of_entrance(GE.StationedHull(box_hull(), name="box"))
+        self.assertIsNone(r["values"]["iE_deg"])
+        self.assertTrue(any("不编造" in w for w in r["warnings"]))
+
+    def test_convention_is_declared(self):
+        """口径不唯一必须写进警告 —— 跨来源比较前先对齐。"""
+        r = H.half_angle_of_entrance(wedge_hull())
+        self.assertTrue(any("口径" in w for w in r["warnings"]))
+
+    def test_queen_mary_in_plausible_band(self):
+        """QM 型线 iE ≈ 27°，落在细瘦船常见区间。"""
+        r = H.half_angle_of_entrance(queen_mary_hull())
+        self.assertTrue(10.0 < r["values"]["iE_deg"] < 40.0,
+                        "iE=%.2f 不合理" % r["values"]["iE_deg"])
 
 
 class TestWaterlineLength(unittest.TestCase):

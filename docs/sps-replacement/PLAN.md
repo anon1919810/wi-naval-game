@@ -26,7 +26,8 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **261 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+- 一键回归 **272 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （…test_hull 32 = Hull 页补齐 + **7.3 船型系数地基**；test_generic_ship 11 = 通用性契约）
   （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16；test_freeboard 16；
   test_weapons 17；test_engines 14 = Engines 页；test_generic_ship 11 = **通用性契约**）
 - **SPS 七页全部到 ◐ 以上**（2026-09-22）：Hull 基本齐 / Freeboard·Armour·Guns·Weapons·
@@ -292,7 +293,25 @@
     设计 80 发/门 vs 战时 110 发/门（主炮 Magazine 492.6 vs ≈677.6 t）与 Jutland 名录
     的 661 t 全舰 allowance 三者口径矛盾，已在案例 `_note` 里记录，基准取 as-built。
   - 测试 18 项（含两轮变异验证：齐射丢门数 3 红、Magazine 丢门数 6 红）。
-- [ ] **7.3 阻力与功率**：Holtrop-Mennen / Taylor。
+- [~] **7.3 阻力与功率**（Holtrop-Mennen / Taylor）—— **地基已打（2026-09-22）**：
+  - **方法选择（已定，理由见 COVERAGE §4）**：主力用 **Taylor-Gertler**（母型是军舰
+    装甲巡洋舰 Leviathan、适用 warships、QM 的 B/T 与 ∇/L³ 都在范围），
+    **Holtrop-Mennen 作对照**（QM 的 Cb=0.533~0.547 **低于其下限 0.55**，文献明说
+    "fine warship forms, accuracy degrades"，不得当主值）。两者摩擦口径不同
+    （Schoenherr+0.4e-3 vs ITTC-1957+CA），比较前必须对齐。
+  - **地基（已完成）**：`hull.form_coefficients()` 与 `hull.half_angle_of_entrance()`
+    从型线**真算** ∇ / Am / LCB / **Cb / Cp / Cm / iE**，已物化为
+    `cases/queen_mary_1913_formcoeff.json`。QM（满载口径 z=0）：
+    ∇=30943.9、Bwl=26.8、T=9.9、Lwl=213.4、**Cb=0.5465 / Cp=0.7657 / Cm=0.7138**、
+    iE=27.06°、S=6407.9。
+  - ⚠️ **关键限界**：模型型线 **Cm=0.71 明显低于战舰常见 0.9+** —— 这是
+    「体积/Cb 已验证、形状分布未验证」的量化证据。**阻力对 Cm/Cp 极敏感**，
+    7.3 的结论必须带上这条限界（测试已锚住：型线改了会提醒重记）。
+  - 半进流角**口径不唯一**（艏端切线/B·10/B·4 各派不同）：实现为显式约定
+    （默认离中线 Bwl/10，参数可调），取不到就返回 None，**不编造**。
+  - 测试 21 → 32（test_hull）；变异验证：Cp 分母写错 4 项红、钝艏编造角度 1 项红。
+  - **待做**：Taylor-Gertler 图谱插值（四维：B/T、Cp、∇/L³、Fn）+ 摩擦按 Schoenherr
+    + 用试航真值 83,000 shp→28.1 kn 黑盒标定 + 误差带文档。
 - [ ] **7.4 耐波性估算**：切片理论（最低优先级）。
 - [-] **7.5 Web 界面**：**搁置（2026-09-21 用户指令）**——SPS 覆盖度仅 ~13%，
   网站会把"只有 Hull 一页"固化成看起来完整的样子。`feature/plimsoll-web` 草稿保留不删；

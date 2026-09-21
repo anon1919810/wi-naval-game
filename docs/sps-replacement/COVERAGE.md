@@ -143,6 +143,23 @@ Engine weight / Bunker / Displacement factor（输出）。
 
 ---
 
+## 附：7.3 方法选择记录（2026-09-22）
+
+| | Taylor-Gertler | Holtrop-Mennen |
+|---|---|---|
+| 母型 | **军舰（装甲巡洋舰 Leviathan）** | 民船（油船/散货/杂货/集装箱） |
+| 分解 | Froude：摩擦（Schoenherr + 0.4e-3）+ 剩余阻力图谱 | 回归闭式 `Rt=Rf(1+k1)+Rapp+Rw+Rb+Rtr+RA` |
+| 摩擦线 | Schoenherr | ITTC-1957 |
+| 已知偏差 | 低估 5–10% | Cb<0.55 精度下降 |
+| QM 适用性 | Fn 0.315 ✓、B/T 3.19 ✓、∇/L³ 0.0027 ✓、Cb 0.533 ✓ | **Cb 越界（<0.55）** |
+
+→ **主力 Taylor-Gertler，Holtrop 仅作对照**；两者摩擦口径不同，比较前必须对齐。
+
+**还得补的 7.3 输入**：Cp/Cm/LCB（已由 `hull.form_coefficients()` 从型线真算，见
+`cases/queen_mary_1913_formcoeff.json`）、lpp（垂线间长，∇/L³ 用它，**仍无源**）。
+
+---
+
 ## 3. 参考材料的三个洞（实现前必须补）
 
 1. **Guns 的 Battery 子页截图从未捕获**——而那里才是全部输入（每门炮重/座圈/弹药/锁定）。

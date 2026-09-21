@@ -1,0 +1,89 @@
+{
+  "schema": "plimsoll-formcoeff-1",
+  "ship": "HMS Queen Mary (1913)",
+  "_note": "由型线（cases/queen_mary_1913_offsets.json，水线 z=0 = 满载吃水 9.9 m）逐站积分推出，非文献值。口径：L 取该水线处水线长；B 取水线最大宽；T = z − 龙骨 z。半进流角口径为『离中线 Bwl/10 处切线』（口径不唯一）。⚠️ Cm 明显低于战舰常见 0.9+，说明型线**形状分布**与史实不符（体积/Cb 已验证，形状未验证）—— 7.3 阻力对 Cm/Cp 极敏感，须带着这个限界用。",
+  "offsets_source": "queen_mary_v4.py 内建 OFFSETS（生成脚本自述形状为 estimate，非史实型线）；拿到型线图后直接替换本文件的 stations 即可",
+  "values": {
+    "volume_m3": 30943.880252213905,
+    "midship_area_m2": 189.3736463032547,
+    "x_of_max_area_m": 10.0,
+    "lcb_x_m": 1.5842497304081027,
+    "beam_wl_m": 26.8,
+    "draught_at_wl_m": 9.9,
+    "lwl_m": 213.4,
+    "cb": 0.5465254217293214,
+    "cp": 0.76570382270097,
+    "cm": 0.7137556396172724,
+    "iE_deg": 27.061359863679964,
+    "wetted_surface_m2": 6407.873049363283
+  },
+  "trace": [
+    {
+      "key": "volume_m3",
+      "value": 30943.880252213905,
+      "formula": "∇ = ∫ A(x) dx（逐站剖面面积，梯形）",
+      "source": "型线积分",
+      "estimate": false
+    },
+    {
+      "key": "midship_area_m2",
+      "value": 189.3736463032547,
+      "formula": "Am = max A(x) @ x=10.00",
+      "source": "型线积分",
+      "estimate": false
+    },
+    {
+      "key": "lcb_x_m",
+      "value": 1.5842497304081027,
+      "formula": "LCB = ∫ x·A(x) dx / ∇",
+      "source": "型线积分（船体 x 坐标）",
+      "estimate": false
+    },
+    {
+      "key": "beam_wl_m",
+      "value": 26.8,
+      "formula": "Bwl = 2·max 水线半宽",
+      "source": "型线",
+      "estimate": false
+    },
+    {
+      "key": "draught_at_wl_m",
+      "value": 9.9,
+      "formula": "T = 水线 z − 龙骨 z",
+      "source": "型线",
+      "estimate": false
+    },
+    {
+      "key": "cb",
+      "value": 0.5465254217293214,
+      "formula": "Cb = ∇ / (Lwl·Bwl·T)",
+      "source": "定义式（L 取该水线长）",
+      "estimate": false
+    },
+    {
+      "key": "cp",
+      "value": 0.76570382270097,
+      "formula": "Cp = ∇ / (Am·Lwl)",
+      "source": "定义式（L 取该水线长）",
+      "estimate": false
+    },
+    {
+      "key": "cm",
+      "value": 0.7137556396172724,
+      "formula": "Cm = Am / (Bwl·T)",
+      "source": "定义式",
+      "estimate": false
+    },
+    {
+      "key": "iE_deg",
+      "value": 27.061359863679964,
+      "formula": "iE = atan(|dhb/dx|) @ 半宽=20%·半宽max (x≈106.7)",
+      "source": "型线差分（约定：离中线 Bwl/10 量法；**口径不唯一**）",
+      "estimate": true
+    }
+  ],
+  "warnings": [
+    "以上为 z=0.000 处的系数（型线的设计水线口径），与案例『正常吃水』的系数口径不同。",
+    "半进流角口径不唯一（艏端切线 / B/10 / B/4 各派不同），本值按 at_frac=0.20 约定，跨来源比较前先对齐口径。"
+  ]
+}
