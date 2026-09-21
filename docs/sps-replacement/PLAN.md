@@ -1,5 +1,8 @@
 # Plimsoll 改进计划
 
+> **2026-09-22 1.0 目标生效**：本文件后续阶段保留为历史记录。执行顺序以 [1.0 实施计划](../superpowers/plans/2026-09-22-plimsoll-1.0.md) 为准，状态以 [当前状态](../plimsoll-1.0/current-status.md) 为准。
+> 用户已授权恢复本地 Web；旧“覆盖 13%”“界面搁置”等表述不再代表当前约定。历史勾选不证明新的 A–G 验收已通过。
+
 > 范围：**只做 Plimsoll**。游戏侧的接入（`ShipFloatPrototype` 换数、`hydrostatics.json` 写回等）
 > 不在此计划内，待 Plimsoll 自身稳定后再单独立项。
 >

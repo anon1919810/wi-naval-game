@@ -1,0 +1,65 @@
+{
+  "probe": "legacy_lcb_constraint_is_not_finite_trim_moment_equilibrium",
+  "inputs": {
+    "length_m": 40.0,
+    "beam_m": 10.0,
+    "depth_m": 10.0,
+    "target_volume_m3": 1600.0,
+    "lcg_m": 1.0,
+    "kg_m": 3.0,
+    "stations": 161,
+    "coordinates": "keel z=0, x forward, y starboard"
+  },
+  "legacy_result": {
+    "d_m": 3.999999999796273,
+    "trim_rad": 0.029988650290513362,
+    "trim_deg": 1.7182230949401858,
+    "volume_m3": 1599.9999999185093,
+    "xlcb_m": 0.9999995627368002,
+    "target_volume_m3": 1600.0,
+    "target_lcb_m": 1.0,
+    "volume_residual_m3": -8.149072527885437e-08,
+    "lcb_residual_m": -4.372631997595633e-07,
+    "volume_eq_tol_m3": 0.00015999999999999999,
+    "outer_iterations": 22,
+    "phi_rad": 0.0,
+    "hydrostatics": {
+      "volume": 1599.9999999185093,
+      "yb": 2.220446049363404e-18,
+      "zb": 2.0149988149970506,
+      "xlcb": 0.9999995627368002,
+      "awp": 400.17993125181783,
+      "trace": {
+        "volume": {
+          "formula": "trapz(station clipped areas, x)",
+          "source": "StationedHull.integrate",
+          "estimate": false
+        },
+        "yb": {
+          "formula": "trapz(Ay,x)/volume",
+          "source": "StationedHull.integrate",
+          "estimate": false
+        },
+        "zb": {
+          "formula": "trapz(Az,x)/volume",
+          "source": "StationedHull.integrate",
+          "estimate": false
+        },
+        "xlcb": {
+          "formula": "trapz(x*A,x)/volume",
+          "source": "StationedHull.integrate",
+          "estimate": false
+        },
+        "awp": {
+          "formula": "trapz(chord,x)*sqrt(1+tan²φ+tan²θ)",
+          "source": "StationedHull.integrate",
+          "estimate": false
+        }
+      }
+    }
+  },
+  "full_longitudinal_moment_arm_m": -0.02954815147546738,
+  "scaled_moment_residual": -0.0007387037868866845,
+  "predeclared_new_solver_tolerance": 1e-06,
+  "status": "legacy target passes, full moment condition fails; correction pending Task 4"
+}

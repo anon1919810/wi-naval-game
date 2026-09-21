@@ -1,7 +1,8 @@
-# 覆盖度检查表 · Plimsoll vs SpringSharp · 2026-09-21
+# 覆盖度检查表 · Plimsoll 与 SpringSharp · 2026-09-22
 
-> **这就是 `SPEC.md` §5 承诺但从未创建的那份表。**
-> 维护纪律：**新增能力先在这里改状态，再写代码**；砍掉能力要留理由。
+> 本表保留七页参考字段的盘点；功能状态只能在实现和验证后更新。
+> 1.0 的范围与验收以 [批准目标](../plimsoll-1.0/spec.md) 为准，执行状态见 [当前状态](../plimsoll-1.0/current-status.md)。
+> 不以字段数量、单元测试数量推算产品完成百分比；未做同输入基准比较，不宣称全面超越 SpringSharp。
 >
 > 基准一：`docs/sps-reference/` 七张界面图（字段经逐图清点，2026-09-21，含对 SPEC §5 的七处纠正）。
 > 基准二：`SPEC.md` §5 字段清单与 §8 分层路线。
@@ -19,27 +20,25 @@
 | **Guns** | 23 | **◐**（模块已建） | `guns.py` v0（Weights 表 + 齐射 + Magazine） | 文献值已采集（NavWeaps 等）；**Armour 行缺**（炮塔装甲）；副炮装药缺 |
 | **Weapons** | 27 | **◐**（模块已建） | `weapons.py` v0（鱼雷 + 水雷/深弹 + Misc 五分区） | 鱼雷有源；**单雷全重/雷长缺**；水雷深弹与 Misc 五分区无数据 |
 | **Armour** | 28 | **◐**（模块已建） | `armour.py` v0（重量表 + SPS 视图） | 厚度带来源已有；**炮塔装甲未计入**（manifest 无选面 role）；面积全 estimate |
-| **Engines** | 27 | **◐**（模块已建） | `engines.py` v0（有源部分） | 功率/锅炉/燃料有源；**阻力模型不做**（PLAN 7.3）；主机重量缺 |
+| **Engines** | 27 | **◐** | `engines.py` + `resistance.py` | Taylor 估算已有；同载荷闭环、Holtrop 对照及主机重量仍待完成 |
 | **Performance** | 25 | **◐** | 稳性部分即我们的差异化 | GM/GZ/破损已强；Seakeeping/成本/强度 ✖ |
-| **（SPS 没有的）静水力曲线 / GZ / FSC / 破损稳性** | — | **✅** | 全部 | **我们的差异化，已完成 129 项测试** |
+| **静水力曲线 / GZ / FSC / 破损稳性** | — | **◐** | `geometric.py` / `damage.py` | 基础算法有测试；完整重量驱动、倾斜液体、连通进水时间线和有效性边界尚未全部实现 |
 
-**公共部分（对标 SPS）覆盖率 ≈ 13%——只有 Hull 的一半多一点。**
-**差异化部分（SPS 做不到的）≈ 100% 完成。**
-即：**我们把"纵深"做满了，"宽度"还是一片空地。**
+**撤销旧“公共部分 13% / 差异化 100%”表述。** 当时没有稳定的计分分母，且与随后新增的模块矛盾。已有函数、完整数据、可操作界面、物理有效性和产品验收必须分别核对。
 
-**层路线对照（SPEC §8）**：L0 ✅ → L1 ✅ → **L2 ❌（被降级到"阶段 7.2"，KG 只能手填）** → L3 ✅（部分）→ L4 ❌ → L5(Web) **曾提前开工、现已叫停**。
+**层路线现状**：L0/L1 有基础实现；L2 仅装甲重量案例和 KG 合成，三轴全船载荷待补；L3 有简化破损计算，完整闭环待补；本地 Web 已获 1.0 目标授权，在核心接口稳定后继续。
 
 ---
 
 ## 2. 逐页字段对照
 
-### 2.1 Hull（33 项）——唯一动工的一页
+### 2.1 Hull（33 项）——参数与型线基础已实现
 
 | 字段（原图） | SPS | Plimsoll | 证据 / 说明 |
 |---|:---:|:---:|---|
 | Name / Country / Type / Year | 输入 | ✅ | 案例字段 pass-through |
 | Ship laid down / Engine built | 输入 | ◐ | `dates.laid_down` 有；Engine built 无 |
-| 单位下拉（feet/metres） | 输入 | ✖ | **明确不做**：内部一律 SI，界面层换算（SPEC §3.1） |
+| 单位下拉（feet/metres） | 输入 | ○ | 内部 canonical SI；1.0 统一显式单位换算，界面展示必须标单位 |
 | Length Waterline / Overall | 输入 | ✅ | `lwl_m` 212.8（六源核对）`loa_m` 214.4；**LWL 另有型线实算口径** `hull.waterline_length()`：QM 型线 z=0（满载吃水）得 213.4 m > 正常吃水 212.8（方向自洽）；`lpp_m` 无源 → 仍缺 |
 | Beam Hull | 输入 | ✅ | 27.1 |
 | Beam Bulges | 输入 | ✖ | **明确不做**：防雷鼓包，本舰无 |
@@ -69,8 +68,7 @@ Sheer 示意图、**Average freeboard（输出）**。
 - **仍缺**：Fore/Aft 细分段、真实舷弧（sheer，模型是平的）、甲板型、船首/船艉型、
   Ram length、Stern overhang —— 均为纯设计输入，本模块不做（同 Hull 页滑条原则）。
 
-→ **全未实现。** 可从型值表+甲板高推出 Average freeboard 与浸没角（CLI 已有 20.6° 告警雏形）。
-**拦路石**：甲板分段比例是纯设计输入，本舰无来源 → 标 estimate 或先不做。
+上述基础输出已实现；真实舷弧与分段仍缺数据，现有模型推导必须保留 estimate。甲板浸没提示不等于已验证的开口进水角。
 
 ### 2.3 Guns（23 项）——模块已建（v0）
 
@@ -102,13 +100,13 @@ Sheer 示意图、**Average freeboard（输出）**。
 - 来源冲突已记录：战斗部 400 lb（维基）vs 515 lb（MaritimeQuest）；射程 10,000 yd @ 29 kn
   （维基）vs 10,750 yd @ 31 kn（MaritimeQuest）。
 
-### 2.5 Armour（28 项）——数据半齐，模块未建
+### 2.5 Armour（28 项）——基础模块已有，完整重量对接待补
 
 - Belts & Bulkheads 表：**Length/Height 是用户输入，Weight 是输出**（图上证实）。
 - **已具备**：14 个分区的厚度，**逐区带来源**（wiki 9in KC 主带 / 6in 上带 / 4in taper / 2.5in 甲板 /
   1in 下甲板 / 4in 舱壁 / 9in 炮座 / 10in 司令塔…，`armour_zones.json`）。
 - **缺**：各区**长/高/面积**。实测从 `object_manifest.json` 的 101 个对象包围盒按 role 选面可推，
-  **估算合计 6,821 t = 排水量 25.5%**，正落史实区间（狮级 6,000–7,000 t / 22–25%）。
+  **旧案例估算合计约 6,821 t，占其参考排水量约 25.5%**；比例接近某个经验范围不能验证选面、装甲面积或历史质量正确。
   ⚠️ 必须 estimate 标注：包围盒无朝向信息，曲面展开面积取曲率系数 1.10，炮管不计入装甲。
 
 ### 2.6 Engines（27 项）——模块已建（v0，只做有源部分）
@@ -119,14 +117,12 @@ Engine weight / Bunker / Displacement factor（输出）。
 
 **【2026-09-22 已建】`engines.py` v0 + `tools/gen_engines_case.py`**：
 - **有源就给**：轴数 4、4 × Parsons 直驱蒸汽轮机、42 × Yarrow 锅炉、
-  设计 75,000 shp = **55,927.5 kW**（1 hp = 745.7 W 精确换算）、试航 83,000 shp = 61,893.1 kW、
+  设计 75,000 shp = **55,927.5 kW**（旧模块使用 1 shp ≈ 745.7 W 的舍入常数）、试航 83,000 shp = 61,893.1 kW、
   最大 27.5 kn（试航 28.1 kn @ 83,000 shp）、Bunker 4,770 t（煤 3,600 + 油 1,170，**%Coal 75.47%**）、
   续航 5,610 nm @ 10 kn。
 - **量级校核（estimate）**：海军部系数 `C = Δ^(2/3)·V³ / P` = **248**（军舰常见 200–300，
   说明功率/航速/排水量自洽）+ 最大航速 Froude 数。
-- **明确不做**：**Friction/Wave resistance**（需 Holtrop-Mennen / Taylor，PLAN **7.3** 独立项）、
-  Engine weight（无来源）、Displacement factor（SPS 口径未公开）、Engine factor（SPS 自有经验系数）
-  —— 均在 warnings 与 `sps_view()["_not_implemented"]` 里点名，**不估算**。
+- **尚需完成/核对**：Taylor 阻力已经独立实现，Holtrop 对照纳入 1.0；Engine weight 将按明确来源或带区间的工程估算进入重量体系。Displacement factor / Engine factor 的 SPS 自有口径未证实，不能伪造同名等价值。旧 `sps_view()` 的未实现标签也须在集成阶段按实际能力更新。
 - 巡航速度无来源 → 置空（不是 0）。
 
 ### 2.7 Performance（25 项）——差异化的主战场
@@ -134,8 +130,8 @@ Engine weight / Bunker / Displacement factor（输出）。
 | 字段 | SPS | Plimsoll |
 |---|:---:|---|
 | Stability / Recoil / Flotation / Steadiness / Seakeeping | 输出（**数字**，非评语） | ◐ GM/横摇周期 ✅；**Seakeeping ✖** |
-| Set Trim 滑条 | 输入 | ✅ `solve_trim_equilibrium`（比 SPS 强：真解平衡） |
-| **Damage sustainability**（Max shell/torpedo hits） | 输出 | ◐ 我们有**真破损稳性**（进水→新浮态→剩余 GZ），比 SPS 的"允许几发"更深 |
+| Set Trim 滑条 | 输入 | ◐ 已有 `solve_trim_equilibrium`；全船三轴载荷联动尚待验收，不据函数名宣称优于 SPS |
+| **Damage sustainability**（Max shell/torpedo hits） | 输出 | ◐ 采用显式进水与剩余稳性的另一种建模范围；它不等价于命中次数估计，且完整时间线与液体几何待完成 |
 | Hull & deck Room（机械/储存/居住评语） | 输出 | ✖ |
 | Displacement Max/Normal/Standard/Light | 输出 | ◐ Normal/Deep 有；**Standard/Light 无** |
 | **Cost (£million)** | 输出 | **✖** |
@@ -147,13 +143,15 @@ Engine weight / Bunker / Displacement factor（输出）。
 
 | | Taylor-Gertler | Holtrop-Mennen |
 |---|---|---|
-| 母型 | **军舰（装甲巡洋舰 Leviathan）** | 民船（油船/散货/杂货/集装箱） |
+| 方法与资料 | Taylor 标准系列；具体图谱版本和归一化仍需逐页核对 | 1982 扩展包含细长军舰研究，不能概括为仅限民船 |
 | 分解 | Froude：摩擦（Schoenherr + 0.4e-3）+ 剩余阻力图谱 | 回归闭式 `Rt=Rf(1+k1)+Rapp+Rw+Rb+Rtr+RA` |
 | 摩擦线 | Schoenherr | ITTC-1957 |
-| 已知偏差 | 低估 5–10% | Cb<0.55 精度下降 |
-| QM 适用性 | Fn 0.315 ✓、B/T 3.19 ✓、∇/L³ 0.0027 ✓、Cb 0.533 ✓ | **Cb 越界（<0.55）** |
+| 偏差判断 | 旧“低估 5–10%”未记录对应算例与置信范围，撤销普遍断言 | 适用范围须对应具体公式版本及其参考样本，不能只看单个 Cb 阈值 |
+| QM 适用性 | 需同时核对 Cp、B/T、体积系数、Fn 和长度定义；不能用 Cb 代替表轴 Cp | 待实现独立对照并核对完整形状参数；缺输入必须显式估算 |
 
-→ **主力 Taylor-Gertler，Holtrop 仅作对照**；两者摩擦口径不同，比较前必须对齐。
+→ 当前计划保留 Taylor-Gertler 并增加 Holtrop 对照；比较时分别列出摩擦线、附体、相关修正和推进效率的定义，不能把不同定义的分量直接当作同一个物理量。
+
+核对依据：[MARIN 的 1982 年原论文摘要](https://www.marin.nl/en/publications/an-approximate-power-prediction-method) 明确提到对细长军舰的扩展，同时限制于与研究样本相似的船型。摘要不提供完整数值域，不能据此宣布 Queen Mary 有效；原公式与基准仍是 Task 7 的必需验收内容。
 
 **【2026-09-22 已落地】** Taylor-Gertler 表已数字化入库
 （`cases/taylor_gertler_cr_table.json`，源自 Molland 附录 A3.8–A3.11 = Gertler DTMB-806）：
@@ -165,7 +163,7 @@ Engine weight / Bunker / Displacement factor（输出）。
 详见 [计算修正与字段迁移](2026-09-22-calculation-integrity.md)。
 
 **还得补的 7.3 输入**：lpp（垂线间长，∇/L³ 用它，**仍无源**）；Cr 的 QPC 误差带；
-Holtrop 对照（原文在 `_holtrop1982.pdf`，注意其 Cb 越界）。
+Holtrop 对照（旧记录提到 `_holtrop1982.pdf`，当前隔离工作区尚未找到该文件；须获取可核对原文与基准）。
 
 ---
 
@@ -180,13 +178,10 @@ Holtrop 对照（原文在 `_holtrop1982.pdf`，注意其 Cb 越界）。
 
 ---
 
-## 4. 结论与顺序
+## 4. 当前结论与实施顺序
 
-1. **"还原到位没有"的答案：没有。** SPS 公共部分 ~13%，六页未动工；
-   但差异化（静水力/GZ/FSC/破损）100%。
-2. **先补 L2（重量分组）**——它是 Guns/Armour/Weapons 三页的共同前置，
-   也是 GM 从"手填 KG"变"分组合成"的唯一路径。素材审计结论：**缺模型不缺关键数据**
-   （装甲：厚度有源+面积可推；炮：弹重有；动力：全缺，先 estimate 占位）。
-3. L2 之后再补各页，顺序按"数据齐不齐"：**Armour（数据半齐）→ Guns（弹重有）→
-   Hull 补齐（湿面积/自然航速）→ Freeboard → Weapons → Engines（需采集数据）**。
-4. **网站继续搁置**，直到覆盖度检查表上六页至少到 ◐。
+1. 现有基础计算能运行，产品 1.0 尚未完成；325 项基线回归通过不替代界面、完整案例及发布验收。
+2. 先建立项目、单位、警告与迁移契约，再实现完整三轴重量和载荷；Queen Mary 缺项可透明估算，不得用补差重量强行匹配吨位。
+3. 由同一载荷推进平衡浮态、稳性、简化破损和阻力；验证方法的适用性、缺值与估算传播。
+4. 核心接口稳定后交付本地交互界面、独立发布包和端到端证据。用户已批准继续界面开发，旧“网站搁置”约定已被此次目标替代。
+5. 1.0 明确不包括完整耐波性、结构强度及历史造价；因此完成当前目标也不等于逐项全面超越 SpringSharp。
