@@ -1,0 +1,281 @@
+{
+  "equilibrium": {
+    "combination": {
+      "added_displacement_t": 1704.7799999999997,
+      "displacement_after_t": 28484.78,
+      "displacement_before_t": 26780.0,
+      "estimate": {
+        "geometry": "舱室为矩形代理；来源须由调用方标注",
+        "km_m": "若调用方未重算破损后 KM，此处沿用输入，属近似"
+      },
+      "formula": "KG_eff=(Δ·KG+Σδ·kg_f)/(Δ+Σδ)+FSC; FSC=Σ(ρi)/(Δ+Σδ)",
+      "fsc_m": 0.574738509477693,
+      "gm_m": 4.325034695721714,
+      "kg_before_m": 8.6,
+      "kg_effective_m": 9.084965304278287,
+      "kg_solid_m": 8.510226794800593,
+      "km_m": 13.41,
+      "lcb_m": 0.0,
+      "lcg_solid_m": -0.008714829463313319,
+      "n_tanks": 1,
+      "source": "stage 4.1 flood combination; rectangular tanks; no new equilibrium",
+      "tanks": [
+        {
+          "added_displacement_t": 1704.7799999999997,
+          "beam_m": 22.0,
+          "flood_fraction": 0.7,
+          "fluid_density_t_m3": 1.025,
+          "formula": "δ=ρ·μ·f·L·b·H；kg_f=z0+f·H；FS 仅 0<f<1",
+          "free_surface_active": true,
+          "height_m": 8.0,
+          "i_effective_m4": 15972.0,
+          "kg_flood_m": 7.1,
+          "length_m": 18.0,
+          "permeability": 0.75,
+          "rho_times_i": 16371.3,
+          "source": "rectangular flood proxy; explicit geometry required",
+          "tank_id": "Engine_Room",
+          "volume_flood_m3": 1663.1999999999998,
+          "volume_perm_m3": 2376.0,
+          "volume_tank_m3": 3168.0,
+          "x_m": -8.0,
+          "y_m": 3.0
+        }
+      ],
+      "tcg_flood_m": 0.17954641039881647
+    },
+    "draught_m": 9.416475877224004,
+    "estimate": {
+      "geometry": "舱室为矩形代理；来源须由调用方标注",
+      "km_m": "hydrostatics_upright(d)，未计入纵倾对 KM 的影响"
+    },
+    "formula": "solve_trim(V*=Δ'/ρ, LCG); KM≈upright@d; heel≈atan(M/(Δ'·GM'))",
+    "gm_m": 3.821948623479523,
+    "gm_negative": false,
+    "heel_deg": 2.6896473227951785,
+    "heel_moment_t_m": 5114.339999999999,
+    "kg_effective_m": 9.084965304278287,
+    "km_m": 12.90691392775781,
+    "lcb_residual_m": 5.339755603014223e-07,
+    "rho_t_m3": 1.025,
+    "source": "stage 4.2 flooded equilibrium",
+    "target_lcg_m": -0.008714829463313319,
+    "target_volume_m3": 27790.029268292685,
+    "tcg_flood_m": 0.17954641039881647,
+    "trim_deg": -0.0012503564357757566,
+    "trim_rad": -2.182283662778797e-05,
+    "trim_solution": {
+      "d_m": 9.416475877224004,
+      "hydrostatics": {
+        "awp": 4334.884242740426,
+        "trace": {
+          "awp": {
+            "estimate": false,
+            "formula": "trapz(chord,x)*sqrt(1+tan²φ+tan²θ)",
+            "source": "StationedHull.integrate"
+          },
+          "volume": {
+            "estimate": false,
+            "formula": "trapz(station clipped areas, x)",
+            "source": "StationedHull.integrate"
+          },
+          "xlcb": {
+            "estimate": false,
+            "formula": "trapz(x*A,x)/volume",
+            "source": "StationedHull.integrate"
+          },
+          "yb": {
+            "estimate": false,
+            "formula": "trapz(Ay,x)/volume",
+            "source": "StationedHull.integrate"
+          },
+          "zb": {
+            "estimate": false,
+            "formula": "trapz(Az,x)/volume",
+            "source": "StationedHull.integrate"
+          }
+        },
+        "volume": 27790.02926731621,
+        "xlcb": -0.008714295487753017,
+        "yb": 3.031852181683814e-17,
+        "zb": 5.650235399649661
+      },
+      "lcb_residual_m": 5.339755603014223e-07,
+      "outer_iterations": 26,
+      "phi_rad": 0.0,
+      "target_lcb_m": -0.008714829463313319,
+      "target_volume_m3": 27790.029268292685,
+      "trim_deg": -0.0012503564357757566,
+      "trim_rad": -2.182283662778797e-05,
+      "volume_eq_tol_m3": 0.0027790029268292683,
+      "volume_m3": 27790.02926731621,
+      "volume_residual_m3": -9.764735295902938e-07,
+      "xlcb_m": -0.008714295487753017
+    },
+    "volume_m3": 27790.02926731621,
+    "volume_residual_m3": -9.764735295902938e-07,
+    "waterline_d_m": 9.416475877224004,
+    "xlcb_m": -0.008714295487753017
+  },
+  "id": "engine_room",
+  "remaining_gz": {
+    "angle_at_max_deg": 30.0,
+    "angles_deg": [
+      0.0,
+      5.0,
+      10.0,
+      15.0,
+      20.0,
+      25.0,
+      30.0,
+      35.0,
+      40.0,
+      45.0,
+      50.0,
+      55.0,
+      60.0
+    ],
+    "estimate": {
+      "deck": "甲板以上形状未外部验证，大角度 GZ 仍属 estimate"
+    },
+    "formula": "GZ at equal-volume waterlines with KG_eff",
+    "kg_effective_m": 9.084965304278287,
+    "max_gz_m": 1.4045939987773421,
+    "range_deg": 60.0,
+    "rows": [
+      {
+        "angle_deg": 0.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 3.195610753314112e-17,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029267316204,
+        "waterline_d_m": 9.416475877224004,
+        "yb_m": 3.195610753314112e-17,
+        "zb_m": 5.65023530456434
+      },
+      {
+        "angle_deg": 5.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 0.32515083998790045,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.02926751095,
+        "waterline_d_m": 9.411136020475535,
+        "yb_m": 0.624525761615667,
+        "zb_m": 5.677290684199203
+      },
+      {
+        "angle_deg": 10.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 0.6126657043088779,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029269078274,
+        "waterline_d_m": 9.37907426141901,
+        "yb_m": 1.209444507459695,
+        "zb_m": 5.754065831293994
+      },
+      {
+        "angle_deg": 15.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 0.8711103278592096,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029268004742,
+        "waterline_d_m": 9.316513128590307,
+        "yb_m": 1.7615878419323818,
+        "zb_m": 5.876341829096417
+      },
+      {
+        "angle_deg": 20.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.1116140416562525,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.0292693417,
+        "waterline_d_m": 9.220096981746613,
+        "yb_m": 2.290154622394928,
+        "zb_m": 6.042959218466219
+      },
+      {
+        "angle_deg": 25.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.3141205066553723,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.02926818523,
+        "waterline_d_m": 9.10246150848689,
+        "yb_m": 2.775129018543851,
+        "zb_m": 6.243155942005204
+      },
+      {
+        "angle_deg": 30.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.4045939987773421,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029267792488,
+        "waterline_d_m": 9.018912093678958,
+        "yb_m": 3.1503087439468955,
+        "zb_m": 6.437658497788454
+      },
+      {
+        "angle_deg": 35.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.4008570027331604,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029268930277,
+        "waterline_d_m": 8.978038098674736,
+        "yb_m": 3.4365357996773183,
+        "zb_m": 6.61940320440971
+      },
+      {
+        "angle_deg": 40.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.327536691100159,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029268472386,
+        "waterline_d_m": 8.979354504228104,
+        "yb_m": 3.658981412092867,
+        "zb_m": 6.789641522557125
+      },
+      {
+        "angle_deg": 45.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.2024157264981437,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029267627684,
+        "waterline_d_m": 9.02441735890461,
+        "yb_m": 3.834921971847106,
+        "zb_m": 6.9505159604555535
+      },
+      {
+        "angle_deg": 50.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 1.0382529232581859,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029268432874,
+        "waterline_d_m": 9.118885792011865,
+        "yb_m": 3.9759193796930377,
+        "zb_m": 7.104115753379041
+      },
+      {
+        "angle_deg": 55.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 0.8445795470074613,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029268713857,
+        "waterline_d_m": 9.274704701418523,
+        "yb_m": 4.089794049759231,
+        "zb_m": 7.252301930086027
+      },
+      {
+        "angle_deg": 60.0,
+        "fsc_m": 0.0,
+        "gm_arm_m": 0.6288946881935307,
+        "kg_effective_m": 9.084965304278287,
+        "volume_m3": 27790.029268492865,
+        "waterline_d_m": 9.514367449202108,
+        "yb_m": 4.181912645496534,
+        "zb_m": 7.396721947714283
+      }
+    ],
+    "source": "stage 4.3 remaining GZ",
+    "target_volume_m3": 27790.029268292685
+  },
+  "stable": true
+}
