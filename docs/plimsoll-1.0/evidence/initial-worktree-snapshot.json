@@ -1,0 +1,122 @@
+{
+  "source": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17",
+  "source_head": "e1596eaf7203fbc3cce4b5f2b884778d9d1f7940",
+  "files": [
+    {
+      "path": "docs/sps-replacement/2026-09-22-calculation-integrity.md",
+      "sha256": "8af6e62c9ce117bbb40a1d9e69bf34e8626c7b820a36c6fc21c96cc36cc98303"
+    },
+    {
+      "path": "docs/sps-replacement/COVERAGE.md",
+      "sha256": "d1af9802e44b58a0e160f74b82422cca97fd3329d4d3036b9b5d14bf9eec08b6"
+    },
+    {
+      "path": "docs/sps-replacement/PLAN.md",
+      "sha256": "ee738e2367f1fefce51792fb875a1d6804da975c8c65e8e373e4399abc665379"
+    },
+    {
+      "path": "tools/plimsoll/README.md",
+      "sha256": "c131d072285266741a0c019a3aa5c8df8e0f0d9e8f206827e8683c3d5062f0c5"
+    },
+    {
+      "path": "tools/plimsoll/cases/out/double_boiler.result.json",
+      "sha256": "0fc3d5f5625b207d4757eac9175f58b35320292d453ab88d85811839bb19e7d9"
+    },
+    {
+      "path": "tools/plimsoll/cases/out/engine_room.result.json",
+      "sha256": "89e527adc94c046441de07c7bcecf83858c95a0f699e535cf53bda93a824b434"
+    },
+    {
+      "path": "tools/plimsoll/cases/out/queen_mary_speed_power.html",
+      "sha256": "1d110e53f332180b48a4ee6ba0b9eb9b9dc0134dc439ceeb1cd319054e30fd9e"
+    },
+    {
+      "path": "tools/plimsoll/cases/out/single_boiler.result.json",
+      "sha256": "994c27ab2c811b6634c58037b0780a188b2db32529e520093c08534efb509d05"
+    },
+    {
+      "path": "tools/plimsoll/cases/queen_mary_1913.json",
+      "sha256": "0087b885d2dc04d3edc9586e62f82c52584fe6616d5ca58e6dc196332ab9c342"
+    },
+    {
+      "path": "tools/plimsoll/cases/queen_mary_1913.result.json",
+      "sha256": "c337705aabd489e885ef3ba7ba7764c4cbec2adce80e8cc96d22d7faa3091581"
+    },
+    {
+      "path": "tools/plimsoll/cases/queen_mary_1913_engines.json",
+      "sha256": "63c65b9520e4d7702eb4be8d95690e6786ebf5d1c8876156ca9ff57094dfe22e"
+    },
+    {
+      "path": "tools/plimsoll/cases/queen_mary_1913_formcoeff.json",
+      "sha256": "b7aa83b86c7dca656556d99e51f94a52d2b0b19ef18062c93d8362c5449df136"
+    },
+    {
+      "path": "tools/plimsoll/cases/queen_mary_1913_resistance.json",
+      "sha256": "b59f4b0fc10c73c8699d6c4e7e331f25bd7ce08675c592ee2c09a2d525c04147"
+    },
+    {
+      "path": "tools/plimsoll/cases/queen_mary_1913_speed_power.json",
+      "sha256": "1b89b39ac72e377a9ee61720eac7b5a8935ba3bb133b939f74ea4a276421982a"
+    },
+    {
+      "path": "tools/plimsoll/cases/templates/speed_power.html",
+      "sha256": "8516c566d842ae680f666cd2b7717d7b200d714853eba21c8d7a2cbdd5ad7c20"
+    },
+    {
+      "path": "tools/plimsoll/cli.py",
+      "sha256": "1da92fab3877748a0cbd866f16fecf8985cd0d4c4a4463d6fc110bd08a9b1cab"
+    },
+    {
+      "path": "tools/plimsoll/damage.py",
+      "sha256": "bfa399d2001be6ba3cd8f9ff15bae56b4afa4486aabbe14b073a665f90af1ec6"
+    },
+    {
+      "path": "tools/plimsoll/engines.py",
+      "sha256": "7d3b8dc40d1d3b118a941f8041ddefcf5c56b352a27611fd262c12dd0a2d8c0d"
+    },
+    {
+      "path": "tools/plimsoll/hydrostatics.py",
+      "sha256": "cfdd744e03b62959f6b27ac3694c77e081596d74fb8c399a831ca257a3e4d3b1"
+    },
+    {
+      "path": "tools/plimsoll/resistance.py",
+      "sha256": "7ecc0885949ff0332a59a488f6efa6c912c5152008da0f76836d38a72ede1fa3"
+    },
+    {
+      "path": "tools/plimsoll/tests/test_calculation_integrity.py",
+      "sha256": "162c2bab0ad81e3f22c25cf7eeaf16d5606ff6881673a16976f23ce30928d409"
+    },
+    {
+      "path": "tools/plimsoll/tests/test_engines.py",
+      "sha256": "82deb3897057c892815fe56d71679bb1ee2883bbc28fa4ef3d3d265602a75ce8"
+    },
+    {
+      "path": "tools/plimsoll/tests/test_flood_combination.py",
+      "sha256": "4e39bb93b592ab94ff372f509941769f087cf05749f1ab495ac79f48a2e6f561"
+    },
+    {
+      "path": "tools/plimsoll/tests/test_resistance.py",
+      "sha256": "5f7d3879e02972399505132b5e26d725d4b63d07aa1e85f0dc8d486dbf744747"
+    },
+    {
+      "path": "tools/plimsoll/tools/gen_engines_case.py",
+      "sha256": "1bc03c98ad3a3b82520909f0f9ef985f4efd3ed205675219e8cc8ba168257b43"
+    },
+    {
+      "path": "tools/plimsoll/tools/gen_formcoeff_case.py",
+      "sha256": "cc39e2e93d300653921a736d5aa3d41e36a016cd2792c44df18e5ec43eda5120"
+    },
+    {
+      "path": "tools/plimsoll/tools/gen_resistance_case.py",
+      "sha256": "2e1b96a80065fc06d03c5e0456b55e5f947362f952ea687e800cabb294598ee4"
+    },
+    {
+      "path": "tools/plimsoll/tools/gen_speed_power_case.py",
+      "sha256": "ed05295df9ee877b79f2da10079341610f3b1f8c22c954e5c001dfca00266d00"
+    },
+    {
+      "path": "tools/plimsoll/tools/qm_resistance_inputs.py",
+      "sha256": "d273d0c0596348e14e6917f2b2fe52a970e109f3bdc991b393a37bea0d0e4cde"
+    }
+  ]
+}

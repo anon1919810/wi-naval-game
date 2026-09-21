@@ -107,7 +107,17 @@ def compute(hull: dict) -> dict:
         warnings.append("未提供 waterplane_coeff，按典型值 0.80 计算（estimate）。"
                         "取得型线后应用几何法（L1）替换。")
     else:
-        Cwp, cwp_est = float(cwp_supplied), False
+        Cwp = float(cwp_supplied)
+        cwp_est = bool(hull.get("waterplane_coeff_is_estimate", True))
+
+    cb_est = bool(hull.get("block_coeff_is_estimate", True))
+    disp_est = bool(hull.get("displacement_unit_is_estimate", False))
+    T("waterplane_coeff", Cwp, "输入或默认值",
+      hull.get("sources", {}).get("waterplane_coeff", "来源未提供；默认按估算处理"), cwp_est)
+    if cwp_supplied is not None and cwp_est:
+        warnings.append("输入 waterplane_coeff 为估算；相关稳性结果继承 estimate 标记。")
+    if disp_est:
+        warnings.append("排水量原始吨位单位未确认；内部公吨口径为假设，相关比较属于估算。")
 
     coeffs = waterplane_coeffs(Cwp)
     p, C_I = coeffs["p"], coeffs["c_i"]
@@ -120,16 +130,16 @@ def compute(hull: dict) -> dict:
     # --- 排水体积与质量
     vol = L * B * Td * Cb
     mass = vol * RHO_SEA
-    T("displacement_volume_m3", vol, "∇ = Lwl · B · T · Cb", "排水体积定义")
-    T("displacement_t", mass, "Δ = ∇ · ρ", "ρ = 1.025 t/m³（海水）")
+    T("displacement_volume_m3", vol, "∇ = Lwl · B · T · Cb", "排水体积定义", cb_est)
+    T("displacement_t", mass, "Δ = ∇ · ρ", "ρ = 1.025 t/m³（海水）", cb_est)
 
     given_disp = hull.get("displacement_normal_t")
     if given_disp:
         given_disp = float(given_disp)
         dev = 100.0 * (mass - given_disp) / given_disp
-        T("displacement_input_t", given_disp, "—", "输入（来源见 hull.sources）")
+        T("displacement_input_t", given_disp, "—", "输入（来源见 hull.sources）", disp_est)
         T("displacement_deviation_pct", dev,
-          "(Δ_算 − Δ_给) / Δ_给 × 100", "一致性检查")
+          "(Δ_算 − Δ_给) / Δ_给 × 100", "一致性检查", cb_est or disp_est)
         if abs(dev) > 5.0:
             warnings.append(
                 "算得排水量 %.0f t 与输入 %.0f t 相差 %.1f%%。L/B/T/Cb 与排水量口径不一致"
@@ -145,14 +155,14 @@ def compute(hull: dict) -> dict:
     # --- 浮心高（Morrish 近似）
     kb = Td * (5.0 / 6.0 - Cb / (3.0 * Cwp))
     T("kb_m", kb, "KB = T · (5/6 − Cb/(3·Cwp))",
-      "Morrish 近似；方箱 Cb=Cwp=1 时退化为 T/2", cwp_est)
+      "Morrish 近似；方箱 Cb=Cwp=1 时退化为 T/2", True)
     if kb <= 0:
         warnings.append("KB ≤ 0：Cb/Cwp 组合超出该近似的适用范围。")
 
     # --- 横稳心半径
     bm_t = C_I * B * B / (12.0 * Cb * Td)
     T("bm_t_m", bm_t, "BM_T = C_I · B² / (12 · Cb · T)",
-      "由 I_T/∇ 导出；方箱 C_I=1 时退化为 B²/(12T)", cwp_est)
+      "由 I_T/∇ 导出；方箱 C_I=1 时退化为 B²/(12T)", cwp_est or cb_est)
 
     # --- 纵稳心半径与每厘米纵倾力矩
     i_l = coeffs["i_l_per_B_L3"] * B * L ** 3
@@ -160,12 +170,12 @@ def compute(hull: dict) -> dict:
     mct = mass * bm_l / (100.0 * L)
     T("il_m4", i_l, "I_L = √π·B·L³·Γ(p+1)/(16·Γ(p+5/2))",
       "同一水线面形状模型的解析积分（方箱 = B·L³/12）", cwp_est)
-    T("bm_l_m", bm_l, "BM_L = I_L / ∇", "纵稳心半径定义")
-    T("mct1cm_t_m_per_cm", mct, "MCT1cm = Δ · BM_L / (100 · L)", "每厘米纵倾力矩")
+    T("bm_l_m", bm_l, "BM_L = I_L / ∇", "纵稳心半径定义", cwp_est or cb_est)
+    T("mct1cm_t_m_per_cm", mct, "MCT1cm = Δ · BM_L / (100 · L)", "每厘米纵倾力矩", cwp_est)
 
     # --- 稳心高（需要 KG；KG 属 L2 重量分组）
     km = kb + bm_t
-    T("km_m", km, "KM = KB + BM_T", "横稳心高定义")
+    T("km_m", km, "KM = KB + BM_T", "横稳心高定义；KB 使用 Morrish 近似", True)
     gm = None
     kg = hull.get("kg_m")
     if kg is not None:
@@ -173,7 +183,7 @@ def compute(hull: dict) -> dict:
         gm = km - kg
         kg_est = bool(hull.get("kg_is_estimate", True))
         T("kg_m", kg, "—", "输入（重量分组属 L2，此处应为估算或实测）", kg_est)
-        T("gm_m", gm, "GM = KM − KG", "初稳性高定义", kg_est)
+        T("gm_m", gm, "GM = KM − KG", "初稳性高定义；继承 KM 的近似", True)
         if gm <= 0:
             warnings.append("GM ≤ 0：按此 KG 该船初稳性不足（会翻）。请核对 KG。")
     else:

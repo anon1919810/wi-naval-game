@@ -1,126 +1,336 @@
 {
-  "schema": "plimsoll-resistance-1",
+  "schema": "plimsoll-resistance-2",
   "ship": "HMS Queen Mary (1913)",
-  "_note": "阻力 v0.1：摩擦（Schoenherr + 0.4e-3 粗糙度）+ **Taylor-Gertler 表插值**（Molland A3.8–A3.11；表内 CR×1000 → scale 1e-3）。★ 船型参数**必须用史实口径**（Cp = Cb/Cm ≈ 0.567，B/T = 27.1/8.5 = 3.19）：模型型线的 Cp=0.766 受 Cm=0.71 异常污染，用它插值会得到 Cr≈5e-3、反推 QPC≈0.28（荒谬）；史实口径给出 Cr≈1.4e-3、QPC≈0.51（合理），并与试航反解 Cr=0.00167 相差约 16% —— **两个独立来源互相印证**。ν 取海水 15°C；QPC=0.55 为反解假定值（无来源）。",
+  "estimate": true,
+  "_note": "正常载荷主尺度 + 同载荷 Mumford 湿面积 + 假定 Cm；满载模型全套参数单列。试航载荷、吨位单位未确认；反解 QPC 只作诊断，不构成历史验证或拟合目标。values.r_total_kN/rr_kN 为试航功率在假定 QPC 下的反解；预测见 normal_prediction。",
   "inputs": {
-    "speed_kn": 28.1,
-    "shp_trial": 83000.0,
-    "wetted_surface_m2": 6407.873049363283,
-    "lwl_m": 213.4,
-    "nu_m2_s": 1.19e-06,
-    "rho_kg_m3": 1025.0,
-    "qpc_assumed": 0.55,
-    "form_params_historical": {
-      "cp": 0.5670212765957447,
+    "normal_estimate": {
+      "loading_condition": "normal",
+      "estimate": true,
+      "lwl_m": 212.8,
+      "beam_m": 27.1,
+      "draught_m": 8.5,
+      "volume_m3": 26117.07317073171,
+      "displacement_t": 26770.0,
+      "displacement_unit": "metric_tonne",
+      "displacement_unit_is_estimate": true,
+      "s_m2": 6147.5568436154945,
+      "cb": 0.5328005513580124,
+      "cm": 0.94,
+      "cp": 0.5668090971893749,
       "bt": 3.1882352941176473,
       "volumetric": 0.0027102517588022167,
-      "fn": 0.3159458935330927,
-      "note": "Cp = Cb(0.533)/Cm(0.94)；B/T、∇/L³ 用正常吃水"
+      "sources": {
+        "offsets_path": "本案例自带 queen_mary_1913_offsets.json（tools/gen_qm_offsets.py 从 queen_mary_v4.py 物化，形状 estimate）；通用性改造后 CLI 不再扫描仓库路径",
+        "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
+        "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
+        "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
+        "draught_normal_m": "Navypedia '8.50 mean'",
+        "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
+        "block_coeff": "由来源反推：26770 ÷ (212.8 × 27.1 × 8.5 × 1.025) = 0.5328。注意此前填 0.551 是从**错误的 LWL 205.7** 反推的，属循环论证 —— LWL 修正后必须同步改这个值，否则排水量会虚高 3.4%",
+        "model_cross_check": "独立佐证：由 queen_mary_v4.py 的型值表放样出的模型船体，在自身设计水线 z=0（吃水 9.9 m = 实船满载吃水）上积分得 30943.9 m³ = 31717 t，对实船满载 31650 t 差 +0.213%；模型 Cb=0.5405 vs 实船满载 Cb=0.5408，差 0.06%。**说明该型值表对体积特性的估算是可信的。** 但注意：这只验证了体积/方形系数，**不验证形状分布**（不同分布可以给出相同体积而完全不同的 KB/BM/GZ）",
+        "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
+        "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
+        "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
+        "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测",
+        "cb": "normal displacement / (rho * Lwl * B * T); no rounded Cb reuse",
+        "cp": "Cb / Cm; Cm is an assumption, not a measured Queen Mary section",
+        "cm": "先验假定；没有 Queen Mary 的实测最大横剖面资料，非史实值",
+        "s_m2": "Mumford S=L*(1.7*T+Cb*B), all inputs at normal loading",
+        "displacement_unit": "metric tonne internally; historical source unit unresolved"
+      },
+      "trace": [
+        {
+          "key": "wetted_surface_m2",
+          "value": 6147.5568436154945,
+          "formula": "S = L·(c·T + Cb·B)，c=1.70",
+          "source": "Mumford 经验式（造船学教科书；与 ∇/T + 1.7·L·T 同形）",
+          "estimate": true
+        }
+      ],
+      "warnings": [
+        "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+        "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+        "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。"
+      ]
     },
-    "form_params_model": {
+    "model_full_load": {
+      "lwl_m": 213.4,
+      "s_m2": 6407.873049363283,
       "cp": 0.76570382270097,
       "bt": 2.707070707070707,
       "volumetric": 0.0031841353955379356,
-      "note": "模型型线（Cm=0.71 异常）—— 仅作对照"
+      "loading_condition": "model_design_full_load",
+      "estimate": true,
+      "warnings": [
+        "以上为 z=0.000 处的系数（型线的设计水线口径），与案例『正常吃水』的系数口径不同。",
+        "半进流角口径不唯一（艏端切线 / B/10 / B/4 各派不同），本值按 at_frac=0.20 约定，跨来源比较前先对齐口径。",
+        "所有几何结果继承输入模型型线的 estimate；数值积分不等于史实测量。"
+      ],
+      "sources": {
+        "geometry": "queen_mary_1913_formcoeff.json"
+      }
     },
-    "sources": {
-      "S": "cases/queen_mary_1913_formcoeff.json（型线逐站积分）",
-      "L": "同上（水线长）",
-      "trial": "cases/queen_mary_1913_engines.json（Navypedia）",
-      "cr_table": "cases/taylor_gertler_cr_table.json（Molland A3.8-A3.11）"
-    }
+    "trial": {
+      "speed_kn": 28.1,
+      "shp": 83000,
+      "loading_condition": "unknown",
+      "source": "Navypedia: on trials made 28.1 kts with 83,000 shp"
+    },
+    "qpc_assumed": 0.55
+  },
+  "normal_prediction": {
+    "speed_kn": 28.1,
+    "fr": 0.31639099245328706,
+    "fr_used": 0.31639099245328706,
+    "rn": 2585050838.5882354,
+    "rf_kN": 1159.8169881997655,
+    "cr": 0.0013958723338495962,
+    "rr_kN": 919.032722924031,
+    "rt_kN": 2078.8497111237966,
+    "pe_kw": 30051.59447818131,
+    "pe_shp": 40299.84508271598,
+    "shp_required": 73272.44560493814,
+    "complete": true,
+    "estimate": true,
+    "warnings": [
+      "Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+    ],
+    "trace": [
+      {
+        "key": "cf",
+        "value": 0.0013615873796156903,
+        "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+        "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+        "estimate": true
+      },
+      {
+        "key": "rn",
+        "value": 2585050838.5882354,
+        "formula": "Rn = V·L / ν",
+        "source": "定义式（ν=1.190e-06 由调用方给出）",
+        "estimate": true
+      },
+      {
+        "key": "cf_total",
+        "value": 0.0017615873796156902,
+        "formula": "Cf,total = Cf + ΔCf",
+        "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+        "estimate": true
+      },
+      {
+        "key": "rf_n",
+        "value": 1159816.9881997656,
+        "formula": "Rf = ½·ρ·S·Cf,total·V²",
+        "source": "摩擦阻力定义式",
+        "estimate": true
+      },
+      {
+        "key": "cr",
+        "value": 0.0013958723338495962,
+        "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+        "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+        "estimate": true
+      }
+    ]
+  },
+  "model_full_load_prediction": {
+    "speed_kn": 28.1,
+    "fr": 0.3159458935330927,
+    "fr_used": 0.3159458935330927,
+    "rn": 2592339515.764706,
+    "rf_kN": 1208.6134984170405,
+    "cr": 0.004816684517946894,
+    "rr_kN": 3305.558315900949,
+    "rt_kN": 4514.171814317989,
+    "pe_kw": 65256.309796144604,
+    "pe_shp": 87510.13785187689,
+    "shp_required": 159109.34154886706,
+    "complete": true,
+    "estimate": true,
+    "warnings": [
+      "Rn=2.592e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "插值涉及 8/16 个缺格（表中「—」）：已按可用角点重新归一化，按原插值权重归一化，边界区精度下降。"
+    ],
+    "trace": [
+      {
+        "key": "cf",
+        "value": 0.00136112758259426,
+        "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+        "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+        "estimate": true
+      },
+      {
+        "key": "rn",
+        "value": 2592339515.764706,
+        "formula": "Rn = V·L / ν",
+        "source": "定义式（ν=1.190e-06 由调用方给出）",
+        "estimate": true
+      },
+      {
+        "key": "cf_total",
+        "value": 0.0017611275825942599,
+        "formula": "Cf,total = Cf + ΔCf",
+        "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+        "estimate": true
+      },
+      {
+        "key": "rf_n",
+        "value": 1208613.4984170406,
+        "formula": "Rf = ½·ρ·S·Cf,total·V²",
+        "source": "摩擦阻力定义式",
+        "estimate": true
+      },
+      {
+        "key": "cr",
+        "value": 0.004816684517946894,
+        "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+        "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+        "estimate": true
+      }
+    ]
   },
   "values": {
-    "rn": 2592339515.764706,
-    "cf_schoenherr": 0.00136112758259426,
-    "cf_total": 0.0017611275825942599,
-    "rf_kN": 1208.6134984170405,
-    "cf_ittc1957": 0.001364558624368952,
+    "rn": 2585050838.5882354,
+    "rf_kN": 1159.8169881997655,
+    "cf_ittc1957": 0.0013650088679375094,
     "pe_kw_at_trial": 34041.20500000001,
     "r_total_kN": 2354.8350897632195,
-    "rr_kN": 1146.221591346179,
-    "cr_implied": 0.0016702133998409928,
-    "cr_table_historical": 0.0013919456116193811,
+    "rr_kN": 1195.018101563454,
+    "cr_implied": 0.0018150525708318878,
+    "cr_table_normal_estimate": 0.0013958723338495962,
     "cr_table_model": 0.004816684517946894,
-    "qpc_implied_by_table_historical": 0.5053972384833444,
+    "shp_predicted_normal_estimate": 73272.44560493814,
+    "qpc_implied_by_table_normal_estimate": 0.4855403022013974,
     "qpc_implied_by_table_model": 1.054339010263577
   },
   "trace": [
     {
       "key": "cf",
-      "value": 0.00136112758259426,
+      "value": 0.0013615873796156903,
       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
-      "estimate": false
+      "estimate": true,
+      "basis": "normal_estimate"
     },
     {
       "key": "rn",
-      "value": 2592339515.764706,
+      "value": 2585050838.5882354,
       "formula": "Rn = V·L / ν",
       "source": "定义式（ν=1.190e-06 由调用方给出）",
-      "estimate": false
+      "estimate": true,
+      "basis": "normal_estimate"
     },
     {
       "key": "cf_total",
-      "value": 0.0017611275825942599,
+      "value": 0.0017615873796156902,
       "formula": "Cf,total = Cf + ΔCf",
       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
-      "estimate": true
+      "estimate": true,
+      "basis": "normal_estimate"
     },
     {
       "key": "rf_n",
-      "value": 1208613.4984170406,
+      "value": 1159816.9881997656,
       "formula": "Rf = ½·ρ·S·Cf,total·V²",
       "source": "摩擦阻力定义式",
-      "estimate": false
+      "estimate": true,
+      "basis": "normal_estimate"
+    },
+    {
+      "key": "cr",
+      "value": 0.0013958723338495962,
+      "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+      "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+      "estimate": true,
+      "basis": "normal_estimate"
     },
     {
       "key": "pe_kw",
       "value": 34041.20500000001,
       "formula": "P_E = SHP × QPC × 0.7457",
       "source": "试航 SHP=83000，QPC=0.55（**假定值，无来源**）",
-      "estimate": true
+      "estimate": true,
+      "basis": "trial_inverse_normal_estimate"
     },
     {
       "key": "r_total_n",
       "value": 2354835.0897632195,
       "formula": "R_total = P_E / V",
-      "source": "由试航功率反推",
-      "estimate": false
+      "source": "由试航功率与假定 QPC 反推",
+      "estimate": true,
+      "basis": "trial_inverse_normal_estimate"
     },
     {
       "key": "rr_n",
-      "value": 1146221.591346179,
+      "value": 1195018.101563454,
       "formula": "Rr = R_total − Rf",
       "source": "扣除已算出的摩擦阻力",
-      "estimate": true
+      "estimate": true,
+      "basis": "trial_inverse_normal_estimate"
     },
     {
       "key": "cr_implied",
-      "value": 0.0016702133998409928,
+      "value": 0.0018150525708318878,
       "formula": "Cr = Rr / (½·ρ·S·V²)",
       "source": "由试航真值反解",
-      "estimate": true
+      "estimate": true,
+      "basis": "trial_inverse_normal_estimate"
     },
     {
-      "key": "cr",
-      "value": 0.0013919456116193811,
-      "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
-      "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
-      "estimate": true
+      "key": "cf",
+      "value": 0.00136112758259426,
+      "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+      "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+      "estimate": true,
+      "basis": "model_full_load"
+    },
+    {
+      "key": "rn",
+      "value": 2592339515.764706,
+      "formula": "Rn = V·L / ν",
+      "source": "定义式（ν=1.190e-06 由调用方给出）",
+      "estimate": true,
+      "basis": "model_full_load"
+    },
+    {
+      "key": "cf_total",
+      "value": 0.0017611275825942599,
+      "formula": "Cf,total = Cf + ΔCf",
+      "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+      "estimate": true,
+      "basis": "model_full_load"
+    },
+    {
+      "key": "rf_n",
+      "value": 1208613.4984170406,
+      "formula": "Rf = ½·ρ·S·Cf,total·V²",
+      "source": "摩擦阻力定义式",
+      "estimate": true,
+      "basis": "model_full_load"
     },
     {
       "key": "cr",
       "value": 0.004816684517946894,
       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
-      "estimate": true
+      "estimate": true,
+      "basis": "model_full_load"
     }
   ],
   "warnings": [
-    "Rn=2.592e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
-    "QPC=0.55 是**假定值**（QM 无来源）：Cr 随 QPC 线性变化 —— QPC 每 ±0.05，Rr 约 ∓104 kN。结论须带此限界。",
+    "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+    "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+    "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。",
+    "[28.1 kn] Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "QPC=0.55 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，引用时必须带上这一条。",
+    "QPC=0.55 是**假定值**（无来源）：Cr 随 QPC 线性变化 —— QPC 每 ±0.05，Rr 同向变化约 ±214 kN。结论须带此限界。",
     "本结果是**反解**（真值推导），不是从图谱预测；用于校验将来的图谱插值结果。",
-    "表插值（模型口径）：插值涉及 8/16 个缺格（表中「—」）：已按可用角点重新归一化，等权近似，边界区精度下降。"
+    "满载模型对照：以上为 z=0.000 处的系数（型线的设计水线口径），与案例『正常吃水』的系数口径不同。",
+    "满载模型对照：半进流角口径不唯一（艏端切线 / B/10 / B/4 各派不同），本值按 at_frac=0.20 约定，跨来源比较前先对齐口径。",
+    "满载模型对照：所有几何结果继承输入模型型线的 estimate；数值积分不等于史实测量。",
+    "满载模型对照：[28.1 kn] Rn=2.592e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "满载模型对照：[28.1 kn] 插值涉及 8/16 个缺格（表中「—」）：已按可用角点重新归一化，按原插值权重归一化，边界区精度下降。",
+    "满载模型对照：QPC=0.55 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，引用时必须带上这一条。"
   ]
 }

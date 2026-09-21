@@ -4,7 +4,11 @@
   "name": "HMS Queen Mary",
   "country": "United Kingdom",
   "type": "battlecruiser",
-  "dates": { "laid_down": 1911, "launched": 1912, "completed": 1913 },
+  "dates": {
+    "laid_down": 1911,
+    "launched": 1912,
+    "completed": 1913
+  },
   "units": "SI",
   "hull": {
     "lwl_m": 212.8,
@@ -12,8 +16,8 @@
     "beam_m": 27.1,
     "draught_normal_m": 8.5,
     "draught_deep_m": 9.9,
-    "block_coeff": 0.533,
-    "waterplane_coeff": 0.80,
+    "block_coeff": 0.5328005513580124,
+    "waterplane_coeff": 0.8,
     "displacement_normal_t": 26770,
     "displacement_deep_t": 31650,
     "kg_m": 8.6,
@@ -38,6 +42,25 @@
       "【已解决 2026-09-21】本项目契约 length_m=213.4（=700 ft 1 in，维基口径）与本案例 lwl_m 的关系：LWL=212.8 m（698 ft，worldwar1.co.uk）、LOA=214.4 m（703 ft 6 in）。契约的 213.4 介于两者，最可能是维基的「Length」字段口径（近似于水线长）。模型全长 213.4 与 LWL 212.8 差 0.3%，尺度可靠。",
       "吨位单位未注明长吨/公吨；本项目内部按公吨处理。史料 26770/31650 与 26780/31486 并存，属来源间正常差异，各自标注即可，不强行调和。",
       "形状细节仍是估算（生成脚本自述）。体积特性已与实船验证（差 0.21%），但 KB/BM/GZ 的形状分布**未**经外部验证 —— 需型线图才能定论。"
-    ]
+    ],
+    "waterplane_coeff_is_estimate": true,
+    "block_coeff_is_estimate": true,
+    "displacement_unit": "metric_tonne",
+    "displacement_unit_is_estimate": true,
+    "loading_condition": "normal"
+  },
+  "resistance_assumptions": {
+    "cm": 0.94,
+    "cm_is_estimate": true,
+    "cm_source": "先验假定；没有 Queen Mary 的实测最大横剖面资料，非史实值",
+    "qpc": 0.55,
+    "qpc_band": [
+      0.5,
+      0.55,
+      0.6
+    ],
+    "qpc_is_estimate": true,
+    "qpc_source": "敏感性分析假设，未根据试航数据拟合",
+    "wetted_surface_method": "Mumford normal-loading estimate"
   }
 }

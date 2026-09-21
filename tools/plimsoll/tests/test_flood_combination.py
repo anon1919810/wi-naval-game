@@ -28,7 +28,7 @@ class TestFloodTankState(unittest.TestCase):
         self.assertAlmostEqual(row["volume_tank_m3"], v_tank, places=9)
         self.assertAlmostEqual(row["volume_flood_m3"], v_flood, places=9)
         self.assertAlmostEqual(row["added_displacement_t"], 1.0 * v_flood, places=9)
-        self.assertAlmostEqual(row["kg_flood_m"], 2.0 + 0.5 * 4.0, places=9)
+        self.assertAlmostEqual(row["kg_flood_m"], 3.0, places=9)  # 水体占 z=2..4
         self.assertTrue(row["free_surface_active"])
         self.assertAlmostEqual(row["i_effective_m4"], 10.0 * 8.0 ** 3 / 12.0, places=9)
 
@@ -87,9 +87,9 @@ class TestFloodCombination(unittest.TestCase):
         }
         # hand calc
         d1 = 1.0 * 1.0 * 0.4 * 10 * 4 * 5  # 80
-        kg1 = 1.0 + 0.4 * 5  # 3.0
+        kg1 = 2.0  # 水体占 z=1..3
         d2 = 1.025 * 0.5 * 0.5 * 8 * 6 * 5  # 61.5
-        kg2 = 1.0 + 0.5 * 5  # 3.5
+        kg2 = 2.25  # 水体占 z=1..3.5；μ 不改变均匀水体形心
         d_sum = d1 + d2
         d_tot = 1000.0 + d_sum
         kg_s = (1000.0 * 5.0 + d1 * kg1 + d2 * kg2) / d_tot

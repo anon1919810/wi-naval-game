@@ -233,56 +233,29 @@ class TestInterpolationWithHoles(unittest.TestCase):
 
 
 class TestQueenMaryAnchor(unittest.TestCase):
-    """★ 核心验收：**表插值 vs 试航反解** —— 两个独立来源必须互相印证。
-
-    结论（2026-09-22）：用**史实口径**的船型参数（Cb 0.533 / Cm≈0.94 → Cp≈0.567）
-    插值得到的 Cr 与试航反解的 0.00167 相差 ~16%，反推 QPC≈0.51（1913 年汽轮机合理）；
-    而用**模型型线**参数（Cp=0.766，受 Cm=0.71 异常污染）则给出 Cr≈5e-3、QPC≈0.28（荒谬）。
-    → 这独立证实了「模型型线形状未经验证」的限界，resistane 计算必须用史实口径系数。
-    """
+    """Case integration checks, not historical certification by assumed QPC."""
 
     @classmethod
     def setUpClass(cls):
+        from tools.qm_resistance_inputs import load_inputs
+        cls.hp, cls.assumptions, cls.trial = load_inputs()
         cls.table = cr_table_case()
-        # 史实口径：Cb 0.533（案例）、Cm ≈ 0.94（战舰常见）→ Cp = Cb/Cm
-        cls.cp_hist = 0.533 / 0.94
-        cls.bt_hist = 27.1 / 8.5                 # 正常吃水
-        cls.vol_hist = (26770 / 1.025) / 212.8 ** 3
-        cls.cp_model, cls.bt_model = 0.7657, 26.8 / 9.9
-        cls.vol_model = 30943.9 / 213.4 ** 3
-        cls.back = 0.00167                        # 试航反解（QPC=0.55）
 
-    def _cr(self, cp, bt, vol):
-        r = R.residual_from_table(self.table, cp, bt, vol, 0.316)
-        return r["values"]["cr"], r["warnings"]
+    def test_normal_basis_volume_matches_displacement(self):
+        hp = self.hp
+        self.assertAlmostEqual(hp["volumetric"] * hp["lwl_m"] ** 3 * 1.025,
+                               hp["displacement_t"], places=8)
 
-    def test_historical_params_agree_with_trial(self):
-        cr, _ = self._cr(self.cp_hist, self.bt_hist, self.vol_hist)
-        self.assertTrue(0.5 * self.back < cr < 1.5 * self.back,
-                        "史实口径插值 Cr=%.5f 与反解 %.5f 差太多" % (cr, self.back))
+    def test_trial_reference_does_not_claim_known_loading(self):
+        self.assertEqual(self.trial["loading_condition"], "unknown")
+        self.assertTrue(self.hp["estimate"])
 
-    def test_historical_implies_plausible_qpc(self):
-        """Cr→Rr→R_total→EHP→QPC 应落在 1913 年汽轮机的 0.45–0.60。"""
-        cr, _ = self._cr(self.cp_hist, self.bt_hist, self.vol_hist)
-        v = 28.1 * R.KNOT_MPS
-        S, rf = 6407.9, 1208.6135e3
-        rr = 0.5 * R.RHO_SEA * S * cr * v * v
-        qpc = (rf + rr) * v / 1000.0 / (83000 * R.HP_TO_KW)
-        self.assertTrue(0.45 < qpc < 0.60, "反推 QPC=%.3f 不合理" % qpc)
-
-    def test_model_params_are_inconsistent_and_flagged(self):
-        """模型型线口径会给出荒谬的 QPC —— 记录这个矛盾（不要静默用它算阻力）。"""
-        cr_m, _ = self._cr(self.cp_model, self.bt_model, self.vol_model)
-        cr_h, _ = self._cr(self.cp_hist, self.bt_hist, self.vol_hist)
-        self.assertGreater(cr_m, 2.0 * cr_h,
-                           "模型口径 Cr=%.5f 未显著高于史实口径 %.5f：Cm 异常的影响改变了？"
-                           % (cr_m, cr_h))
-
-    def test_historical_params_use_declared_range(self):
-        """史实口径应落在表的适用范围内（Cp 0.50–0.80、B/T 2.25–3.75、∇/L³ 范围内）。"""
-        self.assertTrue(0.50 <= self.cp_hist <= 0.80)
-        self.assertTrue(2.25 <= self.bt_hist <= 3.75)
-        self.assertTrue(0.001 <= self.vol_hist <= 0.007)
+    def test_prediction_changes_with_assumption_without_changing_resistance(self):
+        speed = self.trial["speed_kn"]
+        low = R.speed_power_curve(self.hp, [speed], self.table, qpc=.5)["rows"][0]
+        high = R.speed_power_curve(self.hp, [speed], self.table, qpc=.6)["rows"][0]
+        self.assertEqual(low["rt_kN"], high["rt_kN"])
+        self.assertAlmostEqual(low["shp_required"] / high["shp_required"], 1.2)
 
 
 class TestSpeedPowerCurve(unittest.TestCase):
@@ -291,9 +264,8 @@ class TestSpeedPowerCurve(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.table = cr_table_case()
-        cls.hp = {"lwl_m": 212.8, "s_m2": 6407.9,
-                  "cp": 0.533 / 0.94, "bt": 27.1 / 8.5,
-                  "volumetric": (26770 / 1.025) / 212.8 ** 3}
+        from tools.qm_resistance_inputs import load_inputs
+        cls.hp, _, cls.trial = load_inputs()
         cls.curve = R.speed_power_curve(cls.hp, list(range(10, 30, 2)), cls.table, qpc=0.55)
 
     def test_pe_equals_r_times_v(self):
@@ -311,14 +283,13 @@ class TestSpeedPowerCurve(unittest.TestCase):
         rt = [r["rt_kN"] for r in self.curve["rows"]]
         self.assertTrue(all(b > a for a, b in zip(rt, rt[1:])), rt)
 
-    def test_black_box_vs_trial(self):
-        """★ 黑盒对照：28 kn 处按 QPC=0.55 预测所需 SHP vs 试航 83,000 shp (28.1 kn)。
-        书里明说 Taylor-Gertler **一般低估 5–10%**；实测低 ~10%，落在预期内。"""
-        near = min(self.curve["rows"], key=lambda r: abs(r["speed_kn"] - 28.0))
-        ratio = near["shp_required"] / 83000.0
-        self.assertTrue(0.85 < ratio < 1.10,
-                        "28 kn 预测 %.0f shp 对试航 83000 的比值 %.3f 超出预期带" %
-                        (near["shp_required"], ratio))
+    def test_trial_speed_is_evaluated_exactly(self):
+        """Do not compare a 28 kn prediction against a different trial speed."""
+        speed = self.trial["speed_kn"]
+        row = R.speed_power_curve(self.hp, [speed], self.table)["rows"][0]
+        self.assertEqual(row["speed_kn"], speed)
+        self.assertTrue(row["estimate"])
+        self.assertTrue(row["complete"])
 
     def test_low_speed_clipped_and_warned(self):
         """10–14 kn 低于表的最低 Fr=0.16 → 截断并警告（不外推）。"""

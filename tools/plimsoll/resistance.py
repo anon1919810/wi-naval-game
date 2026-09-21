@@ -4,9 +4,8 @@
 --------------------
 - **已实现**：Schoenherr 摩擦阻力（Taylor 法口径）、总阻力合成、有效功率、
   **由试航真值反解隐含剩余阻力系数**。
-- **未实现**：Taylor-Gertler 剩余阻力图谱插值 —— Gertler (1954) DTMB-806 的 Cr 图谱
-  只在教科书附录里，公开检索到的都是 OCR 乱码版本；**照乱码抄数就是编数据**，
-  故本模块留出 `cr_table` 接入位（四维插值已实现并有测试），图谱数字化后直接插上。
+- **已实现**：调用方提供 Taylor-Gertler 数字化表时的四维插值；缺表/缺格
+  必须传播诊断。图谱适用性与输入来源仍由调用方审核。
   缺表时 `residual_from_table()` 返回 **None + 警告**，不编造。
 - **试航反解的限界**：需要假定推进系数 QPC（QM 无来源，1913 年汽轮机常见 0.5–0.6），
   该假定会**线性传递**到反解出的剩余阻力上 —— 警告里写明。
@@ -131,9 +130,9 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
         if not ax:
             raise ValueError("axes.%s 为空" % key)
         if x <= ax[0]:
-            return 0, 0.0, True
+            return 0, 0.0, x < ax[0]
         if x >= ax[-1]:
-            return len(ax) - 2, 1.0, True
+            return len(ax) - 2, 1.0, x > ax[-1]
         for i in range(len(ax) - 1):
             if ax[i] <= x <= ax[i + 1]:
                 t = 0.0 if ax[i + 1] == ax[i] else (x - ax[i]) / (ax[i + 1] - ax[i])
@@ -146,7 +145,7 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
         idx.append(i); frac.append(t); clipped.append(c)
     if any(clipped):
         warnings.append("插值点在图谱边界之外：已按端点截断（**不外推**），"
-                        "结果偏保守且不代表图谱趋势。")
+                        "误差方向未知，不代表图谱趋势。")
 
     # 四维多线性插值。**表里有缺格（"—"）→ 用可用角点重新归一化**，
     # 不当 0 也不崩（当 0 会把阻力压低；崩掉会让整条链不可用）。
@@ -161,6 +160,8 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
         for b, bit in enumerate(bits):
             w *= (frac[b] if bit else (1.0 - frac[b]))
             sel.append(idx[b] + bit)
+        if w == 0.0:
+            continue
         cell = grid[sel[0]][sel[1]][sel[2]][sel[3]]
         if cell is None:
             skipped += 1
@@ -174,7 +175,7 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
     cr = total / wsum * scale
     if skipped:
         warnings.append("插值涉及 %d/16 个缺格（表中「—」）：已按可用角点重新归一化，"
-                        "等权近似，边界区精度下降。" % skipped)
+                        "按原插值权重归一化，边界区精度下降。" % skipped)
     _T(trace, "cr", cr, "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)%s"
        % ("，×%.0e 换算" % scale if scale != 1.0 else ""),
        cr_table.get("source", "Gertler 图谱数字化表"), True)
@@ -186,8 +187,8 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
                       rho: float = RHO_SEA, delta_cf: float = DELTA_CF_TAYLOR) -> dict:
     """速度–阻力–功率曲线（Taylor-Gertler 口径）。
 
-    `hull_params`：{lwl_m, s_m2, cp, bt, volumetric}（**船型参数必须用史实口径**，
-      理由见 cases/queen_mary_1913_resistance.json 的 _note：模型型线的 Cp 受 Cm 异常污染）。
+    `hull_params`：{lwl_m, s_m2, cp, bt, volumetric}，必须对应同一载荷；
+      可附 estimate / sources / loading_condition，来源与假设由调用方负责。
     `cr_table`：plimsoll-cr-table-1 案例（缺则只剩摩擦阻力，并为每条给出警告）。
     `qpc`：推进系数（**假定值**），SHP = EHP / QPC；本函数会把该假定写进 warnings。
     Fr 超出表范围（0.16–0.58）时**端点截断**并警告，不外推。
@@ -199,13 +200,13 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
     vol = _finite(hull_params.get("volumetric"), "volumetric", positive=True)
     qpc = _finite(qpc, "qpc", positive=True)
 
-    speeds = [float(v) for v in speeds_kn]
+    speeds = [_finite(v, "speed_kn", positive=True) for v in speeds_kn]
     if not speeds or any(v <= 0 for v in speeds):
         raise ValueError("speeds_kn 必须是非空的正数序列")
     speeds = sorted(speeds)
 
     rows = []
-    warnings = []
+    warnings = list(hull_params.get("warnings", []))
     fr_lo, fr_hi = (cr_table or {}).get("range", {}).get("fr", [0.16, 0.58])
     clipped_lo = clipped_hi = False
 
@@ -217,22 +218,33 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
             clipped_lo = True
         if fr > fr_hi:
             clipped_hi = True
-        rf = friction_resistance(v, L, S, nu=nu, rho=rho, delta_cf=delta_cf)["values"]["rf_n"]
+        friction = friction_resistance(v, L, S, nu=nu, rho=rho, delta_cf=delta_cf)
+        rf = friction["values"]["rf_n"]
         resid = residual_from_table(cr_table, cp, bt, vol, fr_use)
+        row_warnings = list(friction["warnings"]) + list(resid["warnings"])
+        if fr_use != fr:
+            row_warnings.append("Fr=%.5f 超出表范围，按 %.5f 截断；误差方向未知。" % (fr, fr_use))
         cr = resid["values"]["cr"]
         if cr is None:
             rr = None
-            rt = rf
+            rt = None
+            row_warnings.append("剩余阻力不可用：总阻力及所需功率置空。")
         else:
             rr = residual_force(cr, v, S, rho=rho)["values"]["rr_n"]
             rt = rf + rr
-        pe_kw = rt * v / 1000.0
+        pe_kw = rt * v / 1000.0 if rt is not None else None
+        warnings.extend("[%g kn] %s" % (v_kn, w) for w in row_warnings)
         rows.append({
             "speed_kn": v_kn, "fr": fr, "fr_used": fr_use,
             "rn": v * L / nu, "rf_kN": rf / 1000.0,
             "cr": cr, "rr_kN": (rr / 1000.0) if rr is not None else None,
-            "rt_kN": rt / 1000.0, "pe_kw": pe_kw, "pe_shp": pe_kw / HP_TO_KW,
-            "shp_required": pe_kw / HP_TO_KW / qpc,
+            "rt_kN": rt / 1000.0 if rt is not None else None, "pe_kw": pe_kw,
+            "pe_shp": pe_kw / HP_TO_KW if pe_kw is not None else None,
+            "shp_required": pe_kw / HP_TO_KW / qpc if pe_kw is not None else None,
+            "complete": cr is not None, "estimate": True,
+            "warnings": row_warnings,
+            "trace": [dict(t, estimate=bool(t["estimate"] or hull_params.get("estimate", True)))
+                      for t in friction["trace"] + resid["trace"]],
         })
 
     trace = []
@@ -240,7 +252,7 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
     _T(trace, "speeds", len(rows), "输入速度点数", "调用方给出")
     if clipped_lo:
         warnings.append("有速度点低于表的最低 Fr=%.2f：已端点截断（**不外推**），"
-                        "低速段阻力偏保守。" % fr_lo)
+                        "低速段误差方向未知。" % fr_lo)
     if clipped_hi:
         warnings.append("有速度点高于表的最高 Fr=%.2f：已端点截断。" % fr_hi)
     if not cr_table:
@@ -248,11 +260,17 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
     warnings.append("QPC=%.2f 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，"
                     "引用时必须带上这一条。" % qpc)
 
+    def available_max(key):
+        return max((r[key] for r in rows if r[key] is not None), default=None)
+
     return {"rows": rows, "trace": trace, "warnings": warnings,
+            "estimate": True, "loading_condition": hull_params.get("loading_condition"),
+            "input_sources": hull_params.get("sources", {}),
             "values": {"qpc": qpc, "points": len(rows),
-                       "rt_max_kN": max(r["rt_kN"] for r in rows),
-                       "pe_max_kw": max(r["pe_kw"] for r in rows),
-                       "shp_max": max(r["shp_required"] for r in rows)}}
+                       "complete_points": sum(r["complete"] for r in rows),
+                       "rt_max_kN": available_max("rt_kN"),
+                       "pe_max_kw": available_max("pe_kw"),
+                       "shp_max": available_max("shp_required")}}
 
 
 def residual_force(cr: float, v_mps: float, s_m2: float, rho: float = RHO_SEA) -> dict:
@@ -305,13 +323,14 @@ def implied_residual_from_trial(shp: float, v_kn: float, rf_n: float,
     trace = []
     _T(trace, "pe_kw", pe_w / 1000.0, "P_E = SHP × QPC × 0.7457",
        "试航 SHP=%.0f，QPC=%.2f（**假定值，无来源**）" % (shp, qpc), True)
-    _T(trace, "r_total_n", r_total, "R_total = P_E / V", "由试航功率反推")
+    _T(trace, "r_total_n", r_total, "R_total = P_E / V", "由试航功率与假定 QPC 反推", True)
     _T(trace, "rr_n", rr, "Rr = R_total − Rf", "扣除已算出的摩擦阻力", True)
     _T(trace, "cr_implied", cr, "Cr = Rr / (½·ρ·S·V²)", "由试航真值反解", True)
 
     warnings = [
-        "QPC=%.2f 是**假定值**（QM 无来源）：Cr 随 QPC 线性变化 —— "
-        "QPC 每 ±0.05，Rr 约 ∓%.0f kN。结论须带此限界。" % (qpc, 0.05 / qpc * (r_total - rf) / 1000.0),
+        "QPC=%.2f 是**假定值**（无来源）：Cr 随 QPC 线性变化 —— "
+        "QPC 每 ±0.05，Rr 同向变化约 ±%.0f kN。结论须带此限界。" %
+        (qpc, 0.05 / qpc * r_total / 1000.0),
         "本结果是**反解**（真值推导），不是从图谱预测；用于校验将来的图谱插值结果。",
     ]
     if rr <= 0:

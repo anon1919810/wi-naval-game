@@ -49,7 +49,7 @@
 | Displacement Normal / Max | 输入 | ◐ | 输入接受且做一致性检查（±5% 告警）；"Max" 口径未进计算 |
 | Normal / Max volume | 输出 | ✅ | L0 `∇=L·B·T·Cb`；L1 逐站积分 |
 | **Waterplane area** | 输出 | ✅ | L0 `Cwp·L·B`=4613.5；L1 积分=4610.4（差 0.07%）|
-| **Wetted surface area** | 输出 | **◐→✅** | `hull.py`：Mumford 经验式（L0）+ 逐站湿周长积分（L1）。QM 两法 6148.7 / 6407.9（差 4.2%） |
+| **Wetted surface area** | 输出 | **◐→✅** | `hull.py`：Mumford 经验式（L0）+ 逐站湿周长积分（L1）。正常载荷经验式 6147.6 / 满载模型积分 6407.9 m²；工况不同，不作两法互证 |
 | **Length:Beam** | 输出 | **✅** | `hull.form_ratios()`，定义式（QM 7.852） |
 | **Natural Speed** | 输出 | **◐→✅** | `hull.natural_speed()`：**两口径并列** —— Froude 兴波速度（有源，35.43 kn）+ SPS 惯例 1.09·√L_ft（**estimate，常数无公开出处**，28.8 kn），并给出 Fn=0.324 |
 
@@ -158,9 +158,11 @@ Engine weight / Bunker / Displacement factor（输出）。
 **【2026-09-22 已落地】** Taylor-Gertler 表已数字化入库
 （`cases/taylor_gertler_cr_table.json`，源自 Molland 附录 A3.8–A3.11 = Gertler DTMB-806）：
 四维网格 Cp×B/T×∇/L³×Fn，缺格按可用角点归一化，表内 CR×1000 → scale 1e-3。
-**交叉校验结论**：用史实口径 Cp=0.567 插值得 Cr≈1.4e-3、反推 QPC≈0.51（合理），
-与试航反解 0.00167 差 ~16%；用模型型线 Cp=0.766 则得 Cr≈5e-3、QPC≈0.28（荒谬）
-→ **7.3 必须用史实口径的船型参数，模型型线的形状分布不可用**。
+**2026-09-22 修正**：正常载荷输入统一使用同载荷湿面积估算，Cm=0.94 / QPC=0.55 显式为假设。
+28.1 kn 预测 73,272 shp，相对试航参考低 11.72%，但试航载荷、原史料吨位单位未确认。
+满载模型全部参数单列，反解 QPC=1.05434，旧“0.28”作废；撤销“史实口径互证”结论。
+警告已贯穿曲线/Engines/HTML，缺剩余阻力时总阻力和功率为空。
+详见 [计算修正与字段迁移](2026-09-22-calculation-integrity.md)。
 
 **还得补的 7.3 输入**：lpp（垂线间长，∇/L³ 用它，**仍无源**）；Cr 的 QPC 误差带；
 Holtrop 对照（原文在 `_holtrop1982.pdf`，注意其 Cb 越界）。

@@ -148,8 +148,8 @@ def compute(case: dict) -> dict:
         _T(trace, "froude_at_max", fn, "Fn = V(m/s) / √(g·Lwl)", "最大航速对应的 Froude 数", True)
 
     # ---------------- 明确不做
-    warnings.append("Friction/Wave resistance 未实现：需要 Holtrop-Mennen / Taylor 阻力模型"
-                    "（PLAN 7.3，独立项），本模块不估算。")
+    warnings.append("Friction/Wave resistance 由独立 resistance.py 提供 Taylor-Gertler 估算；"
+                    "本模块不自动计算，Holtrop-Mennen 对照尚未实现。")
     if case.get("engine_weight_t") is None:
         warnings.append("Engine weight 未提供：主机重量无来源，置空（不估算）。")
     else:
@@ -191,8 +191,11 @@ def sps_view(result: dict, resistance: dict | None = None) -> dict:
         "resistance_at_speed_kn": (resistance or {}).get("speed_kn"),
         "range_nm": v["range_nm"], "pct_coal": v["pct_coal"],
         "engine_weight_t": v["engine_weight_t"], "bunker_t": v["bunker_total_t"],
-        "_not_implemented": [] if resistance else
-        ["friction_resistance", "wave_resistance", "displacement_factor"],
+        "_not_implemented": (["friction_resistance"] if fr is None else []) +
+                            (["wave_resistance"] if rr is None else []) + ["displacement_factor"],
+        "warnings": list(result.get("warnings", [])) + list((resistance or {}).get("warnings", [])),
+        "_resistance_estimate": (resistance or {}).get("estimate", True) if resistance else None,
+        "_resistance_trace": (resistance or {}).get("trace", []),
         "_resistance_source": ("resistance.py（Taylor-Gertler + Schoenherr）"
                                if resistance else None),
     }

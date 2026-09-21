@@ -1,20 +1,69 @@
 {
- "schema": "plimsoll-speed-power-1",
+ "schema": "plimsoll-speed-power-2",
  "ship": "HMS Queen Mary (1913)",
- "_note": "速度–阻力–功率曲线（Taylor-Gertler 口径）。船型参数用**史实口径**（Cp=0.533/0.94=0.567, B/T=3.19, ∇/L³=2.71e-3）——模型型线的 Cp 不可用（用它反推 QPC>1，物理不可能）。摩擦 Schoenherr + ΔCf=0.4e-3；剩余查 A3.8–A3.11 表。★ 黑盒对照：28 kn 按 QPC=0.55 预测所需 SHP ≈75,300，试航 83,000 shp @28.1 kn，偏低 ~10% —— 与文献所述「Taylor-Gertler 一般低估 5–10%」一致。Fr<0.16 的低速点端点截断（不外推）。",
- "hull_params_historical": {
+ "estimate": true,
+ "_note": "正常载荷估算，湿面积使用同载荷 Mumford 经验式；Cm 和 QPC 为假定值。试航载荷及史料吨位单位未确认；功率偏差只作诊断，不作为验证通过的依据。",
+ "hull_params_normal_estimate": {
+  "loading_condition": "normal",
+  "estimate": true,
   "lwl_m": 212.8,
-  "s_m2": 6407.9,
-  "cp": 0.5670212765957447,
+  "beam_m": 27.1,
+  "draught_m": 8.5,
+  "volume_m3": 26117.07317073171,
+  "displacement_t": 26770.0,
+  "displacement_unit": "metric_tonne",
+  "displacement_unit_is_estimate": true,
+  "s_m2": 6147.5568436154945,
+  "cb": 0.5328005513580124,
+  "cm": 0.94,
+  "cp": 0.5668090971893749,
   "bt": 3.1882352941176473,
-  "volumetric": 0.0027102517588022167
+  "volumetric": 0.0027102517588022167,
+  "sources": {
+   "offsets_path": "本案例自带 queen_mary_1913_offsets.json（tools/gen_qm_offsets.py 从 queen_mary_v4.py 物化，形状 estimate）；通用性改造后 CLI 不再扫描仓库路径",
+   "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
+   "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
+   "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
+   "draught_normal_m": "Navypedia '8.50 mean'",
+   "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
+   "block_coeff": "由来源反推：26770 ÷ (212.8 × 27.1 × 8.5 × 1.025) = 0.5328。注意此前填 0.551 是从**错误的 LWL 205.7** 反推的，属循环论证 —— LWL 修正后必须同步改这个值，否则排水量会虚高 3.4%",
+   "model_cross_check": "独立佐证：由 queen_mary_v4.py 的型值表放样出的模型船体，在自身设计水线 z=0（吃水 9.9 m = 实船满载吃水）上积分得 30943.9 m³ = 31717 t，对实船满载 31650 t 差 +0.213%；模型 Cb=0.5405 vs 实船满载 Cb=0.5408，差 0.06%。**说明该型值表对体积特性的估算是可信的。** 但注意：这只验证了体积/方形系数，**不验证形状分布**（不同分布可以给出相同体积而完全不同的 KB/BM/GZ）",
+   "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
+   "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
+   "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
+   "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测",
+   "cb": "normal displacement / (rho * Lwl * B * T); no rounded Cb reuse",
+   "cp": "Cb / Cm; Cm is an assumption, not a measured Queen Mary section",
+   "cm": "先验假定；没有 Queen Mary 的实测最大横剖面资料，非史实值",
+   "s_m2": "Mumford S=L*(1.7*T+Cb*B), all inputs at normal loading",
+   "displacement_unit": "metric tonne internally; historical source unit unresolved"
+  },
+  "trace": [
+   {
+    "key": "wetted_surface_m2",
+    "value": 6147.5568436154945,
+    "formula": "S = L·(c·T + Cb·B)，c=1.70",
+    "source": "Mumford 经验式（造船学教科书；与 ∇/T + 1.7·L·T 同形）",
+    "estimate": true
+   }
+  ],
+  "warnings": [
+   "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+   "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+   "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。"
+  ]
  },
- "hull_params_basis": "Cp = Cb(0.533)/Cm(0.94)；B/T、∇/L³ 按正常吃水 8.5 m",
- "sources": {
-  "cr_table": "cases/taylor_gertler_cr_table.json（Molland A3.8-A3.11 / Gertler DTMB-806）",
-  "wetted_surface": "cases/queen_mary_1913_formcoeff.json",
-  "friction": "Schoenherr 0.4631/(lgRn)^2.6 + ΔCf=0.4e-3（原书要求）",
-  "trial": "Navypedia: 83,000 shp → 28.1 kn"
+ "trial_reference": {
+  "speed_kn": 28.1,
+  "shp": 83000,
+  "loading_condition": "unknown",
+  "source": "Navypedia: on trials made 28.1 kts with 83,000 shp"
+ },
+ "trial_comparison": {
+  "speed_kn": 28.1,
+  "shp_predicted": 73272.44560493814,
+  "deviation_pct": -11.719945054291392,
+  "validated": false
  },
  "curves": {
   "qpc=0.50": {
@@ -24,175 +73,842 @@
      "fr": 0.09007572738883618,
      "fr_used": 0.16,
      "rn": 735957534.117647,
-     "rf_kN": 110.70834405502754,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 22.546590796478032,
-     "rt_kN": 133.25493485150557,
-     "pe_kw": 548.4176136379834,
-     "pe_shp": 735.440007560659,
-     "shp_required": 1470.880015121318
+     "rf_kN": 106.21043370539854,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 21.620511930742637,
+     "rt_kN": 127.83094563614117,
+     "pe_kw": 526.0949039747121,
+     "pe_shp": 705.504765957774,
+     "shp_required": 1411.009531915548,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001590281804586533,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 735957534.117647,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0019902818045865332,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 106210.43370539854,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 10.0,
      "fr": 0.11259465923604522,
      "fr_used": 0.16,
      "rn": 919946917.6470588,
-     "rf_kN": 169.1301344134752,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 35.22904811949692,
-     "rt_kN": 204.35918253297214,
-     "pe_kw": 1051.3135529899232,
-     "pe_shp": 1409.8344548611012,
-     "shp_required": 2819.6689097222024
+     "rf_kN": 162.2586362576145,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 33.78204989178537,
+     "rt_kN": 196.04068614939987,
+     "pe_kw": 1008.5195474544188,
+     "pe_shp": 1352.4467580185312,
+     "shp_required": 2704.8935160370625,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0015459657217561078,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 919946917.6470588,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0019459657217561078,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 162258.6362576145,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 12.0,
      "fr": 0.13511359108325424,
      "fr_used": 0.16,
      "rn": 1103936301.1764705,
-     "rf_kN": 239.1733160958986,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 50.729829292075564,
-     "rt_kN": 289.9031453879742,
-     "pe_kw": 1789.6672047116517,
-     "pe_shp": 2399.982841238637,
-     "shp_required": 4799.965682477274
+     "rf_kN": 229.4560708150179,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 48.646151844170916,
+     "rt_kN": 278.10222265918884,
+     "pe_kw": 1716.8162380042047,
+     "pe_shp": 2302.2881024597086,
+     "shp_required": 4604.576204919417,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001511016446889129,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1103936301.1764705,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.001911016446889129,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 229456.0708150179,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 14.0,
      "fr": 0.1576325229304633,
      "fr_used": 0.16,
      "rn": 1287925684.7058823,
-     "rf_kN": 320.65218813694935,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 69.04893431421397,
-     "rt_kN": 389.7011224511633,
-     "pe_kw": 2806.7116593357273,
-     "pe_shp": 3763.861686114694,
-     "shp_required": 7527.723372229388
+     "rf_kN": 307.6245811578809,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 66.21281778789931,
+     "rt_kN": 373.83739894578025,
+     "pe_kw": 2692.4576960856816,
+     "pe_shp": 3610.644623958269,
+     "shp_required": 7221.289247916538,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014823151096907215,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1287925684.7058823,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018823151096907214,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 307624.58115788095,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 16.0,
      "fr": 0.18015145477767236,
      "fr_used": 0.18015145477767236,
      "rn": 1471915068.235294,
-     "rf_kN": 413.4142030212703,
-     "cr": 0.0004111706579761175,
-     "rr_kN": 91.48457783948545,
-     "rt_kN": 504.8987808607557,
-     "pe_kw": 4155.8743747380895,
-     "pe_shp": 5573.118378353345,
-     "shp_required": 11146.23675670669
+     "rf_kN": 396.61781754260454,
+     "cr": 0.00041099083346269667,
+     "rr_kN": 87.72931465367947,
+     "rt_kN": 484.347132196284,
+     "pe_kw": 3986.7116172093624,
+     "pe_shp": 5346.267422836747,
+     "shp_required": 10692.534845673494,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014580595099993082,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1471915068.235294,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018580595099993082,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 396617.8175426045,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00041099083346269667,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 18.0,
      "fr": 0.2026703866248814,
      "fr_used": 0.2026703866248814,
      "rn": 1655904451.764706,
-     "rf_kN": 517.3303513482584,
-     "cr": 0.0004269682384402512,
-     "rr_kN": 120.23374871976372,
-     "rt_kN": 637.5641000680222,
-     "pe_kw": 5903.838466117085,
-     "pe_shp": 7917.176433038869,
-     "shp_required": 15834.352866077737
+     "rf_kN": 496.31201202281466,
+     "cr": 0.00042680326509801116,
+     "rr_kN": 115.30426692801073,
+     "rt_kN": 611.6162789508253,
+     "pe_kw": 5663.561850154411,
+     "pe_shp": 7594.96023890896,
+     "shp_required": 15189.92047781792,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014371183728261632,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1655904451.764706,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018371183728261632,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 496312.01202281466,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00042680326509801116,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 20.0,
      "fr": 0.22518931847209045,
      "fr_used": 0.22518931847209045,
      "rn": 1839893835.2941177,
-     "rf_kN": 632.28915640612,
-     "cr": 0.0005158353491324743,
-     "rr_kN": 179.33163150533994,
-     "rt_kN": 811.6207879114601,
-     "pe_kw": 8350.668892326465,
-     "pe_shp": 11198.429519010948,
-     "shp_required": 22396.859038021896
+     "rf_kN": 606.6002170146711,
+     "cr": 0.0005157073550539098,
+     "rr_kN": 172.0029725159904,
+     "rt_kN": 778.6031895306614,
+     "pe_kw": 8010.954784698232,
+     "pe_shp": 10742.865474987571,
+     "shp_required": 21485.730949975143,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014187371352706209,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1839893835.2941177,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018187371352706208,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 606600.2170146711,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0005157073550539098,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 22.0,
      "fr": 0.2477082503192995,
      "fr_used": 0.2477082503192995,
      "rn": 2023883218.8235295,
-     "rf_kN": 758.1926796662214,
-     "cr": 0.0006851800049740595,
-     "rr_kN": 288.22778921978767,
-     "rt_kN": 1046.420468886009,
-     "pe_kw": 11843.14409730307,
-     "pe_shp": 15881.915109699703,
-     "shp_required": 31763.830219399406
+     "rf_kN": 727.3884730818598,
+     "cr": 0.0006850366583290482,
+     "rr_kN": 276.45968558712315,
+     "rt_kN": 1003.848158668983,
+     "pe_kw": 11361.32056704274,
+     "pe_shp": 15235.779223605658,
+     "shp_required": 30471.558447211315,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014023885393953264,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2023883218.8235295,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018023885393953264,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 727388.4730818599,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0006850366583290482,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 24.0,
      "fr": 0.2702271821665085,
      "fr_used": 0.2702271821665085,
      "rn": 2207872602.352941,
-     "rf_kN": 894.95373388767,
-     "cr": 0.0008972839463231149,
-     "rr_kN": 449.19838815843417,
-     "rt_kN": 1344.152122046104,
-     "pe_kw": 16595.783862573266,
-     "pe_shp": 22255.308921246164,
-     "shp_required": 44510.61784249233
+     "rf_kN": 858.5931352674647,
+     "cr": 0.0008966974000125433,
+     "rr_kN": 430.666439217428,
+     "rt_kN": 1289.2595744848927,
+     "pe_kw": 15918.044460871346,
+     "pe_shp": 21346.44556909125,
+     "shp_required": 42692.8911381825,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001387690337473126,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2207872602.352941,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.001787690337473126,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 858593.1352674647,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0008966974000125433,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 26.0,
      "fr": 0.29274611401371753,
      "fr_used": 0.29274611401371753,
      "rn": 2391861985.882353,
-     "rf_kN": 1042.4938643416697,
-     "cr": 0.0011329328713740895,
-     "rr_kN": 665.6358156368829,
-     "rt_kN": 1708.1296799785528,
-     "pe_kw": 22847.16369225905,
-     "pe_shp": 30638.545919617878,
-     "shp_required": 61277.091839235756
+     "rf_kN": 1000.1389363380817,
+     "cr": 0.0011317471994484317,
+     "rr_kN": 637.9237334945784,
+     "rt_kN": 1638.06266983266,
+     "pe_kw": 21909.979315104218,
+     "pe_shp": 29381.761184262057,
+     "shp_required": 58763.522368524114,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013743569972844995,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2391861985.882353,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017743569972844995,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1000138.9363380817,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0011317471994484317,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 27.0,
      "fr": 0.3040055799373221,
      "fr_used": 0.3040055799373221,
      "rn": 2483856677.647059,
-     "rf_kN": 1120.2835751339205,
-     "cr": 0.001255805950227548,
-     "rr_kN": 795.6752933825958,
-     "rt_kN": 1915.958868516516,
-     "pe_kw": 26612.645692187987,
-     "pe_shp": 35688.1395898994,
-     "shp_required": 71376.2791797988
+     "rf_kN": 1074.768170399751,
+     "cr": 0.0012544906697394861,
+     "rr_kN": 762.5487255129789,
+     "rt_kN": 1837.31689591273,
+     "pe_kw": 25520.30963642507,
+     "pe_shp": 34223.29306212293,
+     "shp_required": 68446.58612424586,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013681317885522023,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2483856677.647059,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017681317885522023,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1074768.170399751,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0012544906697394861,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 28.0,
      "fr": 0.3152650458609266,
      "fr_used": 0.3152650458609266,
      "rn": 2575851369.4117646,
-     "rf_kN": 1200.741841379621,
-     "cr": 0.0013841828028116668,
-     "rr_kN": 943.181600611011,
-     "rt_kN": 2143.923441990632,
-     "pe_kw": 30881.999433360004,
-     "pe_shp": 41413.436279147114,
-     "shp_required": 82826.87255829423
+     "rf_kN": 1151.95754059657,
+     "cr": 0.0013830194552941317,
+     "rr_kN": 904.101079522148,
+     "rt_kN": 2056.058620118718,
+     "pe_kw": 29616.356581513905,
+     "pe_shp": 39716.1815495694,
+     "shp_required": 79432.3630991388,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013621698794562794,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2575851369.4117646,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017621698794562793,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1151957.54059657,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0013830194552941317,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
+    },
+    {
+     "speed_kn": 28.1,
+     "fr": 0.31639099245328706,
+     "fr_used": 0.31639099245328706,
+     "rn": 2585050838.5882354,
+     "rf_kN": 1159.8169881997655,
+     "cr": 0.0013958723338495962,
+     "rr_kN": 919.032722924031,
+     "rt_kN": 2078.8497111237966,
+     "pe_kw": 30051.59447818131,
+     "pe_shp": 40299.84508271598,
+     "shp_required": 80599.69016543197,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013615873796156903,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2585050838.5882354,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017615873796156902,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1159816.9881997656,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0013958723338495962,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 29.0,
      "fr": 0.3265245117845311,
      "fr_used": 0.3265245117845311,
      "rn": 2667846061.1764708,
-     "rf_kN": 1283.860699181539,
-     "cr": 0.0015749517521758305,
-     "rr_kN": 1151.1954326367918,
-     "rt_kN": 2435.056131818331,
-     "pe_kw": 36328.30048363733,
-     "pe_shp": 48717.04503639175,
-     "shp_required": 97434.0900727835
+     "rf_kN": 1231.6994065922443,
+     "cr": 0.001574135006854231,
+     "rr_kN": 1103.8513894457578,
+     "rt_kN": 2335.550796038002,
+     "pe_kw": 34843.79271779224,
+     "pe_shp": 46726.287673048464,
+     "shp_required": 93452.57534609693,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013564512509350872,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2667846061.1764708,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017564512509350872,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1231699.4065922443,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.001574135006854231,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
+    }
+   ],
+   "trace": [
+    {
+     "key": "qpc_assumed",
+     "value": 0.5,
+     "formula": "SHP = EHP / QPC",
+     "source": "**推进系数为假定值，无来源**",
+     "estimate": true
+    },
+    {
+     "key": "speeds",
+     "value": 14,
+     "formula": "输入速度点数",
+     "source": "调用方给出",
+     "estimate": false
     }
    ],
    "warnings": [
-    "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段阻力偏保守。",
+    "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+    "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+    "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。",
+    "[8 kn] Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[10 kn] Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[12 kn] Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[12 kn] Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[14 kn] Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[14 kn] Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[16 kn] Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[18 kn] Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[20 kn] Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[22 kn] Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[24 kn] Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[26 kn] Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[27 kn] Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[28 kn] Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[28.1 kn] Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[29 kn] Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段误差方向未知。",
     "QPC=0.50 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，引用时必须带上这一条。"
-   ]
+   ],
+   "estimate": true,
+   "loading_condition": "normal",
+   "input_sources": {
+    "offsets_path": "本案例自带 queen_mary_1913_offsets.json（tools/gen_qm_offsets.py 从 queen_mary_v4.py 物化，形状 estimate）；通用性改造后 CLI 不再扫描仓库路径",
+    "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
+    "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
+    "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
+    "draught_normal_m": "Navypedia '8.50 mean'",
+    "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
+    "block_coeff": "由来源反推：26770 ÷ (212.8 × 27.1 × 8.5 × 1.025) = 0.5328。注意此前填 0.551 是从**错误的 LWL 205.7** 反推的，属循环论证 —— LWL 修正后必须同步改这个值，否则排水量会虚高 3.4%",
+    "model_cross_check": "独立佐证：由 queen_mary_v4.py 的型值表放样出的模型船体，在自身设计水线 z=0（吃水 9.9 m = 实船满载吃水）上积分得 30943.9 m³ = 31717 t，对实船满载 31650 t 差 +0.213%；模型 Cb=0.5405 vs 实船满载 Cb=0.5408，差 0.06%。**说明该型值表对体积特性的估算是可信的。** 但注意：这只验证了体积/方形系数，**不验证形状分布**（不同分布可以给出相同体积而完全不同的 KB/BM/GZ）",
+    "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
+    "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
+    "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
+    "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测",
+    "cb": "normal displacement / (rho * Lwl * B * T); no rounded Cb reuse",
+    "cp": "Cb / Cm; Cm is an assumption, not a measured Queen Mary section",
+    "cm": "先验假定；没有 Queen Mary 的实测最大横剖面资料，非史实值",
+    "s_m2": "Mumford S=L*(1.7*T+Cb*B), all inputs at normal loading",
+    "displacement_unit": "metric tonne internally; historical source unit unresolved"
+   },
+   "values": {
+    "qpc": 0.5,
+    "points": 14,
+    "complete_points": 14,
+    "rt_max_kN": 2335.550796038002,
+    "pe_max_kw": 34843.79271779224,
+    "shp_max": 93452.57534609693
+   }
   },
   "qpc=0.55": {
    "rows": [
@@ -201,175 +917,842 @@
      "fr": 0.09007572738883618,
      "fr_used": 0.16,
      "rn": 735957534.117647,
-     "rf_kN": 110.70834405502754,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 22.546590796478032,
-     "rt_kN": 133.25493485150557,
-     "pe_kw": 548.4176136379834,
-     "pe_shp": 735.440007560659,
-     "shp_required": 1337.163650110289
+     "rf_kN": 106.21043370539854,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 21.620511930742637,
+     "rt_kN": 127.83094563614117,
+     "pe_kw": 526.0949039747121,
+     "pe_shp": 705.504765957774,
+     "shp_required": 1282.7359381050435,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001590281804586533,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 735957534.117647,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0019902818045865332,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 106210.43370539854,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 10.0,
      "fr": 0.11259465923604522,
      "fr_used": 0.16,
      "rn": 919946917.6470588,
-     "rf_kN": 169.1301344134752,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 35.22904811949692,
-     "rt_kN": 204.35918253297214,
-     "pe_kw": 1051.3135529899232,
-     "pe_shp": 1409.8344548611012,
-     "shp_required": 2563.3353724747294
+     "rf_kN": 162.2586362576145,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 33.78204989178537,
+     "rt_kN": 196.04068614939987,
+     "pe_kw": 1008.5195474544188,
+     "pe_shp": 1352.4467580185312,
+     "shp_required": 2458.9941054882383,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0015459657217561078,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 919946917.6470588,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0019459657217561078,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 162258.6362576145,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 12.0,
      "fr": 0.13511359108325424,
      "fr_used": 0.16,
      "rn": 1103936301.1764705,
-     "rf_kN": 239.1733160958986,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 50.729829292075564,
-     "rt_kN": 289.9031453879742,
-     "pe_kw": 1789.6672047116517,
-     "pe_shp": 2399.982841238637,
-     "shp_required": 4363.605165888431
+     "rf_kN": 229.4560708150179,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 48.646151844170916,
+     "rt_kN": 278.10222265918884,
+     "pe_kw": 1716.8162380042047,
+     "pe_shp": 2302.2881024597086,
+     "shp_required": 4185.978368108561,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001511016446889129,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1103936301.1764705,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.001911016446889129,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 229456.0708150179,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 14.0,
      "fr": 0.1576325229304633,
      "fr_used": 0.16,
      "rn": 1287925684.7058823,
-     "rf_kN": 320.65218813694935,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 69.04893431421397,
-     "rt_kN": 389.7011224511633,
-     "pe_kw": 2806.7116593357273,
-     "pe_shp": 3763.861686114694,
-     "shp_required": 6843.384883844898
+     "rf_kN": 307.6245811578809,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 66.21281778789931,
+     "rt_kN": 373.83739894578025,
+     "pe_kw": 2692.4576960856816,
+     "pe_shp": 3610.644623958269,
+     "shp_required": 6564.808407196852,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014823151096907215,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1287925684.7058823,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018823151096907214,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 307624.58115788095,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 16.0,
      "fr": 0.18015145477767236,
      "fr_used": 0.18015145477767236,
      "rn": 1471915068.235294,
-     "rf_kN": 413.4142030212703,
-     "cr": 0.0004111706579761175,
-     "rr_kN": 91.48457783948545,
-     "rt_kN": 504.8987808607557,
-     "pe_kw": 4155.8743747380895,
-     "pe_shp": 5573.118378353345,
-     "shp_required": 10132.94250609699
+     "rf_kN": 396.61781754260454,
+     "cr": 0.00041099083346269667,
+     "rr_kN": 87.72931465367947,
+     "rt_kN": 484.347132196284,
+     "pe_kw": 3986.7116172093624,
+     "pe_shp": 5346.267422836747,
+     "shp_required": 9720.48622333954,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014580595099993082,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1471915068.235294,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018580595099993082,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 396617.8175426045,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00041099083346269667,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 18.0,
      "fr": 0.2026703866248814,
      "fr_used": 0.2026703866248814,
      "rn": 1655904451.764706,
-     "rf_kN": 517.3303513482584,
-     "cr": 0.0004269682384402512,
-     "rr_kN": 120.23374871976372,
-     "rt_kN": 637.5641000680222,
-     "pe_kw": 5903.838466117085,
-     "pe_shp": 7917.176433038869,
-     "shp_required": 14394.86624188885
+     "rf_kN": 496.31201202281466,
+     "cr": 0.00042680326509801116,
+     "rr_kN": 115.30426692801073,
+     "rt_kN": 611.6162789508253,
+     "pe_kw": 5663.561850154411,
+     "pe_shp": 7594.96023890896,
+     "shp_required": 13809.018616198107,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014371183728261632,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1655904451.764706,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018371183728261632,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 496312.01202281466,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00042680326509801116,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 20.0,
      "fr": 0.22518931847209045,
      "fr_used": 0.22518931847209045,
      "rn": 1839893835.2941177,
-     "rf_kN": 632.28915640612,
-     "cr": 0.0005158353491324743,
-     "rr_kN": 179.33163150533994,
-     "rt_kN": 811.6207879114601,
-     "pe_kw": 8350.668892326465,
-     "pe_shp": 11198.429519010948,
-     "shp_required": 20360.780943656267
+     "rf_kN": 606.6002170146711,
+     "cr": 0.0005157073550539098,
+     "rr_kN": 172.0029725159904,
+     "rt_kN": 778.6031895306614,
+     "pe_kw": 8010.954784698232,
+     "pe_shp": 10742.865474987571,
+     "shp_required": 19532.482681795584,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014187371352706209,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1839893835.2941177,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018187371352706208,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 606600.2170146711,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0005157073550539098,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 22.0,
      "fr": 0.2477082503192995,
      "fr_used": 0.2477082503192995,
      "rn": 2023883218.8235295,
-     "rf_kN": 758.1926796662214,
-     "cr": 0.0006851800049740595,
-     "rr_kN": 288.22778921978767,
-     "rt_kN": 1046.420468886009,
-     "pe_kw": 11843.14409730307,
-     "pe_shp": 15881.915109699703,
-     "shp_required": 28876.209290363095
+     "rf_kN": 727.3884730818598,
+     "cr": 0.0006850366583290482,
+     "rr_kN": 276.45968558712315,
+     "rt_kN": 1003.848158668983,
+     "pe_kw": 11361.32056704274,
+     "pe_shp": 15235.779223605658,
+     "shp_required": 27701.416770192103,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014023885393953264,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2023883218.8235295,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018023885393953264,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 727388.4730818599,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0006850366583290482,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 24.0,
      "fr": 0.2702271821665085,
      "fr_used": 0.2702271821665085,
      "rn": 2207872602.352941,
-     "rf_kN": 894.95373388767,
-     "cr": 0.0008972839463231149,
-     "rr_kN": 449.19838815843417,
-     "rt_kN": 1344.152122046104,
-     "pe_kw": 16595.783862573266,
-     "pe_shp": 22255.308921246164,
-     "shp_required": 40464.19803862939
+     "rf_kN": 858.5931352674647,
+     "cr": 0.0008966974000125433,
+     "rr_kN": 430.666439217428,
+     "rt_kN": 1289.2595744848927,
+     "pe_kw": 15918.044460871346,
+     "pe_shp": 21346.44556909125,
+     "shp_required": 38811.71921652954,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001387690337473126,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2207872602.352941,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.001787690337473126,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 858593.1352674647,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0008966974000125433,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 26.0,
      "fr": 0.29274611401371753,
      "fr_used": 0.29274611401371753,
      "rn": 2391861985.882353,
-     "rf_kN": 1042.4938643416697,
-     "cr": 0.0011329328713740895,
-     "rr_kN": 665.6358156368829,
-     "rt_kN": 1708.1296799785528,
-     "pe_kw": 22847.16369225905,
-     "pe_shp": 30638.545919617878,
-     "shp_required": 55706.44712657796
+     "rf_kN": 1000.1389363380817,
+     "cr": 0.0011317471994484317,
+     "rr_kN": 637.9237334945784,
+     "rt_kN": 1638.06266983266,
+     "pe_kw": 21909.979315104218,
+     "pe_shp": 29381.761184262057,
+     "shp_required": 53421.383971385556,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013743569972844995,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2391861985.882353,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017743569972844995,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1000138.9363380817,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0011317471994484317,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 27.0,
      "fr": 0.3040055799373221,
      "fr_used": 0.3040055799373221,
      "rn": 2483856677.647059,
-     "rf_kN": 1120.2835751339205,
-     "cr": 0.001255805950227548,
-     "rr_kN": 795.6752933825958,
-     "rt_kN": 1915.958868516516,
-     "pe_kw": 26612.645692187987,
-     "pe_shp": 35688.1395898994,
-     "shp_required": 64887.526527089816
+     "rf_kN": 1074.768170399751,
+     "cr": 0.0012544906697394861,
+     "rr_kN": 762.5487255129789,
+     "rt_kN": 1837.31689591273,
+     "pe_kw": 25520.30963642507,
+     "pe_shp": 34223.29306212293,
+     "shp_required": 62224.16920385987,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013681317885522023,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2483856677.647059,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017681317885522023,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1074768.170399751,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0012544906697394861,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 28.0,
      "fr": 0.3152650458609266,
      "fr_used": 0.3152650458609266,
      "rn": 2575851369.4117646,
-     "rf_kN": 1200.741841379621,
-     "cr": 0.0013841828028116668,
-     "rr_kN": 943.181600611011,
-     "rt_kN": 2143.923441990632,
-     "pe_kw": 30881.999433360004,
-     "pe_shp": 41413.436279147114,
-     "shp_required": 75297.15687117656
+     "rf_kN": 1151.95754059657,
+     "cr": 0.0013830194552941317,
+     "rr_kN": 904.101079522148,
+     "rt_kN": 2056.058620118718,
+     "pe_kw": 29616.356581513905,
+     "pe_shp": 39716.1815495694,
+     "shp_required": 72211.23918103527,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013621698794562794,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2575851369.4117646,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017621698794562793,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1151957.54059657,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0013830194552941317,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
+    },
+    {
+     "speed_kn": 28.1,
+     "fr": 0.31639099245328706,
+     "fr_used": 0.31639099245328706,
+     "rn": 2585050838.5882354,
+     "rf_kN": 1159.8169881997655,
+     "cr": 0.0013958723338495962,
+     "rr_kN": 919.032722924031,
+     "rt_kN": 2078.8497111237966,
+     "pe_kw": 30051.59447818131,
+     "pe_shp": 40299.84508271598,
+     "shp_required": 73272.44560493814,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013615873796156903,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2585050838.5882354,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017615873796156902,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1159816.9881997656,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0013958723338495962,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 29.0,
      "fr": 0.3265245117845311,
      "fr_used": 0.3265245117845311,
      "rn": 2667846061.1764708,
-     "rf_kN": 1283.860699181539,
-     "cr": 0.0015749517521758305,
-     "rr_kN": 1151.1954326367918,
-     "rt_kN": 2435.056131818331,
-     "pe_kw": 36328.30048363733,
-     "pe_shp": 48717.04503639175,
-     "shp_required": 88576.44552071227
+     "rf_kN": 1231.6994065922443,
+     "cr": 0.001574135006854231,
+     "rr_kN": 1103.8513894457578,
+     "rt_kN": 2335.550796038002,
+     "pe_kw": 34843.79271779224,
+     "pe_shp": 46726.287673048464,
+     "shp_required": 84956.88667826993,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013564512509350872,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2667846061.1764708,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017564512509350872,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1231699.4065922443,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.001574135006854231,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
+    }
+   ],
+   "trace": [
+    {
+     "key": "qpc_assumed",
+     "value": 0.55,
+     "formula": "SHP = EHP / QPC",
+     "source": "**推进系数为假定值，无来源**",
+     "estimate": true
+    },
+    {
+     "key": "speeds",
+     "value": 14,
+     "formula": "输入速度点数",
+     "source": "调用方给出",
+     "estimate": false
     }
    ],
    "warnings": [
-    "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段阻力偏保守。",
+    "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+    "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+    "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。",
+    "[8 kn] Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[10 kn] Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[12 kn] Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[12 kn] Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[14 kn] Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[14 kn] Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[16 kn] Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[18 kn] Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[20 kn] Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[22 kn] Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[24 kn] Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[26 kn] Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[27 kn] Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[28 kn] Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[28.1 kn] Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[29 kn] Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段误差方向未知。",
     "QPC=0.55 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，引用时必须带上这一条。"
-   ]
+   ],
+   "estimate": true,
+   "loading_condition": "normal",
+   "input_sources": {
+    "offsets_path": "本案例自带 queen_mary_1913_offsets.json（tools/gen_qm_offsets.py 从 queen_mary_v4.py 物化，形状 estimate）；通用性改造后 CLI 不再扫描仓库路径",
+    "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
+    "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
+    "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
+    "draught_normal_m": "Navypedia '8.50 mean'",
+    "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
+    "block_coeff": "由来源反推：26770 ÷ (212.8 × 27.1 × 8.5 × 1.025) = 0.5328。注意此前填 0.551 是从**错误的 LWL 205.7** 反推的，属循环论证 —— LWL 修正后必须同步改这个值，否则排水量会虚高 3.4%",
+    "model_cross_check": "独立佐证：由 queen_mary_v4.py 的型值表放样出的模型船体，在自身设计水线 z=0（吃水 9.9 m = 实船满载吃水）上积分得 30943.9 m³ = 31717 t，对实船满载 31650 t 差 +0.213%；模型 Cb=0.5405 vs 实船满载 Cb=0.5408，差 0.06%。**说明该型值表对体积特性的估算是可信的。** 但注意：这只验证了体积/方形系数，**不验证形状分布**（不同分布可以给出相同体积而完全不同的 KB/BM/GZ）",
+    "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
+    "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
+    "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
+    "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测",
+    "cb": "normal displacement / (rho * Lwl * B * T); no rounded Cb reuse",
+    "cp": "Cb / Cm; Cm is an assumption, not a measured Queen Mary section",
+    "cm": "先验假定；没有 Queen Mary 的实测最大横剖面资料，非史实值",
+    "s_m2": "Mumford S=L*(1.7*T+Cb*B), all inputs at normal loading",
+    "displacement_unit": "metric tonne internally; historical source unit unresolved"
+   },
+   "values": {
+    "qpc": 0.55,
+    "points": 14,
+    "complete_points": 14,
+    "rt_max_kN": 2335.550796038002,
+    "pe_max_kw": 34843.79271779224,
+    "shp_max": 84956.88667826993
+   }
   },
   "qpc=0.60": {
    "rows": [
@@ -378,175 +1761,842 @@
      "fr": 0.09007572738883618,
      "fr_used": 0.16,
      "rn": 735957534.117647,
-     "rf_kN": 110.70834405502754,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 22.546590796478032,
-     "rt_kN": 133.25493485150557,
-     "pe_kw": 548.4176136379834,
-     "pe_shp": 735.440007560659,
-     "shp_required": 1225.7333459344316
+     "rf_kN": 106.21043370539854,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 21.620511930742637,
+     "rt_kN": 127.83094563614117,
+     "pe_kw": 526.0949039747121,
+     "pe_shp": 705.504765957774,
+     "shp_required": 1175.84127659629,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001590281804586533,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 735957534.117647,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0019902818045865332,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 106210.43370539854,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 10.0,
      "fr": 0.11259465923604522,
      "fr_used": 0.16,
      "rn": 919946917.6470588,
-     "rf_kN": 169.1301344134752,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 35.22904811949692,
-     "rt_kN": 204.35918253297214,
-     "pe_kw": 1051.3135529899232,
-     "pe_shp": 1409.8344548611012,
-     "shp_required": 2349.7240914351687
+     "rf_kN": 162.2586362576145,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 33.78204989178537,
+     "rt_kN": 196.04068614939987,
+     "pe_kw": 1008.5195474544188,
+     "pe_shp": 1352.4467580185312,
+     "shp_required": 2254.0779300308855,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0015459657217561078,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 919946917.6470588,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0019459657217561078,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 162258.6362576145,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 12.0,
      "fr": 0.13511359108325424,
      "fr_used": 0.16,
      "rn": 1103936301.1764705,
-     "rf_kN": 239.1733160958986,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 50.729829292075564,
-     "rt_kN": 289.9031453879742,
-     "pe_kw": 1789.6672047116517,
-     "pe_shp": 2399.982841238637,
-     "shp_required": 3999.971402064395
+     "rf_kN": 229.4560708150179,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 48.646151844170916,
+     "rt_kN": 278.10222265918884,
+     "pe_kw": 1716.8162380042047,
+     "pe_shp": 2302.2881024597086,
+     "shp_required": 3837.146837432848,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001511016446889129,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1103936301.1764705,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.001911016446889129,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 229456.0708150179,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 14.0,
      "fr": 0.1576325229304633,
      "fr_used": 0.16,
      "rn": 1287925684.7058823,
-     "rf_kN": 320.65218813694935,
-     "cr": 0.0004053359283866063,
-     "rr_kN": 69.04893431421397,
-     "rt_kN": 389.7011224511633,
-     "pe_kw": 2806.7116593357273,
-     "pe_shp": 3763.861686114694,
-     "shp_required": 6273.102810191157
+     "rf_kN": 307.6245811578809,
+     "cr": 0.00040514768653482976,
+     "rr_kN": 66.21281778789931,
+     "rt_kN": 373.83739894578025,
+     "pe_kw": 2692.4576960856816,
+     "pe_shp": 3610.644623958269,
+     "shp_required": 6017.741039930449,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+      "Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014823151096907215,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1287925684.7058823,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018823151096907214,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 307624.58115788095,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00040514768653482976,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 16.0,
      "fr": 0.18015145477767236,
      "fr_used": 0.18015145477767236,
      "rn": 1471915068.235294,
-     "rf_kN": 413.4142030212703,
-     "cr": 0.0004111706579761175,
-     "rr_kN": 91.48457783948545,
-     "rt_kN": 504.8987808607557,
-     "pe_kw": 4155.8743747380895,
-     "pe_shp": 5573.118378353345,
-     "shp_required": 9288.53063058891
+     "rf_kN": 396.61781754260454,
+     "cr": 0.00041099083346269667,
+     "rr_kN": 87.72931465367947,
+     "rt_kN": 484.347132196284,
+     "pe_kw": 3986.7116172093624,
+     "pe_shp": 5346.267422836747,
+     "shp_required": 8910.445704727912,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014580595099993082,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1471915068.235294,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018580595099993082,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 396617.8175426045,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00041099083346269667,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 18.0,
      "fr": 0.2026703866248814,
      "fr_used": 0.2026703866248814,
      "rn": 1655904451.764706,
-     "rf_kN": 517.3303513482584,
-     "cr": 0.0004269682384402512,
-     "rr_kN": 120.23374871976372,
-     "rt_kN": 637.5641000680222,
-     "pe_kw": 5903.838466117085,
-     "pe_shp": 7917.176433038869,
-     "shp_required": 13195.294055064782
+     "rf_kN": 496.31201202281466,
+     "cr": 0.00042680326509801116,
+     "rr_kN": 115.30426692801073,
+     "rt_kN": 611.6162789508253,
+     "pe_kw": 5663.561850154411,
+     "pe_shp": 7594.96023890896,
+     "shp_required": 12658.267064848267,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014371183728261632,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1655904451.764706,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018371183728261632,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 496312.01202281466,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.00042680326509801116,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 20.0,
      "fr": 0.22518931847209045,
      "fr_used": 0.22518931847209045,
      "rn": 1839893835.2941177,
-     "rf_kN": 632.28915640612,
-     "cr": 0.0005158353491324743,
-     "rr_kN": 179.33163150533994,
-     "rt_kN": 811.6207879114601,
-     "pe_kw": 8350.668892326465,
-     "pe_shp": 11198.429519010948,
-     "shp_required": 18664.049198351582
+     "rf_kN": 606.6002170146711,
+     "cr": 0.0005157073550539098,
+     "rr_kN": 172.0029725159904,
+     "rt_kN": 778.6031895306614,
+     "pe_kw": 8010.954784698232,
+     "pe_shp": 10742.865474987571,
+     "shp_required": 17904.775791645952,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014187371352706209,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 1839893835.2941177,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018187371352706208,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 606600.2170146711,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0005157073550539098,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 22.0,
      "fr": 0.2477082503192995,
      "fr_used": 0.2477082503192995,
      "rn": 2023883218.8235295,
-     "rf_kN": 758.1926796662214,
-     "cr": 0.0006851800049740595,
-     "rr_kN": 288.22778921978767,
-     "rt_kN": 1046.420468886009,
-     "pe_kw": 11843.14409730307,
-     "pe_shp": 15881.915109699703,
-     "shp_required": 26469.858516166172
+     "rf_kN": 727.3884730818598,
+     "cr": 0.0006850366583290482,
+     "rr_kN": 276.45968558712315,
+     "rt_kN": 1003.848158668983,
+     "pe_kw": 11361.32056704274,
+     "pe_shp": 15235.779223605658,
+     "shp_required": 25392.965372676095,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0014023885393953264,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2023883218.8235295,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0018023885393953264,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 727388.4730818599,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0006850366583290482,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 24.0,
      "fr": 0.2702271821665085,
      "fr_used": 0.2702271821665085,
      "rn": 2207872602.352941,
-     "rf_kN": 894.95373388767,
-     "cr": 0.0008972839463231149,
-     "rr_kN": 449.19838815843417,
-     "rt_kN": 1344.152122046104,
-     "pe_kw": 16595.783862573266,
-     "pe_shp": 22255.308921246164,
-     "shp_required": 37092.18153541027
+     "rf_kN": 858.5931352674647,
+     "cr": 0.0008966974000125433,
+     "rr_kN": 430.666439217428,
+     "rt_kN": 1289.2595744848927,
+     "pe_kw": 15918.044460871346,
+     "pe_shp": 21346.44556909125,
+     "shp_required": 35577.40928181876,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.001387690337473126,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2207872602.352941,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.001787690337473126,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 858593.1352674647,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0008966974000125433,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 26.0,
      "fr": 0.29274611401371753,
      "fr_used": 0.29274611401371753,
      "rn": 2391861985.882353,
-     "rf_kN": 1042.4938643416697,
-     "cr": 0.0011329328713740895,
-     "rr_kN": 665.6358156368829,
-     "rt_kN": 1708.1296799785528,
-     "pe_kw": 22847.16369225905,
-     "pe_shp": 30638.545919617878,
-     "shp_required": 51064.24319936313
+     "rf_kN": 1000.1389363380817,
+     "cr": 0.0011317471994484317,
+     "rr_kN": 637.9237334945784,
+     "rt_kN": 1638.06266983266,
+     "pe_kw": 21909.979315104218,
+     "pe_shp": 29381.761184262057,
+     "shp_required": 48969.6019737701,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013743569972844995,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2391861985.882353,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017743569972844995,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1000138.9363380817,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0011317471994484317,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 27.0,
      "fr": 0.3040055799373221,
      "fr_used": 0.3040055799373221,
      "rn": 2483856677.647059,
-     "rf_kN": 1120.2835751339205,
-     "cr": 0.001255805950227548,
-     "rr_kN": 795.6752933825958,
-     "rt_kN": 1915.958868516516,
-     "pe_kw": 26612.645692187987,
-     "pe_shp": 35688.1395898994,
-     "shp_required": 59480.23264983234
+     "rf_kN": 1074.768170399751,
+     "cr": 0.0012544906697394861,
+     "rr_kN": 762.5487255129789,
+     "rt_kN": 1837.31689591273,
+     "pe_kw": 25520.30963642507,
+     "pe_shp": 34223.29306212293,
+     "shp_required": 57038.821770204886,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013681317885522023,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2483856677.647059,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017681317885522023,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1074768.170399751,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0012544906697394861,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 28.0,
      "fr": 0.3152650458609266,
      "fr_used": 0.3152650458609266,
      "rn": 2575851369.4117646,
-     "rf_kN": 1200.741841379621,
-     "cr": 0.0013841828028116668,
-     "rr_kN": 943.181600611011,
-     "rt_kN": 2143.923441990632,
-     "pe_kw": 30881.999433360004,
-     "pe_shp": 41413.436279147114,
-     "shp_required": 69022.39379857853
+     "rf_kN": 1151.95754059657,
+     "cr": 0.0013830194552941317,
+     "rr_kN": 904.101079522148,
+     "rt_kN": 2056.058620118718,
+     "pe_kw": 29616.356581513905,
+     "pe_shp": 39716.1815495694,
+     "shp_required": 66193.63591594901,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013621698794562794,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2575851369.4117646,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017621698794562793,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1151957.54059657,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0013830194552941317,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
+    },
+    {
+     "speed_kn": 28.1,
+     "fr": 0.31639099245328706,
+     "fr_used": 0.31639099245328706,
+     "rn": 2585050838.5882354,
+     "rf_kN": 1159.8169881997655,
+     "cr": 0.0013958723338495962,
+     "rr_kN": 919.032722924031,
+     "rt_kN": 2078.8497111237966,
+     "pe_kw": 30051.59447818131,
+     "pe_shp": 40299.84508271598,
+     "shp_required": 67166.40847119331,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013615873796156903,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2585050838.5882354,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017615873796156902,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1159816.9881997656,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.0013958723338495962,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
     },
     {
      "speed_kn": 29.0,
      "fr": 0.3265245117845311,
      "fr_used": 0.3265245117845311,
      "rn": 2667846061.1764708,
-     "rf_kN": 1283.860699181539,
-     "cr": 0.0015749517521758305,
-     "rr_kN": 1151.1954326367918,
-     "rt_kN": 2435.056131818331,
-     "pe_kw": 36328.30048363733,
-     "pe_shp": 48717.04503639175,
-     "shp_required": 81195.07506065292
+     "rf_kN": 1231.6994065922443,
+     "cr": 0.001574135006854231,
+     "rr_kN": 1103.8513894457578,
+     "rt_kN": 2335.550796038002,
+     "pe_kw": 34843.79271779224,
+     "pe_shp": 46726.287673048464,
+     "shp_required": 77877.14612174744,
+     "complete": true,
+     "estimate": true,
+     "warnings": [
+      "Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。"
+     ],
+     "trace": [
+      {
+       "key": "cf",
+       "value": 0.0013564512509350872,
+       "formula": "Cf = 0.4631 / (lg Rn)^2.6",
+       "source": "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）",
+       "estimate": true
+      },
+      {
+       "key": "rn",
+       "value": 2667846061.1764708,
+       "formula": "Rn = V·L / ν",
+       "source": "定义式（ν=1.190e-06 由调用方给出）",
+       "estimate": true
+      },
+      {
+       "key": "cf_total",
+       "value": 0.0017564512509350872,
+       "formula": "Cf,total = Cf + ΔCf",
+       "source": "ΔCf=4.0e-04（粗糙度附加；Taylor 法取 0.4e-3）",
+       "estimate": true
+      },
+      {
+       "key": "rf_n",
+       "value": 1231699.4065922443,
+       "formula": "Rf = ½·ρ·S·Cf,total·V²",
+       "source": "摩擦阻力定义式",
+       "estimate": true
+      },
+      {
+       "key": "cr",
+       "value": 0.001574135006854231,
+       "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+       "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+       "estimate": true
+      }
+     ]
+    }
+   ],
+   "trace": [
+    {
+     "key": "qpc_assumed",
+     "value": 0.6,
+     "formula": "SHP = EHP / QPC",
+     "source": "**推进系数为假定值，无来源**",
+     "estimate": true
+    },
+    {
+     "key": "speeds",
+     "value": 14,
+     "formula": "输入速度点数",
+     "source": "调用方给出",
+     "estimate": false
     }
    ],
    "warnings": [
-    "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段阻力偏保守。",
+    "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+    "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+    "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。",
+    "[8 kn] Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[10 kn] Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[12 kn] Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[12 kn] Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[14 kn] Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[14 kn] Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。",
+    "[16 kn] Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[18 kn] Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[20 kn] Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[22 kn] Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[24 kn] Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[26 kn] Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[27 kn] Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[28 kn] Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[28.1 kn] Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "[29 kn] Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+    "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段误差方向未知。",
     "QPC=0.60 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，引用时必须带上这一条。"
-   ]
+   ],
+   "estimate": true,
+   "loading_condition": "normal",
+   "input_sources": {
+    "offsets_path": "本案例自带 queen_mary_1913_offsets.json（tools/gen_qm_offsets.py 从 queen_mary_v4.py 物化，形状 estimate）；通用性改造后 CLI 不再扫描仓库路径",
+    "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
+    "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
+    "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",
+    "draught_normal_m": "Navypedia '8.50 mean'",
+    "draught_deep_m": "ThoughtCo 32'4\" = 9.86 m；本项目契约 draft_m 9.9",
+    "block_coeff": "由来源反推：26770 ÷ (212.8 × 27.1 × 8.5 × 1.025) = 0.5328。注意此前填 0.551 是从**错误的 LWL 205.7** 反推的，属循环论证 —— LWL 修正后必须同步改这个值，否则排水量会虚高 3.4%",
+    "model_cross_check": "独立佐证：由 queen_mary_v4.py 的型值表放样出的模型船体，在自身设计水线 z=0（吃水 9.9 m = 实船满载吃水）上积分得 30943.9 m³ = 31717 t，对实船满载 31650 t 差 +0.213%；模型 Cb=0.5405 vs 实船满载 Cb=0.5408，差 0.06%。**说明该型值表对体积特性的估算是可信的。** 但注意：这只验证了体积/方形系数，**不验证形状分布**（不同分布可以给出相同体积而完全不同的 KB/BM/GZ）",
+    "waterplane_coeff": "estimate —— 无来源。待 L1 几何法从真实船体算出后替换",
+    "displacement_normal_t": "Navypedia / Tyne Built Ships 26770（长吨/公吨口径未注明）",
+    "displacement_deep_t": "Navypedia / Tyne Built Ships 31650",
+    "kg_m": "estimate —— 重量分组属 L2，此处为先验估计值，非实测",
+    "cb": "normal displacement / (rho * Lwl * B * T); no rounded Cb reuse",
+    "cp": "Cb / Cm; Cm is an assumption, not a measured Queen Mary section",
+    "cm": "先验假定；没有 Queen Mary 的实测最大横剖面资料，非史实值",
+    "s_m2": "Mumford S=L*(1.7*T+Cb*B), all inputs at normal loading",
+    "displacement_unit": "metric tonne internally; historical source unit unresolved"
+   },
+   "values": {
+    "qpc": 0.6,
+    "points": 14,
+    "complete_points": 14,
+    "rt_max_kN": 2335.550796038002,
+    "pe_max_kw": 34843.79271779224,
+    "shp_max": 77877.14612174744
+   }
   }
  },
  "trace": [
@@ -559,10 +2609,33 @@
   },
   {
    "key": "speeds",
-   "value": 13,
+   "value": 14,
    "formula": "输入速度点数",
    "source": "调用方给出",
    "estimate": false
   }
+ ],
+ "warnings": [
+  "湿面积经验式精度约 ±5%~10%，且对形状不敏感；有型线时优先用 `wetted_surface_from_hull()`（逐站湿周长积分）。",
+  "正常载荷估算：Cm 为假定值，湿面积由同载荷主尺度经验式计算，未使用满载模型湿面积。",
+  "史料吨位的长吨/公吨未确认；此处按公吨计算，试航载荷未确认，不能据功率接近宣称已验证。",
+  "[8 kn] Fr=0.09008 超出表范围，按 0.16000 截断；误差方向未知。",
+  "[10 kn] Fr=0.11259 超出表范围，按 0.16000 截断；误差方向未知。",
+  "[12 kn] Rn=1.104e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[12 kn] Fr=0.13511 超出表范围，按 0.16000 截断；误差方向未知。",
+  "[14 kn] Rn=1.288e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[14 kn] Fr=0.15763 超出表范围，按 0.16000 截断；误差方向未知。",
+  "[16 kn] Rn=1.472e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[18 kn] Rn=1.656e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[20 kn] Rn=1.840e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[22 kn] Rn=2.024e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[24 kn] Rn=2.208e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[26 kn] Rn=2.392e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[27 kn] Rn=2.484e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[28 kn] Rn=2.576e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[28.1 kn] Rn=2.585e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "[29 kn] Rn=2.668e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
+  "有速度点低于表的最低 Fr=0.16：已端点截断（**不外推**），低速段误差方向未知。",
+  "QPC=0.55 为**假定值**（无来源）：所需 SHP 与 QPC 成反比，引用时必须带上这一条。"
  ]
 }

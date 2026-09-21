@@ -172,10 +172,14 @@ def main() -> int:
                 vol = GM.hydrostatics_upright(h, 0.0)["volume_m3"]
                 wl_z = 0.0                    # 型值表船体：设计水线就在 z=0
 
+            gz_warnings = ["GZ 采用所选船体的设计载荷与输入 KG，几何和 KG 来源须分别核验。"]
+            if a.hull != "reference":
+                gz_warnings.append("型线 GZ 使用设计水线 z=0 的排水体积；独立于 L0 正常载荷，不能混作同一工况。")
             top_z = max(z for _, poly in h.stations for _, z in poly)
             rows = GM.gz_curve(h, kg, vol, angles)
             deepest = max(r["waterline_d_m"] for r in rows)
             if deepest > top_z - 0.01:
+                gz_warnings.append("平衡水线 %.3f m 接近或超过船体顶端 %.3f m，GZ 不可信。" % (deepest, top_z))
                 print()
                 print("  ⚠ 平衡水线 %.3f m 已超过船体顶端 %.3f m —— 该船体定义不足以承载此排水量，"
                       "GZ 不可信。检查甲板高度（reference 用 T×1.6；offsets 用 DECK_Z）"
@@ -189,6 +193,7 @@ def main() -> int:
             freeboard = deck_z - wl_z
             if half > 0 and freeboard > 0:
                 limit = _m.degrees(_m.atan(freeboard / half))
+                gz_warnings.append("甲板浸没角约 %.1f°；超过此角度的封闭船体 GZ 未验证，不应作真实稳性结论。" % limit)
                 print("  ⚠ 甲板浸没角约 %.1f°（干舷 %.2f m ÷ 半宽 %.2f m）——"
                       "超过它浸没剖面被主甲板截断，GZ 偏小，该角以上数值不应引用"
                       % (limit, freeboard, half))
@@ -199,7 +204,10 @@ def main() -> int:
                       % ("%d°" % r["angle_deg"], r["gm_arm_m"], r["waterline_d_m"], bar))
             peak = max(rows, key=lambda r: r["gm_arm_m"])
             print("  最大复原力臂 %.4f m @ %d°" % (peak["gm_arm_m"], peak["angle_deg"]))
-            gz_block = {"hull_source": prov, "deck_z_m": deck_z, "rows": rows}
+            gz_block = {"hull_source": prov, "deck_z_m": deck_z, "rows": rows,
+                        "loading_condition": "reference_normal" if a.hull == "reference" else "offsets_design_waterline",
+                        "volume_m3": vol, "waterline_z_m": wl_z,
+                        "kg_m": kg, "estimate": True, "warnings": gz_warnings}
 
     if a.out:
         result = {
@@ -207,12 +215,14 @@ def main() -> int:
             "ship": name,
             "engine": "plimsoll L0 (parametric hydrostatics)",
             "historically_certified": False,
+            "loading_condition": hull.get("loading_condition", "normal"),
+            "mass_unit": "metric_tonne",
             "values": out["values"],
             "shape_model": out["shape_model"],
             "kg_sensitivity": H.sensitivity_kg(hull, ks),
             "gz_curve": gz_block,
             "trace": out["trace"],
-            "warnings": out["warnings"],
+            "warnings": out["warnings"] + (gz_block["warnings"] if gz_block else []),
         }
         with open(a.out, "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=1)

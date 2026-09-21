@@ -17,7 +17,7 @@
     V_perm = μ · V_tank
     V_flood = flood_fraction · V_perm
     δ = ρ · V_flood
-    kg_flood = keel_to_bottom + flood_fraction · H   （自舱底起充的矩形）
+    kg_flood = keel_to_bottom + flood_fraction · H / 2（自舱底起充的矩形）
     Δ' = Δ + δ
     KG_solid' = (Δ·KG + δ·kg_flood) / Δ'
     FSC = Σ(ρ_i · i_i) / Δ' ,  i = L·b³/12（仅 0<flood_fraction<1 且 free_surface）
@@ -72,9 +72,11 @@ def flood_tank_state(tank: dict) -> dict:
     v_perm = mu * v_tank
     v_flood = frac * v_perm
     delta = rho * v_flood
-    kg_f = z0 + frac * H
+    # μ is a uniform available-volume factor, not an additional height factor.
+    # The water centroid lies halfway between the bottom and the free surface.
+    kg_f = z0 + 0.5 * frac * H
 
-    fs_active = want_fs and (0.0 < frac < 1.0) and (b > 0.0)
+    fs_active = want_fs and (0.0 < frac < 1.0) and (v_flood > 0.0) and (rho > 0.0)
     i_full = L * (b ** 3) / 12.0
     i_eff = i_full if fs_active else 0.0
 
@@ -96,7 +98,7 @@ def flood_tank_state(tank: dict) -> dict:
         "free_surface_active": fs_active,
         "i_effective_m4": i_eff,
         "rho_times_i": rho * i_eff,
-        "formula": "δ=ρ·μ·f·L·b·H；kg_f=z0+f·H；FS 仅 0<f<1",
+        "formula": "δ=ρ·μ·f·L·b·H；kg_f=z0+f·H/2；FS 仅 0<f<1 且有液体",
         "source": "rectangular flood proxy; explicit geometry required",
     }
 
@@ -333,13 +335,17 @@ def flood_tanks_to_fs_tanks(tanks):
     """damage 舱室 → freesurface 舱室（键映射，避免静默 no-op）。
 
     `flood_fraction` → `fill_fraction`；其余 L/b/ρ 透传。
+    无水或显式关闭自由液面的舱不传入 GZ 层，避免该层重新激活 FSC。
     仅在「GZ 层加 FS、且 kg 为实心合成」时使用。
     """
     out = []
     for t in tanks or []:
         t = dict(t)
-        if "fill_fraction" not in t and "flood_fraction" in t:
+        if "flood_fraction" in t:
             t["fill_fraction"] = t["flood_fraction"]
+        state = flood_tank_state(dict(t, flood_fraction=t.get("fill_fraction", 0.0)))
+        if not state["free_surface_active"]:
+            continue
         out.append(t)
     return out
 

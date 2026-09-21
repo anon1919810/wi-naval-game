@@ -1,5 +1,10 @@
 # Plimsoll
 
+> **2026-09-22 计算修正**：进水重心/无水 FSC 已修复；阻力警告贯穿结果与报告，缺剩余阻力时总量置空。
+> 正常载荷估算与满载模型已分开，Cm/QPC/湿面积的假设显式标记。325 项回归通过、6 项变异验证通过。
+> 新生成案例采用 resistance-2 / speed-power-2 schema；迁移说明与限制见
+> [计算完整性修正](../../docs/sps-replacement/2026-09-22-calculation-integrity.md)。
+
 自研舰船设计与静水力计算核心。规格见 [`docs/sps-replacement/SPEC.md`](../../docs/sps-replacement/SPEC.md)。
 与 SpringSharp **无代码关系**；其界面仅作需求覆盖度检查表（参考图在 `docs/sps-reference/`）。
 

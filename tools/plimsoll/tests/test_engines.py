@@ -145,7 +145,7 @@ class TestResistanceIntegration(unittest.TestCase):
         self.assertAlmostEqual(v["friction_resistance_kN"], 1209.0, places=9)
         self.assertAlmostEqual(v["wave_resistance_kN"], 959.0, places=9)
         self.assertAlmostEqual(v["resistance_at_speed_kn"], 28.1, places=9)
-        self.assertEqual(v["_not_implemented"], [])
+        self.assertEqual(v["_not_implemented"], ["displacement_factor"])
         self.assertIn("resistance.py", v["_resistance_source"])
 
 
