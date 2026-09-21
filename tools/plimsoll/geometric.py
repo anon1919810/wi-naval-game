@@ -59,13 +59,26 @@ def solve_equilibrium(hull, phi_rad, target_volume, lo=None, hi=None, tol=1e-9,
                       trim_rad=0.0):
     """等体积倾斜：解出使浸没体积等于目标值的水线截距。
 
-    `trim_rad` 为给定的纵倾角（θ > 0 = 艏倾）。**纵倾平衡（解出 θ 本身）
-    属阶段 2.2**：那需要同时满足体积与纵向力矩两个条件，是二维求根，
-    与这里的一维求 d 不是同一层的事，不要混在一起。
+    `trim_rad` 为给定的纵倾角（θ > 0 = 艏倾）。**解 θ 本身请用
+    `solve_trim_equilibrium`（阶段 2.2）**：那要同时满足体积与纵向力矩，
+    是二维求根，与这里的一维求 d 不是同一层的事，不要混在一起。
     """
     d = hull.solve_waterline(phi_rad, target_volume, lo=lo, hi=hi, tol=tol,
                              trim_rad=trim_rad)
     return d, hull.integrate(phi_rad, d, trim_rad)
+
+
+def solve_trim_equilibrium(hull, target_volume, target_lcb, **kwargs):
+    """纵倾平衡（阶段 2.2）：给定排水体积与 LCB(=LCG)，解出 (d, θ)。
+
+    与 `solve_equilibrium` 的分工：
+      · `solve_equilibrium` —— 固定 φ（及可选固定 θ），**一维**求 d，体积达标。
+      · 本函数 —— 体积与纵向力矩**同时**平衡，**二维**求 (d, θ)。
+
+    `target_lcb` 必须与 `integrate().xlcb` 使用**同一船体坐标原点**。
+    θ > 0 = 艏倾。返回完整契约字典（见 `StationedHull.solve_trim_equilibrium`）。
+    """
+    return hull.solve_trim_equilibrium(target_volume, target_lcb, **kwargs)
 
 
 def hydrostatics_upright(hull, waterline_z, rho=RHO_SEA):

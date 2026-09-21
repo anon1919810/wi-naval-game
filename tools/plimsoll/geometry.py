@@ -185,6 +185,116 @@ class StationedHull:
                 break
         return 0.5 * (lo + hi)
 
+    def solve_trim_equilibrium(self, target_volume, target_lcb, *,
+                               phi_rad=0.0,
+                               theta_lo=None, theta_hi=None,
+                               vol_tol=1e-9, lcb_tol=1e-6,
+                               max_outer=80):
+        """纵倾平衡（阶段 2.2）：同时解出水线截距 d 与纵倾角 θ。
+
+        给定目标排水体积 V* 与目标浮心纵向位置 `target_lcb`（= LCG，
+        **与 `integrate().xlcb` 同一船体坐标原点**），求 (d, θ) 使
+
+            ∇(d, θ) = V*
+            xlcb(d, θ) = target_lcb
+
+        **θ > 0 = 艏倾（bow down）** —— 与 `integrate` / `solve_waterline` 一致。
+
+        算法：嵌套求根，**不要与 `solve_waterline` 混成一层**。
+          内层：固定 θ，`solve_waterline` 二分 d 使体积达标。
+          外层：残差 r(θ) = xlcb − target_lcb，在 θ 上二分；括号不足时扩大。
+
+        直壁方箱、整段浸没时闭式解为
+            d* = keel + V*/(L·B)   （与 θ 无关）
+            tanθ = 12·T·LCB / L² ,  T = V*/(L·B)
+        可用作测试锚点。
+
+        返回 dict（全精度，不取整）。失败（体积不可达、LCB 在 θ 限界内
+        无法变号、外层未收敛）一律 `ValueError`，不返回伪解。
+        """
+        if not (target_volume > 1e-12):
+            raise ValueError("target_volume 必须为正，收到 %r" % target_volume)
+
+        if theta_lo is None:
+            theta_lo = math.radians(-15.0)
+        if theta_hi is None:
+            theta_hi = math.radians(15.0)
+        if not (theta_lo < theta_hi):
+            raise ValueError("需要 theta_lo < theta_hi，收到 %r >= %r"
+                             % (theta_lo, theta_hi))
+
+        def evaluate(theta):
+            d = self.solve_waterline(phi_rad, target_volume,
+                                     tol=vol_tol, trim_rad=theta)
+            r = self.integrate(phi_rad, d, theta)
+            return d, r, r["xlcb"] - target_lcb
+
+        # 扩大 θ 括号，直到 LCB 残差变号
+        hard_lo, hard_hi = math.radians(-30.0), math.radians(30.0)
+        lo, hi = theta_lo, theta_hi
+        d_lo, r_lo, res_lo = evaluate(lo)
+        d_hi, r_hi, res_hi = evaluate(hi)
+        if r_lo["volume"] <= 0.0 or r_hi["volume"] <= 0.0:
+            raise ValueError(
+                "目标体积 %r 在 θ 限界处不可达（积分体积非正）" % target_volume)
+
+        expand = 0
+        while res_lo * res_hi > 0.0 and expand < 6:
+            expand += 1
+            span = hi - lo
+            new_lo = max(hard_lo, lo - span)
+            new_hi = min(hard_hi, hi + span)
+            if new_lo == lo and new_hi == hi:
+                break
+            lo, hi = new_lo, new_hi
+            d_lo, r_lo, res_lo = evaluate(lo)
+            d_hi, r_hi, res_hi = evaluate(hi)
+
+        if res_lo * res_hi > 0.0:
+            raise ValueError(
+                "目标 LCB=%.6f 在 θ∈[%.4f°, %.4f°] 内不可达："
+                "残差两端同号（r_lo=%.6e, r_hi=%.6e）。"
+                "检查 target_lcb 是否与 xlcb 同一坐标原点，或放宽 θ 限界。"
+                % (target_lcb, math.degrees(lo), math.degrees(hi), res_lo, res_hi))
+
+        theta_best = 0.5 * (lo + hi)
+        d_best, r_best, res_best = evaluate(theta_best)
+        outer_iterations = 0
+        converged = False
+        for outer_iterations in range(1, max_outer + 1):
+            if abs(res_best) <= lcb_tol:
+                converged = True
+                break
+            if res_lo * res_best <= 0.0:
+                hi, res_hi = theta_best, res_best
+            else:
+                lo, res_lo = theta_best, res_best
+            if hi - lo < 1e-15:
+                break
+            theta_best = 0.5 * (lo + hi)
+            d_best, r_best, res_best = evaluate(theta_best)
+
+        if not converged and abs(res_best) > lcb_tol:
+            raise ValueError(
+                "纵倾平衡未达 LCB 容差：|残差|=%.6e > tol=%.6e，"
+                "θ=%.6f°，外层迭代 %d 次"
+                % (abs(res_best), lcb_tol, math.degrees(theta_best), outer_iterations))
+
+        return {
+            "d_m": d_best,
+            "trim_rad": theta_best,
+            "trim_deg": math.degrees(theta_best),
+            "volume_m3": r_best["volume"],
+            "xlcb_m": r_best["xlcb"],
+            "target_volume_m3": float(target_volume),
+            "target_lcb_m": float(target_lcb),
+            "volume_residual_m3": r_best["volume"] - target_volume,
+            "lcb_residual_m": res_best,
+            "outer_iterations": outer_iterations,
+            "phi_rad": float(phi_rad),
+            "hydrostatics": r_best,
+        }
+
     def bonjean_curve(self, station_index, levels):
         """Bonjean 曲线：某站位剖面面积随水线高变化（正浮、无横倾）。
 
