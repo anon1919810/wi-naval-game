@@ -145,16 +145,98 @@ class TestProjectDefaultsAndValidation(unittest.TestCase):
         self.assertIn("$.hull.beam_m", unknown_paths)
         self.assertIn("$.loading_conditions[0].reference_displacement_t", unknown_paths)
 
-    def test_explicit_geometry_requires_payload_or_reference_parameters(self):
+    def test_malformed_hull_key_returns_diagnostic_instead_of_crashing(self):
         project = populated_project()
-        project["geometry"] = {
-            "kind": "offsets",
-            "source": "lines plan",
-            "estimate": False,
-            "keel_offset_m": 0.0,
-        }
+        project["hull"] = {1: 2}
         diagnostics = project_io.validate_project(project)
-        self.assertTrue(any(d["code"] == "geometry.payload_missing" for d in diagnostics))
+        self.assertTrue(any(d["code"] == "json.key_invalid" for d in diagnostics))
+        with self.assertRaises(project_io.ProjectValidationError) as caught:
+            project_io.normalize_project(project)
+        self.assertTrue(any(d["code"] == "json.key_invalid" for d in caught.exception.diagnostics))
+
+    def test_missing_or_null_estimate_is_unknown_not_confirmed_false(self):
+        missing = populated_project()
+        del missing["weight_groups"][0]["items"][0]["estimate"]
+        explicit_unknown = copy.deepcopy(missing)
+        explicit_unknown["weight_groups"][0]["items"][0]["estimate"] = None
+        confirmed = copy.deepcopy(missing)
+        confirmed["weight_groups"][0]["items"][0]["estimate"] = False
+
+        normalized = project_io.normalize_project(missing)
+        self.assertIsNone(normalized["weight_groups"][0]["items"][0]["estimate"])
+        self.assertTrue(
+            any(d["code"] == "estimate.unknown" for d in project_io.validate_project(missing))
+        )
+        self.assertEqual(
+            project_io.input_fingerprint(missing),
+            project_io.input_fingerprint(explicit_unknown),
+        )
+        self.assertNotEqual(
+            project_io.input_fingerprint(missing),
+            project_io.input_fingerprint(confirmed),
+        )
+
+    def test_geometry_kinds_require_matching_nonempty_structural_payloads(self):
+        invalid_geometry = (
+            {
+                "kind": "offsets_reference",
+                "reference": {},
+            },
+            {
+                "kind": "offsets_reference",
+                "reference": {"path": ""},
+            },
+            {
+                "kind": "parameters",
+                "parameters": {},
+            },
+            {
+                "kind": "offsets",
+                "offsets": {"stations": []},
+            },
+            {
+                "kind": "parameters",
+                "reference": {"path": "ship.json"},
+            },
+            {
+                "kind": "future_geometry",
+                "parameters": {"block_coeff": 0.7},
+            },
+        )
+        for geometry in invalid_geometry:
+            project = populated_project()
+            project["geometry"] = {
+                "source": "test fixture",
+                "estimate": False,
+                "keel_offset_m": 0.0,
+                **geometry,
+            }
+            with self.subTest(geometry=geometry):
+                self.assertTrue(
+                    any(
+                        d["code"].startswith("geometry.") and d["severity"] == "error"
+                        for d in project_io.validate_project(project)
+                    )
+                )
+
+    def test_geometry_kinds_accept_minimum_valid_structural_payloads(self):
+        valid_geometry = (
+            {"kind": "offsets_reference", "reference": {"path": "ship.json"}},
+            {"kind": "parameters", "parameters": {"block_coeff": 0.7}},
+            {"kind": "offsets", "offsets": {"stations": [{"x_m": 0.0}]}},
+        )
+        for geometry in valid_geometry:
+            project = populated_project()
+            project["geometry"] = {
+                "source": "test fixture",
+                "estimate": False,
+                "keel_offset_m": 0.0,
+                **geometry,
+            }
+            with self.subTest(geometry=geometry):
+                self.assertFalse(
+                    any(d["severity"] == "error" for d in project_io.validate_project(project))
+                )
 
     def test_duplicate_group_item_and_loading_ids_are_errors(self):
         cases = []

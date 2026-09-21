@@ -84,13 +84,19 @@ replace them.
 
 `geometry` is either `null` or an object with:
 
-- `kind`: a non-empty type token, such as `parameters`, `offsets` or
-  `offsets_reference`;
+- `kind`: one of `parameters`, `offsets` or `offsets_reference`;
 - `source`: source metadata;
 - `estimate`: a boolean;
 - `keel_offset_m`: a finite real number or `null`;
-- either materialized geometry data or the parameters/reference needed to load
-  it.
+- the one payload matching its kind.
+
+The payload validation at this layer is structural. `offsets_reference`
+requires a `reference` object with a non-empty string `path`. `parameters`
+requires a non-empty `parameters` object; it may remain partial and combine
+with hull fields. Materialized `offsets` requires an `offsets` object with a
+non-empty `stations` array. Empty payloads, wrong payload types, payloads that
+do not match their kind and unsupported kinds are errors. Domain completeness
+and hull physics remain the geometry loader's responsibility.
 
 An unresolved external offsets file uses a typed reference, for example:
 
@@ -158,6 +164,14 @@ All four numeric values may be `null`. `mass_t` and `kg_m` are nonnegative;
 `x_m` and `y_m` are signed. Missing source metadata and each unknown numeric
 value produce diagnostics. Normalization never invents a mass or centre of
 gravity and never changes source metadata.
+
+`estimate` is `true` for an estimate, `false` for explicitly confirmed
+non-estimated provenance, and `null` when that provenance is unknown. A missing
+item `estimate` normalizes to `null` and produces a warning; it is never
+silently treated as `false`. Declared booleans are preserved. Legacy migration
+may conservatively assign `true` when a legacy item omitted the field, while
+retaining the untouched legacy payload under `legacy_inputs` and disclosing
+the migration provenance.
 
 `uncertainty` is optional. It is an object whose optional keys are exactly
 `mass_t`, `x_m`, `y_m` and `kg_m`. Each value is a two-element inclusive range

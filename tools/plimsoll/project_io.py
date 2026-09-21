@@ -114,7 +114,7 @@ def _with_schema_defaults(payload: dict) -> dict:
                 for field in _NUMERIC_ITEM_FIELDS:
                     item.setdefault(field, None)
                 item.setdefault("source", None)
-                item.setdefault("estimate", False)
+                item.setdefault("estimate", None)
 
     conditions = project.get("loading_conditions")
     if isinstance(conditions, list):
@@ -237,6 +237,8 @@ def _validate_hull(project: dict, diagnostics: list[dict]) -> None:
         return
     dimensional_values = 0
     for key, value in hull.items():
+        if not isinstance(key, str):
+            continue
         if not _hull_numeric_key(key):
             continue
         path = f"$.hull.{key}"
@@ -307,13 +309,59 @@ def _validate_geometry(project: dict, diagnostics: list[dict]) -> None:
         diagnostics,
         unknown_warning=True,
     )
-    if not any(geometry.get(field) is not None for field in ("offsets", "reference", "parameters")):
+    kind = geometry.get("kind")
+    payload_field = {
+        "offsets_reference": "reference",
+        "parameters": "parameters",
+        "offsets": "offsets",
+    }.get(kind)
+    if payload_field is None:
         diagnostics.append(
             _diagnostic(
-                "geometry.payload_missing",
+                "geometry.kind_unsupported",
+                "error",
+                "$.geometry.kind",
+                f"unsupported geometry kind {kind!r}",
+            )
+        )
+        return
+    mismatched = [
+        field
+        for field in ("offsets", "reference", "parameters")
+        if field != payload_field and field in geometry
+    ]
+    if mismatched:
+        diagnostics.append(
+            _diagnostic(
+                "geometry.payload_mismatched",
                 "error",
                 "$.geometry",
-                "explicit geometry requires offsets, reference, or parameter payload",
+                f"geometry kind {kind!r} cannot use payload field(s) {mismatched!r}",
+            )
+        )
+    payload = geometry.get(payload_field)
+    payload_valid = False
+    if kind == "offsets_reference":
+        payload_valid = (
+            isinstance(payload, dict)
+            and isinstance(payload.get("path"), str)
+            and bool(payload["path"].strip())
+        )
+    elif kind == "parameters":
+        payload_valid = isinstance(payload, dict) and bool(payload)
+    elif kind == "offsets":
+        payload_valid = (
+            isinstance(payload, dict)
+            and isinstance(payload.get("stations"), list)
+            and bool(payload["stations"])
+        )
+    if not payload_valid:
+        diagnostics.append(
+            _diagnostic(
+                "geometry.payload_invalid",
+                "error",
+                f"$.geometry.{payload_field}",
+                f"geometry kind {kind!r} requires a non-empty {payload_field} payload",
             )
         )
 
@@ -529,7 +577,18 @@ def _validate_weight_groups(project: dict, diagnostics: list[dict]) -> set[str]:
                         blocking=False,
                     )
                 )
-            if not isinstance(item.get("estimate"), bool):
+            estimate = item.get("estimate")
+            if estimate is None:
+                diagnostics.append(
+                    _diagnostic(
+                        "estimate.unknown",
+                        "warning",
+                        f"{item_path}.estimate",
+                        "weight item estimate provenance is unknown",
+                        blocking=False,
+                    )
+                )
+            elif not isinstance(estimate, bool):
                 diagnostics.append(
                     _diagnostic(
                         "estimate.invalid",
