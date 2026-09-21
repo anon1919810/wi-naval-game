@@ -1,94 +1,53 @@
 ---
 feature: plimsoll-damage-loop
-status: designed
+status: delivered
 updated: 2026-09-21
 branch: feature/plimsoll-damage-loop
-commits: cc266fe..cc266fe
+commits: cc266fe..0f48727
 ---
 
 # Plimsoll 长任务 · 破损稳性闭环 + 工程化收口
 
-> 用户离开期间可无人值守推进的长任务。范围：PLAN **4.2–4.4** 与 **5.1/5.2/5.4**。
-> 前置已在 master：2.2 纵倾平衡、3.x FSC、4.1 进水组合（`cc266fe`）。
-
 ## Report
+
+**What was built** — 在 master（2.2+FSC+4.1，`cc266fe`）之上完成破损稳性闭环与工程收口：`damage.solve_flooded_equilibrium`（4.1 组合 + 2.2 纵倾平衡；KM≈upright(d) 标 estimate；小角度横倾）；`remaining_gz_curve`（**FSC 只计一次**：kg_eff 路径禁止再传 tanks，双计抛错；键名映射 `flood_tanks_to_fs_tanks`）；三场景 `run_damage_scenarios.py` 落盘可复现；`integrate()["trace"]`；`plimsoll` 包入口（path bootstrap + 可调用 API）；`run_all_tests.py` 一键回归。
+
+**Verification** —
+- `test_damage_loop.py`：**11/11**（浮态自洽、艏倾符号、GZ 字段、FSC 单次、包可调用、场景可复现）
+- `run_all_tests.py`：**PLIMSOLL_REGRESSION run=129 fail=0**
+- 场景 ×3 写出 `cases/out/*.result.json`，`stable=True`
+- 变异：LCG 恒 0、忽略 FSC、双计路径 → 测试红
+- Review critical（FSC 静默 no-op/双计、包导入假绿）→ 修复后复审 **无 critical**
+
+**Journey log** —
+1. `flood_fraction`（damage）与 `fill_fraction`（freesurface）混用会**静默**关闭 FS — 必须显式映射。
+2. FSC **只允许计一次**：场景固定走 4.1 的 kg_eff，GZ 不再叠舱。
+3. 包 `__init__` 必须 bootstrap `sys.path`（内部是脚式模块名）；验收要 **call** API，不能只 hasattr。
+4. 传 `free_surface_tanks` 时强制显式 `fsc_already_in_kg`，避免无人值守下的双计。
+5. KM 为 upright 近似；横倾仅小角度 — 结果标 estimate，勿当规范计算。
 
 ## [S1] Problem
 
-4.1 只给出进水后的重量/重心/FSC，**不能**回答：船破损后吃水纵倾多少、剩余稳性如何、典型进水场景是否可复现。工程上测试仍靠手工逐文件调用，L1 输出无 trace，包导入依赖 cwd。用户离开时需要一条自足、可验证、可续接的闭环。
+4.1 无浮态/剩余 GZ/场景；工程侧无一键回归与 L1 trace。用户离开期间需自足闭环。
 
 ## [S2] Design
 
-### 4.2 破损后浮态（纵向 + 垂向；横倾小角度估计）
-
-输入：`hull`（StationedHull）、`ship`（Δ, KG, 可选 LCG/LCB/KM）、`tanks`（显式矩形进水舱）。
-
-流程：
-
-1. `combo = damage.flood_combination(ship, tanks)` → Δ′, KG_eff, FSC, lcg_solid, tcg_flood…
-2. 目标体积 `V* = Δ′ / ρ`
-3. 目标纵向浮心 = **破损后 LCG**（4.1 的 `lcg_solid_m`；若输入无 LCG，用原 `lcb_m` 或 0 并标 estimate）
-4. `solve_trim_equilibrium(hull, V*, lcg)` → `(d, θ)`（复用 2.2）
-5. 在 `(d, θ)` 上 `integrate` → 体积/浮心；**新 KM**：用该水线附近的正浮静水力
-   `hydrostatics_upright(hull, waterline_z=d)` 的 KM 作一阶近似；纵倾对 KM 的影响标 estimate
-6. 横倾（小角度）：`φ ≈ arctan( (δ·y) / (Δ′·GM′) )` 仅当 `GM′>0`；GM′ = KM′ − KG_eff
-   否则 `heel_deg = null` 且 `gm_negative: true`
-7. 输出契约 dict：浮态、残差、KM/GM、estimate 字段
-
-失败：沿用 2.2/4.1 的 ValueError；GM≤0 时不抛错，标记不稳定。
-
-### 4.3 剩余 GZ
-
-- `gz_curve(hull, kg_eff, V*, angles)`，angles 默认 0..60 每 5°
-- 可选 `free_surface_tanks`：若进水舱仍有自由液面，再叠一层 FSC（分母用 Δ′）
-- 输出：曲线、`max_gz_m`/`angle_at_max_deg`、`range_deg`（GZ&gt;0 的连续区间）、甲板浸没角提示（相对水线几何若可估）
-- **甲板以上**形状未验证 — 与现有限界一致，结果标 estimate
-
-### 4.4 场景回归
-
-场景 JSON（`tools/plimsoll/cases/damage_scenarios.json`）：
-
-| id | 内容 |
-|---|---|
-| `single_boiler` | 单炉舱部分进水 |
-| `double_boiler` | 相邻两炉舱 |
-| `engine_room` | 机舱大体积进水 |
-
-每场景：ship 基线 + tanks 列表 + 期望字段（可复现）。CLI/脚本 `damage_loop.run_scenario` 写出 `cases/out/<id>.result.json`。
-
-验收：三次运行字节级可复现（无随机）；关键字段与手算/自洽检查一致。
-
-### 5.1 L1 trace
-
-`StationedHull.integrate` 返回值增加 `trace`：对 volume/xlcb/yb/zb/awp 等写 `formula`/`source`/`estimate`。测试断言键存在。
-
-### 5.2 包化
-
-`tools/plimsoll/__init__.py` 导出公共 API；测试改为 `sys.path` 指向 `tools` 后 `from plimsoll import ...` **或** 保持脚本式但增加 `run_all_tests.py` 从任意 cwd 可跑。验收：从仓库根 `python -c "import sys; sys.path.insert(0,'tools'); import plimsoll"` 成功。
-
-### 5.4 一键回归
-
-`tools/plimsoll/run_all_tests.py`：发现并执行全部 tests/*.py，汇总 PASS/FAIL，非零退出码。
-
-### 纪律
-
-纯函数；核心不 round；数值实现由主代理完成（不把数值交给子代理写）；变异验证；每完成一项回写 PLAN。
+4.2：Δ′/LCG → `solve_trim_equilibrium`；KM≈upright(d)；heel=atan(Σδy/(Δ′·GM′))（GM≤0 → null）。  
+4.3：GZ @ kg_eff + V*；**FSC 单次**；双计 ValueError；`flood_tanks_to_fs_tanks` 供实心 KG + GZ 层 FS。  
+4.4：`damage_scenarios.json` 三场景 + runner 落盘。  
+5.1：`integrate` trace。5.2：包入口可调用。5.4：`run_all_tests.py`。
 
 ## [S3] Out of Scope
 
-- 真实型线图接入
-- 游戏侧 Unity 写回 / hydrostatics.json
-- 5.3 sweep CLI（可后置）
-- 7.x 阻力/耐波/穿深
-- 非矩形舱、完整二维破损稳性规范计算
+5.3 sweep CLI；真实型线；游戏写回；完整规范破损稳性；7.x。
 
 ## Tasks
 
-- [ ] T1: worktree + 本 spec — acceptance: 分支存在且 spec 可读 (covers: S2)
-- [ ] T2: 4.2 `damage.solve_flooded_equilibrium` — acceptance: 方箱+单舱进水体积/纵倾/残差达标 (covers: S2)
-- [ ] T3: 4.3 `damage.remaining_gz_curve` — acceptance: 有 GZ 表与 max/range 字段 (covers: S2; depends: T2)
-- [ ] T4: 4.4 场景 JSON + runner + 落盘 — acceptance: 3 场景可复现运行 (covers: S2; depends: T2,T3)
-- [ ] T5: 5.1 integrate trace — acceptance: 测试断言 trace 键存在 (covers: S2)
-- [ ] T6: 5.2 + 5.4 包入口与 run_all_tests — acceptance: 一键回归汇总全绿 (covers: S2)
-- [ ] T7: 测试 + 变异 + 全量回归 — acceptance: 新测试红/绿证据；旧套件不回归 (covers: S2; depends: T2–T6)
-- [ ] T8: review + finalize + PLAN/交接 — acceptance: review 无 critical；spec delivered；PLAN 勾选 (covers: S2; depends: T7)
+- [x] T1: worktree + spec
+- [x] T2: 4.2 `solve_flooded_equilibrium`
+- [x] T3: 4.3 `remaining_gz_curve`（FSC 单次契约）
+- [x] T4: 4.4 场景 JSON + runner
+- [x] T5: 5.1 integrate trace
+- [x] T6: 5.2 包入口 + 5.4 一键回归
+- [x] T7: 测试+变异+回归 129
+- [x] T8: review 无 critical + PLAN/交接

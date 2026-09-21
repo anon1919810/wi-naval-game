@@ -63,12 +63,10 @@ class TestFloodedEquilibrium(unittest.TestCase):
     def test_volume_and_trim_self_consistent(self):
         eq = D.solve_flooded_equilibrium(self.hull, self.ship, [self.tank],
                                          rho=RHO, lcb_tol=1e-6)
-        self.assertGreater(eq["displacement_after_t"] if False else
-                           eq["combination"]["displacement_after_t"],
+        self.assertGreater(eq["combination"]["displacement_after_t"],
                            self.ship["displacement_t"])
         self.assertLess(abs(eq["volume_residual_m3"] or 0.0), 1e-3)
         self.assertLess(abs(eq["lcb_residual_m"] or 0.0), 1e-5)
-        # 对称进水 x=0 → 纵倾应接近 0
         self.assertLess(abs(eq["trim_rad"]), 1e-3)
         self.assertIsNotNone(eq["km_m"])
         self.assertIsNotNone(eq["gm_m"])
@@ -140,20 +138,67 @@ class TestScenarios(unittest.TestCase):
 
 class TestPackageImport(unittest.TestCase):
 
-    def test_import_plimsoll_from_tools(self):
+    def test_import_plimsoll_callables(self):
         tools_dir = os.path.dirname(HERE)
-        import importlib
         if tools_dir not in sys.path:
             sys.path.insert(0, tools_dir)
-        # 若已以脚本方式占用 plimsoll 名，至少 damage/geometric 可调用
-        import damage
-        self.assertTrue(hasattr(damage, "solve_flooded_equilibrium"))
-        try:
-            import plimsoll
-            self.assertTrue(hasattr(plimsoll, "damage") or hasattr(plimsoll, "__version__"))
-        except Exception:
-            # 包内相对导入失败时，脚本模式仍须可用
-            pass
+        import plimsoll
+        self.assertTrue(hasattr(plimsoll, "damage"))
+        self.assertTrue(hasattr(plimsoll.damage, "solve_flooded_equilibrium"))
+        self.assertTrue(hasattr(plimsoll.damage, "flood_combination"))
+        self.assertTrue(hasattr(plimsoll, "geometry"))
+        self.assertTrue(hasattr(plimsoll.geometry, "StationedHull"))
+        # 真正可调用，而不只是模块名存在
+        hull = make_box()
+        out = plimsoll.damage.flood_combination(
+            {"displacement_t": 1000.0, "kg_m": 5.0}, [])
+        self.assertAlmostEqual(out["kg_effective_m"], 5.0, places=12)
+
+
+class TestFSCOnce(unittest.TestCase):
+
+    def test_double_count_raises(self):
+        hull = make_box()
+        kg_solid = 4.0
+        vol = 100.0 * 20.0 * 5.0
+        tank = {"id": "t", "length_m": 10.0, "beam_m": 8.0, "height_m": 4.0,
+                "permeability": 1.0, "flood_fraction": 0.5,
+                "fluid_density_t_m3": RHO}
+        with self.assertRaises(ValueError):
+            D.remaining_gz_curve(hull, kg_solid + 0.1, vol,
+                                 free_surface_tanks=[tank],
+                                 fsc_already_in_kg=True)
+
+    def test_scenario_gz_has_no_implicit_fs_tanks(self):
+        path = os.path.join(os.path.dirname(HERE),
+                            "cases", "damage_scenarios.json")
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        hull = RDS.load_hull(data["hull"])
+        sc = data["scenarios"][0]
+        out = D.run_damage_scenario(hull, {
+            "id": sc["id"], "ship": data["ship_baseline"], "tanks": sc["tanks"],
+        })
+        self.assertTrue(out["remaining_gz"]["fsc_already_in_kg"])
+        # kg_eff 含 FSC；GZ 层不得再叠 tanks（rows 里 fsc_m 若存在应为 0/缺省）
+        for row in out["remaining_gz"]["rows"]:
+            if "fsc_m" in row:
+                self.assertEqual(row["fsc_m"], 0.0)
+
+    def test_mapped_tanks_with_solid_kg(self):
+        """显式路径：实心 KG + 映射后的 tanks → GZ 层 FS 生效。"""
+        hull = make_box()
+        vol = 100.0 * 20.0 * 5.0
+        tanks = [{"id": "t", "length_m": 20.0, "beam_m": 10.0,
+                  "height_m": 4.0, "flood_fraction": 0.5,
+                  "fluid_density_t_m3": 1.0}]
+        fs_tanks = D.flood_tanks_to_fs_tanks(tanks)
+        self.assertEqual(fs_tanks[0]["fill_fraction"], 0.5)
+        gz_solid = D.remaining_gz_curve(hull, 4.0, vol)
+        gz_fs = D.remaining_gz_curve(hull, 4.0, vol,
+                                     free_surface_tanks=fs_tanks,
+                                     fsc_already_in_kg=False)
+        self.assertLess(gz_fs["max_gz_m"], gz_solid["max_gz_m"])
 
 
 if __name__ == "__main__":

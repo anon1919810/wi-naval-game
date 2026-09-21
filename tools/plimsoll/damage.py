@@ -27,6 +27,12 @@
 from __future__ import annotations
 
 import math
+import os
+import sys
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 RHO_SEA = 1.025
 
@@ -259,12 +265,40 @@ def solve_flooded_equilibrium(hull, ship, tanks=None, rho=RHO_SEA, **trim_kwargs
 
 
 def remaining_gz_curve(hull, kg_effective_m, target_volume_m3,
-                       angles_deg=None, rho=RHO_SEA, free_surface_tanks=None):
-    """阶段 4.3：在（破损后）目标体积与 KG_eff 下的剩余 GZ 曲线。"""
+                       angles_deg=None, rho=RHO_SEA,
+                       free_surface_tanks=None,
+                       fsc_already_in_kg=None):
+    """阶段 4.3：在（破损后）目标体积与 KG_eff 下的剩余 GZ 曲线。
+
+    **FSC 只计一次（关键）**：
+    - 若 `kg_effective_m` 来自 4.1 `flood_combination`（已含 FSC），
+      必须 **`fsc_already_in_kg=True`（默认：当 free_surface_tanks 为 None 时
+      视为 True）**，**不要**再传同一批舱给 `free_surface_tanks`。
+    - 若 `kg_effective_m` 只是实心合成 KG（不含 FS），且要显式在 GZ 层加 FS，
+      传 `free_surface_tanks` 并设 `fsc_already_in_kg=False`。
+      舱室键需用 freesurface 的 `fill_fraction`（或调用
+      `flood_tanks_to_fs_tanks` 映射 `flood_fraction`→`fill_fraction`）。
+
+    禁止：kg 已含 FSC，又传入同一批舱 → **双计**。此时抛 ValueError。
+    """
     import geometric as M
 
     if angles_deg is None:
         angles_deg = [float(a) for a in range(0, 65, 5)]
+
+    if fsc_already_in_kg is None:
+        if free_surface_tanks:
+            raise ValueError(
+                "传入 free_surface_tanks 时必须显式设置 fsc_already_in_kg："
+                "False=kg 为实心且在 GZ 层加 FS；True=禁止再传 tanks（会双计）。")
+        fsc_already_in_kg = True
+
+    if fsc_already_in_kg and free_surface_tanks:
+        raise ValueError(
+            "FSC 双计风险：kg_effective_m 已含自由液面修正时，"
+            "不得再传 free_surface_tanks。"
+            "要么 kg=KG_solid + tanks，要么 kg=KG_eff 且 tanks=None。")
+
     rows = M.gz_curve(hull, float(kg_effective_m), float(target_volume_m3),
                       angles_deg, rho=rho,
                       free_surface_tanks=free_surface_tanks)
@@ -286,7 +320,8 @@ def remaining_gz_curve(hull, kg_effective_m, target_volume_m3,
         "max_gz_m": max_gz,
         "angle_at_max_deg": angle_at_max,
         "range_deg": range_deg if (max_gz is not None and max_gz > 0.0) else 0.0,
-        "formula": "GZ at equal-volume waterlines with KG_eff",
+        "fsc_already_in_kg": bool(fsc_already_in_kg),
+        "formula": "GZ at equal-volume waterlines with KG (FSC applied once)",
         "source": "stage 4.3 remaining GZ",
         "estimate": {
             "deck": "甲板以上形状未外部验证，大角度 GZ 仍属 estimate",
@@ -294,13 +329,33 @@ def remaining_gz_curve(hull, kg_effective_m, target_volume_m3,
     }
 
 
+def flood_tanks_to_fs_tanks(tanks):
+    """damage 舱室 → freesurface 舱室（键映射，避免静默 no-op）。
+
+    `flood_fraction` → `fill_fraction`；其余 L/b/ρ 透传。
+    仅在「GZ 层加 FS、且 kg 为实心合成」时使用。
+    """
+    out = []
+    for t in tanks or []:
+        t = dict(t)
+        if "fill_fraction" not in t and "flood_fraction" in t:
+            t["fill_fraction"] = t["flood_fraction"]
+        out.append(t)
+    return out
+
+
 def run_damage_scenario(hull, scenario: dict):
-    """阶段 4.4：跑一个场景 → 浮态 + 剩余 GZ（可复现）。"""
+    """阶段 4.4：跑一个场景 → 浮态 + 剩余 GZ（可复现）。
+
+    **FSC 只走 4.1 一次**：GZ 使用 `kg_effective_m`，**不再**传入进水舱
+    作为 `free_surface_tanks`（避免双计，也避免 flood/fill 键名静默失配）。
+    """
     ship = scenario["ship"]
     tanks = scenario["tanks"]
     eq = solve_flooded_equilibrium(hull, ship, tanks)
     gz = remaining_gz_curve(hull, eq["kg_effective_m"], eq["target_volume_m3"],
-                            free_surface_tanks=tanks)
+                            free_surface_tanks=None,
+                            fsc_already_in_kg=True)
     return {
         "id": scenario.get("id", ""),
         "equilibrium": eq,
