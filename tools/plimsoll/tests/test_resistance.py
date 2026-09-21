@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """阻力与功率（7.3 v0）：摩擦线解析对照、四维插值、试航反解。"""
+import json
 import math
 import os
 import sys
@@ -165,6 +166,123 @@ class TestQueenMaryTrial(unittest.TestCase):
             self.assertIn("formula", t)
             self.assertIn("source", t)
             self.assertIn("estimate", t)
+
+
+def cr_table_case():
+    p = os.path.join(PKG, "cases", "taylor_gertler_cr_table.json")
+    with open(p, encoding="utf-8") as f:
+        return json.load(f)
+
+
+class TestCrTableIntegrity(unittest.TestCase):
+    """Taylor-Gertler 表（Molland A3.8–A3.11）：结构与书中抽检值。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.case = cr_table_case()
+
+    def test_shape_and_axes(self):
+        ax = self.case["axes"]
+        self.assertEqual(ax["cp"], [0.5, 0.6, 0.7, 0.8])
+        self.assertEqual(ax["bt"], [2.25, 3.0, 3.75])
+        self.assertEqual(len(ax["volumetric"]), 6)      # L/∇⅓ = 10,9,8,7,6,5.5
+        self.assertEqual(len(ax["fn"]), 22)             # Fr 0.16–0.58 步长 0.02
+        g = self.case["cr"]
+        self.assertEqual((len(g), len(g[0]), len(g[0][0]), len(g[0][0][0])),
+                         (4, 3, 6, 22))
+
+    def test_scale_is_thousandth(self):
+        """表内是 CR×1000，scale 必须为 1e-3（否则 Cr 差一千倍）。"""
+        self.assertEqual(self.case["scale"], 1e-3)
+
+    def test_book_spot_rows(self):
+        """书中抽检（已与原书页面逐格核对）：
+        Cp=0.60 Fr=0.16 全 18 值；Cp=0.50 Fr=0.40 前 9 格缺。"""
+        r60 = self.case["raw_rows"]["0.60"]["0.16"]
+        self.assertEqual(r60, [0.50, 0.60, 0.75, 0.42, 0.51, 0.65, 0.35, 0.42, 0.51,
+                               0.29, 0.38, 0.48, 0.22, 0.32, 0.44, 0.23, 0.30, 0.42])
+        r50 = self.case["raw_rows"]["0.50"]["0.40"]
+        self.assertEqual(r50[:9], [None] * 9)
+        self.assertEqual(r50[9:], [3.71, 3.80, 3.95, 2.58, 2.63, 2.64, 1.75, 1.82, 1.90])
+
+    def test_cp_080_isolated_holes_are_genuine(self):
+        """Cp=0.80 Fr=0.30 的孤立缺格已与原书页面核对，是原书真实的「—」。"""
+        self.assertEqual(self.case["raw_rows"]["0.80"]["0.30"],
+                         [None] * 6 + [5.20, None, None, 3.70, 4.00, 3.87,
+                                       2.77, None, None, 2.20, None, None])
+
+
+class TestInterpolationWithHoles(unittest.TestCase):
+    def test_missing_corners_renormalised(self):
+        """缺格 → 按可用角点重新归一化 + 警告，**不当 0 也不崩**。"""
+        t = {"axes": {"cp": [0.5, 0.6], "bt": [2.0, 3.0], "volumetric": [0.002, 0.003],
+                      "fn": [0.2, 0.3]},
+             "cr": [[[[1.0, None], [None, 2.0]], [[3.0, 3.0], [3.0, 3.0]]],
+                    [[[5.0, 5.0], [5.0, 5.0]], [[5.0, 5.0], [5.0, 5.0]]]]}
+        r = R.residual_from_table(t, 0.55, 2.5, 0.0025, 0.25)
+        self.assertIsNotNone(r["values"]["cr"])
+        self.assertTrue(any("缺格" in w for w in r["warnings"]))
+
+    def test_all_corners_missing_gives_none(self):
+        t = {"axes": {"cp": [0.5, 0.6], "bt": [2.0, 3.0], "volumetric": [0.002, 0.003],
+                      "fn": [0.2, 0.3]},
+             "cr": [[[[None, None], [None, None]], [[None, None], [None, None]]],
+                    [[[None, None], [None, None]], [[None, None], [None, None]]]]}
+        r = R.residual_from_table(t, 0.55, 2.5, 0.0025, 0.25)
+        self.assertIsNone(r["values"]["cr"])
+
+
+class TestQueenMaryAnchor(unittest.TestCase):
+    """★ 核心验收：**表插值 vs 试航反解** —— 两个独立来源必须互相印证。
+
+    结论（2026-09-22）：用**史实口径**的船型参数（Cb 0.533 / Cm≈0.94 → Cp≈0.567）
+    插值得到的 Cr 与试航反解的 0.00167 相差 ~16%，反推 QPC≈0.51（1913 年汽轮机合理）；
+    而用**模型型线**参数（Cp=0.766，受 Cm=0.71 异常污染）则给出 Cr≈5e-3、QPC≈0.28（荒谬）。
+    → 这独立证实了「模型型线形状未经验证」的限界，resistane 计算必须用史实口径系数。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.table = cr_table_case()
+        # 史实口径：Cb 0.533（案例）、Cm ≈ 0.94（战舰常见）→ Cp = Cb/Cm
+        cls.cp_hist = 0.533 / 0.94
+        cls.bt_hist = 27.1 / 8.5                 # 正常吃水
+        cls.vol_hist = (26770 / 1.025) / 212.8 ** 3
+        cls.cp_model, cls.bt_model = 0.7657, 26.8 / 9.9
+        cls.vol_model = 30943.9 / 213.4 ** 3
+        cls.back = 0.00167                        # 试航反解（QPC=0.55）
+
+    def _cr(self, cp, bt, vol):
+        r = R.residual_from_table(self.table, cp, bt, vol, 0.316)
+        return r["values"]["cr"], r["warnings"]
+
+    def test_historical_params_agree_with_trial(self):
+        cr, _ = self._cr(self.cp_hist, self.bt_hist, self.vol_hist)
+        self.assertTrue(0.5 * self.back < cr < 1.5 * self.back,
+                        "史实口径插值 Cr=%.5f 与反解 %.5f 差太多" % (cr, self.back))
+
+    def test_historical_implies_plausible_qpc(self):
+        """Cr→Rr→R_total→EHP→QPC 应落在 1913 年汽轮机的 0.45–0.60。"""
+        cr, _ = self._cr(self.cp_hist, self.bt_hist, self.vol_hist)
+        v = 28.1 * R.KNOT_MPS
+        S, rf = 6407.9, 1208.6135e3
+        rr = 0.5 * R.RHO_SEA * S * cr * v * v
+        qpc = (rf + rr) * v / 1000.0 / (83000 * R.HP_TO_KW)
+        self.assertTrue(0.45 < qpc < 0.60, "反推 QPC=%.3f 不合理" % qpc)
+
+    def test_model_params_are_inconsistent_and_flagged(self):
+        """模型型线口径会给出荒谬的 QPC —— 记录这个矛盾（不要静默用它算阻力）。"""
+        cr_m, _ = self._cr(self.cp_model, self.bt_model, self.vol_model)
+        cr_h, _ = self._cr(self.cp_hist, self.bt_hist, self.vol_hist)
+        self.assertGreater(cr_m, 2.0 * cr_h,
+                           "模型口径 Cr=%.5f 未显著高于史实口径 %.5f：Cm 异常的影响改变了？"
+                           % (cr_m, cr_h))
+
+    def test_historical_params_use_declared_range(self):
+        """史实口径应落在表的适用范围内（Cp 0.50–0.80、B/T 2.25–3.75、∇/L³ 范围内）。"""
+        self.assertTrue(0.50 <= self.cp_hist <= 0.80)
+        self.assertTrue(2.25 <= self.bt_hist <= 3.75)
+        self.assertTrue(0.001 <= self.vol_hist <= 0.007)
 
 
 if __name__ == "__main__":

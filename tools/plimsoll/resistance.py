@@ -148,8 +148,12 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
         warnings.append("插值点在图谱边界之外：已按端点截断（**不外推**），"
                         "结果偏保守且不代表图谱趋势。")
 
-    # 四维多线性插值
+    # 四维多线性插值。**表里有缺格（"—"）→ 用可用角点重新归一化**，
+    # 不当 0 也不崩（当 0 会把阻力压低；崩掉会让整条链不可用）。
     total = 0.0
+    wsum = 0.0
+    skipped = 0
+    scale = cr_table.get("scale", 1.0)     # 表内单位换算（如 CR×1000 → scale=1e-3）
     for m in range(16):
         bits = [(m >> b) & 1 for b in range(4)]
         w = 1.0
@@ -157,11 +161,24 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
         for b, bit in enumerate(bits):
             w *= (frac[b] if bit else (1.0 - frac[b]))
             sel.append(idx[b] + bit)
-        total += w * grid[sel[0]][sel[1]][sel[2]][sel[3]]
-
-    _T(trace, "cr", total, "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)",
+        cell = grid[sel[0]][sel[1]][sel[2]][sel[3]]
+        if cell is None:
+            skipped += 1
+            continue
+        wsum += w
+        total += w * cell
+    if wsum <= 0:
+        _T(trace, "cr", None, "四维插值：全部角点缺格", cr_table.get("source", "无"), True)
+        warnings.append("插值涉及的全部角点在表里都是缺格（—）：无法给出 Cr。")
+        return {"values": {"cr": None, "rr_n": None}, "trace": trace, "warnings": warnings}
+    cr = total / wsum * scale
+    if skipped:
+        warnings.append("插值涉及 %d/16 个缺格（表中「—」）：已按可用角点重新归一化，"
+                        "等权近似，边界区精度下降。" % skipped)
+    _T(trace, "cr", cr, "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)%s"
+       % ("，×%.0e 换算" % scale if scale != 1.0 else ""),
        cr_table.get("source", "Gertler 图谱数字化表"), True)
-    return {"values": {"cr": total, "rr_n": None}, "trace": trace, "warnings": warnings}
+    return {"values": {"cr": cr, "rr_n": None}, "trace": trace, "warnings": warnings}
 
 
 def residual_force(cr: float, v_mps: float, s_m2: float, rho: float = RHO_SEA) -> dict:

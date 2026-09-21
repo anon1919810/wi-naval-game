@@ -155,8 +155,15 @@ Engine weight / Bunker / Displacement factor（输出）。
 
 → **主力 Taylor-Gertler，Holtrop 仅作对照**；两者摩擦口径不同，比较前必须对齐。
 
-**还得补的 7.3 输入**：Cp/Cm/LCB（已由 `hull.form_coefficients()` 从型线真算，见
-`cases/queen_mary_1913_formcoeff.json`）、lpp（垂线间长，∇/L³ 用它，**仍无源**）。
+**【2026-09-22 已落地】** Taylor-Gertler 表已数字化入库
+（`cases/taylor_gertler_cr_table.json`，源自 Molland 附录 A3.8–A3.11 = Gertler DTMB-806）：
+四维网格 Cp×B/T×∇/L³×Fn，缺格按可用角点归一化，表内 CR×1000 → scale 1e-3。
+**交叉校验结论**：用史实口径 Cp=0.567 插值得 Cr≈1.4e-3、反推 QPC≈0.51（合理），
+与试航反解 0.00167 差 ~16%；用模型型线 Cp=0.766 则得 Cr≈5e-3、QPC≈0.28（荒谬）
+→ **7.3 必须用史实口径的船型参数，模型型线的形状分布不可用**。
+
+**还得补的 7.3 输入**：lpp（垂线间长，∇/L³ 用它，**仍无源**）；Cr 的 QPC 误差带；
+Holtrop 对照（原文在 `_holtrop1982.pdf`，注意其 Cb 越界）。
 
 ---
 

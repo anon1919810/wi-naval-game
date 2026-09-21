@@ -1,7 +1,7 @@
 {
   "schema": "plimsoll-resistance-1",
   "ship": "HMS Queen Mary (1913)",
-  "_note": "阻力 v0：只含**已算部分**。摩擦用 Schoenherr（Taylor 法口径）+ 0.4e-3 粗糙度；剩余阻力图谱（Gertler 1954 DTMB-806）**缺** → cr_from_table 为 None；cr_implied 是由试航真值**反解**的（QPC=0.55 为假定，无来源）。ν 取海水 15°C 1.19e-6。",
+  "_note": "阻力 v0.1：摩擦（Schoenherr + 0.4e-3 粗糙度）+ **Taylor-Gertler 表插值**（Molland A3.8–A3.11；表内 CR×1000 → scale 1e-3）。★ 船型参数**必须用史实口径**（Cp = Cb/Cm ≈ 0.567，B/T = 27.1/8.5 = 3.19）：模型型线的 Cp=0.766 受 Cm=0.71 异常污染，用它插值会得到 Cr≈5e-3、反推 QPC≈0.28（荒谬）；史实口径给出 Cr≈1.4e-3、QPC≈0.51（合理），并与试航反解 Cr=0.00167 相差约 16% —— **两个独立来源互相印证**。ν 取海水 15°C；QPC=0.55 为反解假定值（无来源）。",
   "inputs": {
     "speed_kn": 28.1,
     "shp_trial": 83000.0,
@@ -10,10 +10,24 @@
     "nu_m2_s": 1.19e-06,
     "rho_kg_m3": 1025.0,
     "qpc_assumed": 0.55,
+    "form_params_historical": {
+      "cp": 0.5670212765957447,
+      "bt": 3.1882352941176473,
+      "volumetric": 0.0027102517588022167,
+      "fn": 0.3159458935330927,
+      "note": "Cp = Cb(0.533)/Cm(0.94)；B/T、∇/L³ 用正常吃水"
+    },
+    "form_params_model": {
+      "cp": 0.76570382270097,
+      "bt": 2.707070707070707,
+      "volumetric": 0.0031841353955379356,
+      "note": "模型型线（Cm=0.71 异常）—— 仅作对照"
+    },
     "sources": {
       "S": "cases/queen_mary_1913_formcoeff.json（型线逐站积分）",
       "L": "同上（水线长）",
-      "trial": "cases/queen_mary_1913_engines.json（Navypedia）"
+      "trial": "cases/queen_mary_1913_engines.json（Navypedia）",
+      "cr_table": "cases/taylor_gertler_cr_table.json（Molland A3.8-A3.11）"
     }
   },
   "values": {
@@ -26,7 +40,10 @@
     "r_total_kN": 2354.8350897632195,
     "rr_kN": 1146.221591346179,
     "cr_implied": 0.0016702133998409928,
-    "cr_from_table": null
+    "cr_table_historical": 0.0013919456116193811,
+    "cr_table_model": 0.004816684517946894,
+    "qpc_implied_by_table_historical": 0.5053972384833444,
+    "qpc_implied_by_table_model": 1.054339010263577
   },
   "trace": [
     {
@@ -84,13 +101,26 @@
       "formula": "Cr = Rr / (½·ρ·S·V²)",
       "source": "由试航真值反解",
       "estimate": true
+    },
+    {
+      "key": "cr",
+      "value": 0.0013919456116193811,
+      "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+      "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+      "estimate": true
+    },
+    {
+      "key": "cr",
+      "value": 0.004816684517946894,
+      "formula": "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)，×1e-03 换算",
+      "source": "Molland, Turnock & Hudson, Ship Resistance and Propulsion, Appendix A3, Tables A3.8-A3.11 (pp. 495-498); data after Gertler, M. \"A reanalysis of the original test data for the Taylor Standard Series\", DTMB Report 806 (1954), SNAME reprint 1998",
+      "estimate": true
     }
   ],
   "warnings": [
     "Rn=2.592e+09 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。",
     "QPC=0.55 是**假定值**（QM 无来源）：Cr 随 QPC 线性变化 —— QPC 每 ±0.05，Rr 约 ∓104 kN。结论须带此限界。",
     "本结果是**反解**（真值推导），不是从图谱预测；用于校验将来的图谱插值结果。",
-    "缺 Taylor-Gertler 剩余阻力图谱（Gertler 1954 DTMB-806）：剩余阻力置空。**公开检索到的只有 OCR 乱码版本，不得照抄**；需从正规教材附录/报告数字化后再接入 cr_table。",
-    "当前只能给出摩擦阻力；若要看总阻力，请用 `implied_residual_from_trial()` 由试航真值反解。"
+    "表插值（模型口径）：插值涉及 8/16 个缺格（表中「—」）：已按可用角点重新归一化，等权近似，边界区精度下降。"
   ]
 }
