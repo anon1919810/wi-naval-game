@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8">
+<title>HMS Queen Mary (1913) · 速度–阻力–功率曲线</title>
+<style>
+ body{background:#f7f8fa;color:#1d2330;font:14px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;margin:0;padding:28px}
+ .card{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:20px 22px;max-width:900px;margin:0 auto 18px}
+ h1{font-size:19px;margin:0 0 6px} .sub{color:#5b6472;font-size:12.5px;margin:0 0 14px}
+ table{border-collapse:collapse;width:100%;font-size:12.5px}
+ th,td{padding:4px 8px;border-bottom:1px solid #eef0f3;text-align:right}
+ th:first-child,td:first-child{text-align:left}
+ .k{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+ .note{color:#5b6472;font-size:12px;margin-top:12px}
+</style></head><body>
+<div class="card">
+ <h1>HMS Queen Mary (1913) · 速度–阻力–功率曲线</h1>
+ <p class="sub">Taylor-Gertler 表插值（Molland 附录 A3.8–A3.11 / Gertler DTMB-806）+ Schoenherr 摩擦（ΔCf=0.4e-3）；
+ 船型参数用史实口径（Cp=0.567、B/T=3.19、∇/L³=2.71e-3）。Fr&lt;0.16 的低速点已端点截断、不外推。</p>
+ <svg viewBox="0 0 {{W}} {{H}}" width="100%" height="auto" role="img">
+  <rect x="0" y="0" width="{{W}}" height="{{H}}" fill="#ffffff"/>
+  {{GRID}}
+  <path d="{{RT}}" fill="none" stroke="#c0392b" stroke-width="2.4"/>
+  <path d="{{SHP50}}" fill="none" stroke="#2f6fd0" stroke-width="2" stroke-dasharray="6 4"/>
+  <path d="{{SHP55}}" fill="none" stroke="#2f6fd0" stroke-width="3"/>
+  <path d="{{SHP60}}" fill="none" stroke="#2f6fd0" stroke-width="2" stroke-dasharray="2 3"/>
+  <circle cx="{{TX}}" cy="{{TY}}" r="4" fill="#111"/>
+  <text x="{{TXL}}" y="{{TYL}}" font-size="11.5" fill="#1d2330">试航 83,000 shp @ 28.1 kn</text>
+  <text x="56" y="22" font-size="12.5" fill="#c0392b">总阻力 Rt (kN，左轴同刻度)</text>
+  <text x="{{MID}}" y="22" font-size="12.5" fill="#2f6fd0">所需 SHP（QPC 0.50 / 0.55 / 0.60）</text>
+  <text x="{{XAX}}" y="{{YAX}}" font-size="11" fill="#5b6472">航速</text>
+ </svg>
+ <p class="note"><span class="k" style="background:#c0392b"></span>总阻力 Rt　
+ <span class="k" style="background:#2f6fd0"></span>所需轴功率 SHP = EHP / QPC（QPC 为假定值，实线取 0.55）</p>
+</div>
+<div class="card"><table>
+<tr><th>航速 kn</th><th>Fr</th><th>Rf kN</th><th>Cr×1000</th><th>Rt kN</th><th>EHP kW</th>
+<th>SHP(0.50)</th><th>SHP(0.55)</th><th>SHP(0.60)</th></tr>
+{{ROWS}}
+</table>
+<p class="note">★ 黑盒对照：28 kn 处 QPC=0.55 预测所需 SHP ≈ 75,300，试航实为 83,000 shp @28.1 kn，
+偏低约 10% —— 与文献「Taylor-Gertler 一般低估 5–10%」一致。QPC 无来源，属假定值。</p>
+</div></body></html>

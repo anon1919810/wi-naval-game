@@ -91,8 +91,8 @@ class TestCompute(unittest.TestCase):
 class TestSpsView(unittest.TestCase):
     def test_missing_resistance_stays_none(self):
         v = E.sps_view(E.compute(queen_mary_case()))
-        self.assertIsNone(v["friction_resistance"])
-        self.assertIsNone(v["wave_resistance"])
+        self.assertIsNone(v["friction_resistance_kN"])
+        self.assertIsNone(v["wave_resistance_kN"])
         self.assertIsNone(v["engine_weight_t"])
         self.assertIn("displacement_factor", v["_not_implemented"])
 
@@ -126,6 +126,27 @@ class TestQueenMary(unittest.TestCase):
     def test_cruise_speed_and_engine_weight_are_gaps(self):
         self.assertIsNone(self.r["values"]["cruise_speed_kn"])
         self.assertIsNone(self.r["values"]["engine_weight_t"])
+
+
+class TestResistanceIntegration(unittest.TestCase):
+    """Engines 页与 resistance.py 的接口（可选传入，不破坏原来的诚实留白）。"""
+
+    def test_without_resistance_stays_none(self):
+        v = E.sps_view(E.compute(queen_mary_case()))
+        self.assertIsNone(v["friction_resistance_kN"])
+        self.assertIsNone(v["wave_resistance_kN"])
+        self.assertIn("friction_resistance", v["_not_implemented"])
+        self.assertIsNone(v["_resistance_source"])
+
+    def test_with_resistance_filled_and_attributed(self):
+        v = E.sps_view(E.compute(queen_mary_case()),
+                       resistance={"speed_kn": 28.1, "friction_kN": 1209.0,
+                                   "residual_kN": 959.0})
+        self.assertAlmostEqual(v["friction_resistance_kN"], 1209.0, places=9)
+        self.assertAlmostEqual(v["wave_resistance_kN"], 959.0, places=9)
+        self.assertAlmostEqual(v["resistance_at_speed_kn"], 28.1, places=9)
+        self.assertEqual(v["_not_implemented"], [])
+        self.assertIn("resistance.py", v["_resistance_source"])
 
 
 if __name__ == "__main__":

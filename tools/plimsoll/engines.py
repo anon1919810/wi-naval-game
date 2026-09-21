@@ -171,15 +171,28 @@ def compute(case: dict) -> dict:
     return {"values": values, "trace": trace, "warnings": warnings}
 
 
-def sps_view(result: dict) -> dict:
-    """compute() 结果 → SPS Engines 页视图（缺项保持 None）。"""
+def sps_view(result: dict, resistance: dict | None = None) -> dict:
+    """compute() 结果 → SPS Engines 页视图（缺项保持 None）。
+
+    `resistance`（可选）：来自 `resistance.py` 的结果快照
+    `{"speed_kn":…, "friction_kN":…, "residual_kN":…}` —— 给了就填 Friction/Wave resistance
+    两格（**值来自阻力模块，不是本页算的**）；不给仍是 None（诚实留白）。
+    """
     v = result["values"]
+    fr = rr = None
+    if resistance:
+        fr = resistance.get("friction_kN")
+        rr = resistance.get("residual_kN")
     return {
         "max_speed_kn": v["max_speed_kn"], "cruise_speed_kn": v["cruise_speed_kn"],
         "shafts": v["shafts"],
         "power_hp": v["power_design_shp"], "power_kw": v["power_design_kw"],
-        "friction_resistance": None, "wave_resistance": None,   # 明确不做（PLAN 7.3）
+        "friction_resistance_kN": fr, "wave_resistance_kN": rr,
+        "resistance_at_speed_kn": (resistance or {}).get("speed_kn"),
         "range_nm": v["range_nm"], "pct_coal": v["pct_coal"],
         "engine_weight_t": v["engine_weight_t"], "bunker_t": v["bunker_total_t"],
-        "_not_implemented": ["friction_resistance", "wave_resistance", "displacement_factor"],
+        "_not_implemented": [] if resistance else
+        ["friction_resistance", "wave_resistance", "displacement_factor"],
+        "_resistance_source": ("resistance.py（Taylor-Gertler + Schoenherr）"
+                               if resistance else None),
     }

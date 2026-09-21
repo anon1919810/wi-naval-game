@@ -26,8 +26,8 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **291 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （…test_hull 32；test_resistance 19 = **7.3 阻力 v0**；test_generic_ship 11 = 通用性契约）
+- 一键回归 **311 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （…test_resistance 37 = **7.3 阻力/曲线**；test_engines 16；test_generic_ship 11 = 通用性契约）
   （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16；test_freeboard 16；
   test_weapons 17；test_engines 14 = Engines 页；test_generic_ship 11 = **通用性契约**）
 - **SPS 七页全部到 ◐ 以上**（2026-09-22）：Hull 基本齐 / Freeboard·Armour·Guns·Weapons·
@@ -348,8 +348,17 @@
       模型口径必须显著偏高并标注）。这也**独立证实**了「模型型线形状未经验证」的限界。
   - 测试 19 → 29 项（表完整性 + 书上抽检值 + 缺格归一化 + QM 双向交叉校验）；
     变异验证：忽略 scale 2 项红、缺格当 0 3 项红。
-  - **待做**：① Cr 的 QPC 敏感性误差带（0.5–0.6 扫）；② Holtrop 对照（原文已下载，
-    注意其 Cb 越界）；③ 把 Cr 表用于整条 R–V 曲线（现只算试航点 28.1 kn）。
+  - **② 整条 R–V 曲线已完成（2026-09-22）**：`resistance.speed_power_curve()`
+    + `tools/gen_speed_power_case.py` → `cases/queen_mary_1913_speed_power.json`
+    （8–29 kn × QPC 0.50/0.55/0.60 三条带）+ 可视化
+    `cases/out/queen_mary_speed_power.html`（自绘 SVG，无外部依赖）。
+    - **黑盒对照结果**：28 kn 按 QPC=0.55 需 75,297 shp；28.1 kn 需 76,403 shp，
+      试航实为 **83,000 shp** → **低 8%**，正落文献所述「Taylor-Gertler 一般低估 5–10%」区间。
+    - Fr<0.16 的低速点**端点截断不外推**（表中最低 Fr=0.16）；QPC 假定值写进每条警告。
+    - `engines.sps_view(result, resistance=…)` 接口打通：Engines 页的 Friction/Wave resistance
+      两格现在可填（值来自 resistance.py 并标来源；不传仍为 None，保持诚实留白）。
+  - **待做**：① QPC 敏感性已在曲线里以三条带形式给出，误差带文档待写；
+    ③ Holtrop 对照（原文在手，注意 Cb 越界）。
 - [ ] **7.4 耐波性估算**：切片理论（最低优先级）。
 - [-] **7.5 Web 界面**：**搁置（2026-09-21 用户指令）**——SPS 覆盖度仅 ~13%，
   网站会把"只有 Hull 一页"固化成看起来完整的样子。`feature/plimsoll-web` 草稿保留不删；

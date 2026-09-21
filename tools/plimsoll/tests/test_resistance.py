@@ -285,5 +285,60 @@ class TestQueenMaryAnchor(unittest.TestCase):
         self.assertTrue(0.001 <= self.vol_hist <= 0.007)
 
 
+class TestSpeedPowerCurve(unittest.TestCase):
+    """速度–阻力–功率曲线：内部一致性 + 与试航真值的黑盒对照。"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.table = cr_table_case()
+        cls.hp = {"lwl_m": 212.8, "s_m2": 6407.9,
+                  "cp": 0.533 / 0.94, "bt": 27.1 / 8.5,
+                  "volumetric": (26770 / 1.025) / 212.8 ** 3}
+        cls.curve = R.speed_power_curve(cls.hp, list(range(10, 30, 2)), cls.table, qpc=0.55)
+
+    def test_pe_equals_r_times_v(self):
+        """每点必须满足 P_E = R_total × V（定义式，无例外）。"""
+        for r in self.curve["rows"]:
+            v = r["speed_kn"] * R.KNOT_MPS
+            self.assertAlmostEqual(r["pe_kw"], r["rt_kN"] * 1000.0 * v / 1000.0, places=6)
+
+    def test_shp_is_ehp_over_qpc(self):
+        for r in self.curve["rows"]:
+            self.assertAlmostEqual(r["shp_required"], r["pe_shp"] / 0.55, places=6)
+
+    def test_resistance_monotonic(self):
+        """阻力随航速单调增（曲线不该有负斜率）。"""
+        rt = [r["rt_kN"] for r in self.curve["rows"]]
+        self.assertTrue(all(b > a for a, b in zip(rt, rt[1:])), rt)
+
+    def test_black_box_vs_trial(self):
+        """★ 黑盒对照：28 kn 处按 QPC=0.55 预测所需 SHP vs 试航 83,000 shp (28.1 kn)。
+        书里明说 Taylor-Gertler **一般低估 5–10%**；实测低 ~10%，落在预期内。"""
+        near = min(self.curve["rows"], key=lambda r: abs(r["speed_kn"] - 28.0))
+        ratio = near["shp_required"] / 83000.0
+        self.assertTrue(0.85 < ratio < 1.10,
+                        "28 kn 预测 %.0f shp 对试航 83000 的比值 %.3f 超出预期带" %
+                        (near["shp_required"], ratio))
+
+    def test_low_speed_clipped_and_warned(self):
+        """10–14 kn 低于表的最低 Fr=0.16 → 截断并警告（不外推）。"""
+        self.assertTrue(any("端点截断" in w for w in self.curve["warnings"]))
+        self.assertAlmostEqual(self.curve["rows"][0]["fr_used"], 0.16, places=9)
+
+    def test_qpc_assumption_flagged(self):
+        self.assertTrue(any("QPC" in w and "假定值" in w for w in self.curve["warnings"]))
+
+    def test_without_table_only_friction(self):
+        """没有 Cr 表 → 只有摩擦，且必须明确警告不完整。"""
+        c = R.speed_power_curve(self.hp, [20.0], None)
+        self.assertIsNone(c["rows"][0]["cr"])
+        self.assertTrue(any("不完整" in w for w in c["warnings"]))
+
+    def test_bad_speeds_raise(self):
+        for bad in ([], [0.0], [-5.0]):
+            with self.assertRaises(ValueError):
+                R.speed_power_curve(self.hp, bad, self.table)
+
+
 if __name__ == "__main__":
     unittest.main()
