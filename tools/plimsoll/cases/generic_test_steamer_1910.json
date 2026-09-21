@@ -1,0 +1,26 @@
+{
+  "schema": "plimsoll-ship-1",
+  "_note": "SS Testbed 1910 —— 通用性样板案例：一艘 90 m 沿海货船，纯解析构造，非史实。用作『Plimsoll 能解任何船』的活证据与二次开发模板（tests/test_generic_ship.py 锚定其手算值）。",
+  "name": "SS Testbed",
+  "country": "(虚构)",
+  "type": "cargo_steamer",
+  "dates": { "completed": 1910 },
+  "units": "SI",
+  "hull": {
+    "lwl_m": 90.0,
+    "loa_m": 92.0,
+    "beam_m": 13.0,
+    "draught_normal_m": 5.5,
+    "block_coeff": 0.72,
+    "waterplane_coeff": 0.82,
+    "displacement_normal_t": 4749.03,
+    "kg_m": 4.82,
+    "kg_is_estimate": true,
+    "sources": {
+      "_all": "解析构造：∇ = 0.72×90×13×5.5 = 4633.2 m³，Δ = ×1.025 = 4749.03 t；Awp = 0.82×90×13 = 959.4 m²，TPC = 9.83385 t/cm。非史实数据，仅供验证与模板用途。"
+    },
+    "known_open_items": [
+      "无型线（未声明 offsets_path）——GZ 需要型线时 CLI 会明确报错并说明给法。"
+    ]
+  }
+}

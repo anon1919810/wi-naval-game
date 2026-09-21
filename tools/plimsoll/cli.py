@@ -36,34 +36,40 @@ DISPLAY = [
 ]
 
 
-def _load_offsets_hull(a, deck_z):
+def _load_offsets_hull(a, case_dir, hull):
     """取型值表船体。
 
-    优先级：显式 `--offsets <file>` → 仓库里的 `hull_offsets.json`（真实型线接入点）
-    → 生成脚本的内建估算表。**返回值里必须带来源说明**，因为这三者的可信度不同。
+    **通用性契约（2026-09-22）**：Plimsoll 是通用求解器，CLI 不知道任何具体船。
+    型线来源优先级：`--offsets <file>` → 案例 `hull.offsets_path`（相对案例文件目录）。
+    都没有就明确报错并告诉用户怎么给 —— **不扫描仓库路径、不回落到任何生成脚本**。
+    甲板高：offsets 文件自带 `deck_z_m` → 案例 `hull.depth_m`，再没有就报错。
     """
     import offsets as OF
-    here = os.path.dirname(os.path.abspath(__file__))
-    repo = os.path.dirname(os.path.dirname(here))
 
-    if a.offsets:
-        table, note = OF.load_offsets_json(a.offsets)
-        return OF.build_hull(table, deck_z=deck_z), "真实型线：%s（%s）" % (a.offsets, note or "无说明"), deck_z
+    path = a.offsets or hull.get("offsets_path")
+    if not path:
+        raise SystemExit(
+            "ERROR: 本船未声明型线。两种给法任选：\n"
+            "  1. 案例 hull 段加 \"offsets_path\": \"<hull_offsets.json>\"（相对案例文件目录）\n"
+            "     JSON 每站 5 个数 (y, deck_hb, wl_hb, keel_z, flat_hb)，可带 deck_z_m 与 source\n"
+            "  2. 命令行 --offsets <file> 直接指定")
+    if not os.path.isabs(path) and not os.path.isfile(path):
+        cand = os.path.join(case_dir, path)
+        path = cand if os.path.isfile(cand) else path
+    if not os.path.isfile(path):
+        raise SystemExit("ERROR: 型线文件不存在：%s" % path)
 
-    for cand in (os.path.join(repo, "queen_mary_v4", "hull_offsets.json"),
-                 os.path.join(repo, "queen_mary_v3", "hull_offsets.json"),
-                 os.path.join(repo, "data", "hull_offsets.json")):
-        if os.path.isfile(cand):
-            table, note = OF.load_offsets_json(cand)
-            return OF.build_hull(table, deck_z=deck_z), "真实型线：%s（%s）" % (cand, note or "无说明"), deck_z
-
-    script = os.path.join(repo, "queen_mary_v4", "queen_mary_v4.py")
-    if not os.path.isfile(script):
-        raise SystemExit("ERROR: 既没有 hull_offsets.json，也找不到 %s" % script)
-    table = OF.parse_offsets_from_python(script)
-    return (OF.build_hull(table, deck_z=deck_z),
-            "**估算**型值表：%s 的内建 OFFSETS（非史实，生成脚本自述形状为 estimate）" % os.path.basename(script),
-            deck_z)
+    table, note, deck_z_file = OF.load_offsets_payload(path)
+    if a.deck_z is not None:
+        deck_z = a.deck_z
+    elif deck_z_file is not None:
+        deck_z = deck_z_file
+    elif hull.get("depth_m") is not None:
+        deck_z = hull["depth_m"]
+    else:
+        raise SystemExit("ERROR: 甲板高没有来源：offsets 文件给 deck_z_m，"
+                         "或案例 hull 给 depth_m，或命令行 --deck-z。")
+    return OF.build_hull(table, deck_z=deck_z), "型线：%s（%s）" % (path, note or "无说明"), deck_z
 
 
 def main() -> int:
@@ -76,7 +82,9 @@ def main() -> int:
     ap.add_argument("--hull", choices=["offsets", "reference"], default="offsets",
                     help="GZ 用哪种船体：offsets=型值表船体（默认，真实几何）；"
                          "reference=合成参照船体（与 L0 同源，仅供交叉验证）")
-    ap.add_argument("--offsets", help="指定 hull_offsets.json 路径；省略则按约定在仓库里找")
+    ap.add_argument("--offsets", help="型线 JSON 路径；省略则用案例 hull.offsets_path")
+    ap.add_argument("--deck-z", type=float, default=None,
+                    help="主甲板 z（型值表坐标，水线 z=0）；优先级高于文件与案例")
     a = ap.parse_args()
 
     if a.selftest or not a.ship:
@@ -158,8 +166,9 @@ def main() -> int:
                 prov = "合成参照船体（与 L0 同源，仅供交叉验证）"
                 wl_z = T                      # 参照船体：龙骨在 0，设计水线在 T
             else:
-                deck_z = hull.get("depth_m", 5.10)
-                h, prov, deck_z = _load_offsets_hull(a, deck_z)
+                # 甲板高不允许静默默认值 —— 没来源就明确报错（通用性契约）。
+                case_dir = os.path.dirname(os.path.abspath(a.ship))
+                h, prov, deck_z = _load_offsets_hull(a, case_dir, hull)
                 vol = GM.hydrostatics_upright(h, 0.0)["volume_m3"]
                 wl_z = 0.0                    # 型值表船体：设计水线就在 z=0
 

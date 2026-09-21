@@ -56,6 +56,20 @@ def load_offsets_json(path):
     return _validate(rows, path), source
 
 
+def load_offsets_payload(path):
+    """读 plimsoll-offsets-1 案例（stations + 自带 deck_z_m 与来源）。
+
+    通用性契约：任何船的型线都是这样一份 JSON；CLI 不关心它从哪来。
+    返回 (table, source, deck_z_m)；deck_z_m 缺省 None（调用方须另有来源）。
+    """
+    with open(path, encoding="utf-8") as f:
+        payload = json.load(f)
+    rows = payload["stations"] if isinstance(payload, dict) else payload
+    source = payload.get("source", payload.get("sources", "")) if isinstance(payload, dict) else ""
+    deck_z = payload.get("deck_z_m") if isinstance(payload, dict) else None
+    return _validate(rows, path), source, deck_z
+
+
 def find_offsets(default_dir, filename="hull_offsets.json"):
     """按约定找型线文件；找不到返回 None（此时调用方应回落到生成脚本的内建表）。"""
     p = os.path.join(default_dir, filename)

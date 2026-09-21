@@ -6,6 +6,22 @@
 配对游戏：**《敌前转向》（Gefahrwend）**。
 命名约定：**平台用历史意象，模块用方法命名** —— `plimsoll.hydrostatics` / `.bonjean` / `.stability` / `.damage`。
 
+## 通用求解器（不是 Queen Mary 专用机）
+
+**Plimsoll 能解任何船、任何设定**；Queen Mary 只是随包的一个案例。SPEC §2.7 通用性契约：
+
+- 核心模块**零船只常量、零仓库路径** —— `tests/test_generic_ship.py` 源码扫描把守（变异验证过）；
+- 每艘船 = 一组案例 JSON（`plimsoll-ship-1` / `-weights-1` / `-armour-1` / `-guns-1`），
+  型线用 `plimsoll-offsets-1` JSON 随案例携带（`hull.offsets_path` 或 CLI `--offsets`）；
+- 通用 CLI 用法（任何船）：
+  ```bash
+  python cli.py <你的船>.json              # L0 表
+  python cli.py <你的船>.json --gz         # + GZ（需案例声明 offsets_path 或 --offsets）
+  python cli.py <你的船>.json --gz --offsets 船型线.json --deck-z 8.2
+  ```
+- 通用性活证据：`cases/generic_test_steamer_1910.json`（90 m 货船，解析锚定全链路）；
+- `tools/gen_*.py` 是本项目数据的适配器，不属于核心 —— 给别的船配数据时照抄其结构即可。
+
 ## 已完成
 
 ### L0 · 参数化静水力（`hydrostatics.py`）

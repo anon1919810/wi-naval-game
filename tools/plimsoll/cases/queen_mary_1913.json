@@ -19,7 +19,9 @@
     "kg_m": 8.6,
     "kg_is_estimate": true,
     "roll_gyration_coeff": 0.38,
+    "offsets_path": "queen_mary_1913_offsets.json",
     "sources": {
+      "offsets_path": "本案例自带 queen_mary_1913_offsets.json（tools/gen_qm_offsets.py 从 queen_mary_v4.py 物化，形状 estimate）；通用性改造后 CLI 不再扫描仓库路径",
       "lwl_m": "worldwar1.co.uk 明写「Length 698 feet waterline, 703 feet 6 inches overall」→ 698 ft = 212.75 m。六源核对：维基 700 ft 1 in = 213.4、Navypedia 214.4(总长)、MaritimeQuest 700 ft、ThoughtCo/快懂 703 ft 6 in = 214.4；Tyne 的 675 ft = 205.7 为孤例，已弃用。另核：本模型全长 213.4 m，与 212.75 差 0.3%",
       "loa_m": "Navypedia 214.4 m；快懂百科 703.5 ft = 214.4 m（两源一致）",
       "beam_m": "Navypedia 27.1 m；MaritimeQuest 88'9\" = 27.05 m（两源一致）",

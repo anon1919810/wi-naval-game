@@ -26,8 +26,18 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **182 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （test_weights.py 15 = L2 v0；test_armour.py 20 = Armour 页 v0；test_guns.py 18 = Guns 页 v0）
+- 一键回归 **193 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （test_weights 15 = L2；test_armour 20 = Armour 页；test_guns 18 = Guns 页；
+  test_generic_ship 11 = **通用性契约**）
+
+### 通用性契约（2026-09-22 用户指令，SPEC §2.7）
+
+**Plimsoll 是通用求解器，能解任何船、任何设定；Queen Mary 只是案例，不是前提。**
+本次落实：核心源码扫描护栏（船只字面量即红，变异验证过）；QM 型线物化为
+`cases/queen_mary_1913_offsets.json`（CLI 不再扫描仓库路径/解析生成脚本）；
+新增非 QM 解析靶船 `cases/generic_test_steamer_1910.json` 全链路测试。
+**遗留**：`offsets.py` 的 `DECK_Z_DEFAULT=5.10` 仍是生成脚本带来的默认甲板高
+（CLI 已不会静默使用它，但核心签名还留着）——下次动 offsets 接口时改为必填。
 - 跑主案例：`"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json --gz -o <out.json>`
 
 ### 下一步

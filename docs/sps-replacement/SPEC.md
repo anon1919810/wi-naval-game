@@ -52,6 +52,15 @@
 4. **每个输出字段可溯源**：结果 JSON 中每一项附 `formula` / `source` / `estimate` 标记。
 5. **确定性**：同输入必得同输出；用固定种子做抽样（如破损稳性场景）。
 6. **可回归**：任何公式改动都要能通过靶船对照表（见 §7）。
+7. **通用性契约（2026-09-22 用户指令）**：**Plimsoll 是通用求解器，能解任何船、任何设定；
+   Queen Mary 只是案例，不是前提。**
+   - 核心模块（hydrostatics/geometric/geometry/offsets/weights/armour/guns/freesurface/damage/cli）
+     不得出现任何具体船只的字面常量或仓库路径 —— 由 `test_generic_ship.py` 的源码扫描把守；
+   - 每艘船的全部专属数据都在自己的案例 JSON（含型线 `offsets_path`）里；
+     型线是 `plimsoll-offsets-1` JSON，CLI 只认案例声明或 `--offsets`，不扫描仓库、不回落生成脚本；
+   - per-ship 生成器（`tools/gen_*.py`）是**数据适配器**，不属于核心，允许读项目模型文件；
+   - 通用性必须有活证据：`cases/generic_test_steamer_1910.json`（非 QM 的解析船）
+     全链路测试通过 —— 至少保留一艘非史实/非本项目的靶船。
 
 ---
 
