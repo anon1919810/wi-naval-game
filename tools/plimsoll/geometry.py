@@ -118,50 +118,65 @@ class StationedHull:
             a, ay, az = -a, -ay, -az
         return a, ay, az
 
-    def integrate(self, phi_rad, d, waterline_offset=None):
-        """沿 x 积分，返回该浮态下的体积与浮心。
+    def integrate(self, phi_rad, d, trim_rad=0.0):
+        """沿 x 积分，返回该浮态下的体积、浮心、浮心纵向位置与水线面面积。
 
-        waterline_offset: 可选。水线截距 d 通常是「随 x 变化」的（纵倾），
-        这里先用常量 d（无纵倾）。纵倾留待后续。
-        返回 dict：volume, yb, zb, awp（水线面面积，按倾斜平面换算）
+        浮态由**一张水线平面**确定，在船体坐标里写成
+            z = x·tanθ + y·tanφ + d
+        其中 φ = 横倾（绕 x 轴，右舷下沉为正）、θ = 纵倾。
+
+        **θ 的符号约定：θ > 0 = 艏倾（bow down）** ——
+        水线在船体坐标里朝舰艏（+x）方向抬高，故逐站截距
+            d(x) = d + x·tanθ
+        艏部截距更大、浸没更深。
+
+        关键点：固定 x 时水线在剖面内仍是**一条直线** `z = y·tanφ + d(x)`，
+        与纯横倾只有截距不同 —— 所以倾斜用**同一套裁剪逻辑**，
+        不需要第二种几何算法。这是把纵倾做成一个参数而不是新函数的原因。
+
+        返回 `xlcb` = 浮心纵向位置（相对船体坐标原点）。纵倾平衡要用它。
         """
         tan_phi = math.tan(phi_rad)
-        cos_phi = math.cos(phi_rad)
+        tan_trim = math.tan(trim_rad)
+        # 水线面是斜平面：面积元 dx·dy 要乘 sqrt(1 + tan²φ + tan²θ)
+        area_factor = math.sqrt(1.0 + tan_phi * tan_phi + tan_trim * tan_trim)
         xs = [x for x, _ in self.stations]
-        areas, ays, azs, chords = [], [], [], []
+        areas, ays, azs, mxs, chords = [], [], [], [], []
         for x, poly in self.stations:
-            a, ay, az = self.section_under_line(poly, tan_phi, d)
+            d_x = d + x * tan_trim
+            a, ay, az = self.section_under_line(poly, tan_phi, d_x)
             areas.append(a)
             ays.append(ay)
             azs.append(az)
-            # 水线在剖面内的 y 跨度（用于水线面面积）
-            w = _line_chord_halfwidth(poly, tan_phi, d)
-            if w is None:
-                chords.append(0.0)
-            else:
-                chords.append(2.0 * w)
+            mxs.append(x * a)
+            w = _line_chord_halfwidth(poly, tan_phi, d_x)
+            chords.append(0.0 if w is None else 2.0 * w)
         vol = _trapz(areas, xs)
-        my = _trapz(ays, xs)
-        mz = _trapz(azs, xs)
-        awp = _trapz(chords, xs) / cos_phi if cos_phi > 1e-9 else 0.0
+        awp = _trapz(chords, xs) * area_factor
         if vol <= 1e-12:
-            return {"volume": 0.0, "yb": 0.0, "zb": 0.0, "awp": 0.0}
-        return {"volume": vol, "yb": my / vol, "zb": mz / vol, "awp": awp}
+            return {"volume": 0.0, "yb": 0.0, "zb": 0.0, "xlcb": 0.0, "awp": awp}
+        return {"volume": vol,
+                "yb": _trapz(ays, xs) / vol,
+                "zb": _trapz(azs, xs) / vol,
+                "xlcb": _trapz(mxs, xs) / vol,
+                "awp": awp}
 
-    def solve_waterline(self, phi_rad, target_volume, lo=None, hi=None, tol=1e-9):
+    def solve_waterline(self, phi_rad, target_volume, lo=None, hi=None, tol=1e-9,
+                        trim_rad=0.0):
         """解出使浸没体积等于 target_volume 的水线截距 d（二分法）。
 
         这是 GZ 曲线的核心步骤：**等体积倾斜**要求每个横倾角下都重新
         找到平衡水线，船才会既不浮起也不下沉。
+        `trim_rad` 传入时按给定纵倾求解（纵倾平衡本身是阶段 2.2 的事）。
         """
         if lo is None or hi is None:
             zmin = min(z for _, poly in self.stations for _, z in poly)
             zmax = max(z for _, poly in self.stations for _, z in poly)
-            lo, hi = zmin - abs(zmin) - 1.0, zmax * 2.0 + 1.0
-        # 保证体积单调（d 越大浸没越多）
+            span = max(1.0, zmax - zmin)
+            lo, hi = zmin - span, zmax + span
         for _ in range(200):
             mid = 0.5 * (lo + hi)
-            v = self.integrate(phi_rad, mid)["volume"]
+            v = self.integrate(phi_rad, mid, trim_rad)["volume"]
             if v < target_volume:
                 lo = mid
             else:

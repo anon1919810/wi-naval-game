@@ -232,6 +232,91 @@ class TestDatumShift(unittest.TestCase):
             M.hydrostatics_upright(self.hull, self.SHIFT - 1.0)                # 低于龙骨
 
 
+class TestTrim(unittest.TestCase):
+    """纵倾（阶段 2.1）：水线在 x–z 平面倾斜后，必须与解析解一致。
+
+    取**直壁方箱**（沿 x 也是矩形），此时浸没剖面面积沿 x **线性**变化，
+    所有量都有闭式解。设船长 L、船宽 B、龙骨 z=k、x=0 处水线高 d，
+    吃水 T = d − k，纵倾角 θ（**θ > 0 = 艏倾**）：
+
+        体积      ∇  = B·L·T                       （tanθ 项在对称区间上积掉）
+        浮心纵向  x_B = tanθ · L² / (12·T)          （艏倾 → 浮心向艏）
+        浮心垂向  KB = T/2 + tan²θ · L² / (24·T)    （纵倾对 KB 是二阶小量）
+        水线面    Awp = L·B·√(1 + tan²θ)            （斜平面面积要乘这个因子）
+    """
+
+    L, B, T = 100.0, 10.0, 5.0
+    KEEL, BOX_H = -5.0, 30.0          # 箱高 30 m：两端都不出水、不露底
+    THETA_DEG = 2.0
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hull = make_box(cls.L, cls.B, cls.T, cls.BOX_H, n=241, bottom_z=cls.KEEL)
+        cls.d0 = cls.KEEL + cls.T     # x=0 处水线高 → 吃水恰为 T
+        cls.theta = math.radians(cls.THETA_DEG)
+        cls.t = math.tan(cls.theta)
+        cls.vol = cls.L * cls.B * cls.T
+
+    def _untrimmed(self):
+        return self.hull.integrate(0.0, self.d0, 0.0)
+
+    def test_trim_zero_matches_untrimmed(self):
+        """θ=0 必须**逐位**退化为原来的无纵倾结果 —— 新参数不能改变旧行为。"""
+        a = self.hull.integrate(0.0, self.d0, 0.0)
+        b = self.hull.integrate(0.0, self.d0)
+        for k in ("volume", "yb", "zb", "xlcb", "awp"):
+            self.assertAlmostEqual(a[k], b[k], places=12, msg="键 %s 不一致" % k)
+
+    def test_volume_matches_closed_form(self):
+        """体积必须等于 L·B·T。
+
+        ⚠️ **但体积测不出纵倾有没有实现** —— 实测：把纵倾去掉，体积仍是 5000.0000。
+        原因是 tanθ 项在对称区间 [−L/2, L/2] 上积掉了，体积对纵倾**一阶不敏感**。
+        真正守住纵倾的是下面三条（LCB / KB / Awp），它们的差异分别是
+        5.82 / 0.10 / 0.61 —— 一去掉纵倾立刻见红。
+        这是"最直觉的断言往往抓不住 bug"的又一例，故在此写明。
+        """
+        got = self.hull.integrate(0.0, self.d0, self.theta)["volume"]
+        self.assertAlmostEqual(got, self.vol, places=4)
+
+    def test_lcb_shifts_toward_bow(self):
+        r = self.hull.integrate(0.0, self.d0, self.theta)
+        self.assertGreater(r["xlcb"], 0.0, "艏倾时浮心应向舰艏移动")
+        expect = self.t * self.L ** 2 / (12.0 * self.T)
+        # ∫x·A dx 的被积函数是**二次**的（A 沿 x 线性 ×x），梯形积分对二次不精确，
+        # 故残留约 1e-4 相对量级的离散误差（体积与 KB 则是精确的）。
+        # 这里断言相对误差，比写死小数位数更能说明"差在哪、为什么可以接受"。
+        self.assertLess(abs(r["xlcb"] - expect) / expect, 1e-3,
+                        "LCB 相对误差 %.2e 超出梯形积分的离散量级" % (abs(r["xlcb"] - expect) / expect))
+
+    def test_kb_second_order_in_trim(self):
+        kb = self.hull.integrate(0.0, self.d0, self.theta)["zb"] - self.KEEL
+        expect = self.T / 2 + self.t ** 2 * self.L ** 2 / (24.0 * self.T)
+        self.assertAlmostEqual(kb, expect, places=4)
+        # 一阶项为零：KB 对纵倾是二阶敏感，这是纵倾不显著改变 KB 的定量依据
+        self.assertLess(abs(kb - self.T / 2), 0.2)
+
+    def test_awp_includes_slope_factor(self):
+        awp = self.hull.integrate(0.0, self.d0, self.theta)["awp"]
+        self.assertAlmostEqual(awp, self.L * self.B * math.sqrt(1 + self.t ** 2), places=3)
+        # 必须比未纵倾时大（斜平面）
+        self.assertGreater(awp, self._untrimmed()["awp"])
+        self.assertAlmostEqual(self._untrimmed()["awp"], self.L * self.B, places=4)
+
+    def test_lcb_sign_reverses_with_trim_sign(self):
+        a = self.hull.integrate(0.0, self.d0, self.theta)["xlcb"]
+        b = self.hull.integrate(0.0, self.d0, -self.theta)["xlcb"]
+        self.assertAlmostEqual(a, -b, places=6)
+
+    def test_solve_waterline_respects_trim(self):
+        """等体积倾斜下给定纵倾求水线：体积必须回到目标值。"""
+        d = self.hull.solve_waterline(0.0, self.vol, tol=1e-12, trim_rad=self.theta)
+        v = self.hull.integrate(0.0, d, self.theta)["volume"]
+        self.assertAlmostEqual(v, self.vol, places=6)
+        # 纵倾对称：艏倾时 x=0 处水线应仍在同一高度
+        self.assertAlmostEqual(d, self.d0, places=6)
+
+
 class TestConvergence(unittest.TestCase):
     """离散精度：站位数与剖面边数增加时，结果必须收敛。"""
 
