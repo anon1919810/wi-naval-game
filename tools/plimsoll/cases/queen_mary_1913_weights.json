@@ -1,0 +1,155 @@
+{
+  "schema": "plimsoll-weights-1",
+  "ship": "HMS Queen Mary (1913)",
+  "datum": "keel",
+  "_note": "L2 重量分组 v0：目前只有装甲组是几何推得的实数据（全 estimate）；其余组为空，等数据采集。生成器 tools/plimsoll/tools/gen_weights_case.py。",
+  "groups": [
+    {
+      "id": "armour",
+      "label": "装甲",
+      "items": [
+        {
+          "id": "Armour_Belt_229mm",
+          "mass_t": 1127.127,
+          "kg_m": 10.0,
+          "source": "thickness: wiki 9in KC main belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 627.0,
+          "_thickness_mm": 229.0
+        },
+        {
+          "id": "Armour_Belt_Taper_102mm_Aft",
+          "mass_t": 123.308,
+          "kg_m": 9.9,
+          "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 154.0,
+          "_thickness_mm": 102.0
+        },
+        {
+          "id": "Armour_Belt_Taper_102mm_Fwd",
+          "mass_t": 258.946,
+          "kg_m": 9.9,
+          "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 323.4,
+          "_thickness_mm": 102.0
+        },
+        {
+          "id": "Armour_Bulkhead_Aft",
+          "mass_t": 257.516,
+          "kg_m": 7.629,
+          "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 321.61,
+          "_thickness_mm": 102.0
+        },
+        {
+          "id": "Armour_Bulkhead_Fwd",
+          "mass_t": 298.856,
+          "kg_m": 7.52,
+          "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 373.24,
+          "_thickness_mm": 102.0
+        },
+        {
+          "id": "Armour_Deck_25mm",
+          "mass_t": 784.192,
+          "kg_m": 5.312,
+          "source": "thickness: wiki 1in lower deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 3995.88,
+          "_thickness_mm": 25.0
+        },
+        {
+          "id": "Armour_Deck_64mm",
+          "mass_t": 2669.819,
+          "kg_m": 8.332,
+          "source": "thickness: wiki 2.5in deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 5314.13,
+          "_thickness_mm": 64.0
+        },
+        {
+          "id": "Armour_Upper_Belt_152mm",
+          "mass_t": 598.509,
+          "kg_m": 12.7,
+          "source": "thickness: wiki 6in upper belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 501.6,
+          "_thickness_mm": 152.0
+        },
+        {
+          "id": "Barbette_A",
+          "mass_t": 71.877,
+          "kg_m": 17.724,
+          "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 39.98,
+          "_thickness_mm": 229.0
+        },
+        {
+          "id": "Barbette_B",
+          "mass_t": 71.877,
+          "kg_m": 21.41,
+          "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 39.98,
+          "_thickness_mm": 229.0
+        },
+        {
+          "id": "Barbette_Q",
+          "mass_t": 71.877,
+          "kg_m": 17.38,
+          "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 39.98,
+          "_thickness_mm": 229.0
+        },
+        {
+          "id": "Barbette_X",
+          "mass_t": 85.971,
+          "kg_m": 15.991,
+          "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 47.82,
+          "_thickness_mm": 229.0
+        },
+        {
+          "id": "Conning_Tower",
+          "mass_t": 400.826,
+          "kg_m": 21.299,
+          "source": "thickness: wiki 10in conning tower | extent: object_manifest bounds (role=conning_tower, face=all4side x1, curve=1.00) | rho=7850 kg/m3",
+          "estimate": true,
+          "_area_m2": 201.03,
+          "_thickness_mm": 254.0
+        }
+      ]
+    },
+    {
+      "id": "armament",
+      "label": "武备",
+      "items": [],
+      "_note": "缺：炮塔/炮架重量、副炮弹重、弹药容量。弹重 1400 lb 已在 penetration_main.json"
+    },
+    {
+      "id": "machinery",
+      "label": "动力",
+      "items": [],
+      "_note": "全缺：功率/锅炉/燃料无任何数据，需外部采集"
+    },
+    {
+      "id": "hull_outfit",
+      "label": "船体与舾装",
+      "items": [],
+      "_note": "缺：钢料重量（可由型值表湿面积推，未做）"
+    }
+  ],
+  "reference": {
+    "displacement_normal_t": 26770,
+    "displacement_source": "Navypedia / Tyne Built Ships",
+    "kg_estimate_m": 8.6,
+    "kg_source": "estimate（L0 案例同款；待本文件合成后替换）"
+  }
+}

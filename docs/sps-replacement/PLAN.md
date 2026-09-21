@@ -18,19 +18,16 @@
 ### 按顺序读这四份，不用问任何人
 
 1. **本文件** —— 阶段清单与勾选框。**下一个未勾选项就是下一步。**
-2. `tools/plimsoll/README.md` —— 当前状态、已完成的 L0/L1、验证方式、诚实限界清单
-3. `tools/plimsoll/cases/queen_mary_1913.json` —— 主案例，每个数值都带来源与口径说明
-4. `docs/sps-replacement/SPEC.md` —— 架构原则与最终目标
+2. `docs/sps-replacement/COVERAGE.md` —— **SPS 七页覆盖度检查表**（对标到哪了，一查便知）
+3. `tools/plimsoll/README.md` —— 当前状态、已完成的 L0/L1、验证方式、诚实限界清单
+4. `tools/plimsoll/cases/queen_mary_1913.json` —— 主案例，每个数值都带来源与口径说明
+5. `docs/sps-replacement/SPEC.md` —— 架构原则与最终目标
 
-### 基线（2026-09-21，可直接信赖）
+### 基线（2026-09-21 晚，可直接信赖）
 
-- 最新提交见 `git log -1`（阶段 1.1 + 5.0 已完成），工作区干净
-- 三套测试 **79 项全绿**：
-  ```
-  "$PY" tools/plimsoll/tests/test_hydrostatics.py    # 28
-  "$PY" tools/plimsoll/tests/test_geometric.py       # 35
-  "$PY" tools/plimsoll/tests/test_offsets_import.py  # 16
-  ```
+- 最新提交见 `git log -1`，工作区干净
+- 一键回归 **144 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （其中 test_weights.py 15 项 = L2 v0）
 - 跑主案例：`"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json --gz -o <out.json>`
 
 ### 下一步
@@ -193,13 +190,28 @@
 
 ## 阶段 7 · 功能扩展（优先级低于阶段 2–4）
 
+> **2026-09-21 路线修正**：经 SPS 覆盖度核查（见 **COVERAGE.md**），SPS 公共七页只覆盖 ~13%，
+> 而 L2（重量分组）是 Guns/Armour/Weapons 三页的共同前置 —— 故 **7.2 升为当前主线**，
+> **7.5 网站搁置**（用户指令），直到覆盖度六页至少到 ◐。
+
 - [ ] **7.1 L4 穿深校准**：装甲验收标准数据已录入 `data/british_armour_standards_1908_1912.json`，
   至今一条未用。拟用 de Marre / Thompson F 反解系数复现"刚好穿透"边界，
   **必须在未参与拟合的表项上回测**。
-- [ ] **7.2 L2 重量分组与重心**：现在 KG 只能手填 estimate；没有它 GM 永远是"猜的 KG"。
+- [~] **7.2 L2 重量分组与重心**（v0 已完成 2026-09-21）：
+  - 合成引擎 `weights.py`：质量矩加权 KG（**基准强制 `datum: keel`**——坐标基准教训的第三道闸）、
+    逐组小计、trace 全套、覆盖率对照。
+  - **关键行为：合成质量不足排水量 95% 时拒绝算 GM** —— 用残缺 KG 算出漂亮 GM 是本项目最该防的错。
+  - 装甲组实数据：厚度带 wiki 来源（`queen_mary_v3/armour_zones.json`）+ 面积由模型包围盒
+    按 role 选面推得（`tools/gen_weights_case.py` 可复现，曲率系数 1.10，炮管不计装甲）。
+    **合计 6,820.7 t = 排水量 25.5%，正落史实带（狮级 22–28%）**；装甲合成 KG ≈ 9.86 m。
+  - 测试 15 项（含变异验证：加权丢失 4 项红、删 GM 闸 1 项红）。
+  - **待做**：武备组（弹重 1400 lb 已有，炮塔/炮架重量缺）、动力组（全缺，需外部采集）、
+    船体舾装组（可由型值表湿面积推）。
 - [ ] **7.3 阻力与功率**：Holtrop-Mennen / Taylor。
 - [ ] **7.4 耐波性估算**：切片理论（最低优先级）。
-- [ ] **7.5 Web 界面**：等核心稳定后。
+- [-] **7.5 Web 界面**：**搁置（2026-09-21 用户指令）**——SPS 覆盖度仅 ~13%，
+  网站会把"只有 Hull 一页"固化成看起来完整的样子。`feature/plimsoll-web` 草稿保留不删；
+  另见复查报告（根目录 `复查_Plimsoll上网站前_2026-09-21.md`）的三条 P0，复工前必修。
 
 ## 搁置项
 
