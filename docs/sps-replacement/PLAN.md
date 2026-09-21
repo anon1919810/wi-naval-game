@@ -26,9 +26,9 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **209 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+- 一键回归 **225 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
   （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16 = Hull 页补齐；
-  test_generic_ship 11 = **通用性契约**）
+  test_freeboard 16 = Freeboard 页；test_generic_ship 11 = **通用性契约**）
 
 - [x] **7.2d Hull 页补齐（湿面积 / 长宽比 / 自然航速）**（v0 已完成 2026-09-22）：
   - `hull.py`：湿面积两法（Mumford 经验式 L0 + 逐站湿周长积分 L1，**积分必须扣除裁剪补出的
@@ -39,6 +39,15 @@
     自然航速 28.8 kn（SPS 口径）vs Froude 35.43 kn。
   - 测试 16 项（两轮变异验证：湿周长忘扣水线边 4 项红、经验式丢船长 3 项红）；
     `hull.py` 已纳入通用性护栏的核心文件清单。
+- [x] **7.2e Freeboard 页**（v0 已完成 2026-09-22）：
+  - `freeboard.py`：加权平均干舷 `f̄ = Σ(L段·f段)/ΣL段`；逐段长度 %Lwl→m；
+    **每段输出甲板浸没角 `atan(f/(B/2))`**（与 cli 的 GZ 告警同一判据，<15° 就警告）；
+    `from_depth(D, T)` 给型深口径的干舷。
+  - **QM 无外部文献源**（Navypedia/维基都不列型深/干舷）→ 全部由模型包围盒推得，
+    **全标 estimate**：型深 15.0 m（Hull z 跨度）→ 主甲板干舷 6.5 m；
+    Forecastle 58.4%/8.90 m/33.3°、Quarterdeck 41.6%/7.12 m/27.7°；平均干舷 8.16 m。
+  - 测试 16 项（两轮变异验证：加权丢长度 2 项红、浸没角半宽写错 1 项红→已加精确锚）；
+    `freeboard.py` 已纳入通用性护栏核心清单。
 
 ### 通用性契约（2026-09-22 用户指令，SPEC §2.7）
 

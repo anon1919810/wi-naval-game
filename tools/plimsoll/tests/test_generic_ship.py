@@ -131,7 +131,7 @@ class TestGeneralityContract(unittest.TestCase):
 
     CORE_FILES = ("hydrostatics.py", "geometric.py", "geometry.py", "offsets.py",
                   "weights.py", "armour.py", "guns.py", "freesurface.py",
-                  "damage.py", "hull.py", "cli.py")
+                  "damage.py", "hull.py", "freeboard.py", "cli.py")
 
     FORBIDDEN = ("26770", "31650", "76.102", "queen_mary_v4.py\",", "212.8")
 

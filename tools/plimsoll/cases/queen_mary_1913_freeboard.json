@@ -1,0 +1,27 @@
+{
+  "schema": "plimsoll-freeboard-1",
+  "ship": "HMS Queen Mary (1913)",
+  "lwl_m": 212.8,
+  "beam_m": 27.1,
+  "_note": "Freeboard 页 v0：**型深/干舷无外部文献源**（Navypedia/维基均不列），全部由模型包围盒推得 → 全 estimate。型深 = Hull z[-9.90, 5.10] = 15.00 m；正常吃水 8.5 → 水线 z=-1.40，满载 9.9 → z=0.00。模型舷弧为平（段内艏艉同值），真实舷弧未考证；甲板分段只有 Forecastle/Quarterdeck 两段（模型就这两段），Fore/Aft 细分段与 sheer、甲板型、船首/船艉型、Ram length、Stern overhang 均为缺口。",
+  "segments": [
+    {
+      "id": "forecastle",
+      "kind": "forecastle",
+      "length_pct_lwl": 58.43,
+      "fb_fore_m": 8.9,
+      "fb_aft_m": 8.9,
+      "source": "depth: 模型 Forecastle 对象包围盒 z[5.05, 7.50]，取上表面 7.50 为甲板面（下表面 5.05 与 Hull 甲板 5.10 连续，模型未区分板厚/舷墙）；waterline: Hull z_min=-9.90（龙骨）+ 正常吃水 8.5 → z=-1.40；length: 同对象 y 跨度 ÷ 船体 y 总跨度 213.4",
+      "estimate": true
+    },
+    {
+      "id": "quarterdeck",
+      "kind": "quarterdeck",
+      "length_pct_lwl": 41.57,
+      "fb_fore_m": 7.12,
+      "fb_aft_m": 7.12,
+      "source": "depth: 模型 Quarterdeck 对象包围盒 z[5.05, 5.72]，取上表面 5.72 为甲板面（下表面 5.05 与 Hull 甲板 5.10 连续，模型未区分板厚/舷墙）；waterline: Hull z_min=-9.90（龙骨）+ 正常吃水 8.5 → z=-1.40；length: 同对象 y 跨度 ÷ 船体 y 总跨度 213.4",
+      "estimate": true
+    }
+  ]
+}

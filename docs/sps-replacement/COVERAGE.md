@@ -15,7 +15,7 @@
 | SPS 页签 | 图上字段数 | 状态 | Plimsoll 对应物 | 缺口性质 |
 |---|---:|:---:|---|---|
 | **Hull** | 33 | **◐** | `hydrostatics.py`(L0) + `offsets/geometry/geometric`(L1) | 模型有；少湿面积/自然航速等派生显示 |
-| **Freeboard** | 26 | **✖→○** | 无（仅 CLI 有甲板浸没角告警） | 模型缺；甲板分段数据缺 |
+| **Freeboard** | 26 | **◐**（模块已建） | `freeboard.py` v0（加权平均干舷 + 浸没角） | **无外部文献源**：型深/干舷全由模型包围盒推得（estimate）；sheer/细分段缺 |
 | **Guns** | 23 | **◐**（模块已建） | `guns.py` v0（Weights 表 + 齐射 + Magazine） | 文献值已采集（NavWeaps 等）；**Armour 行缺**（炮塔装甲）；副炮装药缺 |
 | **Weapons** | 27 | **○** | 无 | 数据缺（鱼雷/水雷/深弹） |
 | **Armour** | 28 | **◐**（模块已建） | `armour.py` v0（重量表 + SPS 视图） | 厚度带来源已有；**炮塔装甲未计入**（manifest 无选面 role）；面积全 estimate |
@@ -53,11 +53,21 @@
 | **Length:Beam** | 输出 | **✅** | `hull.form_ratios()`，定义式（QM 7.852） |
 | **Natural Speed** | 输出 | **◐→✅** | `hull.natural_speed()`：**两口径并列** —— Froude 兴波速度（有源，35.43 kn）+ SPS 惯例 1.09·√L_ft（**estimate，常数无公开出处**，28.8 kn），并给出 Fn=0.324 |
 
-### 2.2 Freeboard（26 项）——未动工
+### 2.2 Freeboard（26 项）——模块已建（v0），但**数据是本页最大的缺口**
 
 甲板分段（Forecastle/Fore/Aft/Quarter deck 的 %Lwl）、艏艉干舷（各 4 行）、
 甲板型（Flush/Mid break）、船首型/船艉型、Ram Length、Stern overhang、Depth Unlocked、
 Sheer 示意图、**Average freeboard（输出）**。
+
+**【2026-09-22 已建】`freeboard.py` v0 + `tools/gen_freeboard_case.py`**：
+- 加权平均干舷 `f̄ = Σ(L段·f段)/ΣL段`（段内艏艉线性取均值）+ 逐段长度（%Lwl → m）。
+- **干舷↔稳性的桥**：每段输出 `deck_immersion_deg = atan(f段/(B/2))` —— 与 cli.py 的
+  GZ 甲板浸没告警同一判据；低于 15° 会警告「GZ 在该角以上不可信」。
+- QM 数据**全部由模型推得（无外部文献源）**：型深 = Hull z[−9.90, 5.10] = 15.0 m →
+  主甲板干舷 6.5 m（正常吃水）；Forecastle 段 58.4% / 8.90 m / 浸没角 33.3°，
+  Quarterdeck 段 41.6% / 7.12 m / 27.7°；加权平均干舷 8.16 m。**全标 estimate**。
+- **仍缺**：Fore/Aft 细分段、真实舷弧（sheer，模型是平的）、甲板型、船首/船艉型、
+  Ram length、Stern overhang —— 均为纯设计输入，本模块不做（同 Hull 页滑条原则）。
 
 → **全未实现。** 可从型值表+甲板高推出 Average freeboard 与浸没角（CLI 已有 20.6° 告警雏形）。
 **拦路石**：甲板分段比例是纯设计输入，本舰无来源 → 标 estimate 或先不做。
