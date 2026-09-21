@@ -38,6 +38,7 @@ PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
 "$PY" tools/plimsoll/tests/test_offsets_import.py      # 型值表：16 项
 "$PY" tools/plimsoll/tests/test_trim_equilibrium.py    # 纵倾平衡 2.2
 "$PY" tools/plimsoll/tests/test_freesurface.py         # 阶段 3 FSC
+"$PY" tools/plimsoll/tests/test_flood_combination.py   # 阶段 4.1 进水组合
 ```
 
 ## Queen Mary 案例结果
@@ -98,7 +99,8 @@ GZ 曲线（KG = 8.6 m 为 estimate，甲板按 1.6T 假定）：
 | 纵倾平衡 | **已实现（2.2）**：`solve_trim_equilibrium` 给定 V 与 LCB(=LCG) 解 `(d, θ)`；`target_lcb` 必须与 `xlcb` 同坐标原点 |
 | 大纵倾 LWL 耦合 | **未做**（阶段 2.3）：大 θ 下水线长变化对排水量的影响尚未专项交代 |
 | 自由液面 FSC | **已实现（3.1/3.2）**：`freesurface.py` + `gz_curve(free_surface_tanks=)`；舱室须显式 L×b，游戏侧 compartment JSON 无此字段 |
-| 破损稳性 | **未做**（阶段 4）；依赖 FSC + 进水组合（下一步 4.1） |
+| 进水组合 | **已实现（4.1）**：`damage.flood_combination` — 增重/合成 KG/FSC(分母 Δ')；矩形舱须显式几何 |
+| 破损稳性 | **部分**：4.1 完成；**4.2–4.4 未做**（新浮态、剩余 GZ、场景回归） |
 | 水线长口径 | **已解决**：LWL = 212.8 m（698 ft，worldwar1.co.uk 明写 "698 feet waterline"），LOA = 214.4 m。契约的 213.4 介于两者，最可能是维基「Length」字段口径。模型全长 213.4 与 LWL 212.8 差 0.3% |
 | 吨位单位 | 史料常混用长吨/公吨，核心内部按公吨 |
 
