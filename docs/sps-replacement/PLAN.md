@@ -26,8 +26,8 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **144 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （其中 test_weights.py 15 项 = L2 v0）
+- 一键回归 **164 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （其中 test_weights.py 15 项 = L2 v0；test_armour.py 20 项 = Armour 页 v0）
 - 跑主案例：`"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json --gz -o <out.json>`
 
 ### 下一步
@@ -207,6 +207,16 @@
   - 测试 15 项（含变异验证：加权丢失 4 项红、删 GM 闸 1 项红）。
   - **待做**：武备组（弹重 1400 lb 已有，炮塔/炮架重量缺）、动力组（全缺，需外部采集）、
     船体舾装组（可由型值表湿面积推）。
+- [x] **7.2b Armour 页（SPS）**（v0 已完成 2026-09-21）：
+  - `armour.py`：逐区 `W = 面积 × 厚 × ρ`（ρ=7850 带出处），按 SPS 行结构分组
+    （Main/Ends/Upper/Bulge/Torpedo bulkhead + 甲板/炮座/司令塔/其他），`sps_table()` 出表视图。
+  - 与 SPS 的差异（诚实记录）：面积优先用模型包围盒逐对象选面累加（比 SPS 的 L×H 口径保真），
+    Length/Height 只作展示；行只给 L×H 时退化为 SPS 口径。
+  - 生成器 `tools/gen_armour_case.py` **直接 import gen_weights_case 的选面规则**（同源同数），
+    一致性由测试把守（与 L2 装甲组差 < 0.5 t）。
+  - 诚实缺口：**炮塔装甲未计入**（turret_face 在 manifest 里无选面 role，L2 同）；
+    Bulge 行置 None + 警告不冒充 0；Armour deck 按厚度层两行，按位置分段待补。
+  - 测试 20 项（含两轮变异验证：丢密度 4 项红、Bulge 冒充 0 5 项红）。
 - [ ] **7.3 阻力与功率**：Holtrop-Mennen / Taylor。
 - [ ] **7.4 耐波性估算**：切片理论（最低优先级）。
 - [-] **7.5 Web 界面**：**搁置（2026-09-21 用户指令）**——SPS 覆盖度仅 ~13%，

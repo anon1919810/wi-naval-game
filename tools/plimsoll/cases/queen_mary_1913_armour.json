@@ -1,0 +1,89 @@
+{
+  "schema": "plimsoll-armour-1",
+  "ship": "HMS Queen Mary (1913)",
+  "rho_kg_m3": 7850.0,
+  "rho_source": "造船学教科书常量（低碳钢 7850 kg/m3）",
+  "_note": "Armour 页 v0：厚度带 wiki 来源；面积由模型包围盒按 role 选面（全 estimate），与 L2 weights 装甲组同源同规则。Length/Height 为 zone 内 union 包围盒的展示口径（SPS 里是用户输入，此处为推得值）。SPS Bulge 行无对应分区（1913 设计无防雷凸舱）。Armour deck 按厚度层出两行（64/25 mm），按位置分段（Forecastle/Fore&aft/Quarter）为已知缺口。turret_face（9in 炮塔面）在 object_manifest 里无选面 role 对象，炮塔装甲未计入（L2 同），待补炮塔重量数据。",
+  "rows": [
+    {
+      "id": "belt_main",
+      "group": "main",
+      "thickness_mm": 229,
+      "area_m2": 627.0,
+      "length_m": 95.0,
+      "height_m": 3.0,
+      "source": "thickness: wiki 9in KC main belt | extent: object_manifest bounds (n=1 objects, roles=armour_belt, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "upper_belt",
+      "group": "upper",
+      "thickness_mm": 152,
+      "area_m2": 501.6,
+      "length_m": 95.0,
+      "height_m": 2.4,
+      "source": "thickness: wiki 6in upper belt | extent: object_manifest bounds (n=1 objects, roles=armour_belt, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "belt_taper",
+      "group": "ends",
+      "thickness_mm": 102,
+      "area_m2": 477.4,
+      "length_m": 205.5,
+      "height_m": 2.8,
+      "source": "thickness: wiki 4in taper | extent: object_manifest bounds (n=2 objects, roles=armour_belt, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "deck_armour",
+      "group": "armour_deck",
+      "thickness_mm": 64,
+      "area_m2": 5314.13,
+      "length_m": 205.5,
+      "height_m": 0.06,
+      "source": "thickness: wiki 2.5in deck | extent: object_manifest bounds (n=1 objects, roles=armour_deck, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "deck_lower",
+      "group": "armour_deck",
+      "thickness_mm": 25,
+      "area_m2": 3995.88,
+      "length_m": 190.0,
+      "height_m": 0.02,
+      "source": "thickness: wiki 1in lower deck | extent: object_manifest bounds (n=1 objects, roles=armour_deck, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "bulkhead",
+      "group": "torpedo_bulkhead",
+      "thickness_mm": 102,
+      "area_m2": 694.86,
+      "length_m": 114.1,
+      "height_m": 14.96,
+      "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (n=2 objects, roles=armour_bulkhead, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "barbette",
+      "group": "barbette",
+      "thickness_mm": 229,
+      "area_m2": 167.78,
+      "length_m": 137.8,
+      "height_m": 6.54,
+      "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (n=4 objects, roles=barbette, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    },
+    {
+      "id": "conning_tower",
+      "group": "conning_tower",
+      "thickness_mm": 254,
+      "area_m2": 201.03,
+      "length_m": 6.0,
+      "height_m": 8.38,
+      "source": "thickness: wiki 10in conning tower | extent: object_manifest bounds (n=1 objects, roles=conning_tower, face by role, curve=1.10) | rho=7850 kg/m3",
+      "estimate": true
+    }
+  ]
+}
