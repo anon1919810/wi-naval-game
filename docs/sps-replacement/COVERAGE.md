@@ -49,9 +49,9 @@
 | Displacement Normal / Max | 输入 | ◐ | 输入接受且做一致性检查（±5% 告警）；"Max" 口径未进计算 |
 | Normal / Max volume | 输出 | ✅ | L0 `∇=L·B·T·Cb`；L1 逐站积分 |
 | **Waterplane area** | 输出 | ✅ | L0 `Cwp·L·B`=4613.5；L1 积分=4610.4（差 0.07%）|
-| **Wetted surface area** | 输出 | **✖** | 未实现。 型值表可积 girth，**列入待办** |
-| **Length:Beam** | 输出 | **✖** | 未实现（平凡，顺手可补） |
-| **Natural Speed** | 输出 | **✖** | 未实现（`1.09·√L` 系经验式，须带出处再上） |
+| **Wetted surface area** | 输出 | **◐→✅** | `hull.py`：Mumford 经验式（L0）+ 逐站湿周长积分（L1）。QM 两法 6148.7 / 6407.9（差 4.2%） |
+| **Length:Beam** | 输出 | **✅** | `hull.form_ratios()`，定义式（QM 7.852） |
+| **Natural Speed** | 输出 | **◐→✅** | `hull.natural_speed()`：**两口径并列** —— Froude 兴波速度（有源，35.43 kn）+ SPS 惯例 1.09·√L_ft（**estimate，常数无公开出处**，28.8 kn），并给出 Fn=0.324 |
 
 ### 2.2 Freeboard（26 项）——未动工
 

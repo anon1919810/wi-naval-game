@@ -26,9 +26,19 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **193 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （test_weights 15 = L2；test_armour 20 = Armour 页；test_guns 18 = Guns 页；
+- 一键回归 **209 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16 = Hull 页补齐；
   test_generic_ship 11 = **通用性契约**）
+
+- [x] **7.2d Hull 页补齐（湿面积 / 长宽比 / 自然航速）**（v0 已完成 2026-09-22）：
+  - `hull.py`：湿面积两法（Mumford 经验式 L0 + 逐站湿周长积分 L1，**积分必须扣除裁剪补出的
+    水线闭合边**——否则方箱会多出 10×L 的假面积，测试专门守这个坑）；Length:Beam 定义式；
+    自然航速**两口径并列**：Froude 兴波速度（有源）+ SPS 惯例 1.09·√L_ft（**estimate，
+    常数无公开出处，标警告**），附 Fn 便于判断适用性。
+  - QM 交叉验证：湿面积 6148.7（经验式）vs 6407.9（积分）差 4.2%；L:B 7.852；
+    自然航速 28.8 kn（SPS 口径）vs Froude 35.43 kn。
+  - 测试 16 项（两轮变异验证：湿周长忘扣水线边 4 项红、经验式丢船长 3 项红）；
+    `hull.py` 已纳入通用性护栏的核心文件清单。
 
 ### 通用性契约（2026-09-22 用户指令，SPEC §2.7）
 
