@@ -17,7 +17,7 @@
 | **Hull** | 33 | **◐** | `hydrostatics.py`(L0) + `offsets/geometry/geometric`(L1) | 模型有；少湿面积/自然航速等派生显示 |
 | **Freeboard** | 26 | **◐**（模块已建） | `freeboard.py` v0（加权平均干舷 + 浸没角） | **无外部文献源**：型深/干舷全由模型包围盒推得（estimate）；sheer/细分段缺 |
 | **Guns** | 23 | **◐**（模块已建） | `guns.py` v0（Weights 表 + 齐射 + Magazine） | 文献值已采集（NavWeaps 等）；**Armour 行缺**（炮塔装甲）；副炮装药缺 |
-| **Weapons** | 27 | **○** | 无 | 数据缺（鱼雷/水雷/深弹） |
+| **Weapons** | 27 | **◐**（模块已建） | `weapons.py` v0（鱼雷 + 水雷/深弹 + Misc 五分区） | 鱼雷有源；**单雷全重/雷长缺**；水雷深弹与 Misc 五分区无数据 |
 | **Armour** | 28 | **◐**（模块已建） | `armour.py` v0（重量表 + SPS 视图） | 厚度带来源已有；**炮塔装甲未计入**（manifest 无选面 role）；面积全 estimate |
 | **Engines** | 27 | **✖→○** | 无 | **全无数据**（无功率/锅炉/燃料） |
 | **Performance** | 25 | **◐** | 稳性部分即我们的差异化 | GM/GZ/破损已强；Seakeeping/成本/强度 ✖ |
@@ -86,11 +86,21 @@ Sheer 示意图、**Average freeboard（输出）**。
   Battery 子页的每门炮细目（炮架/座圈/锁定，需 SpringSharp3b3 截图或外部采集）；
   弹药库容量换算、射速输出。口径矛盾（设计 80 / 战时 110 发/门 vs 名录 661 t）已记录于案例 `_note`。
 
-### 2.4 Weapons（27 项）——未动工
+### 2.4 Weapons（27 项）——模块已建（v0），鱼雷部分有源
 
 鱼雷（主/副：数量/直径/长/布置）、水雷、深弹、**Misc weight 五分区**
 （Hull-Below/Above water、On deck、Above Deck、Void）。
-→ **全未实现。** Misc weight 分区其实是 **L2 的输入格式**，应并入 L2 设计。
+
+**【2026-09-22 已建】`weapons.py` v0 + `tools/gen_weapons_case.py`**：
+- 鱼雷：管数/携带数/直径/布置 pass-through，**战斗部装药总重 = 携带数 × 单雷装药**；
+  **单雷全重未采集 → 置 None（不能用装药重冒充，差一个数量级）**，雷长同样缺。
+  QM：2 × 533 mm 水下舷侧管、14 枚 Mk II***、战斗部 400 lb (181 kg) → 装药总重 **2.534 t**。
+- 水雷/深弹：**没给 = 没数据（None，带警告）**，显式给 0 才是"确实不装备"——
+  QM 两项均无文献源，置空。
+- Misc weight 五分区：小计 + 占排水量比例（>25% 告警，防与船体钢料重复计入）+ **L2 接口警告**
+  （分区只有重量、没有 kg_m，不能直接喂 `weights.py` 合成 KG）。QM 五分区全无数据。
+- 来源冲突已记录：战斗部 400 lb（维基）vs 515 lb（MaritimeQuest）；射程 10,000 yd @ 29 kn
+  （维基）vs 10,750 yd @ 31 kn（MaritimeQuest）。
 
 ### 2.5 Armour（28 项）——数据半齐，模块未建
 

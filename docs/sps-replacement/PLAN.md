@@ -26,9 +26,9 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **225 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16 = Hull 页补齐；
-  test_freeboard 16 = Freeboard 页；test_generic_ship 11 = **通用性契约**）
+- 一键回归 **242 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16；test_freeboard 16；
+  test_weapons 17 = Weapons 页；test_generic_ship 11 = **通用性契约**）
 
 - [x] **7.2d Hull 页补齐（湿面积 / 长宽比 / 自然航速）**（v0 已完成 2026-09-22）：
   - `hull.py`：湿面积两法（Mumford 经验式 L0 + 逐站湿周长积分 L1，**积分必须扣除裁剪补出的
@@ -48,6 +48,16 @@
     Forecastle 58.4%/8.90 m/33.3°、Quarterdeck 41.6%/7.12 m/27.7°；平均干舷 8.16 m。
   - 测试 16 项（两轮变异验证：加权丢长度 2 项红、浸没角半宽写错 1 项红→已加精确锚）；
     `freeboard.py` 已纳入通用性护栏核心清单。
+- [x] **7.2f Weapons 页**（v0 已完成 2026-09-22）：
+  - `weapons.py`：鱼雷清单（管数/携带数/直径/布置 + **战斗部装药总重**）；水雷/深弹
+    （**没给 = None，显式 0 才是"不装备"**）；Misc weight 五分区（小计 + 占排水量 +
+    >25% 告警 + **缺 kg_m 的 L2 接口警告**）；`sps_view()` 整页视图。
+  - QM 鱼雷有源：2 × 533 mm 水下舷侧管、14 枚 Mk II***、战斗部 400 lb (181 kg)
+    → 装药总重 2.534 t。**单雷全重/雷长未采集 → 置 None 并警告**（不用装药冒充全重）。
+    水雷/深弹/Misc 五分区无文献源 → 置空。来源冲突（400 vs 515 lb；10,000@29kn vs
+    10,750@31kn）已在案例里并列记录。
+  - 测试 17 项（两轮变异验证：装药丢携带数 3 项红、缺项冒充 0 3 项红）；
+    `weapons.py` 已纳入通用性护栏核心清单。
 
 ### 通用性契约（2026-09-22 用户指令，SPEC §2.7）
 
