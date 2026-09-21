@@ -1,0 +1,46 @@
+{
+  "schema": "plimsoll-guns-1",
+  "ship": "HMS Queen Mary (1913)",
+  "_note": "Guns 页 v0：数量来自模型契约（4 塔 × 2 管 = 8 管）；重量/弹药为文献值，逐项带出处。Mounts 行 estimate（BII* 未单列）；Armour 行（炮塔装甲）缺 —— 模型无炮塔装甲对象；副炮 Magazine 只算弹重（装药未采集）。战时口径（110 发/门 → 主炮 Magazine ≈ 677.6 t）与 Jutland 名录的 661 t 全舰弹药 allowance 见 PLAN/COVERAGE 讨论。",
+  "batteries": [
+    {
+      "id": "main_135mk5",
+      "column": "main",
+      "label": "13.5in/45 BL Mk V(H)",
+      "guns": 8,
+      "gun_weight_t": 76.102,
+      "gun_source": "NavWeaps WNBR_135-45_mk5: Gun Weight Without Breech 167,776 lbs (76,102 kg)",
+      "gun_estimate": false,
+      "mounts": 4,
+      "mount_weight_t": 600.0,
+      "mount_source": "NavWeaps Mount/Turret Data: Mark II 600 tons (610 mt)；BII* 未单列（N/A），沿用 Mark II 数值 —— estimate",
+      "mount_estimate": true,
+      "shell_lb": 1400.0,
+      "shell_source": "NavWeaps/维基: 1,400 lb (635.03 kg) Mk V(H) heavy shell；口径/门数: ship_contract.json",
+      "shell_estimate": false,
+      "charge_lb": 297.0,
+      "rounds_per_gun": 80,
+      "ammo_source": "NavWeaps Propellant Charge - Ships: APC (Heavy) 297 lbs (135 kg) MD45 | 储弹: NavWeaps as-built 80 rounds/gun",
+      "ammo_estimate": false,
+      "broadside_guns": 8,
+      "_broadside_note": "四塔全中线布置，单舷 8 门齐射（狮级布局，academic/维基）"
+    },
+    {
+      "id": "secondary_4mk7",
+      "column": "2nd",
+      "label": "4in/50 BL Mk VII casemate",
+      "guns": 16,
+      "gun_weight_t": 2.134,
+      "gun_source": "Military Wiki (BL 4-inch Mk VII): Mass 4,704 pounds (2,130 kg) (barrel & breech)",
+      "gun_estimate": false,
+      "shell_lb": 31.0,
+      "shell_source": "维基/MaritimeQuest: 31 lb (14.06 kg)；16 门 casemate：ship_contract.json + 维基",
+      "shell_estimate": false,
+      "rounds_per_gun": 150,
+      "ammo_source": "维基 (HMS Queen Mary): 150 rounds per gun",
+      "ammo_estimate": false,
+      "broadside_guns": 16,
+      "_broadside_note": "casemate 单舷齐射门数未单独考证，暂按 16 —— estimate"
+    }
+  ]
+}

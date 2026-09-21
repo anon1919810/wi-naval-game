@@ -16,7 +16,7 @@
 |---|---:|:---:|---|---|
 | **Hull** | 33 | **◐** | `hydrostatics.py`(L0) + `offsets/geometry/geometric`(L1) | 模型有；少湿面积/自然航速等派生显示 |
 | **Freeboard** | 26 | **✖→○** | 无（仅 CLI 有甲板浸没角告警） | 模型缺；甲板分段数据缺 |
-| **Guns** | 23 | **○** | 无 | **弹重已有**（`penetration_main.json` 1400 lb，带源）；炮塔/炮架重量缺 |
+| **Guns** | 23 | **◐**（模块已建） | `guns.py` v0（Weights 表 + 齐射 + Magazine） | 文献值已采集（NavWeaps 等）；**Armour 行缺**（炮塔装甲）；副炮装药缺 |
 | **Weapons** | 27 | **○** | 无 | 数据缺（鱼雷/水雷/深弹） |
 | **Armour** | 28 | **◐**（模块已建） | `armour.py` v0（重量表 + SPS 视图） | 厚度带来源已有；**炮塔装甲未计入**（manifest 无选面 role）；面积全 estimate |
 | **Engines** | 27 | **✖→○** | 无 | **全无数据**（无功率/锅炉/燃料） |
@@ -62,13 +62,19 @@ Sheer 示意图、**Average freeboard（输出）**。
 → **全未实现。** 可从型值表+甲板高推出 Average freeboard 与浸没角（CLI 已有 20.6° 告警雏形）。
 **拦路石**：甲板分段比例是纯设计输入，本舰无来源 → 标 estimate 或先不做。
 
-### 2.3 Guns（23 项）——未动工，但数据半齐
+### 2.3 Guns（23 项）——模块已建（v0）
 
 - Weights 表（行：Guns/Mounts/Armour/Total/Broadside lbs/Broadside kg/Magazine；
   列：Main/2nd–5th/Total）—— **Summary 全是输出**，输入在 Battery 子页。
 - **已具备**：主炮口径 343 mm、倍径 45、弹重 1400 lb、射距-穿深曲线（`penetration_main.json`，带源）；
   数量 8 管/4 塔/16 门副炮（`ship_contract.json`）。
-- **缺**：炮塔/炮架重量、副炮弹重、弹药库容量、射速 → **需外部数据**（Navypedia/Conway 有）。
+- **【2026-09-22 已建】`guns.py` v0 + `tools/gen_guns_case.py`**：Weights 表全行输出。
+  外部数据已采集（NavWeaps/维基/Jutland 名录）：主炮 76.102 t/门、BII 座 600 t
+  （BII* 未单列 → estimate）、装药 297 lb、设计储弹 80 发/门；副炮 2.134 t/门、弹 31 lb、150 发/门。
+  齐射：主炮单舷 8 门 = 11,200 lb / 5,080 kg；主炮 Magazine（as-built）= 492.6 t。
+  **仍未覆盖**：Armour 行（炮塔装甲重，与 Armour 页同缺口）；副炮装药（Magazine 偏低）；
+  Battery 子页的每门炮细目（炮架/座圈/锁定，需 SpringSharp3b3 截图或外部采集）；
+  弹药库容量换算、射速输出。口径矛盾（设计 80 / 战时 110 发/门 vs 名录 661 t）已记录于案例 `_note`。
 
 ### 2.4 Weapons（27 项）——未动工
 

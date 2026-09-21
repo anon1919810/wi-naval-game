@@ -26,8 +26,8 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **164 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
-  （其中 test_weights.py 15 项 = L2 v0；test_armour.py 20 项 = Armour 页 v0）
+- 一键回归 **182 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+  （test_weights.py 15 = L2 v0；test_armour.py 20 = Armour 页 v0；test_guns.py 18 = Guns 页 v0）
 - 跑主案例：`"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json --gz -o <out.json>`
 
 ### 下一步
@@ -217,6 +217,18 @@
   - 诚实缺口：**炮塔装甲未计入**（turret_face 在 manifest 里无选面 role，L2 同）；
     Bulge 行置 None + 警告不冒充 0；Armour deck 按厚度层两行，按位置分段待补。
   - 测试 20 项（含两轮变异验证：丢密度 4 项红、Bulge 冒充 0 5 项红）。
+- [x] **7.2c Guns 页（SPS）**（v0 已完成 2026-09-22）：
+  - `guns.py`：SPS Weights 表（行 Guns/Mounts/Armour/Total/Broadside lbs/Broadside kg/Magazine；
+    列 Main/2nd…）。`sps_table()` 直出表视图；lb→kg 用国际磅定义 0.45359237（精确）。
+  - **外部数据采集完成**（此前的缺口）：主炮 76.102 t/门（NavWeaps，不含炮闩）、
+    BII 座 600 t（**BII* 未单列 → 沿用并标 estimate**）、弹 1,400 lb、装药 297 lb MD45、
+    设计储弹 80 发/门；副炮 4" Mk VII 2.134 t/门、弹 31 lb、150 发/门。
+  - 数量（8 管/4 塔/16 副炮）来自 `ship_contract.json`（模型有源）；齐射 = 单舷 8 门（四塔全中线）。
+  - 诚实缺口：**Armour 行（炮塔装甲重）置 None + 警告**——与 Armour 页同缺口；
+    副炮装药未采集（Magazine 只算弹重，偏低，有警告）；
+    设计 80 发/门 vs 战时 110 发/门（主炮 Magazine 492.6 vs ≈677.6 t）与 Jutland 名录
+    的 661 t 全舰 allowance 三者口径矛盾，已在案例 `_note` 里记录，基准取 as-built。
+  - 测试 18 项（含两轮变异验证：齐射丢门数 3 红、Magazine 丢门数 6 红）。
 - [ ] **7.3 阻力与功率**：Holtrop-Mennen / Taylor。
 - [ ] **7.4 耐波性估算**：切片理论（最低优先级）。
 - [-] **7.5 Web 界面**：**搁置（2026-09-21 用户指令）**——SPS 覆盖度仅 ~13%，
