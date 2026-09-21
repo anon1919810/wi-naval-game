@@ -26,9 +26,12 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **242 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+- 一键回归 **256 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
   （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16；test_freeboard 16；
-  test_weapons 17 = Weapons 页；test_generic_ship 11 = **通用性契约**）
+  test_weapons 17；test_engines 14 = Engines 页；test_generic_ship 11 = **通用性契约**）
+- **SPS 七页全部到 ◐ 以上**（2026-09-22）：Hull 基本齐 / Freeboard·Armour·Guns·Weapons·
+  Engines·Performance 均为 ◐。剩 PLAN 7.3 阻力与功率、Hull 尾巴（`lpp_m`）、
+  `offsets.py` 的 `DECK_Z_DEFAULT` 清理三条尾巴。
 
 - [x] **7.2d Hull 页补齐（湿面积 / 长宽比 / 自然航速）**（v0 已完成 2026-09-22）：
   - `hull.py`：湿面积两法（Mumford 经验式 L0 + 逐站湿周长积分 L1，**积分必须扣除裁剪补出的
@@ -58,6 +61,18 @@
     10,750@31kn）已在案例里并列记录。
   - 测试 17 项（两轮变异验证：装药丢携带数 3 项红、缺项冒充 0 3 项红）；
     `weapons.py` 已纳入通用性护栏核心清单。
+- [x] **7.2g Engines 页（只做有源部分）**（v0 已完成 2026-09-22）：
+  - `engines.py`：轴数/主机/锅炉/功率/航速/燃料/续航；`kW = shp × 0.7457`（精确换算）；
+    `%Coal`、Bunker、续航（含"未注明对应航速"警告）。
+  - 量级校核（estimate）：**海军部系数 `C = Δ^(2/3)·V³ / P` = 248**（军舰 200–300 区间，
+    证明功率/航速/排水量自洽）+ 最大航速 Froude 数。
+  - **明确不做并点名**：Friction/Wave resistance（→ **PLAN 7.3** Holtrop-Mennen/Taylor）、
+    Engine weight（无源）、Displacement factor、Engine factor（SPS 自有系数无公开定义）。
+  - **踩坑与修正**：初版把导出量在 trace 与 values 里**各算了一遍**（双源头），
+    导致变异验证改了一处而测试仍绿 —— 已重构为单一变量共用，重做变异才真正变红。
+    **教训：变异没打红时，先怀疑"是不是有两个真值来源"，而不是怀疑测试没用。**
+  - 测试 14 项（两轮变异验证：换算因子改错 2 项红、%Coal 分母改错 2 项红）；
+    `engines.py` 已纳入通用性护栏核心清单。
 
 ### 通用性契约（2026-09-22 用户指令，SPEC §2.7）
 

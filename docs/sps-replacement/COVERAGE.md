@@ -19,7 +19,7 @@
 | **Guns** | 23 | **◐**（模块已建） | `guns.py` v0（Weights 表 + 齐射 + Magazine） | 文献值已采集（NavWeaps 等）；**Armour 行缺**（炮塔装甲）；副炮装药缺 |
 | **Weapons** | 27 | **◐**（模块已建） | `weapons.py` v0（鱼雷 + 水雷/深弹 + Misc 五分区） | 鱼雷有源；**单雷全重/雷长缺**；水雷深弹与 Misc 五分区无数据 |
 | **Armour** | 28 | **◐**（模块已建） | `armour.py` v0（重量表 + SPS 视图） | 厚度带来源已有；**炮塔装甲未计入**（manifest 无选面 role）；面积全 estimate |
-| **Engines** | 27 | **✖→○** | 无 | **全无数据**（无功率/锅炉/燃料） |
+| **Engines** | 27 | **◐**（模块已建） | `engines.py` v0（有源部分） | 功率/锅炉/燃料有源；**阻力模型不做**（PLAN 7.3）；主机重量缺 |
 | **Performance** | 25 | **◐** | 稳性部分即我们的差异化 | GM/GZ/破损已强；Seakeeping/成本/强度 ✖ |
 | **（SPS 没有的）静水力曲线 / GZ / FSC / 破损稳性** | — | **✅** | 全部 | **我们的差异化，已完成 129 项测试** |
 
@@ -111,12 +111,23 @@ Sheer 示意图、**Average freeboard（输出）**。
   **估算合计 6,821 t = 排水量 25.5%**，正落史实区间（狮级 6,000–7,000 t / 22–25%）。
   ⚠️ 必须 estimate 标注：包围盒无朝向信息，曲面展开面积取曲率系数 1.10，炮管不计入装甲。
 
-### 2.6 Engines（27 项）——未动工，**数据完全空白**
+### 2.6 Engines（27 项）——模块已建（v0，只做有源部分）
 
 Max/Cruise speed、轴数、Friction/Wave resistance、Power (hp/kW)（全输出）、
 锅炉/主机型式复选框、Range、%Coal、Engine factor（输入）、
 Engine weight / Bunker / Displacement factor（输出）。
-→ **仓库里没有任何功率/锅炉/燃料数据**（只有 `speed_knots: 28.0`）。**需外部采集**。
+
+**【2026-09-22 已建】`engines.py` v0 + `tools/gen_engines_case.py`**：
+- **有源就给**：轴数 4、4 × Parsons 直驱蒸汽轮机、42 × Yarrow 锅炉、
+  设计 75,000 shp = **55,927.5 kW**（1 hp = 745.7 W 精确换算）、试航 83,000 shp = 61,893.1 kW、
+  最大 27.5 kn（试航 28.1 kn @ 83,000 shp）、Bunker 4,770 t（煤 3,600 + 油 1,170，**%Coal 75.47%**）、
+  续航 5,610 nm @ 10 kn。
+- **量级校核（estimate）**：海军部系数 `C = Δ^(2/3)·V³ / P` = **248**（军舰常见 200–300，
+  说明功率/航速/排水量自洽）+ 最大航速 Froude 数。
+- **明确不做**：**Friction/Wave resistance**（需 Holtrop-Mennen / Taylor，PLAN **7.3** 独立项）、
+  Engine weight（无来源）、Displacement factor（SPS 口径未公开）、Engine factor（SPS 自有经验系数）
+  —— 均在 warnings 与 `sps_view()["_not_implemented"]` 里点名，**不估算**。
+- 巡航速度无来源 → 置空（不是 0）。
 
 ### 2.7 Performance（25 项）——差异化的主战场
 
