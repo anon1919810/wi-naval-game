@@ -20,6 +20,9 @@
 - **Bonjean 曲线**：站剖面面积 vs 水线高
 - **大角稳性 GZ**：**等体积倾斜** —— 每个横倾角下重解平衡水线，再按
   `GZ = y_B·cosφ + (z_B − KG)·sinφ` 求复原力臂
+- **纵倾平衡（2.2）**：`geometric.solve_trim_equilibrium(hull, target_volume, target_lcb)`
+  给定排水体积与浮心纵向位置（= LCG），嵌套求根解出水线截距 d 与纵倾角 θ
+  （θ > 0 = 艏倾）；体积与 LCB 同时达标，否则抛错
 
 ```bash
 PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
@@ -27,8 +30,10 @@ PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
 "$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json \
         --gz -o tools/plimsoll/cases/queen_mary_1913.result.json
 "$PY" tools/plimsoll/cli.py --selftest
-"$PY" tools/plimsoll/tests/test_hydrostatics.py     # L0：28 项
-"$PY" tools/plimsoll/tests/test_geometric.py        # L1：22 项
+"$PY" tools/plimsoll/tests/test_hydrostatics.py        # L0：28 项
+"$PY" tools/plimsoll/tests/test_geometric.py           # L1：35 项
+"$PY" tools/plimsoll/tests/test_offsets_import.py      # 型值表：16 项
+"$PY" tools/plimsoll/tests/test_trim_equilibrium.py    # 纵倾平衡 2.2：10 项
 ```
 
 ## Queen Mary 案例结果
@@ -86,7 +91,8 @@ GZ 曲线（KG = 8.6 m 为 estimate，甲板按 1.6T 假定）：
 | 参照船体 | `make_reference_hull` 是**合成**船体（与 L0 同源，用于交叉验证），**不是 Queen Mary 真实型线** |
 | 真实型线 | 待从 `queen_mary_v4` 的 FBX/blend 抽取站位剖面（下一步） |
 | 甲板以上形状 | 合成船体用直壁，故 >20.6° 的 GZ 不具代表性 |
-| 纵倾 | 目前只做横倾；纵倾平衡待后续 |
+| 纵倾平衡 | **已实现（2.2）**：`solve_trim_equilibrium` 给定 V 与 LCB(=LCG) 解 `(d, θ)`；`target_lcb` 必须与 `xlcb` 同坐标原点 |
+| 大纵倾 LWL 耦合 | **未做**（阶段 2.3）：大 θ 下水线长变化对排水量的影响尚未专项交代 |
 | 水线长口径 | **已解决**：LWL = 212.8 m（698 ft，worldwar1.co.uk 明写 "698 feet waterline"），LOA = 214.4 m。契约的 213.4 介于两者，最可能是维基「Length」字段口径。模型全长 213.4 与 LWL 212.8 差 0.3% |
 | 吨位单位 | 史料常混用长吨/公吨，核心内部按公吨 |
 
