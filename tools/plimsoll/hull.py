@@ -128,6 +128,52 @@ def wetted_surface_parametric(hull: dict, coeff: float = 1.7) -> dict:
     }
 
 
+def waterline_length(hull, z: float = 0.0, eps: float = 1e-6) -> dict:
+    """从型线真算水线长：在给定水线高 z 上，船体剖面半宽 > 0 的纵向跨度。
+
+    端点用相邻站线性插值到零（而不是取整站位置），否则会系统性偏短一个站距。
+    ⚠️ 口径提醒：型线文件的 z=0 是**该型线自己的设计水线**（QM 型线对应满载吃水 9.9 m），
+    所以这里算出的不是案例里"正常吃水"的 Lwl，两者不可直接混用 —— 已在 warnings 里点明。
+    """
+    import geometric as GM
+
+    xs = [float(x) for x, _ in hull.stations]
+    hb = [GM._waterline_halfbeam(poly, z) for _, poly in hull.stations]
+
+    idx = [i for i, v in enumerate(hb) if v > eps]
+    trace = []
+    if not idx:
+        _T(trace, "lwl_at_z_m", 0.0, "无剖面与 z=%.3f 相交" % z, "型线逐站半宽")
+        return {"values": {"lwl_at_z_m": 0.0, "z_m": z},
+                "trace": trace,
+                "warnings": ["水线 z=%.3f 与船体无交点：船体定义或水线高有误。" % z]}
+
+    i0, i1 = idx[0], idx[-1]
+
+    def _cross(i, j):
+        """在 i（内侧有宽度）与 j（外侧为零）之间线性插值零点。"""
+        xi, xj = xs[i], xs[j]
+        vi, vj = hb[i], hb[j]
+        if abs(vi - vj) < 1e-12:
+            return xi
+        return xi + (xj - xi) * vi / (vi - vj)
+
+    lo = _cross(i0, i0 - 1) if i0 > 0 else xs[i0]
+    hi = _cross(i1, i1 + 1) if i1 < len(xs) - 1 else xs[i1]
+    length = hi - lo
+
+    warnings = []
+    _T(trace, "lwl_at_z_m", length, "L = x(半宽→0, 艉) → x(半宽→0, 艏)，端点线性插值",
+       "型线逐站半宽（%d 站）" % len(xs))
+    if i0 == 0 or i1 == len(xs) - 1:
+        warnings.append("水线两端在首/末站仍有宽度：船体在该处未收拢，"
+                        "水线长被站端点截断（偏短）。")
+    warnings.append("此水线长对应 z=%.3f（型线自己的设计水线，QM 型线 = 满载吃水），"
+                    "与案例里『正常吃水』的 Lwl 口径不同，勿直接混用。" % z)
+
+    return {"values": {"lwl_at_z_m": length, "z_m": z}, "trace": trace, "warnings": warnings}
+
+
 def _submerged_girth(poly, tan_phi: float, d: float, eps: float = 1e-9) -> float:
     """湿周长：裁到水线以下的多边形周长，**扣除贴在水线上的闭合边**（那一段不湿）。
 

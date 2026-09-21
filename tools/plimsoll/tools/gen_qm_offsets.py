@@ -21,6 +21,10 @@ sys.path.insert(0, PKG)
 
 import offsets as OF  # noqa: E402
 
+# 生成脚本 DECK_Z（主甲板高，模型坐标水线 z=0）—— 生成器是 QM 的数据适配器，
+# 允许知道这艘船的具体数值；核心 offsets 模块已不再提供该默认值。
+DECK_Z = 5.10
+
 OUT = os.path.join(PKG, "cases", "queen_mary_1913_offsets.json")
 
 
@@ -30,7 +34,7 @@ def main():
     payload = {
         "schema": "plimsoll-offsets-1",
         "ship": "HMS Queen Mary (1913)",
-        "deck_z_m": OF.DECK_Z_DEFAULT,
+        "deck_z_m": DECK_Z,
         "source": ("queen_mary_v4.py 内建 OFFSETS（生成脚本自述形状为 estimate，"
                    "非史实型线）；拿到型线图后直接替换本文件的 stations 即可"),
         "coordinates": "x 沿船长(+艏) / y 右舷 / z 上；水线 z=0；每站 (y, deck_hb, wl_hb, keel_z, flat_hb)",

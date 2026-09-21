@@ -115,6 +115,47 @@ class TestNaturalSpeed(unittest.TestCase):
                 self.assertIn("estimate", t)
 
 
+class TestWaterlineLength(unittest.TestCase):
+    def test_box_exact(self):
+        """常剖面方箱：水线长 = 全长 100 m。"""
+        h = GE.StationedHull(box_hull(), name="box")
+        self.assertAlmostEqual(H.waterline_length(h)["values"]["lwl_at_z_m"], 100.0, places=6)
+
+    def test_tapered_ends_interpolated(self):
+        """端部收拢：只在 x=50 有半宽，两端线性插到零 → 25 → 100，长 75。
+        （不插值会退化成取整站位置 50，专门守这个坑）"""
+        end = [(0.0, -T), (0.0, DECK), (0.0, -1.0)]
+        st = [(0.0, list(end)), (25.0, list(end)),
+              (50.0, [(-B / 2, -T), (B / 2, -T), (B / 2, DECK), (-B / 2, DECK)]),
+              (100.0, list(end))]
+        h = GE.StationedHull(st, name="tapered")
+        self.assertAlmostEqual(H.waterline_length(h)["values"]["lwl_at_z_m"], 75.0, places=6)
+
+    def test_no_intersection_gives_zero_and_warns(self):
+        h = GE.StationedHull(box_hull(), name="box")
+        r = H.waterline_length(h, z=50.0)
+        self.assertEqual(r["values"]["lwl_at_z_m"], 0.0)
+        self.assertTrue(any("无交点" in w for w in r["warnings"]))
+
+    def test_queen_mary_deep_draught_lwl(self):
+        """QM 型线 z=0（满载吃水 9.9）→ 213.4 m，比案例『正常吃水』Lwl 212.8 略长（方向自洽）。"""
+        import offsets as OF
+        tbl, _src, dz = OF.load_offsets_payload(
+            os.path.join(PKG, "cases", "queen_mary_1913_offsets.json"))
+        hh = OF.build_hull(tbl, deck_z=dz)
+        r = H.waterline_length(hh)
+        self.assertAlmostEqual(r["values"]["lwl_at_z_m"], 213.4, delta=0.5)
+        self.assertTrue(any("口径" in w for w in r["warnings"]))
+        self.assertGreater(r["values"]["lwl_at_z_m"], 212.8)
+
+    def test_trace_discipline(self):
+        h = GE.StationedHull(box_hull(), name="box")
+        for t in H.waterline_length(h)["trace"]:
+            self.assertIn("formula", t)
+            self.assertIn("source", t)
+            self.assertIn("estimate", t)
+
+
 class TestQueenMarySanity(unittest.TestCase):
     """QM 只是其中一艘船；这里两法交叉校验（经验式 vs 逐站积分）。"""
 

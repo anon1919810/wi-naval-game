@@ -40,7 +40,7 @@
 | Name / Country / Type / Year | 输入 | ✅ | 案例字段 pass-through |
 | Ship laid down / Engine built | 输入 | ◐ | `dates.laid_down` 有；Engine built 无 |
 | 单位下拉（feet/metres） | 输入 | ✖ | **明确不做**：内部一律 SI，界面层换算（SPEC §3.1） |
-| Length Waterline / Overall | 输入 | ✅ | `lwl_m` 212.8（六源核对）`loa_m` 214.4；`lpp_m` 待拆（PLAN 1.3）|
+| Length Waterline / Overall | 输入 | ✅ | `lwl_m` 212.8（六源核对）`loa_m` 214.4；**LWL 另有型线实算口径** `hull.waterline_length()`：QM 型线 z=0（满载吃水）得 213.4 m > 正常吃水 212.8（方向自洽）；`lpp_m` 无源 → 仍缺 |
 | Beam Hull | 输入 | ✅ | 27.1 |
 | Beam Bulges | 输入 | ✖ | **明确不做**：防雷鼓包，本舰无 |
 | Draught (hull only) Normal / Max | 输入 | ✅ | `draught_normal_m` 8.5 / `draught_deep_m` 9.9 |

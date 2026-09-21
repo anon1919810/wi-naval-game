@@ -28,7 +28,9 @@ import os
 
 from geometry import StationedHull
 
-DECK_Z_DEFAULT = 5.10      # 主甲板高（生成脚本 DECK_Z）
+# 甲板高 deck_z 是**船的数据**，不是代码的默认：本模块不再提供 DECK_Z 默认值
+# （2026-09-22 清理：原先沿用生成脚本的 5.10，会让别的船静默拿到 QM 的甲板高）。
+# 调用方必须从型线文件（deck_z_m）、案例（depth_m）或命令行显式给出。
 
 
 # ---------------------------------------------------------------- 读表
@@ -128,7 +130,7 @@ def station_params(table, y):
     return tuple(out)
 
 
-def section_profile(deck_hb, wl_hb, keel_z, flat_hb, deck_z=DECK_Z_DEFAULT):
+def section_profile(deck_hb, wl_hb, keel_z, flat_hb, deck_z):
     """单站剖面：(z, 半宽) 序列，自甲板向下到龙骨。
 
     忠实复现生成脚本：9 点舷弧段（指数 .85）+ 24 点龙骨余弦弧（指数 .92）。
@@ -143,7 +145,7 @@ def section_profile(deck_hb, wl_hb, keel_z, flat_hb, deck_z=DECK_Z_DEFAULT):
     return pts
 
 
-def halfbeam_at(table, y, z, deck_z=DECK_Z_DEFAULT):
+def halfbeam_at(table, y, z, deck_z):
     """某站位在高度 z 处的半宽（线性插值）。"""
     prof = section_profile(*station_params(table, y), deck_z=deck_z)
     if z >= prof[0][0]:
@@ -166,7 +168,7 @@ def deck_halfbeam(table, y):
 # ---------------------------------------------------------------- 造站位船体
 
 
-def build_hull(table, deck_z=DECK_Z_DEFAULT, n_stations=121, n_section=96,
+def build_hull(table, deck_z, n_stations=121, n_section=96,
                spacing="cosine", extra_ys=()):
     """型值表 → Plimsoll `StationedHull`。
 

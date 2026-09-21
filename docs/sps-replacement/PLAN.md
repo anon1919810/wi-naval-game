@@ -26,7 +26,7 @@
 ### 基线（2026-09-21 晚，可直接信赖）
 
 - 最新提交见 `git log -1`，工作区干净
-- 一键回归 **256 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
+- 一键回归 **261 项全绿**：`"$PY" tools/plimsoll/run_all_tests.py`
   （test_weights 15 = L2；test_armour 20；test_guns 18；test_hull 16；test_freeboard 16；
   test_weapons 17；test_engines 14 = Engines 页；test_generic_ship 11 = **通用性契约**）
 - **SPS 七页全部到 ◐ 以上**（2026-09-22）：Hull 基本齐 / Freeboard·Armour·Guns·Weapons·
@@ -71,8 +71,17 @@
   - **踩坑与修正**：初版把导出量在 trace 与 values 里**各算了一遍**（双源头），
     导致变异验证改了一处而测试仍绿 —— 已重构为单一变量共用，重做变异才真正变红。
     **教训：变异没打红时，先怀疑"是不是有两个真值来源"，而不是怀疑测试没用。**
-  - 测试 14 项（两轮变异验证：换算因子改错 2 项红、%Coal 分母改错 2 项红）；
-    `engines.py` 已纳入通用性护栏核心清单。
+- [x] **7.2h 两条尾巴清理**（2026-09-22）：
+  - **`offsets.py` 的 `DECK_Z_DEFAULT = 5.10` 已删除**：`section_profile` /
+    `halfbeam_at` / `build_hull` 的 `deck_z` 改为**必填**（甲板高是船的数据，不是代码默认，
+    否则别的船会静默拿到 QM 的 5.10）。调用方（cli 从型线文件/案例取、测试显式给、
+    `gen_qm_offsets.py` 生成器内定义）已同步；**型线 JSON 的 md5 不变**，行为无回归。
+  - **水线长可从型线真算**：`hull.waterline_length(hull, z)` —— 逐站半宽 >0 的纵向跨度，
+    **端点线性插值到零**（不插值会退化成取整站位置，变异验证守住）。QM 型线 z=0 得
+    213.4 m（满载吃水口径）> 案例正常吃水 212.8，方向自洽；`lpp_m` 仍无源，未编造。
+  - 测试 16 → 21（test_hull）；变异验证：端点不插值 1 项红。
+- **剩唯一尾巴：PLAN 7.3 阻力与功率**（Holtrop-Mennen / Taylor）—— 与 Engines 页的
+  Friction/Wave resistance 是同一件事，单独立项做。
 
 ### 通用性契约（2026-09-22 用户指令，SPEC §2.7）
 
@@ -80,8 +89,8 @@
 本次落实：核心源码扫描护栏（船只字面量即红，变异验证过）；QM 型线物化为
 `cases/queen_mary_1913_offsets.json`（CLI 不再扫描仓库路径/解析生成脚本）；
 新增非 QM 解析靶船 `cases/generic_test_steamer_1910.json` 全链路测试。
-**遗留**：`offsets.py` 的 `DECK_Z_DEFAULT=5.10` 仍是生成脚本带来的默认甲板高
-（CLI 已不会静默使用它，但核心签名还留着）——下次动 offsets 接口时改为必填。
+- **通用性遗留已清（2026-09-22）**：~~`offsets.py` 的 `DECK_Z_DEFAULT=5.10`~~ 已删除，
+  `deck_z` 改为必填。
 - 跑主案例：`"$PY" tools/plimsoll/cli.py tools/plimsoll/cases/queen_mary_1913.json --gz -o <out.json>`
 
 ### 下一步

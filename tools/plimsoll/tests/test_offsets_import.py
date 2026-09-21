@@ -34,7 +34,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 V4_SCRIPT = os.path.join(REPO, "queen_mary_v4", "queen_mary_v4.py")
 V3_SCRIPT = os.path.join(REPO, "queen_mary_v3", "queen_mary.py")
 
-DECK_Z = 5.10
+DECK_Z = 5.10           # 生成脚本 DECK_Z（本测试针对 QM 型线，显式给出，不依赖默认值）
 ANCHOR_CLOSED_VOLUME = 54865.7
 ANCHOR_IMMERSED_VOLUME = 30663.7
 ANCHOR_WATERPLANE = 4610.4
@@ -124,7 +124,7 @@ class TestAnchorProvenance(unittest.TestCase):
     def test_our_extraction_matches_the_interpolant_not_the_coarse_anchor(self):
         """我们的提取必须复现**同一插值**，而不是去迁就那个粗求积的锚点。"""
         t = load_table()
-        hull = O.build_hull(t)
+        hull = O.build_hull(t, deck_z=DECK_Z)
         awp = M.hydrostatics_upright(hull, 0.0)["awp_m2"]
         # 与"三次插值密集积分"一致（0.05% 内）
         self.assertGreater(awp, ANCHOR_WATERPLANE)
@@ -141,7 +141,7 @@ class TestReproducesModelGeometry(unittest.TestCase):
         已排除：剖面采样密度、站位间距、形状模型复现。**原因尚未查明**。
         故此处只断言量级与正负，不假装精确。
         """
-        hull = O.build_hull(load_table())
+        hull = O.build_hull(load_table(), deck_z=DECK_Z)
         v = M.hydrostatics_upright(hull, DECK_Z)["volume_m3"]
         self.assertGreater(v, 0)
         self.assertLess(abs(v - ANCHOR_CLOSED_VOLUME) / ANCHOR_CLOSED_VOLUME, 0.02,
@@ -149,7 +149,7 @@ class TestReproducesModelGeometry(unittest.TestCase):
 
     def test_immersed_volume_brackets_the_coarse_anchor(self):
         """设计水线 z=0 处的浸没体积略高于粗求积锚点（同水线面的道理）。"""
-        hull = O.build_hull(load_table())
+        hull = O.build_hull(load_table(), deck_z=DECK_Z)
         v = M.hydrostatics_upright(hull, 0.0)["volume_m3"]
         self.assertGreater(v, ANCHOR_IMMERSED_VOLUME)
         self.assertLess(v, ANCHOR_IMMERSED_VOLUME * 1.02)
@@ -160,7 +160,7 @@ class TestGZOnRealOffsets(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.hull = O.build_hull(load_table())
+        cls.hull = O.build_hull(load_table(), deck_z=DECK_Z)
         cls.d0 = cls.hull.solve_waterline(0.0, M.hydrostatics_upright(cls.hull, 0.0)["volume_m3"],
                                           tol=1e-12)
         cls.vol = M.hydrostatics_upright(cls.hull, cls.d0)["volume_m3"]
