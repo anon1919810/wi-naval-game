@@ -26,8 +26,6 @@
 
 from __future__ import annotations
 
-import freesurface as FS
-
 RHO_SEA = 1.025
 
 
