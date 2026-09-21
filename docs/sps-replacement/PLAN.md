@@ -35,15 +35,16 @@
 
 ### 下一步
 
-**阶段 2.2 已完成（2026-09-21）**：`StationedHull.solve_trim_equilibrium` / `geometric.solve_trim_equilibrium`
-嵌套求根解 `(d, θ)`。新会话可直接使用；详见该函数 docstring 与 `test_trim_equilibrium.py`。
+**已合入 master（2026-09-21）**：
+- 阶段 **2.2 纵倾平衡**：`solve_trim_equilibrium`（体积+LCB 双门闩）
+- 阶段 **3 FSC**：`freesurface.py` + `gz_curve(free_surface_tanks=)`
 
-**接下来可选**：
-1. **2.3 水线长与排水量耦合**（大纵倾下 LWL 变化的影响说明）
-2. **阶段 3 自由液面 FSC**（破损稳性前置）
-3. **5.1 L1 输出补 trace**（工程辅线，可并行）
+**优先下一步：阶段 4.1 进水组合模型**（舱室进水 → 增重与重心，含自由液面）。
+舱室几何必须**显式**给 L×b，**禁止**从 `buoyancy_compartments.json` 猜自由液面尺寸。
 
-**变异验证纪律保持**：改数值实现后，先确认相关测试对“残差恒零 / θ 被忽略”等缺陷会变红。
+**可选并行**：2.3 LWL 耦合说明；5.1 L1 trace → 5.2 包化 → 5.4 一键回归。
+
+**变异验证纪律**：改数值实现后，先确认相关测试对设计缺陷会变红。
 
 ### 三条别重新踩的坑（都是这一晚踩出来的）
 
@@ -113,10 +114,16 @@
 
 进水舱的自由液面会显著抬高重心等效位置。
 
-- [ ] **3.1 单舱自由液面惯性矩**：由舱室几何算液面惯性矩，`FSC = Σ(ρ_i·i_i)/(Δ)`。
-  验收：矩形舱解析解。
-- [ ] **3.2 并入 GM 与 GZ**：修正后的 KG 用于稳性曲线。
-  验收：与未修正版本对比，量化差异。
+- [x] **3.1 单舱自由液面惯性矩**（2026-09-21）
+  `tools/plimsoll/freesurface.py`：矩形舱 `i = L·b³/12`；
+  空/满舱 `i_eff=0`；`FSC = Σ(ρ_i·i_i)/Δ`。
+  验收：矩形舱解析解 + 双舱线性叠加 + 空满为零（`test_freesurface.py`）。
+  ⚠️ 游戏侧 `buoyancy_compartments.json` **无 L×b**，本阶段输入必须显式给尺寸；
+  由舱容反推形状属阶段 4，禁止猜几何。
+- [x] **3.2 并入 GM 与 GZ**（2026-09-21）
+  `apply_fsc` → `KG_eff = KG+FSC`；`geometric.gz_curve(..., free_surface_tanks=)`。
+  验收：与手工 `gz_curve(hull, kg+fsc, ...)` 逐点一致；无 tanks 时行为不变；
+  GZ 下降量 ≈ `FSC·sinφ`。
 
 ## 阶段 4 · 破损稳性（**阶段性目标**）
 

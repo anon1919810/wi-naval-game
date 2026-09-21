@@ -23,6 +23,9 @@
 - **纵倾平衡（2.2）**：`geometric.solve_trim_equilibrium(hull, target_volume, target_lcb)`
   给定排水体积与浮心纵向位置（= LCG），嵌套求根解出水线截距 d 与纵倾角 θ
   （θ > 0 = 艏倾）；体积与 LCB 同时达标，否则抛错
+- **自由液面 FSC（阶段 3）**：`freesurface.free_surface_correction` /
+  `geometric.gz_curve(..., free_surface_tanks=)` —— 矩形舱 `i=L·b³/12`，
+  `KG_eff=KG+FSC`；空/满舱不计
 
 ```bash
 PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
@@ -33,7 +36,8 @@ PY="C:/Users/杨睿/.workbuddy/binaries/python/versions/3.13.12/python.exe"
 "$PY" tools/plimsoll/tests/test_hydrostatics.py        # L0：28 项
 "$PY" tools/plimsoll/tests/test_geometric.py           # L1：35 项
 "$PY" tools/plimsoll/tests/test_offsets_import.py      # 型值表：16 项
-"$PY" tools/plimsoll/tests/test_trim_equilibrium.py    # 纵倾平衡 2.2：10 项
+"$PY" tools/plimsoll/tests/test_trim_equilibrium.py    # 纵倾平衡 2.2
+"$PY" tools/plimsoll/tests/test_freesurface.py         # 阶段 3 FSC
 ```
 
 ## Queen Mary 案例结果
@@ -93,6 +97,8 @@ GZ 曲线（KG = 8.6 m 为 estimate，甲板按 1.6T 假定）：
 | 甲板以上形状 | 合成船体用直壁，故 >20.6° 的 GZ 不具代表性 |
 | 纵倾平衡 | **已实现（2.2）**：`solve_trim_equilibrium` 给定 V 与 LCB(=LCG) 解 `(d, θ)`；`target_lcb` 必须与 `xlcb` 同坐标原点 |
 | 大纵倾 LWL 耦合 | **未做**（阶段 2.3）：大 θ 下水线长变化对排水量的影响尚未专项交代 |
+| 自由液面 FSC | **已实现（3.1/3.2）**：`freesurface.py` + `gz_curve(free_surface_tanks=)`；舱室须显式 L×b，游戏侧 compartment JSON 无此字段 |
+| 破损稳性 | **未做**（阶段 4）；依赖 FSC + 进水组合（下一步 4.1） |
 | 水线长口径 | **已解决**：LWL = 212.8 m（698 ft，worldwar1.co.uk 明写 "698 feet waterline"），LOA = 214.4 m。契约的 213.4 介于两者，最可能是维基「Length」字段口径。模型全长 213.4 与 LWL 212.8 差 0.3% |
 | 吨位单位 | 史料常混用长吨/公吨，核心内部按公吨 |
 

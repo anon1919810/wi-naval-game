@@ -29,6 +29,8 @@ from __future__ import annotations
 
 import math
 
+import freesurface as FS
+
 RHO_SEA = 1.025
 G = 9.80665
 
@@ -130,28 +132,43 @@ def hydrostatics_upright(hull, waterline_z, rho=RHO_SEA):
     }
 
 
-def gz_curve(hull, kg, target_volume, angles_deg, rho=RHO_SEA):
+def gz_curve(hull, kg, target_volume, angles_deg, rho=RHO_SEA,
+             free_surface_tanks=None):
     """大角稳性 GZ 曲线。
 
     每个横倾角下**重解平衡水线**（等体积），再按
     `GZ = y_B·cosφ + (z_B − KG)·sinφ` 求力臂；`kg` 自龙骨量，
     故 `z_B` 也要用 `keel_z` 换算（见模块 docstring）。
+
+    `free_surface_tanks`：可选舱室列表（见 `freesurface.free_surface_correction`）。
+    提供时用 **KG_eff = KG + FSC** 计算 GZ，并在每行写入 `fsc_m` 与
+    `kg_effective_m`。FSC 用排水量 `target_volume * rho`（t）作分母。
     """
     kz = keel_z(hull)
+    fsc_m = 0.0
+    if free_surface_tanks:
+        displacement_t = target_volume * rho
+        fsc_m = FS.free_surface_correction(
+            free_surface_tanks, displacement_t, sea_density_t_m3=rho)["fsc_m"]
+    kg_eff = kg + fsc_m
     rows = []
     for a in angles_deg:
         phi = math.radians(a)
         d, r = solve_equilibrium(hull, phi, target_volume)
         zb_keel = r["zb"] - kz
-        gz = r["yb"] * math.cos(phi) + (zb_keel - kg) * math.sin(phi)
-        rows.append({
+        gz = r["yb"] * math.cos(phi) + (zb_keel - kg_eff) * math.sin(phi)
+        row = {
             "angle_deg": float(a),
             "gm_arm_m": gz,
             "yb_m": r["yb"],
             "zb_m": zb_keel,
             "waterline_d_m": d,
             "volume_m3": r["volume"],
-        })
+        }
+        if free_surface_tanks:
+            row["fsc_m"] = fsc_m
+            row["kg_effective_m"] = kg_eff
+        rows.append(row)
     return rows
 
 
