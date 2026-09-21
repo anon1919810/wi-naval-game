@@ -26,6 +26,8 @@
 
 from __future__ import annotations
 
+import math
+
 RHO_SEA = 1.025
 
 
@@ -171,4 +173,137 @@ def flood_combination(ship: dict, tanks=None) -> dict:
             "km_m": "若调用方未重算破损后 KM，此处沿用输入，属近似",
             "geometry": "舱室为矩形代理；来源须由调用方标注",
         },
+    }
+
+
+def solve_flooded_equilibrium(hull, ship, tanks=None, rho=RHO_SEA, **trim_kwargs):
+    """阶段 4.2：破损后浮态（纵向/垂向平衡 + 小角度横倾估计）。
+
+    组合 4.1 进水 → 目标体积与 LCG → 2.2 `solve_trim_equilibrium`。
+    新 KM 用该截距处正浮 `hydrostatics_upright` 作一阶近似（纵倾影响标 estimate）。
+    横倾：GM′>0 时 φ≈atan(HeelMoment/(Δ′·GM′))，HeelMoment=Σδ·y（t·m）。
+    GM′≤0 时不抛错，`gm_negative=True`，`heel_deg=None`。
+    """
+    import geometric as M
+
+    combo = flood_combination(ship, tanks or [])
+    rho = float(rho)
+    vol_target = combo["displacement_after_t"] / rho
+
+    lcg = combo.get("lcg_solid_m")
+    estimates = dict(combo.get("estimate") or {})
+    if lcg is None:
+        lcg = combo.get("lcb_m")
+        estimates["lcg"] = "ship.lcg_m/lcb_m 缺失，纵向目标用 %r" % lcg
+        if lcg is None:
+            lcg = 0.0
+            estimates["lcg"] = "无纵向输入，目标 LCG 取 0"
+
+    trim_kwargs = dict(trim_kwargs)
+    sol = hull.solve_trim_equilibrium(vol_target, float(lcg), **trim_kwargs)
+    d = sol["d_m"]
+    theta = sol["trim_rad"]
+
+    # 正浮 KM 近似（水线截距 d）
+    kz = min(z for _, poly in hull.stations for _, z in poly)
+    try:
+        hs = M.hydrostatics_upright(hull, d)
+        km_new = hs["km_m"]
+        draught = hs["draught_m"]
+        estimates["km_m"] = "hydrostatics_upright(d)，未计入纵倾对 KM 的影响"
+    except ValueError:
+        # 纵倾很大时 d 可能仍在体内但 upright 校验失败 → 退回 integrate
+        r_up = hull.integrate(0.0, min(max(d, kz + 1e-6),
+                                       max(z for _, poly in hull.stations for _, z in poly)))
+        vol_up = r_up["volume"]
+        km_new = None
+        draught = d - kz
+        estimates["km_m"] = "upright 静水力不可用，KM 为 null"
+
+    kg_eff = combo["kg_effective_m"]
+    gm_prime = None if km_new is None else (km_new - kg_eff)
+    heel_moment = sum(row["added_displacement_t"] * row["y_m"]
+                      for row in combo["tanks"])
+    heel_deg = None
+    gm_negative = gm_prime is not None and gm_prime <= 0.0
+    if gm_prime is not None and gm_prime > 0.0 and combo["displacement_after_t"] > 0.0:
+        heel_rad = math.atan(heel_moment / (combo["displacement_after_t"] * gm_prime))
+        heel_deg = math.degrees(heel_rad)
+
+    r = hull.integrate(0.0, d, theta)
+    return {
+        "combination": combo,
+        "target_volume_m3": vol_target,
+        "target_lcg_m": float(lcg),
+        "waterline_d_m": d,
+        "trim_rad": theta,
+        "trim_deg": sol.get("trim_deg"),
+        "draught_m": draught,
+        "volume_m3": r["volume"],
+        "xlcb_m": r["xlcb"],
+        "volume_residual_m3": sol.get("volume_residual_m3"),
+        "lcb_residual_m": sol.get("lcb_residual_m"),
+        "km_m": km_new,
+        "kg_effective_m": kg_eff,
+        "gm_m": gm_prime,
+        "gm_negative": bool(gm_negative),
+        "heel_moment_t_m": heel_moment,
+        "tcg_flood_m": combo["tcg_flood_m"],
+        "heel_deg": heel_deg,
+        "rho_t_m3": rho,
+        "formula": "solve_trim(V*=Δ'/ρ, LCG); KM≈upright@d; heel≈atan(M/(Δ'·GM'))",
+        "source": "stage 4.2 flooded equilibrium",
+        "estimate": estimates,
+        "trim_solution": sol,
+    }
+
+
+def remaining_gz_curve(hull, kg_effective_m, target_volume_m3,
+                       angles_deg=None, rho=RHO_SEA, free_surface_tanks=None):
+    """阶段 4.3：在（破损后）目标体积与 KG_eff 下的剩余 GZ 曲线。"""
+    import geometric as M
+
+    if angles_deg is None:
+        angles_deg = [float(a) for a in range(0, 65, 5)]
+    rows = M.gz_curve(hull, float(kg_effective_m), float(target_volume_m3),
+                      angles_deg, rho=rho,
+                      free_surface_tanks=free_surface_tanks)
+    max_gz = None
+    angle_at_max = None
+    range_deg = 0.0
+    for row in rows:
+        gz = row["gm_arm_m"]
+        if max_gz is None or gz > max_gz:
+            max_gz = gz
+            angle_at_max = row["angle_deg"]
+        if gz > 0.0:
+            range_deg = max(range_deg, row["angle_deg"])
+    return {
+        "kg_effective_m": float(kg_effective_m),
+        "target_volume_m3": float(target_volume_m3),
+        "angles_deg": list(angles_deg),
+        "rows": rows,
+        "max_gz_m": max_gz,
+        "angle_at_max_deg": angle_at_max,
+        "range_deg": range_deg if (max_gz is not None and max_gz > 0.0) else 0.0,
+        "formula": "GZ at equal-volume waterlines with KG_eff",
+        "source": "stage 4.3 remaining GZ",
+        "estimate": {
+            "deck": "甲板以上形状未外部验证，大角度 GZ 仍属 estimate",
+        },
+    }
+
+
+def run_damage_scenario(hull, scenario: dict):
+    """阶段 4.4：跑一个场景 → 浮态 + 剩余 GZ（可复现）。"""
+    ship = scenario["ship"]
+    tanks = scenario["tanks"]
+    eq = solve_flooded_equilibrium(hull, ship, tanks)
+    gz = remaining_gz_curve(hull, eq["kg_effective_m"], eq["target_volume_m3"],
+                            free_surface_tanks=tanks)
+    return {
+        "id": scenario.get("id", ""),
+        "equilibrium": eq,
+        "remaining_gz": gz,
+        "stable": (not eq["gm_negative"]) and (gz["max_gz_m"] or 0.0) > 0.0,
     }

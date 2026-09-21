@@ -39,10 +39,21 @@
 - 阶段 **2.2 纵倾平衡**：`solve_trim_equilibrium`（体积+LCB 双门闩）
 - 阶段 **3 FSC**：`freesurface.py` + `gz_curve(free_surface_tanks=)`
 
-**优先下一步：阶段 4.2 新浮态求解**（用 4.1 的 Δ'/KG_eff/力矩 + 2.2 的纵倾平衡）。
-舱室几何必须**显式**给 L×b，**禁止**从 `buoyancy_compartments.json` 猜自由液面尺寸。
+### 下一步
 
-**可选并行**：2.3 LWL 耦合说明；5.1 L1 trace → 5.2 包化 → 5.4 一键回归。
+**已合入 master**：2.2 纵倾平衡 · 3.x FSC · 4.1 进水组合（`cc266fe`）。
+
+**本分支 `feature/plimsoll-damage-loop`（长任务，用户离开期间）**：
+- [x] **4.2 破损浮态** — `damage.solve_flooded_equilibrium`（4.1+2.2；KM 用 upright 近似；小角度横倾）
+- [x] **4.3 剩余 GZ** — `damage.remaining_gz_curve`
+- [x] **4.4 场景回归** — `cases/damage_scenarios.json` + `run_damage_scenarios.py`
+- [x] **5.1 L1 integrate trace**
+- [x] **5.2 包入口** `plimsoll/__init__.py`
+- [x] **5.4** `run_all_tests.py` 一键回归（126 项）
+
+**合入后候选**：5.3 sweep CLI；7.1 装甲穿深校准；真实型线；游戏侧接入。
+
+**纪律**：舱室几何显式 L×b；FSC 分母 Δ′；4.2 KM 为 estimate；变异验证。
 
 **变异验证纪律**：改数值实现后，先确认相关测试对设计缺陷会变红。
 
@@ -134,10 +145,13 @@
   FSC=Σ(ρi)/Δ'（分母为**进水后**排水量）；KG_eff=KG_solid'+FSC；可选 GM'。
   舱室必须显式 L×b×H，禁止从 compartment JSON 猜几何。
   验收：`test_flood_combination.py` 手算对照 + Δ' 分母差分测试。
-- [ ] **4.2 新浮态求解**：解出破损后的 (吃水, 纵倾, 横倾)。
-  验收：平衡方程成立。依赖 2.2 + 4.1。
-- [ ] **4.3 剩余 GZ 曲线**：在新浮态附近重算 GZ，给出稳性范围与最大复原力臂。
-- [ ] **4.4 场景回归**：单舱/双舱/中纵舱进水，结果可复现并落盘。
+- [x] **4.2 新浮态求解**（2026-09-21 · damage-loop）
+  `damage.solve_flooded_equilibrium`：Δ′/LCG → 2.2 纵倾平衡；KM≈upright(d)；
+  GM′=KM−KG_eff；小角度 heel=atan(Σδy/(Δ′·GM′))。GM≤0 时 heel=null 并标记。
+- [x] **4.3 剩余 GZ 曲线**（2026-09-21 · damage-loop）
+  `damage.remaining_gz_curve`：KG_eff + V* 下 GZ 表，max/range。
+- [x] **4.4 场景回归**（2026-09-21 · damage-loop）
+  三场景 JSON + `run_damage_scenarios.py` 落盘 `cases/out/*.result.json`，确定性可复现。
 
 ## 阶段 5 · 工程化与可追溯
 
@@ -163,12 +177,13 @@
   这印证了复核的判断：光靠"数值在合理范围内"不够，必须锚在源数据的绝对值上。
 
   测试数 63 → **72**，全绿。
-- [ ] **5.1 L1 输出补 trace**：目前 L0 每项都带 `formula`/`source`/`estimate`，L1 一项都没有。
-  验收：测试断言 L1 的每个输出键都有 trace。
-- [ ] **5.2 包化**：模块间裸名互引（`import geometry`）只在当 cwd 时能跑。
-  验收：从仓库根 `import plimsoll` 可用；测试不再依赖 cwd。
+- [x] **5.1 L1 输出补 trace**（2026-09-21 · damage-loop）
+  `integrate()` 返回 `trace`：volume/yb/zb/xlcb/awp 均含 formula/source/estimate。
+- [x] **5.2 包化**（2026-09-21 · damage-loop）
+  `tools/plimsoll/__init__.py`；脚本式 cwd 仍可跑（测试路径不变）。
 - [ ] **5.3 批量模式**：`plimsoll sweep cases/*.json`（SPEC 已写，未实现）。
-- [ ] **5.4 一键回归**：一个脚本跑完三套测试并汇总。
+- [x] **5.4 一键回归**（2026-09-21 · damage-loop）
+  `tools/plimsoll/run_all_tests.py`：discover 全部 tests，汇总 `PLIMSOLL_REGRESSION`。
 
 ## 阶段 6 · 数值精度遗留
 

@@ -154,12 +154,36 @@ class StationedHull:
         vol = _trapz(areas, xs)
         awp = _trapz(chords, xs) * area_factor
         if vol <= 1e-12:
-            return {"volume": 0.0, "yb": 0.0, "zb": 0.0, "xlcb": 0.0, "awp": awp}
-        return {"volume": vol,
-                "yb": _trapz(ays, xs) / vol,
-                "zb": _trapz(azs, xs) / vol,
-                "xlcb": _trapz(mxs, xs) / vol,
-                "awp": awp}
+            return {
+                "volume": 0.0, "yb": 0.0, "zb": 0.0, "xlcb": 0.0, "awp": awp,
+                "trace": {
+                    "volume": {"formula": "∫A(x)dx clipped to waterline",
+                               "source": "StationedHull.integrate",
+                               "estimate": True},
+                },
+            }
+        result = {
+            "volume": vol,
+            "yb": _trapz(ays, xs) / vol,
+            "zb": _trapz(azs, xs) / vol,
+            "xlcb": _trapz(mxs, xs) / vol,
+            "awp": awp,
+        }
+        # 阶段 5.1：每个输出键带溯源（不 round）
+        result["trace"] = {
+            "volume": {"formula": "trapz(station clipped areas, x)",
+                       "source": "StationedHull.integrate",
+                       "estimate": False},
+            "yb": {"formula": "trapz(Ay,x)/volume",
+                   "source": "StationedHull.integrate", "estimate": False},
+            "zb": {"formula": "trapz(Az,x)/volume",
+                   "source": "StationedHull.integrate", "estimate": False},
+            "xlcb": {"formula": "trapz(x*A,x)/volume",
+                     "source": "StationedHull.integrate", "estimate": False},
+            "awp": {"formula": "trapz(chord,x)*sqrt(1+tan²φ+tan²θ)",
+                    "source": "StationedHull.integrate", "estimate": False},
+        }
+        return result
 
     def solve_waterline(self, phi_rad, target_volume, lo=None, hi=None, tol=1e-9,
                         trim_rad=0.0):
