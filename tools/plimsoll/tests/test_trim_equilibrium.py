@@ -28,6 +28,28 @@ def make_box(L, B, T, depth, n=81, bottom_z=0.0):
     return G.StationedHull(st, name="box")
 
 
+def make_asymmetric_box(L, B_aft, B_fore, depth, n=81, bottom_z=0.0):
+    """艉半宽 B_aft、艏半宽 B_fore 的直壁折线箱。
+
+    对称船体上 ∫x·B(x)dx=0，等体积下 d*(+θ)=d*(−θ)，**测不出内层丢掉 θ**。
+    不对称时 d* = (V* − tanθ·∫xB dx)/∫B dx，必须随 θ 变化。
+    """
+    st = []
+    for i in range(n):
+        t = i / (n - 1.0)
+        x = -0.5 * L + t * L
+        if x <= 0.0:
+            half = 0.5 * B_aft
+        else:
+            half = 0.5 * B_fore
+        if -L * 0.05 < x < L * 0.05:
+            u = (x + L * 0.05) / (L * 0.1)
+            half = 0.5 * ((1 - u) * B_aft + u * B_fore)
+        st.append((x, [(half, bottom_z), (half, bottom_z + depth),
+                       (-half, bottom_z + depth), (-half, bottom_z)]))
+    return G.StationedHull(st, name="asym-box")
+
+
 class TestTrimEquilibriumBox(unittest.TestCase):
     """方箱：整段浸没时闭式解 d*=keel+T，tanθ=12·T·LCB/L²。"""
 
@@ -124,6 +146,25 @@ class TestTrimEquilibriumBox(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.hull.solve_trim_equilibrium(-1.0, 0.0)
 
+    def test_overcapacity_volume_raises(self):
+        """目标排水量超过船体可浸没体积 → 必须抛错（体积门闩）。
+
+        方箱最大浸没体积 = L·B·BOX_H（整箱，龙骨到箱顶）。
+        """
+        v_max = self.L * self.B * self.BOX_H
+        v_over = v_max * 1.2
+        with self.assertRaises(ValueError) as ctx:
+            self.hull.solve_trim_equilibrium(v_over, 0.0)
+        msg = str(ctx.exception)
+        self.assertTrue("体积" in msg or "可浸没" in msg, msg)
+
+    def test_success_requires_volume_and_lcb_gates(self):
+        """成功返回时体积与 LCB 残差都必须在容差内（双门闩）。"""
+        out = self.hull.solve_trim_equilibrium(self.vol, 2.0, lcb_tol=1e-7)
+        self.assertLessEqual(abs(out["volume_residual_m3"]), out["volume_eq_tol_m3"])
+        self.assertLessEqual(abs(out["lcb_residual_m"]), 1e-7)
+        self.assertIn("volume_eq_tol_m3", out)
+
 
 class TestTrimEquilibriumRoundTrip(unittest.TestCase):
     """参照船体往返：先由已知 θ 观测 xlcb，再反解必须还原 θ。"""
@@ -156,6 +197,27 @@ class TestTrimEquilibriumRoundTrip(unittest.TestCase):
         out = self.hull.solve_trim_equilibrium(self.vol, self.lcb0, lcb_tol=1e-6)
         self.assertLess(abs(out["trim_rad"]), 1e-3)
         self.assertAlmostEqual(out["xlcb_m"], self.lcb0, places=5)
+
+    def test_d_changes_with_trim_on_asymmetric_hull(self):
+        """内层若忽略 θ，不对称船体上的 d 会不对 —— 变异哨兵。
+
+        对称船体 d*(±θ) 相同，测不出内层丢掉纵倾；艉宽 30 / 艏宽 12 时
+        d* = (V* − tanθ·∫xB dx)/∫B dx，必须随 θ 变化。
+        """
+        hull = make_asymmetric_box(100.0, 30.0, 12.0, 30.0, n=121, bottom_z=-5.0)
+        # 设计状态：中线吃水 6 m 的等效体积（按 x=0 处宽 21 m 估算目标）
+        vol = hull.integrate(0.0, 1.0, 0.0)["volume"]  # waterline z=1 → draught 6
+        theta_a = math.radians(-2.0)
+        theta_b = math.radians(2.0)
+        d_a = hull.solve_waterline(0.0, vol, trim_rad=theta_a)
+        d_b = hull.solve_waterline(0.0, vol, trim_rad=theta_b)
+        self.assertGreater(abs(d_a - d_b), 1e-4,
+                           "不对称船体上 ±θ 的平衡 d 应不同（实测 Δd=%.3e）"
+                           % abs(d_a - d_b))
+        lcb_b = hull.integrate(0.0, d_b, theta_b)["xlcb"]
+        out = hull.solve_trim_equilibrium(vol, lcb_b, lcb_tol=1e-6)
+        self.assertLess(abs(out["d_m"] - d_b), 1e-3)
+        self.assertLess(abs(out["volume_residual_m3"]), out["volume_eq_tol_m3"])
 
 
 if __name__ == "__main__":

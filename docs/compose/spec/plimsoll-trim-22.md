@@ -81,8 +81,10 @@ def solve_trim_equilibrium(hull, target_volume, target_lcb, **kwargs) -> dict
 ### 失败行为
 
 - 目标体积 ≤ 0 或超出船体可浸没范围 → `ValueError`
+- **成功解必须同时**满足 `|∇−V*| ≤ volume_eq_tol` 与 `|xlcb−target_lcb| ≤ lcb_tol`；任一超标 → `ValueError`（禁止只返回 LCB 达标而体积残差很大的伪解）
 - θ 在限界内无法使 LCB 残差变号 → `ValueError`（写明已试范围与残差符号）
 - 外层耗尽仍未达 `lcb_tol` → `ValueError`（附最终残差）
+- `theta_lo/hi` 先夹入硬限界 ±30°，避免越界参数使“扩大”反而收窄搜索
 
 ### 纪律
 
@@ -100,7 +102,7 @@ def solve_trim_equilibrium(hull, target_volume, target_lcb, **kwargs) -> dict
 
 - [ ] T1: 在 `geometry.py` 实现 `StationedHull.solve_trim_equilibrium`（嵌套求根 + θ 括号扩大 + 失败抛错）— acceptance: 方箱正 LCB 案例返回 (d,θ) 且体积/LCB 残差达标 (covers: S2)
 - [ ] T2: 在 `geometric.py` 增加纯函数包装，返回契约字典 — acceptance: 从 hull 包装调用可得同一 (d,θ) (covers: S2; depends: T1)
-- [ ] T3: 测试 `tests/test_trim_equilibrium.py`：方箱 LCB=0 / ±LCB 闭式解；θ 与 LCB 同号；体积与 LCB 双达标；参照船体由已知 θ 往返还原；不可达目标抛错 — acceptance: 新文件全绿 (covers: S2; depends: T1,T2)
+- [ ] T3: 测试 `tests/test_trim_equilibrium.py`：方箱 LCB=0 / ±LCB 闭式解；θ 与 LCB 同号；体积与 LCB 双达标；超容积体积抛错；参照船体由已知 θ 往返还原；d(θ) 变异哨兵；不可达目标抛错 — acceptance: 新文件全绿 (covers: S2; depends: T1,T2)
 - [ ] T4: 回归既有三套测试 — acceptance: hydrostatics 28 + geometric 35 + offsets 16 仍全绿 (covers: S2; depends: T1,T2)
 - [ ] T5: 变异验证 — 将外层残差改为恒 0、或只断言体积不查 LCB，确认对应测试变红；记录于 spec Report — acceptance: 至少一条设计缺陷被测试抓住 (covers: S2; depends: T3)
 - [ ] T6: 更新 `PLAN.md` 勾选 2.2 与 `tools/plimsoll/README.md` 限界/能力说明 — acceptance: 2.2 标为完成并附结论摘要 (covers: S2; depends: T3,T4)
