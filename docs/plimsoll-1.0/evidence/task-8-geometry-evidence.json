@@ -1,0 +1,548 @@
+{
+  "method_version": "geometry-analysis-1",
+  "tolerance": {
+    "exact_relative": 1e-10,
+    "exact_absolute": 1e-10,
+    "refinement_relative": 0.01
+  },
+  "box": {
+    "status": "completed",
+    "method_version": "geometry-analysis-1",
+    "validity": {
+      "complete": true,
+      "numerical_convergence": null,
+      "model_applicable": true,
+      "historical_validated": null
+    },
+    "diagnostics": [
+      {
+        "code": "geometry.sealed_envelope",
+        "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+        "path": "$.geometry",
+        "severity": "warning",
+        "blocking": false
+      }
+    ],
+    "geometry": {
+      "schema": "plimsoll-section-polygons-1",
+      "keel_offset_m": 0.0,
+      "source": "independent analytic prism",
+      "estimate": false,
+      "bounds_m": [
+        [
+          -10.0,
+          10.0
+        ],
+        [
+          -3.0,
+          3.0
+        ],
+        [
+          0.0,
+          5.0
+        ]
+      ],
+      "station_count": 3,
+      "section_vertex_counts": [
+        4,
+        4,
+        4
+      ],
+      "quadrature": "trapezoidal_station_areas_and_first_moments",
+      "sealed_envelope_capacity_m3": 600.0
+    },
+    "plane": {
+      "p": 0.0,
+      "q": 0.0,
+      "waterline_d_m": 2.0
+    },
+    "rho_t_m3": 1.025,
+    "estimate": true,
+    "envelope_state": "partial",
+    "values": {
+      "volume_m3": 240.0,
+      "displacement_t": 245.99999999999997,
+      "lcb_m": 0.0,
+      "tcb_m": 0.0,
+      "kb_m": 1.0,
+      "awp_m2": 120.0,
+      "awp_projected_xy_m2": 120.0,
+      "it_m4": 360.0,
+      "il_m4": 4000.0,
+      "waterplane_product_m4": 0.0,
+      "waterplane_centroid_x_m": 0.0,
+      "waterplane_centroid_y_m": 0.0,
+      "bm_t_m": 1.5,
+      "bm_l_m": 16.666666666666668,
+      "km_t_m": 2.5,
+      "tpc_t_per_cm": 1.2299999999999998,
+      "waterline_length_body_x_m": 20.0,
+      "waterline_beam_body_y_m": 6.0,
+      "reference_draft_midships_m": 2.0
+    },
+    "sections": [
+      {
+        "x_m": -10.0,
+        "intercept_m": 2.0,
+        "area_m2": 12.0
+      },
+      {
+        "x_m": 0.0,
+        "intercept_m": 2.0,
+        "area_m2": 12.0
+      },
+      {
+        "x_m": 10.0,
+        "intercept_m": 2.0,
+        "area_m2": 12.0
+      }
+    ],
+    "units": {
+      "length": "m",
+      "area": "m2",
+      "volume": "m3",
+      "inertia": "m4",
+      "mass": "t",
+      "density": "t/m3"
+    },
+    "waterplane_frame": "orthonormal_plane_u_longitudinal_v_transverse_centroidal_moments",
+    "waterplane_axes": {
+      "u": [
+        1.0,
+        -0.0,
+        0.0
+      ],
+      "v": [
+        0,
+        1.0,
+        0.0
+      ]
+    },
+    "upright_empirical_eligible": true,
+    "form_coefficients": {
+      "values": {
+        "cb": 1.0,
+        "cm": 1.0,
+        "cp": 1.0,
+        "cwp": 1.0
+      },
+      "applicability": "upright_body_axis_coefficients",
+      "reference": "station-support x length, extreme waterline y beam, midships plane draft; Cm and Cp use linearly interpolated submerged area at x=0",
+      "length_method": "support_of_piecewise_linear_station_chords"
+    },
+    "wetted_surface": {
+      "area_m2": 200.0,
+      "method": "longitudinal_station_girth_integral",
+      "estimate": true,
+      "end_faces": "excluded",
+      "units": "m2",
+      "approximation": "ignores longitudinal shell slope and finite end faces",
+      "station_girths_m": [
+        10.0,
+        10.0,
+        10.0
+      ]
+    },
+    "trace": {
+      "submerged_moments": "geometry.StationedHull.integrate: station trapezoids",
+      "clipping": "geometry.clip_below_line via section_under_line",
+      "waterplane": "geometry.waterline_intervals; exact x-polynomial moments of linear station scalars",
+      "wetted_surface": "trapezoidal integral of submerged original boundary edges; no closing waterline edge"
+    }
+  },
+  "triangle": {
+    "status": "completed",
+    "method_version": "geometry-analysis-1",
+    "validity": {
+      "complete": true,
+      "numerical_convergence": null,
+      "model_applicable": true,
+      "historical_validated": null
+    },
+    "diagnostics": [
+      {
+        "code": "geometry.sealed_envelope",
+        "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+        "path": "$.geometry",
+        "severity": "warning",
+        "blocking": false
+      }
+    ],
+    "geometry": {
+      "schema": "plimsoll-section-polygons-1",
+      "keel_offset_m": 0.0,
+      "source": "independent analytic prism",
+      "estimate": false,
+      "bounds_m": [
+        [
+          -10.0,
+          10.0
+        ],
+        [
+          -3.0,
+          3.0
+        ],
+        [
+          0.0,
+          5.0
+        ]
+      ],
+      "station_count": 3,
+      "section_vertex_counts": [
+        3,
+        3,
+        3
+      ],
+      "quadrature": "trapezoidal_station_areas_and_first_moments",
+      "sealed_envelope_capacity_m3": 300.0
+    },
+    "plane": {
+      "p": 0.0,
+      "q": 0.0,
+      "waterline_d_m": 2.0
+    },
+    "rho_t_m3": 1.025,
+    "estimate": true,
+    "envelope_state": "partial",
+    "values": {
+      "volume_m3": 48.00000000000001,
+      "displacement_t": 49.2,
+      "lcb_m": 0.0,
+      "tcb_m": 0.0,
+      "kb_m": 1.3333333333333335,
+      "awp_m2": 48.00000000000001,
+      "awp_projected_xy_m2": 48.00000000000001,
+      "it_m4": 23.040000000000013,
+      "il_m4": 1600.0000000000002,
+      "waterplane_product_m4": 0.0,
+      "waterplane_centroid_x_m": 0.0,
+      "waterplane_centroid_y_m": 0.0,
+      "bm_t_m": 0.4800000000000002,
+      "bm_l_m": 33.333333333333336,
+      "km_t_m": 1.8133333333333337,
+      "tpc_t_per_cm": 0.49200000000000005,
+      "waterline_length_body_x_m": 20.0,
+      "waterline_beam_body_y_m": 2.4000000000000004,
+      "reference_draft_midships_m": 2.0
+    },
+    "sections": [
+      {
+        "x_m": -10.0,
+        "intercept_m": 2.0,
+        "area_m2": 2.4000000000000004
+      },
+      {
+        "x_m": 0.0,
+        "intercept_m": 2.0,
+        "area_m2": 2.4000000000000004
+      },
+      {
+        "x_m": 10.0,
+        "intercept_m": 2.0,
+        "area_m2": 2.4000000000000004
+      }
+    ],
+    "units": {
+      "length": "m",
+      "area": "m2",
+      "volume": "m3",
+      "inertia": "m4",
+      "mass": "t",
+      "density": "t/m3"
+    },
+    "waterplane_frame": "orthonormal_plane_u_longitudinal_v_transverse_centroidal_moments",
+    "waterplane_axes": {
+      "u": [
+        1.0,
+        -0.0,
+        0.0
+      ],
+      "v": [
+        0,
+        1.0,
+        0.0
+      ]
+    },
+    "upright_empirical_eligible": true,
+    "form_coefficients": {
+      "values": {
+        "cb": 0.5,
+        "cm": 0.5,
+        "cp": 1.0,
+        "cwp": 1.0
+      },
+      "applicability": "upright_body_axis_coefficients",
+      "reference": "station-support x length, extreme waterline y beam, midships plane draft; Cm and Cp use linearly interpolated submerged area at x=0",
+      "length_method": "support_of_piecewise_linear_station_chords"
+    },
+    "wetted_surface": {
+      "area_m2": 93.29523031752481,
+      "method": "longitudinal_station_girth_integral",
+      "estimate": true,
+      "end_faces": "excluded",
+      "units": "m2",
+      "approximation": "ignores longitudinal shell slope and finite end faces",
+      "station_girths_m": [
+        4.664761515876241,
+        4.664761515876241,
+        4.664761515876241
+      ]
+    },
+    "trace": {
+      "submerged_moments": "geometry.StationedHull.integrate: station trapezoids",
+      "clipping": "geometry.clip_below_line via section_under_line",
+      "waterplane": "geometry.waterline_intervals; exact x-polynomial moments of linear station scalars",
+      "wetted_surface": "trapezoidal integral of submerged original boundary edges; no closing waterline edge"
+    }
+  },
+  "inclined": {
+    "status": "completed",
+    "method_version": "geometry-analysis-1",
+    "validity": {
+      "complete": true,
+      "numerical_convergence": null,
+      "model_applicable": true,
+      "historical_validated": null
+    },
+    "diagnostics": [
+      {
+        "code": "geometry.sealed_envelope",
+        "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+        "path": "$.geometry",
+        "severity": "warning",
+        "blocking": false
+      },
+      {
+        "code": "geometry.inclined_reference",
+        "message": "inclined body-axis ratios are not upright empirical resistance inputs; BM/TPC are unavailable",
+        "path": "$.geometry",
+        "severity": "warning",
+        "blocking": false
+      }
+    ],
+    "geometry": {
+      "schema": "plimsoll-section-polygons-1",
+      "keel_offset_m": 0.0,
+      "source": "independent analytic prism",
+      "estimate": false,
+      "bounds_m": [
+        [
+          -10.0,
+          10.0
+        ],
+        [
+          -3.0,
+          3.0
+        ],
+        [
+          0.0,
+          5.0
+        ]
+      ],
+      "station_count": 3,
+      "section_vertex_counts": [
+        4,
+        4,
+        4
+      ],
+      "quadrature": "trapezoidal_station_areas_and_first_moments",
+      "sealed_envelope_capacity_m3": 600.0
+    },
+    "plane": {
+      "p": 0.05,
+      "q": 0.2,
+      "waterline_d_m": 2.0
+    },
+    "rho_t_m3": 1.025,
+    "estimate": true,
+    "envelope_state": "partial",
+    "values": {
+      "volume_m3": 240.0,
+      "displacement_t": 245.99999999999997,
+      "lcb_m": 1.2499999999999998,
+      "tcb_m": 0.3,
+      "kb_m": 1.06125,
+      "awp_m2": 122.52346713997282,
+      "awp_projected_xy_m2": 120.0,
+      "it_m4": 382.6659208970356,
+      "il_m4": 4093.9331568404373,
+      "waterplane_product_m4": 40.09615384615385,
+      "waterplane_centroid_x_m": 0.0,
+      "waterplane_centroid_y_m": 0.0,
+      "bm_t_m": null,
+      "bm_l_m": null,
+      "km_t_m": null,
+      "tpc_t_per_cm": null,
+      "waterline_length_body_x_m": 20.0,
+      "waterline_beam_body_y_m": 6.0,
+      "reference_draft_midships_m": 2.0
+    },
+    "sections": [
+      {
+        "x_m": -10.0,
+        "intercept_m": 1.5,
+        "area_m2": 9.000000000000002
+      },
+      {
+        "x_m": 0.0,
+        "intercept_m": 2.0,
+        "area_m2": 12.000000000000002
+      },
+      {
+        "x_m": 10.0,
+        "intercept_m": 2.5,
+        "area_m2": 15.0
+      }
+    ],
+    "units": {
+      "length": "m",
+      "area": "m2",
+      "volume": "m3",
+      "inertia": "m4",
+      "mass": "t",
+      "density": "t/m3"
+    },
+    "waterplane_frame": "orthonormal_plane_u_longitudinal_v_transverse_centroidal_moments",
+    "waterplane_axes": {
+      "u": [
+        0.9988002395200092,
+        -0.009603848456923166,
+        0.04801924228461583
+      ],
+      "v": [
+        0,
+        0.9805806756909201,
+        0.19611613513818402
+      ]
+    },
+    "upright_empirical_eligible": false,
+    "form_coefficients": {
+      "values": {
+        "cb": 1.0,
+        "cm": 1.0000000000000002,
+        "cp": 0.9999999999999999,
+        "cwp": 1.0
+      },
+      "applicability": "inclined_body_axis_ratios_not_upright_empirical_inputs",
+      "reference": "station-support x length, extreme waterline y beam, midships plane draft; Cm and Cp use linearly interpolated submerged area at x=0",
+      "length_method": "support_of_piecewise_linear_station_chords"
+    },
+    "wetted_surface": {
+      "area_m2": 200.0,
+      "method": "longitudinal_station_girth_integral",
+      "estimate": true,
+      "end_faces": "excluded",
+      "units": "m2",
+      "approximation": "ignores longitudinal shell slope and finite end faces",
+      "station_girths_m": [
+        9.0,
+        10.0,
+        11.0
+      ]
+    },
+    "trace": {
+      "submerged_moments": "geometry.StationedHull.integrate: station trapezoids",
+      "clipping": "geometry.clip_below_line via section_under_line",
+      "waterplane": "geometry.waterline_intervals; exact x-polynomial moments of linear station scalars",
+      "wetted_surface": "trapezoidal integral of submerged original boundary edges; no closing waterline edge"
+    }
+  },
+  "refinement": [
+    {
+      "n_stations": 41,
+      "n_section": 48,
+      "values": {
+        "volume_m3": 143.54902417668055,
+        "displacement_t": 147.13774978109754,
+        "lcb_m": -6.015199074703892e-16,
+        "tcb_m": -7.73635410051043e-19,
+        "kb_m": 1.145189281929926,
+        "awp_m2": 95.90110187776838,
+        "awp_projected_xy_m2": 95.90110187776838,
+        "it_m4": 218.69448355714877,
+        "il_m4": 2452.2528658306724,
+        "waterplane_product_m4": 0.0,
+        "waterplane_centroid_x_m": 1.0071771987093278e-16,
+        "waterplane_centroid_y_m": 0.0,
+        "bm_t_m": 1.5234828993889848,
+        "bm_l_m": 17.083034035901438,
+        "km_t_m": 2.668672181318911,
+        "tpc_t_per_cm": 0.9829862942471259,
+        "waterline_length_body_x_m": 20.0,
+        "waterline_beam_body_y_m": 6.0,
+        "reference_draft_midships_m": 2.0
+      },
+      "content_sha256": "1c99d103195e858403abf6229efb7240e9c39deebcd4f43ba92ad9759348510c"
+    },
+    {
+      "n_stations": 81,
+      "n_section": 96,
+      "values": {
+        "volume_m3": 143.84241428835583,
+        "displacement_t": 147.4384746455647,
+        "lcb_m": -5.032832663274092e-16,
+        "tcb_m": -2.7835834293368094e-18,
+        "kb_m": 1.1437961638748069,
+        "awp_m2": 95.97529686438845,
+        "awp_projected_xy_m2": 95.97529686438845,
+        "it_m4": 218.86321402140535,
+        "il_m4": 2456.2352900744013,
+        "waterplane_product_m4": 0.0,
+        "waterplane_centroid_x_m": 5.3211879307775055e-17,
+        "waterplane_centroid_y_m": 0.0,
+        "bm_t_m": 1.5215485300646996,
+        "bm_l_m": 17.075876418136815,
+        "km_t_m": 2.6653446939395065,
+        "tpc_t_per_cm": 0.9837467928599816,
+        "waterline_length_body_x_m": 20.0,
+        "waterline_beam_body_y_m": 6.0,
+        "reference_draft_midships_m": 2.0
+      },
+      "content_sha256": "5cc3a168fdcdfc0b047302f08f91f05debd2972ed9c896b3ea2aac0eb31fcb9a"
+    }
+  ],
+  "refinement_relative_deltas": {
+    "volume_m3": 0.0020396634269995665,
+    "awp_m2": 0.0007730633719727651,
+    "it_m4": 0.0007709402651835369,
+    "kb_m": 0.0012179775550215045
+  },
+  "mutation_results": [
+    {
+      "name": "omit_station_trim",
+      "detected": true,
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "name": "omit_inclined_area_factor",
+      "detected": true,
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "name": "omit_keel_from_deck",
+      "detected": true,
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "name": "omit_clearance_normalization",
+      "detected": true,
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "name": "wrong_longitudinal_moment_power",
+      "detected": true,
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "name": "discard_parameter_keel_shift",
+      "detected": true,
+      "failures": 1,
+      "errors": 0
+    }
+  ]
+}
