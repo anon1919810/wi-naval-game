@@ -1,6 +1,6 @@
 # Historical task review records
 
-Verbatim implementation and independent review reports for completed Tasks 1-5,
+Verbatim implementation and independent review reports for completed Tasks 1-5 and 7,
 copied from the development plan's ignored workspace. Manifest hashes match the
 source bytes at archival time. Each report is limited to its own named commit
 and review scope; later code changes need their own validation. A report's
