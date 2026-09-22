@@ -196,9 +196,20 @@ def _divide_intervals(numerator: list[float], denominator: list[float]) -> list[
     return [min(quotients), max(quotients)]
 
 
+def _source_unknown(source):
+    return source in (None, "", {}) or isinstance(source, str) and not source.strip()
+
+
 def _provenance_summary(items: list[dict]) -> dict:
+    def missing_source(item):
+        return any(_source_unknown(field.get("source"))
+                   for field in item["provenance"]["fields"].values())
+
+    def unknown_estimate(item):
+        return any(field.get("estimate") is None for field in item["provenance"]["fields"].values())
+
     source_missing = [
-        item["id"] for item in items if item["source"] in (None, "", {})
+        item["id"] for item in items if missing_source(item)
     ]
     estimate_counts = {
         "estimated": sum(item["estimate"] is True for item in items),
@@ -208,7 +219,7 @@ def _provenance_summary(items: list[dict]) -> dict:
     unverified = [
         item["id"]
         for item in items
-        if item["source"] in (None, "", {}) or item["estimate"] is None
+        if missing_source(item) or unknown_estimate(item)
     ]
     return {
         "item_count": len(items),
@@ -252,7 +263,7 @@ def _uncertainty_summary(
         mass_interval[1] += item_mass_interval[1]
 
         missing_fields = []
-        if item["estimate"] is True and "mass_t" not in uncertainty:
+        if item["provenance"]["fields"]["mass_t"]["estimate"] is True and "mass_t" not in uncertainty:
             missing_fields.append("mass_t")
         for axis, field in _AXIS_FIELDS.items():
             if item_mass_interval[1] == 0:
@@ -266,7 +277,7 @@ def _uncertainty_summary(
             else:
                 position_interval = [position, position]
                 conditional_fields.append(f"{item_path}.{field}")
-                if item["estimate"] is True:
+                if item["provenance"]["fields"][field]["estimate"] is True:
                     missing_fields.append(field)
             contribution = _multiply_intervals(item_mass_interval, position_interval)
             moment_intervals[axis][0] += contribution[0]
@@ -355,6 +366,7 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
     )
     if condition is None:
         raise LoadingConditionError(condition_id)
+    condition_index = normalized["loading_conditions"].index(condition)
 
     diagnostics = copy.deepcopy(project_io.validate_project(normalized))
     effective_items = []
@@ -377,6 +389,12 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
         for item_index, base_item in enumerate(group["items"]):
             item = copy.deepcopy(base_item)
             override = condition["overrides"].get(item["id"], {})
+            field_provenance = {field: {"source": copy.deepcopy(item["source"]),
+                                      "estimate": item["estimate"], "origin": "base"}
+                                for field in ("mass_t", "x_m", "y_m", "kg_m")}
+            declared_provenance = condition.get("override_provenance", {}).get(item["id"], {})
+            override_path = (f"$.loading_conditions[{condition_index}].overrides"
+                             f"[{json.dumps(item['id'], ensure_ascii=False)}]")
             for field, value in override.items():
                 item[field] = value
                 uncertainty = item.get("uncertainty")
@@ -386,16 +404,32 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
                         _diagnostic(
                             "loading.uncertainty_override_cleared",
                             "warning",
-                            f"$.loading_conditions.{condition_id}.overrides.{item['id']}.{field}",
+                            f"{override_path}.{field}",
                             "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
                         )
                     )
+                metadata = copy.deepcopy(declared_provenance.get(field, {}))
+                metadata.setdefault("source", None)
+                metadata.setdefault("estimate", None)
+                metadata["origin"] = "selected_condition"
+                field_provenance[field] = metadata
+                if "uncertainty" in metadata:
+                    item.setdefault("uncertainty", {})[field] = copy.deepcopy(metadata["uncertainty"])
+                if _source_unknown(metadata["source"]) or metadata["estimate"] is None:
+                    diagnostics.append(_diagnostic("loading.override_provenance_unknown", "warning",
+                        f"{override_path}.{field}", "override has unknown field provenance; base source is not inherited"))
+            estimates = [entry["estimate"] for entry in field_provenance.values()]
+            item["estimate"] = True if True in estimates else None if None in estimates else False
+            if override:
+                item["source"] = {"fields": {field: copy.deepcopy(entry["source"])
+                                             for field, entry in field_provenance.items()}}
             item["group_id"] = group["id"]
             item["group_label"] = group["label"]
             item["overridden_fields"] = sorted(override)
             item["provenance"] = {
                 "source": copy.deepcopy(item["source"]),
                 "estimate": item["estimate"],
+                "fields": field_provenance,
             }
             group_items.append(item)
             effective_items.append(item)

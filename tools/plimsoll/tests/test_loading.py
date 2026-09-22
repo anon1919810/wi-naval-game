@@ -348,7 +348,7 @@ class TestUncertaintyAndProvenance(unittest.TestCase):
         self.assertTrue(
             any(
                 d["code"] == "loading.uncertainty_override_cleared"
-                and d["path"].endswith("second.mass_t")
+                and d["path"] == '$.loading_conditions[1].overrides["second"].mass_t'
                 for d in result["diagnostics"]
             )
         )

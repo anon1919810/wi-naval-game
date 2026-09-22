@@ -10,9 +10,10 @@ from typing import Any
 import uuid
 
 try:
-    from . import units
+    from . import units, project_extensions
 except ImportError:  # Preserve the repository's direct-module import convention.
     import units
+    import project_extensions
 
 
 SCHEMA = "plimsoll-project-1"
@@ -88,6 +89,10 @@ def _is_finite_real(value: Any) -> bool:
 def _with_schema_defaults(payload: dict) -> dict:
     project = copy.deepcopy(payload)
     project.setdefault("schema", SCHEMA)
+    if "opening_definition" not in project:
+        project["opening_definition"] = (
+            "unknown" if "openings" not in project else
+            "legacy_ambiguous" if project["openings"] == [] else "supplied")
     for key, default in _TOP_LEVEL_DEFAULTS.items():
         project.setdefault(key, copy.deepcopy(default))
 
@@ -146,6 +151,7 @@ def new_project(name: str, project_id: str | None = None) -> dict:
         "id": project_id or str(uuid.uuid4()),
         "name": name,
         **copy.deepcopy(_TOP_LEVEL_DEFAULTS),
+        "opening_definition": "unknown",
     }
 
 
@@ -664,7 +670,7 @@ def _validate_loading_conditions(
             )
             continue
         for item_id, override in overrides.items():
-            override_path = f"{path}.overrides.{item_id}"
+            override_path = f"{path}.overrides[{json.dumps(item_id, ensure_ascii=False)}]"
             if item_id not in item_ids:
                 diagnostics.append(
                     _diagnostic(
@@ -699,6 +705,43 @@ def _validate_loading_conditions(
                     diagnostics,
                     nonnegative=field in {"mass_t", "kg_m"},
                 )
+        _validate_override_provenance(condition, path, diagnostics)
+
+
+def _validate_override_provenance(condition, path, diagnostics):
+    metadata = condition.get("override_provenance", {})
+    path += ".override_provenance"
+    if not isinstance(metadata, dict):
+        diagnostics.append(_diagnostic("override_provenance.invalid", "error", path, "must be an object"))
+        return
+    for item_id, fields in metadata.items():
+        item_path = f"{path}[{json.dumps(item_id, ensure_ascii=False)}]"
+        override = condition["overrides"].get(item_id)
+        if not isinstance(override, dict) or not isinstance(fields, dict):
+            diagnostics.append(_diagnostic("override_provenance.orphan", "error", item_path,
+                                           "metadata requires a matching item override and field object"))
+            continue
+        for field, entry in fields.items():
+            field_path = f"{item_path}.{field}"
+            if field not in override or field not in _OVERRIDE_FIELDS or not isinstance(entry, dict):
+                diagnostics.append(_diagnostic("override_provenance.orphan", "error", field_path,
+                                               "metadata requires a matching numeric override"))
+                continue
+            for key in entry.keys() - {"source", "estimate", "uncertainty", "acceptance"}:
+                diagnostics.append(_diagnostic("override_provenance.field_unknown", "error",
+                    field_path + "." + str(key), "unsupported field provenance property"))
+            if entry.get("source") is not None and not isinstance(entry["source"], (str, dict)):
+                diagnostics.append(_diagnostic("source.invalid", "error", field_path + ".source",
+                                               "source must be string, object or null"))
+            if entry.get("estimate") is not None and not isinstance(entry["estimate"], bool):
+                diagnostics.append(_diagnostic("estimate.invalid", "error", field_path + ".estimate",
+                                               "estimate must be boolean or null"))
+            if "uncertainty" in entry:
+                _validate_uncertainty({field: override[field], "uncertainty": {field: entry["uncertainty"]}},
+                                      field_path, diagnostics)
+            if "acceptance" in entry:
+                diagnostics.extend(project_extensions.validate_acceptance(
+                    entry["acceptance"], condition.get("id"), field, override[field], field_path + ".acceptance"))
 
 
 def validate_project(payload: Any) -> list[dict]:
@@ -781,6 +824,17 @@ def validate_project(payload: Any) -> list[dict]:
     _validate_geometry(project, diagnostics)
     item_ids = _validate_weight_groups(project, diagnostics)
     _validate_loading_conditions(project, item_ids, diagnostics)
+    definition = project.get("opening_definition")
+    if definition not in ("unknown", "supplied", "legacy_ambiguous"):
+        diagnostics.append(_diagnostic("openings.definition_invalid", "error", "$.opening_definition",
+                                       "opening_definition must be unknown, supplied or legacy_ambiguous"))
+    elif definition != "supplied" and project.get("openings") != []:
+        diagnostics.append(_diagnostic("openings.definition_conflict", "error", "$.opening_definition",
+                                       "unknown or ambiguous definitions require an empty openings array"))
+    elif definition != "supplied":
+        diagnostics.append(_diagnostic("openings." + definition, "warning", "$.opening_definition",
+            "opening knowledge is unknown" if definition == "unknown" else
+            "legacy empty openings have ambiguous origin; explicitly declare supplied to mean none"))
     for field, expected_type in (
         ("systems", dict),
         ("compartments", list),
@@ -796,6 +850,7 @@ def validate_project(payload: Any) -> list[dict]:
                     f"{field} must be a JSON {expected_type.__name__}",
                 )
             )
+    diagnostics.extend(project_extensions.validate_extensions(project, item_ids))
     return diagnostics
 
 

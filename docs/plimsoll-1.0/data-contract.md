@@ -118,6 +118,35 @@ arrays reserved for their canonical domain payloads. Later Plimsoll tasks may
 add optional, schema-preserving sections; they must validate those sections
 without changing the meanings defined here.
 
+### Persistent opening knowledge
+
+Normalized projects contain `opening_definition`: `unknown`, `supplied`, or
+`legacy_ambiguous`. When `openings` is absent, normalization records `unknown`
+before supplying an empty array. A nonempty array without a marker implies
+`supplied`. An existing marker-free empty array has ambiguous origin and becomes
+`legacy_ambiguous` with a diagnostic. No historical intent is reconstructed.
+`new_project` and legacy ship migration start with `unknown`.
+
+An explicit no-openings declaration must write both `opening_definition:
+"supplied"` and `openings: []`. Unknown and ambiguous states require an empty
+array; combining either marker with actual points is an error. Editors adding
+points to a new draft must also set the marker to supplied. Existing markers are
+preserved through normalization, save/reopen and project/loading fingerprints.
+Unknown and supplied-none therefore have different identities. Consumers must
+pass `None` to the opening-aware numerical APIs for unknown/ambiguous definitions,
+and the actual array (including explicit `[]`) only for supplied definitions.
+The later coordinator/flooding bridge owns that conversion; validation does not
+change the public solver's raw `None` versus `[]` meanings.
+
+### Optional calculation-core fields
+
+[Optional core inputs](project-extensions.md) specifies validated metadata,
+display preferences, deck points/segments, propulsion/ordnance/armour facts,
+fuel ledger bindings, explicit resistance/endurance scenarios and historical
+comparison rows. Optional facts preserve their literal value/source/tri-state
+estimate; schema validation never fills numerical assumptions or evaluates a
+physical formula. Existing systems mass-model/count keys retain their contracts.
+
 Stored calculation output is not project input. Top-level `result`, `results`,
 `cache`, `cache_key` and `input_fingerprint` fields are rejected, preventing a
 stored result from changing its own input fingerprint.
@@ -209,6 +238,32 @@ project I/O, applies overrides and detects duplicate active `includes` tokens.
 
 Normal and deep reference displacements are checks, not residual-mass plugs.
 They never fabricate an unlisted fuel, stores or payload difference.
+
+### Per-field override provenance
+
+A condition may include a sibling `override_provenance` object keyed by item ID,
+then by one of the four overridden numeric fields. Every metadata entry must
+have a matching numeric override. Allowed metadata properties are `source`
+(string/object/null), `estimate` (boolean/null), optional `uncertainty` (two
+inclusive finite bounds containing the effective nominal), and optional
+`acceptance` (the audited physical-mass record in the extension contract).
+Metadata is never placed inside the numeric `overrides` object.
+
+Resolution clears the inherited uncertainty only for an overridden field and
+then applies explicitly supplied replacement bounds. It records effective
+`provenance.fields` for all four fields with `origin: base|selected_condition`.
+An override with no source/estimate metadata becomes unknown, never borrowing
+the base source for a new mass or coordinate. Unchanged coordinate sources stay
+attached to those coordinates. For overridden items, the aggregate source is
+`{fields: {mass_t: ..., x_m: ..., y_m: ..., kg_m: ...}}`; item-level estimate is
+true if any field is estimated, otherwise null if any field is unknown, otherwise
+false. Provenance completeness inspects every field, so an estimated aggregate
+does not conceal another field's unknown provenance. Uncertainty warnings also
+use the individual field's estimate state. No base/other-condition inputs mutate.
+
+The uncertainty-clearing diagnostic uses the actual condition array index and
+JSON-quoted item key, for example
+`$.loading_conditions[1].overrides["plate.a[1]"].mass_t`.
 
 ## Diagnostics and normalization
 
