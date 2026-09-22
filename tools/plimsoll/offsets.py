@@ -26,7 +26,10 @@ import json
 import math
 import os
 
-from geometry import StationedHull
+if __package__:
+    from .geometry import StationedHull
+else:
+    from geometry import StationedHull
 
 # 甲板高 deck_z 是**船的数据**，不是代码的默认：本模块不再提供 DECK_Z 默认值
 # （2026-09-22 清理：原先沿用生成脚本的 5.10，会让别的船静默拿到 QM 的甲板高）。

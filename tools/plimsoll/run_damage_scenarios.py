@@ -5,13 +5,14 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(HERE))
-
-import damage as D  # noqa: E402
-import geometry as G  # noqa: E402
+if __package__:
+    from . import damage as D
+    from . import geometry as G
+else:
+    import damage as D
+    import geometry as G
 
 
 def load_hull(hull_cfg: dict):

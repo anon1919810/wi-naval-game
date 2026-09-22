@@ -24,7 +24,10 @@ from __future__ import annotations
 
 import math
 
-import units
+if __package__:
+    from . import units
+else:
+    import units
 
 SCHEMA = "plimsoll-engines-1"
 HP_TO_KW = 0.7457          # 1 hp = 745.7 W（机械马力国际定义）

@@ -15,9 +15,10 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-import hydrostatics as H  # noqa: E402
+if __package__:
+    from . import hydrostatics as H
+else:
+    import hydrostatics as H
 
 # 显示用：键 → (中文名, 小数位, 单位)
 DISPLAY = [
@@ -44,7 +45,10 @@ def _load_offsets_hull(a, case_dir, hull):
     都没有就明确报错并告诉用户怎么给 —— **不扫描仓库路径、不回落到任何生成脚本**。
     甲板高：offsets 文件自带 `deck_z_m` → 案例 `hull.depth_m`，再没有就报错。
     """
-    import offsets as OF
+    if __package__:
+        from . import offsets as OF
+    else:
+        import offsets as OF
 
     path = a.offsets or hull.get("offsets_path")
     if not path:
@@ -142,9 +146,14 @@ def main() -> int:
 
     gz_block = None
     if a.gz:
-        import geometry as GE
-        import geometric as GM
-        import offsets as OF
+        if __package__:
+            from . import geometric as GM
+            from . import geometry as GE
+            from . import offsets as OF
+        else:
+            import geometric as GM
+            import geometry as GE
+            import offsets as OF
         import math as _m
         kg = hull.get("kg_m")
         if kg is None:

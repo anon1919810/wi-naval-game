@@ -25,7 +25,10 @@ from __future__ import annotations
 
 import math
 
-import freesurface as FS
+if __package__:
+    from . import freesurface as FS
+else:
+    import freesurface as FS
 
 RHO_SEA = 1.025
 G = 9.80665

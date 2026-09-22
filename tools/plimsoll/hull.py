@@ -135,7 +135,10 @@ def waterline_length(hull, z: float = 0.0, eps: float = 1e-6) -> dict:
     ⚠️ 口径提醒：型线文件的 z=0 是**该型线自己的设计水线**（QM 型线对应满载吃水 9.9 m），
     所以这里算出的不是案例里"正常吃水"的 Lwl，两者不可直接混用 —— 已在 warnings 里点明。
     """
-    import geometric as GM
+    if __package__:
+        from . import geometric as GM
+    else:
+        import geometric as GM
 
     xs = [float(x) for x, _ in hull.stations]
     hb = [GM._waterline_halfbeam(poly, z) for _, poly in hull.stations]
@@ -187,8 +190,12 @@ def form_coefficients(hull, z: float = 0.0) -> dict:
     ⚠️ 型线的 z=0 是**它自己的设计水线**（QM 型线 = 满载吃水 9.9），
       所以这里得到的系数是满载口径，与案例里正常吃水（8.5）的 Cb 不是一回事。
     """
-    import geometry as GE
-    import geometric as GM
+    if __package__:
+        from . import geometric as GM
+        from . import geometry as GE
+    else:
+        import geometric as GM
+        import geometry as GE
 
     xs, areas, hbs = [], [], []
     for x, poly in hull.stations:
@@ -249,7 +256,10 @@ def half_angle_of_entrance(hull, z: float = 0.0, at_frac: float = 0.20) -> dict:
     ⚠️ 若水线在艏端**没有收拢**（型线被截断，首尾站仍有宽度）→ 取不到该点，
     **返回 None + 警告**，不编一个角度出来。
     """
-    import geometric as GM
+    if __package__:
+        from . import geometric as GM
+    else:
+        import geometric as GM
 
     xs = [float(x) for x, _ in hull.stations]
     hb = [GM._waterline_halfbeam(poly, z) for _, poly in hull.stations]
@@ -315,7 +325,10 @@ def wetted_surface_from_hull(hull, phi_rad: float = 0.0, d: float = 0.0) -> dict
     `hull` 是 `geometry.StationedHull`（有 .stations = [(x, poly), ...]）。
     横倾/纵倾可由 `phi_rad`、`d` 给出（默认正浮、设计水线）。
     """
-    import geometry as GE
+    if __package__:
+        from . import geometry as GE
+    else:
+        import geometry as GE
 
     tan_phi = math.tan(phi_rad)
     xs, gs = [], []

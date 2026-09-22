@@ -27,12 +27,6 @@
 from __future__ import annotations
 
 import math
-import os
-import sys
-
-_HERE = os.path.dirname(os.path.abspath(__file__))
-if _HERE not in sys.path:
-    sys.path.insert(0, _HERE)
 
 RHO_SEA = 1.025
 
@@ -192,7 +186,10 @@ def solve_flooded_equilibrium(hull, ship, tanks=None, rho=RHO_SEA, **trim_kwargs
     横倾：GM′>0 时 φ≈atan(HeelMoment/(Δ′·GM′))，HeelMoment=Σδ·y（t·m）。
     GM′≤0 时不抛错，`gm_negative=True`，`heel_deg=None`。
     """
-    import geometric as M
+    if __package__:
+        from . import geometric as M
+    else:
+        import geometric as M
 
     combo = flood_combination(ship, tanks or [])
     rho = float(rho)
@@ -283,7 +280,10 @@ def remaining_gz_curve(hull, kg_effective_m, target_volume_m3,
 
     禁止：kg 已含 FSC，又传入同一批舱 → **双计**。此时抛 ValueError。
     """
-    import geometric as M
+    if __package__:
+        from . import geometric as M
+    else:
+        import geometric as M
 
     if angles_deg is None:
         angles_deg = [float(a) for a in range(0, 65, 5)]
