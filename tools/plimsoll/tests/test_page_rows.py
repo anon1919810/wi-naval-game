@@ -31,9 +31,9 @@ def state(items):
             "effective_items": items}
 
 
-def systems_result(bound_ids, leaf_mass, models=()):
+def systems_result(bound_ids, leaf_mass, models=(), leaf="armour.fixed"):
     return {"schema": "plimsoll-systems-1",
-            "systems": {"armour.fixed": {
+            "systems": {leaf: {
                 "ledger_mass_t": leaf_mass, "linked_items": list(bound_ids),
                 "mass_models": list(models), "status": "complete"}}}
 
@@ -180,9 +180,93 @@ class QueenMaryIntegrationTests(unittest.TestCase):
     def test_a_project_without_a_declaration_gains_no_invented_rows(self):
         stripped = json.loads(json.dumps(self.project))
         stripped["systems"]["armour"]["fixed"].pop("page_rows")
+        stripped["systems"]["weapons"]["torpedo"].pop("page_rows")
         result = analysis.compute_project(
             stripped, "normal-engineering", {"stages": ["loading", "systems"]})
         self.assertNotIn("page_rows", result["stages"]["systems"]["data"])
+
+
+    def test_typed_fields_are_echoed_and_unknowns_reported(self):
+        ledger = state([item("torpedoes", 62.0)])
+        known = page_rows.project_declared_rows(
+            ledger, systems_result(["torpedoes"], 62.0, leaf="weapons.torpedo"),
+            "weapons", "torpedo",
+            [{"row": "torpedo_main", "weight_item_ids": ["torpedoes"],
+              "typed": {"tubes": 2, "carried": 14, "diameter_mm": 533.0}}])["rows"][0]
+        self.assertEqual(known["typed_status"], "declared")
+        self.assertEqual(known["typed_unknown_fields"], [])
+
+        partial = page_rows.project_declared_rows(
+            ledger, systems_result(["torpedoes"], 62.0, leaf="weapons.torpedo"),
+            "weapons", "torpedo",
+            [{"row": "torpedo_main", "weight_item_ids": ["torpedoes"],
+              "typed": {"tubes": 2, "length_m": None}}])
+        self.assertEqual(partial["rows"][0]["typed_status"], "partial_unknown")
+        self.assertEqual(partial["rows"][0]["typed_unknown_fields"], ["length_m"])
+        self.assertIn("page_rows.typed_field_unknown",
+                      {diag["code"] for diag in partial["diagnostics"]})
+        self.assertFalse(any(diag["blocking"] for diag in partial["diagnostics"]))
+
+    def test_row_without_a_ledger_binding_has_unknown_mass_not_zero(self):
+        ledger = state([item("torpedoes", 62.0)])
+        result = page_rows.project_declared_rows(
+            ledger, systems_result(["torpedoes"], 62.0, leaf="weapons.torpedo"),
+            "weapons", "torpedo",
+            [{"row": "torpedo_main", "weight_item_ids": ["torpedoes"]},
+             {"row": "mines", "weight_item_ids": [], "typed": {"count": None}}])
+        mines = result["rows"][1]
+        self.assertIsNone(mines["weight_t"])
+        self.assertEqual(mines["mass_status"], "no_ledger_binding")
+        # unknown mass must not be counted as zero in the total
+        self.assertAlmostEqual(result["values"]["declared_rows_total_t"], 62.0, places=9)
+        self.assertTrue(result["values"]["matches_ledger_mass"])
+
+    def test_undeclared_typed_row_is_reported_as_unknown(self):
+        ledger = state([item("torpedoes", 62.0)])
+        row = page_rows.project_declared_rows(
+            ledger, systems_result(["torpedoes"], 62.0, leaf="weapons.torpedo"),
+            "weapons", "torpedo", [{"row": "mines"}])["rows"][0]
+        self.assertEqual(row["typed_status"], "unknown_no_typed_declaration")
+        self.assertIsNone(row["typed"])
+
+
+class QueenMaryWeaponsTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        case = (PKG / "cases" / "projects" / "queen_mary_1913.project.json")
+        cls.project = project_store.load(case)
+        cls.state = loading.resolve_loading(cls.project, "normal-engineering")
+        cls.summary = systems.summary(cls.project, cls.state)
+        cls.declaration = cls.project["systems"]["weapons"]["torpedo"]["page_rows"]
+
+    def test_torpedo_row_matches_the_ledger_and_flags_missing_length(self):
+        result = page_rows.project_declared_rows(self.state, self.summary, "weapons",
+                                                 "torpedo", self.declaration)
+        values = result["values"]
+        self.assertEqual(values["declared_rows"], 4)
+        self.assertEqual(values["declared_item_count"], 2)
+        self.assertEqual(values["ledger_item_count"], 2)
+        self.assertTrue(values["matches_ledger_mass"])
+        main = result["rows"][0]
+        self.assertAlmostEqual(main["weight_t"], 62.0, places=9)
+        self.assertEqual(main["typed"]["diameter_mm"], 533.0)
+        self.assertEqual(main["typed_unknown_fields"], ["length_m"])
+
+    def test_count_only_rows_stay_unknown(self):
+        result = page_rows.project_declared_rows(self.state, self.summary, "weapons",
+                                                 "torpedo", self.declaration)
+        for row in result["rows"][1:]:
+            self.assertIsNone(row["weight_t"])
+            self.assertEqual(row["mass_status"], "no_ledger_binding")
+            self.assertTrue(row["typed_unknown_fields"])
+
+    def test_coordinator_attaches_armour_and_weapons_projections(self):
+        result = analysis.compute_project(
+            self.project, "normal-engineering", {"stages": ["loading", "systems"]})
+        views = result["stages"]["systems"]["data"]["page_rows"]
+        self.assertEqual(sorted(views), ["armour.fixed", "weapons.torpedo"])
+        self.assertTrue(views["armour.fixed"]["values"]["matches_ledger_mass"])
+        self.assertTrue(views["weapons.torpedo"]["values"]["matches_ledger_mass"])
 
 
 if __name__ == "__main__":

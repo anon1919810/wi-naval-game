@@ -113,8 +113,10 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
         if not isinstance(row_name, str) or not row_name.strip():
             raise ValueError("%s.row must be a nonempty string" % path)
         ids = entry.get("weight_item_ids")
-        if not isinstance(ids, list) or not ids:
-            raise ValueError("%s.weight_item_ids must be a nonempty array" % path)
+        if ids is None:
+            ids = []
+        if not isinstance(ids, list):
+            raise ValueError("%s.weight_item_ids must be an array" % path)
 
         mass = 0.0
         areas, thicknesses, estimates, sources = [], [], [], []
@@ -155,6 +157,20 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
         thickness_mm = float(declared_thickness) if isinstance(
             declared_thickness, (int, float)) and not isinstance(declared_thickness, bool) else (
             max(thicknesses) if thicknesses else None)
+
+        # Typed inputs (diameter/counts/arrangement/...) are declared, never inferred.
+        typed = entry.get("typed")
+        typed = dict(typed) if isinstance(typed, dict) else None
+        typed_unknown = sorted(key for key, value in (typed or {}).items() if value is None)
+        if typed_unknown:
+            diagnostics.append(_diagnostic(
+                "page_rows.typed_field_unknown",
+                "typed fields are unknown and must not be substituted: %r" % (typed_unknown,),
+                path + ".typed"))
+        if typed:
+            typed_status = "declared" if not typed_unknown else "partial_unknown"
+        else:
+            typed_status = "unknown_no_typed_declaration"
         extents = entry.get("extents_m")
         declared_extent = (isinstance(extents, dict)
                            and isinstance(extents.get("aft_m"), (int, float))
@@ -169,22 +185,29 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
         rows_out.append({
             "row": row_name,
             "label": entry.get("label"),
-            "weight_t": mass,
+            # A row that binds no ledger item has no mass: unknown, never zero.
+            "weight_t": mass if ids else None,
+            "mass_status": "ledger_bound" if ids else "no_ledger_binding",
             "item_ids": list(ids),
             "item_count": len(ids),
-            "thickness_mm": thickness_mm,
+            "thickness_mm": thickness_mm if ids else entry.get("thickness_mm"),
             "area_m2": sum(areas) if areas else None,
             "length_m": length_m,
             "extents_m": dict(extents) if declared_extent else None,
             "segment_status": ("declared_extents" if declared_extent
                                else "unknown_no_declared_extent"),
+            "typed": typed,
+            "typed_unknown_fields": typed_unknown,
+            "typed_status": typed_status,
             "estimate": all(estimates) if estimates else None,
             "sources": sorted(set(sources)),
         })
         trace.append({
             "key": "page_row.%s.weight_t" % row_name,
-            "value": mass,
-            "formula": "Σ 声明条目的账本 mass_t（不重算）",
+            # A row with no ledger binding has unknown mass; the trace must not say 0.
+            "value": mass if ids else None,
+            "formula": ("Σ 声明条目的账本 mass_t（不重算）" if ids
+                        else "no ledger binding → mass unknown"),
             "source": "selected loading weight ledger; declared binding by weight_item_ids",
             "estimate": all(estimates) if estimates else None,
         })
@@ -196,7 +219,7 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             "armour ledger items are not declared by any page row: %r" % (uncovered,),
             "$.page_rows"))
 
-    total = sum(row["weight_t"] for row in rows_out)
+    total = sum(row["weight_t"] for row in rows_out if row["weight_t"] is not None)
     bound = leaf_payload.get("ledger_mass_t")
     matches = (isinstance(bound, (int, float)) and not isinstance(bound, bool)
                and math.isclose(total, float(bound), rel_tol=MASS_TOLERANCE_T,

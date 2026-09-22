@@ -111656,6 +111656,56 @@
       },
       "torpedo": {
         "installed_tubes": 2,
+        "page_rows": [
+          {
+            "label": "Torpedo tubes (main)",
+            "row": "torpedo_main",
+            "source": "tubes: Navypedia '2 - 533 TT (beam)' / 维基两舷各一；carried: 维基 14 枚 Mk II***；diameter: Navypedia 533 mm；length: 未采集（雷长缺源）",
+            "typed": {
+              "arrangement": "submerged beam（两舷各一）",
+              "carried": 14,
+              "diameter_mm": 533.0,
+              "length_m": null,
+              "tubes": 2
+            },
+            "weight_item_ids": [
+              "torpedo-launch-outfit",
+              "torpedoes"
+            ]
+          },
+          {
+            "label": "Torpedo tubes (secondary)",
+            "row": "torpedo_secondary",
+            "source": "Queen Mary 未见第二组鱼雷发射管的配置记录；未采集来源",
+            "typed": {
+              "carried": null,
+              "diameter_mm": null,
+              "length_m": null,
+              "tubes": null
+            },
+            "weight_item_ids": []
+          },
+          {
+            "label": "Mines",
+            "row": "mines",
+            "source": "1913 年战列巡洋舰配置未见布雷装备记录；未采集来源",
+            "typed": {
+              "count": null,
+              "kind": null
+            },
+            "weight_item_ids": []
+          },
+          {
+            "label": "Depth charges",
+            "row": "depth_charges",
+            "source": "深弹 1916 年才投入使用，本舰（1916-05 战沉）未见装备记录；未采集来源",
+            "typed": {
+              "count": null,
+              "kind": null
+            },
+            "weight_item_ids": []
+          }
+        ],
         "weight_item_ids": [
           "torpedo-launch-outfit",
           "torpedoes"

@@ -206,6 +206,31 @@ QM_ARMOUR_PAGE_ROWS = [
 ]
 
 
+# SPS Weapons 页的行声明。typed 字段为**声明输入**（不可由其它量推断）；缺失一律 null →
+# 投影层会报 page_rows.typed_field_unknown，而不是补零。
+# 无 weight_item_ids 的行 = 该行没有对应账本质量（质量 unknown，不是 0）。
+QM_WEAPONS_PAGE_ROWS = [
+    {"row": "torpedo_main", "label": "Torpedo tubes (main)",
+     "weight_item_ids": ["torpedo-launch-outfit", "torpedoes"],
+     "typed": {"tubes": 2, "carried": 14, "diameter_mm": 533.0, "length_m": None,
+               "arrangement": "submerged beam（两舷各一）"},
+     "source": ("tubes: Navypedia '2 - 533 TT (beam)' / 维基两舷各一；carried: 维基 14 枚 "
+                "Mk II***；diameter: Navypedia 533 mm；length: 未采集（雷长缺源）")},
+    {"row": "torpedo_secondary", "label": "Torpedo tubes (secondary)",
+     "weight_item_ids": [],
+     "typed": {"tubes": None, "carried": None, "diameter_mm": None, "length_m": None},
+     "source": "Queen Mary 未见第二组鱼雷发射管的配置记录；未采集来源"},
+    {"row": "mines", "label": "Mines",
+     "weight_item_ids": [],
+     "typed": {"count": None, "kind": None},
+     "source": "1913 年战列巡洋舰配置未见布雷装备记录；未采集来源"},
+    {"row": "depth_charges", "label": "Depth charges",
+     "weight_item_ids": [],
+     "typed": {"count": None, "kind": None},
+     "source": "深弹 1916 年才投入使用，本舰（1916-05 战沉）未见装备记录；未采集来源"},
+]
+
+
 def queen_mary_project() -> dict:
     project = _project(
         "hms-queen-mary-1913",
@@ -697,7 +722,11 @@ def queen_mary_project() -> dict:
                     },
                 ],
             },
-            "torpedo": {"weight_item_ids": ["torpedo-launch-outfit", "torpedoes"], "installed_tubes": 2},
+            "torpedo": {
+                "weight_item_ids": ["torpedo-launch-outfit", "torpedoes"],
+                "installed_tubes": 2,
+                "page_rows": copy.deepcopy(QM_WEAPONS_PAGE_ROWS),
+            },
         },
         "propulsion": {
             "weight_item_ids": ["boilers-uptakes", "turbines-shafting"],
