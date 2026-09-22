@@ -1,0 +1,286 @@
+{
+  "compartments": [
+    {
+      "beam_m": 8.0,
+      "estimate": true,
+      "free_surface": false,
+      "height_m": 3.0,
+      "id": "box-tank",
+      "keel_to_bottom_m": 0.5,
+      "label": "Central tank fixture",
+      "length_m": 10.0,
+      "permeability": 1.0,
+      "source": "Analytic engineering fixture geometry; not surveyed ship data",
+      "x_m": 0.0,
+      "y_m": 0.0
+    }
+  ],
+  "coordinates": {
+    "x_origin": "midships",
+    "x_positive": "forward",
+    "y_positive": "starboard",
+    "z_origin": "keel"
+  },
+  "damage_presets": [
+    {
+      "estimate": true,
+      "id": "intact",
+      "initial_water_volumes_m3": {
+        "box-tank": 0.0
+      },
+      "label": "Intact dry-compartment initial state",
+      "opening_overrides": {},
+      "source": "Explicit Task 3 initial-state fixture; zero is known, not missing."
+    }
+  ],
+  "geometry": {
+    "estimate": false,
+    "keel_offset_m": 0.0,
+    "kind": "offsets",
+    "offsets": {
+      "schema": "plimsoll-section-polygons-1",
+      "stations": [
+        [
+          -10.0,
+          [
+            [
+              -5.0,
+              0.0
+            ],
+            [
+              5.0,
+              0.0
+            ],
+            [
+              5.0,
+              8.0
+            ],
+            [
+              -5.0,
+              8.0
+            ]
+          ]
+        ],
+        [
+          0.0,
+          [
+            [
+              -5.0,
+              0.0
+            ],
+            [
+              5.0,
+              0.0
+            ],
+            [
+              5.0,
+              8.0
+            ],
+            [
+              -5.0,
+              8.0
+            ]
+          ]
+        ],
+        [
+          10.0,
+          [
+            [
+              -5.0,
+              0.0
+            ],
+            [
+              5.0,
+              0.0
+            ],
+            [
+              5.0,
+              8.0
+            ],
+            [
+              -5.0,
+              8.0
+            ]
+          ]
+        ]
+      ]
+    },
+    "source": {
+      "citation": "Task 3 analytic definition",
+      "formula": "three identical 10 m by 8 m transverse rectangles over 20 m length",
+      "method": "explicit rectangular sections"
+    }
+  },
+  "hull": {
+    "beam_m": 10.0,
+    "block_coeff": 1.0,
+    "draught_normal_m": 4.0,
+    "loa_m": 20.0,
+    "lwl_m": 20.0,
+    "waterplane_coeff": 1.0
+  },
+  "id": "analytic-box-reference",
+  "loading_conditions": [
+    {
+      "id": "loaded",
+      "label": "Four-metre analytic draught",
+      "overrides": {},
+      "reference_displacement_t": 820.0
+    },
+    {
+      "id": "light",
+      "label": "Ballast discharged",
+      "overrides": {
+        "box-ballast": {
+          "mass_t": 0.0
+        }
+      },
+      "reference_displacement_t": null,
+      "scenario_provenance": "Analytic zero-ballast mutation; zero is known, not missing."
+    }
+  ],
+  "name": "Analytic rectangular box reference",
+  "openings": [
+    {
+      "area_m2": 0.25,
+      "discharge_coefficient": 0.62,
+      "estimate": true,
+      "from": "sea",
+      "id": "box-tank-hole",
+      "kind": "connection",
+      "label": "Tank aperture",
+      "open": false,
+      "source": "Analytic engineering fixture; not surveyed ship data",
+      "to": "box-tank",
+      "x_m": 0.0,
+      "y_m": 4.0,
+      "z_m": 1.5
+    },
+    {
+      "estimate": true,
+      "id": "box-rim",
+      "kind": "downflooding",
+      "label": "Box rim downflooding point",
+      "open": true,
+      "source": "Analytic engineering fixture; not surveyed ship data",
+      "x_m": 0.0,
+      "y_m": 0.0,
+      "z_m": 8.0
+    }
+  ],
+  "revision": 0,
+  "schema": "plimsoll-project-1",
+  "sources": {
+    "analytic_anchor": {
+      "mass_at_rho_1_025_t_m3_t": 820.0,
+      "volume_at_draught_4_m_m3": 800.0
+    },
+    "historical_validation": {
+      "reason": "Exact analytic fixture; no historical claim.",
+      "validated": false
+    }
+  },
+  "systems": {
+    "ballast": {
+      "weight_item_ids": [
+        "box-ballast"
+      ]
+    }
+  },
+  "units": {
+    "angle": "deg",
+    "length": "m",
+    "mass": "t",
+    "power": "kW",
+    "speed": "kn"
+  },
+  "weight_groups": [
+    {
+      "id": "hull",
+      "items": [
+        {
+          "estimate": false,
+          "id": "box-structure",
+          "includes": [
+            "hull.structure"
+          ],
+          "kg_m": 3.0,
+          "mass_t": 700.0,
+          "source": "Analytic fixture definition",
+          "x_m": 0.0,
+          "y_m": 0.0
+        }
+      ],
+      "label": "Hull structure",
+      "required": true
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "armour",
+      "items": [],
+      "label": "Fixed armour",
+      "required": false
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "armament",
+      "items": [],
+      "label": "Installed armament",
+      "required": false
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "machinery",
+      "items": [],
+      "label": "Installed dry machinery",
+      "required": false
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "outfit",
+      "items": [],
+      "label": "Fixed outfit",
+      "required": false
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "ammunition",
+      "items": [],
+      "label": "Ammunition",
+      "required": false
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "fuel",
+      "items": [],
+      "label": "Fuel",
+      "required": false
+    },
+    {
+      "id": "water",
+      "items": [
+        {
+          "estimate": false,
+          "id": "box-ballast",
+          "includes": [
+            "consumable.ballast-water"
+          ],
+          "kg_m": 2.0,
+          "mass_t": 120.0,
+          "source": "Analytic loaded-condition ballast",
+          "x_m": 0.0,
+          "y_m": 0.0
+        }
+      ],
+      "label": "Water",
+      "required": true
+    },
+    {
+      "absence_reason": "Explicitly absent in the unpropelled analytic-box fixture.",
+      "id": "other_loads",
+      "items": [],
+      "label": "Other variable loads",
+      "required": false
+    }
+  ]
+}
