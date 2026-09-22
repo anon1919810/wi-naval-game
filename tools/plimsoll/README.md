@@ -1,6 +1,6 @@
 # Plimsoll
 
-> **1.0 开发状态（2026-09-22）**：产品尚未完成。以 [当前状态](../../docs/plimsoll-1.0/current-status.md) 和 [批准目标](../../docs/plimsoll-1.0/spec.md) 为准。
+> **当前交付范围（2026-09-22）**：用户要求先完成类 SPS 计算核心，尚未完成最终验收。以 [本轮范围](../../docs/plimsoll-1.0/current-core-scope.md) 和 [当前状态](../../docs/plimsoll-1.0/current-status.md) 为准；界面、部署和独立打包后移。下文旧接口与历史案例记录不代表当前核心整合已完成。
 > 下文保留早期模块与算例记录；历史算例、单元测试通过、软件全流程可用和真实舰船验证不是同一件事。
 > 新的统一项目与载荷层正在实施，本地 Web 已纳入本次目标；不宣称全面超越 SpringSharp。
 
@@ -48,7 +48,7 @@
 - **纵倾平衡（2.2）**：`geometric.solve_trim_equilibrium(hull, target_volume, target_lcb)`
   给定排水体积与浮心纵向位置（= LCG），嵌套求根解出水线截距 d 与纵倾角 θ
   （θ > 0 = 艏倾）；体积与 LCB 同时达标，否则抛错
-  。注意该旧接口使用 `LCB=LCG` 近似；新加载闭环将核验倾斜后的完整力矩，见 [预定解析验算](../../docs/plimsoll-1.0/equilibrium-validation-design.md)。
+  。注意该旧接口使用 `LCB=LCG` 近似；新的加载求解器已核验倾斜后的完整力矩，见 [求解器契约](../../docs/plimsoll-1.0/stability-api.md) 与 [解析验算](../../docs/plimsoll-1.0/equilibrium-validation-design.md)。统一计算入口仍在整合。
 - **自由液面 FSC（阶段 3）**：`freesurface.free_surface_correction` /
   `geometric.gz_curve(..., free_surface_tanks=)` —— 矩形舱 `i=L·b³/12`，
   `KG_eff=KG+FSC`；空/满舱不计
