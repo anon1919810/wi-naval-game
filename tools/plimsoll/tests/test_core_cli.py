@@ -143,6 +143,45 @@ class CoreCliEntrypointTests(unittest.TestCase):
         self.assertTrue(payload["diagnostics"][0]["blocking"])
         self.assertNotIn("Traceback", result.stderr)
 
+    def test_analyze_without_propulsion_facts_reports_partial_and_exit_1(self):
+        # The default request set includes propulsion, so a project that lacks
+        # the required propulsion facts honestly reports partial and exits 1;
+        # the cause is pinned to the propulsion stage being unavailable, not a
+        # crash. Scripts must read the payload, not only the exit code.
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="缺动力-") as temp:
+            result = self.run_cli(
+                ["analyze", project_path, "--condition", "loaded"], temp)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(result.stderr, "")
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema"], "plimsoll-analysis-1")
+        self.assertEqual(payload["status"], "partial")
+        propulsion = payload["stages"]["propulsion"]
+        self.assertEqual(propulsion["status"], "unavailable")
+        self.assertEqual(
+            propulsion["reason"],
+            "requested output is incomplete or outside its model",
+        )
+
+    def test_analyze_missing_condition_is_usage_error_exit_2(self):
+        # A non-existent condition is an input/usage error: exit 2 with a single
+        # structured plimsoll-cli-error-1 on stderr (consistent with the
+        # invalid-JSON usage-error anchor above), never a traceback and never 0/1.
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="缺工况-") as temp:
+            result = self.run_cli(
+                ["analyze", project_path, "--condition", "does_not_exist"], temp)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertNotIn("Traceback", result.stderr)
+
     def test_result_output_cannot_alias_explicit_options_input(self):
         project_path = TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
         with tempfile.TemporaryDirectory(prefix="路径保护-") as temp:

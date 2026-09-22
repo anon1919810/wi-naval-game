@@ -86,6 +86,40 @@ class AnalysisTests(unittest.TestCase):
         self.assertTrue(sampled["events"])
         self.assertNotIn("analysis.deck_events_require_gz", [d["code"] for d in deck["diagnostics"]])
 
+    def test_deck_dependency_policy_excludes_gz(self):
+        # DEPENDENCIES["deck"] must stay exactly ["equilibrium"]. This is
+        # load-bearing, not cosmetic:
+        #  * require() (analysis.py) transitively activates every listed
+        #    dependency, so adding "gz" would silently pull an extra default
+        #    kernel into a deck-only request and inflate compute;
+        #  * failed_dependencies (analysis.py) marks a stage unavailable when
+        #    any dependency is not completed, so a deck that depended on gz
+        #    would be dropped to unavailable whenever gz is absent -- losing
+        #    deck's own angle-clearance result. Deck instead derives only its
+        #    profile and reports missing gz sampling through a non-blocking
+        #    diagnostic (see the deck_events_require_gz tests above).
+        self.assertEqual(analysis.DEPENDENCIES["deck"], ["equilibrium"])
+
+    def test_deck_does_not_blame_missing_gz_when_geometry_absent(self):
+        # Adversarial anchor: request both deck and gz, but with geometry that
+        # is not materialized. The gz stage cannot run, yet deck must NOT be
+        # downgraded to "missing gz" -- it stays attributed to its own
+        # (equilibrium) dependency, and it must not carry the deck_events_require_gz
+        # diagnostic unconditionally.
+        project = self._deck_project()
+        project["geometry"] = {"kind": "offsets_reference", "keel_offset_m": None,
+            "reference": {"path": "不存在.json"}, "source": "declared", "estimate": True}
+        result = analysis.compute_project(project, "normal",
+            {"stages": ["deck", "gz"], "gz_angles_deg": [0, 30]})
+        deck = result["stages"]["deck"]
+        codes = [d["code"] for d in deck["diagnostics"]]
+        self.assertNotIn("analysis.deck_events_require_gz", codes)
+        # deck is unavailable only because its own dependency (equilibrium)
+        # failed, never because gz is missing.
+        self.assertEqual(deck["status"], "unavailable")
+        self.assertEqual(deck["reason"], "unavailable dependencies: equilibrium")
+        self.assertNotIn("gz", deck["reason"])
+
     def test_selected_fuel_endurance_and_historical_conditions_remain_explicit(self):
         project = box_project()
         project["systems"] = {"propulsion": {"weight_item_ids": ["hull.a[0]"],

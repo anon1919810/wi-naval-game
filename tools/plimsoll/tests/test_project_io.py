@@ -354,6 +354,8 @@ class TestProjectDefaultsAndValidation(unittest.TestCase):
             d["code"] == "schema.missing" and d["severity"] == "error"
             for d in diagnostics
         ))
+        missing = next(d for d in diagnostics if d["code"] == "schema.missing")
+        self.assertEqual(missing["path"], "$.schema")
         with self.assertRaises(project_io.ProjectValidationError):
             project_io.normalize_project(project)
 
@@ -363,8 +365,13 @@ class TestProjectDefaultsAndValidation(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "no_schema.json"
             path.write_text(json.dumps(project, ensure_ascii=False), encoding="utf-8")
-            with self.assertRaises(project_io.ProjectValidationError):
+            with self.assertRaises(project_io.ProjectValidationError) as caught:
                 project_store.load(path)
+            # Pin the rejection reason so a different failure mode cannot also pass.
+            self.assertTrue(any(
+                d["code"] == "schema.missing" and d["severity"] == "error"
+                for d in caught.exception.diagnostics
+            ))
 
 
 class TestMigrationAndFingerprint(unittest.TestCase):
