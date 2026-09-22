@@ -1,0 +1,14 @@
+{
+  "kind": "hardware_metadata_not_performance_benchmark",
+  "date": "2026-09-22",
+  "source": "Read-only Win32_Processor, Win32_ComputerSystem and Win32_OperatingSystem CIM query",
+  "cpu": "AMD Ryzen 7 8845H w/ Radeon 780M Graphics",
+  "physical_cores": 8,
+  "logical_processors": 16,
+  "os_reported_total_physical_memory_bytes": 29860155392,
+  "os_caption": "Microsoft Windows 11 家庭版 中文版",
+  "os_version": "10.0.26200",
+  "os_architecture": "64 位",
+  "timings": null,
+  "note": "Hardware inventory only. No final application performance or standalone-release acceptance is implied. Benchmark the shipped artifact on this machine and capture actual runtime version separately."
+}
