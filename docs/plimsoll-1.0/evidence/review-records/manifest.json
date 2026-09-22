@@ -1,0 +1,77 @@
+[
+  {
+    "file": "task-1-report.md",
+    "sha256": "932725e52240286c238ffdb468c2a0d02b781e8096f3c1982728b2e8339bb033",
+    "bytes": 7241
+  },
+  {
+    "file": "task-1-review-round-0.md",
+    "sha256": "ef065846758b6c779bb2b76c5800089bff1700a750d3cb49f985d66a76f3d192",
+    "bytes": 2779
+  },
+  {
+    "file": "task-1-review-round-1.md",
+    "sha256": "b3bfb7cc5a1f1e5638b39d0b2bde3dce0bf4439b706331072199fb4f19b7f4ec",
+    "bytes": 1068
+  },
+  {
+    "file": "task-2-report.md",
+    "sha256": "48298c798fa823717fbd387cf1dbeb852c854ff134f89158b0f027539a51d413",
+    "bytes": 4175
+  },
+  {
+    "file": "task-2-review-round-0.md",
+    "sha256": "fc933980adfaf88e59b20339813ee6c16d116e91b94b2d26f4569ca86e2c78d1",
+    "bytes": 4826
+  },
+  {
+    "file": "task-3-report.md",
+    "sha256": "ad68d72a2416ea42b830dd9a858c8c7bd93f3c27049e4693ef8fc7303fd4a09c",
+    "bytes": 7619
+  },
+  {
+    "file": "task-3-review-round-0.md",
+    "sha256": "a2f4e58fba5563f7b8d4452676ddc761abe0e33fe639fb817558976c7069d17b",
+    "bytes": 3812
+  },
+  {
+    "file": "task-3-review-round-1.md",
+    "sha256": "dc9e7907a4098c020fe48e25fe086a1588962b479f282b5717928fd6d46de6a0",
+    "bytes": 1985
+  },
+  {
+    "file": "task-4-report.md",
+    "sha256": "12e1c48575f4491c4379671646f3b7999e824f4997b1e35cad7803f33913de77",
+    "bytes": 13573
+  },
+  {
+    "file": "task-4-review-round-0.md",
+    "sha256": "5bcc6536fb3f72483d85a8bc7103fb119960331439c1f673668a9da47f6faf81",
+    "bytes": 6787
+  },
+  {
+    "file": "task-4-review-round-1.md",
+    "sha256": "932248bea0fc19779a727b74899daff4bdc9aa3ac88b97f3c4aa41d55069569b",
+    "bytes": 3296
+  },
+  {
+    "file": "task-4-fix-round-1-report.md",
+    "sha256": "5d851fc10a78bc698cfa25d84c2c6dcfeb2bd0184086a8b813819c22c6a7df27",
+    "bytes": 4119
+  },
+  {
+    "file": "task-5-report.md",
+    "sha256": "f33ff0b9a8f7755d475eae860325a6b805c6d38f05bfbdcf35feb69494b16854",
+    "bytes": 7775
+  },
+  {
+    "file": "task-5-review-round-0.md",
+    "sha256": "94325a0999a880076cdc378e510e2490c7ced7842171ef1ec8c26fc0eb0feb2e",
+    "bytes": 4854
+  },
+  {
+    "file": "task-5-review-round-1.md",
+    "sha256": "217f119c28c8373d629a2ba59782c8eeef31a13a89e98534e785a3c1697f9b27",
+    "bytes": 2197
+  }
+]
