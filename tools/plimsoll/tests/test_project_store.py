@@ -239,6 +239,27 @@ class TestProjectStore(unittest.TestCase):
         self.assertEqual(self.path.read_bytes(), b"prior")
         self.assertEqual(list(self.directory.iterdir()), [self.path])
 
+    def test_cleanup_failure_keeps_primary_save_error_and_identifies_owned_temp(self):
+        self.path.write_bytes(b"prior")
+        unrelated = self.directory / ".unrelated.tmp"
+        unrelated.write_bytes(b"keep")
+        for operation in ("fsync", "replace"):
+            primary = OSError(f"primary {operation} failure")
+            with self.subTest(operation=operation):
+                with mock.patch.object(project_store.os, operation, side_effect=primary), \
+                     mock.patch.object(Path, "unlink", side_effect=PermissionError("cleanup denied")):
+                    with self.assertRaises(OSError) as caught:
+                        project_store.save(self.path, sample_project())
+                self.assertIs(caught.exception, primary)
+                leftovers = [p for p in self.directory.iterdir() if p not in (self.path, unrelated)]
+                self.assertEqual(len(leftovers), 1)
+                note = "\n".join(getattr(caught.exception, "__notes__", []))
+                self.assertIn("cleanup denied", note)
+                self.assertIn(str(leftovers[0]), note)
+                self.assertEqual(self.path.read_bytes(), b"prior")
+                self.assertEqual(unrelated.read_bytes(), b"keep")
+                leftovers[0].unlink()
+
     def test_load_rejects_invalid_json_and_does_not_return_previous_project(self):
         project_store.save(self.path, sample_project())
         project_store.load(self.path)

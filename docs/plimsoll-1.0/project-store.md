@@ -74,6 +74,11 @@ ordinary write, flush or replacement failure, cleanup removes only that owned
 temporary path and the previous destination bytes remain intact. Other
 temporary files are never scanned or removed. Successful saves leave no owned
 temporary file.
+If cleanup itself raises an operating-system error after a save failure, the
+original write/flush/replace exception remains the raised exception. Its notes
+identify the owned temporary path and cleanup error; that path may remain for
+manual cleanup. A successful replacement already consumes the temporary path
+and does not attempt a second filesystem deletion.
 
 Atomicity follows the local filesystem's replacement semantics. This is not a
 multi-writer transaction or a guarantee against power loss: no directory fsync,

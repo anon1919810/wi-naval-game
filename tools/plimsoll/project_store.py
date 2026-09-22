@@ -61,9 +61,13 @@ def save(path: str | Path, project: dict) -> None:
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary_path, destination)
-    finally:
+    except BaseException as error:
         if temporary_path is not None:
-            temporary_path.unlink(missing_ok=True)
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError as cleanup_error:
+                error.add_note(f"Owned temporary file cleanup failed at {temporary_path}: {cleanup_error}")
+        raise
 
 
 def resolve_geometry_reference(project_path: str | Path, project: dict) -> Path:

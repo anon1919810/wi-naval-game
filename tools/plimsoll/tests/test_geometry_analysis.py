@@ -314,6 +314,70 @@ class GeometryAnalysisTests(unittest.TestCase):
         self.assertIsNone(result["inputs"]["sources"])
         self.assertTrue(any(d["code"] == "l0.sources_unknown" for d in result["diagnostics"]))
 
+    def test_l0_rejects_present_malformed_fields_before_any_early_return(self):
+        for base in ({}, {**parameters(), "block_coeff": 0.9}, parameters()):
+            for bad in ({"sources": []}, {"kg_is_estimate": "invalid"},
+                        {"block_coeff_is_estimate": 0}, {"waterplane_coeff_is_estimate": []},
+                        {"displacement_unit_is_estimate": "false"},
+                        {"draught_normal_m": 2, "draught_m": True}):
+                with self.subTest(base=base, bad=bad), self.assertRaises(ValueError):
+                    analysis.parameterized_hydrostatics({**base, **bad})
+
+    def test_l0_diagnoses_empty_and_missing_direct_input_sources(self):
+        hull = {**parameters(), "kg_m": 0, "displacement_normal_t": 0, "sources": {}}
+        result = analysis.parameterized_hydrostatics(hull)
+        self.assertEqual(result["inputs"]["sources"], {})
+        self.assertIsNone(result["reference_displacement"]["source"])
+        self.assertTrue(any(d["code"] == "l0.sources_unknown" for d in result["diagnostics"]))
+        missing_paths = {d["path"] for d in result["diagnostics"] if d["code"] == "l0.input_source_unknown"}
+        self.assertEqual(missing_paths, {
+            "$.hull.sources.lwl_m", "$.hull.sources.beam_m", "$.hull.sources.draught_m",
+            "$.hull.sources.block_coeff", "$.hull.sources.waterplane_coeff",
+            "$.hull.sources.depth_m", "$.hull.sources.kg_m", "$.hull.sources.displacement_normal_t"})
+        hull["sources"] = {"lwl_m": "survey", "kg_m": "", "beam_m": None}
+        partial = analysis.parameterized_hydrostatics(hull)
+        paths = {d["path"] for d in partial["diagnostics"] if d["code"] == "l0.input_source_unknown"}
+        self.assertNotIn("$.hull.sources.lwl_m", paths)
+        self.assertIn("$.hull.sources.kg_m", paths)
+        self.assertIn("$.hull.sources.beam_m", paths)
+        self.assertEqual(partial["inputs"], hull)
+
+    def test_l0_shape_limit_diagnostic_points_to_hull(self):
+        result = analysis.parameterized_hydrostatics({**parameters(), "block_coeff": 0.9})
+        self.assertEqual(next(d for d in result["diagnostics"] if d["code"] == "l0.shape_limit")["path"],
+                         "$.hull")
+
+    def test_l0_default_estimate_flags_are_explicit_assumptions_and_diagnostics(self):
+        hull = {**parameters(), "kg_m": 0, "kg_is_estimate": None,
+                "block_coeff_is_estimate": False}
+        result = analysis.parameterized_hydrostatics(hull)
+        assumptions = {a["field"]: a for a in result["assumptions"]}
+        for flag in ("waterplane_coeff_is_estimate", "kg_is_estimate", "displacement_unit_is_estimate"):
+            self.assertIn(flag, assumptions)
+            self.assertIs(assumptions[flag]["value"], True)
+            self.assertIsNone(assumptions[flag]["original_value"])
+            self.assertTrue(assumptions[flag]["source"])
+            self.assertTrue(any(d["code"] == "l0.default_assumption" and d["path"] == f"$.hull.{flag}"
+                                for d in result["diagnostics"]))
+        self.assertNotIn("block_coeff_is_estimate", assumptions)
+        self.assertIsNone(result["inputs"]["kg_is_estimate"])
+        self.assertIs(next(t for t in result["trace"] if t["key"] == "kg_m")["estimate"], None)
+
+    def test_deck_event_inputs_are_validated_even_when_all_samples_failed(self):
+        deck = {"source": "deck plan", "estimate": False,
+                "points": [{"id": "edge", "x_m": 0, "y_m": 3, "z_m": 4}]}
+        samples = [{"angle_deg": 0, "equilibrium": {"converged": False}}]
+        for bad in ([], {**deck, "source": None}, {**deck, "source": " "},
+                    {**deck, "estimate": "invalid"}, {**deck, "points": []},
+                    {**deck, "points": [{"id": "edge", "x_m": 0, "y_m": 3, "z_m": math.nan}]}):
+            with self.subTest(deck=bad), self.assertRaises(ValueError):
+                analysis.deck_immersion_events(bad, samples, keel_offset_m=0)
+        for keel in (math.nan, math.inf, True, None):
+            with self.subTest(keel=keel), self.assertRaises(ValueError):
+                analysis.deck_immersion_events(deck, samples, keel_offset_m=keel)
+        unknown = analysis.deck_immersion_events(None, samples, keel_offset_m=0)
+        self.assertEqual(unknown["rows"][0]["status"], "unavailable")
+
     def test_l0_preserves_positive_reference_discrepancy_warning(self):
         result = analysis.parameterized_hydrostatics({**parameters(), "displacement_normal_t": 1000,
                                                       "displacement_unit_is_estimate": False})

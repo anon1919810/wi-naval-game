@@ -42,6 +42,9 @@ does not silently fall back to a different draft. Missing required values give
 numeric input is rejected before the legacy float coercions. Positive dimensions,
 `0.2 <= Cb <= Cwp <= 1` and `Cwp >= 0.3` bound this model. An explicitly supplied
 deck/depth must exceed draft; infeasible shape/deck conditions give `model_limit`.
+All supplied numeric fields (including an unused alternate draft), estimate flags
+and the source-map type are validated before missing-input or model-limit returns.
+The shape-limit diagnostic points to `$.hull`.
 
 Actual arithmetic and its formula/source trace come from `hydrostatics.compute`.
 The scenario is `parameterized_design_waterline_not_loaded_equilibrium`. It
@@ -53,6 +56,12 @@ coefficient assumes 0.38; seawater density is the legacy 1.025 t/m³. Every used
 default is listed with its value, source and estimated status, plus diagnostics.
 Unknown inputs are still null in `inputs`. `effective_inputs` records the
 actual arguments passed to the calculator.
+Absent/null estimate flags become conservative `True` only in effective inputs;
+each default has an explicit assumption and diagnostic. Original unknown flags
+and direct-input trace uncertainty remain unknown. Null and empty source maps
+both supply no provenance. Each supplied direct numeric input whose source is
+missing, null or empty receives `l0.input_source_unknown` at its source-map path,
+including a supplied reference displacement of zero. Literal inputs are preserved.
 
 Unknown KG yields null GM/roll period; explicit KG=0 is a known value.
 `reference_displacement` is an independent comparison, never substituted for
@@ -189,6 +198,9 @@ boolean `estimate`, and 1–10000 `points`. Each point has a unique nonempty `id
 and finite `x_m`, `y_m`, `z_m`; z is **above keel**. This phase defines a helper
 input, not a new canonical project schema field. A caller with a deck profile
 must explicitly supply its chosen sampled points and provenance.
+Both APIs validate a supplied deck and the finite keel datum before examining
+sample outcomes. Even an entirely failed equilibrium series rejects malformed
+deck metadata/ordinates; null deck remains a documented unknown.
 
 The signed normal clearance is
 `(z+keel-p*x-q*y-d)/sqrt(1+p²+q²)`. Positive is dry, negative immersed and exact

@@ -73,19 +73,38 @@ def parameterized_hydrostatics(hull: dict) -> dict:
     _finite_result(hull)
     inputs = copy.deepcopy(hull)
     draft_key = "draught_normal_m" if "draught_normal_m" in hull else "draught_m"
-    numeric = ("lwl_m", "beam_m", draft_key, "block_coeff", "waterplane_coeff",
+    numeric = ("lwl_m", "beam_m", "draught_normal_m", "draught_m", "block_coeff", "waterplane_coeff",
                "kg_m", "roll_gyration_coeff", "displacement_normal_t", "depth_m")
     for key in numeric:
         if hull.get(key) is not None:
             value = _number(hull[key], key)
             if value < 0:
                 raise ValueError(f"{key} must be nonnegative")
+    flags = ("waterplane_coeff_is_estimate", "block_coeff_is_estimate",
+             "kg_is_estimate", "displacement_unit_is_estimate")
+    for flag in flags:
+        if flag in hull and hull[flag] is not None and not isinstance(hull[flag], bool):
+            raise ValueError(f"{flag} must be boolean or null")
+    if hull.get("sources") is not None and not isinstance(hull["sources"], dict):
+        raise ValueError("hull.sources must be an object")
+    sources = copy.deepcopy(hull.get("sources") or {})
+    diagnostics = []
+    if not sources:
+        diagnostics.append(_diagnostic("l0.sources_unknown",
+            "input source metadata is unknown; the empty effective source map supplies no provenance",
+            "$.hull.sources"))
+    for key in numeric:
+        source = sources.get(key)
+        if hull.get(key) is not None and (source in (None, "", {}) or
+                                         isinstance(source, str) and not source.strip()):
+            diagnostics.append(_diagnostic("l0.input_source_unknown",
+                f"direct input {key} has no source provenance", f"$.hull.sources.{key}"))
     base = dict(inputs=inputs, scenario="parameterized_design_waterline_not_loaded_equilibrium",
                 estimate=True, units=dict(length="m", mass="t", density="t/m3"),
                 rho_t_m3=hydrostatics.RHO_SEA, values=None, trace=[], assumptions=[])
     missing = [key for key in ("lwl_m", "beam_m", draft_key, "block_coeff") if hull.get(key) is None]
     if missing:
-        return {**_envelope("unavailable", [
+        return {**_envelope("unavailable", diagnostics + [
             _diagnostic("l0.input_unknown", f"{key} is unknown", f"$.hull.{key}") for key in missing
         ]), **base}
     effective = copy.deepcopy(hull)
@@ -96,25 +115,23 @@ def parameterized_hydrostatics(hull: dict) -> dict:
             effective[key] = default
             assumptions.append(dict(field=key, value=default, estimate=True,
                                     original_value=None, source="documented legacy L0 default"))
+    for flag in flags:
+        if effective.get(flag) is None:
+            effective[flag] = True
+            assumptions.append(dict(field=flag, value=True, estimate=True,
+                original_value=None, source="conservative legacy L0 estimate-state default"))
+    diagnostics.extend(_diagnostic("l0.default_assumption",
+                       f"{a['field']}={a['value']} used as an explicit estimated assumption",
+                       f"$.hull.{a['field']}") for a in assumptions)
     base["assumptions"] = assumptions
     cb, cwp = effective["block_coeff"], effective["waterplane_coeff"]
     if (min(effective["lwl_m"], effective["beam_m"], effective[draft_key]) <= 0
             or not 0.2 <= cb <= cwp <= 1 or cwp < 0.3
             or (effective.get("depth_m") is not None and effective["depth_m"] <= effective[draft_key])):
-        return {**_envelope("model_limit", [_diagnostic(
+        return {**_envelope("model_limit", diagnostics + [_diagnostic(
             "l0.shape_limit", "L0 needs positive dimensions, 0.2 <= Cb <= Cwp <= 1, "
-            "Cwp >= 0.3 and a supplied deck strictly above the design draft"
+            "Cwp >= 0.3 and a supplied deck strictly above the design draft", "$.hull"
         )]), **base}
-    for key in ("waterplane_coeff", "block_coeff", "kg", "displacement_unit"):
-        flag = f"{key}_is_estimate"
-        if flag in hull and hull[flag] is not None and not isinstance(hull[flag], bool):
-            raise ValueError(f"{flag} must be boolean or null")
-        if effective.get(flag) is None:
-            effective[flag] = True
-    sources_unknown = effective.get("sources") is None
-    sources = {} if sources_unknown else effective["sources"]
-    if not isinstance(sources, dict):
-        raise ValueError("hull.sources must be an object")
     effective["sources"] = sources
     # Reference mass is a comparison, never a calculation authority. Handle its
     # explicit zero outside the legacy truthiness branch, retaining positive
@@ -123,15 +140,8 @@ def parameterized_hydrostatics(hull: dict) -> dict:
     if reference == 0:
         effective.pop("displacement_normal_t")
     raw = hydrostatics.compute(effective)
-    diagnostics = [_diagnostic("l0.legacy_warning", warning, f"$.hull.warnings[{i}]")
-                   for i, warning in enumerate(raw["warnings"])]
-    if sources_unknown:
-        diagnostics.append(_diagnostic("l0.sources_unknown",
-            "input source metadata is unknown; the empty effective source map supplies no provenance",
-            "$.hull.sources"))
-    diagnostics.extend(_diagnostic("l0.default_assumption",
-                       f"{a['field']}={a['value']} used as an explicit estimated assumption",
-                       f"$.hull.{a['field']}") for a in assumptions)
+    diagnostics.extend(_diagnostic("l0.legacy_warning", warning, f"$.hull.warnings[{i}]")
+                       for i, warning in enumerate(raw["warnings"]))
     values = raw["values"]
     for key in ("kg_m", "gm_m", "roll_period_s"):
         values.setdefault(key, None)
@@ -404,31 +414,44 @@ def hydrostatic_table(hull, waterlines_above_keel_m, *, rho_t_m3=1.025, geometry
         requested_waterlines_above_keel_m=levels, rows=rows))
 
 
-def deck_clearance(deck, plane, *, keel_offset_m) -> dict:
-    """Measure explicitly supplied deck points using signed waterplane-normal distance."""
-    selected = _plane(plane)
-    keel = _number(keel_offset_m, "keel_offset_m")
+def _validated_deck_points(deck):
+    """Validate supplied deck data independently of any equilibrium outcome."""
     if deck is None:
-        return {**_envelope("unavailable", [_diagnostic("geometry.deck_unknown",
-            "deck geometry was not supplied", "$.deck")]), "minimum_clearance_m": None,
-            "points": [], "event_type": "deck_geometry_only_not_downflooding"}
+        return None
     if not isinstance(deck, dict) or not isinstance(deck.get("points"), (list, tuple)):
         raise ValueError("deck must contain an explicit points array")
-    if not isinstance(deck.get("source"), (str, dict)) or not deck["source"]:
+    if (not isinstance(deck.get("source"), (str, dict)) or not deck["source"]
+            or isinstance(deck["source"], str) and not deck["source"].strip()):
         raise ValueError("deck needs explicit source provenance")
     if not isinstance(deck.get("estimate"), bool):
         raise ValueError("deck estimate must be boolean")
     if not 1 <= len(deck["points"]) <= 10000:
         raise ValueError("deck must contain 1..10000 supplied points")
-    p, q, d = selected["p"], selected["q"], selected["waterline_d_m"]
-    ids, rows = set(), []
+    ids, points = set(), []
     for point in deck["points"]:
         if not isinstance(point, dict) or not isinstance(point.get("id"), str) or not point["id"].strip() or point["id"] in ids:
             raise ValueError("deck points need unique nonempty string IDs")
         ids.add(point["id"])
         x, y, z = [_number(point.get(key), key) for key in ("x_m", "y_m", "z_m")]
+        points.append((point["id"], x, y, z))
+    _finite_result(deck)
+    return points
+
+
+def deck_clearance(deck, plane, *, keel_offset_m) -> dict:
+    """Measure explicitly supplied deck points using signed waterplane-normal distance."""
+    selected = _plane(plane)
+    keel = _number(keel_offset_m, "keel_offset_m")
+    points = _validated_deck_points(deck)
+    if points is None:
+        return {**_envelope("unavailable", [_diagnostic("geometry.deck_unknown",
+            "deck geometry was not supplied", "$.deck")]), "minimum_clearance_m": None,
+            "points": [], "event_type": "deck_geometry_only_not_downflooding"}
+    p, q, d = selected["p"], selected["q"], selected["waterline_d_m"]
+    rows = []
+    for point_id, x, y, z in points:
         clearance = (z+keel-p*x-q*y-d)/math.hypot(1, p, q)
-        rows.append(dict(id=point["id"], normal_clearance_m=clearance,
+        rows.append(dict(id=point_id, normal_clearance_m=clearance,
                          state="dry" if clearance > 0 else "immersed" if clearance < 0 else "contact"))
     minimum = min(rows, key=lambda row: row["normal_clearance_m"])
     return _finite_result({**_envelope(), "minimum_clearance_m": minimum["normal_clearance_m"],
@@ -439,6 +462,8 @@ def deck_clearance(deck, plane, *, keel_offset_m) -> dict:
 
 def deck_immersion_events(deck, samples, *, keel_offset_m) -> dict:
     """Report deck contacts and sign brackets from existing equilibrium samples only."""
+    _number(keel_offset_m, "keel_offset_m")
+    _validated_deck_points(deck)
     if not isinstance(samples, (list, tuple)) or any(not isinstance(s, dict) for s in samples):
         raise ValueError("samples must be an array of angle/equilibrium objects")
     _grid([s.get("angle_deg") for s in samples], "angle_deg")
