@@ -1,10 +1,10 @@
 # Plimsoll 计算核心当前状态
 
-更新：2026-09-22。**当前仍在整合，尚未通过最终验收。** 用户要求先完成类 SPS 计算功能；以[本轮范围](current-core-scope.md)为准。界面、服务器部署和独立打包后移。原完整产品路线保留在[规格](spec.md)与[计划](../superpowers/plans/2026-09-22-plimsoll-1.0.md)。
+更新：2026-09-22。**已完成本次收尾，计算核心尚未通过最终验收；长期目标系统当前为暂停状态。** 代码固定在 `1752467` 检查点。用户本次要求完成报告与交接，不恢复扩展开发。详见[项目报告](项目报告_Plimsoll计算核心_2026-09-22.md)与[现状交接](交接_Plimsoll计算核心现状_2026-09-22.md)。原计算范围保留在[本轮范围](current-core-scope.md)，界面、服务器部署和独立打包后移。
 
 ## 工作位置与保护状态
 
-实现位于 Codex 工作目录 `work/plimsoll-1.0`，分支 `feature/plimsoll-1.0`。主资产仓库和 Unity 工程没有被本轮改写。主仓库原有 29 个待提交文件已保存在隔离基线；最新只读复查的 29 个摘要均与起始记录一致，主仓库 HEAD 仍为 `e1596ea`。[起始快照](evidence/initial-worktree-snapshot.json) · [保护复查](evidence/primary-preservation-check.json)
+实现位于 Codex 工作目录 `work/plimsoll-1.0`，分支 `feature/plimsoll-1.0`。主资产仓库原代码和 Unity 工程没有被本轮改写；桌面原目录仅新增两份收尾文档。主仓库原有 29 个待提交文件已保存在隔离基线；只读复查的 29 个摘要均与起始记录一致，主仓库 HEAD 仍为 `e1596ea`。[起始快照](evidence/initial-worktree-snapshot.json) · [保护复查](evidence/primary-preservation-check.json)
 
 ## 已实现并通过独立审查的组成部分
 
@@ -19,20 +19,20 @@
 
 以上是组成部分的完成状态，不表示已全部通过统一入口、命令行和导出的最终验收。具体实现与复核记录见[审查档案](evidence/review-records/README.md)；其中的历史测试不会被冒充为最新回归。
 
-## 正在完成的工作
+## 已冻结、仍待继续的工作
 
 - 统一计算入口与实际质量修订应用：以同一工况连接各模块，保留指纹、来源、诊断以及计算完成、数值收敛、方法适用和史实验证的分别判断。
 - JSON/CSV 导出和真实命令行：单工况、显式清单批量、速度/QPC 扫描、型线导入。
 - 七页 191 条原始记录逐项绑定实际输入/输出，核对仍需接入的计算项。
 - 冻结后的联合回归、独立整合审查、Queen Mary 非零时长进水验收、核心耗时测量和简明使用说明。
 
-包导入修正 `7a673b9` 已通过 140 项针对性测试和独立审查。JSON/CSV 导出 `9985e8f` 已通过 9 项针对性测试，仍待独立审查和实际协调结果整合。严格型线导入 `3dd85fb` 加 `c0ca074`、项目扩展数据修正 `92019a7` 均已通过独立复核。
+包导入修正 `7a673b9` 已通过 140 项针对性测试和独立审查。JSON/CSV 导出 `9985e8f` 已通过 9 项针对性测试和独立审查，仍待实际协调结果整合。严格型线导入 `3dd85fb` 加 `c0ca074`、项目扩展数据修正 `92019a7` 均已通过独立复核。
 
 ## 最近一次全套回归
 
-**573 项通过，156.558 秒**；进程总耗时 157.225 秒。对应冻结检查点 `9655584`，运行前后 96 个 Python/JSON 文件摘要一致，实际解释器为 Python 3.13.14。[机器可读证据](evidence/task-6fix-8b-schema-regression.json) · [完整输出](evidence/task-6fix-8b-schema-regression.log)
+**629 项通过，0 失败，189.194 秒**；进程总耗时 189.955 秒。运行前后 114 个 Python/JSON 文件摘要一致，提交 `1752467` 保存了相同源码。实际解释器为 Python 3.13.14。[机器可读证据](evidence/core-handoff-checkpoint-regression.json) · [完整输出](evidence/core-handoff-checkpoint-regression.log)
 
-这次全套运行早于后续数据修正、导入、包导入和当前协调/CLI/导出改动，不能据此宣布当前代码全套通过。[核心覆盖清单](evidence/core-acceptance-inventory.json)仍待最终逐项核对。
+现有测试通过不代表未实现功能已经完成，也不替代新协调入口与 CLI 的独立审查、Queen Mary 非零进水验收或性能测量。[核心覆盖清单](evidence/core-acceptance-inventory.json)仍待最终逐项核对。旧 573 项结果仅保留为历史证据。
 
 ## 数据与方法边界
 

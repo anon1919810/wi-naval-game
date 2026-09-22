@@ -125,6 +125,11 @@
     "bytes": 5560
   },
   {
+    "file": "task-8b-coordinator-checkpoint-report.md",
+    "sha256": "54a00bc4f291762d11e3402b14af05a5fe35c907338b718f93dfbc534b2ceaa4",
+    "bytes": 11488
+  },
+  {
     "file": "task-8b-schema-phase-report.md",
     "sha256": "068ecc6fdf03fd85ec4706214d6331512bf6bda0c3d3df2e020de509a021f71a",
     "bytes": 39883
@@ -138,6 +143,11 @@
     "file": "task-8b-schema-review-round-1.md",
     "sha256": "ab58f81e25546e6284236617fd70bf25980d5e5878e0569683f64ff59116b009",
     "bytes": 4210
+  },
+  {
+    "file": "task-8c-report.md",
+    "sha256": "733c84c14f89e102ae192741ccaa430eb92ada242d0db4ecf733e51ca5f30dd3",
+    "bytes": 5920
   },
   {
     "file": "task-8d-report.md",
@@ -163,5 +173,20 @@
     "file": "task-8e-review-round-0.md",
     "sha256": "e37c605f84dc22a4068a88ceaefcc9bf001e02c291d66131543275d8a75f89f0",
     "bytes": 3729
+  },
+  {
+    "file": "task-8f-report.md",
+    "sha256": "0d1c551e6cec8b9621ed406c84e1ab9ac49d52b2a01112c1b2eaaa838381a6c6",
+    "bytes": 5533
+  },
+  {
+    "file": "task-8f-review-round-0.md",
+    "sha256": "c9c3aaa53611d7848d0baf20e8c7936a1fbf161c65c833e3f4c69e38b273c3bd",
+    "bytes": 2404
+  },
+  {
+    "file": "task-8g-preparation-report.md",
+    "sha256": "58f68795fb665c6da4e2e9169bd9699ec6f7453c955c99157e684cc6dd400f1c",
+    "bytes": 6318
   }
 ]

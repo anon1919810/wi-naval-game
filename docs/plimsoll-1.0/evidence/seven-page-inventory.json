@@ -1,0 +1,435 @@
+{
+  "schema": "plimsoll-seven-page-field-coverage-draft-1",
+  "status": "task-8-preparation-not-an-implementation-review",
+  "prepared_from": [
+    "docs/plimsoll-1.0/spec.md",
+    "docs/sps-reference/00_Hull.png",
+    "docs/sps-reference/01_Freeboard.png",
+    "docs/sps-reference/02_Guns.png",
+    "docs/sps-reference/03_Weapons.png",
+    "docs/sps-reference/04_Armour.png",
+    "docs/sps-reference/05_Engines.png",
+    "docs/sps-reference/06_Performance.png",
+    "docs/sps-replacement/SPEC.md#5",
+    "docs/sps-replacement/COVERAGE.md"
+  ],
+  "interpretation": {
+    "existing": "An established local core/data/result contract exists. This does not claim that the Task 8 coordinator, Task 9 UI, reports, or release already expose it.",
+    "new_binding": "Required for 1.0 but the canonical project/result/UI binding is still pending. Proposed names are omitted when no stable contract exists.",
+    "calculated_estimate": "The 1.0 surface may show a traced engineering estimate with source, assumptions, uncertainty/limits, and diagnostics; it must not be presented as measured history.",
+    "explicitly_excluded": "Outside the approved 1.0 scope or dependent on a mapping not established from the available references; the UI/report must show the stated reason and no numeric placeholder.",
+    "null_binding": "null means unresolved; it must not be converted to zero or treated as a completed implementation."
+  },
+  "field_keys": {
+    "seen": "Screenshot observation status: observed or unobserved.",
+    "io": "Field role: input, output, or control.",
+    "canonical_input": "Established canonical project/loading path when one exists; otherwise null.",
+    "result_binding": "Established core/result path when one exists; otherwise null. A non-null legacy result path does not imply Task 8/9 integration is complete."
+  },
+  "scope_guardrails": [
+    "All A-G requirements in docs/plimsoll-1.0/spec.md remain mandatory; this registry only covers the seven SPS reference pages.",
+    "Normal, deep/full and custom loading conditions use the shared project/loading contracts and one selected loading state.",
+    "Source, estimate, uncertainty, validity and diagnostics must survive coordinator, UI and exports.",
+    "This draft invents neither SPS algorithms nor accuracy comparisons and does not assess in-progress Task 4 or Task 7 implementation."
+  ],
+  "common_controls": [
+    {"id":"common.menu_bar","label":"File / Edit / Report / Help menus","io":"control","seen":"observed","treatment":"new_binding","reason":"Task F must provide project lifecycle, editing, report and help actions; submenu behavior is not inferred from the screenshots.","canonical_input":null,"result_binding":null},
+    {"id":"common.show_report","label":"Show report","io":"control","seen":"observed","treatment":"new_binding","reason":"Open the offline report generated from the same coordinator result and diagnostics.","canonical_input":null,"result_binding":null},
+    {"id":"common.show_sidebar","label":"Show sidebar","io":"control","seen":"observed","treatment":"new_binding","reason":"Task 9 workspace/navigation control; no calculation semantics.","canonical_input":null,"result_binding":null},
+    {"id":"common.page_tabs","label":"Hull / Freeboard / Guns / Weapons / Armour / Engines / Performance tabs","io":"control","seen":"observed","treatment":"new_binding","reason":"The seven views must consume the shared canonical project/result rather than separate calculators.","canonical_input":null,"result_binding":null},
+    {"id":"common.diagnostics","label":"Footer warning/status message","io":"output","seen":"observed","treatment":"new_binding","reason":"Bind structured coordinator diagnostics with stage/path/severity; do not use a single lossy string channel.","canonical_input":null,"result_binding":null},
+    {"id":"common.dirty_state","label":"(unsaved) project state","io":"output","seen":"observed","treatment":"new_binding","reason":"Task F save/reopen flow needs explicit dirty state tied to the canonical project revision/fingerprint.","canonical_input":"$.revision","result_binding":null},
+    {"id":"common.make_report","label":"Make report checkbox","io":"control","seen":"observed","treatment":"new_binding","reason":"If retained, it controls report generation from the completed coordinator result and must not trigger independent calculations.","canonical_input":null,"result_binding":null}
+  ],
+  "pages": [
+    {
+      "id": "hull",
+      "label": "Hull",
+      "screenshot": "docs/sps-reference/00_Hull.png",
+      "groups": [
+        {
+          "id": "hull.ship",
+          "label": "Ship",
+          "fields": [
+            {"id":"hull.ship.name","label":"Name","io":"input","seen":"observed","treatment":"existing","reason":"Canonical project identity.","canonical_input":"$.name","result_binding":null},
+            {"id":"hull.ship.country","label":"Country","io":"input","seen":"observed","treatment":"new_binding","reason":"Useful design metadata but absent from the canonical top-level contract.","canonical_input":null,"result_binding":null},
+            {"id":"hull.ship.type","label":"Type","io":"input","seen":"observed","treatment":"new_binding","reason":"Useful design metadata but absent from the canonical top-level contract.","canonical_input":null,"result_binding":null},
+            {"id":"hull.ship.year","label":"Year","io":"input","seen":"observed","treatment":"new_binding","reason":"Needs an explicit semantic choice such as design/completion year.","canonical_input":null,"result_binding":null},
+            {"id":"hull.ship.laid_down","label":"Ship laid down","io":"input","seen":"observed","treatment":"new_binding","reason":"Legacy case has a value but canonical project metadata has no stable field.","canonical_input":null,"result_binding":null},
+            {"id":"hull.ship.engine_built","label":"Engine built","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field or Queen Mary source is established.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id": "hull.dimensions",
+          "label": "Dimensions",
+          "fields": [
+            {"id":"hull.dimensions.display_unit","label":"feet / metres","io":"input","seen":"observed","treatment":"new_binding","reason":"Display/import preference must convert through units.convert while canonical storage remains SI.","canonical_input":"$.units.length","result_binding":null},
+            {"id":"hull.dimensions.lwl","label":"Length — Waterline","io":"input","seen":"observed","treatment":"existing","reason":"Canonical hull dimension.","canonical_input":"$.hull.lwl_m","result_binding":null},
+            {"id":"hull.dimensions.loa","label":"Length — Overall","io":"input","seen":"observed","treatment":"existing","reason":"Canonical hull dimension.","canonical_input":"$.hull.loa_m","result_binding":null},
+            {"id":"hull.dimensions.beam_hull","label":"Beam — Hull","io":"input","seen":"observed","treatment":"existing","reason":"Canonical hull dimension.","canonical_input":"$.hull.beam_m","result_binding":null},
+            {"id":"hull.dimensions.beam_bulges","label":"Beam — Bulges","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"The separate SPS bulge-width parameterization is outside 1.0; explicit hull geometry may include bulges or other appendages when supplied.","canonical_input":null,"result_binding":null},
+            {"id":"hull.dimensions.draught_normal","label":"Draught (hull only) — Normal","io":"input","seen":"observed","treatment":"existing","reason":"Canonical hull lead and loading/equilibrium comparison input.","canonical_input":"$.hull.draught_normal_m","result_binding":null},
+            {"id":"hull.dimensions.draught_max","label":"Draught (hull only) — Max","io":"input","seen":"observed","treatment":"existing","reason":"Canonical deep-draught lead; solved draught remains loading-specific.","canonical_input":"$.hull.draught_deep_m","result_binding":null}
+          ]
+        },
+        {
+          "id": "hull.displacement",
+          "label": "Displacement",
+          "fields": [
+            {"id":"hull.displacement.hullform_slider","label":"Destroyer ↔ Cruiser ↔ Battleship ↔ Merchant hullform","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"The mapping from this categorical slider to hull geometry is not established from the available references; 1.0 uses explicit coefficients or offsets geometry.","canonical_input":null,"result_binding":null},
+            {"id":"hull.displacement.block_coeff_normal","label":"Block coefficient — Normal","io":"input","seen":"observed","treatment":"existing","reason":"Canonical hull coefficient; loading-specific geometry results must identify the waterline used.","canonical_input":"$.hull.block_coeff","result_binding":null},
+            {"id":"hull.displacement.block_coeff_max","label":"Block coefficient — Max","io":"input","seen":"observed","treatment":"new_binding","reason":"Required loading-specific value should come from deep-condition geometry; no canonical per-condition field is established.","canonical_input":null,"result_binding":null},
+            {"id":"hull.displacement.mass_normal","label":"Displacement — Normal","io":"output","seen":"observed","treatment":"existing","reason":"The grey screenshot cell is a derived display. Show selected-condition solved displacement/ledger mass and compare any reference displacement separately; never create a residual-weight plug.","canonical_input":"$.loading_conditions[condition=normal].reference_displacement_t","result_binding":"loading.values.total_mass_t"},
+            {"id":"hull.displacement.mass_max","label":"Displacement — Max","io":"output","seen":"observed","treatment":"existing","reason":"The grey screenshot cell is a derived display for the explicit deep/full condition, not an inferred historical load.","canonical_input":"$.loading_conditions[condition=deep].reference_displacement_t","result_binding":"loading.values.total_mass_t"}
+          ]
+        },
+        {
+          "id": "hull.derived",
+          "label": "Derived display",
+          "fields": [
+            {"id":"hull.derived.waterplane_area","label":"Waterplane area (square feet / square metres)","io":"output","seen":"observed","treatment":"existing","reason":"Display conversion of one canonical result; L0 or offsets method provenance must be shown.","canonical_input":null,"result_binding":"hydrostatics.values.awp_m2"},
+            {"id":"hull.derived.wetted_surface_area","label":"Wetted surface area (square feet / square metres)","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Offsets integration is preferred; the parameter-only Mumford fallback is explicitly estimated and loading-specific.","canonical_input":null,"result_binding":"hull.wetted_surface_m2"},
+            {"id":"hull.derived.length_beam","label":"Length : Beam","io":"output","seen":"observed","treatment":"existing","reason":"Defined as Lwl/B.","canonical_input":null,"result_binding":"hull.form_ratios.values.length_beam"},
+            {"id":"hull.derived.natural_speed","label":"Natural Speed","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Show the sourced Froude wave-speed interpretation and label the SPS-style 1.09√Lft convention as an estimate; do not imply an SPS-equivalent algorithm.","canonical_input":null,"result_binding":"hull.natural_speed.values"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "freeboard",
+      "label": "Freeboard",
+      "screenshot": "docs/sps-reference/01_Freeboard.png",
+      "groups": [
+        {
+          "id":"freeboard.deck_form",
+          "label":"Deck form and profile",
+          "fields":[
+            {"id":"freeboard.deck_form.type","label":"Flush deck / Mid break","io":"input","seen":"observed","treatment":"new_binding","reason":"May be retained as explicit design metadata, but no canonical project field exists.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.deck_form.depth_unlocked","label":"Depth Unlocked","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"This is an SPS editing-mode control, not a physical datum or required 1.0 calculation.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.deck_form.profile","label":"Sheer/profile diagram with deck and vital-space labels","io":"output","seen":"observed","treatment":"new_binding","reason":"1.0 needs a geometry-backed profile/section display; labels must reflect actual project geometry and compartments.","canonical_input":"$.geometry; $.compartments","result_binding":null},
+            {"id":"freeboard.deck_form.save_picture","label":"Save Picture…","io":"control","seen":"observed","treatment":"new_binding","reason":"Task F requires export; this should export the actual plotted profile with units and validity.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"freeboard.segments",
+          "label":"Deck segments",
+          "fields":[
+            {"id":"freeboard.segments.forecastle.length_pct","label":"Forecastle — Length (% of Lwl)","io":"input","seen":"observed","treatment":"new_binding","reason":"The legacy freeboard model accepts it, but canonical project integration is pending.","canonical_input":null,"result_binding":"freeboard.segments[forecastle].length_pct_lwl"},
+            {"id":"freeboard.segments.forecastle.forward","label":"Forecastle — Freeboard Forward","io":"input","seen":"observed","treatment":"new_binding","reason":"Canonical project integration and provenance are pending; Queen Mary value is model-derived estimate.","canonical_input":null,"result_binding":"freeboard.segments[forecastle].fb_fore_m"},
+            {"id":"freeboard.segments.forecastle.aft","label":"Forecastle — Freeboard Aft","io":"input","seen":"observed","treatment":"new_binding","reason":"Canonical project integration and provenance are pending; Queen Mary value is model-derived estimate.","canonical_input":null,"result_binding":"freeboard.segments[forecastle].fb_aft_m"},
+            {"id":"freeboard.segments.fore.length_pct","label":"Fore Deck — Length (% of Lwl)","io":"input","seen":"observed","treatment":"new_binding","reason":"Canonical segment is required only when actually supplied; Queen Mary remains unknown rather than zero.","canonical_input":null,"result_binding":"freeboard.segments[fore].length_pct_lwl"},
+            {"id":"freeboard.segments.fore.forward","label":"Fore Deck — Freeboard Forward","io":"input","seen":"observed","treatment":"new_binding","reason":"Unknown for Queen Mary; retain null with reason until a geometry/source exists.","canonical_input":null,"result_binding":"freeboard.segments[fore].fb_fore_m"},
+            {"id":"freeboard.segments.fore.aft","label":"Fore Deck — Freeboard Aft","io":"input","seen":"observed","treatment":"new_binding","reason":"Unknown for Queen Mary; retain null with reason until a geometry/source exists.","canonical_input":null,"result_binding":"freeboard.segments[fore].fb_aft_m"},
+            {"id":"freeboard.segments.aft.length_pct","label":"Aft Deck — Length (% of Lwl)","io":"input","seen":"observed","treatment":"new_binding","reason":"Canonical segment is required only when actually supplied; Queen Mary remains unknown rather than zero.","canonical_input":null,"result_binding":"freeboard.segments[aft].length_pct_lwl"},
+            {"id":"freeboard.segments.aft.forward","label":"Aft Deck — Freeboard Forward","io":"input","seen":"observed","treatment":"new_binding","reason":"Unknown for Queen Mary; retain null with reason until a geometry/source exists.","canonical_input":null,"result_binding":"freeboard.segments[aft].fb_fore_m"},
+            {"id":"freeboard.segments.aft.aft","label":"Aft Deck — Freeboard Aft","io":"input","seen":"observed","treatment":"new_binding","reason":"Unknown for Queen Mary; retain null with reason until a geometry/source exists.","canonical_input":null,"result_binding":"freeboard.segments[aft].fb_aft_m"},
+            {"id":"freeboard.segments.quarterdeck.length_pct","label":"Quarter Deck — Length (% of Lwl)","io":"input","seen":"observed","treatment":"new_binding","reason":"The legacy freeboard model accepts it, but canonical project integration is pending.","canonical_input":null,"result_binding":"freeboard.segments[quarterdeck].length_pct_lwl"},
+            {"id":"freeboard.segments.quarterdeck.forward","label":"Quarter Deck — Freeboard Forward","io":"input","seen":"observed","treatment":"new_binding","reason":"Canonical project integration and provenance are pending; Queen Mary value is model-derived estimate.","canonical_input":null,"result_binding":"freeboard.segments[quarterdeck].fb_fore_m"},
+            {"id":"freeboard.segments.quarterdeck.aft","label":"Quarter Deck — Freeboard Aft","io":"input","seen":"observed","treatment":"new_binding","reason":"Canonical project integration and provenance are pending; Queen Mary value is model-derived estimate.","canonical_input":null,"result_binding":"freeboard.segments[quarterdeck].fb_aft_m"}
+          ]
+        },
+        {
+          "id":"freeboard.ends",
+          "label":"Bow, stern and overall length",
+          "fields":[
+            {"id":"freeboard.ends.bow_type","label":"Bow type","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"No approved 1.0 algorithm consumes the SPS categorical bow selector; geometry is authoritative.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.ends.stern_type","label":"Stern type","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"No approved 1.0 algorithm consumes the SPS categorical stern selector; geometry is authoritative.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.ends.waterline_length","label":"Waterline length (Lwl)","io":"output","seen":"observed","treatment":"existing","reason":"Reuse the canonical Lwl or loading-specific geometry result with the waterline datum shown.","canonical_input":"$.hull.lwl_m","result_binding":"hull.waterline_length.values.lwl_at_z_m"},
+            {"id":"freeboard.ends.bow_angle","label":"Bow Angle (+ve = fore)","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"The screenshot does not establish the geometric convention and 1.0 resistance uses explicit documented shape inputs instead.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.ends.ram_length","label":"Ram Length","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"Pure SPS design detail with no approved 1.0 calculation dependency.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.ends.stern_overhang","label":"Stern overhang","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"Pure SPS design detail with no approved 1.0 calculation dependency.","canonical_input":null,"result_binding":null},
+            {"id":"freeboard.ends.loa","label":"Length OA","io":"output","seen":"observed","treatment":"existing","reason":"Canonical hull dimension, display-converted only.","canonical_input":"$.hull.loa_m","result_binding":null},
+            {"id":"freeboard.ends.average","label":"Average freeboard","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Legacy calculation is length-weighted; input estimates and incomplete segment coverage must propagate.","canonical_input":null,"result_binding":"freeboard.values.average_freeboard_m"}
+          ]
+        }
+      ]
+    },
+    {
+      "id":"guns",
+      "label":"Guns",
+      "screenshot":"docs/sps-reference/02_Guns.png",
+      "groups":[
+        {
+          "id":"guns.battery_selection",
+          "label":"Battery selection",
+          "fields":[
+            {"id":"guns.battery_selection.slots","label":"Main / 2nd / 3rd / 4th / 5th Battery slots","io":"input","seen":"observed","treatment":"existing","reason":"Canonical systems can hold named weapon systems and installed/broadside counts; absent batteries must remain absent or explicitly zero by source.","canonical_input":"$.systems.weapons","result_binding":"systems.systems[weapons.*]"},
+            {"id":"guns.battery_selection.shell_weight_lock","label":"Lock / Unlock all shell weights","io":"control","seen":"observed","treatment":"new_binding","reason":"If retained, this is editor state for linked ammunition inputs and must not alter the physical contract silently.","canonical_input":null,"result_binding":null},
+            {"id":"guns.battery_selection.editor_fields_unknown","label":"Battery-editor detailed inputs","io":"input","seen":"unobserved","treatment":"new_binding","reason":"Only the Summary subpage was captured; detailed SPS field names and conventions are unknown, so Task 8 must bind Plimsoll's explicit gun/mount/ammunition data without claiming screenshot parity.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"guns.weights",
+          "label":"Weights matrix (Main / 2nd / 3rd / 4th / 5th / Total)",
+          "fields":[
+            {"id":"guns.weights.guns","label":"Guns","io":"output","seen":"observed","treatment":"existing","reason":"Count × unit gun mass exists; canonical ledger remains the mass authority.","canonical_input":"$.systems.weapons.*.installed_guns; linked weight items","result_binding":"guns.batteries[*].guns_t"},
+            {"id":"guns.weights.mounts","label":"Mounts","io":"output","seen":"observed","treatment":"existing","reason":"Mount mass exists with provenance/estimate boundaries; canonical ledger remains authoritative.","canonical_input":"$.systems.weapons.*.weight_item_ids","result_binding":"guns.batteries[*].mounts_t"},
+            {"id":"guns.weights.armour","label":"Armour","io":"output","seen":"observed","treatment":"new_binding","reason":"Rotating turret armour is owned inside the main-mount ledger boundary while the legacy guns result is null; Task 8 must expose one non-duplicated ownership view.","canonical_input":"$.weight_groups[armament].items[main-mounts].includes","result_binding":null},
+            {"id":"guns.weights.total","label":"Total (t)","io":"output","seen":"observed","treatment":"new_binding","reason":"Must sum canonical linked items once, including the declared mount/armour boundary, rather than reuse the legacy partial total.","canonical_input":"$.systems.weapons.*.weight_item_ids","result_binding":"systems.systems[weapons.*].ledger_mass_t"},
+            {"id":"guns.weights.broadside_lb","label":"Broadside (lbs)","io":"output","seen":"observed","treatment":"existing","reason":"Broadside count × shell mass, with exact display conversion.","canonical_input":"$.systems.weapons.*.broadside_guns","result_binding":"guns.batteries[*].broadside_lb"},
+            {"id":"guns.weights.broadside_kg","label":"Broadside (kg)","io":"output","seen":"observed","treatment":"existing","reason":"Same broadside result converted with the exact international pound definition.","canonical_input":"$.systems.weapons.*.broadside_guns","result_binding":"guns.batteries[*].broadside_kg"},
+            {"id":"guns.weights.magazine","label":"Magazine (t)","io":"output","seen":"observed","treatment":"new_binding","reason":"Canonical ammunition items now define projectile/charge boundaries; Task 8 must use those ledger masses and avoid the legacy secondary-charge omission.","canonical_input":"$.systems.weapons.*.weight_item_ids","result_binding":"systems.systems[weapons.*].ledger_mass_t"}
+          ]
+        }
+      ]
+    },
+    {
+      "id":"weapons",
+      "label":"Weapons",
+      "screenshot":"docs/sps-reference/03_Weapons.png",
+      "groups":[
+        {
+          "id":"weapons.torpedoes",
+          "label":"Main / 2nd Torpedoes",
+          "fields":[
+            {"id":"weapons.torpedoes.main.number","label":"Main Torpedoes — Number","io":"input","seen":"observed","treatment":"existing","reason":"Installed tube count has a canonical systems binding.","canonical_input":"$.systems.weapons.torpedo.installed_tubes","result_binding":"weapons.torpedoes[*].tubes"},
+            {"id":"weapons.torpedoes.main.sets","label":"Main Torpedoes — Sets","io":"input","seen":"observed","treatment":"new_binding","reason":"The SPS meaning of sets versus carried rounds is not established; Plimsoll must use an explicitly labelled carried-round count.","canonical_input":null,"result_binding":"weapons.torpedoes[*].carried"},
+            {"id":"weapons.torpedoes.main.diameter","label":"Main Torpedoes — Diameter","io":"input","seen":"observed","treatment":"new_binding","reason":"Legacy case has sourced diameter, but canonical systems metadata has no stable field.","canonical_input":null,"result_binding":"weapons.torpedoes[*].diameter_mm"},
+            {"id":"weapons.torpedoes.main.diameter_unit","label":"Main Torpedoes — Diameter unit","io":"input","seen":"observed","treatment":"new_binding","reason":"Import/display selector only; canonical diameter remains metric and must use explicit conversion.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.torpedoes.main.length","label":"Main Torpedoes — Length","io":"input","seen":"observed","treatment":"new_binding","reason":"Unknown for Queen Mary and absent from canonical systems; remain null with a reason.","canonical_input":null,"result_binding":"weapons.torpedoes[*].length_m"},
+            {"id":"weapons.torpedoes.main.arrangement","label":"Main Torpedoes — Arrangement","io":"input","seen":"observed","treatment":"new_binding","reason":"Legacy sourced text exists but lacks a canonical systems field.","canonical_input":null,"result_binding":"weapons.torpedoes[*].arrangement"},
+            {"id":"weapons.torpedoes.main.weight","label":"Main Torpedoes — Weight","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Use the canonical torpedo-round ledger item with uncertainty; the legacy case's complete unit weight is unknown and must not substitute warhead mass.","canonical_input":"$.systems.weapons.torpedo.weight_item_ids","result_binding":"systems.systems[weapons.torpedo].ledger_mass_t"},
+            {"id":"weapons.torpedoes.second.number","label":"2nd Torpedoes — Number","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic repeated battery support is required, but no second Queen Mary battery is sourced.","canonical_input":null,"result_binding":"weapons.torpedoes[*].tubes"},
+            {"id":"weapons.torpedoes.second.sets","label":"2nd Torpedoes — Sets","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic repeated battery support is required; the SPS sets convention remains unresolved.","canonical_input":null,"result_binding":"weapons.torpedoes[*].carried"},
+            {"id":"weapons.torpedoes.second.diameter","label":"2nd Torpedoes — Diameter","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic repeated battery metadata; no Queen Mary value is established.","canonical_input":null,"result_binding":"weapons.torpedoes[*].diameter_mm"},
+            {"id":"weapons.torpedoes.second.diameter_unit","label":"2nd Torpedoes — Diameter unit","io":"input","seen":"observed","treatment":"new_binding","reason":"Import/display selector only; canonical diameter remains metric and must use explicit conversion.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.torpedoes.second.length","label":"2nd Torpedoes — Length","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic repeated battery metadata; no Queen Mary value is established.","canonical_input":null,"result_binding":"weapons.torpedoes[*].length_m"},
+            {"id":"weapons.torpedoes.second.arrangement","label":"2nd Torpedoes — Arrangement","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic repeated battery metadata; no Queen Mary value is established.","canonical_input":null,"result_binding":"weapons.torpedoes[*].arrangement"},
+            {"id":"weapons.torpedoes.second.weight","label":"2nd Torpedoes — Weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Calculate only when a second battery owns explicit canonical ledger items; otherwise show unavailable, not zero.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"weapons.mines",
+          "label":"Mines",
+          "fields":[
+            {"id":"weapons.mines.number","label":"Mines — Number","io":"input","seen":"observed","treatment":"new_binding","reason":"Needs explicit ordnance inventory; Queen Mary remains unknown unless a source confirms zero or a count.","canonical_input":null,"result_binding":"weapons.mines.count"},
+            {"id":"weapons.mines.reloads","label":"Mines — Reloads","io":"input","seen":"observed","treatment":"new_binding","reason":"No canonical or sourced Queen Mary value.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.mines.unit_weight","label":"Mines — Weight","io":"input","seen":"observed","treatment":"new_binding","reason":"No canonical or sourced Queen Mary value; unknown is not zero.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.mines.weight_unit","label":"Mines — Weight unit","io":"input","seen":"observed","treatment":"new_binding","reason":"Import/display selector only; canonical mass remains tonnes and must use explicit conversion.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.mines.arrangement","label":"Mines — Deployment arrangement","io":"input","seen":"observed","treatment":"new_binding","reason":"No canonical or sourced Queen Mary value.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.mines.total_weight","label":"Mines — Total weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Compute only from explicit count/reloads/unit mass and link the resulting mass to one ledger owner.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"weapons.depth_charge_main",
+          "label":"Main DC / AS Mortars",
+          "fields":[
+            {"id":"weapons.depth_charge_main.number","label":"Main DC / AS Mortars — Number","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic ordnance field; Queen Mary remains unknown rather than zero.","canonical_input":null,"result_binding":"weapons.depth_charges.count"},
+            {"id":"weapons.depth_charge_main.reloads","label":"Main DC / AS Mortars — Reloads","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_main.unit_weight","label":"Main DC / AS Mortars — Weight","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_main.weight_unit","label":"Main DC / AS Mortars — Weight unit","io":"input","seen":"observed","treatment":"new_binding","reason":"Import/display selector only; canonical mass remains tonnes and must use explicit conversion.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_main.arrangement","label":"Main DC / AS Mortars — Arrangement","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_main.total_weight","label":"Main DC / AS Mortars — Total weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Compute only from explicit inputs and one linked ledger owner.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"weapons.depth_charge_second",
+          "label":"2nd DC / AS Mortars",
+          "fields":[
+            {"id":"weapons.depth_charge_second.number","label":"2nd DC / AS Mortars — Number","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic repeated ordnance field; Queen Mary remains unknown rather than zero.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_second.reloads","label":"2nd DC / AS Mortars — Reloads","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_second.unit_weight","label":"2nd DC / AS Mortars — Weight","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_second.weight_unit","label":"2nd DC / AS Mortars — Weight unit","io":"input","seen":"observed","treatment":"new_binding","reason":"Import/display selector only; canonical mass remains tonnes and must use explicit conversion.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_second.arrangement","label":"2nd DC / AS Mortars — Arrangement","io":"input","seen":"observed","treatment":"new_binding","reason":"No stable canonical field.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.depth_charge_second.total_weight","label":"2nd DC / AS Mortars — Total weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Compute only from explicit inputs and one linked ledger owner.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"weapons.misc_weight",
+          "label":"Misc weight (t)",
+          "fields":[
+            {"id":"weapons.misc_weight.hull_below","label":"Hull — Below water","io":"input","seen":"observed","treatment":"new_binding","reason":"Must become a sourced weight item with x/y/kg and ownership; a zone-only mass cannot enter the canonical ledger safely.","canonical_input":null,"result_binding":"weapons.misc_weight[hull_below_water].mass_t"},
+            {"id":"weapons.misc_weight.hull_above","label":"Hull — Above water","io":"input","seen":"observed","treatment":"new_binding","reason":"Must become a sourced weight item with x/y/kg and ownership.","canonical_input":null,"result_binding":"weapons.misc_weight[hull_above_water].mass_t"},
+            {"id":"weapons.misc_weight.on_deck","label":"On deck","io":"input","seen":"observed","treatment":"new_binding","reason":"Must become a sourced weight item with x/y/kg and ownership.","canonical_input":null,"result_binding":"weapons.misc_weight[on_deck].mass_t"},
+            {"id":"weapons.misc_weight.above_deck","label":"Above Deck","io":"input","seen":"observed","treatment":"new_binding","reason":"Must become a sourced weight item with x/y/kg and ownership.","canonical_input":null,"result_binding":"weapons.misc_weight[above_deck].mass_t"},
+            {"id":"weapons.misc_weight.void","label":"Void weight","io":"input","seen":"observed","treatment":"new_binding","reason":"Must become a sourced weight item with x/y/kg and ownership; an arbitrary balancing weight is forbidden.","canonical_input":null,"result_binding":"weapons.misc_weight[void].mass_t"},
+            {"id":"weapons.misc_weight.hull_space","label":"Hull space","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"The mapping for this room-allocation output is not established from the available references, and room ratings are outside 1.0; explicit compartments remain available separately.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.misc_weight.deck_space","label":"Deck space","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"The mapping for this room-allocation output is not established from the available references, and room ratings are outside 1.0.","canonical_input":null,"result_binding":null},
+            {"id":"weapons.misc_weight.summary","label":"Ordnance summary text","io":"output","seen":"observed","treatment":"new_binding","reason":"May summarize only explicit values, units, arrangement and unknown reasons; it must not manufacture absent ordnance.","canonical_input":null,"result_binding":null}
+          ]
+        }
+      ]
+    },
+    {
+      "id":"armour",
+      "label":"Armour",
+      "screenshot":"docs/sps-reference/04_Armour.png",
+      "groups":[
+        {
+          "id":"armour.settings",
+          "label":"Armour settings",
+          "fields":[
+            {"id":"armour.settings.thickness_unit","label":"Maximum thickness in inches","io":"input","seen":"observed","treatment":"new_binding","reason":"Display/import preference converts to canonical metric thickness; it is not a physical input by itself.","canonical_input":null,"result_binding":null},
+            {"id":"armour.settings.minimum_main_belt_length","label":"Minimum main belt length to cover machinery and magazines","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Could be derived only from explicit compartment/machinery extents; Queen Mary compartments are engineering proxies and the result must say so.","canonical_input":"$.compartments; $.systems.propulsion","result_binding":null},
+            {"id":"armour.settings.default_preset","label":"Belts & Bulkheads preset (Default)","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"The preset-to-armour mapping is not established from the available references; 1.0 uses explicit rows and provenance rather than recreating an opaque preset.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"armour.belts_bulkheads",
+          "label":"Belts & Bulkheads",
+          "fields":[
+            {"id":"armour.belts.main.thickness","label":"Main — Max Thickness","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Published thickness plus model-derived extent; canonical detailed protection binding is pending.","canonical_input":null,"result_binding":"armour.belts[main].thickness_mm"},
+            {"id":"armour.belts.main.length","label":"Main — Length","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate, not surveyed plate geometry.","canonical_input":null,"result_binding":"armour.belts[main].length_m"},
+            {"id":"armour.belts.main.height","label":"Main — Height","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate, not surveyed plate geometry.","canonical_input":null,"result_binding":"armour.belts[main].height_m"},
+            {"id":"armour.belts.main.weight","label":"Main — Weight","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Area × thickness × density with explicit assumptions; link once to the canonical armour ledger.","canonical_input":"$.weight_groups[armour]","result_binding":"armour.belts[main].weight_t"},
+            {"id":"armour.belts.ends.thickness","label":"Ends — Max Thickness","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Published thickness plus estimated extent.","canonical_input":null,"result_binding":"armour.belts[ends].thickness_mm"},
+            {"id":"armour.belts.ends.length","label":"Ends — Length","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate.","canonical_input":null,"result_binding":"armour.belts[ends].length_m"},
+            {"id":"armour.belts.ends.height","label":"Ends — Height","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate.","canonical_input":null,"result_binding":"armour.belts[ends].height_m"},
+            {"id":"armour.belts.ends.weight","label":"Ends — Weight","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Area × thickness × density with explicit assumptions.","canonical_input":"$.weight_groups[armour]","result_binding":"armour.belts[ends].weight_t"},
+            {"id":"armour.belts.upper.thickness","label":"Upper — Max Thickness","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Published thickness plus estimated extent.","canonical_input":null,"result_binding":"armour.belts[upper].thickness_mm"},
+            {"id":"armour.belts.upper.length","label":"Upper — Length","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate.","canonical_input":null,"result_binding":"armour.belts[upper].length_m"},
+            {"id":"armour.belts.upper.height","label":"Upper — Height","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate.","canonical_input":null,"result_binding":"armour.belts[upper].height_m"},
+            {"id":"armour.belts.upper.weight","label":"Upper — Weight","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Area × thickness × density with explicit assumptions.","canonical_input":"$.weight_groups[armour]","result_binding":"armour.belts[upper].weight_t"},
+            {"id":"armour.belts.bulge.thickness","label":"Bulge — Max Thickness","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic optional row; Queen Mary has no sourced bulge and should show explicit absence rather than numeric zero.","canonical_input":null,"result_binding":"armour.belts[bulge].thickness_mm"},
+            {"id":"armour.belts.bulge.length","label":"Bulge — Length","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic optional row; no Queen Mary datum.","canonical_input":null,"result_binding":"armour.belts[bulge].length_m"},
+            {"id":"armour.belts.bulge.height","label":"Bulge — Height","io":"input","seen":"observed","treatment":"new_binding","reason":"Generic optional row; no Queen Mary datum.","canonical_input":null,"result_binding":"armour.belts[bulge].height_m"},
+            {"id":"armour.belts.bulge.weight","label":"Bulge — Weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Unavailable unless an explicit bulge row exists; no placeholder zero.","canonical_input":null,"result_binding":"armour.belts[bulge].weight_t"},
+            {"id":"armour.belts.torpedo_bulkhead.thickness","label":"Torpedo bulkhead — Max Thickness","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Published nominal thickness plus model-derived extent.","canonical_input":null,"result_binding":"armour.belts[torpedo_bulkhead].thickness_mm"},
+            {"id":"armour.belts.torpedo_bulkhead.length","label":"Torpedo bulkhead — Length","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate.","canonical_input":null,"result_binding":"armour.belts[torpedo_bulkhead].length_m"},
+            {"id":"armour.belts.torpedo_bulkhead.height","label":"Torpedo bulkhead — Height","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Model-bounds extent is an estimate.","canonical_input":null,"result_binding":"armour.belts[torpedo_bulkhead].height_m"},
+            {"id":"armour.belts.torpedo_bulkhead.weight","label":"Torpedo bulkhead — Weight","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Area × thickness × density with explicit assumptions.","canonical_input":"$.weight_groups[armour]","result_binding":"armour.belts[torpedo_bulkhead].weight_t"},
+            {"id":"armour.belts.total_weight","label":"Belts & Bulkheads — Total weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Sum the canonical linked armour items once; the display grouping must not duplicate the ledger.","canonical_input":"$.weight_groups[armour]","result_binding":null}
+          ]
+        },
+        {
+          "id":"armour.bulkhead_geometry",
+          "label":"Belt and bulkhead geometry",
+          "fields":[
+            {"id":"armour.bulkhead_geometry.main_belt_incline","label":"Main belt incline","io":"input","seen":"observed","treatment":"new_binding","reason":"Potentially affects true plate area, but no canonical field or Queen Mary source is established.","canonical_input":null,"result_binding":null},
+            {"id":"armour.bulkhead_geometry.type","label":"Type — Additional bulkheads","io":"input","seen":"observed","treatment":"new_binding","reason":"The selector-to-geometry mapping is not established from the available references; use explicit bulkhead rows/geometry, with canonical detailed armour binding still pending.","canonical_input":null,"result_binding":null},
+            {"id":"armour.bulkhead_geometry.beam_between","label":"Beam between bulkheads","io":"input","seen":"observed","treatment":"new_binding","reason":"Could map to explicit compartment/protection geometry; no stable canonical field exists.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"armour.other",
+          "label":"Guns, deck and conning towers",
+          "fields":[
+            {"id":"armour.other.guns","label":"Guns (see Guns page)","io":"output","seen":"observed","treatment":"new_binding","reason":"Show the single canonical rotating-mount/armour ownership boundary from the Guns/system view; do not recalculate a second mass.","canonical_input":"$.systems.weapons.main.weight_item_ids","result_binding":null},
+            {"id":"armour.deck.forecastle","label":"Armour deck — Forecastle","io":"input","seen":"observed","treatment":"new_binding","reason":"Legacy armour data is grouped by thickness layer, not deck position; positional split is unresolved.","canonical_input":null,"result_binding":null},
+            {"id":"armour.deck.fore_aft","label":"Armour deck — Fore & aft decks","io":"input","seen":"observed","treatment":"new_binding","reason":"Legacy armour data is grouped by thickness layer, not deck position; positional split is unresolved.","canonical_input":null,"result_binding":null},
+            {"id":"armour.deck.quarter","label":"Armour deck — Quarter deck","io":"input","seen":"observed","treatment":"new_binding","reason":"Legacy armour data is grouped by thickness layer, not deck position; positional split is unresolved.","canonical_input":null,"result_binding":null},
+            {"id":"armour.deck.total","label":"Armour deck — Total","io":"output","seen":"observed","treatment":"new_binding","reason":"Must sum one canonical set of deck-armour ledger items; detailed positional ownership remains pending.","canonical_input":"$.weight_groups[armour]","result_binding":"armour.groups.armour_deck"},
+            {"id":"armour.deck.coverage","label":"Armour deck coverage","io":"input","seen":"observed","treatment":"new_binding","reason":"Needs an explicit geometric definition rather than an SPS dropdown convention.","canonical_input":null,"result_binding":null},
+            {"id":"armour.conning.forward","label":"Conning towers — Forward","io":"input","seen":"observed","treatment":"calculated_estimate","reason":"Existing geometry-based conning-tower mass is estimated; fore/aft separation is not yet canonical.","canonical_input":null,"result_binding":"armour.conning_tower[*].weight_t"},
+            {"id":"armour.conning.aft","label":"Conning towers — Aft","io":"input","seen":"observed","treatment":"new_binding","reason":"No sourced Queen Mary aft-tower datum or canonical split is established.","canonical_input":null,"result_binding":null},
+            {"id":"armour.conning.total","label":"Conning towers — Total","io":"output","seen":"observed","treatment":"new_binding","reason":"Sum explicit linked conning-tower items without duplicating the armour ledger.","canonical_input":"$.weight_groups[armour]","result_binding":"armour.groups.conning_tower"},
+            {"id":"armour.total","label":"Total armour","io":"output","seen":"observed","treatment":"new_binding","reason":"Canonical selected-loading armour group is the mass authority; legacy geometric total is a comparison estimate only.","canonical_input":"$.weight_groups[armour]","result_binding":"loading.groups[armour].total_mass_t"},
+            {"id":"armour.diagram","label":"Armour deck / void-weight diagram","io":"output","seen":"observed","treatment":"new_binding","reason":"Render only from actual geometry and weight ownership; unknown zones remain visibly unavailable.","canonical_input":"$.geometry; $.weight_groups[armour]","result_binding":null}
+          ]
+        }
+      ]
+    },
+    {
+      "id":"engines",
+      "label":"Engines",
+      "screenshot":"docs/sps-reference/05_Engines.png",
+      "groups":[
+        {
+          "id":"engines.speed_power",
+          "label":"Speed & Power",
+          "fields":[
+            {"id":"engines.speed_power.max_speed","label":"Max speed","io":"input","seen":"observed","treatment":"existing","reason":"Sourced design/trial input exists; predicted speed-power results must be identified separately.","canonical_input":null,"result_binding":"engines.values.max_speed_kn"},
+            {"id":"engines.speed_power.cruise_speed","label":"Cruise speed","io":"input","seen":"observed","treatment":"new_binding","reason":"No sourced Queen Mary value in the current case; retain null rather than infer it from historical range speed.","canonical_input":null,"result_binding":"engines.values.cruise_speed_kn"},
+            {"id":"engines.speed_power.shafts","label":"No. of shafts","io":"input","seen":"observed","treatment":"existing","reason":"Sourced system datum.","canonical_input":"$.systems.propulsion","result_binding":"engines.values.shafts"},
+            {"id":"engines.speed_power.lock_power","label":"Lock Power","io":"control","seen":"observed","treatment":"new_binding","reason":"If retained, it must explicitly select fixed-power versus predicted-power mode and participate in the request fingerprint.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.max_friction","label":"Max — Friction resistance","io":"output","seen":"observed","treatment":"new_binding","reason":"Task 7 result must bind at the same selected loading and speed with method/applicability diagnostics; Task 7 is still in progress.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.max_wave","label":"Max — Wave resistance","io":"output","seen":"observed","treatment":"new_binding","reason":"Use the method's explicitly named residual/wave component only when definitions match; Task 7 is still in progress.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.max_wave_power_pct","label":"Max — Power to wavemaking","io":"output","seen":"observed","treatment":"new_binding","reason":"Requires a documented component ratio; no stable result binding is established and no SPS formula may be invented.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.max_power_hp","label":"Max — Power (hp)","io":"output","seen":"observed","treatment":"new_binding","reason":"Bind the selected Task 7 delivered/shaft-power result and convert units exactly; in-progress code is not marked complete.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.max_power_kw","label":"Max — Power (kW)","io":"output","seen":"observed","treatment":"new_binding","reason":"Same power result in canonical kW with method/QPC/applicability disclosed.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.cruise_friction","label":"Cruise — Friction resistance","io":"output","seen":"observed","treatment":"new_binding","reason":"Same selected-loading Task 7 curve at an explicit cruise speed; unavailable while cruise speed is unknown.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.cruise_wave","label":"Cruise — Wave resistance","io":"output","seen":"observed","treatment":"new_binding","reason":"Same selected-loading Task 7 curve and method definition; unavailable while cruise speed is unknown.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.cruise_wave_power_pct","label":"Cruise — Power to wavemaking","io":"output","seen":"observed","treatment":"new_binding","reason":"No stable documented ratio binding; unavailable while required inputs are unknown.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.cruise_power_hp","label":"Cruise — Power (hp)","io":"output","seen":"observed","treatment":"new_binding","reason":"Bind Task 7 delivered/shaft power only at explicit speed and loading.","canonical_input":null,"result_binding":null},
+            {"id":"engines.speed_power.cruise_power_kw","label":"Cruise — Power (kW)","io":"output","seen":"observed","treatment":"new_binding","reason":"Same canonical power result in kW.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"engines.configuration",
+          "label":"Engine configuration",
+          "fields":[
+            {"id":"engines.configuration.energy_source","label":"Coal / Oil boilers; Diesel / Petrol motors; Batteries","io":"input","seen":"observed","treatment":"new_binding","reason":"Store explicit propulsion components and fuels, not mutually ambiguous checkbox text; current canonical propulsion metadata is partial.","canonical_input":"$.systems.propulsion","result_binding":null},
+            {"id":"engines.configuration.prime_mover","label":"Simple / Complex reciprocating; Steam turbines","io":"input","seen":"observed","treatment":"new_binding","reason":"Current case has sourced turbine text but no stable typed canonical field.","canonical_input":"$.systems.propulsion","result_binding":null},
+            {"id":"engines.configuration.transmission","label":"Direct / Geared / Electric / Hydraulic","io":"input","seen":"observed","treatment":"new_binding","reason":"Current case has sourced direct-drive text but no stable typed canonical field.","canonical_input":"$.systems.propulsion","result_binding":null},
+            {"id":"engines.configuration.summary","label":"Fuel / motor / drive summary","io":"output","seen":"observed","treatment":"new_binding","reason":"Derived plain-language summary of explicit typed system inputs; never infer missing selections.","canonical_input":"$.systems.propulsion","result_binding":null}
+          ]
+        },
+        {
+          "id":"engines.weights",
+          "label":"Weights",
+          "fields":[
+            {"id":"engines.weights.engine_factor","label":"Engine factor","io":"input","seen":"observed","treatment":"explicitly_excluded","reason":"The SPS factor definition is not established. 1.0 uses explicit sourced or ranged machinery weight items, so the slider must not be recreated with an invented formula.","canonical_input":null,"result_binding":null},
+            {"id":"engines.weights.range","label":"Range","io":"input","seen":"observed","treatment":"existing","reason":"Historical/comparison range can be stored with its speed/source; prediction requires explicit fuel-consumption inputs.","canonical_input":null,"result_binding":"engines.values.range_nm"},
+            {"id":"engines.weights.pct_coal","label":"% Coal","io":"input","seen":"observed","treatment":"existing","reason":"Derived from selected-loading coal and oil masses; historical maximum fuel values must not be mistaken for every condition.","canonical_input":"$.weight_groups[fuel]; $.loading_conditions[*].overrides","result_binding":"engines.values.pct_coal"},
+            {"id":"engines.weights.displacement_for_machinery","label":"Engine disp for machinery","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"The displacement-allocation mapping is not established from the available references; 1.0 uses explicit compartment volumes and machinery weights rather than a substitute score.","canonical_input":null,"result_binding":null},
+            {"id":"engines.weights.engine","label":"Engine","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"Canonical machinery ledger has sourced screening estimates and uncertainty; show its declared component boundary.","canonical_input":"$.systems.propulsion.weight_item_ids","result_binding":"systems.systems[propulsion].ledger_mass_t"},
+            {"id":"engines.weights.bunker_max","label":"Bunker (Max)","io":"output","seen":"observed","treatment":"existing","reason":"Sum selected deep/full loading-condition fuel items once.","canonical_input":"$.weight_groups[fuel]; $.loading_conditions[deep].overrides","result_binding":"loading.groups[fuel].total_mass_t"},
+            {"id":"engines.weights.bunker_normal","label":"Bunker (Normal)","io":"output","seen":"observed","treatment":"existing","reason":"Sum selected normal loading-condition fuel items once.","canonical_input":"$.weight_groups[fuel]; $.loading_conditions[normal].overrides","result_binding":"loading.groups[fuel].total_mass_t"},
+            {"id":"engines.weights.load","label":"Load — Weight","io":"output","seen":"observed","treatment":"new_binding","reason":"Define from explicit variable-load groups/ownership at the selected condition; do not reverse-engineer an SPS factor.","canonical_input":"$.weight_groups; $.loading_conditions","result_binding":null},
+            {"id":"engines.weights.hull","label":"Hull — Weight","io":"output","seen":"observed","treatment":"existing","reason":"Canonical hull-structure group mass with estimate range and boundary.","canonical_input":"$.weight_groups[hull]","result_binding":"loading.groups[hull].total_mass_t"},
+            {"id":"engines.weights.displacement_factor","label":"Displacement factor","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"The SPS factor definition is not established; show actual group totals and selected displacement instead of an invented score.","canonical_input":null,"result_binding":null}
+          ]
+        }
+      ]
+    },
+    {
+      "id":"performance",
+      "label":"Performance",
+      "screenshot":"docs/sps-reference/06_Performance.png",
+      "groups":[
+        {
+          "id":"performance.stability_seakeeping",
+          "label":"Stability & Seakeeping",
+          "fields":[
+            {"id":"performance.set_trim","label":"Set Trim","io":"input","seen":"observed","treatment":"new_binding","reason":"1.0 requires solved trim from the shared loading state; any user target/constraint must be explicit and fingerprinted. Task 4 bindings are still in progress.","canonical_input":null,"result_binding":null},
+            {"id":"performance.stability","label":"Stability","io":"output","seen":"observed","treatment":"new_binding","reason":"Replace the opaque SPS score with named GM/GZ peak/range/downflooding/validity metrics from the selected loading; Task 4 is not marked complete here.","canonical_input":null,"result_binding":null},
+            {"id":"performance.recoil","label":"Recoil","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"A numeric recoil rating requires weapon impulse, mount dynamics and acceptance criteria outside the approved 1.0 scope; no zero or decorative score.","canonical_input":null,"result_binding":null},
+            {"id":"performance.flotation","label":"Flotation","io":"output","seen":"observed","treatment":"new_binding","reason":"Expose solved draught/trim/heel, freeboard/downflooding limits and residuals rather than an undocumented SPS score.","canonical_input":null,"result_binding":null},
+            {"id":"performance.steadiness","label":"Steadiness","io":"output","seen":"observed","treatment":"calculated_estimate","reason":"A small-angle roll-period estimate may be shown with the assumed gyration radius; it is not a complete seakeeping rating.","canonical_input":"$.hull.roll_gyration_coeff; loading.values.kg_m","result_binding":"hydrostatics.values.roll_period_s"},
+            {"id":"performance.metacentric_height","label":"Metacentric height","io":"output","seen":"observed","treatment":"existing","reason":"GM is available when geometry and complete selected-loading KG are available; provenance and model limits must be shown.","canonical_input":"loading.values.kg_m","result_binding":"hydrostatics.values.gm_m"},
+            {"id":"performance.seakeeping","label":"Seakeeping","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Complete seakeeping is outside 1.0; roll-period and stability results must not be relabelled as a seakeeping score.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"performance.damage",
+          "label":"Damage sustainability",
+          "fields":[
+            {"id":"performance.damage.shell_hits","label":"Max 6.00 in / 152 mm shell hits","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Hit-count survivability needs penetration, damage mapping and combat assumptions outside 1.0. The approved damage tool reports explicit flooded scenarios and residual stability instead.","canonical_input":null,"result_binding":null},
+            {"id":"performance.damage.torpedo_hits","label":"Max 20 in / 508 mm torpedo hits","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Torpedo-hit counts are not equivalent to the approved compartment/opening flooding simulation and require an out-of-scope weapon-damage model.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"performance.room",
+          "label":"Hull & deck Room",
+          "fields":[
+            {"id":"performance.room.machinery_storage_compartmentation","label":"Machinery, storage, compartmentation space assessment","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"The rating mapping is not established from the available references, and room ratings are outside 1.0; explicit compartment geometry remains available without a decorative score.","canonical_input":null,"result_binding":null},
+            {"id":"performance.room.accommodation_workspace","label":"Accommodation and workspace assessment","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Habitability/room ratings are outside 1.0 and the current project has no complete accommodation model.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"performance.displacement",
+          "label":"Displacement",
+          "fields":[
+            {"id":"performance.displacement.maximum","label":"Maximum (t)","io":"output","seen":"observed","treatment":"new_binding","reason":"Use an explicitly named deep/full/custom loading condition; do not infer a historical maximum without provenance.","canonical_input":"$.loading_conditions[*]","result_binding":"loading.values.total_mass_t"},
+            {"id":"performance.displacement.normal","label":"Normal (t)","io":"output","seen":"observed","treatment":"existing","reason":"Selected normal condition total from the canonical ledger.","canonical_input":"$.loading_conditions[normal]","result_binding":"loading.values.total_mass_t"},
+            {"id":"performance.displacement.standard","label":"Standard (t)","io":"output","seen":"observed","treatment":"new_binding","reason":"Represent only as an explicit user/source-defined loading condition; Queen Mary has no accepted canonical standard condition yet.","canonical_input":"$.loading_conditions[*]","result_binding":"loading.values.total_mass_t"},
+            {"id":"performance.displacement.light","label":"Light (t)","io":"output","seen":"observed","treatment":"new_binding","reason":"Represent only as an explicit user/source-defined loading condition; no current canonical lightship condition is established.","canonical_input":"$.loading_conditions[*]","result_binding":"loading.values.total_mass_t"},
+            {"id":"performance.displacement.weight_per_hull_area","label":"Weight / sq foot hull (lbs)","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"The screenshot does not define the hull-area denominator and 1.0 has no approved structural-strength use for this SPS ratio.","canonical_input":null,"result_binding":null}
+          ]
+        },
+        {
+          "id":"performance.cost_strength",
+          "label":"Cost & Strength",
+          "fields":[
+            {"id":"performance.cost_gbp","label":"Cost (£ million)","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Historical cost modelling is outside 1.0 and would require year/currency/scope normalization.","canonical_input":null,"result_binding":null},
+            {"id":"performance.cost_usd","label":"Cost ($ million)","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Historical cost and currency conversion are outside 1.0; no current-rate or nominal placeholder is appropriate.","canonical_input":null,"result_binding":null},
+            {"id":"performance.strength.cross_sectional","label":"Cross sectional strength","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Structural strength/finite-element assessment is outside 1.0 and the SPS scoring formula is unknown.","canonical_input":null,"result_binding":null},
+            {"id":"performance.strength.longitudinal","label":"Longitudinal strength","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"Longitudinal strength requires a structural model and load cases outside 1.0.","canonical_input":null,"result_binding":null},
+            {"id":"performance.strength.composite","label":"Composite strength","io":"output","seen":"observed","treatment":"explicitly_excluded","reason":"No auditable composition rule exists and structural strength is outside 1.0.","canonical_input":null,"result_binding":null},
+            {"id":"performance.design_assessment","label":"Design performance assessment text","io":"output","seen":"observed","treatment":"new_binding","reason":"May summarize named diagnostics from implemented analyses only; it must not reproduce an undocumented SPS aggregate score.","canonical_input":null,"result_binding":null}
+          ]
+        }
+      ]
+    }
+  ]
+}
