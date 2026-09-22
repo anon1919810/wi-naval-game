@@ -6,10 +6,12 @@ try:
     from . import _analysis_request as request_api
     from . import loading, project_io, geometry_analysis, stability, systems, flooding
     from . import _analysis_proposals as proposals
+    from . import _analysis_bindings as bindings
 except ImportError:
     import _analysis_request as request_api
     import loading, project_io, geometry_analysis, stability, systems, flooding
     import _analysis_proposals as proposals
+    import _analysis_bindings as bindings
 
 AnalysisInputError = request_api.AnalysisInputError
 METHOD_VERSION = request_api.VERSIONS["coordinator"]
@@ -120,6 +122,7 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                         and not any(d["blocking"] for d in state["diagnostics"]))
             elif name == "systems":
                 data = proposals.bind(systems.summary(snapshot, state), state, fingerprint)
+                data = bindings.page_rows_for(snapshot, state, data)
                 _finish(envelope, name, data, complete=data["complete"])
             elif name == "l0":
                 data = geometry_analysis.parameterized_hydrostatics(snapshot["hull"])
@@ -170,10 +173,6 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                 mapped = {"invalid_input": "unavailable", "equilibrium_failure": "failed", "downflooding_event": "model_limit"}
                 _finish(envelope, name, data, mapped.get(data["status"], data["status"]))
             else:
-                try:
-                    from . import _analysis_bindings as bindings
-                except ImportError:
-                    import _analysis_bindings as bindings
                 data, status = bindings.run(name, snapshot, state, opts, stages)
                 _finish(envelope, name, data, status)
         except (ValueError, TypeError, KeyError, OverflowError, ZeroDivisionError) as error:

@@ -1,0 +1,239 @@
+"""Plimsoll · 声明式页面行投影（v0：Armour）
+
+**为什么需要这一层**：SPS 七页的「行」与账本条目之间**没有对应关系**。
+以装甲为例——SPS 页声明 8 行（main / upper / ends / armour_deck×2 /
+torpedo_bulkhead / barbette / conning_tower），而账本有 13 个装甲条目
+（`armour-belt-229mm`、`armour-belt-taper-102mm-fwd/aft`、`barbette-a/b/q/x`…），
+两边的 id 与粒度都不同。此前没有机制能回答：
+「SPS 的 main 行到底由账本哪些条目构成、合计是否等于账本装甲组质量」。
+
+本模块提供该机制，并沿用仓库已有的绑定模式（`systems.*.weight_item_ids`）：
+
+  页面行 ——(声明 weight_item_ids)--> 账本条目 ——(唯一质量权威)--> 质量
+
+投影层只做四件事：**按声明聚合、校验不变量、回显几何输入、如实报告未知**。
+它不产生任何新的质量数值，也不发明缺失的几何。
+
+硬不变量（违反即诊断，不静默）
+------------------------------
+1. 同一条目被两行引用 → `page_rows.item_duplicate`（blocking）
+2. 声明引用了账本里不存在的条目 → `page_rows.item_unknown`（blocking）
+3. 账本里的装甲条目未被任何行覆盖 → `page_rows.item_uncovered`（非阻塞，列出 id）
+4. 行合计 ≠ 账本该系统组质量 → `page_rows.mass_mismatch`（非阻塞但显式报告）
+5. 未声明跨度 → `length_m = None` + `segment_status = "unknown_no_declared_extent"`
+   （**不按形心反推长度**，也不拿面积冒充跨度）
+
+设计纪律（承 SPEC §2 与通用性契约）：纯函数 dict→dict；核心零船只常量；
+船只专属的分组声明进**项目数据**（本模块只消费它）；输出带 formula/source/estimate。
+"""
+
+from __future__ import annotations
+
+import math
+
+SCHEMA = "plimsoll-page-rows-1"
+MASS_TOLERANCE_T = 1e-9
+
+
+def _diagnostic(code, message, path, blocking=False):
+    return {"code": code, "severity": "error" if blocking else "warning",
+            "path": path, "message": str(message), "blocking": bool(blocking)}
+
+
+def _item_index(state):
+    items = state.get("effective_items")
+    if not isinstance(items, list):
+        raise ValueError("state.effective_items must be an array (plimsoll-loading-1)")
+    return {item["id"]: item for item in items}
+
+
+def _plate_models(systems):
+    """Return linked plate mass models of one system leaf, keyed by ledger item id."""
+    index = {}
+    for leaf in (systems or {}).values():
+        if not isinstance(leaf, dict):
+            continue
+        for model in leaf.get("mass_models") or []:
+            linked = model.get("linked_weight_item_id")
+            if linked and model.get("method") == "plate_area_thickness_density_mass":
+                index[linked] = {
+                    "model_id": model.get("id"),
+                    "area_m2": (model.get("inputs") or {}).get("area_m2"),
+                    "thickness_mm": (
+                        (model.get("inputs") or {}).get("thickness_m") * 1000.0
+                        if isinstance((model.get("inputs") or {}).get("thickness_m"),
+                                      (int, float)) else None),
+                    "estimate": model.get("estimate"),
+                    "source": model.get("source"),
+                }
+    return index
+
+
+def project_declared_rows(state, systems_result, system, leaf, declaration):
+    """Project declared page rows onto the selected loading ledger.
+
+    Args:
+        state: ``plimsoll-loading-1`` result (the only mass authority).
+        systems_result: ``systems.summary`` result (bound ledger masses).
+        system, leaf: e.g. ``"armour"`` / ``"fixed"`` — locates the bound system.
+        declaration: list of rows, each
+            ``{"row": str, "weight_item_ids": [str], "thickness_mm": float|None,
+               "extents_m": {"aft_m": float, "fore_m": float}|None, "source": str,
+               "estimate": bool}``.
+
+    Returns:
+        dict with per-row ledger masses, invariant diagnostics and honest unknowns.
+    """
+    if not isinstance(declaration, list) or not declaration:
+        raise ValueError("declaration must be a nonempty array")
+    ledger = _item_index(state)
+    systems = (systems_result or {}).get("systems") or {}
+    if not isinstance(systems, dict):
+        raise ValueError("systems_result.systems must be an object")
+    # systems.summary keys leaves as dotted identifiers: "armour.fixed", "weapons.main", ...
+    leaf_key = "%s.%s" % (system, leaf)
+    leaf_payload = systems.get(leaf_key)
+    if not isinstance(leaf_payload, dict):
+        raise ValueError("systems.%s is missing from the systems result" % leaf_key)
+    bound_ids = leaf_payload.get("linked_items")
+    if isinstance(bound_ids, list) and bound_ids and isinstance(bound_ids[0], dict):
+        bound_ids = [entry.get("id") for entry in bound_ids]
+    if not isinstance(bound_ids, list) or not bound_ids:
+        raise ValueError("systems.%s.linked_items must be a nonempty array" % leaf_key)
+    models = _plate_models({leaf_key: leaf_payload})
+
+    diagnostics: list[dict] = []
+    trace: list[dict] = []
+    rows_out: list[dict] = []
+    used: dict[str, str] = {}
+
+    for index, entry in enumerate(declaration):
+        path = "$.page_rows[%d]" % index
+        row_name = entry.get("row")
+        if not isinstance(row_name, str) or not row_name.strip():
+            raise ValueError("%s.row must be a nonempty string" % path)
+        ids = entry.get("weight_item_ids")
+        if not isinstance(ids, list) or not ids:
+            raise ValueError("%s.weight_item_ids must be a nonempty array" % path)
+
+        mass = 0.0
+        areas, thicknesses, estimates, sources = [], [], [], []
+        for item_id in ids:
+            if item_id in used:
+                diagnostics.append(_diagnostic(
+                    "page_rows.item_duplicate",
+                    "item %r is already declared by row %r" % (item_id, used[item_id]),
+                    path + ".weight_item_ids", blocking=True))
+                continue
+            used[item_id] = row_name
+            item = ledger.get(item_id)
+            if item is None:
+                diagnostics.append(_diagnostic(
+                    "page_rows.item_unknown",
+                    "item %r is not present in the selected loading ledger" % item_id,
+                    path + ".weight_item_ids", blocking=True))
+                continue
+            value = item.get("mass_t")
+            if isinstance(value, (int, float)) and not isinstance(value, bool):
+                mass += float(value)
+            else:
+                diagnostics.append(_diagnostic(
+                    "page_rows.item_mass_unknown",
+                    "item %r has no known mass; row total is incomplete" % item_id,
+                    path + ".weight_item_ids"))
+            estimates.append(bool(item.get("estimate", False)))
+            model = models.get(item_id)
+            if model:
+                if isinstance(model["area_m2"], (int, float)):
+                    areas.append(float(model["area_m2"]))
+                if isinstance(model["thickness_mm"], (int, float)):
+                    thicknesses.append(float(model["thickness_mm"]))
+            if isinstance(item.get("source"), str):
+                sources.append(item["source"])
+
+        declared_thickness = entry.get("thickness_mm")
+        thickness_mm = float(declared_thickness) if isinstance(
+            declared_thickness, (int, float)) and not isinstance(declared_thickness, bool) else (
+            max(thicknesses) if thicknesses else None)
+        extents = entry.get("extents_m")
+        declared_extent = (isinstance(extents, dict)
+                           and isinstance(extents.get("aft_m"), (int, float))
+                           and isinstance(extents.get("fore_m"), (int, float)))
+        if extents is not None and not declared_extent:
+            diagnostics.append(_diagnostic(
+                "page_rows.extent_invalid",
+                "extents_m must declare finite aft_m and fore_m", path + ".extents_m"))
+        length_m = (float(extents["fore_m"]) - float(extents["aft_m"])
+                    if declared_extent else None)
+
+        rows_out.append({
+            "row": row_name,
+            "label": entry.get("label"),
+            "weight_t": mass,
+            "item_ids": list(ids),
+            "item_count": len(ids),
+            "thickness_mm": thickness_mm,
+            "area_m2": sum(areas) if areas else None,
+            "length_m": length_m,
+            "extents_m": dict(extents) if declared_extent else None,
+            "segment_status": ("declared_extents" if declared_extent
+                               else "unknown_no_declared_extent"),
+            "estimate": all(estimates) if estimates else None,
+            "sources": sorted(set(sources)),
+        })
+        trace.append({
+            "key": "page_row.%s.weight_t" % row_name,
+            "value": mass,
+            "formula": "Σ 声明条目的账本 mass_t（不重算）",
+            "source": "selected loading weight ledger; declared binding by weight_item_ids",
+            "estimate": all(estimates) if estimates else None,
+        })
+
+    uncovered = sorted(set(bound_ids) - set(used))
+    if uncovered:
+        diagnostics.append(_diagnostic(
+            "page_rows.item_uncovered",
+            "armour ledger items are not declared by any page row: %r" % (uncovered,),
+            "$.page_rows"))
+
+    total = sum(row["weight_t"] for row in rows_out)
+    bound = leaf_payload.get("ledger_mass_t")
+    matches = (isinstance(bound, (int, float)) and not isinstance(bound, bool)
+               and math.isclose(total, float(bound), rel_tol=MASS_TOLERANCE_T,
+                                abs_tol=MASS_TOLERANCE_T))
+    if not matches and not uncovered:
+        diagnostics.append(_diagnostic(
+            "page_rows.mass_mismatch",
+            "declared rows total %.9f t but %s.%s ledger mass is %r"
+            % (total, system, leaf, bound), "$.page_rows"))
+    trace.append({
+        "key": "declared_rows_total_t",
+        "value": total,
+        "formula": "Σ 页面行（均为账本条目之和）",
+        "source": "declared page rows over the selected ledger",
+        "estimate": None,
+    })
+
+    return {
+        "schema": SCHEMA,
+        "system": system,
+        "leaf": leaf,
+        "rows": rows_out,
+        "values": {
+            "declared_rows": len(rows_out),
+            "declared_item_count": len(used),
+            "ledger_item_count": len(bound_ids),
+            "uncovered_item_ids": uncovered,
+            "declared_rows_total_t": total,
+            "ledger_leaf_mass_t": float(bound) if isinstance(bound, (int, float))
+            and not isinstance(bound, bool) else None,
+            "matches_ledger_mass": bool(matches),
+        },
+        "trace": trace,
+        "diagnostics": diagnostics,
+    }
+
+
+def armour_rows(state, systems_result, declaration):
+    """Armour page rows (SPS Belts & Bulkheads / deck / towers) from the ledger."""
+    return project_declared_rows(state, systems_result, "armour", "fixed", declaration)

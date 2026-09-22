@@ -176,6 +176,36 @@ def _qm_geometry() -> dict:
     }
 
 
+# SPS Armour 页的行 → 账本装甲条目的**声明式绑定**（船的数据；投影层只消费它）。
+# 每一行列出构成它的账本条目 id；不变量：13 个装甲条目各出现且仅出现一次，
+# 行合计必须等于账本 armour 组的 ledger_mass_t（见 tools/plimsoll/page_rows.py）。
+# extents_m 未声明：缺失的纵向跨度**不按形心反推**，投影层会报 unknown_no_declared_extent。
+QM_ARMOUR_PAGE_ROWS = [
+    {"row": "main", "label": "Main belt", "thickness_mm": 229.0,
+     "weight_item_ids": ["armour-belt-229mm"],
+     "source": "SPS Belts & Bulkheads 行绑定；厚度为公布名义值（Navypedia / 维基）"},
+    {"row": "upper", "label": "Upper belt", "thickness_mm": 152.0,
+     "weight_item_ids": ["armour-upper-belt-152mm"],
+     "source": "SPS Belts & Bulkheads 行绑定；厚度为公布名义值"},
+    {"row": "ends", "label": "Belt ends (tapered 102 mm)",
+     "thickness_mm": 102.0,
+     "weight_item_ids": ["armour-belt-taper-102mm-fwd", "armour-belt-taper-102mm-aft"],
+     "source": "SPS Belts & Bulkheads 行绑定；艏艉各一，合并为 ends 行"},
+    {"row": "torpedo_bulkhead", "label": "Bulkheads (102 mm)", "thickness_mm": 102.0,
+     "weight_item_ids": ["armour-bulkhead-fwd", "armour-bulkhead-aft"],
+     "source": "SPS Belts & Bulkheads 行绑定（案例原声明即前/后两道 102 mm 隔舱壁）"},
+    {"row": "armour_deck", "label": "Armour deck", "thickness_mm": 64.0,
+     "weight_item_ids": ["armour-deck-64mm", "armour-deck-25mm"],
+     "source": "SPS Armour deck 行绑定；行厚度取其中较厚的 64 mm，25 mm 为下层甲板"},
+    {"row": "barbette", "label": "Barbettes", "thickness_mm": 229.0,
+     "weight_item_ids": ["barbette-a", "barbette-b", "barbette-q", "barbette-x"],
+     "source": "SPS 炮座行绑定；四座炮座（A/B/Q/X）合并"},
+    {"row": "conning_tower", "label": "Conning tower", "thickness_mm": 254.0,
+     "weight_item_ids": ["conning-tower"],
+     "source": "SPS 司令塔行绑定；厚度为公布名义值（254 mm 前面）"},
+]
+
+
 def queen_mary_project() -> dict:
     project = _project(
         "hms-queen-mary-1913",
@@ -484,6 +514,7 @@ def queen_mary_project() -> dict:
                 ),
                 "estimate": True,
                 "mass_models": armour_models,
+                "page_rows": copy.deepcopy(QM_ARMOUR_PAGE_ROWS),
             }
         },
         "weapons": {

@@ -2,11 +2,36 @@
 import copy
 
 try:
-    from . import engines, geometry_analysis, units
+    from . import engines, geometry_analysis, page_rows, units
     from ._analysis_request import diagnostic
 except ImportError:
-    import engines, geometry_analysis, units
+    import engines, geometry_analysis, page_rows, units
     from _analysis_request import diagnostic
+
+
+def page_rows_for(project, state, summary):
+    """Attach declared SPS page rows (ledger projections) to a systems summary.
+
+    A leaf that declares ``page_rows`` gets its rows projected from the selected
+    loading ledger; leaves without a declaration are left untouched (no invention).
+    Diagnostics travel inside each projection and are collected by the coordinator.
+    """
+    declared = {}
+    for system, sections in (project.get("systems") or {}).items():
+        if not isinstance(sections, dict):
+            continue
+        for leaf, payload in sections.items():
+            if isinstance(payload, dict) and isinstance(payload.get("page_rows"), list):
+                declared["%s.%s" % (system, leaf)] = payload["page_rows"]
+    if not declared:
+        return summary
+    views = {}
+    for key, declaration in declared.items():
+        system, leaf = key.split(".", 1)
+        views[key] = page_rows.project_declared_rows(state, summary, system, leaf, declaration)
+    result = copy.deepcopy(summary)
+    result["page_rows"] = views
+    return result
 
 
 def _deck(project, stages):

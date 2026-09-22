@@ -111284,6 +111284,77 @@
             "source": "thickness: wiki 10in conning tower | extent: object_manifest bounds (role=conning_tower, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
           }
         ],
+        "page_rows": [
+          {
+            "label": "Main belt",
+            "row": "main",
+            "source": "SPS Belts & Bulkheads 行绑定；厚度为公布名义值（Navypedia / 维基）",
+            "thickness_mm": 229.0,
+            "weight_item_ids": [
+              "armour-belt-229mm"
+            ]
+          },
+          {
+            "label": "Upper belt",
+            "row": "upper",
+            "source": "SPS Belts & Bulkheads 行绑定；厚度为公布名义值",
+            "thickness_mm": 152.0,
+            "weight_item_ids": [
+              "armour-upper-belt-152mm"
+            ]
+          },
+          {
+            "label": "Belt ends (tapered 102 mm)",
+            "row": "ends",
+            "source": "SPS Belts & Bulkheads 行绑定；艏艉各一，合并为 ends 行",
+            "thickness_mm": 102.0,
+            "weight_item_ids": [
+              "armour-belt-taper-102mm-fwd",
+              "armour-belt-taper-102mm-aft"
+            ]
+          },
+          {
+            "label": "Bulkheads (102 mm)",
+            "row": "torpedo_bulkhead",
+            "source": "SPS Belts & Bulkheads 行绑定（案例原声明即前/后两道 102 mm 隔舱壁）",
+            "thickness_mm": 102.0,
+            "weight_item_ids": [
+              "armour-bulkhead-fwd",
+              "armour-bulkhead-aft"
+            ]
+          },
+          {
+            "label": "Armour deck",
+            "row": "armour_deck",
+            "source": "SPS Armour deck 行绑定；行厚度取其中较厚的 64 mm，25 mm 为下层甲板",
+            "thickness_mm": 64.0,
+            "weight_item_ids": [
+              "armour-deck-64mm",
+              "armour-deck-25mm"
+            ]
+          },
+          {
+            "label": "Barbettes",
+            "row": "barbette",
+            "source": "SPS 炮座行绑定；四座炮座（A/B/Q/X）合并",
+            "thickness_mm": 229.0,
+            "weight_item_ids": [
+              "barbette-a",
+              "barbette-b",
+              "barbette-q",
+              "barbette-x"
+            ]
+          },
+          {
+            "label": "Conning tower",
+            "row": "conning_tower",
+            "source": "SPS 司令塔行绑定；厚度为公布名义值（254 mm 前面）",
+            "thickness_mm": 254.0,
+            "weight_item_ids": [
+              "conning-tower"
+            ]
+          }
+        ],
         "source": "tools/plimsoll/cases/queen_mary_1913_weights.json; rounded model bounding-box areas and published nominal thicknesses",
         "weight_item_ids": [
           "armour-belt-229mm",
