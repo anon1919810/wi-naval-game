@@ -31,7 +31,8 @@ keyword arguments are explicit:
 - `keel_offset_m` is a finite, nonboolean number in metres in the canonical
   geometry datum;
 - `source` is a nonblank string or a nonempty JSON object describing the
-  caller's selection/provenance;
+  caller's selection/provenance; every nested key and string value must contain
+  valid Unicode scalar text so the returned project remains UTF-8 serializable;
 - `estimate` is a boolean and is copied unchanged to `geometry.estimate`.
 
 The importer performs no unit conversion and no origin shift. Polygon
@@ -53,7 +54,9 @@ errors. The importer does not guess a format from row length.
 Parsing rejects invalid UTF-8, malformed JSON, duplicate object keys, unpaired
 Unicode surrogates, `NaN`, `Infinity`, overflowing exponents, and integers
 outside the supported finite numeric range. The root JSON value must be an
-object.
+object. Integer tokens beyond Python's bounded conversion limit receive the
+same structured range diagnostic; the importer does not change that interpreter
+limit.
 
 After parsing, the importer constructs canonical materialized geometry and
 calls `stability.prepare_geometry`. This shared adapter validates finite

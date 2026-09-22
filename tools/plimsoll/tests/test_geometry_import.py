@@ -142,6 +142,35 @@ class GeometryImportTests(unittest.TestCase):
                 self.assertEqual(diagnostic["code"], code)
                 self.assertTrue(diagnostic["blocking"])
 
+    def test_caller_source_rejects_surrogates_and_preserves_chinese_text(self):
+        invalid_sources = [
+            ("string", "\ud800", "$.source"),
+            ("object value", {"title": "\ud800"}, "$.source.title"),
+            ("nested value", {"details": {"page": "\ud800"}},
+             "$.source.details.page"),
+            ("nested key", {"details": {"\ud800": "value"}},
+             "$.source.details"),
+        ]
+        for label, declared_source, expected_path in invalid_sources:
+            with self.subTest(case=label):
+                with self.assertRaises(geometry_import.GeometryImportError) as caught:
+                    geometry_import.import_geometry_content(
+                        project(), polygon_payload(),
+                        format="plimsoll-section-polygons-1", keel_offset_m=7,
+                        source=declared_source, estimate=False)
+                diagnostic = caught.exception.diagnostics[0]
+                self.assertEqual(diagnostic["code"],
+                                 "geometry_import.unicode_scalar_invalid")
+                self.assertEqual(diagnostic["path"], expected_path)
+
+        chinese = {"标题": "用户选择的型线", "细节": {"页": "第六页"}}
+        imported = geometry_import.import_geometry_content(
+            project(), polygon_payload(), format="plimsoll-section-polygons-1",
+            keel_offset_m=7, source=chinese, estimate=False)
+        self.assertEqual(imported["geometry"]["source"]["input_source"], chinese)
+        encoded = json.dumps(imported, ensure_ascii=False, allow_nan=False).encode("utf-8")
+        self.assertIn("用户选择的型线".encode("utf-8"), encoded)
+
     def test_escaped_lone_surrogate_is_not_returned_as_unsavable_text(self):
         raw = polygon_payload().replace(
             b'"estimate":false', b'"note":"\\ud800","estimate":false')
@@ -219,7 +248,7 @@ class GeometryImportTests(unittest.TestCase):
 
     def test_strict_parser_rejects_ambiguous_or_nonportable_json(self):
         huge = b'{"schema":"plimsoll-section-polygons-1","value":' + (
-            b"1" + b"0"*400) + b',"stations":[]}'
+            b"9"*5000) + b',"stations":[]}'
         cases = [
             ("invalid utf8", b"\xff", "geometry_import.utf8_invalid"),
             ("malformed", b"{", "geometry_import.json_invalid"),

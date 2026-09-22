@@ -68,10 +68,10 @@ def _float(token: str) -> float:
 
 
 def _integer(token: str) -> int:
-    value = int(token)
     try:
+        value = int(token)
         representable = math.isfinite(value)
-    except OverflowError as error:
+    except (ValueError, OverflowError) as error:
         raise _StrictJSONError(
             "geometry_import.number_out_of_range",
             "JSON integer is outside the supported finite numeric range",
@@ -171,7 +171,9 @@ def _source(value: Any) -> str | dict:
             "geometry_import.source_invalid", "$.source",
             "source must be a nonempty string or object",
         )])
-    return copy.deepcopy(value)
+    source = copy.deepcopy(value)
+    _validate_unicode(source, "$.source")
+    return source
 
 
 def _normalized_project(project: Any) -> dict:
