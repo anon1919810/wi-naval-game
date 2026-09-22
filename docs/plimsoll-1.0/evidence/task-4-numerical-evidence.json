@@ -1,0 +1,567 @@
+{
+  "runtime": "3.13.14 (main, Jun 11 2026, 04:04:46) [MSC v.1944 64 bit (AMD64)]",
+  "oracle": {
+    "kind": "continuous_analytic_oracle_not_solver_result",
+    "geometry_m": {
+      "semi_axes": [
+        20.0,
+        5.0,
+        5.0
+      ],
+      "centre": [
+        0,
+        0,
+        5.0
+      ],
+      "keel_offset": 0
+    },
+    "waterplane": {
+      "p": 0.01,
+      "q": 0.1,
+      "d_m": 4.0,
+      "trim_deg": 0.5729386976834859,
+      "heel_deg": 5.710593137499643
+    },
+    "volume_m3": 738.9616567702825,
+    "mass_t": 757.4356981895395,
+    "buoyancy_centre_m": [
+      0.38992486365407397,
+      0.2437030397837962,
+      2.562969602162038
+    ],
+    "free_equilibrium_cg_m": [
+      0.38555455967569435,
+      0.19999999999999998,
+      3.0
+    ],
+    "constrained_heel_cg_m": [
+      0.38540530409716284,
+      0.04925186568318665,
+      3.0
+    ],
+    "constrained_heel_gz_m": 0.15,
+    "discretization_note": "Refine longitudinal stations and polygonal elliptical sections separately; this continuous oracle is not fitted to a sampled hull."
+  },
+  "ellipsoid": [
+    {
+      "stations": 41,
+      "vertices": 32,
+      "mode": "free",
+      "converged": true,
+      "seconds": 0.06058560000383295,
+      "p": 0.010008207565340158,
+      "q": 0.10000634836859452,
+      "d": 4.021532650067153,
+      "gz": -2.060157600070056e-14,
+      "b": [
+        0.3897420323797892,
+        0.24184304237255058,
+        2.5815961380936545
+      ],
+      "volume": 738.9616567705372,
+      "residuals": {
+        "raw": {
+          "volume": 2.546585164964199e-10,
+          "longitudinal": 7.995861798734162e-12,
+          "transverse": -2.060157600070056e-14
+        },
+        "scaled": {
+          "volume": 3.4461668499747937e-13,
+          "longitudinal": 1.9989654496835405e-13,
+          "transverse": -2.060157600070056e-15
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 32,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.0017645671177013021,
+          10.001764567117702
+        ]
+      }
+    },
+    {
+      "stations": 41,
+      "vertices": 32,
+      "mode": "prescribed",
+      "converged": true,
+      "seconds": 0.05048520001582801,
+      "p": 0.010008204479955955,
+      "q": 0.1,
+      "d": 4.021533264062972,
+      "gz": 0.1499874192575923,
+      "b": [
+        0.3897421561575401,
+        0.24182789406504718,
+        2.581594624453109
+      ],
+      "volume": 738.9616567702825,
+      "residuals": {
+        "raw": {
+          "volume": 0.0,
+          "longitudinal": -3.3813013153305427e-15
+        },
+        "scaled": {
+          "volume": 0.0,
+          "longitudinal": -8.453253288326356e-17
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 24,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.001758388839297445,
+          10.001758388839297
+        ]
+      }
+    },
+    {
+      "stations": 81,
+      "vertices": 64,
+      "mode": "free",
+      "converged": true,
+      "seconds": 0.19438610001816414,
+      "p": 0.010002137561549617,
+      "q": 0.09999829222986759,
+      "d": 4.0054026305023385,
+      "gz": -6.467049118441537e-15,
+      "b": [
+        0.3898791847110833,
+        0.2432362697986334,
+        2.5676299181264812
+      ],
+      "volume": 738.9616567703148,
+      "residuals": {
+        "raw": {
+          "volume": 3.228706191293895e-11,
+          "longitudinal": -1.008408356546319e-12,
+          "transverse": -6.467049118441537e-15
+        },
+        "scaled": {
+          "volume": 4.369247256218042e-14,
+          "longitudinal": -2.5210208913657976e-14,
+          "transverse": -6.467049118441537e-16
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 32,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.028910968172855073,
+          10.028910968172855
+        ]
+      }
+    },
+    {
+      "stations": 81,
+      "vertices": 64,
+      "mode": "prescribed",
+      "converged": true,
+      "seconds": 0.1794129000045359,
+      "p": 0.0100021400808479,
+      "q": 0.1,
+      "d": 4.005402462041896,
+      "gz": 0.15000340237321103,
+      "b": [
+        0.38987921700886297,
+        0.24324038633282202,
+        2.5676303300993673
+      ],
+      "volume": 738.9616567702823,
+      "residuals": {
+        "raw": {
+          "volume": -2.2737367544323206e-13,
+          "longitudinal": -4.261185588411154e-16
+        },
+        "scaled": {
+          "volume": -3.076934687477494e-16,
+          "longitudinal": -1.0652963971027884e-17
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 24,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.028911806459461415,
+          10.02891180645946
+        ]
+      }
+    },
+    {
+      "stations": 161,
+      "vertices": 128,
+      "mode": "free",
+      "converged": true,
+      "seconds": 0.8549533000041265,
+      "p": 0.01000054616280849,
+      "q": 0.09999971942572955,
+      "d": 4.001348460047145,
+      "gz": -3.747002708109903e-15,
+      "b": [
+        0.389913451013059,
+        0.24358641055738023,
+        2.5641346715001943
+      ],
+      "volume": 738.9616567703158,
+      "residuals": {
+        "raw": {
+          "volume": 3.3310243452433497e-11,
+          "longitudinal": -1.06526939369243e-12,
+          "transverse": -3.747002708109903e-15
+        },
+        "scaled": {
+          "volume": 4.507709317154529e-14,
+          "longitudinal": -2.663173484231075e-14,
+          "transverse": -3.7470027081099033e-16
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 32,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.02891041752146367,
+          10.028910417521463
+        ]
+      }
+    },
+    {
+      "stations": 161,
+      "vertices": 128,
+      "mode": "prescribed",
+      "converged": true,
+      "seconds": 0.814454699982889,
+      "p": 0.010000546652280779,
+      "q": 0.1,
+      "d": 4.001348432260621,
+      "gz": 0.15000055846145566,
+      "b": [
+        0.3899134592646543,
+        0.24358708732092577,
+        2.5641347392589107
+      ],
+      "volume": 738.9616567702823,
+      "residuals": {
+        "raw": {
+          "volume": -2.2737367544323206e-13,
+          "longitudinal": -4.019950605033129e-16
+        },
+        "scaled": {
+          "volume": -3.076934687477494e-16,
+          "longitudinal": -1.0049876512582822e-17
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 24,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.028910555305222005,
+          10.028910555305222
+        ]
+      }
+    },
+    {
+      "stations": 81,
+      "vertices": 128,
+      "mode": "free",
+      "converged": true,
+      "seconds": 0.4373976000060793,
+      "p": 0.010001673080051806,
+      "q": 0.09999971494548422,
+      "d": 4.001823438919217,
+      "gz": -1.672273430841642e-15,
+      "b": [
+        0.3899111452004323,
+        0.24355844339454133,
+        2.5644143243979314
+      ],
+      "volume": 738.9616567703122,
+      "residuals": {
+        "raw": {
+          "volume": 2.9672264645341784e-11,
+          "longitudinal": -9.873939231345996e-13,
+          "transverse": -1.672273430841642e-15
+        },
+        "scaled": {
+          "volume": 4.01539976715813e-14,
+          "longitudinal": -2.468484807836499e-14,
+          "transverse": -1.6722734308416421e-16
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 32,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.02891130017871928,
+          10.02891130017872
+        ]
+      }
+    },
+    {
+      "stations": 81,
+      "vertices": 128,
+      "mode": "prescribed",
+      "converged": true,
+      "seconds": 0.4152382999891415,
+      "p": 0.010001674011710733,
+      "q": 0.1,
+      "d": 4.001823410633832,
+      "gz": 0.15000056738032894,
+      "b": [
+        0.3899111704673385,
+        0.2435591308703666,
+        2.5644143933980694
+      ],
+      "volume": 738.9616567702825,
+      "residuals": {
+        "raw": {
+          "volume": 0.0,
+          "longitudinal": 6.273735871087371e-16
+        },
+        "scaled": {
+          "volume": 0.0,
+          "longitudinal": 1.5684339677718428e-17
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 24,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.028911440503692293,
+          10.028911440503691
+        ]
+      }
+    },
+    {
+      "stations": 161,
+      "vertices": 64,
+      "mode": "free",
+      "converged": true,
+      "seconds": 0.426161300012609,
+      "p": 0.010001019633019024,
+      "q": 0.09999829732442819,
+      "d": 4.004927201608879,
+      "gz": -5.023759186428833e-15,
+      "b": [
+        0.3898814988015645,
+        0.24326424316698933,
+        2.567350201707629
+      ],
+      "volume": 738.9616567703176,
+      "residuals": {
+        "raw": {
+          "volume": 3.512923285597935e-11,
+          "longitudinal": -1.0735422221867276e-12,
+          "transverse": -5.023759186428833e-15
+        },
+        "scaled": {
+          "volume": 4.753864092152729e-14,
+          "longitudinal": -2.683855555466819e-14,
+          "transverse": -5.023759186428834e-16
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 32,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.028910092874338603,
+          10.028910092874339
+        ]
+      }
+    },
+    {
+      "stations": 161,
+      "vertices": 64,
+      "mode": "prescribed",
+      "converged": true,
+      "seconds": 0.3890133000095375,
+      "p": 0.010001021711843808,
+      "q": 0.1,
+      "d": 4.00492703364174,
+      "gz": 0.15000339220679682,
+      "b": [
+        0.38988151422072476,
+        0.24326834789255597,
+        2.5673506123308294
+      ],
+      "volume": 738.9616567702822,
+      "residuals": {
+        "raw": {
+          "volume": -3.410605131648481e-13,
+          "longitudinal": -9.583805103685616e-16
+        },
+        "scaled": {
+          "volume": -4.615402031216241e-16,
+          "longitudinal": -2.3959512759214042e-17
+        },
+        "tolerance": 1e-06,
+        "scales": {
+          "volume_m3": 738.9616567702825,
+          "longitudinal_m": 40.0,
+          "transverse_m": 10.0
+        }
+      },
+      "solver": {
+        "method": "safeguarded_simultaneous_Newton_central_Jacobian",
+        "iterations": 4,
+        "max_iterations": 50,
+        "evaluations": 24,
+        "heel_bounds_deg": [
+          -85.0,
+          85.0
+        ],
+        "trim_bounds_deg": [
+          -45.0,
+          45.0
+        ],
+        "intercept_support_m": [
+          -0.02891092832024039,
+          10.02891092832024
+        ]
+      }
+    }
+  ]
+}

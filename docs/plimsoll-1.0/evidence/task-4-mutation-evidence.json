@@ -1,0 +1,34 @@
+[
+  {
+    "name": "legacy_lcb_only",
+    "test": "test_free_coupled_box_and_mirror",
+    "caught": true,
+    "failures": 1,
+    "errors": 0,
+    "output": "F\n======================================================================\nFAIL: test_free_coupled_box_and_mirror (test_stability_loading.LoadedStability.test_free_coupled_box_and_mirror)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools/plimsoll/tests\\test_stability_loading.py\", line 113, in test_free_coupled_box_and_mirror\n    self.solved(r)\n    ~~~~~~~~~~~^^^\n  File \"C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools/plimsoll/tests\\test_stability_loading.py\", line 93, in solved\n    self.assertLessEqual(abs(longitudinal)/scales['longitudinal_m'],1e-6)\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 0.00023965262798227737 not less than or equal to 1e-06\n\n----------------------------------------------------------------------\nRan 1 test in 0.057s\n\nFAILED (failures=1)\n"
+  },
+  {
+    "name": "omit_constrained_coupling",
+    "test": "test_prescribed_heel_uses_projected_longitudinal_axis",
+    "caught": true,
+    "failures": 1,
+    "errors": 0,
+    "output": "F\n======================================================================\nFAIL: test_prescribed_heel_uses_projected_longitudinal_axis (test_stability_loading.LoadedStability.test_prescribed_heel_uses_projected_longitudinal_axis)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools/plimsoll/tests\\test_stability_loading.py\", line 122, in test_prescribed_heel_uses_projected_longitudinal_axis\n    self.solved(r)\n    ~~~~~~~~~~~^^^\n  File \"C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools/plimsoll/tests\\test_stability_loading.py\", line 93, in solved\n    self.assertLessEqual(abs(longitudinal)/scales['longitudinal_m'],1e-6)\n    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 6.2138553298141375e-06 not less than or equal to 1e-06\n\n----------------------------------------------------------------------\nRan 1 test in 0.194s\n\nFAILED (failures=1)\n"
+  },
+  {
+    "name": "omit_keel_conversion",
+    "test": "test_inclined_explicit_keel_translation_preserves_physical_attitude",
+    "caught": true,
+    "failures": 1,
+    "errors": 0,
+    "output": "F\n======================================================================\nFAIL: test_inclined_explicit_keel_translation_preserves_physical_attitude (test_stability_loading.LoadedStability.test_inclined_explicit_keel_translation_preserves_physical_attitude)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools/plimsoll/tests\\test_stability_loading.py\", line 329, in test_inclined_explicit_keel_translation_preserves_physical_attitude\n    self.assertAlmostEqual(answers[0][key],answers[1][key],places=8)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 0.009999194995226291 != 0.007095341214004435 within 8 places (0.002903853781221857 difference)\n\n----------------------------------------------------------------------\nRan 1 test in 0.108s\n\nFAILED (failures=1)\n"
+  },
+  {
+    "name": "freeze_moving_liquid",
+    "test": "test_moving_liquid_conserves_mass_and_its_stiffness_has_no_second_fsc",
+    "caught": true,
+    "failures": 1,
+    "errors": 0,
+    "output": "F\n======================================================================\nFAIL: test_moving_liquid_conserves_mass_and_its_stiffness_has_no_second_fsc (test_stability_loading.LoadedStability.test_moving_liquid_conserves_mass_and_its_stiffness_has_no_second_fsc)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools/plimsoll/tests\\test_stability_loading.py\", line 232, in test_moving_liquid_conserves_mass_and_its_stiffness_has_no_second_fsc\n    self.assertAlmostEqual((plus['gz_m']-minus['gz_m'])/math.radians(.02),expected,delta=2e-6)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 1.2784553097932967 != 1.01829268292683 within 2e-06 delta (0.26016262686646674 difference)\n\n----------------------------------------------------------------------\nRan 1 test in 0.064s\n\nFAILED (failures=1)\n"
+  }
+]
