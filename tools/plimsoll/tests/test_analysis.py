@@ -54,6 +54,38 @@ class AnalysisTests(unittest.TestCase):
         self.assertAlmostEqual(data["profile"]["mean_normal_clearance_m"], 0, delta=1e-10)
         self.assertLess(data["points"][0]["normal_clearance_m"], 0)
 
+    def _deck_project(self):
+        project = box_project()
+        project["deck"] = dict(source="deck drawing", estimate=False, reference_length_m={"value": 20},
+            points=[dict(id="aft", x_m=-5, y_m=3, z_m=1), dict(id="fore", x_m=5, y_m=3, z_m=3)],
+            segments=[dict(id="main", aft_point_id="aft", fore_point_id="fore")])
+        return project
+
+    def test_deck_without_gz_stays_completed_and_reports_missing_stage(self):
+        result = analysis.compute_project(self._deck_project(), "normal", {"stages": ["deck"]})
+        deck = result["stages"]["deck"]
+        self.assertEqual(deck["status"], "completed")
+        self.assertIsNone(deck["data"]["sampled_events"])
+        codes = [d["code"] for d in deck["diagnostics"]]
+        self.assertIn("analysis.deck_events_require_gz", codes)
+        diagnostic = next(d for d in deck["diagnostics"] if d["code"] == "analysis.deck_events_require_gz")
+        self.assertFalse(diagnostic["blocking"])
+        self.assertEqual(diagnostic["path"], "$.stages.deck.data.sampled_events")
+
+    def test_deck_missing_gz_diagnostic_reaches_envelope_aggregation(self):
+        result = analysis.compute_project(self._deck_project(), "normal", {"stages": ["deck"]})
+        self.assertIn("analysis.deck_events_require_gz", [d["code"] for d in result["diagnostics"]])
+
+    def test_deck_with_gz_populates_events_without_missing_stage_diagnostic(self):
+        result = analysis.compute_project(self._deck_project(), "normal",
+            {"stages": ["deck", "gz"], "gz_angles_deg": [0, 30]})
+        deck = result["stages"]["deck"]
+        self.assertEqual(deck["status"], "completed")
+        sampled = deck["data"]["sampled_events"]
+        self.assertIsNotNone(sampled)
+        self.assertTrue(sampled["events"])
+        self.assertNotIn("analysis.deck_events_require_gz", [d["code"] for d in deck["diagnostics"]])
+
     def test_selected_fuel_endurance_and_historical_conditions_remain_explicit(self):
         project = box_project()
         project["systems"] = {"propulsion": {"weight_item_ids": ["hull.a[0]"],

@@ -40,8 +40,15 @@ def _deck(project, stages):
         data["diagnostics"].append(diagnostic("analysis.deck_profile_incomplete",
             "overlapping or absent segments do not define a whole-ship mean freeboard", "$.deck.segments", False))
     curve = stages["gz"]["data"]
-    data["sampled_events"] = geometry_analysis.deck_immersion_events(deck, curve["rows"],
-        keel_offset_m=geometry["keel_offset_m"]) if curve is not None else None
+    if curve is None:
+        data["diagnostics"].append(diagnostic(
+            "analysis.deck_events_require_gz",
+            "sampled deck immersion events require the gz stage; it was neither requested nor available in this request",
+            "$.stages.deck.data.sampled_events", False))
+        data["sampled_events"] = None
+    else:
+        data["sampled_events"] = geometry_analysis.deck_immersion_events(
+            deck, curve["rows"], keel_offset_m=geometry["keel_offset_m"])
     return data, "completed"
 
 
