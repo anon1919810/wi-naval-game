@@ -61,3 +61,11 @@ Predeclare timestep sequence0.5,0.25,0.125 s. Errors in transferred volume must 
 - Selected nontrivial coupled scenario: compare endpoint volumes, draft and angles for dt and dt/2; report residuals and require differences below1% away from zero, with a predeclared absolute near-zero angle bound. Retain identical scenario input/fingerprint for deterministic replay.
 
 All scenario geometry, Cd and initial water data carry source/estimate metadata. Queen Mary scenario tanks are layout proxies until actual subdivision and openings are documented.
+
+## Source basis and independent reproducible answers
+
+The [USBR Water Measurement Manual, chapter9 section5](https://www.usbr.gov/tsc/techreferences/mands/wmm/chap09_05.html) describes submerged-orifice discharge from differential head and a discharge coefficient incorporating contraction/loss effects. Its experimental coefficient and low-head restriction concern a specific calibrated irrigation structure; neither is a universal ship-damage constant. Plimsoll requires an explicit, sourced or estimated Cd.
+
+The [USACE HEC-HMS outlet reference](https://www.hec.usace.army.mil/confluence/hmsdocs/hmstrm/reservoir-modeling/reservoir-modeling-concepts-and-equations/outlets) likewise uses an opening-centre elevation, area and entered coefficient, while warning that insufficiently submerged openings need a different flow regime. This supports the point-orifice approximation and its applicability warning; it does not validate a moving ship, partial aperture, trapped air or blast hole.
+
+The analytic two-tank and sea-fill answers above are independently executable in [flooding_oracles.py](evidence/flooding_oracles.py), which imports no Plimsoll code. With the predeclared5s fixture, the paired transfer is1.24034731541798m³ (total retained30m³), and the fixed-sea inflow is1.8348043474001763m³. These are exact solutions of the chosen constant-Cd, fixed-attitude ODE. Keep the0.5/0.25/0.125s refinement and1% criterion unchanged; matching this ODE is not empirical flooding validation. Source/model uncertainty near zero differential head remains distinct from numerical convergence.
