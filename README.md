@@ -1,7 +1,7 @@
 # 《敌前转向》（Gefahrwend）· 一战舰船游戏资产
 
 > 项目名取自 1916 年日德兰海战中舍尔的敌前转向（*Gefechtskehrtwendung*）——三次 180° 转向让公海舰队从英军战列线前脱险。
-> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/sps-replacement/SPEC.md)**（载重线）。
+> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。当前优先完成[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)，界面与部署后移。
 > 命名约定：**平台用历史意象命名，模块用方法命名**（`plimsoll.bonjean` / `.stability` / `.damage`）。
 
 当前**玩法运行时**模型为 v4：`Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` 由 `queen_mary_v4/QueenMary_v4_Gameplay.fbx` 构建（`unity/Editor/ShipRuntimeBuilder.cs:190-203`，找不到 v4 时才回退到契约里的 v3 FBX）。v3 灰盒（`queen_mary_v3/queen_mary.py`，101 对象、85 网格、31,164 三角形）保留为历史资产与**契约数据来源**——碰撞代理、14 个舱室、LOD 剖面等仍从 `queen_mary_v3/` 读取。
