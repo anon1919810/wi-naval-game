@@ -32,6 +32,12 @@ mass, ammunition/count, thickness, area, ram/overhang may be zero. Angles are
 signed. No invented physical angle or QPC upper cutoff is imposed here.
 
 System facts live on a leaf declaring weight_item_ids, status or mass_models.
+Such a boundary cannot contain nested system declarations, including beneath
+intermediate containers. The facts, mass_models, source and fuel_bindings
+payloads are not child systems; source content remains opaque. A fact leaf's
+present weight_item_ids must be an array of unique existing ledger item IDs.
+Empty links or a status-only leaf can remain a draft; systems.summary retains
+authority for present/absent consistency, ledger accounting and shared ownership.
 Existing scalar installed/broadside counts, raw power and mass_models retain their
 reviewed meanings; new facts neither replace nor silently reinterpret those keys.
 Existing count/formula keys remain the authoritative mass-model inputs. If a fact
@@ -55,7 +61,11 @@ speed kn/m_s and angle deg/rad. These are display/import choices only; canonical
 
 IDs must exist, be unique within each fuel and not overlap between fuels.
 Empty IDs require `absent: true`; an absent fuel cannot own items. An absent
-binding means unknown ownership. Later engine/endurance input comes from those
+binding means unknown ownership. Every present binding, including declared
+absence, requires nonempty string/object source and boolean estimate. Missing,
+null or blank provenance is an error for this calculable declaration; nullable
+descriptive facts retain their separate unknown-value semantics.
+Later engine/endurance input comes from those
 IDs' selected effective masses; no name matching or duplicate ledger is defined.
 
 ## Deck and profile
@@ -103,7 +113,9 @@ is a positive sourced typed fact. Optional qpc_sensitivity is
 `{values: [...], source, estimate}`, 1..21 positive strictly increasing samples.
 No scenario silently adds a default QPC.
 
-Optional table_id/table_sha256 retain table identity; optional friction_method,
+Optional table_id/table_sha256 retain table identity. A present table_sha256
+must contain exactly 64 lowercase hexadecimal characters; null is invalid.
+Optional friction_method,
 interpolation_method and speed_conversion_method only accept the reviewed
 implicit Schoenherr, strict source-axis Taylor and exact international-knot IDs.
 Missing required table/method/scenario inputs remain the coordinator's explicit
@@ -135,7 +147,9 @@ contains operation replace_weight_item_mass, matching condition_id,
 source_system_id, source_model_id, formula, inputs, input_provenance,
 previous_mass_t, new_mass_t and three lowercase SHA-256 identities:
 project_fingerprint, input_fingerprint and request_fingerprint. New mass must
-equal the containing numeric override. Optional method is one of the four
+equal the containing numeric override. Both previous_mass_t and new_mass_t
+are required finite nonnegative numbers; missing/null/bool values are errors.
+Optional method is one of the four
 reviewed systems mass-model methods. Inputs are nonnegative numeric values,
 except count_field/count_basis text; every input has source/boolean estimate.
 

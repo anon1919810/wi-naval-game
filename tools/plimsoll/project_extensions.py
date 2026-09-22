@@ -78,6 +78,11 @@ def _metadata(value, path, diagnostics, required=False):
               "extension.provenance_unknown", not required)
 
 
+def _sha256(value, path, diagnostics):
+    if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+        _diag(diagnostics, path, "must be a lowercase SHA-256 identity")
+
+
 def _fact(value, kind, path, diagnostics, required=False):
     if not _object(value, path, diagnostics):
         return
@@ -122,7 +127,7 @@ def _fuel_bindings(value, item_ids, path, diagnostics):
         if not _object(binding, p, diagnostics):
             continue
         _keys(binding, {"weight_item_ids", "absent", "source", "estimate"}, p, diagnostics)
-        _metadata(binding, p, diagnostics)
+        _metadata(binding, p, diagnostics, required=True)
         ids = binding.get("weight_item_ids")
         if not isinstance(ids, list) or any(not isinstance(i, str) or i not in item_ids for i in ids):
             _diag(diagnostics, p + ".weight_item_ids", "must link existing ledger item IDs")
@@ -139,17 +144,28 @@ def _fuel_bindings(value, item_ids, path, diagnostics):
 def _system_fields(systems, item_ids, diagnostics):
     if not isinstance(systems, dict):
         return
-    def visit(value, path, fields):
+    def visit(value, path, fields, below_leaf=False):
         if not isinstance(value, dict):
             return
+        boundary = any(key in value for key in ("weight_item_ids", "status", "mass_models"))
+        if below_leaf and (boundary or "facts" in value):
+            _diag(diagnostics, path, "nested system below a declared system leaf is not allowed")
         if "facts" in value:
-            if not any(key in value for key in ("weight_item_ids", "status", "mass_models")):
+            if not boundary:
                 _diag(diagnostics, path, "fact-bearing system must explicitly declare its ledger/status boundary")
             _facts(value["facts"], fields, path + ".facts", diagnostics)
-        if any(key in value for key in ("weight_item_ids", "status", "mass_models", "facts")):
-            return
+            if "weight_item_ids" in value:
+                ids = value["weight_item_ids"]
+                if (not isinstance(ids, list)
+                        or any(not isinstance(i, str) or not i or i not in item_ids for i in ids)
+                        or len(set(ids)) != len(ids)):
+                    _diag(diagnostics, path + ".weight_item_ids", "must link unique existing ledger item IDs")
         for key, child in value.items():
-            visit(child, f"{path}[{json.dumps(key, ensure_ascii=False)}]", fields)
+            # These are leaf payloads, not nested systems; their own validators
+            # retain authority over their contents (source remains opaque).
+            if key not in {"facts", "mass_models", "source", "fuel_bindings"}:
+                visit(child, f"{path}[{json.dumps(key, ensure_ascii=False)}]", fields,
+                      below_leaf or boundary or "facts" in value)
     propulsion = systems.get("propulsion")
     if isinstance(propulsion, dict):
         visit(propulsion, "$.systems.propulsion", PROPULSION_FIELDS)
@@ -235,9 +251,10 @@ def _resistance(rows, diagnostics):
                               ("speed_conversion_method", "international_knot_exact")):
             if key in row and row[key] != expected:
                 _diag(diagnostics, p + "." + key, "unsupported canonical method selection")
-        for key in ("table_id", "table_sha256"):
-            if key in row:
-                _value(row[key], "text", p + "." + key, diagnostics)
+        if "table_id" in row:
+            _value(row["table_id"], "text", p + ".table_id", diagnostics)
+        if "table_sha256" in row:
+            _sha256(row["table_sha256"], p + ".table_sha256", diagnostics)
         if "qpc" in row:
             _fact(row["qpc"], "positive", p + ".qpc", diagnostics, required=True)
         if "qpc_sensitivity" in row:
@@ -340,10 +357,8 @@ def validate_acceptance(record, condition_id, field, nominal, path):
             "volume_density_mass", "plate_area_thickness_density_mass", "counted_unit_mass", "counted_ammunition_mass"):
         _diag(diagnostics, path + ".method", "unsupported physical model method")
     for key in ("project_fingerprint", "input_fingerprint", "request_fingerprint"):
-        value = record.get(key)
-        if not isinstance(value, str) or len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
-            _diag(diagnostics, path + "." + key, "must be a lowercase SHA-256 identity")
-    _value(record.get("previous_mass_t"), "nonnegative", path + ".previous_mass_t", diagnostics)
+        _sha256(record.get(key), path + "." + key, diagnostics)
+    _value(record.get("previous_mass_t"), "nonnegative", path + ".previous_mass_t", diagnostics, False)
     _value(record.get("new_mass_t"), "nonnegative", path + ".new_mass_t", diagnostics, False)
     if record.get("new_mass_t") != nominal:
         _diag(diagnostics, path + ".new_mass_t", "accepted mass must equal the numeric override")

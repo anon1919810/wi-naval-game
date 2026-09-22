@@ -123,11 +123,19 @@ class OverrideProvenanceTests(unittest.TestCase):
         self.assertEqual(project_io.normalize_project(raw)["loading_conditions"][1][
             "override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"], record)
         for patch in ({"new_mass_t": 11}, {"condition_id": "normal"}, {"request_fingerprint": "stale"},
-                      {"new_mass_t": True}, {"inputs": {"volume_m3": True}}, {"input_provenance": {}}):
+                      {"new_mass_t": True}, {"inputs": {"volume_m3": True}}, {"input_provenance": {}},
+                      {"previous_mass_t": None}, {"previous_mass_t": True},
+                      {"previous_mass_t": -1}, {"previous_mass_t": float("inf")}):
             bad = copy.deepcopy(raw)
             bad["loading_conditions"][1]["override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"].update(patch)
             with self.subTest(patch=patch), self.assertRaises(project_io.ProjectValidationError):
                 project_io.normalize_project(bad)
+        del record["previous_mass_t"]
+        with self.assertRaises(project_io.ProjectValidationError):
+            project_io.normalize_project(raw)
+        record["previous_mass_t"] = 0
+        self.assertEqual(project_io.normalize_project(raw)["loading_conditions"][1][
+            "override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"]["previous_mass_t"], 0)
 
     def test_mixed_estimated_and_unknown_fields_do_not_certify_provenance(self):
         raw = project()
@@ -147,6 +155,69 @@ class OverrideProvenanceTests(unittest.TestCase):
 
 
 class OptionalCoreFieldsTests(unittest.TestCase):
+    def test_present_fuel_ownership_and_absence_require_provenance(self):
+        for declaration in ({"weight_item_ids": ["plate.a[1]"]},
+                            {"weight_item_ids": [], "absent": True}):
+            for metadata in ({}, {"source": None, "estimate": None},
+                             {"source": " ", "estimate": False},
+                             {"source": {}, "estimate": True},
+                             {"source": "ledger"}, {"source": "ledger", "estimate": 0}):
+                raw = project()
+                raw["systems"] = {"propulsion": {"status": "present", "fuel_bindings": {
+                    "coal": {**declaration, **metadata}}}}
+                with self.subTest(declaration=declaration, metadata=metadata):
+                    errors = [d for d in project_io.validate_project(raw) if d["blocking"]]
+                    self.assertTrue(any(d["path"].startswith(
+                        "$.systems.propulsion.fuel_bindings.coal.") for d in errors))
+                    with self.assertRaises(project_io.ProjectValidationError):
+                        project_io.normalize_project(raw)
+            for source, estimate in (("ledger", False), ({"document": "fuel plan"}, True)):
+                raw["systems"]["propulsion"]["fuel_bindings"]["coal"] = {
+                    **declaration, "source": source, "estimate": estimate}
+                self.assertEqual(project_io.normalize_project(raw)["systems"], raw["systems"])
+        raw = project()
+        raw["systems"] = {"propulsion": {"status": "present"}}
+        self.assertNotIn("fuel_bindings", project_io.normalize_project(raw)["systems"]["propulsion"])
+
+    def test_system_leaf_cannot_hide_nested_systems_or_malformed_facts(self):
+        for category, field in (("weapons", "calibre_m"), ("armour", "thickness_m"),
+                                ("propulsion", "shafts")):
+            for boundary in ({"status": "present"}, {"weight_item_ids": ["plate.a[1]"]},
+                             {"mass_models": []}):
+                for value in (True, 2, None):
+                    raw = project()
+                    raw["systems"] = {category: {**boundary, "group": {"main": {
+                        "weight_item_ids": ["plate.a[1]"], "facts": {field: fact(value)}}}}}
+                    with self.subTest(category=category, boundary=boundary, value=value):
+                        errors = [d for d in project_io.validate_project(raw) if d["blocking"]]
+                        self.assertTrue(any(d["path"] == f'$.systems.{category}["group"]["main"]'
+                                            for d in errors))
+
+    def test_fact_leaf_links_are_validated_without_reinterpreting_leaf_payloads(self):
+        leaf = {"weight_item_ids": ["plate.a[1]"], "facts": {"calibre_m": fact(None, None, None)},
+                "source": {"facts": "original survey metadata", "status": "archival"},
+                "mass_models": []}
+        raw = {**project(), "systems": {"weapons": {"main": leaf}}}
+        self.assertEqual(project_io.normalize_project(raw)["systems"], raw["systems"])
+        for ids in (None, "plate.a[1]", [True], ["ghost"], ["plate.a[1]", "plate.a[1]"]):
+            bad = copy.deepcopy(raw)
+            bad["systems"]["weapons"]["main"]["weight_item_ids"] = ids
+            with self.subTest(ids=ids):
+                errors = [d for d in project_io.validate_project(bad) if d["blocking"]]
+                self.assertTrue(any(d["path"] == '$.systems.weapons["main"].weight_item_ids'
+                                    for d in errors))
+
+    def test_table_sha256_requires_lowercase_full_hex_identity(self):
+        scenario = {"id": "taylor", "method": "taylor_gertler_source_axis_strict",
+                    "attitude_policy": "strict_upright", "source": "source table", "estimate": True,
+                    "table_id": "strict-source-table", "table_sha256": "abcdef0123456789" * 4}
+        raw = {**project(), "resistance_scenarios": [scenario]}
+        self.assertEqual(project_io.normalize_project(raw)["resistance_scenarios"], [scenario])
+        for value in ("not-a-sha", "A" * 64, "g" * 64, "a" * 63, "a" * 65, "", None, True):
+            with self.subTest(value=value), self.assertRaises(project_io.ProjectValidationError):
+                project_io.normalize_project({**project(), "resistance_scenarios": [
+                    {**scenario, "table_sha256": value}]})
+
     def test_optional_facts_keep_null_source_and_exact_selected_ledger_binding(self):
         raw = project()
         raw.update(metadata={"country": fact(None, None, None), "design_year": fact(1913)},
@@ -183,6 +254,8 @@ class OptionalCoreFieldsTests(unittest.TestCase):
                       {"coal": {"weight_item_ids": ["plate.a[1]", "plate.a[1]"]}},
                       {"coal": {"weight_item_ids": ["plate.a[1]"]}, "oil": {"weight_item_ids": ["plate.a[1]"]}},
                       {"coal": {"weight_item_ids": ["plate.a[1]"], "absent": True}}):
+            for binding in fuels.values():
+                binding.update(source="fuel allocation", estimate=True)
             raw = project()
             raw["systems"] = {"propulsion": {"weight_item_ids": [], "fuel_bindings": fuels}}
             with self.subTest(fuels=fuels), self.assertRaises(project_io.ProjectValidationError):
