@@ -16,23 +16,31 @@
 
 from __future__ import annotations
 
+import copy
 import math
 
 RHO_SEA = 1025.0           # kg/m³（海水，15°C 常用值）
 NU_SEA_15C = 1.19e-6       # m²/s（海水 15°C 运动粘度）
 KNOT_MPS = 0.514444
+KNOT_MPS_EXACT = 1852.0 / 3600.0
 HP_TO_KW = 0.7457
 DELTA_CF_TAYLOR = 0.0004   # Taylor 法的粗糙度附加（0.4×10⁻³）
 
 
 def _finite(v, what, positive=False):
-    if not isinstance(v, (int, float)) or isinstance(v, bool) or not math.isfinite(v):
+    if not isinstance(v, (int, float)) or isinstance(v, bool):
         raise ValueError("%s 必须是有限数值，收到 %r" % (what, v))
-    if positive and v <= 0:
+    try:
+        number = float(v)
+    except (OverflowError, ValueError) as exc:
+        raise ValueError("%s 超出支持的数值范围" % what) from exc
+    if not math.isfinite(number):
+        raise ValueError("%s 必须是有限数值，收到 %r" % (what, v))
+    if positive and number <= 0:
         raise ValueError("%s 必须为正，收到 %r" % (what, v))
-    if v < 0:
+    if number < 0:
         raise ValueError("%s 不能为负，收到 %r" % (what, v))
-    return float(v)
+    return number
 
 
 def _T(trace, key, value, formula, source, estimate=False):
@@ -43,23 +51,64 @@ def _T(trace, key, value, formula, source, estimate=False):
 # ---------------------------------------------------------------- 摩擦阻力
 
 
-def schoenherr_cf(rn: float) -> dict:
-    """Schoenherr（桑海）摩擦阻力系数：Cf = 0.4631 / (lg Rn)^2.6。
+def friction_coefficient(rn: float, *, method: str) -> dict:
+    """Calculate a named Schoenherr friction convention.
 
-    Taylor 法配的就是这条线（不是 ITTC-1957）。适用 Rn ≈ 1e6 – 1e9，
-    超出区间只给警告不拒绝（量级仍有参考价值）。
+    Args:
+        rn (float): Reynolds number.
+        method (str): Exact method identifier.
+
+    Returns:
+        (dict): Coefficient, method metadata, trace, and applicability warnings.
     """
     rn = _finite(rn, "rn", positive=True)
-    if rn < 1e5:
-        raise ValueError("Rn=%.3e 过小，摩擦线不适用" % rn)
-    cf = 0.4631 / (math.log10(rn) ** 2.6)
+    if method == "conn_1953_schoenherr_approx":
+        if rn < 1e5:
+            raise ValueError("Rn=%.3e 过小，Conn 近似式不适用" % rn)
+        cf = 0.4631 / math.log10(rn) ** 2.6
+        formula = "Cf = 0.4631 / (log10 Re)^2.6"
+        source = "Conn 1953 explicit approximation to the Karman-Schoenherr line"
+        warnings = []
+        if rn < 1e6 or rn > 1e9:
+            warnings.append(
+                "Rn=%.3e 在 Conn 1953 显式 Schoenherr 近似的既有项目区间"
+                "（1e6–1e9）之外。" % rn
+            )
+    elif method == "schoenherr_implicit_ittc_0.242":
+        if rn <= 1.0:
+            raise ValueError("rn 必须大于 1 才能求解隐式 Schoenherr 方程")
+        log_re = math.log10(rn)
+        lower = 0.0
+        upper = max(1.0, log_re / 0.242 + 1.0)
+        for _ in range(90):
+            middle = (lower + upper) / 2.0
+            residual = 0.242 * middle + 2.0 * math.log10(middle) - log_re
+            if residual > 0.0:
+                upper = middle
+            else:
+                lower = middle
+        inverse_root = (lower + upper) / 2.0
+        cf = inverse_root**-2
+        formula = "0.242 / sqrt(Cf) = log10(Re * Cf)"
+        source = "8th ITTC proceedings, formal discussion, Table 2 convention"
+        warnings = [
+            "隐式方程可求解不等于湍流适用性已成立；调用方必须单独判断适用范围。"
+        ]
+    else:
+        raise ValueError("未知摩擦线方法 %r" % method)
     trace = []
-    _T(trace, "cf", cf, "Cf = 0.4631 / (lg Rn)^2.6",
-       "Schoenherr（桑海）近似式，Rn=1e6–1e9（Taylor-Gertler 法配套摩擦线）")
-    warnings = []
-    if rn < 1e6 or rn > 1e9:
-        warnings.append("Rn=%.3e 在 Schoenherr 适用区间（1e6–1e9）之外，Cf 仅作量级参考。" % rn)
-    return {"values": {"cf": cf, "rn": rn}, "trace": trace, "warnings": warnings}
+    _T(trace, "cf", cf, formula, source)
+    return {
+        "values": {"cf": cf, "rn": rn},
+        "method": method,
+        "trace": trace,
+        "warnings": warnings,
+    }
+
+
+def schoenherr_cf(rn: float) -> dict:
+    """Return the legacy Conn explicit approximation under its historical API."""
+    return friction_coefficient(rn, method="conn_1953_schoenherr_approx")
 
 
 def ittc1957_cf(rn: float) -> float:
@@ -70,7 +119,8 @@ def ittc1957_cf(rn: float) -> float:
 
 def friction_resistance(v_mps: float, l_wl_m: float, s_m2: float,
                         nu: float = NU_SEA_15C, rho: float = RHO_SEA,
-                        delta_cf: float = 0.0) -> dict:
+                        delta_cf: float = 0.0,
+                        method: str = "conn_1953_schoenherr_approx") -> dict:
     """摩擦阻力 Rf = ½·ρ·S·(Cf + ΔCf)·V²。"""
     v = _finite(v_mps, "v_mps", positive=True)
     L = _finite(l_wl_m, "l_wl_m", positive=True)
@@ -80,7 +130,7 @@ def friction_resistance(v_mps: float, l_wl_m: float, s_m2: float,
     dc = _finite(delta_cf, "delta_cf")
 
     rn = v * L / nu
-    sc = schoenherr_cf(rn)
+    sc = friction_coefficient(rn, method=method)
     cf = sc["values"]["cf"]
     cf_total = cf + dc
     rf = 0.5 * rho * S * cf_total * v * v
@@ -94,14 +144,179 @@ def friction_resistance(v_mps: float, l_wl_m: float, s_m2: float,
 
     return {"values": {"rn": rn, "cf": cf, "cf_total": cf_total, "rf_n": rf,
                        "rf_kN": rf / 1000.0},
-            "trace": trace, "warnings": list(sc["warnings"])}
+            "method": method, "trace": trace, "warnings": list(sc["warnings"])}
 
 
 # ---------------------------------------------------------------- 剩余阻力（图谱接入位）
 
 
+def taylor_volume_ratio(length_volume_ratio: float) -> float:
+    """Convert Taylor's printed L/volume^(1/3) heading to volume/L^3."""
+    ratio = _finite(length_volume_ratio, "length_volume_ratio", positive=True)
+    return 1.0 / ratio**3
+
+
+def taylor_gertler_source_table(cr_table: dict, source_headings=None) -> dict:
+    """Declare exact printed Taylor length-volume headings for strict use.
+
+    The returned copy retains the raw stored axis and cells. Exact source
+    headings are associated by index so interpolation does not inherit rounding
+    from the compatibility ``volume/L^3`` axis.
+    """
+    if not isinstance(cr_table, dict):
+        raise ValueError("cr_table must be an object")
+    volumetric = cr_table.get("axes", {}).get("volumetric")
+    if not isinstance(volumetric, list):
+        raise ValueError("cr_table.axes.volumetric must be an array")
+    if source_headings is None:
+        if (cr_table.get("schema") != "plimsoll-cr-table-1"
+                or "Molland" not in str(cr_table.get("source", ""))):
+            raise ValueError("generic tables must provide their exact source_headings")
+        source_headings = [10.0, 9.0, 8.0, 7.0, 6.0, 5.5]
+    headings = [_finite(value, "source_heading", positive=True) for value in source_headings]
+    if len(headings) != len(volumetric):
+        raise ValueError("source_headings length must match the stored volume axis")
+    for index, (stored, heading) in enumerate(zip(volumetric, headings)):
+        stored_value = _finite(stored, "axes.volumetric[%d]" % index, positive=True)
+        if not math.isclose(stored_value, taylor_volume_ratio(heading), rel_tol=0.0, abs_tol=5e-10):
+            raise ValueError("source heading does not match stored node %d" % index)
+    declared = copy.deepcopy(cr_table)
+    declared["interpolation_coordinate"] = "l_over_volume_cuberoot"
+    declared["source_axes"] = {"l_over_volume_cuberoot": headings}
+    return declared
+
+
+def _strict_taylor_residual(cr_table: dict, cp: float, bt: float,
+                            volumetric: float, fn: float) -> dict:
+    if cr_table.get("interpolation_coordinate") != "l_over_volume_cuberoot":
+        raise ValueError(
+            "strict Taylor tables must declare interpolation_coordinate="
+            "'l_over_volume_cuberoot'"
+        )
+    axes = cr_table["axes"]
+    declared_source_axis = cr_table.get("source_axes", {}).get("l_over_volume_cuberoot")
+    if declared_source_axis is not None:
+        if not isinstance(declared_source_axis, list) or len(declared_source_axis) != len(axes["volumetric"]):
+            raise ValueError("source_axes.l_over_volume_cuberoot must align with axes.volumetric")
+        volume_pairs = sorted(
+            ((_finite(value, "source axis", positive=True), index)
+             for index, value in enumerate(declared_source_axis)),
+            key=lambda pair: pair[0],
+        )
+    else:
+        volume_pairs = sorted(
+            ((value ** (-1.0 / 3.0), index) for index, value in enumerate(axes["volumetric"])),
+            key=lambda pair: pair[0],
+        )
+    interpolation_axes = [
+        list(axes["cp"]),
+        list(axes["bt"]),
+        [pair[0] for pair in volume_pairs],
+        list(axes["fn"]),
+    ]
+    values = [
+        _finite(cp, "cp", positive=True),
+        _finite(bt, "bt", positive=True),
+        _finite(volumetric, "volumetric", positive=True) ** (-1.0 / 3.0),
+        _finite(fn, "fn", positive=True),
+    ]
+
+    def locate(axis, value):
+        if len(axis) < 2 or any(b <= a for a, b in zip(axis, axis[1:])):
+            raise ValueError("strict Taylor axes must contain at least two increasing nodes")
+        if value < axis[0] and not math.isclose(value, axis[0], rel_tol=1e-12, abs_tol=1e-12):
+            return None
+        if value > axis[-1] and not math.isclose(value, axis[-1], rel_tol=1e-12, abs_tol=1e-12):
+            return None
+        if math.isclose(value, axis[0], rel_tol=1e-12, abs_tol=1e-12):
+            return 0, 0.0
+        if math.isclose(value, axis[-1], rel_tol=1e-12, abs_tol=1e-12):
+            return len(axis) - 2, 1.0
+        for index in range(len(axis) - 1):
+            if axis[index] <= value <= axis[index + 1]:
+                fraction = (value - axis[index]) / (axis[index + 1] - axis[index])
+                if math.isclose(fraction, 0.0, abs_tol=1e-12):
+                    fraction = 0.0
+                elif math.isclose(fraction, 1.0, abs_tol=1e-12):
+                    fraction = 1.0
+                return index, fraction
+        return None
+
+    locations = [locate(axis, value) for axis, value in zip(interpolation_axes, values)]
+    if any(location is None for location in locations):
+        diagnostic = {
+            "code": "taylor.outside_table",
+            "severity": "error",
+            "path": "$",
+            "message": "The request lies outside the populated Taylor table axes; strict mode does not clip.",
+            "blocking": True,
+        }
+        return {
+            "values": {"cr": None, "rr_n": None},
+            "method": "taylor_gertler_source_axis_strict",
+            "interpolation_coordinate": "l_over_volume_cuberoot",
+            "complete": False,
+            "trace": [],
+            "warnings": [diagnostic["message"]],
+            "diagnostics": [diagnostic],
+        }
+    indices = [location[0] for location in locations]
+    fractions = [location[1] for location in locations]
+    total = 0.0
+    for mask in range(16):
+        bits = [(mask >> bit) & 1 for bit in range(4)]
+        weight = math.prod(
+            fraction if bit else 1.0 - fraction
+            for fraction, bit in zip(fractions, bits)
+        )
+        if weight == 0.0:
+            continue
+        selected = [index + bit for index, bit in zip(indices, bits)]
+        volume_index = volume_pairs[selected[2]][1]
+        cell = cr_table["cr"][selected[0]][selected[1]][volume_index][selected[3]]
+        if cell is None:
+            diagnostic = {
+                "code": "taylor.missing_corner",
+                "severity": "error",
+                "path": "$.cr",
+                "message": "A positive-weight interpolation corner is unavailable; strict mode does not renormalize.",
+                "blocking": True,
+            }
+            return {
+                "values": {"cr": None, "rr_n": None},
+                "method": "taylor_gertler_source_axis_strict",
+                "interpolation_coordinate": "l_over_volume_cuberoot",
+                "complete": False,
+                "trace": [],
+                "warnings": [diagnostic["message"]],
+                "diagnostics": [diagnostic],
+            }
+        total += weight * cell
+    scale = _finite(cr_table.get("scale", 1.0), "scale", positive=True)
+    coefficient = total * scale
+    trace = []
+    _T(
+        trace,
+        "cr",
+        coefficient,
+        "four-dimensional multilinear interpolation in (Cp, B/T, L/volume^(1/3), Fn)",
+        cr_table.get("source", "declared Taylor table"),
+        True,
+    )
+    return {
+        "values": {"cr": coefficient, "rr_n": None},
+        "method": "taylor_gertler_source_axis_strict",
+        "interpolation_coordinate": "l_over_volume_cuberoot",
+        "complete": True,
+        "trace": trace,
+        "warnings": [],
+        "diagnostics": [],
+    }
+
+
 def residual_from_table(cr_table: dict | None, cp: float, bt: float,
-                        volumetric: float, fn: float) -> dict:
+                        volumetric: float, fn: float,
+                        method: str = "legacy_volume_ratio_clip_renormalize") -> dict:
     """Taylor-Gertler 剩余阻力系数插值（四维：Cp、B/T、∇/L³、Fn）。
 
     `cr_table` 结构：{"axes": {"cp": [...], "bt": [...], "volumetric": [...], "fn": [...]},
@@ -109,6 +324,27 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
     **没有表就返回 None + 警告** —— 不编造图谱数据。
     越界只做端点截断并警告（不外推，外推会静默编数据）。
     """
+    if method == "taylor_gertler_source_axis_strict":
+        if not cr_table:
+            return {
+                "values": {"cr": None, "rr_n": None},
+                "method": method,
+                "interpolation_coordinate": "l_over_volume_cuberoot",
+                "complete": False,
+                "trace": [],
+                "warnings": ["Taylor table is unavailable."],
+                "diagnostics": [{
+                    "code": "taylor.table_missing",
+                    "severity": "error",
+                    "path": "$.cr_table",
+                    "message": "Taylor table is unavailable.",
+                    "blocking": True,
+                }],
+            }
+        return _strict_taylor_residual(cr_table, cp, bt, volumetric, fn)
+    if method != "legacy_volume_ratio_clip_renormalize":
+        raise ValueError("未知 Taylor 插值方法 %r" % method)
+
     trace: list[dict] = []
     warnings: list[str] = []
     if not cr_table:
@@ -118,7 +354,9 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
                         "需从正规教材附录/报告数字化后再接入 cr_table。")
         warnings.append("当前只能给出摩擦阻力；若要看总阻力，请用 "
                         "`implied_residual_from_trial()` 由试航真值反解。")
-        return {"values": {"cr": None, "rr_n": None}, "trace": trace, "warnings": warnings}
+        return {"values": {"cr": None, "rr_n": None}, "trace": trace, "warnings": warnings,
+                "method": method, "interpolation_coordinate": "volume_over_length_cubed",
+                "complete": False, "diagnostics": []}
 
     axes = cr_table["axes"]
     grid = cr_table["cr"]
@@ -171,7 +409,9 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
     if wsum <= 0:
         _T(trace, "cr", None, "四维插值：全部角点缺格", cr_table.get("source", "无"), True)
         warnings.append("插值涉及的全部角点在表里都是缺格（—）：无法给出 Cr。")
-        return {"values": {"cr": None, "rr_n": None}, "trace": trace, "warnings": warnings}
+        return {"values": {"cr": None, "rr_n": None}, "trace": trace, "warnings": warnings,
+                "method": method, "interpolation_coordinate": "volume_over_length_cubed",
+                "complete": False, "diagnostics": []}
     cr = total / wsum * scale
     if skipped:
         warnings.append("插值涉及 %d/16 个缺格（表中「—」）：已按可用角点重新归一化，"
@@ -179,12 +419,17 @@ def residual_from_table(cr_table: dict | None, cp: float, bt: float,
     _T(trace, "cr", cr, "四维多线性插值 Cr(Cp, B/T, ∇/L³, Fn)%s"
        % ("，×%.0e 换算" % scale if scale != 1.0 else ""),
        cr_table.get("source", "Gertler 图谱数字化表"), True)
-    return {"values": {"cr": cr, "rr_n": None}, "trace": trace, "warnings": warnings}
+    return {"values": {"cr": cr, "rr_n": None}, "trace": trace, "warnings": warnings,
+            "method": method, "interpolation_coordinate": "volume_over_length_cubed",
+            "complete": True, "diagnostics": []}
 
 
 def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
                       qpc: float = 0.55, nu: float = NU_SEA_15C,
-                      rho: float = RHO_SEA, delta_cf: float = DELTA_CF_TAYLOR) -> dict:
+                      rho: float = RHO_SEA, delta_cf: float = DELTA_CF_TAYLOR,
+                      interpolation_method: str = "legacy_volume_ratio_clip_renormalize",
+                      friction_method: str = "conn_1953_schoenherr_approx",
+                      speed_conversion_method: str = "legacy_rounded_0.514444_m_s_per_kn") -> dict:
     """速度–阻力–功率曲线（Taylor-Gertler 口径）。
 
     `hull_params`：{lwl_m, s_m2, cp, bt, volumetric}，必须对应同一载荷；
@@ -199,6 +444,12 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
     bt = _finite(hull_params.get("bt"), "bt", positive=True)
     vol = _finite(hull_params.get("volumetric"), "volumetric", positive=True)
     qpc = _finite(qpc, "qpc", positive=True)
+    if speed_conversion_method == "legacy_rounded_0.514444_m_s_per_kn":
+        knot_mps = KNOT_MPS
+    elif speed_conversion_method == "international_knot_exact":
+        knot_mps = KNOT_MPS_EXACT
+    else:
+        raise ValueError("未知航速换算方法 %r" % speed_conversion_method)
 
     speeds = [_finite(v, "speed_kn", positive=True) for v in speeds_kn]
     if not speeds or any(v <= 0 for v in speeds):
@@ -207,21 +458,33 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
 
     rows = []
     warnings = list(hull_params.get("warnings", []))
+    diagnostics = []
     fr_lo, fr_hi = (cr_table or {}).get("range", {}).get("fr", [0.16, 0.58])
     clipped_lo = clipped_hi = False
 
-    for v_kn in speeds:
-        v = v_kn * KNOT_MPS
+    for speed_index, v_kn in enumerate(speeds):
+        v = v_kn * knot_mps
         fr = v / math.sqrt(9.81 * L)
-        fr_use = min(max(fr, fr_lo), fr_hi)
-        if fr < fr_lo:
+        strict = interpolation_method == "taylor_gertler_source_axis_strict"
+        fr_use = fr if strict else min(max(fr, fr_lo), fr_hi)
+        if fr < fr_lo and not strict:
             clipped_lo = True
-        if fr > fr_hi:
+        if fr > fr_hi and not strict:
             clipped_hi = True
-        friction = friction_resistance(v, L, S, nu=nu, rho=rho, delta_cf=delta_cf)
+        friction = friction_resistance(v, L, S, nu=nu, rho=rho, delta_cf=delta_cf,
+                                       method=friction_method)
         rf = friction["values"]["rf_n"]
-        resid = residual_from_table(cr_table, cp, bt, vol, fr_use)
+        resid = residual_from_table(cr_table, cp, bt, vol, fr_use,
+                                    method=interpolation_method)
         row_warnings = list(friction["warnings"]) + list(resid["warnings"])
+        row_diagnostics = []
+        for diagnostic in resid.get("diagnostics", []):
+            contextual = dict(diagnostic)
+            contextual["source_path"] = diagnostic.get("path")
+            contextual["path"] = f"$.speeds_kn[{speed_index}]"
+            contextual["speed_kn"] = v_kn
+            row_diagnostics.append(contextual)
+        diagnostics.extend(row_diagnostics)
         if fr_use != fr:
             row_warnings.append("Fr=%.5f 超出表范围，按 %.5f 截断；误差方向未知。" % (fr, fr_use))
         cr = resid["values"]["cr"]
@@ -242,7 +505,9 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
             "pe_shp": pe_kw / HP_TO_KW if pe_kw is not None else None,
             "shp_required": pe_kw / HP_TO_KW / qpc if pe_kw is not None else None,
             "complete": cr is not None, "estimate": True,
+            "methods": {"friction": friction_method, "interpolation": interpolation_method},
             "warnings": row_warnings,
+            "diagnostics": row_diagnostics,
             "trace": [dict(t, estimate=bool(t["estimate"] or hull_params.get("estimate", True)))
                       for t in friction["trace"] + resid["trace"]],
         })
@@ -264,6 +529,12 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
         return max((r[key] for r in rows if r[key] is not None), default=None)
 
     return {"rows": rows, "trace": trace, "warnings": warnings,
+            "diagnostics": diagnostics,
+            "methods": {"friction": friction_method,
+                        "interpolation": interpolation_method,
+                        "roughness": "declared_delta_cf_once",
+                        "power": "effective_power_then_qpc_once",
+                        "speed_conversion": speed_conversion_method},
             "estimate": True, "loading_condition": hull_params.get("loading_condition"),
             "input_sources": hull_params.get("sources", {}),
             "values": {"qpc": qpc, "points": len(rows),

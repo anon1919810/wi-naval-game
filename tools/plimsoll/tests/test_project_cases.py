@@ -194,6 +194,52 @@ class ProjectCaseTests(unittest.TestCase):
         self.assertEqual(project["sources"]["comparisons"][0]["raw_value"], 26770)
         self.assertEqual(project["sources"]["comparisons"][0]["raw_unit"], "tons (unresolved)")
 
+    def test_queen_mary_systems_expose_physical_inputs_on_existing_ledger_items(self):
+        """Catches empty armour/weapon editors and broadside-scaled mass formulas."""
+        project = _load(FILENAMES[0])
+        systems = project["systems"]
+        fixed_armour = systems["armour"]["fixed"]
+        armour_items = next(
+            group["items"] for group in project["weight_groups"] if group["id"] == "armour"
+        )
+        armour_ids = [item["id"] for item in armour_items]
+        self.assertEqual(fixed_armour["weight_item_ids"], armour_ids)
+        self.assertEqual(
+            [model["linked_weight_item_id"] for model in fixed_armour["mass_models"]],
+            armour_ids,
+        )
+        for model in fixed_armour["mass_models"]:
+            self.assertEqual(model["method"], "plate_area_thickness_density_mass")
+            self.assertGreater(model["inputs"]["area_m2"], 0.0)
+            self.assertGreater(model["inputs"]["thickness_m"], 0.0)
+            self.assertEqual(model["inputs"]["density_kg_m3"], 7850.0)
+            self.assertTrue(model["estimate"])
+            self.assertTrue(model["input_provenance"]["area_m2"]["rounded"])
+            self.assertIn("object_manifest", model["input_provenance"]["area_m2"]["source"])
+
+        main = systems["weapons"]["main"]
+        secondary = systems["weapons"]["secondary"]
+        for weapon, installed in ((main, 8), (secondary, 16)):
+            models = {model["linked_weight_item_id"]: model for model in weapon["mass_models"]}
+            self.assertEqual(set(models), set(weapon["weight_item_ids"]))
+            self.assertEqual(models[weapon["weight_item_ids"][0]]["inputs"]["count_field"],
+                             "installed_guns")
+            ammunition = models[weapon["weight_item_ids"][2]]
+            self.assertEqual(ammunition["method"], "counted_ammunition_mass")
+            self.assertEqual(ammunition["inputs"]["count_field"], "installed_guns")
+            self.assertEqual(ammunition["inputs"]["rounds_field"], "rounds_per_gun")
+            self.assertEqual(weapon["installed_guns"], installed)
+            if installed == 16:
+                self.assertNotEqual(weapon["installed_guns"], weapon["broadside_guns"])
+
+        main_mount = next(
+            model for model in main["mass_models"]
+            if model["linked_weight_item_id"] == "main-mounts"
+        )
+        self.assertEqual(main_mount["inputs"]["count_value"], 4)
+        self.assertEqual(main_mount["inputs"]["count_basis"], "installed_twin_mounts")
+        self.assertIn("rotating gunhouse armour", main_mount["boundary"])
+
     def test_serialized_geometry_has_direct_analytic_volume_anchors(self):
         """Catches wrong station coordinates, datum shifts, and parameter materialization errors."""
         box = _load(FILENAMES[2])

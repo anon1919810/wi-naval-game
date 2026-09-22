@@ -11,6 +11,7 @@ PKG = os.path.dirname(HERE)
 sys.path.insert(0, PKG)
 
 import engines as E  # noqa: E402
+import units  # noqa: E402
 
 
 def analytic_case():
@@ -64,7 +65,9 @@ class TestCompute(unittest.TestCase):
         self.assertTrue(any("cruise_speed_kn" in w for w in r["warnings"]))
         c2 = analytic_case()
         del c2["coal_t"], c2["oil_t"]
-        self.assertTrue(any("Bunker" in w for w in E.compute(c2)["warnings"]))
+        missing = E.compute(c2)
+        self.assertTrue(any("Bunker" in w for w in missing["warnings"]))
+        self.assertIsNone(missing["values"]["bunker_known_subtotal_t"])
 
     def test_bad_shafts_raise(self):
         for bad in (0, -2, 2.5, "4"):
@@ -74,7 +77,7 @@ class TestCompute(unittest.TestCase):
                 E.compute(c)
 
     def test_resistance_and_weight_are_known_gaps(self):
-        """阻力必须点名"未实现"（PLAN 7.3），主机重量缺则置空。"""
+        """阻力方法选择留给协调器，主机重量缺则置空。"""
         r = E.compute(analytic_case())
         self.assertTrue(any("Holtrop" in w for w in r["warnings"]))
         c = analytic_case()
@@ -86,6 +89,126 @@ class TestCompute(unittest.TestCase):
             self.assertIn("formula", t)
             self.assertIn("source", t)
             self.assertIn("estimate", t)
+
+    def test_partial_fuel_is_subtotal_not_complete_bunker_total(self):
+        """Catch treating an unknown fuel mass as known zero."""
+        case = analytic_case()
+        del case["oil_t"]
+        result = E.compute(case)
+        self.assertIsNone(result["values"]["bunker_total_t"])
+        self.assertEqual(result["values"]["bunker_known_subtotal_t"], 800.0)
+        self.assertIsNone(result["values"]["pct_coal"])
+        self.assertTrue(any(d["code"] == "engines.bunker_partial" for d in result["diagnostics"]))
+
+    def test_explicit_zero_fuel_is_known_and_complete(self):
+        """Catch collapsing an explicit zero into an unknown value."""
+        case = analytic_case()
+        case["oil_t"] = 0.0
+        result = E.compute(case)
+        self.assertEqual(result["values"]["bunker_total_t"], 800.0)
+        self.assertEqual(result["values"]["pct_coal"], 100.0)
+
+    def test_precise_power_conversion_is_explicitly_selectable(self):
+        """Catch silently replacing legacy rounded power semantics."""
+        case = analytic_case()
+        case["power_conversion_method"] = "international_mechanical_hp_precise"
+        case["speed_conversion_method"] = "international_knot_exact"
+        result = E.compute(case)
+        self.assertAlmostEqual(result["values"]["power_design_kw"], 7456.998715822702)
+        self.assertEqual(result["methods"]["power_conversion"], "international_mechanical_hp_precise")
+        self.assertEqual(result["methods"]["speed_conversion"], "international_knot_exact")
+        froude = next(item["value"] for item in result["trace"] if item["key"] == "froude_at_max")
+        self.assertTrue(math.isclose(froude, units.convert(20.0, "kn", "m_s")
+                                     / math.sqrt(E.G * 120.0), rel_tol=1e-10))
+        legacy = E.compute(analytic_case())
+        self.assertEqual(legacy["values"]["power_design_kw"], 7457.0)
+        self.assertEqual(legacy["methods"]["power_conversion"], "legacy_rounded_0.7457_kw_per_shp")
+
+    def test_range_and_speed_inputs_reject_bool_and_nonfinite(self):
+        """Catch unchecked raw values escaping into public JSON."""
+        for key, value in (("range_nm", True), ("range_at_speed_kn", math.inf),
+                           ("max_speed_kn", math.nan), ("cruise_speed_kn", False)):
+            case = analytic_case()
+            case[key] = value
+            with self.assertRaises(ValueError, msg=(key, value)):
+                E.compute(case)
+        case = analytic_case()
+        case["range_nm"] = None
+        case["range_at_speed_kn"] = math.inf
+        with self.assertRaises(ValueError):
+            E.compute(case)
+
+
+class TestSteadyEndurance(unittest.TestCase):
+    @staticmethod
+    def scenario(oil_rate=20.0):
+        return {
+            "method": "steady_simultaneous_fuel_consumption",
+            "speed_kn": 12.0,
+            "power_kw": 5000.0,
+            "fuels": {
+                "coal": {"required": True, "burn_t_per_day": 40.0, "reserve_t": 80.0},
+                "oil": {"required": oil_rate > 0.0, "burn_t_per_day": oil_rate, "reserve_t": 20.0},
+            },
+            "source": "analytic fixed-operating-point fixture",
+            "estimate": True,
+        }
+
+    def test_first_required_fuel_limits_hours_and_range(self):
+        """Catch adding unlike fuel tonnes before applying separate burn rates."""
+        case = analytic_case()
+        case["endurance_scenario"] = self.scenario()
+        endurance = E.compute(case)["values"]["steady_endurance"]
+        self.assertEqual(endurance["limiting_fuel"], "oil")
+        self.assertEqual(endurance["hours"], 9.0 * 24.0)
+        self.assertEqual(endurance["range_nm"], 9.0 * 24.0 * 12.0)
+        self.assertEqual(endurance["speed_kn"], 12.0)
+        self.assertEqual(endurance["power_kw"], 5000.0)
+
+    def test_zero_burn_stream_is_unused_not_infinite(self):
+        """Catch serializing infinity for an explicitly unused fuel stream."""
+        case = analytic_case()
+        case["endurance_scenario"] = self.scenario(oil_rate=0.0)
+        endurance = E.compute(case)["values"]["steady_endurance"]
+        self.assertEqual(endurance["limiting_fuel"], "coal")
+        self.assertEqual(endurance["hours"], 18.0 * 24.0)
+        self.assertEqual(endurance["fuels"]["oil"]["status"], "unused")
+        self.assertNotIn(math.inf, endurance.values())
+
+    def test_missing_required_consumption_makes_endurance_unknown(self):
+        """Catch filling a missing required burn rate with zero."""
+        case = analytic_case()
+        scenario = self.scenario()
+        del scenario["fuels"]["oil"]["burn_t_per_day"]
+        case["endurance_scenario"] = scenario
+        result = E.compute(case)
+        self.assertIsNone(result["values"]["steady_endurance"])
+        self.assertTrue(any(d["code"] == "engines.endurance_input_unknown" for d in result["diagnostics"]))
+
+    def test_historical_range_remains_a_separate_comparison_input(self):
+        """Catch overwriting a cited historical range with the estimate."""
+        case = analytic_case()
+        case["endurance_scenario"] = self.scenario()
+        values = E.compute(case)["values"]
+        self.assertEqual(values["range_nm"], 4000.0)
+        self.assertEqual(values["range_at_speed_kn"], 12.0)
+        self.assertNotEqual(values["steady_endurance"]["range_nm"], values["range_nm"])
+
+    def test_consumed_stream_and_scenario_provenance_must_be_explicit(self):
+        """Catch ambiguous optional burn streams or untraceable endurance outputs."""
+        case = analytic_case()
+        scenario = self.scenario()
+        scenario["fuels"]["oil"]["required"] = False
+        case["endurance_scenario"] = scenario
+        with self.assertRaisesRegex(ValueError, "positive burn"):
+            E.compute(case)
+        for field in ("source", "estimate"):
+            case = analytic_case()
+            scenario = self.scenario()
+            del scenario[field]
+            case["endurance_scenario"] = scenario
+            with self.assertRaises(ValueError, msg=field):
+                E.compute(case)
 
 
 class TestSpsView(unittest.TestCase):

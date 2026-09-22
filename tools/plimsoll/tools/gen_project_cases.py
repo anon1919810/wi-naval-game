@@ -20,6 +20,7 @@ import offsets  # noqa: E402
 
 LONG_TON_TO_T = 1.0160469088
 LB_TO_T = 0.45359237 / 1000.0
+ALGEBRAIC_TOLERANCE = {"relative": 1e-10, "absolute_t": 1e-10}
 UNITS = {"length": "m", "mass": "t", "speed": "kn", "power": "kW", "angle": "deg"}
 COORDINATES = {
     "x_positive": "forward",
@@ -187,12 +188,14 @@ def queen_mary_project() -> dict:
     centres = _manifest_centres()
     legacy = json.loads((PKG / "cases" / "queen_mary_1913_weights.json").read_text(encoding="utf-8"))
     armour_items = []
+    armour_models = []
     for raw in legacy["groups"][0]["items"]:
         x, y, kg = centres[raw["id"]]
-        token = "armour.fixed." + raw["id"].lower().replace("_", "-")
+        item_id = raw["id"].lower().replace("_", "-")
+        token = "armour.fixed." + item_id
         armour_items.append(
             _item(
-                raw["id"].lower().replace("_", "-"),
+                item_id,
                 raw["mass_t"],
                 x,
                 y,
@@ -206,6 +209,50 @@ def queen_mary_project() -> dict:
                 [token],
                 _bounded(raw["mass_t"], x, y, kg, [0.55 * raw["mass_t"], 1.25 * raw["mass_t"]], dx=3.0),
             )
+        )
+        area_m2 = raw["_area_m2"]
+        area_resolution_m2 = 0.1 if area_m2 == round(area_m2, 1) else 0.01
+        armour_models.append(
+            {
+                "id": item_id + "-plate-mass-check",
+                "method": "plate_area_thickness_density_mass",
+                "linked_weight_item_id": item_id,
+                "inputs": {
+                    "area_m2": area_m2,
+                    "thickness_m": raw["_thickness_mm"] / 1000.0,
+                    "density_kg_m3": 7850.0,
+                },
+                "input_provenance": {
+                    "area_m2": {
+                        "source": raw["source"],
+                        "estimate": True,
+                        "rounded": True,
+                        "displayed_resolution_m2": area_resolution_m2,
+                    },
+                    "thickness_m": {
+                        "source": raw["source"],
+                        "estimate": False,
+                        "nominal": True,
+                        "original_value": raw["_thickness_mm"],
+                        "original_unit": "mm",
+                    },
+                    "density_kg_m3": {
+                        "source": "declared legacy steel-density assumption",
+                        "estimate": True,
+                    },
+                },
+                "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                "comparison_policy": (
+                    "Algebraic identity only. Rounded legacy area and 0.001 t ledger "
+                    "precision are disclosed; differences remain review proposals and are not fitted."
+                ),
+                "source": raw["source"],
+                "boundary": (
+                    "Fixed protection plate represented by this existing ledger item; "
+                    "excludes rotating turret armour."
+                ),
+                "estimate": True,
+            }
         )
 
     hull_mass = 0.35 * 27_000 * LONG_TON_TO_T
@@ -422,9 +469,117 @@ def queen_mary_project() -> dict:
         },
     ]
     project["systems"] = {
+        "armour": {
+            "fixed": {
+                "weight_item_ids": [item["id"] for item in armour_items],
+                "source": (
+                    "tools/plimsoll/cases/queen_mary_1913_weights.json; rounded model "
+                    "bounding-box areas and published nominal thicknesses"
+                ),
+                "estimate": True,
+                "mass_models": armour_models,
+            }
+        },
         "weapons": {
-            "main": {"weight_item_ids": ["main-guns", "main-mounts", "main-ammunition"], "installed_guns": 8, "broadside_guns": 8, "rounds_per_gun": 80},
-            "secondary": {"weight_item_ids": ["secondary-guns", "secondary-mounts", "secondary-ammunition"], "installed_guns": 16, "broadside_guns": 8, "rounds_per_gun": 150},
+            "main": {
+                "weight_item_ids": ["main-guns", "main-mounts", "main-ammunition"],
+                "installed_guns": 8,
+                "broadside_guns": 8,
+                "rounds_per_gun": 80,
+                "mass_models": [
+                    {
+                        "id": "main-installed-guns-mass-check",
+                        "method": "counted_unit_mass",
+                        "linked_weight_item_id": "main-guns",
+                        "inputs": {
+                            "unit_mass_t": 167_776 * LB_TO_T,
+                            "count_field": "installed_guns",
+                        },
+                        "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                        "source": "NavWeaps WNBR_135-45_mk5 (secondary compilation)",
+                        "boundary": "Eight installed gun tubes; published nominal excludes breech mass; excludes mounts and ammunition.",
+                        "estimate": True,
+                    },
+                    {
+                        "id": "main-installed-mounts-mass-check",
+                        "method": "counted_unit_mass",
+                        "linked_weight_item_id": "main-mounts",
+                        "inputs": {
+                            "unit_mass_t": 600 * LONG_TON_TO_T,
+                            "count_value": 4,
+                            "count_basis": "installed_twin_mounts",
+                        },
+                        "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                        "source": "NavWeaps Mark II value used as a Mark II* proxy (secondary compilation)",
+                        "boundary": "Four complete revolving mounts including rotating gunhouse armour and hoists above fixed trunk; excludes guns, ammunition, and fixed barbettes.",
+                        "estimate": True,
+                    },
+                    {
+                        "id": "main-ammunition-outfit-mass-check",
+                        "method": "counted_ammunition_mass",
+                        "linked_weight_item_id": "main-ammunition",
+                        "inputs": {
+                            "count_field": "installed_guns",
+                            "rounds_field": "rounds_per_gun",
+                            "projectile_mass_kg": 1400 * 0.45359237,
+                            "charge_mass_kg": 297 * 0.45359237,
+                        },
+                        "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                        "source": "NavWeaps ammunition outfit and projectile/charge values (secondary compilation)",
+                        "boundary": "Eighty complete projectile-plus-charge rounds for each of eight installed guns.",
+                        "estimate": True,
+                    },
+                ],
+            },
+            "secondary": {
+                "weight_item_ids": ["secondary-guns", "secondary-mounts", "secondary-ammunition"],
+                "installed_guns": 16,
+                "broadside_guns": 8,
+                "rounds_per_gun": 150,
+                "mass_models": [
+                    {
+                        "id": "secondary-installed-guns-mass-check",
+                        "method": "counted_unit_mass",
+                        "linked_weight_item_id": "secondary-guns",
+                        "inputs": {
+                            "unit_mass_t": 42 * 112 * LB_TO_T,
+                            "count_field": "installed_guns",
+                        },
+                        "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                        "source": "Admiralty Gunnery Branch G.8652/13, 4-inch Mark VII/VIII handbook",
+                        "boundary": "Sixteen installed gun tubes and breeches; excludes mounts and ammunition.",
+                        "estimate": True,
+                    },
+                    {
+                        "id": "secondary-installed-mounts-mass-check",
+                        "method": "counted_unit_mass",
+                        "linked_weight_item_id": "secondary-mounts",
+                        "inputs": {
+                            "unit_mass_t": 1.0,
+                            "count_field": "installed_guns",
+                        },
+                        "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                        "source": "Declared Task 3 engineering assumption; no mounting handbook located",
+                        "boundary": "One pedestal-and-shield allowance per installed gun; excludes gun and ammunition.",
+                        "estimate": True,
+                    },
+                    {
+                        "id": "secondary-ammunition-outfit-mass-check",
+                        "method": "counted_ammunition_mass",
+                        "linked_weight_item_id": "secondary-ammunition",
+                        "inputs": {
+                            "count_field": "installed_guns",
+                            "rounds_field": "rounds_per_gun",
+                            "projectile_mass_kg": 31 * 0.45359237,
+                            "charge_mass_kg": (9 + (5 + 15 / 16) / 16) * 0.45359237,
+                        },
+                        "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
+                        "source": "Task 3 exact projectile and charge formula from cited ammunition references",
+                        "boundary": "One hundred fifty complete projectile-plus-charge rounds for each of sixteen installed guns.",
+                        "estimate": True,
+                    },
+                ],
+            },
             "torpedo": {"weight_item_ids": ["torpedo-launch-outfit", "torpedoes"], "installed_tubes": 2},
         },
         "propulsion": {

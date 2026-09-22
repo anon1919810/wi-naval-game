@@ -88,6 +88,52 @@ armour, and loading hoists above the fixed trunk. It excludes gun tubes,
 ammunition and fixed barbettes. This interpretation and the use of Mark II mass
 for Mark II* are assumptions. No separate turret-armour mass exists.
 
+### Systems physical-input addendum
+
+The canonical systems object now exposes physical mass checks against the same
+reviewed ledger IDs. These are editable proposals, not a second mass ledger.
+`systems.summary` reports a difference and review-required replacement proposal
+without changing the selected loading or total.
+
+The fixed-armour checks preserve the numeric legacy inputs exactly as stored:
+
+| Ledger item | Estimated rounded area (m2) | Nominal thickness (mm) |
+| --- | ---: | ---: |
+| `armour-belt-229mm` | 627.0 | 229 |
+| `armour-belt-taper-102mm-aft` | 154.0 | 102 |
+| `armour-belt-taper-102mm-fwd` | 323.4 | 102 |
+| `armour-bulkhead-aft` | 321.61 | 102 |
+| `armour-bulkhead-fwd` | 373.24 | 102 |
+| `armour-deck-25mm` | 3995.88 | 25 |
+| `armour-deck-64mm` | 5314.13 | 64 |
+| `armour-upper-belt-152mm` | 501.6 | 152 |
+| `barbette-a`, `barbette-b`, `barbette-q` | 39.98 each | 229 |
+| `barbette-x` | 47.82 | 229 |
+| `conning-tower` | 201.03 | 254 |
+
+Every check uses `area_m2 * thickness_m * 7850 kg/m3 / 1000`. Areas shown with
+one decimal retain 0.1 m2 displayed resolution; the others retain 0.01 m2.
+These rounded model-bounds inputs can differ from the existing three-decimal
+ledger masses. The comparison policy deliberately reports the discrepancy; it
+does not derive an artificial area from mass or revise the Task 3 anchors.
+Their boundary is fixed protection only and excludes rotating turret armour.
+
+The weapon checks use the accepted generator precision and installed-count
+boundaries:
+
+| Ledger item | Physical input and count boundary |
+| --- | --- |
+| `main-guns` | 8 installed guns at 76.10191346912 t/gun (`167776 lb`) |
+| `main-mounts` | 4 installed twin mounts at 609.62814528 t/mount (`600 long ton`) |
+| `main-ammunition` | 80 rounds for each of 8 installed guns; 635.029318 kg projectile + 134.71693389 kg charge |
+| `secondary-guns` | 16 installed guns at 2.13369850848 t/gun (`42 cwt`) |
+| `secondary-mounts` | one 1.0 t allowance for each of 16 installed guns |
+| `secondary-ammunition` | 150 rounds for each of 16 installed guns; 14.06136347 kg projectile + 4.250656623554688 kg charge |
+
+Broadside count remains separate and never scales a mass. The main-mount check
+owns the complete revolving mount, including rotating gunhouse armour and
+hoists above the fixed trunk; fixed barbettes remain in the fixed-armour rows.
+
 The machinery screening total is allocated 45% to boilers/uptakes and 55% to
 turbines/shafts/condensers/auxiliaries. That allocation is an explicit
 assumption. Fuel, working/feed water, lubricants and stores are excluded from

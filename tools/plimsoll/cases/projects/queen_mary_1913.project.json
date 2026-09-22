@@ -110337,6 +110337,510 @@
     ]
   },
   "systems": {
+    "armour": {
+      "fixed": {
+        "estimate": true,
+        "mass_models": [
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-belt-229mm-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.1,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 9in KC main belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 229.0,
+                "source": "thickness: wiki 9in KC main belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 627.0,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.229
+            },
+            "linked_weight_item_id": "armour-belt-229mm",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 9in KC main belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-belt-taper-102mm-aft-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.1,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 102.0,
+                "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 154.0,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.102
+            },
+            "linked_weight_item_id": "armour-belt-taper-102mm-aft",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-belt-taper-102mm-fwd-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.1,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 102.0,
+                "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 323.4,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.102
+            },
+            "linked_weight_item_id": "armour-belt-taper-102mm-fwd",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 4in taper | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-bulkhead-aft-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 102.0,
+                "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 321.61,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.102
+            },
+            "linked_weight_item_id": "armour-bulkhead-aft",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-bulkhead-fwd-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 102.0,
+                "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 373.24,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.102
+            },
+            "linked_weight_item_id": "armour-bulkhead-fwd",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 4in bulkhead | extent: object_manifest bounds (role=armour_bulkhead, face=bulk x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-deck-25mm-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 1in lower deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 25.0,
+                "source": "thickness: wiki 1in lower deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 3995.88,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.025
+            },
+            "linked_weight_item_id": "armour-deck-25mm",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 1in lower deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-deck-64mm-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 2.5in deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 64.0,
+                "source": "thickness: wiki 2.5in deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 5314.13,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.064
+            },
+            "linked_weight_item_id": "armour-deck-64mm",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 2.5in deck | extent: object_manifest bounds (role=armour_deck, face=deck x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "armour-upper-belt-152mm-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.1,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 6in upper belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 152.0,
+                "source": "thickness: wiki 6in upper belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 501.6,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.152
+            },
+            "linked_weight_item_id": "armour-upper-belt-152mm",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 6in upper belt | extent: object_manifest bounds (role=armour_belt, face=side x2, curve=1.10) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "barbette-a-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 229.0,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 39.98,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.229
+            },
+            "linked_weight_item_id": "barbette-a",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "barbette-b-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 229.0,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 39.98,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.229
+            },
+            "linked_weight_item_id": "barbette-b",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "barbette-q-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 229.0,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 39.98,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.229
+            },
+            "linked_weight_item_id": "barbette-q",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "barbette-x-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 229.0,
+                "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 47.82,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.229
+            },
+            "linked_weight_item_id": "barbette-x",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 9in barbette | extent: object_manifest bounds (role=barbette, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+          },
+          {
+            "boundary": "Fixed protection plate represented by this existing ledger item; excludes rotating turret armour.",
+            "comparison_policy": "Algebraic identity only. Rounded legacy area and 0.001 t ledger precision are disclosed; differences remain review proposals and are not fitted.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "conning-tower-plate-mass-check",
+            "input_provenance": {
+              "area_m2": {
+                "displayed_resolution_m2": 0.01,
+                "estimate": true,
+                "rounded": true,
+                "source": "thickness: wiki 10in conning tower | extent: object_manifest bounds (role=conning_tower, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              },
+              "density_kg_m3": {
+                "estimate": true,
+                "source": "declared legacy steel-density assumption"
+              },
+              "thickness_m": {
+                "estimate": false,
+                "nominal": true,
+                "original_unit": "mm",
+                "original_value": 254.0,
+                "source": "thickness: wiki 10in conning tower | extent: object_manifest bounds (role=conning_tower, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+              }
+            },
+            "inputs": {
+              "area_m2": 201.03,
+              "density_kg_m3": 7850.0,
+              "thickness_m": 0.254
+            },
+            "linked_weight_item_id": "conning-tower",
+            "method": "plate_area_thickness_density_mass",
+            "source": "thickness: wiki 10in conning tower | extent: object_manifest bounds (role=conning_tower, face=all4side x1, curve=1.00) | rho=7850 kg/m3"
+          }
+        ],
+        "source": "tools/plimsoll/cases/queen_mary_1913_weights.json; rounded model bounding-box areas and published nominal thicknesses",
+        "weight_item_ids": [
+          "armour-belt-229mm",
+          "armour-belt-taper-102mm-aft",
+          "armour-belt-taper-102mm-fwd",
+          "armour-bulkhead-aft",
+          "armour-bulkhead-fwd",
+          "armour-deck-25mm",
+          "armour-deck-64mm",
+          "armour-upper-belt-152mm",
+          "barbette-a",
+          "barbette-b",
+          "barbette-q",
+          "barbette-x",
+          "conning-tower"
+        ]
+      }
+    },
     "propulsion": {
       "boilers": 42,
       "raw_design_power": {
@@ -110353,6 +110857,59 @@
       "main": {
         "broadside_guns": 8,
         "installed_guns": 8,
+        "mass_models": [
+          {
+            "boundary": "Eight installed gun tubes; published nominal excludes breech mass; excludes mounts and ammunition.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "main-installed-guns-mass-check",
+            "inputs": {
+              "count_field": "installed_guns",
+              "unit_mass_t": 76.10191346912
+            },
+            "linked_weight_item_id": "main-guns",
+            "method": "counted_unit_mass",
+            "source": "NavWeaps WNBR_135-45_mk5 (secondary compilation)"
+          },
+          {
+            "boundary": "Four complete revolving mounts including rotating gunhouse armour and hoists above fixed trunk; excludes guns, ammunition, and fixed barbettes.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "main-installed-mounts-mass-check",
+            "inputs": {
+              "count_basis": "installed_twin_mounts",
+              "count_value": 4,
+              "unit_mass_t": 609.6281452799999
+            },
+            "linked_weight_item_id": "main-mounts",
+            "method": "counted_unit_mass",
+            "source": "NavWeaps Mark II value used as a Mark II* proxy (secondary compilation)"
+          },
+          {
+            "boundary": "Eighty complete projectile-plus-charge rounds for each of eight installed guns.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "main-ammunition-outfit-mass-check",
+            "inputs": {
+              "charge_mass_kg": 134.71693389,
+              "count_field": "installed_guns",
+              "projectile_mass_kg": 635.029318,
+              "rounds_field": "rounds_per_gun"
+            },
+            "linked_weight_item_id": "main-ammunition",
+            "method": "counted_ammunition_mass",
+            "source": "NavWeaps ammunition outfit and projectile/charge values (secondary compilation)"
+          }
+        ],
         "rounds_per_gun": 80,
         "weight_item_ids": [
           "main-guns",
@@ -110363,6 +110920,58 @@
       "secondary": {
         "broadside_guns": 8,
         "installed_guns": 16,
+        "mass_models": [
+          {
+            "boundary": "Sixteen installed gun tubes and breeches; excludes mounts and ammunition.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "secondary-installed-guns-mass-check",
+            "inputs": {
+              "count_field": "installed_guns",
+              "unit_mass_t": 2.13369850848
+            },
+            "linked_weight_item_id": "secondary-guns",
+            "method": "counted_unit_mass",
+            "source": "Admiralty Gunnery Branch G.8652/13, 4-inch Mark VII/VIII handbook"
+          },
+          {
+            "boundary": "One pedestal-and-shield allowance per installed gun; excludes gun and ammunition.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "secondary-installed-mounts-mass-check",
+            "inputs": {
+              "count_field": "installed_guns",
+              "unit_mass_t": 1.0
+            },
+            "linked_weight_item_id": "secondary-mounts",
+            "method": "counted_unit_mass",
+            "source": "Declared Task 3 engineering assumption; no mounting handbook located"
+          },
+          {
+            "boundary": "One hundred fifty complete projectile-plus-charge rounds for each of sixteen installed guns.",
+            "comparison_tolerance": {
+              "absolute_t": 1e-10,
+              "relative": 1e-10
+            },
+            "estimate": true,
+            "id": "secondary-ammunition-outfit-mass-check",
+            "inputs": {
+              "charge_mass_kg": 4.250656623554688,
+              "count_field": "installed_guns",
+              "projectile_mass_kg": 14.06136347,
+              "rounds_field": "rounds_per_gun"
+            },
+            "linked_weight_item_id": "secondary-ammunition",
+            "method": "counted_ammunition_mass",
+            "source": "Task 3 exact projectile and charge formula from cited ammunition references"
+          }
+        ],
         "rounds_per_gun": 150,
         "weight_item_ids": [
           "secondary-guns",

@@ -107,6 +107,170 @@ class TestResidualTable(unittest.TestCase):
                                places=9)
 
 
+class TestTaylorSourceAxisStrict(unittest.TestCase):
+    @staticmethod
+    def source_axis_table(missing_index=None):
+        cps = [0.5, 0.6]
+        bts = [2.0, 3.0]
+        volumes = [1.0 / 10.0**3, 1.0 / 5.0**3]
+        fns = [0.2, 0.3]
+        grid = []
+        for cp_index, _cp in enumerate(cps):
+            cp_rows = []
+            for bt_index, _bt in enumerate(bts):
+                bt_rows = []
+                for volume_index, _volume in enumerate(volumes):
+                    fn_rows = []
+                    for fn_index, _fn in enumerate(fns):
+                        index = (cp_index, bt_index, volume_index, fn_index)
+                        fn_rows.append(None if index == missing_index else (10.0 if volume_index == 0 else 20.0))
+                    bt_rows.append(fn_rows)
+                cp_rows.append(bt_rows)
+            grid.append(cp_rows)
+        return {
+            "axes": {"cp": cps, "bt": bts, "volumetric": volumes, "fn": fns},
+            "cr": grid,
+            "scale": 0.001,
+            "interpolation_coordinate": "l_over_volume_cuberoot",
+            "source": "synthetic source-axis test",
+        }
+
+    def test_source_axis_midpoint_uses_printed_coordinate(self):
+        """Catch interpolation in reciprocal-cube coordinates under a source label."""
+        table = self.source_axis_table()
+        volume_ratio = 1.0 / 7.5**3
+        strict = R.residual_from_table(
+            table, 0.5, 2.0, volume_ratio, 0.2, method="taylor_gertler_source_axis_strict"
+        )
+        legacy = R.residual_from_table(
+            table, 0.5, 2.0, volume_ratio, 0.2, method="legacy_volume_ratio_clip_renormalize"
+        )
+        self.assertEqual(strict["values"]["cr"], 0.015)
+        self.assertNotEqual(strict["values"]["cr"], legacy["values"]["cr"])
+        self.assertEqual(strict["method"], "taylor_gertler_source_axis_strict")
+        self.assertEqual(strict["interpolation_coordinate"], "l_over_volume_cuberoot")
+
+    def test_strict_missing_positive_weight_corner_is_unavailable(self):
+        """Catch source-conformance renormalization across a missing table corner."""
+        table = self.source_axis_table(missing_index=(1, 1, 1, 1))
+        result = R.residual_from_table(
+            table,
+            0.55,
+            2.5,
+            1.0 / 7.5**3,
+            0.25,
+            method="taylor_gertler_source_axis_strict",
+        )
+        self.assertIsNone(result["values"]["cr"])
+        self.assertFalse(result["complete"])
+        self.assertTrue(any(d["code"] == "taylor.missing_corner" for d in result["diagnostics"]))
+
+    def test_exact_node_ignores_unrelated_zero_weight_holes(self):
+        """Catch requiring cells that do not contribute to an exact-node request."""
+        table = self.source_axis_table(missing_index=(1, 1, 1, 1))
+        result = R.residual_from_table(
+            table,
+            0.5,
+            2.0,
+            1.0 / 10.0**3,
+            0.2,
+            method="taylor_gertler_source_axis_strict",
+        )
+        self.assertEqual(result["values"]["cr"], 0.01)
+        self.assertTrue(result["complete"])
+
+    def test_strict_outside_domain_and_undeclared_axis_are_unavailable(self):
+        """Catch endpoint clipping or silent reinterpretation in strict mode."""
+        table = self.source_axis_table()
+        outside = R.residual_from_table(
+            table, 0.7, 2.0, 1.0 / 7.5**3, 0.2, method="taylor_gertler_source_axis_strict"
+        )
+        self.assertIsNone(outside["values"]["cr"])
+        self.assertTrue(any(d["code"] == "taylor.outside_table" for d in outside["diagnostics"]))
+        del table["interpolation_coordinate"]
+        with self.assertRaises(ValueError):
+            R.residual_from_table(
+                table, 0.5, 2.0, 1.0 / 7.5**3, 0.2, method="taylor_gertler_source_axis_strict"
+            )
+
+    def test_source_headings_map_to_stored_axis(self):
+        """Catch reversing headings without reversing their associated cells."""
+        for heading in (5.5, 6.0, 7.0, 8.0, 9.0, 10.0):
+            self.assertTrue(
+                math.isclose(R.taylor_volume_ratio(heading), 1.0 / heading**3, rel_tol=1e-10)
+            )
+
+    def test_tracked_table_adapter_uses_exact_headings_without_rewriting_cells(self):
+        """Catch using rounded reciprocal nodes as the strict interpolation coordinate."""
+        raw = cr_table_case()
+        adapted = R.taylor_gertler_source_table(raw)
+        self.assertEqual(
+            adapted["source_axes"]["l_over_volume_cuberoot"],
+            [10.0, 9.0, 8.0, 7.0, 6.0, 5.5],
+        )
+        self.assertEqual(adapted["cr"], raw["cr"])
+        source_midpoint = 9.5
+        result = R.residual_from_table(
+            adapted,
+            0.6,
+            2.25,
+            R.taylor_volume_ratio(source_midpoint),
+            0.16,
+            method="taylor_gertler_source_axis_strict",
+        )
+        expected = 0.5 * (raw["cr"][1][0][0][0] + raw["cr"][1][0][1][0]) * raw["scale"]
+        self.assertTrue(math.isclose(result["values"]["cr"], expected, rel_tol=1e-10,
+                                     abs_tol=1e-10))
+
+    def test_strict_speed_curve_does_not_clip_outside_froude(self):
+        """Catch compatibility clipping leaking into strict source mode."""
+        table = R.taylor_gertler_source_table(cr_table_case())
+        hull = {"lwl_m": 100.0, "s_m2": 2000.0, "cp": 0.6, "bt": 3.0,
+                "volumetric": R.taylor_volume_ratio(8.0), "estimate": True}
+        curve = R.speed_power_curve(
+            hull,
+            [1.0],
+            table,
+            interpolation_method="taylor_gertler_source_axis_strict",
+            friction_method="schoenherr_implicit_ittc_0.242",
+            speed_conversion_method="international_knot_exact",
+        )
+        row = curve["rows"][0]
+        self.assertFalse(row["complete"])
+        self.assertIsNone(row["rt_kN"])
+        self.assertEqual(row["fr"], row["fr_used"])
+        self.assertEqual(curve["methods"]["interpolation"], "taylor_gertler_source_axis_strict")
+        self.assertEqual(curve["methods"]["friction"], "schoenherr_implicit_ittc_0.242")
+        self.assertEqual(curve["methods"]["speed_conversion"], "international_knot_exact")
+        self.assertTrue(math.isclose(row["rn"], (1852.0 / 3600.0) * 100.0 / R.NU_SEA_15C,
+                                     rel_tol=1e-10))
+
+    def test_strict_curve_preserves_structured_table_diagnostic_and_speed_context(self):
+        """Catch reducing a blocking missing-corner result to an unstructured warning."""
+        table = self.source_axis_table(missing_index=(1, 1, 1, 1))
+        hull = {
+            "lwl_m": 100.0,
+            "s_m2": 2000.0,
+            "cp": 0.55,
+            "bt": 2.5,
+            "volumetric": R.taylor_volume_ratio(7.5),
+            "estimate": True,
+        }
+        speed_kn = 0.25 * math.sqrt(9.81 * 100.0) / R.KNOT_MPS_EXACT
+        curve = R.speed_power_curve(
+            hull,
+            [speed_kn],
+            table,
+            interpolation_method="taylor_gertler_source_axis_strict",
+            speed_conversion_method="international_knot_exact",
+        )
+        diagnostic = curve["diagnostics"][0]
+        self.assertEqual(diagnostic["code"], "taylor.missing_corner")
+        self.assertEqual(diagnostic["path"], "$.speeds_kn[0]")
+        self.assertEqual(diagnostic["speed_kn"], speed_kn)
+        self.assertEqual(curve["rows"][0]["diagnostics"], [diagnostic])
+
+
 class TestPowerAndBacksolve(unittest.TestCase):
     def test_effective_power_exact(self):
         r = R.effective_power(1_000_000.0, 10.0)
