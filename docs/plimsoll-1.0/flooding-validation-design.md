@@ -51,6 +51,19 @@ Predeclare timestep sequence0.5,0.25,0.125 s. Errors in transferred volume must 
 
 ## Coupled-body and limit tests
 
+An independent instantaneous inclined-head anchor uses adjacent 10×1×3m tanks
+centred at (x,y)=(0,−0.5) and (0,+0.5), both bottom z=0, permeability1 and
+15m³ of water. Their common aperture is (0,0,0.25), with the same A,Cd,g above.
+Choose trim slope p=0.1 and heel slope q=0.2; neither liquid plane hits a top
+or bottom edge. The slope intercepts are d_port=1.5+0.5q and
+d_starboard=1.5−0.5q. With s=√(1+p²+q²), the world-vertical pressure heads are
+1.35/s and 1.15/s, and initial flow from port to starboard is
+Cd A √(2g×0.2/s). Equal body-frame fill heights must therefore produce a
+nonzero transfer. This anchor catches omission of horizontal position,
+inclination normalization or the shared datum; use algebraic tolerance1e−10.
+Its answer is emitted by the independent oracle script alongside the upright
+time integrals. It specifies a frozen instant, not a ship equilibrium.
+
 - Empty/full tanks, explicit zero permeability, zero-area or closed connections, no apertures, equal head and head reversal.
 - Multiple internal edges must remain conservative when one source has limited water or a receiver approaches capacity.
 - At every accepted coupled step recompute moving-liquid centres and the full force/moment equilibrium, carrying all convergence/geometry diagnostics. The step must not be labelled successful if the equilibrium solve fails.
