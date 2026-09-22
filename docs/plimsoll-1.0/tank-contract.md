@@ -23,6 +23,15 @@ boolean. Booleans are never accepted as numbers.
 - `geometric_volume_m3` is the occupied volume found by geometric integration.
 - `integrated_volume_m3 = permeability * geometric_volume_m3`.
 - `volume_residual_m3 = integrated_volume_m3 - requested_volume_m3`.
+- `phase_volume_residual_m3` is the signed root residual expressed as
+  occupied-liquid volume; for a complementary void solve its sign is reversed.
+- `phase_volume_tolerance_m3` is the tight tolerance that controls the
+  smaller-phase root and therefore the free-surface geometry.
+- `volume_reconstruction_roundoff_m3` is the observed difference between
+  the reconstructed full-volume residual and the phase residual.
+- `volume_tolerance_m3` is a reconstruction-aware bound:
+  `phase_volume_tolerance_m3 + volume_reconstruction_roundoff_m3`, rounded
+  upward when needed. It bounds the published `volume_residual_m3`.
 - `fill_fraction = requested_volume_m3 / capacity_m3`.
 
 The separately reported integration residual never changes mass. Empty liquid
@@ -64,7 +73,10 @@ i_uv_m4 = integral(u*v dA)
 
 `i_uv_m4` is a signed product of area. The corresponding inertia tensor uses
 off-diagonal `-i_uv_m4`. Fields prefixed by `available_` include the uniform
-permeability factor; unprefixed area and moments are geometric.
+permeability factor; unprefixed area and moments are geometric. A nonzero
+permeability-scaled area or moment that falls below the positive floating-point
+range is rejected. An exactly zero `i_uv_m4` or `available_i_uv_m4` remains
+valid because symmetry can make the signed product of area genuinely zero.
 
 `free_surface.applicability` and `free_surface.converged` describe the
 surface calculation separately from the top-level volume-root
@@ -94,6 +106,9 @@ limit, but their products and public outputs must still be representable.
 Positive values below the floating-point range and values above it are
 rejected. Unsupported or unresolved states raise `ValueError`; they never
 return zero, infinity, a last iterate, or plausible free-surface inertias.
+Error-bound fields are conservative bounds: if their exact positive product
+would underflow, they round upward to the smallest representable positive
+float instead of understating the bound.
 
 For fills above one half, the solver integrates the smaller complementary void
 phase and obtains the liquid centroid by central symmetry. This keeps a

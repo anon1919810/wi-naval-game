@@ -247,6 +247,23 @@ class TankGeometryTests(unittest.TestCase):
                     self.close(top['free_surface'][field], bottom['free_surface'][field],
                                rel=2e-8, abs_tol=1e-18)
 
+    def test_near_full_reports_phase_accuracy_and_reconstruction_bound(self):
+        value = tank(length_m=7.13, beam_m=3.17, height_m=2.73,
+                     permeability=0.4)
+        capacity = 7.13 * 3.17 * 2.73 * 0.4
+        requested = capacity * (1.0 - 1e-10)
+        result = liquid_state(value, requested, heel_deg=33.0, trim_deg=17.0)
+        small_phase_volume = capacity - requested
+        self.assertLessEqual(abs(result['phase_volume_residual_m3']),
+                             result['phase_volume_tolerance_m3'])
+        self.assertLessEqual(result['phase_volume_tolerance_m3'],
+                             small_phase_volume * 2.1e-12)
+        self.assertGreater(result['volume_reconstruction_roundoff_m3'], 0.0)
+        self.assertLessEqual(abs(result['volume_residual_m3']),
+                             result['volume_tolerance_m3'])
+        self.assertGreater(result['volume_tolerance_m3'],
+                           result['phase_volume_tolerance_m3'])
+
     def test_capacity_product_is_independent_of_factor_order(self):
         cases = ((1e-200, 1e-200, 1e200, 1e-200),
                  (1e200, 1e200, 1e-200, 1e200))
@@ -267,6 +284,13 @@ class TankGeometryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'finite'):
             liquid_state(tank(length_m=1e-154, beam_m=1e-154, height_m=1e308,
                               keel_to_bottom_m=1.5e308), 0.9999999999999999)
+
+    def test_unrepresentable_positive_available_moment_is_rejected(self):
+        value = tank(length_m=1.0, beam_m=1e-12, height_m=1e-12,
+                     permeability=2e-299)
+        with self.assertRaisesRegex(
+                ValueError, 'available_i_u_m4 is below the positive numerical range'):
+            liquid_state(value, 1e-323)
 
     def test_partial_geometry_has_declared_aspect_ratio_domain(self):
         supported = liquid_state(tank(length_m=1e6, beam_m=1.0, height_m=1.0),

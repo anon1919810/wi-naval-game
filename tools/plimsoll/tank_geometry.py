@@ -44,6 +44,24 @@ def _checked_positive_product(values, name):
     return product
 
 
+def _checked_scaled_product(scale, value, name):
+    """Scale a signed value, rejecting underflow unless the input is truly zero."""
+    if value == 0.0:
+        return 0.0
+    magnitude = _checked_positive_product((scale, abs(value)), name)
+    return math.copysign(magnitude, value)
+
+
+def _scaled_upper_bound(scale, value, name):
+    """Multiply a positive error bound, rounding a subnormal underflow upward."""
+    product = scale*value
+    if not math.isfinite(product):
+        raise ValueError(f'{name} exceeds numerical range')
+    if product == 0.0 and scale > 0.0 and value > 0.0:
+        return math.nextafter(0.0, math.inf)
+    return product
+
+
 def _dot(a, b):
     return sum(x*y for x, y in zip(a, b))
 
@@ -173,10 +191,20 @@ def _surface(cap, normal, centre, permeability):
     iu = math.fsum(ixx)/12-area*cy*cy
     iv = math.fsum(iyy)/12-area*cx*cx
     iuv = math.fsum(ixy)/24-area*cx*cy
+    if iu <= 0.0 or iv <= 0.0:
+        raise ValueError('free surface centroidal area moments must be positive')
+    available_area = _checked_positive_product(
+        (permeability, area), 'free_surface.available_area_m2')
+    available_iu = _checked_positive_product(
+        (permeability, iu), 'free_surface.available_i_u_m4')
+    available_iv = _checked_positive_product(
+        (permeability, iv), 'free_surface.available_i_v_m4')
+    available_iuv = _checked_scaled_product(
+        permeability, iuv, 'free_surface.available_i_uv_m4')
     result.update(active=True, area_m2=area, i_u_m4=iu, i_v_m4=iv, i_uv_m4=iuv,
-                  available_area_m2=permeability*area,
-                  available_i_u_m4=permeability*iu, available_i_v_m4=permeability*iv,
-                  available_i_uv_m4=permeability*iuv,
+                  available_area_m2=available_area,
+                  available_i_u_m4=available_iu, available_i_v_m4=available_iv,
+                  available_i_uv_m4=available_iuv,
                   centroid_m=[centre[i]+origin[i]+cx*u[i]+cy*v[i] for i in range(3)],
                   polygon_m=[[centre[i]+p[i] for i in range(3)] for p in cap],
                   converged=True,
@@ -192,6 +220,8 @@ def _ensure_public_geometry_is_finite(result):
     scalar_fields = ('volume_m3', 'requested_volume_m3', 'integrated_volume_m3',
                      'capacity_m3', 'gross_volume_m3', 'geometric_volume_m3',
                      'fill_fraction', 'permeability', 'heel_deg', 'trim_deg',
+                     'phase_volume_residual_m3', 'phase_volume_tolerance_m3',
+                     'volume_reconstruction_roundoff_m3',
                      'volume_residual_m3', 'volume_tolerance_m3')
     for field in scalar_fields:
         if not _finite(result[field]):
@@ -313,7 +343,10 @@ def liquid_state(tank, volume_m3, heel_deg=0, trim_deg=0):
             'full_empty_product_domain': 'positive gross volume and capacity must be representable',
         },
         applicability={'status': 'applicable', 'reason': 'validated_input_in_method_domain'},
-        converged=True, volume_residual_m3=0.0, volume_tolerance_m3=0.0,
+        converged=True, phase_volume_residual_m3=0.0,
+        phase_volume_tolerance_m3=0.0,
+        volume_reconstruction_roundoff_m3=0.0,
+        volume_residual_m3=0.0, volume_tolerance_m3=0.0,
         iterations=0, fsc_policy='centroid_geometry_no_additional_fsc',
         source=copy.deepcopy(tank.get('source')),
         estimate=copy.deepcopy(tank.get('estimate')), diagnostics=[])
@@ -363,8 +396,17 @@ def liquid_state(tank, volume_m3, heel_deg=0, trim_deg=0):
         geometric_volume = phase_volume
         local_centroid = phase_centroid
         cap = phase_cap
-    integrated = geometric_volume*mu
+    integrated = _checked_positive_product(
+        (geometric_volume, mu), 'integrated liquid volume')
     residual = integrated - requested
+    residual_sign = -1.0 if solve_complement else 1.0
+    phase_residual = residual_sign*_phase_error*mu
+    phase_tolerance = _scaled_upper_bound(
+        mu, tolerance, 'phase volume tolerance')
+    reconstruction_roundoff = abs(residual - phase_residual)
+    volume_tolerance = phase_tolerance + reconstruction_roundoff
+    if reconstruction_roundoff:
+        volume_tolerance = math.nextafter(volume_tolerance, math.inf)
     result.update(
         integrated_volume_m3=integrated,
         geometric_volume_m3=geometric_volume,
@@ -372,8 +414,11 @@ def liquid_state(tank, volume_m3, heel_deg=0, trim_deg=0):
         plane_offset_local_m=offset,
         plane_offset_m=offset + _dot(normal, centre),
         free_surface=_surface(cap, normal, centre, mu),
+        phase_volume_residual_m3=phase_residual,
+        phase_volume_tolerance_m3=phase_tolerance,
+        volume_reconstruction_roundoff_m3=reconstruction_roundoff,
         volume_residual_m3=residual,
-        volume_tolerance_m3=tolerance*mu,
+        volume_tolerance_m3=volume_tolerance,
         iterations=iteration)
     return _ensure_public_geometry_is_finite(result)
 
