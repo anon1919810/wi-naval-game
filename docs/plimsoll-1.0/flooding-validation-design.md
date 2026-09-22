@@ -49,6 +49,45 @@ Use the same S,A,Cd,g, hs=3 m, h0=1 m, check t=5 s. Sea exchange equals the tank
 
 Predeclare timestep sequence0.5,0.25,0.125 s. Errors in transferred volume must decrease under refinement and the finest result must be within1% of the analytic transfer. Conservation is a separate arithmetic criterion: `abs(error)<=1e-10*max(1,total_volume,absolute_sea_exchange)` per run. Do not weaken conservation because the ODE is approximate.
 
+## Analytic floating-body feedback anchor
+
+Before promoting the Task6 prototype, add a fully coupled symmetric case whose
+continuous solution is independent of the equilibrium implementation. Use a
+20×10×6 m rectangular ship with keel z=0 and centred base loading of 401.8 t at
+KG=1 m. Sea and tank water both have density 1.025 t/m³. A centred 4×2×4 m
+rectangular tank, bottom z=0 and permeability1, initially contains 8 m³. That
+water is additional to the base mass, not already counted in its ledger. The
+initial total displacement is 410 t and draft is exactly 2 m. Use the same
+A=0.1 m², Cd=0.6, g=9.80665 m/s² and t=5 s as above; the sea connection is at
+(0,0,0.1) m and stays submerged on both sides. Hull and loading symmetry keep
+heel and trim zero; their numerical solutions must still be checked.
+
+Let Awp=200 m², S=8 m², V0=8 m³ and K=Cd*A*sqrt(2g). As the hull sinks,
+
+```
+d(V) = M_base/(rho*Awp) + V/Awp
+H(V) = d(V) - V/S
+a = 1/S - 1/Awp = 0.12 per m²
+H0 = 1 m
+dH/dt = -a*K*sqrt(H)
+V(t)-V0 = [H0 - (sqrt(H0)-a*K*t/2)^2] / a
+```
+
+This gives inflow 1.2756512554179793 m³ and draft 2.00637825627709 m at 5 s.
+The independent oracle emits all inputs and answers under `coupled_heave`;
+it imports no production code. This is a continuously rebalanced floating
+body, unlike the fixed-sea-relative-to-hull fixture. It detects a stale sea
+plane/draft or omitted added-water mass.
+
+Use the same 0.5/0.25/0.125 s refinement. Inflow error must decrease and the
+finest result must be within 1% of the analytic inflow; draft-change error uses
+1% of the analytic *draft increase*, not 1% of total draft. Require absolute
+heel and trim <=1e-6 degrees and the existing scaled equilibrium residual
+limit at every accepted state. The separate volume/mass conservation criterion
+remains 1e-10 of its declared scale. No capacity, contact or downflooding
+boundary occurs in this fixture. Passing it verifies this idealized feedback
+law, not historical flooding behaviour.
+
 ## Coupled-body and limit tests
 
 An independent instantaneous inclined-head anchor uses adjacent 10×1×3m tanks
