@@ -14,7 +14,7 @@ import project_store
 
 
 def project():
-    return {"id": "schema-study", "name": "型线与载荷", "weight_groups": [{
+    return {"schema": "plimsoll-project-1", "id": "schema-study", "name": "型线与载荷", "weight_groups": [{
         "id": "hull", "items": [{"id": "plate.a[1]", "mass_t": 10, "x_m": 0,
         "y_m": 0, "kg_m": 2, "source": "base survey", "estimate": False,
         "uncertainty": {"mass_t": [9, 11], "kg_m": [1, 3]}}]}],

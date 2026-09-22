@@ -287,7 +287,7 @@ class TestProjectStore(unittest.TestCase):
                     "import importlib, json, pathlib, sys; "
                     "sys.path.insert(0, sys.argv[1]); "
                     "store = importlib.import_module(sys.argv[2]); "
-                    "store.save(sys.argv[3], {'id':'child','name':'子进程'}); "
+                    "store.save(sys.argv[3], {'schema':'plimsoll-project-1','id':'child','name':'子进程'}); "
                     "print(json.dumps(store.load(sys.argv[3]), ensure_ascii=False))"
                 )
                 completed = subprocess.run(

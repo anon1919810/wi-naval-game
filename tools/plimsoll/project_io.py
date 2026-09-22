@@ -88,7 +88,6 @@ def _is_finite_real(value: Any) -> bool:
 
 def _with_schema_defaults(payload: dict) -> dict:
     project = copy.deepcopy(payload)
-    project.setdefault("schema", SCHEMA)
     if "opening_definition" not in project:
         project["opening_definition"] = (
             "unknown" if "openings" not in project else
@@ -760,7 +759,16 @@ def validate_project(payload: Any) -> list[dict]:
     project = _with_schema_defaults(payload)
     diagnostics: list[dict] = []
     _validate_json_value(project, "$", diagnostics)
-    if project.get("schema") != SCHEMA:
+    if project.get("schema") is None:
+        diagnostics.append(
+            _diagnostic(
+                "schema.missing",
+                "error",
+                "$.schema",
+                "schema must be declared explicitly as 'plimsoll-project-1'",
+            )
+        )
+    elif project.get("schema") != SCHEMA:
         diagnostics.append(
             _diagnostic(
                 "schema.unsupported",

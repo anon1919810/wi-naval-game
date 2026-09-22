@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import copy
+import json
 import math
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -14,6 +16,7 @@ PKG = HERE.parent
 sys.path.insert(0, str(PKG))
 
 import project_io  # noqa: E402
+import project_store  # noqa: E402
 import units  # noqa: E402
 
 
@@ -342,6 +345,26 @@ class TestProjectDefaultsAndValidation(unittest.TestCase):
             project.update(patch)
             with self.subTest(patch=patch), self.assertRaises(project_io.ProjectValidationError):
                 project_io.normalize_project(project)
+
+    def test_missing_schema_is_rejected(self):
+        project = populated_project()
+        del project["schema"]
+        diagnostics = project_io.validate_project(project)
+        self.assertTrue(any(
+            d["code"] == "schema.missing" and d["severity"] == "error"
+            for d in diagnostics
+        ))
+        with self.assertRaises(project_io.ProjectValidationError):
+            project_io.normalize_project(project)
+
+    def test_missing_schema_rejected_end_to_end_on_load(self):
+        project = populated_project()
+        del project["schema"]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "no_schema.json"
+            path.write_text(json.dumps(project, ensure_ascii=False), encoding="utf-8")
+            with self.assertRaises(project_io.ProjectValidationError):
+                project_store.load(path)
 
 
 class TestMigrationAndFingerprint(unittest.TestCase):

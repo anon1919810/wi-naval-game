@@ -285,7 +285,7 @@ warnings at this layer; downstream calculations decide whether a particular
 warning blocks their requested output.
 
 `validate_project(payload)` returns the complete diagnostic list.
-`normalize_project(payload)` deep-copies its input, supplies schema defaults and
+`normalize_project(payload)` deep-copies its input, requires schema to be declared explicitly and
 raises `ProjectValidationError` when any error diagnostic exists. The exception
 retains all diagnostics on its `diagnostics` attribute. Unsupported schema
 versions are errors. Normalization never mutates the caller's object.

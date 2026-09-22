@@ -15,7 +15,7 @@ import project_store
 
 
 def box_project():
-    return dict(id="analysis-box", name="解析方箱", geometry=dict(kind="offsets",
+    return dict(schema="plimsoll-project-1", id="analysis-box", name="解析方箱", geometry=dict(kind="offsets",
         keel_offset_m=7, source="analytic box", estimate=False,
         offsets=dict(schema="plimsoll-section-polygons-1", stations=[
             [x, [[-3, 7], [3, 7], [3, 11], [-3, 11]]] for x in [-10, 0, 10]])),
