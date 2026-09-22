@@ -538,6 +538,124 @@ class CoreCliEntrypointTests(unittest.TestCase):
         self.assertNotIn("Traceback", result.stderr)
         self.assertFalse(output.exists())
 
+    def sweep_manifest(self, scenario, speeds, qpcs):
+        """Return a real 3x2 sweep declaration for the bundled steamer case."""
+        project_path = (TOOLS / "plimsoll" / "cases" / "projects"
+                        / "generic_steamer.project.json")
+        return {
+            "schema": "plimsoll-sweep-1",
+            "project": str(project_path),
+            "condition_id": "coastal",
+            "base_options": {"stages": ["resistance"], "resistance": {
+                "scenario_id": scenario, "speeds_kn": [10]}},
+            "axes": [
+                {"field": "resistance.speed_kn", "values": list(speeds),
+                 "source": "declared grid", "estimate": False},
+                {"field": "resistance.qpc", "values": list(qpcs),
+                 "source": "declared qpc", "estimate": True},
+            ],
+        }
+
+    def sweep_summary(self, out):
+        return json.loads((out / "sweep-summary.json").read_text(encoding="utf-8"))
+
+    def test_sweep_success_path_writes_grid_results_and_summary(self):
+        speeds, qpcs = [8.0, 10.0, 12.0], [0.5, 0.55]
+        document = self.sweep_manifest("holtrop-trim-study", speeds, qpcs)
+        with tempfile.TemporaryDirectory(prefix="扫描成功-") as temp:
+            root = Path(temp)
+            source = root / "清单.json"
+            out = root / "输出"
+            csv_path = root / "汇总.csv"
+            source.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+            result = self.run_cli(
+                ["sweep", source, "--out", out, "--csv", csv_path], root)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertEqual(
+                sorted(path.name for path in out.iterdir()),
+                [f"{index:04d}.result.json" for index in range(1, 7)]
+                + ["sweep-summary.json"],
+            )
+            summary = self.sweep_summary(out)
+            self.assertEqual(summary["schema"], "plimsoll-sweep-result-1")
+            self.assertEqual(summary["status"], "completed")
+            self.assertEqual(summary["point_count"], 6)
+            self.assertEqual(summary["declaration"], document)
+            expected_grid = [(speed, qpc) for speed in speeds for qpc in qpcs]
+            self.assertEqual(
+                [(point["varied"][0]["value"], point["varied"][1]["value"])
+                 for point in summary["points"]],
+                expected_grid,
+            )
+            for ordinal, (point, (speed, qpc)) in enumerate(
+                    zip(summary["points"], expected_grid), 1):
+                self.assertEqual(point["ordinal"], ordinal)
+                self.assertEqual(point["status"], "completed")
+                self.assertEqual(point["persistence"]["status"], "saved")
+                self.assertEqual(point["options"]["resistance"]["speeds_kn"], [speed])
+                self.assertEqual(
+                    point["options"]["resistance"]["qpc_override"]["value"], qpc)
+                self.assertEqual(point["options"]["resistance"]["scenario_id"],
+                                 "holtrop-trim-study")
+                report = json.loads(
+                    (out / point["result_path"]).read_text(encoding="utf-8"))
+                self.assertEqual(report["schema"], "plimsoll-analysis-1")
+                self.assertEqual(report["request_fingerprint"],
+                                 point["request_fingerprint"])
+            # One selected project, six distinct requests: the grid really varies.
+            self.assertEqual(
+                len({point["project_fingerprint"] for point in summary["points"]}), 1)
+            self.assertEqual(
+                len({point["request_fingerprint"] for point in summary["points"]}), 6)
+            self.assertTrue(csv_path.exists())
+            self.assertIn("request_fingerprint",
+                          csv_path.read_text(encoding="utf-8"))
+
+    def test_sweep_request_identity_is_deterministic_across_runs(self):
+        document = self.sweep_manifest("holtrop-trim-study", [8.0, 10.0, 12.0],
+                                       [0.5, 0.55])
+        with tempfile.TemporaryDirectory(prefix="扫描确定性-") as temp:
+            root = Path(temp)
+            source = root / "清单.json"
+            source.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+            first = self.run_cli(["sweep", source, "--out", root / "甲"], root)
+            second = self.run_cli(["sweep", source, "--out", root / "乙"], root)
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            first_points = self.sweep_summary(root / "甲")["points"]
+            second_points = self.sweep_summary(root / "乙")["points"]
+        self.assertEqual([point["request_fingerprint"] for point in first_points],
+                         [point["request_fingerprint"] for point in second_points])
+        self.assertEqual(
+            len({point["request_fingerprint"] for point in first_points}), 6)
+
+    def test_sweep_reports_model_limit_when_strict_table_is_out_of_range(self):
+        """The strict Taylor table refuses speeds outside its populated axes:
+        every point stays honest (model_limit) instead of extrapolating."""
+        document = self.sweep_manifest("taylor-trim-study", [8.0, 10.0, 12.0],
+                                       [0.5, 0.55])
+        with tempfile.TemporaryDirectory(prefix="扫描越界-") as temp:
+            root = Path(temp)
+            source = root / "清单.json"
+            out = root / "输出"
+            source.write_text(json.dumps(document, ensure_ascii=False), encoding="utf-8")
+            result = self.run_cli(["sweep", source, "--out", out], root)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            summary = self.sweep_summary(out)
+            self.assertEqual(summary["status"], "partial")
+            self.assertEqual([point["status"] for point in summary["points"]],
+                             ["partial"] * 6)
+            for point in summary["points"]:
+                self.assertEqual(point["persistence"]["status"], "saved")
+                report = json.loads(
+                    (out / point["result_path"]).read_text(encoding="utf-8"))
+                resistance = report["stages"]["resistance"]
+                self.assertEqual(resistance["status"], "model_limit")
+                self.assertFalse(resistance["validity"]["complete"])
+                self.assertIn("taylor.outside_table",
+                              {item["code"] for item in resistance["diagnostics"]})
+
 
 if __name__ == "__main__":
     unittest.main()
