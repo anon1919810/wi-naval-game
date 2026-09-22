@@ -180,6 +180,7 @@ class CoreCliEntrypointTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
         payload = json.loads(result.stderr)
         self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["code"], "cli.calculation_input")
         self.assertNotIn("Traceback", result.stderr)
 
     def test_result_output_cannot_alias_explicit_options_input(self):

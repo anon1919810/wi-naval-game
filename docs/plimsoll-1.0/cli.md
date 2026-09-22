@@ -115,8 +115,10 @@ read input → exit `2` (`cli.output_alias`).
 - A JSON object (e.g. `{"title": "Queen Mary 1913 型线"}`) is decoded and used
   as the structured source.
 - A JSON string literal (`"\"survey 1913\""`) is decoded to the unquoted string.
-- Empty string, whitespace, or empty/non-object JSON → rejected with
-  `cli.provenance_invalid` (exit `2`).
+- Only an **empty or whitespace-only** value is rejected with
+  `cli.provenance_invalid` (exit `2`). Every other value is accepted: a JSON
+  object becomes the structured source, while `null`, a number, an array and an
+  unparseable bare string are all kept verbatim as their literal text.
 
 ## Error shape
 
