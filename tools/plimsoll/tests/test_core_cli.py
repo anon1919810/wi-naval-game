@@ -2,6 +2,7 @@
 
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
+import hashlib
 import json
 from pathlib import Path
 import os
@@ -17,7 +18,7 @@ TOOLS = Path(__file__).resolve().parents[2]
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
-from plimsoll import app, exports  # noqa: E402
+from plimsoll import app, exports, project_store  # noqa: E402
 
 
 def analysis_result(status="completed"):
@@ -236,6 +237,130 @@ class CoreCliEntrypointTests(unittest.TestCase):
                     self.assertEqual(json.loads(result.stderr)["code"],
                                      "cli.schema_invalid")
                     self.assertFalse(out.exists())
+
+    def test_import_geometry_happy_path_materializes_self_contained_offsets(self):
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        geometry_path = (
+            TOOLS / "plimsoll" / "cases" / "queen_mary_1913_offsets.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="导入几何-") as temp:
+            output = Path(temp) / "导入结果.project.json"
+            result = self.run_cli([
+                "import-geometry", str(project_path), str(geometry_path),
+                "--format", "legacy-offsets-5",
+                "--keel-offset-m", "-1.0",
+                "--provenance", json.dumps({"title": "Queen Mary 1913 型线"}),
+                "--estimate", "true",
+                "--output", str(output),
+            ], temp)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            imported = project_store.load(output)
+        geometry = imported["geometry"]
+        self.assertEqual(geometry["kind"], "offsets")
+        self.assertEqual(geometry["keel_offset_m"], -1.0)
+        expected_sha = hashlib.sha256(geometry_path.read_bytes()).hexdigest()
+        self.assertEqual(geometry["source"]["raw_content_sha256"], expected_sha)
+
+    def test_import_geometry_is_no_longer_unimplemented(self):
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        geometry_path = (
+            TOOLS / "plimsoll" / "cases" / "queen_mary_1913_offsets.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="回归保护-") as temp:
+            output = Path(temp) / "回归结果.project.json"
+            stdout, stderr = StringIO(), StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                try:
+                    exit_code = app.main([
+                        "import-geometry", str(project_path), str(geometry_path),
+                        "--format", "legacy-offsets-5",
+                        "--keel-offset-m", "0.0",
+                        "--provenance", json.dumps({"title": "fixture"}),
+                        "--estimate", "false",
+                        "--output", str(output),
+                    ])
+                except NotImplementedError:
+                    self.fail("import-geometry still raises NotImplementedError")
+        self.assertEqual(exit_code, 0, stderr.getvalue())
+
+    def test_import_geometry_rejects_schema_mismatch_as_one_structured_error(self):
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="非法内容-") as temp:
+            geometry = Path(temp) / "坏型线.json"
+            geometry.write_text(
+                json.dumps({"schema": "plimsoll-offsets-9", "stations": []}),
+                encoding="utf-8",
+            )
+            output = Path(temp) / "结果.project.json"
+            result = self.run_cli([
+                "import-geometry", str(project_path), str(geometry),
+                "--format", "legacy-offsets-5",
+                "--keel-offset-m", "0.0",
+                "--provenance", json.dumps({"title": "bad"}),
+                "--estimate", "false",
+                "--output", str(output),
+            ], temp)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["code"], "cli.geometry_import")
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse(output.exists())
+
+    def test_import_geometry_output_cannot_alias_project_input(self):
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        geometry_path = (
+            TOOLS / "plimsoll" / "cases" / "queen_mary_1913_offsets.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="路径保护-") as temp:
+            result = self.run_cli([
+                "import-geometry", str(project_path), str(geometry_path),
+                "--format", "legacy-offsets-5",
+                "--keel-offset-m", "0.0",
+                "--provenance", json.dumps({"title": "fixture"}),
+                "--estimate", "false",
+                "--output", str(project_path),
+            ], temp)
+            preserved = project_path.read_text(encoding="utf-8")
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(json.loads(result.stderr)["code"], "cli.output_alias")
+        self.assertEqual(preserved,
+                         project_path.read_text(encoding="utf-8"))
+
+    def test_import_geometry_passes_estimate_flag_through(self):
+        project_path = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        geometry_path = (
+            TOOLS / "plimsoll" / "cases" / "queen_mary_1913_offsets.json"
+        )
+        for estimate, expected in (("false", False), ("true", True)):
+            with self.subTest(estimate=estimate), \
+                    tempfile.TemporaryDirectory(prefix="估计标志-") as temp:
+                output = Path(temp) / "结果.project.json"
+                result = self.run_cli([
+                    "import-geometry", str(project_path), str(geometry_path),
+                    "--format", "legacy-offsets-5",
+                    "--keel-offset-m", "0.0",
+                    "--provenance", json.dumps({"title": "fixture"}),
+                    "--estimate", estimate,
+                    "--output", str(output),
+                ], temp)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                imported = project_store.load(output)
+                self.assertIs(imported["geometry"]["estimate"], expected)
+
 
 if __name__ == "__main__":
     unittest.main()

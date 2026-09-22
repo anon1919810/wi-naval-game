@@ -556,6 +556,67 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _import_geometry(args):
+    """把显式字节物化为自包含几何；不做任何自动查找/迁移。
+
+    读取调用方显式给出的几何字节，连同其声明（格式、龙骨偏移、
+    provenance、estimate）一并交给 geometry_import 物化为规范化项目副本，
+    再原子落盘。不解析引用、不跨目录迁移、不自动查找任何外部资源。
+    """
+    _guard_destinations([args.project, args.geometry], [args.output])
+    project = _load_project(args.project)
+    try:
+        content = Path(args.geometry).read_bytes()
+    except OSError as error:
+        raise _CLIError(
+            "cli.input_read", f"cannot read input: {error}", input_path=args.geometry,
+        ) from error
+    try:
+        keel = float(args.keel_offset_m)
+    except ValueError as error:
+        raise _CLIError(
+            "cli.keel_offset_invalid", f"keel offset is not a number: {error}",
+            input_path=args.geometry,
+        ) from error
+    estimate = {"true": True, "false": False}[args.estimate]
+    raw = args.provenance
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise _CLIError(
+            "cli.provenance_invalid", f"provenance is not valid JSON: {error}",
+            input_path=args.geometry,
+        ) from error
+    if isinstance(parsed, dict) and parsed:
+        source = parsed
+    else:
+        text = raw.strip()
+        if not text:
+            raise _CLIError(
+                "cli.provenance_invalid",
+                "provenance must be a nonempty string or object",
+                input_path=args.geometry,
+            )
+        source = text
+    try:
+        imported = geometry_import.import_geometry_content(
+            project, content, format=args.format, keel_offset_m=keel,
+            source=source, estimate=estimate,
+        )
+    except geometry_import.GeometryImportError as error:
+        raise _CLIError(
+            "cli.geometry_import", str(error), input_path=args.geometry,
+            diagnostics=error.diagnostics,
+        ) from error
+    try:
+        project_store.save(args.output, imported)
+    except Exception as error:
+        raise _CLIError(
+            "cli.output_write", f"cannot write output: {error}", input_path=args.output,
+        ) from error
+    return 0
+
+
 def main(argv=None) -> int:
     """Run the calculation-core command line."""
     _configure_utf8()
@@ -569,6 +630,8 @@ def main(argv=None) -> int:
             return _batch(args)
         if args.command == "sweep":
             return _sweep(args)
+        if args.command == "import-geometry":
+            return _import_geometry(args)
         raise NotImplementedError(f"command {args.command!r} is not implemented")
     except _CLIError as error:
         _emit_error(command, error)
