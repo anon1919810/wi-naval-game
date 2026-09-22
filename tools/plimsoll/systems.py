@@ -38,6 +38,39 @@ def _count(value, path: str) -> int:
     return value
 
 
+def _physical_model_metadata(model: dict, path: str) -> None:
+    source = model.get("source")
+    structured_source = (
+        isinstance(source, dict)
+        and any(isinstance(value, str) and value.strip() for value in source.values())
+    )
+    if not ((isinstance(source, str) and source.strip()) or structured_source):
+        raise ValueError(f"{path}.source must be a non-empty string or object")
+    estimate = model.get("estimate")
+    if not isinstance(estimate, bool):
+        raise ValueError(f"{path}.estimate must be boolean")
+    inputs = model.get("inputs")
+    if not isinstance(inputs, dict):
+        raise ValueError(f"{path}.inputs must be an object")
+    if not estimate:
+        return
+    provenance = model.get("input_provenance")
+    if not isinstance(provenance, dict) or not provenance:
+        raise ValueError(f"{path}.input_provenance is required for an estimated model")
+    missing = sorted(set(inputs or {}) - set(provenance))
+    if missing:
+        raise ValueError(f"{path}.input_provenance is missing inputs {missing!r}")
+    for key in inputs:
+        declared = provenance[key]
+        if not isinstance(declared, dict):
+            raise ValueError(f"{path}.input_provenance.{key} must be an object")
+        declared_source = declared.get("source")
+        if not isinstance(declared_source, str) or not declared_source.strip():
+            raise ValueError(f"{path}.input_provenance.{key}.source must be non-empty")
+        if not isinstance(declared.get("estimate"), bool):
+            raise ValueError(f"{path}.input_provenance.{key}.estimate must be boolean")
+
+
 def _declared_count(inputs: dict, system: dict, path: str) -> tuple[int, str]:
     has_field = "count_field" in inputs
     has_value = "count_value" in inputs
@@ -215,6 +248,18 @@ def summary(project: dict, state: dict) -> dict:
         seen_here = set()
         known_mass = 0.0
         row_complete = True
+        if not weight_item_ids:
+            diagnostics.append(
+                _diagnostic(
+                    "systems.present_without_weight_items",
+                    "error",
+                    f"{path}.weight_item_ids",
+                    "A present system must own at least one selected-ledger weight item; "
+                    "use status='absent' for an explicit absence.",
+                    True,
+                )
+            )
+            row_complete = False
         for item_id in weight_item_ids:
             if not isinstance(item_id, str) or not item_id:
                 raise ValueError(f"{path}.weight_item_ids must contain non-empty strings")
@@ -287,6 +332,7 @@ def summary(project: dict, state: dict) -> dict:
             linked_id = model.get("linked_weight_item_id")
             if linked_id not in seen_here:
                 raise ValueError(f"{model_path}.linked_weight_item_id must be linked by this system")
+            _physical_model_metadata(model, model_path)
             calculated, formula = _calculated_mass(model, system, model_path)
             linked_item = item_by_id.get(linked_id)
             ledger_mass = linked_item.get("mass_t") if linked_item else None

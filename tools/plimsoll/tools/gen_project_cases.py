@@ -495,6 +495,16 @@ def queen_mary_project() -> dict:
                             "unit_mass_t": 167_776 * LB_TO_T,
                             "count_field": "installed_guns",
                         },
+                        "input_provenance": {
+                            "unit_mass_t": {
+                                "source": "NavWeaps WNBR_135-45_mk5 (secondary compilation), 167776 lb/gun",
+                                "estimate": True,
+                            },
+                            "count_field": {
+                                "source": "reviewed Task 3 eight-gun installed armament declaration",
+                                "estimate": True,
+                            },
+                        },
                         "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
                         "source": "NavWeaps WNBR_135-45_mk5 (secondary compilation)",
                         "boundary": "Eight installed gun tubes; published nominal excludes breech mass; excludes mounts and ammunition.",
@@ -508,6 +518,20 @@ def queen_mary_project() -> dict:
                             "unit_mass_t": 600 * LONG_TON_TO_T,
                             "count_value": 4,
                             "count_basis": "installed_twin_mounts",
+                        },
+                        "input_provenance": {
+                            "unit_mass_t": {
+                                "source": "NavWeaps Mark II 600 long-ton proxy for Mark II* mounting",
+                                "estimate": True,
+                            },
+                            "count_value": {
+                                "source": "reviewed Task 3 four-twin-mount installation declaration",
+                                "estimate": True,
+                            },
+                            "count_basis": {
+                                "source": "reviewed Task 3 revolving-mount mass boundary",
+                                "estimate": True,
+                            },
                         },
                         "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
                         "source": "NavWeaps Mark II value used as a Mark II* proxy (secondary compilation)",
@@ -523,6 +547,24 @@ def queen_mary_project() -> dict:
                             "rounds_field": "rounds_per_gun",
                             "projectile_mass_kg": 1400 * 0.45359237,
                             "charge_mass_kg": 297 * 0.45359237,
+                        },
+                        "input_provenance": {
+                            "count_field": {
+                                "source": "reviewed Task 3 eight-gun installed armament declaration",
+                                "estimate": True,
+                            },
+                            "rounds_field": {
+                                "source": "NavWeaps 80-round outfit used by the reviewed Task 3 formula",
+                                "estimate": True,
+                            },
+                            "projectile_mass_kg": {
+                                "source": "NavWeaps 1400 lb projectile value converted with 0.45359237 kg/lb",
+                                "estimate": True,
+                            },
+                            "charge_mass_kg": {
+                                "source": "NavWeaps 297 lb charge value converted with 0.45359237 kg/lb",
+                                "estimate": True,
+                            },
                         },
                         "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
                         "source": "NavWeaps ammunition outfit and projectile/charge values (secondary compilation)",
@@ -545,6 +587,16 @@ def queen_mary_project() -> dict:
                             "unit_mass_t": 42 * 112 * LB_TO_T,
                             "count_field": "installed_guns",
                         },
+                        "input_provenance": {
+                            "unit_mass_t": {
+                                "source": "Admiralty Gunnery Branch G.8652/13, 42 cwt/gun",
+                                "estimate": True,
+                            },
+                            "count_field": {
+                                "source": "reviewed Task 3 sixteen-gun installed armament declaration",
+                                "estimate": True,
+                            },
+                        },
                         "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
                         "source": "Admiralty Gunnery Branch G.8652/13, 4-inch Mark VII/VIII handbook",
                         "boundary": "Sixteen installed gun tubes and breeches; excludes mounts and ammunition.",
@@ -557,6 +609,16 @@ def queen_mary_project() -> dict:
                         "inputs": {
                             "unit_mass_t": 1.0,
                             "count_field": "installed_guns",
+                        },
+                        "input_provenance": {
+                            "unit_mass_t": {
+                                "source": "declared Task 3 engineering allowance; no mounting handbook located",
+                                "estimate": True,
+                            },
+                            "count_field": {
+                                "source": "reviewed Task 3 sixteen-gun installed armament declaration",
+                                "estimate": True,
+                            },
                         },
                         "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
                         "source": "Declared Task 3 engineering assumption; no mounting handbook located",
@@ -572,6 +634,24 @@ def queen_mary_project() -> dict:
                             "rounds_field": "rounds_per_gun",
                             "projectile_mass_kg": 31 * 0.45359237,
                             "charge_mass_kg": (9 + (5 + 15 / 16) / 16) * 0.45359237,
+                        },
+                        "input_provenance": {
+                            "count_field": {
+                                "source": "reviewed Task 3 sixteen-gun installed armament declaration",
+                                "estimate": True,
+                            },
+                            "rounds_field": {
+                                "source": "reviewed Task 3 150-round engineering outfit declaration",
+                                "estimate": True,
+                            },
+                            "projectile_mass_kg": {
+                                "source": "Task 3 cited 31 lb projectile converted with 0.45359237 kg/lb",
+                                "estimate": True,
+                            },
+                            "charge_mass_kg": {
+                                "source": "Task 3 cited 9 lb 5 15/16 oz charge converted with 0.45359237 kg/lb",
+                                "estimate": True,
+                            },
                         },
                         "comparison_tolerance": dict(ALGEBRAIC_TOLERANCE),
                         "source": "Task 3 exact projectile and charge formula from cited ammunition references",

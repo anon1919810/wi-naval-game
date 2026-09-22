@@ -57,18 +57,30 @@ def _diagnostic(code: str, severity: str, path: str, message: str, blocking: boo
     }
 
 
-def _number(inputs: dict, key: str, *, positive: bool = False, nonnegative: bool = False) -> float:
+def _number(
+    inputs: dict,
+    key: str,
+    *,
+    positive: bool = False,
+    nonnegative: bool = False,
+    path: str | None = None,
+) -> float:
+    diagnostic_path = path or f"$.{key}"
     value = inputs.get(key)
     if isinstance(value, bool) or not isinstance(value, Real):
-        raise HoltropInputError(f"{key}: expected a finite real number")
+        raise HoltropInputError(f"{key}: expected a finite real number", diagnostic_path)
     try:
         number = float(value)
     except (OverflowError, ValueError) as exc:
-        raise HoltropInputError(f"{key}: outside the supported numeric range") from exc
+        raise HoltropInputError(
+            f"{key}: outside the supported numeric range", diagnostic_path
+        ) from exc
     if not math.isfinite(number):
-        raise HoltropInputError(f"{key}: expected a finite real number")
+        raise HoltropInputError(f"{key}: expected a finite real number", diagnostic_path)
     if positive and number <= 0.0 or nonnegative and number < 0.0:
-        raise HoltropInputError(f"{key}: outside the positive/nonnegative domain")
+        raise HoltropInputError(
+            f"{key}: outside the positive/nonnegative domain", diagnostic_path
+        )
     return number
 
 
@@ -222,13 +234,25 @@ def _compute(inputs: dict) -> dict:
 
     appendages = inputs.get("appendages")
     if not isinstance(appendages, list):
-        raise HoltropInputError("appendages: explicit array required, [] for none")
+        raise HoltropInputError(
+            "appendages: explicit array required, [] for none", "$.appendages"
+        )
     effective_appendage_area = 0.0
     for index, appendage in enumerate(appendages):
         if not isinstance(appendage, dict):
-            raise HoltropInputError(f"appendages[{index}]: expected an object")
-        effective_appendage_area += _number(appendage, "area_m2", nonnegative=True) * _number(
-            appendage, "factor", positive=True
+            raise HoltropInputError(
+                f"appendages[{index}]: expected an object", f"$.appendages[{index}]"
+            )
+        effective_appendage_area += _number(
+            appendage,
+            "area_m2",
+            nonnegative=True,
+            path=f"$.appendages[{index}].area_m2",
+        ) * _number(
+            appendage,
+            "factor",
+            positive=True,
+            path=f"$.appendages[{index}].factor",
         )
     rapp = dynamic_pressure * cf * effective_appendage_area
 
@@ -336,8 +360,12 @@ def _compute(inputs: dict) -> dict:
     elif not isinstance(bow_thruster, dict) or not isinstance(bow_thruster.get("present"), bool):
         raise HoltropInputError("bow_thruster: expected {'present': boolean, ...}")
     elif bow_thruster["present"]:
-        diameter = _number(bow_thruster, "diameter_m", positive=True)
-        coefficient = _number(bow_thruster, "coefficient", positive=True)
+        diameter = _number(
+            bow_thruster, "diameter_m", positive=True, path="$.bow_thruster.diameter_m"
+        )
+        coefficient = _number(
+            bow_thruster, "coefficient", positive=True, path="$.bow_thruster.coefficient"
+        )
         rbto = rho * speed**2 * math.pi * diameter**2 * coefficient
         if not 0.003 <= coefficient <= 0.012:
             diagnostics.append(

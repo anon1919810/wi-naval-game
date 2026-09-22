@@ -34,7 +34,13 @@ the exact Report 806 definition remains a disclosed source gap.
   table coverage. Breadth/draft coverage also follows the populated table.
 
 Source headings `5.5,6,7,8,9,10` map to volume ratios
-`1/5.5³,1/6³,1/7³,1/8³,1/9³,1/10³`. Assert this at algebraic tolerance `1e-10`.
+`1/5.5³,1/6³,1/7³,1/8³,1/9³,1/10³`. Assert the exact reciprocal-cube identity
+at algebraic tolerance `1e-10`. The tracked compatibility axis stores those
+values rounded to nine decimal places, so separately assert
+`stored == round(1 / heading³, 9)` with only tiny floating-representation
+tolerance. Do not misrepresent the rounded stored numbers as exact reciprocal
+cubes or reconstruct the printed source headings from them. The strict adapter
+declares the exact headings by index and serializes this rounding policy.
 Populated printed `CR×1000` cells have two decimal places, giving source
 rounding tolerance `5e-6` in `CR`. Taylor wetted-area coefficient `CS` has
 three decimals, giving `0.0005` absolute tolerance. `S=CS sqrt(volume L)`.

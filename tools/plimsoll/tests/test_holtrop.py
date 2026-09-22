@@ -246,6 +246,23 @@ class HoltropDomainAndEligibilityTests(unittest.TestCase):
         self.assertTrue(diagnostic["blocking"])
         self.assertIn("path", diagnostic)
 
+    def test_input_diagnostics_identify_top_level_and_indexed_paths(self):
+        """Catch structured errors that force callers to parse a message for location."""
+        case = benchmark()
+        case["speed_kn"] = math.nan
+        with self.assertRaises(holtrop.HoltropInputError) as caught:
+            holtrop.compute(case)
+        self.assertEqual(caught.exception.diagnostics[0]["path"], "$.speed_kn")
+
+        case = benchmark()
+        case["appendages"][0]["area_m2"] = True
+        with self.assertRaises(holtrop.HoltropInputError) as caught:
+            holtrop.compute(case)
+        self.assertEqual(
+            caught.exception.diagnostics[0]["path"],
+            "$.appendages[0].area_m2",
+        )
+
     def test_tiny_positive_bulb_area_returns_finite_result_or_contextual_error(self):
         """Catch raw overflow from PB inverse-square evaluation."""
         case = benchmark()

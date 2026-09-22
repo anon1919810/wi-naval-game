@@ -132,6 +132,7 @@ class TestTaylorSourceAxisStrict(unittest.TestCase):
             "cr": grid,
             "scale": 0.001,
             "interpolation_coordinate": "l_over_volume_cuberoot",
+            "source_axes": {"l_over_volume_cuberoot": [10.0, 5.0]},
             "source": "synthetic source-axis test",
         }
 
@@ -145,7 +146,7 @@ class TestTaylorSourceAxisStrict(unittest.TestCase):
         legacy = R.residual_from_table(
             table, 0.5, 2.0, volume_ratio, 0.2, method="legacy_volume_ratio_clip_renormalize"
         )
-        self.assertEqual(strict["values"]["cr"], 0.015)
+        self.assertTrue(math.isclose(strict["values"]["cr"], 0.015, rel_tol=1e-10))
         self.assertNotEqual(strict["values"]["cr"], legacy["values"]["cr"])
         self.assertEqual(strict["method"], "taylor_gertler_source_axis_strict")
         self.assertEqual(strict["interpolation_coordinate"], "l_over_volume_cuberoot")
@@ -193,6 +194,31 @@ class TestTaylorSourceAxisStrict(unittest.TestCase):
                 table, 0.5, 2.0, 1.0 / 7.5**3, 0.2, method="taylor_gertler_source_axis_strict"
             )
 
+    def test_strict_mode_rejects_reconstructed_source_headings(self):
+        """Catch presenting reciprocal-cube reconstruction as a declared source axis."""
+        table = self.source_axis_table()
+        del table["source_axes"]
+        with self.assertRaisesRegex(ValueError, "source_axes"):
+            R.residual_from_table(
+                table,
+                0.5,
+                2.0,
+                1.0 / 7.5**3,
+                0.2,
+                method="taylor_gertler_source_axis_strict",
+            )
+        table = self.source_axis_table()
+        table["source_axes"]["l_over_volume_cuberoot"][0] = 10.1
+        with self.assertRaisesRegex(ValueError, "stored node 0"):
+            R.residual_from_table(
+                table,
+                0.5,
+                2.0,
+                1.0 / 7.5**3,
+                0.2,
+                method="taylor_gertler_source_axis_strict",
+            )
+
     def test_source_headings_map_to_stored_axis(self):
         """Catch reversing headings without reversing their associated cells."""
         for heading in (5.5, 6.0, 7.0, 8.0, 9.0, 10.0):
@@ -208,6 +234,12 @@ class TestTaylorSourceAxisStrict(unittest.TestCase):
             adapted["source_axes"]["l_over_volume_cuberoot"],
             [10.0, 9.0, 8.0, 7.0, 6.0, 5.5],
         )
+        self.assertEqual(
+            adapted["source_axis_mapping"]["compatibility_axis_policy"],
+            "rounded_reciprocal_cube_9_decimal_places",
+        )
+        self.assertEqual(adapted["source_axis_mapping"]["decimal_places"], 9)
+        self.assertIn("associated by index", adapted["source_axis_mapping"]["source_note"])
         self.assertEqual(adapted["cr"], raw["cr"])
         source_midpoint = 9.5
         result = R.residual_from_table(
@@ -218,9 +250,18 @@ class TestTaylorSourceAxisStrict(unittest.TestCase):
             0.16,
             method="taylor_gertler_source_axis_strict",
         )
+        self.assertEqual(result["source_axis_mapping"], adapted["source_axis_mapping"])
         expected = 0.5 * (raw["cr"][1][0][0][0] + raw["cr"][1][0][1][0]) * raw["scale"]
         self.assertTrue(math.isclose(result["values"]["cr"], expected, rel_tol=1e-10,
                                      abs_tol=1e-10))
+
+    def test_source_heading_association_uses_fixed_algebraic_tolerance(self):
+        """Catch accepting node disagreement above the declared 1e-10 tolerance."""
+        raw = cr_table_case()
+        headings = [10.0, 9.0, 8.0, 7.0, 6.0, 5.5]
+        headings[0] = (raw["axes"]["volumetric"][0] + 2e-10) ** (-1.0 / 3.0)
+        with self.assertRaisesRegex(ValueError, "stored node 0"):
+            R.taylor_gertler_source_table(raw, headings)
 
     def test_strict_speed_curve_does_not_clip_outside_froude(self):
         """Catch compatibility clipping leaking into strict source mode."""
@@ -242,6 +283,7 @@ class TestTaylorSourceAxisStrict(unittest.TestCase):
         self.assertEqual(curve["methods"]["interpolation"], "taylor_gertler_source_axis_strict")
         self.assertEqual(curve["methods"]["friction"], "schoenherr_implicit_ittc_0.242")
         self.assertEqual(curve["methods"]["speed_conversion"], "international_knot_exact")
+        self.assertEqual(row["source_axis_mapping"], table["source_axis_mapping"])
         self.assertTrue(math.isclose(row["rn"], (1852.0 / 3600.0) * 100.0 / R.NU_SEA_15C,
                                      rel_tol=1e-10))
 

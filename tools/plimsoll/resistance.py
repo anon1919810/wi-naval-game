@@ -25,6 +25,8 @@ KNOT_MPS = 0.514444
 KNOT_MPS_EXACT = 1852.0 / 3600.0
 HP_TO_KW = 0.7457
 DELTA_CF_TAYLOR = 0.0004   # Taylor 法的粗糙度附加（0.4×10⁻³）
+TAYLOR_AXIS_TOLERANCE = 1e-10
+TAYLOR_ROUNDED_AXIS_FLOAT_TOLERANCE = 1e-15
 
 
 def _finite(v, what, positive=False):
@@ -156,6 +158,41 @@ def taylor_volume_ratio(length_volume_ratio: float) -> float:
     return 1.0 / ratio**3
 
 
+def _validate_taylor_axis_mapping(
+    volumetric: list,
+    headings: list,
+    mapping: dict | None,
+) -> None:
+    if len(headings) != len(volumetric):
+        raise ValueError("source_headings length must match the stored volume axis")
+    if mapping is not None and not isinstance(mapping, dict):
+        raise ValueError("source_axis_mapping must be an object")
+    policy = (mapping or {}).get("compatibility_axis_policy", "algebraic_1e-10")
+    for index, (stored, heading) in enumerate(zip(volumetric, headings)):
+        stored_value = _finite(stored, "axes.volumetric[%d]" % index, positive=True)
+        exact = taylor_volume_ratio(heading)
+        if policy == "rounded_reciprocal_cube_9_decimal_places":
+            if (mapping or {}).get("decimal_places") != 9:
+                raise ValueError("rounded Taylor source-axis mapping must declare 9 decimal places")
+            matches = math.isclose(
+                stored_value,
+                round(exact, 9),
+                rel_tol=0.0,
+                abs_tol=TAYLOR_ROUNDED_AXIS_FLOAT_TOLERANCE,
+            )
+        elif policy == "algebraic_1e-10":
+            matches = math.isclose(
+                stored_value,
+                exact,
+                rel_tol=TAYLOR_AXIS_TOLERANCE,
+                abs_tol=TAYLOR_AXIS_TOLERANCE,
+            )
+        else:
+            raise ValueError("unknown Taylor source-axis compatibility policy %r" % policy)
+        if not matches:
+            raise ValueError("source heading does not match stored node %d" % index)
+
+
 def taylor_gertler_source_table(cr_table: dict, source_headings=None) -> dict:
     """Declare exact printed Taylor length-volume headings for strict use.
 
@@ -168,21 +205,39 @@ def taylor_gertler_source_table(cr_table: dict, source_headings=None) -> dict:
     volumetric = cr_table.get("axes", {}).get("volumetric")
     if not isinstance(volumetric, list):
         raise ValueError("cr_table.axes.volumetric must be an array")
-    if source_headings is None:
+    tracked_mapping = source_headings is None
+    if tracked_mapping:
         if (cr_table.get("schema") != "plimsoll-cr-table-1"
                 or "Molland" not in str(cr_table.get("source", ""))):
             raise ValueError("generic tables must provide their exact source_headings")
         source_headings = [10.0, 9.0, 8.0, 7.0, 6.0, 5.5]
     headings = [_finite(value, "source_heading", positive=True) for value in source_headings]
-    if len(headings) != len(volumetric):
-        raise ValueError("source_headings length must match the stored volume axis")
-    for index, (stored, heading) in enumerate(zip(volumetric, headings)):
-        stored_value = _finite(stored, "axes.volumetric[%d]" % index, positive=True)
-        if not math.isclose(stored_value, taylor_volume_ratio(heading), rel_tol=0.0, abs_tol=5e-10):
-            raise ValueError("source heading does not match stored node %d" % index)
+    mapping = {
+        "association": "index_aligned",
+        "compatibility_axis": "volume_over_length_cubed",
+        "compatibility_axis_policy": (
+            "rounded_reciprocal_cube_9_decimal_places"
+            if tracked_mapping
+            else "algebraic_1e-10"
+        ),
+        "decimal_places": 9 if tracked_mapping else None,
+        "tolerance": (
+            TAYLOR_ROUNDED_AXIS_FLOAT_TOLERANCE
+            if tracked_mapping
+            else TAYLOR_AXIS_TOLERANCE
+        ),
+        "source_note": (
+            "Audited printed headings are associated by index; the retained compatibility "
+            "axis is round(1 / heading**3, 9)."
+            if tracked_mapping
+            else "Caller-supplied source headings verified against the compatibility axis."
+        ),
+    }
+    _validate_taylor_axis_mapping(volumetric, headings, mapping)
     declared = copy.deepcopy(cr_table)
     declared["interpolation_coordinate"] = "l_over_volume_cuberoot"
     declared["source_axes"] = {"l_over_volume_cuberoot": headings}
+    declared["source_axis_mapping"] = mapping
     return declared
 
 
@@ -195,19 +250,20 @@ def _strict_taylor_residual(cr_table: dict, cp: float, bt: float,
         )
     axes = cr_table["axes"]
     declared_source_axis = cr_table.get("source_axes", {}).get("l_over_volume_cuberoot")
-    if declared_source_axis is not None:
-        if not isinstance(declared_source_axis, list) or len(declared_source_axis) != len(axes["volumetric"]):
-            raise ValueError("source_axes.l_over_volume_cuberoot must align with axes.volumetric")
-        volume_pairs = sorted(
-            ((_finite(value, "source axis", positive=True), index)
-             for index, value in enumerate(declared_source_axis)),
-            key=lambda pair: pair[0],
+    if not isinstance(declared_source_axis, list) or len(declared_source_axis) != len(axes["volumetric"]):
+        raise ValueError(
+            "source_axes.l_over_volume_cuberoot must be explicitly declared and align "
+            "with axes.volumetric"
         )
-    else:
-        volume_pairs = sorted(
-            ((value ** (-1.0 / 3.0), index) for index, value in enumerate(axes["volumetric"])),
-            key=lambda pair: pair[0],
-        )
+    source_headings = [
+        _finite(heading, "source axis", positive=True) for heading in declared_source_axis
+    ]
+    _validate_taylor_axis_mapping(
+        axes["volumetric"], source_headings, cr_table.get("source_axis_mapping")
+    )
+    source_axis_mapping = copy.deepcopy(cr_table.get("source_axis_mapping"))
+    volume_pairs = list(zip(source_headings, range(len(source_headings))))
+    volume_pairs.sort(key=lambda pair: pair[0])
     interpolation_axes = [
         list(axes["cp"]),
         list(axes["bt"]),
@@ -255,6 +311,7 @@ def _strict_taylor_residual(cr_table: dict, cp: float, bt: float,
             "values": {"cr": None, "rr_n": None},
             "method": "taylor_gertler_source_axis_strict",
             "interpolation_coordinate": "l_over_volume_cuberoot",
+            "source_axis_mapping": source_axis_mapping,
             "complete": False,
             "trace": [],
             "warnings": [diagnostic["message"]],
@@ -286,6 +343,7 @@ def _strict_taylor_residual(cr_table: dict, cp: float, bt: float,
                 "values": {"cr": None, "rr_n": None},
                 "method": "taylor_gertler_source_axis_strict",
                 "interpolation_coordinate": "l_over_volume_cuberoot",
+                "source_axis_mapping": source_axis_mapping,
                 "complete": False,
                 "trace": [],
                 "warnings": [diagnostic["message"]],
@@ -307,6 +365,7 @@ def _strict_taylor_residual(cr_table: dict, cp: float, bt: float,
         "values": {"cr": coefficient, "rr_n": None},
         "method": "taylor_gertler_source_axis_strict",
         "interpolation_coordinate": "l_over_volume_cuberoot",
+        "source_axis_mapping": source_axis_mapping,
         "complete": True,
         "trace": trace,
         "warnings": [],
@@ -506,6 +565,7 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
             "shp_required": pe_kw / HP_TO_KW / qpc if pe_kw is not None else None,
             "complete": cr is not None, "estimate": True,
             "methods": {"friction": friction_method, "interpolation": interpolation_method},
+            "source_axis_mapping": copy.deepcopy(resid.get("source_axis_mapping")),
             "warnings": row_warnings,
             "diagnostics": row_diagnostics,
             "trace": [dict(t, estimate=bool(t["estimate"] or hull_params.get("estimate", True)))

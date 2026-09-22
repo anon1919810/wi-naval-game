@@ -110866,6 +110866,16 @@
             },
             "estimate": true,
             "id": "main-installed-guns-mass-check",
+            "input_provenance": {
+              "count_field": {
+                "estimate": true,
+                "source": "reviewed Task 3 eight-gun installed armament declaration"
+              },
+              "unit_mass_t": {
+                "estimate": true,
+                "source": "NavWeaps WNBR_135-45_mk5 (secondary compilation), 167776 lb/gun"
+              }
+            },
             "inputs": {
               "count_field": "installed_guns",
               "unit_mass_t": 76.10191346912
@@ -110882,6 +110892,20 @@
             },
             "estimate": true,
             "id": "main-installed-mounts-mass-check",
+            "input_provenance": {
+              "count_basis": {
+                "estimate": true,
+                "source": "reviewed Task 3 revolving-mount mass boundary"
+              },
+              "count_value": {
+                "estimate": true,
+                "source": "reviewed Task 3 four-twin-mount installation declaration"
+              },
+              "unit_mass_t": {
+                "estimate": true,
+                "source": "NavWeaps Mark II 600 long-ton proxy for Mark II* mounting"
+              }
+            },
             "inputs": {
               "count_basis": "installed_twin_mounts",
               "count_value": 4,
@@ -110899,6 +110923,24 @@
             },
             "estimate": true,
             "id": "main-ammunition-outfit-mass-check",
+            "input_provenance": {
+              "charge_mass_kg": {
+                "estimate": true,
+                "source": "NavWeaps 297 lb charge value converted with 0.45359237 kg/lb"
+              },
+              "count_field": {
+                "estimate": true,
+                "source": "reviewed Task 3 eight-gun installed armament declaration"
+              },
+              "projectile_mass_kg": {
+                "estimate": true,
+                "source": "NavWeaps 1400 lb projectile value converted with 0.45359237 kg/lb"
+              },
+              "rounds_field": {
+                "estimate": true,
+                "source": "NavWeaps 80-round outfit used by the reviewed Task 3 formula"
+              }
+            },
             "inputs": {
               "charge_mass_kg": 134.71693389,
               "count_field": "installed_guns",
@@ -110929,6 +110971,16 @@
             },
             "estimate": true,
             "id": "secondary-installed-guns-mass-check",
+            "input_provenance": {
+              "count_field": {
+                "estimate": true,
+                "source": "reviewed Task 3 sixteen-gun installed armament declaration"
+              },
+              "unit_mass_t": {
+                "estimate": true,
+                "source": "Admiralty Gunnery Branch G.8652/13, 42 cwt/gun"
+              }
+            },
             "inputs": {
               "count_field": "installed_guns",
               "unit_mass_t": 2.13369850848
@@ -110945,6 +110997,16 @@
             },
             "estimate": true,
             "id": "secondary-installed-mounts-mass-check",
+            "input_provenance": {
+              "count_field": {
+                "estimate": true,
+                "source": "reviewed Task 3 sixteen-gun installed armament declaration"
+              },
+              "unit_mass_t": {
+                "estimate": true,
+                "source": "declared Task 3 engineering allowance; no mounting handbook located"
+              }
+            },
             "inputs": {
               "count_field": "installed_guns",
               "unit_mass_t": 1.0
@@ -110961,6 +111023,24 @@
             },
             "estimate": true,
             "id": "secondary-ammunition-outfit-mass-check",
+            "input_provenance": {
+              "charge_mass_kg": {
+                "estimate": true,
+                "source": "Task 3 cited 9 lb 5 15/16 oz charge converted with 0.45359237 kg/lb"
+              },
+              "count_field": {
+                "estimate": true,
+                "source": "reviewed Task 3 sixteen-gun installed armament declaration"
+              },
+              "projectile_mass_kg": {
+                "estimate": true,
+                "source": "Task 3 cited 31 lb projectile converted with 0.45359237 kg/lb"
+              },
+              "rounds_field": {
+                "estimate": true,
+                "source": "reviewed Task 3 150-round engineering outfit declaration"
+              }
+            },
             "inputs": {
               "charge_mass_kg": 4.250656623554688,
               "count_field": "installed_guns",

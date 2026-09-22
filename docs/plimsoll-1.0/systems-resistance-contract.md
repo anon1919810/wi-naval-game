@@ -22,6 +22,11 @@ those dotted result IDs. `installed_guns` or `installed_tubes` maps to
 Installation and ammunition formulas use installed count. Broadside count is a
 combat-output field and never scales ledger mass.
 
+A row declared `status: present` must link at least one selected-ledger item.
+An empty `weight_item_ids` list is unknown ownership, not known zero mass, and
+produces blocking `systems.present_without_weight_items`. A genuinely absent
+system uses `status: absent` with a reason.
+
 An extended row may declare:
 
 ```json
@@ -57,6 +62,12 @@ comparison tolerance produces `systems.mass_mismatch` and a review-required
 never added to the ledger total and never overwrites a manually reviewed mass.
 An explicit absent system uses `status: absent` plus a reason and yields no fake
 zero performance.
+
+Every physical model must declare a non-empty `source` and boolean `estimate`
+before it can calculate or propose a change. An estimated model must additionally
+provide `input_provenance` for every formula input; each entry has its own
+non-empty source and boolean estimate status. Missing or malformed provenance is
+rejected rather than converted into an untraceable ledger proposal.
 
 Unknown item IDs, repeated links, links shared by multiple system leaves,
 unknown effective masses, and an incomplete loading ledger prevent a complete
@@ -206,6 +217,16 @@ Roughness `delta CF` is separate and applied once.
 `L/volume^(1/3) = [10,9,8,7,6,5.5]` by index to a copy of the tracked table. It
 does not rewrite raw cells or the compatibility axis. Generic tables must
 provide their exact headings explicitly.
+
+The tracked compatibility axis is retained at its original nine-decimal
+precision. Its serialized `source_axis_mapping` declares the by-index
+association and the policy `round(1 / heading**3, 9)`; the adapter verifies that
+rounding policy with only floating-representation tolerance. A generic mapping
+without that audited rounding declaration must associate each explicit heading
+with its stored reciprocal cube at the fixed `1e-10` algebraic tolerance.
+Strict mode requires `source_axes.l_over_volume_cuberoot`, validates the declared
+mapping policy, and interpolates on those exact headings. It never reconstructs
+source headings from the rounded compatibility axis.
 
 `residual_from_table(..., method="taylor_gertler_source_axis_strict")`
 interpolates in the printed length-volume coordinate. It returns unavailable

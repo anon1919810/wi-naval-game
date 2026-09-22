@@ -222,6 +222,11 @@ class ProjectCaseTests(unittest.TestCase):
         for weapon, installed in ((main, 8), (secondary, 16)):
             models = {model["linked_weight_item_id"]: model for model in weapon["mass_models"]}
             self.assertEqual(set(models), set(weapon["weight_item_ids"]))
+            for model in models.values():
+                self.assertEqual(set(model["input_provenance"]), set(model["inputs"]))
+                for provenance in model["input_provenance"].values():
+                    self.assertTrue(provenance["source"])
+                    self.assertIsInstance(provenance["estimate"], bool)
             self.assertEqual(models[weapon["weight_item_ids"][0]]["inputs"]["count_field"],
                              "installed_guns")
             ammunition = models[weapon["weight_item_ids"][2]]

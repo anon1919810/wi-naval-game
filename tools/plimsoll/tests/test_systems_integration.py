@@ -63,6 +63,11 @@ def fixture() -> tuple[dict, dict]:
                         "comparison_tolerance": {"relative": 0.01, "absolute_t": 0.01},
                         "source": "analytic plate check",
                         "estimate": True,
+                        "input_provenance": {
+                            "area_m2": {"source": "analytic fixture", "estimate": False},
+                            "thickness_m": {"source": "analytic fixture", "estimate": False},
+                            "density_kg_m3": {"source": "analytic fixture", "estimate": False},
+                        },
                     },
                 ],
             },
@@ -202,6 +207,30 @@ class SystemsLedgerTests(unittest.TestCase):
             with self.assertRaises(ValueError, msg=value):
                 systems.summary(project, state)
 
+    def test_physical_models_require_source_and_estimate_metadata(self):
+        """Catch untraceable formulas producing authoritative-looking proposals."""
+        mutations = (
+            lambda model: model.pop("source"),
+            lambda model: model.__setitem__("source", ""),
+            lambda model: model.__setitem__("source", {}),
+            lambda model: model.pop("estimate"),
+            lambda model: model.__setitem__("estimate", "estimated"),
+        )
+        for mutate in mutations:
+            project, state = fixture()
+            model = project["systems"]["propulsion"]["mass_models"][0]
+            mutate(model)
+            with self.assertRaises(ValueError):
+                systems.summary(project, state)
+
+    def test_estimated_physical_model_requires_provenance_for_every_input(self):
+        """Catch estimated inputs whose dependency trail is incomplete."""
+        project, state = fixture()
+        model = project["systems"]["armament"]["mass_models"][1]
+        del model["input_provenance"]["density_kg_m3"]
+        with self.assertRaisesRegex(ValueError, "input_provenance"):
+            systems.summary(project, state)
+
     def test_empty_systems_is_unknown_not_complete_absence(self):
         """Catch presenting an undeclared systems inventory as complete."""
         project, state = fixture()
@@ -209,6 +238,29 @@ class SystemsLedgerTests(unittest.TestCase):
         result = systems.summary(project, state)
         self.assertFalse(result["complete"])
         self.assertTrue(any(d["code"] == "systems.none_declared" for d in result["diagnostics"]))
+
+    def test_present_system_requires_owned_ledger_item_instead_of_becoming_zero(self):
+        """Catch missing system ownership collapsing to a known zero-mass system."""
+        project, state = fixture()
+        project["systems"] = {
+            "unowned-present-system": {
+                "status": "present",
+                "weight_item_ids": [],
+                "source": "fixture declaration",
+                "estimate": False,
+            }
+        }
+        result = systems.summary(project, state)
+        row = result["systems"]["unowned-present-system"]
+        self.assertFalse(result["complete"])
+        self.assertIsNone(row["ledger_mass_t"])
+        self.assertIsNone(result["values"]["linked_total_mass_t"])
+        diagnostic = next(
+            item for item in result["diagnostics"]
+            if item["code"] == "systems.present_without_weight_items"
+        )
+        self.assertTrue(diagnostic["blocking"])
+        self.assertEqual(diagnostic["path"], "$.systems.unowned-present-system.weight_item_ids")
 
 
 class CanonicalCaseIntegrationTests(unittest.TestCase):

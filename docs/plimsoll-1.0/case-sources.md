@@ -119,7 +119,9 @@ does not derive an artificial area from mass or revise the Task 3 anchors.
 Their boundary is fixed protection only and excludes rotating turret armour.
 
 The weapon checks use the accepted generator precision and installed-count
-boundaries:
+boundaries. Every displayed physical input carries its own source and estimate
+status in `input_provenance`; the systems summary rejects estimated models with
+missing input provenance:
 
 | Ledger item | Physical input and count boundary |
 | --- | --- |
