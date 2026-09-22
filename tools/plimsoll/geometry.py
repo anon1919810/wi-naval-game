@@ -386,6 +386,17 @@ def _line_chord_halfwidth(poly, tan_phi, d, n=200):
 The historical name is retained. Disconnected intervals are summed. At exact
 edge contact this is the geometric intersection, not a one-sided dV/dd.
 """
+    intervals = waterline_intervals(poly, tan_phi, d)
+    return sum(b-a for a,b in intervals)/2 if intervals else None
+
+
+def waterline_intervals(poly, tan_phi, d):
+    """Return merged occupied y intervals on z = tan_phi*y + d.
+
+    Include coincident boundary edges and preserve gaps in concave sections.
+    The polygon must already be validated by the caller. Contact intervals are
+    geometric intersections, not one-sided volume derivatives.
+    """
     crossings, intervals = [], []
     for i, (y0,z0) in enumerate(poly):
         y1,z1 = poly[(i+1) % len(poly)]
@@ -397,17 +408,18 @@ edge contact this is the geometric intersection, not a one-sided dV/dd.
     crossings.sort()
     intervals.extend(zip(crossings[::2],crossings[1::2]))
     if not intervals:
-        return None
+        return []
     intervals.sort()
     start,end = intervals[0]
-    width = 0.0
+    merged = []
     for a,b in intervals[1:]:
         if a <= end:
             end = max(end,b)
         else:
-            width += end-start
+            merged.append((start,end))
             start,end = a,b
-    return (width+end-start)/2
+    merged.append((start,end))
+    return merged
 
 
 # ---------------------------------------------------------------- 参照船体

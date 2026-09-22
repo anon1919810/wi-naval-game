@@ -140,6 +140,18 @@ def _prepare(hull, options):
     return obj,vertices,scales,metadata
 
 
+def prepare_geometry(hull, options=None):
+    """Copy and validate geometry for shared analysis without solving equilibrium.
+
+    Return (stationed hull, vertices, axis extents, metadata), all owned by the
+    caller. Canonical geometry carries its keel datum; stationed objects require
+    options.keel_offset_m. The same adapter is used by the loaded solver.
+    """
+    if options is not None and not isinstance(options, dict):
+        raise ValueError('options must be an object')
+    return _prepare(hull, {} if options is None else options)
+
+
 def _linear_solve(matrix, rhs):
     a = [list(row)+[value] for row,value in zip(matrix,rhs)]
     size = len(rhs)
