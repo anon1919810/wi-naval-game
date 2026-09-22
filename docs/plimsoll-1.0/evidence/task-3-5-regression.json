@@ -1,0 +1,25 @@
+{
+  "kind": "shared_task_3_5_regression_checkpoint_not_product_acceptance",
+  "date": "2026-09-22",
+  "command": "python -B tools/plimsoll/run_all_tests.py",
+  "runtime": "Python 3.13.12",
+  "worktree": "feature/plimsoll-1.0",
+  "run": 394,
+  "fail": 0,
+  "exit_code": 0,
+  "elapsed_reported_s": 116.53,
+  "stdout_final": "Ran 394 tests in 116.530s\nOK\nPLIMSOLL_REGRESSION run=394 fail=0",
+  "tested_precommit_head": "c6eea8f37ff0d4a739a1da6c57d48ca7f8b36787",
+  "note": "Both implementers froze production files before the shared run; scoped commits follow without production edits. Hashes captured after the green run. Independent reviews remain pending.",
+  "scope_sha256": {
+    "tools/plimsoll/tank_geometry.py": "ef6bb58e5030dc3181879bf210ccc317696051b4556c64def109eaebad07279c",
+    "tools/plimsoll/tests/test_tank_geometry.py": "6d8818a336bf98e779c8679106de1a192009e69f1884f34a3ea274cc57759812",
+    "docs/plimsoll-1.0/tank-contract.md": "4026f6c4f815d03165dc709551de3ccf75bd712276aaf10787bda43079aef49b",
+    "tools/plimsoll/tools/gen_project_cases.py": "01d98db32ad3e9b706128c90aef73f7ad02aca52a85dd215bc709a455f0b84e2",
+    "tools/plimsoll/tests/test_project_cases.py": "89dccb3bbf1aceb85bdadf37409211c87a576fa9479affc2dad20b3b88185377",
+    "docs/plimsoll-1.0/case-sources.md": "66e06595ea09f014859c290ab68dc98b251b4321921684d2573a86161edc2dc5",
+    "tools/plimsoll/cases/projects/queen_mary_1913.project.json": "53f6d82ca8d2f3a3b606f4fb8c20cc374c1a074464a5e72000c53fa689f1cdfe",
+    "tools/plimsoll/cases/projects/generic_steamer.project.json": "15c5f82a42bd10ab134538769e9aeaaa4944afe7024689361772b4eb109bbbeb",
+    "tools/plimsoll/cases/projects/analytic_box.project.json": "68c4e3d3732620065e755ccfa8a9b50946177b0e1de7dd01bd89248cb1512334"
+  }
+}
