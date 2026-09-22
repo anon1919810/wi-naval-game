@@ -1,5 +1,8 @@
 # Explicit geometry analysis helpers
 
+Optional KG and reference-displacement estimate defaults are reported only when
+their associated input value is supplied; absent quantities do not use those flags.
+
 `geometry_analysis.py` implements `geometry-analysis-1`. These helpers do not
 solve a new equilibrium, discover files, read a ship repository, alter project
 input or change ledger KG. The coordinator remains responsible for the immutable

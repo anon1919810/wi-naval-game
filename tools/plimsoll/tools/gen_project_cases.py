@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import copy
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -16,6 +18,10 @@ sys.path.insert(0, str(PKG))
 
 import geometry  # noqa: E402
 import offsets  # noqa: E402
+import units  # noqa: E402
+import loading  # noqa: E402
+import stability  # noqa: E402
+import geometry_analysis  # noqa: E402
 
 
 LONG_TON_TO_T = 1.0160469088
@@ -764,6 +770,98 @@ def analytic_box_project() -> dict:
     return project
 
 
+def _add_core_study_inputs(project: dict) -> None:
+    """Declare reproducible optional studies without changing ledger/geometry."""
+    study = "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+    fact = lambda value, source=study, estimate=True: dict(value=value, source=source, estimate=estimate)
+    geometry_payload = project["geometry"]
+    stations = geometry_payload["offsets"]["stations"]
+    aft, fore = stations[0][0], stations[-1][0]
+    top = max(z for _, points in stations for _, z in points) - geometry_payload["keel_offset_m"]
+    beam = project["hull"]["beam_m"]
+    deck_source = "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim"
+    project["deck"] = dict(source=deck_source, estimate=True,
+        reference_length_m=fact(fore-aft, deck_source), points=[
+            dict(id="aft-centre", x_m=aft, y_m=0, z_m=top), dict(id="fore-centre", x_m=fore, y_m=0, z_m=top),
+            dict(id="mid-port", x_m=0, y_m=-beam/2, z_m=top), dict(id="mid-starboard", x_m=0, y_m=beam/2, z_m=top)],
+        segments=[dict(id="centreline-profile", aft_point_id="aft-centre", fore_point_id="fore-centre")])
+    project["opening_definition"] = "supplied"
+    prop = project["systems"].get("propulsion")
+    if prop is None:
+        return
+    queen_mary = project["id"] == "hms-queen-mary-1913"
+    if queen_mary:
+        inherited = json.loads((PKG / "cases" / "queen_mary_1913_engines.json").read_text(encoding="utf-8"))
+        prop["facts"] = dict(shafts=fact(inherited["shafts"], inherited["shafts_source"], False),
+            boilers=fact(inherited["boilers"]["count"], inherited["boilers_source"], False),
+            design_power_kw=fact(units.convert(inherited["power_design_shp"], "shp", "kW"), inherited["power_design_source"], False),
+            trial_power_kw=fact(units.convert(inherited["power_trial_shp"], "shp", "kW"), inherited["power_trial_source"], False),
+            max_speed_kn=fact(inherited["max_speed_kn"], inherited["max_speed_source"], False),
+            engine_description=fact(inherited["engine_type"], inherited["engine_type_source"], False),
+            boiler_description=fact(inherited["boilers"]["type"], inherited["boilers_source"], False),
+            cruise_speed_kn=fact(None, None, None), engine_built_year=fact(None, None, None))
+        prop["fuel_bindings"] = {name: dict(weight_item_ids=[identity], source="Explicit link to existing canonical fuel ledger", estimate=True)
+            for name, identity in (("coal", "coal"), ("oil", "fuel-oil"))}
+        project["sources"]["unbound_historical_performance"] = dict(
+            trial_speed_kn=inherited["trial_speed_kn"], trial_power_shp=inherited["power_trial_shp"],
+            source=inherited["power_trial_source"], condition_id=None,
+            reason="trial loading condition is unknown; no automatic normal/deep comparison is permitted")
+    else:
+        prop["facts"] = dict(shafts=fact(1), boilers=fact(2), design_power_kw=fact(2000),
+                             max_speed_kn=fact(12), cruise_speed_kn=fact(10))
+        prop["fuel_bindings"] = dict(coal=dict(weight_item_ids=["steamer-fuel"], source=study, estimate=True),
+                                    oil=dict(weight_item_ids=[], absent=True, source=study, estimate=True))
+    common = dict(source=study, estimate=True, attitude_policy="selected_plane_longitudinal_trim_proxy_v1",
+                  qpc=fact(.55), qpc_sensitivity=dict(values=[.5, .55, .6], source=study, estimate=True))
+    taylor_inputs = dict(delta_cf=.0004, density_kg_m3=1025, kinematic_viscosity_m2_s=1.19e-6)
+    holtrop_inputs = dict(c_stern=0, bulb_area_m2=0, transom_area_m2=0, appendages=[], bow_thruster=dict(present=False),
+        additional_roughness_delta_ca=0, density_kg_m3=1025, gravity_m_s2=9.81, kinematic_viscosity_m2_s=1.19e-6,
+        x_aft_perpendicular_m=aft, x_fore_perpendicular_m=fore)
+    project["resistance_scenarios"] = [
+        dict(common, id="taylor-trim-study", method="taylor_gertler_source_axis_strict", inputs=taylor_inputs,
+            input_provenance={key: dict(source=study, estimate=True) for key in taylor_inputs},
+            table_id="taylor-gertler-molland-a3", table_sha256="e9dc5141235ad9a0ddc1c1de70ab33d28f7aac86f75953663c969ad3fd124d93",
+            friction_method="schoenherr_implicit_ittc_0.242", interpolation_method="taylor_gertler_source_axis_strict",
+            speed_conversion_method="international_knot_exact"),
+        dict(common, id="holtrop-trim-study", method="holtrop_mennen_1982", inputs=holtrop_inputs,
+            input_provenance={key: dict(source=study, estimate=True) for key in holtrop_inputs})]
+    project["endurance_scenarios"] = [dict(id="steady-cruise-study", method="steady_simultaneous_fuel_consumption",
+        speed_kn=10, power_kw=5000 if queen_mary else 1000, source=study, estimate=True,
+        fuels=dict(coal=dict(required=True, burn_t_per_day=100 if queen_mary else 20, reserve_t=0),
+                   oil=dict(required=queen_mary, burn_t_per_day=20 if queen_mary else 0, reserve_t=0)))]
+    if queen_mary:
+        prepared = stability.prepare_geometry(geometry_payload)[0]
+        digest = lambda value: hashlib.sha256(json.dumps(value, ensure_ascii=False, sort_keys=True,
+            separators=(",", ":"), allow_nan=False).encode("utf-8")).hexdigest()
+        for condition in project["loading_conditions"]:
+            state = loading.resolve_loading(project, condition["id"])
+            equilibrium = stability.solve_loaded_equilibrium(geometry_payload, state)
+            if not equilibrium["converged"]:
+                raise ValueError("cannot generate a perpendicular study without a converged selected state")
+            plane = {key: equilibrium[key] for key in ("p", "q", "waterline_d_m")}
+            measures = geometry_analysis.measures_at_plane(geometry_payload, plane)
+            # Reuse the public occupied-interval helper and the documented
+            # piecewise-linear station-support definition; never infer AP/FP.
+            widths = [sum(b-a for a, b in geometry.waterline_intervals(poly, plane["q"],
+                plane["waterline_d_m"]+plane["p"]*x)) for x, poly in prepared.stations]
+            active = [i for i in range(len(widths)-1) if widths[i] > 0 or widths[i+1] > 0]
+            left, right = prepared.stations[active[0]][0], prepared.stations[active[-1]+1][0]
+            if right-left != measures["values"]["waterline_length_body_x_m"]:
+                raise ValueError("perpendicular study support differs from the reviewed geometry measure")
+            source = dict(description="Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting",
+                derivation=dict(method="reviewed loaded equilibrium and occupied waterline station support",
+                    condition_id=condition["id"], geometry_sha256=digest(geometry_payload),
+                    selected_loading_sha256=digest(dict(condition_id=condition["id"], effective_items=state["effective_items"])),
+                    selected_plane=plane, selected_volume_m3=equilibrium["volume_m3"],
+                    aft_x_m=left, fore_x_m=right))
+            scenario = copy.deepcopy(project["resistance_scenarios"][1])
+            scenario.update(id="holtrop-support-" + condition["id"], source=source)
+            for key, value in (("x_aft_perpendicular_m", left), ("x_fore_perpendicular_m", right)):
+                scenario["inputs"][key] = value
+                scenario["input_provenance"][key] = dict(source=source, estimate=True)
+            project["resistance_scenarios"].append(scenario)
+
+
 def generate_projects(output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     projects = {
@@ -772,6 +870,7 @@ def generate_projects(output_dir: Path) -> None:
         "analytic_box.project.json": analytic_box_project(),
     }
     for filename, payload in projects.items():
+        _add_core_study_inputs(payload)
         text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n"
         (output_dir / filename).write_text(text, encoding="utf-8", newline="\n")
 

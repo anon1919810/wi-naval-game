@@ -116,6 +116,10 @@ def parameterized_hydrostatics(hull: dict) -> dict:
             assumptions.append(dict(field=key, value=default, estimate=True,
                                     original_value=None, source="documented legacy L0 default"))
     for flag in flags:
+        quantity = {"kg_is_estimate": "kg_m",
+                    "displacement_unit_is_estimate": "displacement_normal_t"}.get(flag)
+        if quantity is not None and effective.get(quantity) is None:
+            continue
         if effective.get(flag) is None:
             effective[flag] = True
             assumptions.append(dict(field=flag, value=True, estimate=True,

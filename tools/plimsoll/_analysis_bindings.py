@@ -1,0 +1,159 @@
+"""Selected deck, propulsion, endurance and historical adapters; no new kernels."""
+import copy
+
+try:
+    from . import engines, geometry_analysis, units
+    from ._analysis_request import diagnostic
+except ImportError:
+    import engines, geometry_analysis, units
+    from _analysis_request import diagnostic
+
+
+def _deck(project, stages):
+    geometry = project["geometry"]
+    plane = stages["equilibrium"]["data"]
+    deck = project.get("deck")
+    data = geometry_analysis.deck_clearance(deck, plane, keel_offset_m=geometry["keel_offset_m"])
+    if data["status"] != "completed":
+        return data, data["status"]
+    points = {point["id"]: point for point in deck["points"]}
+    clearances = {point["id"]: point["normal_clearance_m"] for point in data["points"]}
+    intervals, rows = [], []
+    for segment in deck.get("segments", []):
+        aft, fore = segment["aft_point_id"], segment["fore_point_id"]
+        left, right = points[aft]["x_m"], points[fore]["x_m"]
+        intervals.append((left, right))
+        rows.append(dict(id=segment["id"], length_m=right-left,
+            mean_normal_clearance_m=(clearances[aft]+clearances[fore])/2,
+            source=segment.get("source", deck.get("source")), estimate=segment.get("estimate", deck.get("estimate"))))
+    intervals.sort()
+    overlap = any(b[0] < a[1] for a, b in zip(intervals, intervals[1:]))
+    known_length = sum(r["length_m"] for r in rows)
+    reference = deck.get("reference_length_m", {}).get("value")
+    profile = dict(segments=rows, covered_length_m=known_length if not overlap else None,
+        reference_length_m=reference, coverage_fraction=known_length/reference if reference and not overlap else None,
+        mean_normal_clearance_m=sum(r["length_m"]*r["mean_normal_clearance_m"] for r in rows)/known_length
+            if known_length and not overlap else None, coverage="overlapping" if overlap else "supplied_segments_only",
+        method="length_weighted_linear_endpoint_clearance_over_supplied_nonoverlapping_segments")
+    data["profile"] = profile
+    if overlap or not rows:
+        data["diagnostics"].append(diagnostic("analysis.deck_profile_incomplete",
+            "overlapping or absent segments do not define a whole-ship mean freeboard", "$.deck.segments", False))
+    curve = stages["gz"]["data"]
+    data["sampled_events"] = geometry_analysis.deck_immersion_events(deck, curve["rows"],
+        keel_offset_m=geometry["keel_offset_m"]) if curve is not None else None
+    return data, "completed"
+
+
+def _fuel(propulsion, state):
+    ledger = {i["id"]: i for i in state["effective_items"]}
+    values, trace = {}, {}
+    for name in ("coal", "oil"):
+        binding = propulsion.get("fuel_bindings", {}).get(name)
+        masses = [ledger[i]["mass_t"] for i in binding["weight_item_ids"]] if binding is not None else [None]
+        values[name + "_t"] = sum(masses) if all(v is not None for v in masses) else None
+        trace[name] = dict(binding=copy.deepcopy(binding), selected_items=[copy.deepcopy(ledger[i])
+            for i in binding["weight_item_ids"]] if binding else [], value_t=values[name + "_t"],
+            input_path=f"$.systems.propulsion.fuel_bindings.{name}",
+            output_path=f"$.stages.propulsion.data.values.{name}_t")
+    return values, trace
+
+
+def _propulsion(project, state, stages):
+    prop = project["systems"].get("propulsion", {})
+    facts = copy.deepcopy(prop.get("facts", {}))
+    values, fuels = _fuel(prop, state)
+    case = dict(schema=engines.SCHEMA, **values, displacement_normal_t=state["values"]["total_mass_t"],
+        power_conversion_method="international_mechanical_hp_precise", speed_conversion_method="international_knot_exact",
+        fuel_source=fuels)
+    for field in ("shafts", "max_speed_kn", "cruise_speed_kn"):
+        fact = facts.get(field, {})
+        case[field] = fact.get("value")
+        case[field.replace("_kn", "") + "_source"] = fact.get("source")
+    for canonical, legacy in (("design_power_kw", "power_design"), ("trial_power_kw", "power_trial")):
+        fact = facts.get(canonical, {})
+        case[legacy + "_shp"] = units.convert(fact["value"], "kW", "shp") if fact.get("value") is not None else None
+        case[legacy + "_source"] = fact.get("source")
+    system = (stages["systems"]["data"] or {}).get("systems", {}).get("propulsion", {})
+    mass = system.get("ledger_mass_t")
+    if mass is not None and mass > 0:
+        case["engine_weight_t"] = mass
+        case["engine_weight_source"] = "selected linked propulsion ledger; not an independent mass estimate"
+    # No design L is substituted for an unavailable selected waterline.
+    hydro = stages["hydrostatics"]["data"]
+    if hydro is not None:
+        case["lwl_m"] = hydro["values"]["waterline_length_body_x_m"]
+    known_facts = dict(facts=facts, fuel_bindings=fuels, effective_case=case,
+        assumptions=["legacy displacement_normal_t adapter key contains the selected total mass",
+                     "precise international horsepower and knot conversion"], input_fingerprint=state["input_fingerprint"])
+    if case["shafts"] is None:
+        return dict(**known_facts, values=values, diagnostics=[diagnostic("analysis.shafts_unknown",
+            "engine kernel requires explicit shaft count; supplied facts and fuel masses are retained",
+            "$.systems.propulsion.facts.shafts")]), "unavailable"
+    native = engines.compute(case)
+    return dict(**native, **known_facts), "completed"
+
+
+def _endurance(project, opts, stages):
+    propulsion = stages["propulsion"]["data"]
+    scenario = next(s for s in project["endurance_scenarios"] if s["id"] == opts["endurance_scenario_id"])
+    case = copy.deepcopy(propulsion["effective_case"])
+    case["endurance_scenario"] = copy.deepcopy(scenario)
+    if scenario["speed_kn"] is None or scenario["power_kw"] is None:
+        return dict(values=None, scenario=copy.deepcopy(scenario), diagnostics=[diagnostic("analysis.endurance_operating_point_unknown",
+            "explicit operating speed and power are required", "$.endurance_scenarios")]), "unavailable"
+    native = engines.compute(case)
+    values = native["values"]["steady_endurance"]
+    return dict(values=values, kernel=native, scenario=copy.deepcopy(scenario),
+        fuel_bindings=copy.deepcopy(propulsion["fuel_bindings"]), input_fingerprint=propulsion["input_fingerprint"]), "completed" if values is not None else "unavailable"
+
+
+def _historical(project, state, stages):
+    rows = []
+    for supplied in project.get("historical_comparisons", []):
+        row = dict(comparison=copy.deepcopy(supplied), status="unavailable", calculated=None,
+            difference=None, relative_difference=None, unit=supplied["unit"], result_path=None,
+            historical_validated=None, reason="no calculated result at exactly this condition and speed")
+        quantity, current, path, unit = supplied["quantity"], None, None, None
+        if supplied["condition_id"] == state["condition_id"]:
+            if quantity == "displacement_t":
+                current, unit, path = state["values"]["total_mass_t"], "t", "$.stages.loading.data.values.total_mass_t"
+            elif quantity == "draught_m" and stages["equilibrium"]["data"] is not None:
+                current, unit, path = stages["equilibrium"]["data"].get("waterline_above_keel_m"), "m", "$.stages.equilibrium.data.waterline_above_keel_m"
+            elif quantity == "range_nm" and stages["endurance"]["data"] is not None:
+                value = stages["endurance"]["data"].get("values")
+                if value and supplied.get("speed_kn") == value["speed_kn"]:
+                    current, unit, path = value["range_nm"], "nm", "$.stages.endurance.data.values.range_nm"
+            elif quantity == "shaft_power_kw" and stages["resistance"]["data"] is not None:
+                matches = [r for r in stages["resistance"]["data"].get("power_rows", []) if r["speed_kn"] == supplied.get("speed_kn")]
+                if len(matches) == 1:
+                    current, unit, path = matches[0]["shaft_power_kw"], "kW", "$.stages.resistance.data.power_rows"
+            elif quantity == "speed_kn":
+                row["reason"] = "no independent speed prediction is implemented; supplied speed is not a calculation"
+        if current is not None and supplied["value"] is not None:
+            calculated = current if unit == supplied["unit"] else units.convert(current, unit, supplied["unit"])
+            difference = calculated - supplied["value"]
+            row.update(status="completed", calculated=calculated, difference=difference,
+                       relative_difference=difference/supplied["value"] if supplied["value"] else None,
+                       result_path=path, reason=None)
+        rows.append(row)
+    return dict(rows=rows, diagnostics=[] if rows else [diagnostic("analysis.historical_unknown",
+        "no historical comparison rows supplied", "$.historical_comparisons", False)]), "completed"
+
+
+def run(name, project, state, options, stages):
+    if name == "deck":
+        return _deck(project, stages)
+    if name == "propulsion":
+        return _propulsion(project, state, stages)
+    if name == "endurance":
+        return _endurance(project, options, stages)
+    if name == "historical":
+        return _historical(project, state, stages)
+    if name == "resistance":
+        try:
+            from . import _analysis_resistance
+        except ImportError:
+            import _analysis_resistance
+        return _analysis_resistance.compute(project, state, options, stages)
+    raise ValueError(f"unsupported adapter {name}")

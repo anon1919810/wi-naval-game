@@ -33,6 +33,48 @@
       "source": "Explicit Task 3 initial-state fixture; zero is known, not missing."
     }
   ],
+  "deck": {
+    "estimate": true,
+    "points": [
+      {
+        "id": "aft-centre",
+        "x_m": -10.0,
+        "y_m": 0,
+        "z_m": 8.0
+      },
+      {
+        "id": "fore-centre",
+        "x_m": 10.0,
+        "y_m": 0,
+        "z_m": 8.0
+      },
+      {
+        "id": "mid-port",
+        "x_m": 0,
+        "y_m": -5.0,
+        "z_m": 8.0
+      },
+      {
+        "id": "mid-starboard",
+        "x_m": 0,
+        "y_m": 5.0,
+        "z_m": 8.0
+      }
+    ],
+    "reference_length_m": {
+      "estimate": true,
+      "source": "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim",
+      "value": 20.0
+    },
+    "segments": [
+      {
+        "aft_point_id": "aft-centre",
+        "fore_point_id": "fore-centre",
+        "id": "centreline-profile"
+      }
+    ],
+    "source": "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim"
+  },
   "geometry": {
     "estimate": false,
     "keel_offset_m": 0.0,
@@ -140,6 +182,7 @@
     }
   ],
   "name": "Analytic rectangular box reference",
+  "opening_definition": "supplied",
   "openings": [
     {
       "area_m2": 0.25,

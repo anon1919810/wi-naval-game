@@ -48,6 +48,70 @@
       "source": "Explicit Task 3 initial-state fixture; zero is known, not missing."
     }
   ],
+  "deck": {
+    "estimate": true,
+    "points": [
+      {
+        "id": "aft-centre",
+        "x_m": -45.0,
+        "y_m": 0,
+        "z_m": 8.0
+      },
+      {
+        "id": "fore-centre",
+        "x_m": 45.0,
+        "y_m": 0,
+        "z_m": 8.0
+      },
+      {
+        "id": "mid-port",
+        "x_m": 0,
+        "y_m": -6.5,
+        "z_m": 8.0
+      },
+      {
+        "id": "mid-starboard",
+        "x_m": 0,
+        "y_m": 6.5,
+        "z_m": 8.0
+      }
+    ],
+    "reference_length_m": {
+      "estimate": true,
+      "source": "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim",
+      "value": 90.0
+    },
+    "segments": [
+      {
+        "aft_point_id": "aft-centre",
+        "fore_point_id": "fore-centre",
+        "id": "centreline-profile"
+      }
+    ],
+    "source": "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim"
+  },
+  "endurance_scenarios": [
+    {
+      "estimate": true,
+      "fuels": {
+        "coal": {
+          "burn_t_per_day": 20,
+          "required": true,
+          "reserve_t": 0
+        },
+        "oil": {
+          "burn_t_per_day": 0,
+          "required": false,
+          "reserve_t": 0
+        }
+      },
+      "id": "steady-cruise-study",
+      "method": "steady_simultaneous_fuel_consumption",
+      "power_kw": 1000,
+      "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+      "speed_kn": 10
+    }
+  ],
   "geometry": {
     "estimate": true,
     "keel_offset_m": 0.0,
@@ -24233,6 +24297,7 @@
     }
   ],
   "name": "Generic 1910 coastal steamer reference",
+  "opening_definition": "supplied",
   "openings": [
     {
       "area_m2": 0.5,
@@ -24261,6 +24326,135 @@
       "z_m": 7.0
     }
   ],
+  "resistance_scenarios": [
+    {
+      "attitude_policy": "selected_plane_longitudinal_trim_proxy_v1",
+      "estimate": true,
+      "friction_method": "schoenherr_implicit_ittc_0.242",
+      "id": "taylor-trim-study",
+      "input_provenance": {
+        "delta_cf": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "density_kg_m3": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "kinematic_viscosity_m2_s": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        }
+      },
+      "inputs": {
+        "delta_cf": 0.0004,
+        "density_kg_m3": 1025,
+        "kinematic_viscosity_m2_s": 1.19e-06
+      },
+      "interpolation_method": "taylor_gertler_source_axis_strict",
+      "method": "taylor_gertler_source_axis_strict",
+      "qpc": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "value": 0.55
+      },
+      "qpc_sensitivity": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "values": [
+          0.5,
+          0.55,
+          0.6
+        ]
+      },
+      "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+      "speed_conversion_method": "international_knot_exact",
+      "table_id": "taylor-gertler-molland-a3",
+      "table_sha256": "e9dc5141235ad9a0ddc1c1de70ab33d28f7aac86f75953663c969ad3fd124d93"
+    },
+    {
+      "attitude_policy": "selected_plane_longitudinal_trim_proxy_v1",
+      "estimate": true,
+      "id": "holtrop-trim-study",
+      "input_provenance": {
+        "additional_roughness_delta_ca": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "appendages": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bow_thruster": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bulb_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "c_stern": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "density_kg_m3": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "gravity_m_s2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "kinematic_viscosity_m2_s": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "transom_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "x_aft_perpendicular_m": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "x_fore_perpendicular_m": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        }
+      },
+      "inputs": {
+        "additional_roughness_delta_ca": 0,
+        "appendages": [],
+        "bow_thruster": {
+          "present": false
+        },
+        "bulb_area_m2": 0,
+        "c_stern": 0,
+        "density_kg_m3": 1025,
+        "gravity_m_s2": 9.81,
+        "kinematic_viscosity_m2_s": 1.19e-06,
+        "transom_area_m2": 0,
+        "x_aft_perpendicular_m": -45.0,
+        "x_fore_perpendicular_m": 45.0
+      },
+      "method": "holtrop_mennen_1982",
+      "qpc": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "value": 0.55
+      },
+      "qpc_sensitivity": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "values": [
+          0.5,
+          0.55,
+          0.6
+        ]
+      },
+      "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+    }
+  ],
   "revision": 0,
   "schema": "plimsoll-project-1",
   "sources": {
@@ -24276,6 +24470,48 @@
       ]
     },
     "propulsion": {
+      "facts": {
+        "boilers": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": 2
+        },
+        "cruise_speed_kn": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": 10
+        },
+        "design_power_kw": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": 2000
+        },
+        "max_speed_kn": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": 12
+        },
+        "shafts": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": 1
+        }
+      },
+      "fuel_bindings": {
+        "coal": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "weight_item_ids": [
+            "steamer-fuel"
+          ]
+        },
+        "oil": {
+          "absent": true,
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "weight_item_ids": []
+        }
+      },
       "weight_item_ids": [
         "steamer-machinery"
       ]

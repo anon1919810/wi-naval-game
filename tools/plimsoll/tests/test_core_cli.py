@@ -1,0 +1,241 @@
+"""Subprocess acceptance for the calculation-core command line."""
+
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
+import json
+from pathlib import Path
+import os
+import subprocess
+import sys
+import tempfile
+import types
+import unittest
+from unittest import mock
+
+
+TOOLS = Path(__file__).resolve().parents[2]
+if str(TOOLS) not in sys.path:
+    sys.path.insert(0, str(TOOLS))
+
+from plimsoll import app, exports  # noqa: E402
+
+
+def analysis_result(status="completed"):
+    return {
+        "schema": "plimsoll-analysis-1",
+        "status": status,
+        "project_id": "fixture",
+        "condition_id": "normal",
+        "project_fingerprint": "a" * 64,
+        "input_fingerprint": "b" * 64,
+        "request_fingerprint": "c" * 64,
+        "diagnostics": [],
+        "stages": {},
+    }
+
+
+class CoreCliEntrypointTests(unittest.TestCase):
+    def run_cli(self, arguments, cwd):
+        env = dict(
+            os.environ,
+            PYTHONIOENCODING="utf-8",
+            PYTHONDONTWRITEBYTECODE="1",
+            PYTHONPATH=str(TOOLS),
+        )
+        return subprocess.run(
+            [sys.executable, "-B", "-m", "plimsoll", *map(str, arguments)],
+            cwd=cwd,
+            env=env,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            check=False,
+        )
+
+    def test_module_help_runs_from_unrelated_chinese_directory(self):
+        with tempfile.TemporaryDirectory(prefix="核心命令-") as temp:
+            before = set(Path(temp).iterdir())
+            result = self.run_cli(["--help"], temp)
+            after = set(Path(temp).iterdir())
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("analyze", result.stdout)
+        self.assertIn("batch", result.stdout)
+        self.assertIn("sweep", result.stdout)
+        self.assertIn("import-geometry", result.stdout)
+        self.assertEqual(after, before)
+
+    def test_analyze_computes_once_and_serializes_same_result_to_json_and_csv(self):
+        with tempfile.TemporaryDirectory(prefix="单船计算-") as temp:
+            root = Path(temp)
+            project_path = root / "项目.json"
+            options_path = root / "选项.json"
+            output_path = root / "结果.json"
+            csv_path = root / "结果.csv"
+            project_path.write_text('{"schema":"plimsoll-project-1"}', encoding="utf-8")
+            options_path.write_text('{"stages":["loading"]}', encoding="utf-8")
+            result = analysis_result()
+            stdout, stderr = StringIO(), StringIO()
+            compute = mock.Mock(return_value=result)
+            with (
+                mock.patch.object(app, "project_store", types.SimpleNamespace(
+                    load=mock.Mock(return_value={"id": "fixture"})), create=True),
+                mock.patch.object(app, "analysis", types.SimpleNamespace(
+                    compute_project=compute), create=True),
+                mock.patch.object(app, "exports", exports, create=True),
+                redirect_stdout(stdout),
+                redirect_stderr(stderr),
+            ):
+                try:
+                    exit_code = app.main([
+                        "analyze", str(project_path), "--condition", "normal",
+                        "--options", str(options_path), "--output", str(output_path),
+                        "--csv", str(csv_path),
+                    ])
+                except NotImplementedError:
+                    exit_code = -1
+            self.assertEqual(exit_code, 0, stderr.getvalue())
+            self.assertEqual(stdout.getvalue(), "")
+            self.assertEqual(stderr.getvalue(), "")
+            compute.assert_called_once_with(
+                {"id": "fixture"}, "normal", {"stages": ["loading"]}
+            )
+            self.assertEqual(json.loads(output_path.read_text(encoding="utf-8")), result)
+            csv_text = csv_path.read_text(encoding="utf-8")
+            self.assertIn("request_fingerprint", csv_text)
+            self.assertIn("c" * 64, csv_text)
+
+    def test_invalid_options_json_is_one_structured_error(self):
+        project_path = TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        with tempfile.TemporaryDirectory(prefix="错误输入-") as temp:
+            options = Path(temp) / "重复键.json"
+            options.write_text('{"stages":[],"stages":[]}', encoding="utf-8")
+            result = self.run_cli([
+                "analyze", project_path, "--condition", "loaded",
+                "--options", options,
+            ], temp)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["command"], "analyze")
+        self.assertEqual(payload["code"], "cli.json_invalid")
+        self.assertEqual(payload["input_path"], str(options))
+        self.assertTrue(payload["diagnostics"][0]["blocking"])
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_result_output_cannot_alias_explicit_options_input(self):
+        project_path = TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        with tempfile.TemporaryDirectory(prefix="路径保护-") as temp:
+            options = Path(temp) / "选项.json"
+            original = '{"stages":["loading"]}'
+            options.write_text(original, encoding="utf-8")
+            result = self.run_cli([
+                "analyze", project_path, "--condition", "loaded",
+                "--options", options, "--output", options,
+            ], temp)
+            preserved = options.read_text(encoding="utf-8")
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(json.loads(result.stderr)["code"], "cli.output_alias")
+        self.assertEqual(preserved, original)
+
+    def test_batch_continues_after_case_failures_and_uses_ordinal_filenames(self):
+        source_project = (
+            TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        )
+        with tempfile.TemporaryDirectory(prefix="批量计算-") as temp:
+            root = Path(temp)
+            manifest_dir = root / "清单"
+            projects = manifest_dir / "项目"
+            cwd = root / "无关工作目录"
+            out = root / "输出"
+            projects.mkdir(parents=True)
+            cwd.mkdir()
+            (projects / "方箱.json").write_bytes(source_project.read_bytes())
+            (projects / "坏项目.json").write_text("{", encoding="utf-8")
+            manifest = {
+                "schema": "plimsoll-batch-1",
+                "cases": [
+                    {"id": "first", "project": "项目/方箱.json",
+                     "condition_id": "loaded", "options": {"stages": ["loading"]}},
+                    {"id": "broken", "project": "项目/坏项目.json",
+                     "condition_id": "loaded", "options": {"stages": ["loading"]}},
+                    {"id": "missing-condition", "project": "项目/方箱.json",
+                     "condition_id": "ghost", "options": {"stages": ["loading"]}},
+                    {"id": "../unsafe!?", "project": "项目/方箱.json",
+                     "condition_id": "loaded", "options": {"stages": ["loading"]}},
+                    {"id": "later", "project": "项目/方箱.json",
+                     "condition_id": "loaded", "options": {"stages": ["loading"]}},
+                ],
+            }
+            manifest_path = manifest_dir / "批量.json"
+            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+            result = self.run_cli(["batch", manifest_path, "--out", out], cwd)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(result.stdout, "")
+            self.assertEqual(result.stderr, "")
+            summary = json.loads((out / "batch-summary.json").read_text(encoding="utf-8"))
+            self.assertEqual(summary["schema"], "plimsoll-batch-result-1")
+            self.assertEqual(summary["status"], "partial")
+            self.assertEqual([case["id"] for case in summary["cases"]],
+                             [case["id"] for case in manifest["cases"]])
+            self.assertEqual([case["ordinal"] for case in summary["cases"]],
+                             [1, 2, 3, 4, 5])
+            self.assertEqual(summary["cases"][0]["result_path"], "0001.result.json")
+            self.assertIsNone(summary["cases"][1]["result_path"])
+            self.assertIsNone(summary["cases"][2]["result_path"])
+            self.assertEqual(summary["cases"][3]["result_path"], "0004.result.json")
+            self.assertEqual(summary["cases"][4]["result_path"], "0005.result.json")
+            self.assertTrue(summary["cases"][1]["diagnostics"])
+            self.assertTrue(summary["cases"][2]["diagnostics"])
+            self.assertEqual(
+                sorted(path.name for path in out.iterdir()),
+                ["0001.result.json", "0004.result.json", "0005.result.json",
+                 "batch-summary.json"],
+            )
+            self.assertFalse((root / "unsafe!?").exists())
+
+    def test_sweep_rejects_invalid_axes_before_creating_outputs(self):
+        project_path = TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+        valid = {
+            "schema": "plimsoll-sweep-1",
+            "project": str(project_path),
+            "condition_id": "loaded",
+            "base_options": {"stages": ["resistance"], "resistance": {
+                "scenario_id": "study", "speeds_kn": [10]}},
+            "axes": [{
+                "field": "resistance.speed_kn", "values": [10],
+                "source": "declared grid", "estimate": False,
+            }],
+        }
+        invalid_axes = {
+            "duplicate": [valid["axes"][0], valid["axes"][0]],
+            "unknown": [{**valid["axes"][0], "field": "hull.length_m"}],
+            "boolean": [{**valid["axes"][0], "values": [True]}],
+            "nonpositive": [{**valid["axes"][0], "values": [0]}],
+            "too-many-speed": [{**valid["axes"][0], "values": list(range(1, 203))}],
+            "too-many-qpc": [{**valid["axes"][0], "field": "resistance.qpc",
+                                "values": [index / 100 for index in range(1, 23)]}],
+            "product": [
+                {**valid["axes"][0], "values": list(range(1, 202))},
+                {**valid["axes"][0], "field": "resistance.qpc",
+                 "values": [index / 100 for index in range(1, 7)]},
+            ],
+        }
+        with tempfile.TemporaryDirectory(prefix="扫描边界-") as temp:
+            root = Path(temp)
+            for label, axes in invalid_axes.items():
+                with self.subTest(case=label):
+                    document = {**valid, "axes": axes}
+                    source = root / f"{label}.json"
+                    out = root / f"{label}-输出"
+                    source.write_text(json.dumps(document), encoding="utf-8")
+                    result = self.run_cli(["sweep", source, "--out", out], root)
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertEqual(result.stdout, "")
+                    self.assertEqual(json.loads(result.stderr)["code"],
+                                     "cli.schema_invalid")
+                    self.assertFalse(out.exists())
+
+if __name__ == "__main__":
+    unittest.main()

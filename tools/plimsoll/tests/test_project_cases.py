@@ -56,6 +56,27 @@ def _stationed_hull(project: dict) -> geometry.StationedHull:
 
 
 class ProjectCaseTests(unittest.TestCase):
+    def test_core_studies_declare_typed_fuel_propulsion_and_scenario_provenance(self):
+        for filename in FILENAMES[:2]:
+            project = project_io.normalize_project(_load(filename))
+            self.assertIsNotNone(project["systems"]["propulsion"]["facts"]["shafts"]["value"])
+            for binding in project["systems"]["propulsion"]["fuel_bindings"].values():
+                self.assertTrue(binding["source"])
+                self.assertIsInstance(binding["estimate"], bool)
+            self.assertTrue({"taylor-trim-study", "holtrop-trim-study"} <= {s["id"] for s in project["resistance_scenarios"]})
+            if filename.startswith("queen_mary"):
+                for condition in project["loading_conditions"]:
+                    scenario = next(s for s in project["resistance_scenarios"] if s["id"] == "holtrop-support-" + condition["id"])
+                    self.assertEqual(scenario["source"]["derivation"]["condition_id"], condition["id"])
+                    self.assertGreater(abs(scenario["source"]["derivation"]["selected_plane"]["p"]), .001)
+            for scenario in project["resistance_scenarios"]:
+                self.assertEqual(scenario["attitude_policy"], "selected_plane_longitudinal_trim_proxy_v1")
+                self.assertTrue(scenario["estimate"])
+                self.assertEqual(set(scenario["inputs"]), set(scenario["input_provenance"]))
+            self.assertEqual(project["endurance_scenarios"][0]["id"], "steady-cruise-study")
+        for filename in FILENAMES:
+            self.assertTrue(project_io.normalize_project(_load(filename))["deck"]["points"])
+
     def test_all_committed_cases_normalize_and_resolve_every_loading(self):
         """Catches malformed fixtures and loading overrides that bypass the real pipeline."""
         for filename in FILENAMES:

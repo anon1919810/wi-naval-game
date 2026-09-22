@@ -63,6 +63,70 @@
       "source": "Explicit Task 3 initial-state fixture; zero is known, not missing."
     }
   ],
+  "deck": {
+    "estimate": true,
+    "points": [
+      {
+        "id": "aft-centre",
+        "x_m": -106.7,
+        "y_m": 0,
+        "z_m": 15.0
+      },
+      {
+        "id": "fore-centre",
+        "x_m": 106.7,
+        "y_m": 0,
+        "z_m": 15.0
+      },
+      {
+        "id": "mid-port",
+        "x_m": 0,
+        "y_m": -13.55,
+        "z_m": 15.0
+      },
+      {
+        "id": "mid-starboard",
+        "x_m": 0,
+        "y_m": 13.55,
+        "z_m": 15.0
+      }
+    ],
+    "reference_length_m": {
+      "estimate": true,
+      "source": "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim",
+      "value": 213.4
+    },
+    "segments": [
+      {
+        "aft_point_id": "aft-centre",
+        "fore_point_id": "fore-centre",
+        "id": "centreline-profile"
+      }
+    ],
+    "source": "Explicit flat deck study at the highest supplied sealed-envelope ordinate; not a surveyed Queen Mary deck or watertightness claim"
+  },
+  "endurance_scenarios": [
+    {
+      "estimate": true,
+      "fuels": {
+        "coal": {
+          "burn_t_per_day": 100,
+          "required": true,
+          "reserve_t": 0
+        },
+        "oil": {
+          "burn_t_per_day": 20,
+          "required": true,
+          "reserve_t": 0
+        }
+      },
+      "id": "steady-cruise-study",
+      "method": "steady_simultaneous_fuel_consumption",
+      "power_kw": 5000,
+      "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+      "speed_kn": 10
+    }
+  ],
   "geometry": {
     "estimate": true,
     "keel_offset_m": -9.9,
@@ -110270,6 +110334,7 @@
     }
   ],
   "name": "HMS Queen Mary (1913) engineering reference",
+  "opening_definition": "supplied",
   "openings": [
     {
       "aperture_height_m": 1.0,
@@ -110297,6 +110362,395 @@
       "x_m": 20.0,
       "y_m": 0.0,
       "z_m": 14.5
+    }
+  ],
+  "resistance_scenarios": [
+    {
+      "attitude_policy": "selected_plane_longitudinal_trim_proxy_v1",
+      "estimate": true,
+      "friction_method": "schoenherr_implicit_ittc_0.242",
+      "id": "taylor-trim-study",
+      "input_provenance": {
+        "delta_cf": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "density_kg_m3": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "kinematic_viscosity_m2_s": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        }
+      },
+      "inputs": {
+        "delta_cf": 0.0004,
+        "density_kg_m3": 1025,
+        "kinematic_viscosity_m2_s": 1.19e-06
+      },
+      "interpolation_method": "taylor_gertler_source_axis_strict",
+      "method": "taylor_gertler_source_axis_strict",
+      "qpc": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "value": 0.55
+      },
+      "qpc_sensitivity": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "values": [
+          0.5,
+          0.55,
+          0.6
+        ]
+      },
+      "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+      "speed_conversion_method": "international_knot_exact",
+      "table_id": "taylor-gertler-molland-a3",
+      "table_sha256": "e9dc5141235ad9a0ddc1c1de70ab33d28f7aac86f75953663c969ad3fd124d93"
+    },
+    {
+      "attitude_policy": "selected_plane_longitudinal_trim_proxy_v1",
+      "estimate": true,
+      "id": "holtrop-trim-study",
+      "input_provenance": {
+        "additional_roughness_delta_ca": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "appendages": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bow_thruster": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bulb_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "c_stern": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "density_kg_m3": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "gravity_m_s2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "kinematic_viscosity_m2_s": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "transom_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "x_aft_perpendicular_m": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "x_fore_perpendicular_m": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        }
+      },
+      "inputs": {
+        "additional_roughness_delta_ca": 0,
+        "appendages": [],
+        "bow_thruster": {
+          "present": false
+        },
+        "bulb_area_m2": 0,
+        "c_stern": 0,
+        "density_kg_m3": 1025,
+        "gravity_m_s2": 9.81,
+        "kinematic_viscosity_m2_s": 1.19e-06,
+        "transom_area_m2": 0,
+        "x_aft_perpendicular_m": -106.7,
+        "x_fore_perpendicular_m": 106.7
+      },
+      "method": "holtrop_mennen_1982",
+      "qpc": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "value": 0.55
+      },
+      "qpc_sensitivity": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "values": [
+          0.5,
+          0.55,
+          0.6
+        ]
+      },
+      "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+    },
+    {
+      "attitude_policy": "selected_plane_longitudinal_trim_proxy_v1",
+      "estimate": true,
+      "id": "holtrop-support-normal-engineering",
+      "input_provenance": {
+        "additional_roughness_delta_ca": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "appendages": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bow_thruster": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bulb_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "c_stern": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "density_kg_m3": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "gravity_m_s2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "kinematic_viscosity_m2_s": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "transom_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "x_aft_perpendicular_m": {
+          "estimate": true,
+          "source": {
+            "derivation": {
+              "aft_x_m": -106.7,
+              "condition_id": "normal-engineering",
+              "fore_x_m": 104.913298637,
+              "geometry_sha256": "e06b423927750d70d2a730bcb6549a547e8fd718d9c2c8fd3c233dbf73f80603",
+              "method": "reviewed loaded equilibrium and occupied waterline station support",
+              "selected_loading_sha256": "7f2e68fc4f31569c57cc5afcf165be2c49316eb8910f24e3806806f7d9918c55",
+              "selected_plane": {
+                "p": -0.014673668705099403,
+                "q": 4.165537548466012e-19,
+                "waterline_d_m": -0.8112990708142593
+              },
+              "selected_volume_m3": 27172.321308095485
+            },
+            "description": "Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting"
+          }
+        },
+        "x_fore_perpendicular_m": {
+          "estimate": true,
+          "source": {
+            "derivation": {
+              "aft_x_m": -106.7,
+              "condition_id": "normal-engineering",
+              "fore_x_m": 104.913298637,
+              "geometry_sha256": "e06b423927750d70d2a730bcb6549a547e8fd718d9c2c8fd3c233dbf73f80603",
+              "method": "reviewed loaded equilibrium and occupied waterline station support",
+              "selected_loading_sha256": "7f2e68fc4f31569c57cc5afcf165be2c49316eb8910f24e3806806f7d9918c55",
+              "selected_plane": {
+                "p": -0.014673668705099403,
+                "q": 4.165537548466012e-19,
+                "waterline_d_m": -0.8112990708142593
+              },
+              "selected_volume_m3": 27172.321308095485
+            },
+            "description": "Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting"
+          }
+        }
+      },
+      "inputs": {
+        "additional_roughness_delta_ca": 0,
+        "appendages": [],
+        "bow_thruster": {
+          "present": false
+        },
+        "bulb_area_m2": 0,
+        "c_stern": 0,
+        "density_kg_m3": 1025,
+        "gravity_m_s2": 9.81,
+        "kinematic_viscosity_m2_s": 1.19e-06,
+        "transom_area_m2": 0,
+        "x_aft_perpendicular_m": -106.7,
+        "x_fore_perpendicular_m": 104.913298637
+      },
+      "method": "holtrop_mennen_1982",
+      "qpc": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "value": 0.55
+      },
+      "qpc_sensitivity": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "values": [
+          0.5,
+          0.55,
+          0.6
+        ]
+      },
+      "source": {
+        "derivation": {
+          "aft_x_m": -106.7,
+          "condition_id": "normal-engineering",
+          "fore_x_m": 104.913298637,
+          "geometry_sha256": "e06b423927750d70d2a730bcb6549a547e8fd718d9c2c8fd3c233dbf73f80603",
+          "method": "reviewed loaded equilibrium and occupied waterline station support",
+          "selected_loading_sha256": "7f2e68fc4f31569c57cc5afcf165be2c49316eb8910f24e3806806f7d9918c55",
+          "selected_plane": {
+            "p": -0.014673668705099403,
+            "q": 4.165537548466012e-19,
+            "waterline_d_m": -0.8112990708142593
+          },
+          "selected_volume_m3": 27172.321308095485
+        },
+        "description": "Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting"
+      }
+    },
+    {
+      "attitude_policy": "selected_plane_longitudinal_trim_proxy_v1",
+      "estimate": true,
+      "id": "holtrop-support-deep-engineering",
+      "input_provenance": {
+        "additional_roughness_delta_ca": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "appendages": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bow_thruster": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "bulb_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "c_stern": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "density_kg_m3": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "gravity_m_s2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "kinematic_viscosity_m2_s": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "transom_area_m2": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result"
+        },
+        "x_aft_perpendicular_m": {
+          "estimate": true,
+          "source": {
+            "derivation": {
+              "aft_x_m": -106.7,
+              "condition_id": "deep-engineering",
+              "fore_x_m": 105.386345942,
+              "geometry_sha256": "e06b423927750d70d2a730bcb6549a547e8fd718d9c2c8fd3c233dbf73f80603",
+              "method": "reviewed loaded equilibrium and occupied waterline station support",
+              "selected_loading_sha256": "582ba72c02dd0bcb161577c87a86d8b8e968b60f994ab02b85c160441b7d7dc2",
+              "selected_plane": {
+                "p": -0.016560332589476597,
+                "q": -4.675473810191829e-18,
+                "waterline_d_m": 0.05407403128627247
+              },
+              "selected_volume_m3": 31147.57268894876
+            },
+            "description": "Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting"
+          }
+        },
+        "x_fore_perpendicular_m": {
+          "estimate": true,
+          "source": {
+            "derivation": {
+              "aft_x_m": -106.7,
+              "condition_id": "deep-engineering",
+              "fore_x_m": 105.386345942,
+              "geometry_sha256": "e06b423927750d70d2a730bcb6549a547e8fd718d9c2c8fd3c233dbf73f80603",
+              "method": "reviewed loaded equilibrium and occupied waterline station support",
+              "selected_loading_sha256": "582ba72c02dd0bcb161577c87a86d8b8e968b60f994ab02b85c160441b7d7dc2",
+              "selected_plane": {
+                "p": -0.016560332589476597,
+                "q": -4.675473810191829e-18,
+                "waterline_d_m": 0.05407403128627247
+              },
+              "selected_volume_m3": 31147.57268894876
+            },
+            "description": "Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting"
+          }
+        }
+      },
+      "inputs": {
+        "additional_roughness_delta_ca": 0,
+        "appendages": [],
+        "bow_thruster": {
+          "present": false
+        },
+        "bulb_area_m2": 0,
+        "c_stern": 0,
+        "density_kg_m3": 1025,
+        "gravity_m_s2": 9.81,
+        "kinematic_viscosity_m2_s": 1.19e-06,
+        "transom_area_m2": 0,
+        "x_aft_perpendicular_m": -106.7,
+        "x_fore_perpendicular_m": 105.386345942
+      },
+      "method": "holtrop_mennen_1982",
+      "qpc": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "value": 0.55
+      },
+      "qpc_sensitivity": {
+        "estimate": true,
+        "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+        "values": [
+          0.5,
+          0.55,
+          0.6
+        ]
+      },
+      "source": {
+        "derivation": {
+          "aft_x_m": -106.7,
+          "condition_id": "deep-engineering",
+          "fore_x_m": 105.386345942,
+          "geometry_sha256": "e06b423927750d70d2a730bcb6549a547e8fd718d9c2c8fd3c233dbf73f80603",
+          "method": "reviewed loaded equilibrium and occupied waterline station support",
+          "selected_loading_sha256": "582ba72c02dd0bcb161577c87a86d8b8e968b60f994ab02b85c160441b7d7dc2",
+          "selected_plane": {
+            "p": -0.016560332589476597,
+            "q": -4.675473810191829e-18,
+            "waterline_d_m": 0.05407403128627247
+          },
+          "selected_volume_m3": 31147.57268894876
+        },
+        "description": "Explicit estimated station-support perpendicular proxy, not historical AP/FP; no power fitting"
+      }
     }
   ],
   "revision": 0,
@@ -110334,7 +110788,14 @@
       "Fixture estimates are proposals, not historical certification.",
       "No residual mass or displacement-balancing item is present.",
       "Model geometry supports estimated positions only, never masses."
-    ]
+    ],
+    "unbound_historical_performance": {
+      "condition_id": null,
+      "reason": "trial loading condition is unknown; no automatic normal/deep comparison is permitted",
+      "source": "Navypedia: on trials made 28.1 kts with 83,000 shp",
+      "trial_power_shp": 83000,
+      "trial_speed_kn": 28.1
+    }
   },
   "systems": {
     "armour": {
@@ -110843,6 +111304,69 @@
     },
     "propulsion": {
       "boilers": 42,
+      "facts": {
+        "boiler_description": {
+          "estimate": false,
+          "source": "Navypedia: 42 Yarrow boilers；维基 42 台锅炉",
+          "value": "Yarrow 燃煤（喷油助燃）"
+        },
+        "boilers": {
+          "estimate": false,
+          "source": "Navypedia: 42 Yarrow boilers；维基 42 台锅炉",
+          "value": 42
+        },
+        "cruise_speed_kn": {
+          "estimate": null,
+          "source": null,
+          "value": null
+        },
+        "design_power_kw": {
+          "estimate": false,
+          "source": "Navypedia 75,000 hp；维基 75,000 shp（两源一致）",
+          "value": 55927.49036867027
+        },
+        "engine_built_year": {
+          "estimate": null,
+          "source": null,
+          "value": null
+        },
+        "engine_description": {
+          "estimate": false,
+          "source": "Navypedia: 4 Parsons steam turbines；维基同",
+          "value": "4 × Parsons 直驱蒸汽轮机"
+        },
+        "max_speed_kn": {
+          "estimate": false,
+          "source": "Navypedia: Max speed 27.5 kts（试航 28.1 kn @ 83,000 shp；设计 28 kn）",
+          "value": 27.5
+        },
+        "shafts": {
+          "estimate": false,
+          "source": "Navypedia: No of shafts 4",
+          "value": 4
+        },
+        "trial_power_kw": {
+          "estimate": false,
+          "source": "Navypedia: on trials made 28.1 kts with 83,000 shp",
+          "value": 61893.08934132843
+        }
+      },
+      "fuel_bindings": {
+        "coal": {
+          "estimate": true,
+          "source": "Explicit link to existing canonical fuel ledger",
+          "weight_item_ids": [
+            "coal"
+          ]
+        },
+        "oil": {
+          "estimate": true,
+          "source": "Explicit link to existing canonical fuel ledger",
+          "weight_item_ids": [
+            "fuel-oil"
+          ]
+        }
+      },
       "raw_design_power": {
         "source": "Navypedia and inherited engines case",
         "unit": "shp",

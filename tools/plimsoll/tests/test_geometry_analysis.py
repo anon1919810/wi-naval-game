@@ -349,6 +349,7 @@ class GeometryAnalysisTests(unittest.TestCase):
 
     def test_l0_default_estimate_flags_are_explicit_assumptions_and_diagnostics(self):
         hull = {**parameters(), "kg_m": 0, "kg_is_estimate": None,
+                "displacement_normal_t": 100,
                 "block_coeff_is_estimate": False}
         result = analysis.parameterized_hydrostatics(hull)
         assumptions = {a["field"]: a for a in result["assumptions"]}
@@ -361,7 +362,15 @@ class GeometryAnalysisTests(unittest.TestCase):
                                 for d in result["diagnostics"]))
         self.assertNotIn("block_coeff_is_estimate", assumptions)
         self.assertIsNone(result["inputs"]["kg_is_estimate"])
-        self.assertIs(next(t for t in result["trace"] if t["key"] == "kg_m")["estimate"], None)
+
+    def test_absent_optional_quantities_do_not_report_unused_estimate_defaults(self):
+        result = analysis.parameterized_hydrostatics(parameters())
+        for flag in ("kg_is_estimate", "displacement_unit_is_estimate"):
+            self.assertNotIn(flag, {a["field"] for a in result["assumptions"]})
+            self.assertFalse(any(d["code"] == "l0.default_assumption" and d["path"] == f"$.hull.{flag}"
+                                 for d in result["diagnostics"]))
+        self.assertIsNone(result["values"]["kg_m"])
+        self.assertFalse(any(t["key"] == "kg_m" for t in result["trace"]))
 
     def test_deck_event_inputs_are_validated_even_when_all_samples_failed(self):
         deck = {"source": "deck plan", "estimate": False,
