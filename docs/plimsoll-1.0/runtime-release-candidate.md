@@ -36,6 +36,29 @@ The SPDX document can include source components not actually shipped in this
 Windows archive; final binary inventory and notice mapping must distinguish
 them.
 
+## Isolated candidate smoke check
+
+The unmodified 34-file archive was subsequently extracted into a dedicated
+Chinese-named scratch directory and executed with isolated mode and UTF-8 enabled.
+It reports Python 3.13.15, OpenSSL 3.0.21, SQLite 3.50.4 and Expat 2.8.2.
+The executable SHA-256 is
+`85b71d8c6ec1905935f74be0c9869aae198d00e98f39df699ec66f9c5a84cecd`.
+All original archive file hashes remained unchanged; `sys.path` contained only
+that runtime directory and its own standard-library ZIP.
+
+The probe imported the required standard-library families, received a 200 KB
+result from a spawned child before joining it, terminated and reaped an owned
+worker, and saved/reopened UTF-8 JSON through atomic replacement. It did not
+exercise Plimsoll, browser interactions, application cancellation or performance.
+The raw report and probe hash are preserved in scratch `runtime-smoke.json`;
+application acceptance must still use the actual built release.
+
+Pinned upstream notice bytes for CPython 3.13.15, OpenSSL 3.0.21, Expat 2.8.2,
+XZ 5.2.5, mpdecimal 4.0.0 and zlib 1.3.1 were fetched with normal TLS verification.
+Their source URLs, Git blob IDs and SHA-256 digests are retained in the candidate's
+`notices/sources.json`. These are preparation inputs; matching every shipped
+component and preserving its applicable notices remains a packaging requirement.
+
 ## Packaging direction and remaining checks
 
 - Prefer preserving this small official embeddable distribution, its license
