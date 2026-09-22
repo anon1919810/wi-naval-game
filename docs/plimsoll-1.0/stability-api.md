@@ -100,6 +100,13 @@ and `safe` are separate. Historical validation and overall safety remain null.
 Failure results contain structured blocking diagnostics and no reusable GZ or
 last-iterate equilibrium. Invalid curve request structures (angle ordering or
 opening fields) raise `ValueError`; unsupported geometry returns failed rows.
+Loading values, diagnostics/effective-item lists, initial attitude and each
+liquid/tank container are checked before member access. Malformed loading or
+nested solver options produce failed equilibria/curve rows; a null loading
+state keeps a null fingerprint. Failure output retains the original loading
+payload and any usable diagnostic objects, plus a blocking input diagnostic.
+Curve angle/opening collections must be lists or tuples (JSON arrays); malformed
+collections or opening objects raise `ValueError` before geometry evaluation.
 
 ## Curves, openings and limits
 
@@ -115,6 +122,8 @@ Openings require unique `id`, finite `x_m`, `y_m`, `z_m` above keel and explicit
 boolean `open`. Closed openings do not contribute. Normal clearances use the
 same waterplane normal as buoyancy. An observed positive-to-negative clearance
 bracket is refined; an already immersed first sample remains a sampled cutoff.
+For a refined event, its opening ID is selected from the solved event state,
+since the minimum-clearance opening may change between requested sample angles.
 `openings=None` means unknown and produces a diagnostic; `[]` explicitly
 declares no open points supplied. Generic section vertices do not identify real
 deck edges, so `deck_edge_immersion` remains null with a separate unknown status.

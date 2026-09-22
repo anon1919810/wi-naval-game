@@ -175,9 +175,14 @@ def _solve(prepared, state, options):
         raise ValueError('loading state must be an object')
     if state.get('complete_mass') is not True or state.get('complete_cg') is not True:
         raise ValueError('complete mass and three-axis CG are required')
-    if any(d.get('blocking') for d in state.get('diagnostics',[])):
+    diagnostics = state.get('diagnostics',[])
+    if not isinstance(diagnostics,list) or any(not isinstance(d,dict) for d in diagnostics):
+        raise ValueError('loading diagnostics must be a list of objects')
+    if any(d.get('blocking') for d in diagnostics):
         raise ValueError('loading has blocking diagnostics')
     values = state['values']
+    if not isinstance(values,dict):
+        raise ValueError('loading values must be an object')
     base_mass = _number(values.get('total_mass_t'),'total_mass_t')
     base_cg = [_number(values.get(k),k) for k in ('lcg_m','tcg_m','kg_m')]
     base_cg[2] += keel
@@ -188,9 +193,16 @@ def _solve(prepared, state, options):
     if not isinstance(liquids,list):
         raise ValueError('liquid_loads must be a list')
     ids, added = set(), 0.0
-    ledger_ids = {v.get('id') for v in state.get('effective_items',[])}
+    items = state.get('effective_items',[])
+    if not isinstance(items,list) or any(not isinstance(item,dict) for item in items):
+        raise ValueError('loading effective_items must be a list of objects')
+    ledger_ids = {v.get('id') for v in items}
     for liquid in liquids:
+        if not isinstance(liquid,dict):
+            raise ValueError('each additional liquid load must be an object')
         tank = liquid['tank']
+        if not isinstance(tank,dict):
+            raise ValueError('each liquid tank must be an object')
         identity = tank.get('id')
         if not isinstance(identity,str) or not identity or identity in ids or identity in ledger_ids:
             raise ValueError('liquids need unique IDs absent from base weight ledger')
@@ -222,6 +234,8 @@ def _solve(prepared, state, options):
     p_bounds = [math.tan(math.radians(v)) for v in tb]
     q_bounds = [math.tan(math.radians(v)) for v in hb]
     initial = options.get('initial',{})
+    if not isinstance(initial,dict):
+        raise ValueError('initial attitude must be an object')
     initial_trim = _number(initial.get('trim_deg',0),'initial trim')
     initial_heel = fixed if fixed is not None else _number(initial.get('heel_deg',0),'initial heel')
     if not tb[0]<=initial_trim<=tb[1] or not hb[0]<=initial_heel<=hb[1]:
@@ -350,12 +364,15 @@ def _solve(prepared, state, options):
 
 
 def _failed(state, error):
+    supplied = state.get('diagnostics',[]) if isinstance(state,dict) else []
+    # Keep usable upstream diagnostics and retain the entire malformed payload
+    # in loading; rendering an input error must not itself dereference nulls.
+    diagnostics = [copy.deepcopy(d) for d in supplied if isinstance(d,dict)] if isinstance(supplied,list) else []
     return dict(converged=False,method_version=METHOD_VERSION,
         input_fingerprint=state.get('input_fingerprint') if isinstance(state,dict) else None,
         loading=copy.deepcopy(state),
         validity=dict(complete=False,model_applicable=False,historical_validated=None,safe=None),
-        diagnostics=copy.deepcopy(state.get('diagnostics',[])) + [_diagnostic('stability.unresolved',str(error),True)]
-            if isinstance(state,dict) else [_diagnostic('stability.unresolved',str(error),True)])
+        diagnostics=diagnostics + [_diagnostic('stability.unresolved',str(error),True)])
 
 
 def solve_loaded_equilibrium(hull, loading_state, options=None):
@@ -401,12 +418,31 @@ def stability_curve(hull, state, angles_deg, openings=None, options=None):
     diagnostics = []
     rows, zeros = [], []
     downflooding = None
+    input_fingerprint = state.get('input_fingerprint') if isinstance(state,dict) else None
+    if not isinstance(angles_deg,(list,tuple)):
+        raise ValueError('curve angles must be a list or tuple')
     angles = [_number(a,'curve angle') for a in angles_deg]
     if any(b<=a for a,b in zip(angles,angles[1:])):
         raise ValueError('curve angles must be strictly increasing')
     if options is not None and not isinstance(options,dict):
         raise ValueError('options must be an object')
     options = copy.deepcopy(options) if options is not None else {}
+    open_points = []
+    if openings is None:
+        diagnostics.append(_diagnostic('stability.openings_unknown','downflooding is unknown without supplied opening definitions'))
+    else:
+        if not isinstance(openings,(list,tuple)):
+            raise ValueError('openings must be a list or tuple of objects')
+        ids = set()
+        for point in openings:
+            if not isinstance(point,dict):
+                raise ValueError('each opening must be an object')
+            if not isinstance(point.get('open'),bool) or not isinstance(point.get('id'),str) or point['id'] in ids:
+                raise ValueError('openings need unique IDs and explicit boolean open state')
+            ids.add(point['id'])
+            coords = [_number(point.get(k),k) for k in ('x_m','y_m','z_m')]
+            if point['open']:
+                open_points.append((point['id'],coords))
     try:
         prepared = _prepare(hull,options)
     except (ValueError,TypeError,KeyError,OverflowError,ZeroDivisionError) as error:
@@ -418,21 +454,9 @@ def stability_curve(hull, state, angles_deg, openings=None, options=None):
             zero_crossings=[],avs_deg=None,maximum=None,
             endpoint=dict(kind='failed_sample' if angles else 'no_samples',angle_deg=angles[-1] if angles else None,gz_m=None),
             initial_stiffness_m=None,downflooding=None,deck_edge_immersion=None,
-            diagnostics=failed['diagnostics'],safe=None,input_fingerprint=state.get('input_fingerprint'),
+            diagnostics=failed['diagnostics'],safe=None,input_fingerprint=input_fingerprint,
             loading=copy.deepcopy(state))
     keel = prepared[3]['keel_offset_m']
-    open_points = []
-    if openings is None:
-        diagnostics.append(_diagnostic('stability.openings_unknown','downflooding is unknown without supplied opening definitions'))
-    else:
-        ids = set()
-        for point in openings:
-            if not isinstance(point.get('open'),bool) or not isinstance(point.get('id'),str) or point['id'] in ids:
-                raise ValueError('openings need unique IDs and explicit boolean open state')
-            ids.add(point['id'])
-            coords = [_number(point.get(k),k) for k in ('x_m','y_m','z_m')]
-            if point['open']:
-                open_points.append((point['id'],coords))
     def solve(angle):
         try:
             return _solve(prepared,state,{**options,'heel_deg':angle})
@@ -467,8 +491,9 @@ def stability_curve(hull, state, angles_deg, openings=None, options=None):
         clear = clearance(result) if result['converged'] else None
         if clear is not None and clear[0]<=0 and downflooding is None:
             crossing = bracket(previous[0],angle,'opening') if previous and previous[2] and previous[2][0]>0 else None
+            event_clearance = clearance(crossing[1]) if crossing else clear
             downflooding = dict(angle_deg=crossing[0] if crossing else angle,
-                kind='bracketed_immersion' if crossing else 'already_immersed_sample',opening_id=clear[1])
+                kind='bracketed_immersion' if crossing else 'already_immersed_sample',opening_id=event_clearance[1])
         if previous and result['converged'] and previous[1]['converged']:
             if previous[1]['gz_m']*result['gz_m']<0 and abs(previous[1]['gz_m'])>1e-8 and abs(result['gz_m'])>1e-8:
                 root = bracket(previous[0],angle,'zero')
@@ -505,4 +530,4 @@ def stability_curve(hull, state, angles_deg, openings=None, options=None):
         maximum=maximum,endpoint=endpoint,initial_stiffness_m=stiffness,
         stiffness_definition='dGZ/dheel_rad_at_zero_with_longitudinal_equilibrium',
         downflooding=downflooding,deck_edge_immersion=None,diagnostics=diagnostics,safe=None,
-        input_fingerprint=state.get('input_fingerprint'),loading=copy.deepcopy(state))
+        input_fingerprint=input_fingerprint,loading=copy.deepcopy(state))

@@ -342,6 +342,57 @@ class LoadedStability(unittest.TestCase):
         self.assertLess(r['waterline_d_m'],-10)
         self.assertLess(abs(r['p']-p)/p,.01)
 
+    def test_first_immersion_names_opening_at_refined_event(self):
+        openings=[{'id':'first','x_m':0,'y_m':5,'z_m':4.5,'open':True},
+                  {'id':'later','x_m':0,'y_m':10,'z_m':6,'open':True}]
+        result=stability.stability_curve(box(),load(),[0,20],openings)
+        event=result['downflooding']
+        self.assertEqual(event['kind'],'bracketed_immersion')
+        self.assertAlmostEqual(event['angle_deg'],math.degrees(math.atan(.1)),delta=1e-6)
+        self.assertEqual(event['opening_id'],'first')
+
+    def test_nested_option_containers_produce_structured_failures(self):
+        malformed=[{'initial':None},{'initial':[]},{'liquid_loads':[None]},
+                   {'liquid_loads':[{'tank':None,'volume_m3':1,'fluid_density_t_m3':1}]},
+                   {'liquid_loads':[{'tank':[],'volume_m3':1,'fluid_density_t_m3':1}]}]
+        for options in malformed:
+            with self.subTest(options=options):
+                result=stability.solve_loaded_equilibrium(box(),load(),options)
+                self.assertFalse(result['converged'])
+                self.assertTrue(result['diagnostics'][-1]['blocking'])
+                self.assertNotIn('gz_m',result)
+                curve=stability.stability_curve(box(),load(),[0,10],options=options)
+                self.assertTrue(all(not row['equilibrium']['converged'] for row in curve['rows']))
+
+    def test_malformed_loading_containers_fail_without_attribute_errors(self):
+        malformed=[None,[],{**load(),'values':None},{**load(),'diagnostics':None},
+                   {**load(),'diagnostics':[None]},{**load(),'effective_items':None},
+                   {**load(),'effective_items':[None]}]
+        for state in malformed:
+            with self.subTest(state=state):
+                result=stability.solve_loaded_equilibrium(box(),state)
+                self.assertFalse(result['converged'])
+                self.assertTrue(result['diagnostics'][-1]['blocking'])
+                curve=stability.stability_curve(box(),state,[0,10])
+                self.assertFalse(curve['converged'])
+                self.assertTrue(all(row['equilibrium']['diagnostics'][-1]['blocking'] for row in curve['rows']))
+                self.assertIsNone(curve['initial_stiffness_m'])
+                self.assertEqual(curve['input_fingerprint'],state.get('input_fingerprint') if isinstance(state,dict) else None)
+
+    def test_invalid_curve_request_containers_raise_value_error(self):
+        for angles in (None,1,'0,10',{'angle':0}):
+            with self.subTest(angles=angles),self.assertRaises(ValueError):
+                stability.stability_curve(box(),load(),angles)
+        for openings in (1,'door',{},[None],[[]]):
+            with self.subTest(openings=openings),self.assertRaises(ValueError):
+                stability.stability_curve(box(),load(),[0,10],openings)
+
+    def test_unknown_geometry_with_null_state_retains_failed_curve_contract(self):
+        result=stability.stability_curve({'kind':'parameters'},None,[0,10])
+        self.assertFalse(result['converged'])
+        self.assertIsNone(result['input_fingerprint'])
+        self.assertTrue(all(not row['equilibrium']['converged'] for row in result['rows']))
+
 
 if __name__ == '__main__':
     unittest.main()
