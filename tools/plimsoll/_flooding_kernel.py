@@ -34,6 +34,14 @@ def _metadata(value, name, path):
     return copy.deepcopy(value[name])
 
 
+def _source(value, path):
+    source = _metadata(value, 'source', path)
+    if not ((isinstance(source, str) and source.strip())
+            or (isinstance(source, dict) and source)):
+        raise ValueError(f'{path}.source must be a non-empty string or object')
+    return source
+
+
 def _dot(a, b):
     return math.fsum(x*y for x, y in zip(a, b))
 
@@ -71,7 +79,7 @@ def _prepare_tanks(tanks, volumes_m3, heel, trim):
         density = _number(
             tank.get('fluid_density_t_m3'), f'{path}.fluid_density_t_m3',
             minimum=math.nextafter(0.0, math.inf))
-        source = _metadata(tank, 'source', path)
+        source = _source(tank, path)
         estimate = _metadata(tank, 'estimate', path)
         if tank_id not in volumes_m3:
             raise ValueError(f'missing volume for tank {tank_id!r}')
@@ -108,7 +116,7 @@ def _prepare_sea(sea, normal, tank_ids):
         'fluid_density_t_m3': _number(
             sea.get('fluid_density_t_m3'), 'sea.fluid_density_t_m3',
             minimum=math.nextafter(0.0, math.inf)),
-        'source': _metadata(sea, 'source', 'sea'),
+        'source': _source(sea, 'sea'),
         'estimate': _metadata(sea, 'estimate', 'sea'),
         'normal': list(normal),
     }
@@ -193,7 +201,7 @@ def _prepare_connection(edge, index, node_ids, sea_node):
             edge.get('fluid_density_t_m3'), f'{path}.fluid_density_t_m3',
             minimum=math.nextafter(0.0, math.inf)),
         'open': is_open, 'aperture_height_m': aperture_height,
-        'source': _metadata(edge, 'source', path),
+        'source': _source(edge, path),
         'estimate': _metadata(edge, 'estimate', path),
     }
 
@@ -236,6 +244,8 @@ def evaluate_flows(tanks, volumes_m3, connections, *, attitude, sea=None,
             edge_status, flow = 'closed', 0.0
         elif edge['area_m2'] == 0.0 or edge['discharge_coefficient'] == 0.0:
             edge_status, flow = 'zero_area', 0.0
+        elif left['head_m'] == right['head_m']:
+            edge_status, flow = 'equal_heads', 0.0
         if flow is None and edge['aperture_height_m'] is not None:
             half_normal_height = abs(normal[2])*edge['aperture_height_m']/2.0
             for endpoint in (left, right):
@@ -252,12 +262,9 @@ def evaluate_flows(tanks, volumes_m3, connections, *, attitude, sea=None,
                     break
         if edge_status != 'partial_aperture_unsupported' and flow is None:
             difference = left['head_m']-right['head_m']
-            if difference == 0.0:
-                edge_status, flow = 'equal_heads', 0.0
-            else:
-                flow = math.copysign(
-                    edge['discharge_coefficient']*edge['area_m2']
-                    * math.sqrt(2.0*gravity*abs(difference)), difference)
+            flow = math.copysign(
+                edge['discharge_coefficient']*edge['area_m2']
+                * math.sqrt(2.0*gravity*abs(difference)), difference)
         rows.append({
             **edge, 'centre_m': list(edge['centre_m']),
             'from_head_m': left['head_m'], 'to_head_m': right['head_m'],

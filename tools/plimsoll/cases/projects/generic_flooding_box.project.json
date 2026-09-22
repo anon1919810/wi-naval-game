@@ -1,0 +1,95 @@
+{
+  "schema": "plimsoll-project-1",
+  "id": "generic-box-fixture",
+  "name": "Generic connected-flooding box fixture",
+  "revision": 0,
+  "units": {
+    "length": "m",
+    "mass": "t",
+    "speed": "kn",
+    "power": "kW",
+    "angle": "deg"
+  },
+  "coordinates": {
+    "x_positive": "forward",
+    "x_origin": "midships",
+    "y_positive": "starboard",
+    "z_origin": "keel"
+  },
+  "hull": {
+    "lwl_m": 20.0,
+    "beam_m": 10.0,
+    "depth_m": 6.0
+  },
+  "geometry": {
+    "kind": "offsets",
+    "keel_offset_m": 0.0,
+    "source": {
+      "kind": "analytic_rectangular_prism",
+      "definition": "Twenty-one identical 10 m by 6 m transverse rectangles over 20 m length."
+    },
+    "estimate": false,
+    "offsets": {
+      "schema": "plimsoll-section-polygons-1",
+      "stations": [
+        [-10.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-9.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-8.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-7.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-6.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-5.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-4.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-3.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-2.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [-1.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [0.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [1.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [2.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [3.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [4.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [5.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [6.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [7.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [8.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [9.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]],
+        [10.0, [[-5.0, 0.0], [5.0, 0.0], [5.0, 6.0], [-5.0, 6.0]]]
+      ]
+    }
+  },
+  "weight_groups": [
+    {
+      "id": "lightship",
+      "label": "Base mass",
+      "required": true,
+      "items": [
+        {
+          "id": "base-mass",
+          "mass_t": 401.8,
+          "x_m": 0.0,
+          "y_m": 0.0,
+          "kg_m": 1.0,
+          "source": {
+            "kind": "analytic_fixture",
+            "definition": "Base mass selected for the independent coupled-heave oracle."
+          },
+          "estimate": false
+        }
+      ]
+    }
+  ],
+  "loading_conditions": [
+    {
+      "id": "normal",
+      "label": "Normal analytic condition",
+      "reference_displacement_t": 401.8,
+      "overrides": {}
+    }
+  ],
+  "systems": {},
+  "compartments": [],
+  "opening_definition": "supplied",
+  "openings": [],
+  "sources": {
+    "purpose": "Deterministic synthetic fixture for connected-flooding verification; no historical claim."
+  }
+}

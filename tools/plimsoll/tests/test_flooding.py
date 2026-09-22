@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import sys
 import unittest
+from unittest import mock
 
 
 HERE = Path(__file__).resolve().parent
@@ -212,10 +213,18 @@ class FixedAttitudeKernelTests(unittest.TestCase):
 
         limited = kernel.evaluate_flows(
             tanks, {'a': 10.0, 'b': 5.0},
-            [kernel_edge('partial', 'a', 'b', centre_m=[0, 0, 1], aperture_height_m=0.5)],
+            [kernel_edge('partial', 'a', 'b', centre_m=[0, 0, 0.9], aperture_height_m=0.5)],
             attitude=attitude)
         self.assertEqual(limited['status'], 'model_limit')
         self.assertIsNone(limited['edges'][0]['flow_m3_s'])
+
+        equal_partial = kernel.evaluate_flows(
+            tanks, {'a': 10.0, 'b': 10.0},
+            [kernel_edge('equal-partial', 'a', 'b', centre_m=[0, 0, 1],
+                         aperture_height_m=0.5)], attitude=attitude)
+        self.assertEqual(equal_partial['status'], 'applicable')
+        self.assertEqual(equal_partial['edges'][0]['status'], 'equal_heads')
+        self.assertEqual(equal_partial['edges'][0]['flow_m3_s'], 0.0)
 
     def test_fixed_ode_refinement_and_conservation(self):
         answer = oracle()
@@ -290,6 +299,23 @@ class FixedAttitudeKernelTests(unittest.TestCase):
         self.assertEqual(full['stop_reason'], 'receiver_capacity')
         self.assertAlmostEqual(full['volumes_m3']['full'], 50.0, places=12)
 
+    def test_private_kernel_rejects_empty_source_metadata(self):
+        attitude = {'heel_deg': 0.0, 'trim_deg': 0.0,
+                    'geometry_keel_offset_m': 0.0}
+        bad_tank = kernel_tank('a')
+        bad_tank['source'] = None
+        with self.assertRaisesRegex(ValueError, 'source'):
+            kernel.evaluate_flows(
+                [bad_tank, kernel_tank('b')], {'a': 10.0, 'b': 5.0},
+                [kernel_edge('cross', 'a', 'b')], attitude=attitude)
+
+        bad_edge = kernel_edge('cross', 'a', 'b')
+        bad_edge['source'] = {}
+        with self.assertRaisesRegex(ValueError, 'source'):
+            kernel.evaluate_flows(
+                [kernel_tank('a'), kernel_tank('b')], {'a': 10.0, 'b': 5.0},
+                [bad_edge], attitude=attitude)
+
 
 class CoupledFloodingTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -304,6 +330,7 @@ class CoupledFloodingTests(unittest.TestCase):
                 box_project(), 'normal', scenario(dt=dt), options={})
             self.assertEqual(result['status'], 'completed', result)
             self.assertEqual(result['stop_reason'], 'scheduled_completion')
+            self.assertIs(result['validity']['numerical_convergence'], True)
             influx = result['final_state']['volumes_m3']['centre'] - 8.0
             draft = result['final_state']['equilibrium']['waterline_above_keel_m']
             influx_errors.append(abs(influx-answer['net_sea_inflow_m3']))
@@ -352,6 +379,7 @@ class CoupledFloodingTests(unittest.TestCase):
             options={'cancel_check': cancel})
         self.assertEqual(canceled['status'], 'canceled')
         self.assertEqual(canceled['stop_reason'], 'canceled')
+        self.assertIs(canceled['validity']['numerical_convergence'], True)
         self.assertGreater(canceled['final_state']['time_s'], 0.0)
 
         failed = flooding.simulate_flooding(
@@ -359,6 +387,7 @@ class CoupledFloodingTests(unittest.TestCase):
             options={'equilibrium': {'max_iterations': 1}})
         self.assertEqual(failed['status'], 'equilibrium_failure')
         self.assertEqual(failed['timeline'], [])
+        self.assertIs(failed['validity']['numerical_convergence'], False)
         self.assertFalse(failed['failed_attempt']['equilibrium']['converged'])
 
         flooding_event = scenario(duration=2.0)
@@ -369,6 +398,7 @@ class CoupledFloodingTests(unittest.TestCase):
         event = flooding.simulate_flooding(box_project(), 'normal', flooding_event)
         self.assertEqual(event['status'], 'downflooding_event')
         self.assertEqual(event['stop_reason'], 'downflooding_event')
+        self.assertIs(event['validity']['numerical_convergence'], True)
         self.assertGreater(event['final_state']['time_s'], 0.0)
         self.assertLessEqual(event['final_state']['time_s'], 2.0)
         self.assertEqual(event['downflooding']['opening_id'], 'low-opening')
@@ -378,6 +408,7 @@ class CoupledFloodingTests(unittest.TestCase):
         invalid = flooding.simulate_flooding(box_project(), 'normal', invalid_scenario)
         self.assertEqual(invalid['status'], 'invalid_input')
         self.assertEqual(invalid['timeline'], [])
+        self.assertIsNone(invalid['validity']['numerical_convergence'])
         self.assertTrue(any(d['blocking'] for d in invalid['diagnostics']))
 
         over_capacity = scenario()
@@ -434,6 +465,69 @@ class CoupledFloodingTests(unittest.TestCase):
         self.assertNotEqual(bridged['input_fingerprint'],
                             known_none['input_fingerprint'])
 
+    def test_public_scenario_rejects_empty_source_metadata(self):
+        cases = []
+        bad = scenario(duration=0.0)
+        bad['source'] = None
+        cases.append(('scenario', bad, '$.scenario.source'))
+        bad = scenario(duration=0.0)
+        bad['sea']['source'] = {}
+        cases.append(('sea', bad, '$.scenario.sea.source'))
+        bad = scenario(duration=0.0)
+        bad['tanks'][0]['source'] = ''
+        cases.append(('tank', bad, '$.scenario.tanks[0].source'))
+        bad = scenario(duration=0.0)
+        bad['connections'][0]['source'] = None
+        cases.append(('connection', bad, '$.scenario.connections[0].source'))
+        bad = scenario(duration=0.0)
+        bad['openings'] = [{
+            'id': 'opening', 'x_m': 0.0, 'y_m': 0.0, 'z_m': 5.0,
+            'open': True, 'source': {}, 'estimate': False,
+        }]
+        cases.append(('opening', bad, '$.scenario.openings[0].source'))
+
+        for label, bad_scenario, expected_path in cases:
+            with self.subTest(location=label):
+                result = flooding.simulate_flooding(
+                    box_project(), 'normal', bad_scenario)
+                self.assertEqual(result['status'], 'invalid_input')
+                self.assertEqual(result['timeline'], [])
+                self.assertTrue(any(
+                    item['code'] == 'flooding.source_invalid'
+                    and item['path'] == expected_path
+                    and item['blocking']
+                    for item in result['diagnostics']), result['diagnostics'])
+
+    def test_model_limit_keeps_convergence_separate_from_completion(self):
+        partial = scenario(duration=1.0)
+        partial['connections'][0]['z_m'] = 0.9
+        partial['connections'][0]['aperture_height_m'] = 0.5
+        result = flooding.simulate_flooding(box_project(), 'normal', partial)
+        self.assertEqual(result['status'], 'model_limit')
+        self.assertFalse(result['validity']['complete'])
+        self.assertFalse(result['validity']['model_applicable'])
+        self.assertIs(result['validity']['numerical_convergence'], True)
+
+    def test_late_kernel_validation_retains_resolved_identity_and_context(self):
+        project = box_project()
+        declared = scenario(duration=0.0)
+        with mock.patch.object(
+                flooding.kernel, 'evaluate_flows',
+                side_effect=ValueError('injected kernel invariant')):
+            result = flooding.simulate_flooding(project, 'normal', declared)
+        self.assertEqual(result['status'], 'invalid_input')
+        self.assertIsNotNone(result['input_fingerprint'])
+        self.assertEqual(result['project_fingerprint'],
+                         project_io.input_fingerprint(project))
+        self.assertEqual(result['loading']['condition_id'], 'normal')
+        self.assertEqual(result['scenario']['id'], 'coupled-heave')
+        self.assertEqual(result['openings_origin'], 'project')
+        self.assertIs(result['validity']['numerical_convergence'], True)
+        self.assertTrue(any(
+            item['code'] == 'flooding.invalid_input'
+            and 'kernel invariant' in item['message']
+            for item in result['diagnostics']))
+
     def test_closed_valve_keeps_free_surface_and_optional_gz_uses_current_liquid(self):
         closed = flooding.simulate_flooding(
             box_project(), 'normal', scenario(open_edge=False))
@@ -457,6 +551,10 @@ class CoupledFloodingTests(unittest.TestCase):
     def test_presets_cover_required_generic_and_queen_mary_proxy_cases(self):
         path = PKG / 'cases/projects/damage-presets.json'
         data = json.loads(path.read_text(encoding='utf-8'))
+        projects = {}
+        for project_path in path.parent.glob('*.project.json'):
+            project = json.loads(project_path.read_text(encoding='utf-8'))
+            projects[project['id']] = project
         self.assertEqual(data['schema'], 'plimsoll-flooding-presets-1')
         kinds = {preset['category'] for preset in data['presets']}
         self.assertTrue({'single', 'two_connected', 'asymmetric', 'closed_valve'} <= kinds)
@@ -465,22 +563,26 @@ class CoupledFloodingTests(unittest.TestCase):
             self.assertEqual(preset['scenario']['schema'], 'plimsoll-flooding-scenario-1')
             self.assertIn('source', preset['scenario'])
             self.assertIn('estimate', preset['scenario'])
+            with self.subTest(public_replay=preset['id']):
+                project = projects.get(preset['project_id'])
+                self.assertIsNotNone(
+                    project, f"unresolved preset project_id {preset['project_id']!r}")
+                self.assertIn(
+                    preset['condition_id'],
+                    {condition['id'] for condition in project['loading_conditions']})
+                initial_only = copy.deepcopy(preset['scenario'])
+                initial_only['duration_s'] = 0.0
+                replay = flooding.simulate_flooding(
+                    project, preset['condition_id'], initial_only)
+                self.assertEqual(replay['status'], 'completed', replay)
+                self.assertEqual(replay['stop_reason'], 'scheduled_completion')
+                self.assertIs(replay['validity']['numerical_convergence'], True)
+                if preset['project_id'] == 'generic-box-fixture':
+                    self.assertEqual(project['opening_definition'], 'supplied')
+                    self.assertEqual(project['openings'], [])
             if preset['project_id'] == 'hms-queen-mary-1913':
                 self.assertTrue(preset['scenario']['estimate'])
                 self.assertIn('proxy', json.dumps(preset['scenario']['source']).lower())
-
-        queen_mary = json.loads(
-            (PKG / 'cases/projects/queen_mary_1913.project.json').read_text(
-                encoding='utf-8'))
-        qm_preset = next(
-            preset for preset in data['presets']
-            if preset['id'] == 'queen-mary-single-proxy')
-        initial_only = copy.deepcopy(qm_preset['scenario'])
-        initial_only['duration_s'] = 0.0
-        replay = flooding.simulate_flooding(
-            queen_mary, qm_preset['condition_id'], initial_only)
-        self.assertEqual(replay['status'], 'completed', replay)
-        self.assertTrue(replay['final_state']['equilibrium']['converged'])
 
 
 if __name__ == '__main__':

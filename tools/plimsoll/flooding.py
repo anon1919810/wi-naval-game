@@ -69,6 +69,16 @@ def _metadata(value, field, path):
     return copy.deepcopy(value[field])
 
 
+def _source(value, path):
+    source = _metadata(value, 'source', path)
+    if not ((isinstance(source, str) and source.strip())
+            or (isinstance(source, dict) and source)):
+        raise FloodingInputError(
+            'flooding.source_invalid', f'{path}.source',
+            'source must be a non-empty string or object')
+    return source
+
+
 def _estimate(value, path):
     estimate = _metadata(value, 'estimate', path)
     if not isinstance(estimate, bool):
@@ -174,7 +184,7 @@ def _validate_openings(value, path):
             'x_m': _number(opening.get('x_m'), f'{item_path}.x_m'),
             'y_m': _number(opening.get('y_m'), f'{item_path}.y_m'),
             'z_m': _number(opening.get('z_m'), f'{item_path}.z_m'),
-            'source': _metadata(opening, 'source', item_path),
+            'source': _source(opening, item_path),
             'estimate': _estimate(opening, item_path),
         }
         if 'kind' in opening:
@@ -196,7 +206,7 @@ def _validate_scenario(raw_scenario, raw_project):
                                      '$.scenario.duration_s', minimum=0.0)
     scenario['time_step_s'] = _positive(scenario.get('time_step_s'),
                                         '$.scenario.time_step_s')
-    scenario['source'] = _metadata(scenario, 'source', '$.scenario')
+    scenario['source'] = _source(scenario, '$.scenario')
     scenario['estimate'] = _estimate(scenario, '$.scenario')
 
     sea = scenario.get('sea')
@@ -208,7 +218,7 @@ def _validate_scenario(raw_scenario, raw_project):
                             '$.scenario.sea.fluid_density_t_m3')
     normalized_sea = {
         'id': sea_id, 'fluid_density_t_m3': sea_density,
-        'source': _metadata(sea, 'source', '$.scenario.sea'),
+        'source': _source(sea, '$.scenario.sea'),
         'estimate': _estimate(sea, '$.scenario.sea'),
     }
 
@@ -235,7 +245,7 @@ def _validate_scenario(raw_scenario, raw_project):
                                      'all water nodes must use the same explicit density')
         initial = _number(tank.get('initial_volume_m3'),
                           f'{path}.initial_volume_m3', minimum=0.0)
-        _metadata(tank, 'source', path)
+        _source(tank, path)
         _estimate(tank, path)
         try:
             tank_geometry.liquid_state(tank, initial)
@@ -287,7 +297,7 @@ def _validate_scenario(raw_scenario, raw_project):
                 edge.get('discharge_coefficient'),
                 f'{path}.discharge_coefficient', minimum=0.0, maximum=1.0),
             'fluid_density_t_m3': density, 'open': is_open,
-            'source': _metadata(edge, 'source', path),
+            'source': _source(edge, path),
             'estimate': _estimate(edge, path),
         }
         if 'aperture_height_m' in edge:
@@ -341,6 +351,7 @@ def _solve_equilibrium(geometry, loading_state, tanks, volumes, sea_density,
         return {
             'converged': False,
             'validity': {'complete': False, 'model_applicable': False,
+                         'numerical_convergence': False,
                          'historical_validated': None, 'safe': None},
             'diagnostics': [_diagnostic(
                 'flooding.ambient_density_mismatch', 'error',
@@ -456,13 +467,22 @@ def _state_row(time_s, actual_dt_s, volumes, equilibrium, evaluation, transfers,
     }
 
 
-def _invalid_result(diagnostics):
+def _invalid_result(diagnostics, *, input_fingerprint=None,
+                    project_fingerprint=None, loading_state=None,
+                    scenario=None, openings_origin=None,
+                    numerical_convergence=None):
     return {
         'schema': SCHEMA, 'method_version': METHOD_VERSION,
         'status': 'invalid_input', 'stop_reason': 'invalid_input',
         'validity': {'complete': False, 'model_applicable': False,
+                     'numerical_convergence': numerical_convergence,
                      'historical_validated': None, 'safe': None},
-        'input_fingerprint': None, 'timeline': [], 'final_state': None,
+        'input_fingerprint': input_fingerprint,
+        'project_fingerprint': project_fingerprint,
+        'loading': copy.deepcopy(loading_state),
+        'scenario': copy.deepcopy(scenario),
+        'openings_origin': openings_origin,
+        'timeline': [], 'final_state': None,
         'failed_attempt': None, 'downflooding': None,
         'remaining_gz': None, 'gz_snapshots': [],
         'volume_conservation_error_m3': None,
@@ -547,10 +567,12 @@ def simulate_flooding(project, condition_id, scenario, options=None):
             'schema': SCHEMA, 'method_version': METHOD_VERSION,
             'status': 'equilibrium_failure', 'stop_reason': 'equilibrium_failure',
             'validity': {'complete': False, 'model_applicable': False,
+                         'numerical_convergence': False,
                          'historical_validated': None, 'safe': None},
             'input_fingerprint': fingerprint,
             'project_fingerprint': loading_state.get('project_fingerprint'),
             'loading': loading_state, 'scenario': normalized_scenario,
+            'openings_origin': openings_origin,
             'timeline': [], 'final_state': None,
             'failed_attempt': {'time_s': 0.0, 'volumes_m3': copy.deepcopy(volumes),
                                'equilibrium': copy.deepcopy(equilibrium)},
@@ -566,7 +588,14 @@ def simulate_flooding(project, condition_id, scenario, options=None):
             tanks, volumes, connections, attitude=attitude, sea=sea_state,
             gravity_m_s2=gravity)
     except (ValueError, TypeError, KeyError) as error:
-        return _invalid_result(_failure_diagnostics(error))
+        return _invalid_result(
+            _failure_diagnostics(error),
+            input_fingerprint=fingerprint,
+            project_fingerprint=loading_state.get('project_fingerprint'),
+            loading_state=loading_state,
+            scenario=normalized_scenario,
+            openings_origin=openings_origin,
+            numerical_convergence=True)
     timeline = [_state_row(
         0.0, 0.0, volumes, equilibrium, evaluation, [], 0.0, 0.0, 0.0, 0.0,
         initial_volume, initial_mass, openings, geometry['keel_offset_m'])]
@@ -706,11 +735,13 @@ def simulate_flooding(project, condition_id, scenario, options=None):
 
     complete = status == 'completed'
     model_applicable = status not in ('invalid_input', 'model_limit', 'equilibrium_failure')
+    numerical_convergence = status != 'equilibrium_failure'
     return {
         'schema': SCHEMA, 'method_version': METHOD_VERSION,
         'kernel_method_version': kernel.METHOD_VERSION,
         'status': status, 'stop_reason': stop_reason,
         'validity': {'complete': complete, 'model_applicable': model_applicable,
+                     'numerical_convergence': numerical_convergence,
                      'historical_validated': None, 'safe': None},
         'input_fingerprint': fingerprint,
         'project_fingerprint': loading_state.get('project_fingerprint'),

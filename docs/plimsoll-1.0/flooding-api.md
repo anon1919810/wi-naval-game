@@ -79,7 +79,10 @@ percentage. Task 5 validates it against permeability-scaled capacity. Missing
 `discharge_coefficient` is invalid; the API never inserts a default. Area or Cd
 may be explicit zero, producing zero flow. `open` must be boolean. Source and
 estimate metadata are required on the scenario, sea, every tank, every
-connection, and supplied downflooding opening.
+connection, and supplied downflooding opening. `source` must be either a
+non-empty string or a non-empty object. Null, blank-string, and empty-object
+placeholders produce a blocking `flooding.source_invalid` diagnostic at the
+exact field path.
 
 Connections are the only flow edges. Project or scenario downflooding points
 are never converted into connections. Scenario `openings` overrides project
@@ -94,6 +97,9 @@ An optional positive `aperture_height_m` requests a finite-height
 applicability check. If an active liquid surface crosses that height, the
 point-orifice model stops at a visible model limit. A closed or zero-flow edge
 does not trigger that limit and does not deactivate the liquid free surface.
+Exact equal heads are classified as zero flow before the finite-height check,
+so an aperture touching both equal surfaces does not create a false partial-
+aperture limit.
 Pressure fields are rejected because compressed-air and pressure-network flow
 are outside this version.
 
@@ -187,12 +193,24 @@ an interpolated exact crossing. Completion, convergence, model applicability,
 historical validation and safety remain separate. Positive GM or positive
 sampled GZ never sets `safe=true`.
 
+`validity.numerical_convergence` is an independent three-state field. It is
+`null` when validation rejects input before any equilibrium solve, `false`
+when the initial or an ultimately required candidate equilibrium does not
+converge, and `true` when every state accepted into the reported trajectory
+has a converged equilibrium. `true` does not imply scheduled completion or
+model applicability: cancellation, downflooding, capacity and partial-
+aperture stops can retain a converged last accepted state.
+
 ## Presets and legacy migration
 
 `cases/projects/damage-presets.json` contains deterministic generic single,
 two-connected, asymmetric and closed-valve scenarios plus Queen Mary layout
-proxies. Queen Mary tank boundaries and apertures are explicitly estimated and
-are not historical subdivision or damage evidence.
+proxies. Every preset resolves to a shipped canonical project and loading
+condition. The generic presets use
+`cases/projects/generic_flooding_box.project.json`, an analytic rectangular
+fixture that explicitly declares `opening_definition: supplied` with no
+downflooding points. Queen Mary tank boundaries and apertures are explicitly
+estimated and are not historical subdivision or damage evidence.
 
 Legacy `damage.solve_flooded_equilibrium` and `run_damage_scenario` remain
 callable compatibility paths. They use upright centroids, scalar FSC/upright
