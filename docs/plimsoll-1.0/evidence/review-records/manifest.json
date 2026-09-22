@@ -93,5 +93,15 @@
     "file": "task-7-review-round-1.md",
     "sha256": "6e2740cd92b29c0a3bba30838ae512e166a6e9e3a90cdba46308145ccd7bee9d",
     "bytes": 8960
+  },
+  {
+    "file": "task-8a-review-round-0.md",
+    "sha256": "df37d769eb25f77bae9916efa474047bd4fcc9e7c0ed37c084904153b49894b7",
+    "bytes": 9437
+  },
+  {
+    "file": "task-8a-review-round-1.md",
+    "sha256": "1d21d7fe6a4120ce98cfcc99c1131de1e408987604ca18982eebd14d243d06d6",
+    "bytes": 5560
   }
 ]
