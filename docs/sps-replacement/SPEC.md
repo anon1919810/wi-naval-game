@@ -1,7 +1,9 @@
 # Plimsoll · 舰船设计计算器规格
 
-> 目标：做一个**可脚本化、可验证、比 SpringSharp 更准**的舰船设计与水动力计算核心。
-> 本文是需求与架构基线。参考界面图见 `docs/sps-reference/`。
+> 本文保留早期需求与七页参考字段，供迁移和覆盖核对使用。
+> 当前批准范围以 [Plimsoll 1.0 规格](../plimsoll-1.0/spec.md) 为准，实际进度见 [当前状态](../plimsoll-1.0/current-status.md)。
+> 目标是可脚本化、可验证、可追溯的舰船设计分析工具；未经同输入对照，不宣称比 SpringSharp 更准确。
+> 参考界面图见 `docs/sps-reference/`。下文旧 schema、案例数字和模块路线不覆盖新的项目契约。
 
 ---
 
@@ -30,16 +32,12 @@
 **不是什么**：不是 SpringSharp 的分支、移植或改写；不包含它的任何代码；
 不声称历史认证（沿用 `historically_certified: false` 与 `estimate` 标注纪律）。
 
-**为什么重做而不是改造 SpringSharp**：
-1. SpringSharp 是**专有软件**（`Copyright 2008 James Ross-Gowan and Ian Ross-Gowan`，
-   无任何授权文件；且其自身是 SpringStyle 1.2.1 的授权衍生品）——
-   改造它属于制作衍生作品，需先取得作者许可。
-2. 它把**计算与 GUI 焊死**：无 CLI、无批处理、无 JSON 接口。我们要的正是这些，
-   往 2008 年的 WinForms 上补比重写更贵。
-3. 它的准度上限受"纯参数化"限制（见 §6）。
+**独立实现的技术选择**：Plimsoll 使用自己的 Python 计算核心、公开说明的
+输入输出契约和本地界面，便于批量分析、测试与游戏数据导出。参数化方法和型线积分
+各有输入与离散误差；选择型线方法本身不证明对实际舰船更准确。
 
-**可以合法使用的**：它的**界面字段清单**（可公开观察）作为需求覆盖度检查表；
-以及把它当**黑盒**做结果对照验证。参考图已归档为 `docs/sps-reference/*.png`。
+七页参考图用于字段需求盘点。完整的 SpringSharp 版本能力、内部算法和同输入结果
+尚未逐项核验，不由截图推断其未提供的能力。参考图归档于 `docs/sps-reference/*.png`。
 
 ---
 
@@ -67,6 +65,10 @@
 ## 3. 数据模型
 
 ### 3.1 输入 `ship.json`
+
+以下是旧 `plimsoll-ship-1` 设计示例，数字不作为当前 Queen Mary 史实验收值。
+新项目使用 [data-contract.md](../plimsoll-1.0/data-contract.md) 的
+`plimsoll-project-1`；单位、来源、加载工况和迁移以该契约及实际案例为准。
 
 ```jsonc
 {
