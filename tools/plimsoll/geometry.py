@@ -1,18 +1,8 @@
-"""Plimsoll · L1 船体几何与剖面性质
+"""Polygon-section hydrostatics using half-plane clipping and trapezoidal quadrature.
 
-L1 与 L0 的根本区别：L0 只有长宽吃水和一个方形系数，靠形状假设反推；
-L1 拿**站位剖面**（station sections）做真实积分。这一层是 Plimsoll 相对
-SpringSharp 的差异化所在 —— 它只知道参数，我们知道船体长什么样。
-
-表示法
-------
-船体用**一组站位剖面**表示：每个站位给一个 x 坐标和一个**闭合多边形**（在 y-z 平面内）。
-这正是造船业的标准做法（横剖面图）。好处是：
-  · 浸没体积/浮心 = 逐站「多边形被水线切」后的面积与矩，再沿 x 积分
-  · 倾斜时水线在剖面内变成一条斜线，切削规则不变 —— 大角稳性自然成立
-  · Bonjean 曲线（站剖面面积 vs 水线高）只是把同一套积分换个自变量
-
-坐标：x 沿船长（+ 指向舰艏）、y 指向右舷、z 向上，单位 m。
+Sections describe a finite sealed envelope. Resolution and supplied geometry
+limit accuracy; geometric integration alone does not establish seaworthiness.
+Coordinates in metres: x forward, y starboard, z upward.
 """
 
 from __future__ import annotations
@@ -354,6 +344,7 @@ class StationedHull:
                 % (abs(res_best), lcb_tol, math.degrees(theta_best)))
 
         return {
+            "equilibrium_model": "legacy_lcb_only_not_projected_moment_equilibrium",
             "d_m": d_best,
             "trim_rad": theta_best,
             "trim_deg": math.degrees(theta_best),
@@ -390,28 +381,33 @@ def _trapz(ys, xs):
 
 
 def _line_chord_halfwidth(poly, tan_phi, d, n=200):
-    """求水线 z = y·tanφ + d 在剖面内的 y 跨度的一半。
+    """Return half the occupied y measure, including coincident boundary edges.
 
-    做法：把水线与多边形各边求交，取所有交点的 y 极值。简单稳健，
-    不需要依赖裁剪结果的拓扑。
-    """
-    ys = []
-    n_pts = len(poly)
-    for i in range(n_pts):
-        y0, z0 = poly[i]
-        y1, z1 = poly[(i + 1) % n_pts]
-        f0 = z0 - (y0 * tan_phi + d)
-        f1 = z1 - (y1 * tan_phi + d)
-        if (f0 > 0) == (f1 > 0):
-            continue                      # 同侧，无交点
-        denom = f0 - f1
-        if abs(denom) < 1e-15:
-            continue
-        t = f0 / denom
-        ys.append(y0 + t * (y1 - y0))
-    if len(ys) < 2:
+The historical name is retained. Disconnected intervals are summed. At exact
+edge contact this is the geometric intersection, not a one-sided dV/dd.
+"""
+    crossings, intervals = [], []
+    for i, (y0,z0) in enumerate(poly):
+        y1,z1 = poly[(i+1) % len(poly)]
+        f0, f1 = z0-tan_phi*y0-d, z1-tan_phi*y1-d
+        if f0 == 0 and f1 == 0:
+            intervals.append((min(y0,y1),max(y0,y1)))
+        elif (f0 > 0) != (f1 > 0):
+            crossings.append(y0+f0/(f0-f1)*(y1-y0))
+    crossings.sort()
+    intervals.extend(zip(crossings[::2],crossings[1::2]))
+    if not intervals:
         return None
-    return 0.5 * (max(ys) - min(ys))
+    intervals.sort()
+    start,end = intervals[0]
+    width = 0.0
+    for a,b in intervals[1:]:
+        if a <= end:
+            end = max(end,b)
+        else:
+            width += end-start
+            start,end = a,b
+    return (width+end-start)/2
 
 
 # ---------------------------------------------------------------- 参照船体

@@ -1,13 +1,9 @@
 """Plimsoll · L1 几何法静水力与大角稳性
 
-与 L0 的分工：
-  L0  参数化 —— 只有 L/B/T/Cb/Cwp，靠形状假设反推。快，但对船体形状是"猜"的。
-  L1  几何法 —— 有站位剖面，逐站积分。慢，但静水力是**算出来的**。
-
-本模块提供两件 SpringSharp 没有的东西：
-  1. **真实静水力**：由剖面几何积分得到 ∇、KB、Awp、I_T、BM_T，不用经验近似。
-  2. **大角稳性 GZ 曲线**：等体积倾斜 —— 每个横倾角下重解平衡水线，
-     再算复原力臂。战损进水的船横倾很大，小角度 GM 此时早已失效。
+Legacy hydrostatics use polygon clipping and station trapezoidal quadrature.
+The upright KM assumes symmetric sections. Legacy trim solves LCB=LCG only;
+loading-consistent projected moment equilibrium is provided by stability.py.
+Resolution and input geometry limit these results; GZ alone is no safety claim.
 
 GZ 的定义（须与实现严格一致）
 ------------------------------
