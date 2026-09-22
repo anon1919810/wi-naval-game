@@ -1,0 +1,461 @@
+{
+  "kind": "current_core_acceptance_inventory_not_completion_evidence",
+  "user_instruction": "只需要先做完类SPS的计算功能",
+  "original_source": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\docs\\plimsoll-1.0-long-term-goal.md",
+  "original_source_sha256_before_scope_amendment": "12282dc09ee0e5ac5a69049e9f2f3918954d7ddcadcd610785a6b051155804fc",
+  "current_scope": "docs/plimsoll-1.0/current-core-scope.md",
+  "current_scope_sha256": "5a2d382464abd67925e55cf624a3f9e8884957f0f4fe12ce8fd4c48dce904dc2",
+  "requirements": [
+    {
+      "id": "A1",
+      "section": "建立一致的数据与项目基础",
+      "requirement": "盘点现有源码、案例、测试、生成器、未提交修改和已有独立界面工作；根据实际状态选择复用，避免重做。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "A2",
+      "section": "建立一致的数据与项目基础",
+      "requirement": "修正文档中的过时百分比、模块状态与“史实验证通过”等不成立表述，形成唯一的当前范围清单。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "A3",
+      "section": "建立一致的数据与项目基础",
+      "requirement": "统一长度定义（Lwl/Loa/Lpp）、公吨/长吨、密度、速度、功率单位、龙骨/水线坐标、正常/满载/自定义载荷。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "A4",
+      "section": "建立一致的数据与项目基础",
+      "requirement": "为输入和派生结果提供来源、估算标记、适用范围、数据版本和依赖关系。未知用空值与原因表达，显式零与未知不能混用。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "A5",
+      "section": "建立一致的数据与项目基础",
+      "requirement": "定义跨模块错误与警告结构；从计算核心到 CLI、报告、界面、导出的信息保持一致。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "core_part_required_presentation_deferred",
+      "current_treatment": "本轮验证计算核心、Python/CLI 与 JSON/CSV 的一致诊断；界面与 HTML 展示报告后移。"
+    },
+    {
+      "id": "A6",
+      "section": "建立一致的数据与项目基础",
+      "requirement": "给现有 schema 变更提供迁移说明或兼容读取；不能静默误读旧案例。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "B1",
+      "section": "完成全船重量与载荷体系",
+      "requirement": "完成船体结构、装甲、武器与炮座、机械锅炉、舾装、弹药、煤油、淡水和其他载荷的分组。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "B2",
+      "section": "完成全船重量与载荷体系",
+      "requirement": "每项质量及其纵向、横向、垂向重心可编辑，可标识数据来源和估算区间。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "B3",
+      "section": "完成全船重量与载荷体系",
+      "requirement": "明确炮座质量是否包含装甲、弹药是否包含装药等边界，防止重复计入。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "B4",
+      "section": "完成全船重量与载荷体系",
+      "requirement": "自动合成总质量、LCG、TCG、KG，建立正常、满载和自定义工况；消耗品变化能传递到浮态与稳性。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "B5",
+      "section": "完成全船重量与载荷体系",
+      "requirement": "资料不足时使用有说明的工程估算并给敏感性范围；不得填一个任意“补差重量”来伪造吻合。未分配质量应显式显示，不能自动获得虚构重心。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "B6",
+      "section": "完成全船重量与载荷体系",
+      "requirement": "Queen Mary 完成所有重量类别的可操作输入；历史未知项允许估算，但必须显著区分“案例可运行”与“重心已由史料验证”。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "C1",
+      "section": "完成静水力与稳性分析闭环",
+      "requirement": "保留 L0 参数化与 L1 型线计算；完善输入校验、湿面积、船型系数、Bonjean 与静水力曲线。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "C2",
+      "section": "完成静水力与稳性分析闭环",
+      "requirement": "根据载荷总质量和重心求吃水、纵倾及必要的横倾平衡，报告残差、收敛状态和几何可承载范围。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "C3",
+      "section": "完成静水力与稳性分析闭环",
+      "requirement": "正常/满载工况分别求解，不能把模型设计水线的结果当作全部工况结果。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "C4",
+      "section": "完成静水力与稳性分析闭环",
+      "requirement": "完善 GM、自由液面、GZ、小角度一致性检查，以及甲板浸没、开口进水和有效角度限制。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "C5",
+      "section": "完成静水力与稳性分析闭环",
+      "requirement": "GZ 的峰值、正稳性区间和失稳边界必须区分“实际求得”“采样截断”“超出模型适用范围”；不把最后一个正采样点冒充消失角。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "C6",
+      "section": "完成静水力与稳性分析闭环",
+      "requirement": "有限几何或缺开口数据时，显示代理模型限制，不构造虚假的高角度可靠结果。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "D1",
+      "section": "完成简化破损试验功能",
+      "requirement": "舱室具有显式几何、位置、渗透率、连通关系、开口及进水状态；支持单舱、多舱、左右不对称进水与关闭连通口。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "D2",
+      "section": "完成简化破损试验功能",
+      "requirement": "完成“进水量 → 水体重心与自由液面 → 总质量与重心 → 破损浮态 → 剩余 GZ”的一致计算链。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "D3",
+      "section": "完成简化破损试验功能",
+      "requirement": "提供准静态时间推进：基于压头差与声明的流量系数计算进水/舱间流动，逐步重算浮态；对质量守恒、流向、舱容上限和时间步长进行验证。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "D4",
+      "section": "完成简化破损试验功能",
+      "requirement": "明确一种质量/浮力处理方法，禁止增重法与损失浮力法双计；开口和液面超过简化模型范围时发出警告或停止给出不可信结论。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "D5",
+      "section": "完成简化破损试验功能",
+      "requirement": "对非零倾角下的矩形舱液体使用一致几何处理，或对尚不支持的状态显式拒绝；不能静默沿用水平液面重心。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "D6",
+      "section": "完成简化破损试验功能",
+      "requirement": "提供状态时间线、剖面图、进水舱高亮和结果对比；无需精细可漫游舰内场景。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "core_part_required_presentation_deferred",
+      "current_treatment": "本轮交付可审查的时间线、舱液体/浮态数据与结果对比；图形剖视、高亮与交互播放后移。"
+    },
+    {
+      "id": "E1",
+      "section": "完成武备、装甲、动力与阻力模块",
+      "requirement": "七个参考页的字段逐一标记“实现”“有计算但输入估算”“明确不纳入 1.0”，避免空壳页或零值占位。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "E2",
+      "section": "完成武备、装甲、动力与阻力模块",
+      "requirement": "装甲面积/厚度/密度/质量、炮与炮座/炮塔装甲、弹药和其他武器数据能与重量体系对接，避免各页各算一份。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "E3",
+      "section": "完成武备、装甲、动力与阻力模块",
+      "requirement": "完成动力、燃料、功率与续航的可追溯输入；缺乏耗油率时，不把输入的历史续航冒充算法预测。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "E4",
+      "section": "完成武备、装甲、动力与阻力模块",
+      "requirement": "完善 Taylor-Gertler 速度—阻力—功率计算、适用范围检查、缺格处理、Schoenherr 口径核对、QPC 敏感性与不同载荷对比。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "E5",
+      "section": "完成武备、装甲、动力与阻力模块",
+      "requirement": "增加 Holtrop-Mennen 独立对照方法，用有出处且满足其适用条件的基准验算；越界工况不作为主结果。任何缺少的形状输入都须显式提供或标估算。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "E6",
+      "section": "完成武备、装甲、动力与阻力模块",
+      "requirement": "核对图谱的长度、湿面积和系数定义。试航比较必须采用相同速度，并披露载荷差异；不调参凑验收。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "F1",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "核心保持独立 Python 库；CLI 支持单工况、批量、参数扫描与导出。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "F2",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "在 A–E 的核心接口稳定后恢复本地 Web 界面。用户启用本目标，即同意将此前搁置的界面纳入本轮，但仍以后端可用为前提。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "deferred_by_user",
+      "current_treatment": "本轮不构建本地或服务器 Web 界面。"
+    },
+    {
+      "id": "F3",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "界面支持创建/打开/保存设计、重量分组编辑、载荷切换、运行计算、曲线与剖视、破损场景、比较方案及查看来源/估算/警告。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "deferred_by_user",
+      "current_treatment": "图形交互后移；本轮通过 Python/CLI 完成可编辑项目、计算、比较和结果导出。"
+    },
+    {
+      "id": "F4",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "提供项目 JSON、计算 JSON、CSV 和可离线阅读的 HTML 报告；导出附单位、坐标、载荷、版本、有效性与估算信息。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "core_part_required_presentation_deferred",
+      "current_treatment": "本轮要求项目 JSON、计算 JSON、CSV 及完整单位/坐标/载荷/版本/有效性/估算元数据；离线 HTML 后移。"
+    },
+    {
+      "id": "F5",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "提供独立的游戏数据导出示例和读取契约，不直接修改现有 Unity 工程。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "deferred_by_user",
+      "current_treatment": "游戏专用导出后移；保留计算 JSON/CSV 与通用数据契约。"
+    },
+    {
+      "id": "F6",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "交付 Windows 启动入口、依赖安装说明和示范工程。核心计算及日常使用不依赖外网、密钥或在线 AI 服务。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "core_part_required_presentation_deferred",
+      "current_treatment": "本轮提供 Python 调用环境说明、命令入口及示范项目，计算不依赖网络/密钥/AI；Windows 启动器和内置解释器后移。"
+    },
+    {
+      "id": "F7",
+      "section": "交付可直接使用的本地应用",
+      "requirement": "本地服务默认仅监听回环地址；无需部署公网或创建云服务账号。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "deferred_by_user",
+      "current_treatment": "服务与部署后移，本轮没有需要监听的服务。"
+    },
+    {
+      "id": "G1",
+      "section": "独立验证与发布收尾",
+      "requirement": "保留并扩展现有测试。解析方箱、非方箱/通用测试船、Queen Mary 分别用于公式、通用性和完整案例验证。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "G2",
+      "section": "独立验证与发布收尾",
+      "requirement": "引入有可核对输入和答案的外部基准；历史值只验证其资料支持的量，未知 KG 不能用于断言真实 GM 准确。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "G3",
+      "section": "独立验证与发布收尾",
+      "requirement": "容差在对照前根据解析解、离散误差或方法依据确定，不根据当前输出反调。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "G4",
+      "section": "独立验证与发布收尾",
+      "requirement": "对关键错误开展变异验证；保存测试命令、结果、基准来源和数值残差。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "G5",
+      "section": "独立验证与发布收尾",
+      "requirement": "在当前机器测量单工况、批量、GZ 与破损时间线耗时，记录硬件、案例规模和重复测量结果；界面不能因长计算失去响应，须显示进度或可取消状态。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "core_part_required_presentation_deferred",
+      "current_treatment": "本轮记录核心单工况、批量、GZ、进水计算的硬件、规模和重复耗时；网页响应、队列与界面取消后移。"
+    },
+    {
+      "id": "G6",
+      "section": "独立验证与发布收尾",
+      "requirement": "核对可重复生成、迁移、离线运行、中文路径和错误恢复。生成物、源码和文档保持一致。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    },
+    {
+      "id": "G7",
+      "section": "独立验证与发布收尾",
+      "requirement": "提供发布目录/归档包、版本说明、用户手册、开发接口、数据字典、已知限制、覆盖清单和续接文档。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "core_part_required_presentation_deferred",
+      "current_treatment": "本轮交付源码/本地提交、核心调用说明、数据与接口契约、覆盖清单、限制和证据；独立应用发布包及其使用手册后移。"
+    },
+    {
+      "id": "G8",
+      "section": "独立验证与发布收尾",
+      "requirement": "建立可审查的本地 Git 提交，保留用户原有修改。远端推送、合并或发布只有在现有授权涵盖时执行，不能擅自修改仓库权限或强推。",
+      "status": "not_yet_audited",
+      "evidence": [],
+      "limitations": [],
+      "current_disposition": "required_for_core",
+      "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
+    }
+  ],
+  "note": "All retained requirements remain not_yet_audited until concrete end-to-end evidence is attached. Original full-application gates are superseded for this round by current-core-scope.md; no full 1.0 application completion claim."
+}
