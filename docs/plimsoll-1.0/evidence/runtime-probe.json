@@ -1,0 +1,22 @@
+{
+  "kind": "runtime_metadata_probe_not_regression_run",
+  "date": "2026-09-22",
+  "executable": "C:\\Users\\杨睿\\.workbuddy\\binaries\\python\\versions\\3.13.12\\python.exe",
+  "version": "3.13.14 (main, Jun 11 2026, 04:04:46) [MSC v.1944 64 bit (AMD64)]",
+  "version_info": [
+    3,
+    13,
+    14,
+    "final",
+    0
+  ],
+  "machine": "AMD64",
+  "openssl": "OpenSSL 3.5.7 9 Jun 2026",
+  "sqlite": "3.53.1",
+  "expat": "expat_2.8.1",
+  "sha256": {
+    "python.exe": "ec8139feb5012b12a531196f257fddf53668f0109918d5d44ffa195cf352fdd6",
+    "python313.dll": "597c6747e061ee5a53bf7fefabc20483f3912510510e77ce2398ab40f5e2a118"
+  },
+  "note": "Executable directory label 3.13.12 does not match actual Python 3.13.14. Capture actual runtime metadata and shipped binaries at final validation; do not infer versions from paths."
+}

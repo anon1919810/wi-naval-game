@@ -2,7 +2,7 @@
   "kind": "shared_task_3_5_regression_checkpoint_not_product_acceptance",
   "date": "2026-09-22",
   "command": "python -B tools/plimsoll/run_all_tests.py",
-  "runtime": "Python 3.13.12",
+  "runtime": null,
   "worktree": "feature/plimsoll-1.0",
   "run": 394,
   "fail": 0,
@@ -21,5 +21,7 @@
     "tools/plimsoll/cases/projects/queen_mary_1913.project.json": "53f6d82ca8d2f3a3b606f4fb8c20cc374c1a074464a5e72000c53fa689f1cdfe",
     "tools/plimsoll/cases/projects/generic_steamer.project.json": "15c5f82a42bd10ab134538769e9aeaaa4944afe7024689361772b4eb109bbbeb",
     "tools/plimsoll/cases/projects/analytic_box.project.json": "68c4e3d3732620065e755ccfa8a9b50946177b0e1de7dd01bd89248cb1512334"
-  }
+  },
+  "runtime_executable": "C:\\Users\\杨睿\\.workbuddy\\binaries\\python\\versions\\3.13.12\\python.exe",
+  "runtime_metadata_correction": "Earlier Python 3.13.12 label was inferred from directory name, not captured during this test run. Later runtime-probe.json reports actual Python 3.13.14 from the same path. Historical runtime version is unverified; original test count/output/timing and scope hashes are unchanged."
 }
