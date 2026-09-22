@@ -550,7 +550,10 @@ def _parser() -> argparse.ArgumentParser:
     geometry.add_argument("--format", required=True,
                           choices=("legacy-offsets-5", "plimsoll-section-polygons-1"))
     geometry.add_argument("--keel-offset-m", required=True)
-    geometry.add_argument("--provenance", required=True)
+    geometry.add_argument(
+        "--provenance", required=True,
+        help="nonempty text or JSON object describing the geometry's provenance",
+    )
     geometry.add_argument("--estimate", required=True, choices=("true", "false"))
     geometry.add_argument("--output", required=True)
     return parser
@@ -582,22 +585,21 @@ def _import_geometry(args):
     raw = args.provenance
     try:
         parsed = json.loads(raw)
-    except json.JSONDecodeError as error:
-        raise _CLIError(
-            "cli.provenance_invalid", f"provenance is not valid JSON: {error}",
-            input_path=args.geometry,
-        ) from error
+    except json.JSONDecodeError:
+        parsed = raw  # not valid JSON: treat the literal text as the source
     if isinstance(parsed, dict) and parsed:
         source = parsed
+    elif isinstance(parsed, str):
+        source = parsed  # decoded JSON string literal, without surrounding quotes
     else:
-        text = raw.strip()
-        if not text:
-            raise _CLIError(
-                "cli.provenance_invalid",
-                "provenance must be a nonempty string or object",
-                input_path=args.geometry,
-            )
-        source = text
+        # null / number / bool / array / empty object -> keep raw literal text
+        source = raw
+    if isinstance(source, str) and not source.strip():
+        raise _CLIError(
+            "cli.provenance_invalid",
+            "provenance must be a nonempty string or object",
+            input_path=args.geometry,
+        )
     try:
         imported = geometry_import.import_geometry_content(
             project, content, format=args.format, keel_offset_m=keel,

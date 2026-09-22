@@ -35,6 +35,25 @@ def analysis_result(status="completed"):
     }
 
 
+PROJECT_FIXTURE = (
+    TOOLS / "plimsoll" / "cases" / "projects" / "analytic_box.project.json"
+)
+OFFSETS_FIXTURE = TOOLS / "plimsoll" / "cases" / "queen_mary_1913_offsets.json"
+
+
+def import_geometry_args(project, geometry, *, output, provenance,
+                         estimate="false", keel_offset_m="0.0",
+                         fmt="legacy-offsets-5"):
+    return [
+        "import-geometry", str(project), str(geometry),
+        "--format", fmt,
+        "--keel-offset-m", keel_offset_m,
+        "--provenance", provenance,
+        "--estimate", estimate,
+        "--output", str(output),
+    ]
+
+
 class CoreCliEntrypointTests(unittest.TestCase):
     def run_cli(self, arguments, cwd):
         env = dict(
@@ -263,6 +282,10 @@ class CoreCliEntrypointTests(unittest.TestCase):
         self.assertEqual(geometry["keel_offset_m"], -1.0)
         expected_sha = hashlib.sha256(geometry_path.read_bytes()).hexdigest()
         self.assertEqual(geometry["source"]["raw_content_sha256"], expected_sha)
+        self.assertEqual(
+            geometry["source"]["input_source"],
+            {"title": "Queen Mary 1913 型线"},
+        )
 
     def test_import_geometry_is_no_longer_unimplemented(self):
         project_path = (
@@ -360,6 +383,120 @@ class CoreCliEntrypointTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 imported = project_store.load(output)
                 self.assertIs(imported["geometry"]["estimate"], expected)
+
+    def test_import_geometry_bare_string_provenance_is_kept_verbatim(self):
+        with tempfile.TemporaryDirectory(prefix="裸串来源-") as temp:
+            output = Path(temp) / "结果.project.json"
+            result = self.run_cli(
+                import_geometry_args(
+                    PROJECT_FIXTURE, OFFSETS_FIXTURE, output=output,
+                    provenance="survey 1913",
+                ), temp)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            imported = project_store.load(output)
+        self.assertEqual(imported["geometry"]["source"]["input_source"], "survey 1913")
+
+    def test_import_geometry_json_string_literal_provenance_is_decoded(self):
+        with tempfile.TemporaryDirectory(prefix="字面量来源-") as temp:
+            output = Path(temp) / "结果.project.json"
+            result = self.run_cli(
+                import_geometry_args(
+                    PROJECT_FIXTURE, OFFSETS_FIXTURE, output=output,
+                    provenance='"survey 1913"',
+                ), temp)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout, "")
+            imported = project_store.load(output)
+        self.assertEqual(imported["geometry"]["source"]["input_source"], "survey 1913")
+
+    def test_import_geometry_rejects_empty_provenance(self):
+        with tempfile.TemporaryDirectory(prefix="空来源-") as temp:
+            output = Path(temp) / "结果.project.json"
+            result = self.run_cli(
+                import_geometry_args(
+                    PROJECT_FIXTURE, OFFSETS_FIXTURE, output=output,
+                    provenance="",
+                ), temp)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["code"], "cli.provenance_invalid")
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse(output.exists())
+
+    def test_import_geometry_rejects_duplicate_payload_keys(self):
+        with tempfile.TemporaryDirectory(prefix="重复键-") as temp:
+            geometry = Path(temp) / "重复键.json"
+            geometry.write_bytes(
+                b'{"schema": "plimsoll-offsets-1", "schema": "x", "stations": []}'
+            )
+            output = Path(temp) / "结果.project.json"
+            result = self.run_cli(
+                import_geometry_args(
+                    PROJECT_FIXTURE, geometry, output=output,
+                    provenance="survey 1913",
+                ), temp)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["code"], "cli.geometry_import")
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse(output.exists())
+
+    def test_import_geometry_rejects_invalid_utf8_payload(self):
+        with tempfile.TemporaryDirectory(prefix="非法UTF8-") as temp:
+            geometry = Path(temp) / "坏字节.json"
+            geometry.write_bytes(b'\xff\xff{"schema": "plimsoll-offsets-1"}')
+            output = Path(temp) / "结果.project.json"
+            result = self.run_cli(
+                import_geometry_args(
+                    PROJECT_FIXTURE, geometry, output=output,
+                    provenance="survey 1913",
+                ), temp)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["code"], "cli.geometry_import")
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse(output.exists())
+
+    def test_import_geometry_rejects_nonfinite_keel_offset(self):
+        for keel in ("nan", "inf"):
+            with self.subTest(keel=keel), \
+                    tempfile.TemporaryDirectory(prefix="非有限龙骨-") as temp:
+                output = Path(temp) / "结果.project.json"
+                result = self.run_cli(
+                    import_geometry_args(
+                        PROJECT_FIXTURE, OFFSETS_FIXTURE, output=output,
+                        provenance="survey 1913", keel_offset_m=keel,
+                    ), temp)
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertEqual(result.stdout, "")
+                payload = json.loads(result.stderr)
+                self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+                self.assertEqual(payload["code"], "cli.geometry_import")
+                self.assertNotIn("Traceback", result.stderr)
+                self.assertFalse(output.exists())
+
+    def test_import_geometry_rejects_missing_output_directory(self):
+        with tempfile.TemporaryDirectory(prefix="缺失目录-") as temp:
+            output = Path(temp) / "不存在" / "结果.project.json"
+            result = self.run_cli(
+                import_geometry_args(
+                    PROJECT_FIXTURE, OFFSETS_FIXTURE, output=output,
+                    provenance="survey 1913",
+                ), temp)
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        payload = json.loads(result.stderr)
+        self.assertEqual(payload["schema"], "plimsoll-cli-error-1")
+        self.assertEqual(payload["code"], "cli.output_write")
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertFalse(output.exists())
 
 
 if __name__ == "__main__":
