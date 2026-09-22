@@ -218,6 +218,8 @@ def queen_mary_project() -> dict:
     outfit_mass = 0.03 * 27_000 * LONG_TON_TO_T
     main_ammo = 8 * 80 * (1400 + 297) * LB_TO_T
     secondary_ammo = 16 * 150 * (31 + 9 + (5 + 15 / 16) / 16) * LB_TO_T
+    normal_feed_water = 0.015 * 27_000 * LONG_TON_TO_T
+    deep_feed_water = 0.025 * 27_000 * LONG_TON_TO_T
 
     hull = _item(
         "hull-structure", hull_mass, 0.0, 0.0, 7.5,
@@ -355,7 +357,7 @@ def queen_mary_project() -> dict:
     variable_specs = [
         ("coal", 900.0, -0.429, 0.0, 5.5, [450.0, 3600.0], "25% of inherited 3600 t maximum", "consumable.coal"),
         ("fuel-oil", 292.5, -22.0, 0.0, 4.5, [146.25, 1170.0], "25% of inherited 1170 t maximum", "consumable.oil"),
-        ("reserve-feed-water", 411.499, -22.0, 0.0, 4.5, [274.333, 685.832], "1.5% of assumed-long-ton design displacement", "consumable.feed-water"),
+        ("reserve-feed-water", normal_feed_water, -22.0, 0.0, 4.5, [0.01 * 27_000 * LONG_TON_TO_T, deep_feed_water], "1.5% of assumed-long-ton design displacement", "consumable.feed-water"),
         ("potable-water", 70.0, 0.0, 0.0, 6.0, [35.0, 178.5], "1000 persons * 14 days * 5 kg/person/day", "consumable.potable-water"),
         ("provisions-stores", 56.0, 5.0, 0.0, 10.0, [28.0, 142.8], "1000 persons * 14 days * 4 kg/person/day", "consumable.provisions-spares"),
         ("crew-effects", 100.0, 5.0, 0.0, 12.0, [50.0, 127.5], "1000 persons * 0.10 t/person", "variable.crew-effects"),
@@ -391,7 +393,7 @@ def queen_mary_project() -> dict:
     deep = {
         "coal": {"mass_t": 3600.0, "x_m": -0.429, "y_m": 0.0, "kg_m": 5.5},
         "fuel-oil": {"mass_t": 1170.0, "x_m": -22.0, "y_m": 0.0, "kg_m": 4.5},
-        "reserve-feed-water": {"mass_t": 685.832, "x_m": -22.0, "y_m": 0.0, "kg_m": 4.5},
+        "reserve-feed-water": {"mass_t": deep_feed_water, "x_m": -22.0, "y_m": 0.0, "kg_m": 4.5},
         "potable-water": {"mass_t": 178.5, "x_m": 0.0, "y_m": 0.0, "kg_m": 6.0},
         "provisions-stores": {"mass_t": 142.8, "x_m": 5.0, "y_m": 0.0, "kg_m": 10.0},
         "crew-effects": {"mass_t": 127.5, "x_m": 5.0, "y_m": 0.0, "kg_m": 12.0},

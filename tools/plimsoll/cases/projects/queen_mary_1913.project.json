@@ -110256,7 +110256,7 @@
         },
         "reserve-feed-water": {
           "kg_m": 4.5,
-          "mass_t": 685.832,
+          "mass_t": 685.8316634399999,
           "x_m": -22.0,
           "y_m": 0.0
         }
@@ -111517,7 +111517,7 @@
             "consumable.feed-water"
           ],
           "kg_m": 4.5,
-          "mass_t": 411.499,
+          "mass_t": 411.498998064,
           "source": {
             "boundary": "Scenario consumable/load only; no displacement-balancing margin.",
             "citation": "Declared Task 3 normal engineering scenario",
@@ -111534,8 +111534,8 @@
               6.5
             ],
             "mass_t": [
-              274.333,
-              685.832
+              274.33266537599997,
+              685.8316634399999
             ],
             "x_m": [
               -42.0,

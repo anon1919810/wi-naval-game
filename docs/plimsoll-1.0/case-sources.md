@@ -102,11 +102,11 @@ independent normal and deep engineering scenarios:
 | --- | ---: | ---: | --- |
 | Coal | 900.000 | 3,600.000 | 25% and 100% of inherited maximum |
 | Fuel oil | 292.500 | 1,170.000 | 25% and 100% of inherited maximum |
-| Reserve/feed water | 411.499 | 685.832 | 1.5% and 2.5% of assumed-long-ton 27,000-ton comparison |
+| Reserve/feed water | 411.498998064 | 685.83166344 | Exact 1.5% and 2.5% of `27000 * 1.0160469088 t` |
 | Potable water | 70.000 | 178.500 | people × days × 5 kg/day scenario |
 | Provisions/stores | 56.000 | 142.800 | people × days × 4 kg/day scenario |
 | Crew/effects | 100.000 | 127.500 | people × 0.10 t scenario |
-| **Predicted total** | **27,851.629342730772** | **31,926.26234273077** | fixed/base plus listed variables |
+| **Predicted total** | **27,851.62934079477** | **31,926.26200617077** | fixed/base plus listed variables |
 
 The deep overrides include scenario provenance. Their application clears the
 base uncertainty intervals under the loading contract, so the fixture discloses

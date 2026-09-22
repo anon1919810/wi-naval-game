@@ -132,8 +132,36 @@ class ProjectCaseTests(unittest.TestCase):
         self.assertTrue(math.isclose(actual_fixed, expected_fixed, rel_tol=1e-10))
         normal = loading.resolve_loading(project, "normal-engineering")
         deep = loading.resolve_loading(project, "deep-engineering")
-        self.assertTrue(math.isclose(normal["values"]["total_mass_t"], 27851.629342730772, rel_tol=1e-10))
-        self.assertTrue(math.isclose(deep["values"]["total_mass_t"], 31926.26234273077, rel_tol=1e-10))
+        normal_feed_water = 0.015 * 27_000 * long_ton
+        deep_feed_water = 0.025 * 27_000 * long_ton
+        normal_items = {item["id"]: item for item in normal["effective_items"]}
+        deep_items = {item["id"]: item for item in deep["effective_items"]}
+        self.assertTrue(
+            math.isclose(
+                normal_items["reserve-feed-water"]["mass_t"],
+                normal_feed_water,
+                rel_tol=1e-10,
+            )
+        )
+        self.assertTrue(
+            math.isclose(
+                deep_items["reserve-feed-water"]["mass_t"],
+                deep_feed_water,
+                rel_tol=1e-10,
+            )
+        )
+        expected_normal = expected_fixed + sum(
+            (900.0, 292.5, normal_feed_water, 70.0, 56.0, 100.0)
+        )
+        expected_deep = expected_fixed + sum(
+            (3600.0, 1170.0, deep_feed_water, 178.5, 142.8, 127.5)
+        )
+        self.assertTrue(
+            math.isclose(normal["values"]["total_mass_t"], expected_normal, rel_tol=1e-10)
+        )
+        self.assertTrue(
+            math.isclose(deep["values"]["total_mass_t"], expected_deep, rel_tol=1e-10)
+        )
         self.assertIsNone(project["loading_conditions"][0]["reference_displacement_t"])
         self.assertIsNone(project["loading_conditions"][1]["reference_displacement_t"])
         self.assertNotIn("residual", " ".join(items).lower())
