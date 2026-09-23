@@ -32,6 +32,7 @@ from __future__ import annotations
 import math
 
 SCHEMA = "plimsoll-page-rows-1"
+SCHEMA_FREEBOARD = "plimsoll-page-rows-freeboard-1"
 MASS_TOLERANCE_T = 1e-9
 
 
@@ -409,3 +410,204 @@ def minimum_main_belt(project, declaration):
     result.update(status="completed", reason=None, model_applicable=True,
                   length_m=fore - aft + declaration["aft_margin_m"] + declaration["fore_margin_m"])
     return result
+
+
+def _point_freeboard(point):
+    """Return (value, source, estimate) of a deck point's declared freeboard fact.
+
+    ``value`` is ``None`` when the fact is absent, null, non-finite, or negative:
+    an invalid value is treated as unknown rather than fabricated. The deck
+    validator already reports invalid numeric values separately, so this
+    projection only ever consumes a finite non-negative declared value. It never
+    reads ``z_m`` — the sealed-envelope top is not a freeboard source.
+    """
+    if not isinstance(point, dict):
+        return None, None, None
+    fb = point.get("freeboard_m")
+    if not isinstance(fb, dict):
+        return None, None, None
+    raw = fb.get("value")
+    if (isinstance(raw, (int, float)) and not isinstance(raw, bool)
+            and math.isfinite(raw) and raw >= 0):
+        value = float(raw)
+    else:
+        value = None
+    source = fb.get("source")
+    estimate = fb.get("estimate")
+    estimate = bool(estimate) if isinstance(estimate, bool) else None
+    return value, source, estimate
+
+
+def _point_x(point):
+    raw = point.get("x_m") if isinstance(point, dict) else None
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool) and math.isfinite(raw):
+        return float(raw)
+    return None
+
+
+def freeboard_rows(deck):
+    """Project declared deck-segment freeboards (design-input view, not the ledger).
+
+    This is the SPS-style freeboard page input: each deck point MAY carry a
+    declared ``freeboard_m`` fact (``{"value", "source", "estimate"}``). The
+    projection reports, per segment, the endpoints' declared freeboards and a
+    length-weighted mean over only the segments whose both endpoints declare a
+    freeboard.
+
+    **This is a declared-input projection. It never reads ``z_m``**, never uses
+    the sealed-envelope top, never infers freeboard from a centroid or area, and
+    never treats an unknown freeboard as zero. Unknowns stay unknown.
+
+    Length-weighted mean (declared segments only):
+
+        segment_mean = (fb_aft + fb_fore) / 2            # only when both declared
+        length       = |x_fore - x_aft|
+        weighted_mean = Σ(length × segment_mean) / Σ(length)   # over declared segments
+
+    Coverage:
+
+        coverage_fraction = Σ(length over declared) / Σ(length over all segments)
+
+    A segment missing a freeboard contributes to neither the numerator nor the
+    denominator of the weighted mean; an unknown reference length makes every
+    ``length_percent`` null.
+    """
+    diagnostics = []
+    if not isinstance(deck, dict):
+        diagnostics.append(_diagnostic("page_rows.deck_invalid",
+            "freeboard_rows requires a deck object", "$.deck"))
+        return {"schema": SCHEMA_FREEBOARD, "segments": [], "values": {},
+                "diagnostics": diagnostics}
+
+    points = {p["id"]: p for p in (deck.get("points") or [])
+              if isinstance(p, dict) and isinstance(p.get("id"), str)}
+
+    ref_fact = deck.get("reference_length_m")
+    ref_value = ref_fact.get("value") if isinstance(ref_fact, dict) else None
+    ref_source = ref_fact.get("source") if isinstance(ref_fact, dict) else None
+    ref_known = (isinstance(ref_value, (int, float)) and not isinstance(ref_value, bool)
+                 and math.isfinite(ref_value) and ref_value > 0)
+    if not ref_known:
+        diagnostics.append(_diagnostic("page_rows.reference_length_unknown",
+            "reference_length_m is unknown; every segment length_percent is null",
+            "$.deck.reference_length_m"))
+
+    segments_out = []
+    unknown_segments = []
+    known_ids = []
+    unknown_ids = []
+    weighted_num = 0.0
+    weighted_den = 0.0
+    total_length = 0.0
+    declared_length = 0.0
+    wm_estimates = []
+    wm_sources = []
+
+    for seg in (deck.get("segments") or []):
+        if not isinstance(seg, dict):
+            continue
+        seg_id = seg.get("id")
+        aft_id = seg.get("aft_point_id")
+        fore_id = seg.get("fore_point_id")
+        aft = points.get(aft_id)
+        fore = points.get(fore_id)
+
+        if aft is None or fore is None:
+            diagnostics.append(_diagnostic("page_rows.segment_points_unknown",
+                "segment %r references a non-existent point id (aft=%r fore=%r)"
+                % (seg_id, aft_id, fore_id), "$.deck.segments"))
+            segments_out.append({
+                "id": seg_id, "aft_point_id": aft_id, "fore_point_id": fore_id,
+                "length_m": None, "length_percent": None,
+                "freeboard_aft_m": None, "freeboard_fore_m": None,
+                "segment_mean_freeboard_m": None, "source": None, "estimate": None,
+                "status": "unknown_missing_endpoint"})
+            unknown_ids.append(seg_id)
+            unknown_segments.append(seg_id)
+            continue
+
+        aft_val, aft_src, aft_est = _point_freeboard(aft)
+        fore_val, fore_src, fore_est = _point_freeboard(fore)
+
+        x_aft = _point_x(aft)
+        x_fore = _point_x(fore)
+        length = (abs(x_fore - x_aft)
+                  if x_aft is not None and x_fore is not None else None)
+        length_percent = (100.0 * length / float(ref_value)
+                          if length is not None and ref_known else None)
+        if length is not None:
+            total_length += length
+
+        if aft_val is None or fore_val is None:
+            segments_out.append({
+                "id": seg_id, "aft_point_id": aft_id, "fore_point_id": fore_id,
+                "length_m": length, "length_percent": length_percent,
+                "freeboard_aft_m": aft_val, "freeboard_fore_m": fore_val,
+                "segment_mean_freeboard_m": None,
+                "source": [s for s in (aft_src, fore_src) if s is not None] or None,
+                "estimate": None, "status": "unknown_missing_freeboard"})
+            unknown_ids.append(seg_id)
+            unknown_segments.append(seg_id)
+            continue
+
+        seg_mean = 0.5 * (aft_val + fore_val)
+        seg_estimate = (bool(aft_est and fore_est)
+                        if aft_est is not None and fore_est is not None else None)
+        seg_sources = [s for s in (aft_src, fore_src) if s is not None] or None
+        segments_out.append({
+            "id": seg_id, "aft_point_id": aft_id, "fore_point_id": fore_id,
+            "length_m": length, "length_percent": length_percent,
+            "freeboard_aft_m": aft_val, "freeboard_fore_m": fore_val,
+            "segment_mean_freeboard_m": seg_mean,
+            "source": seg_sources, "estimate": seg_estimate,
+            "status": "declared"})
+        known_ids.append(seg_id)
+        if length is not None:
+            weighted_num += length * seg_mean
+            weighted_den += length
+            declared_length += length
+        wm_estimates.append(seg_estimate)
+        wm_sources.append(seg_sources)
+
+    if unknown_segments:
+        diagnostics.append(_diagnostic("page_rows.freeboard_unknown",
+            "segments with at least one endpoint freeboard unknown: %r"
+            % (unknown_segments,), "$.deck.segments"))
+
+    if weighted_den > 0:
+        weighted_mean = weighted_num / weighted_den
+        wm_estimate = (all(e for e in wm_estimates if e is not None)
+                       if all(e is not None for e in wm_estimates) else None)
+        wm_source_set = set()
+        for grp in wm_sources:
+            if isinstance(grp, list):
+                wm_source_set.update(s for s in grp if isinstance(s, str))
+        wm_source = sorted(wm_source_set) or None
+    else:
+        weighted_mean = None
+        wm_estimate = None
+        wm_source = None
+
+    values = {
+        "weighted_mean_freeboard_m": weighted_mean,
+        "weighted_mean_estimate": wm_estimate,
+        "weighted_mean_source": wm_source,
+        "coverage_fraction": (declared_length / total_length) if total_length > 0 else None,
+        "known_segment_ids": known_ids,
+        "unknown_segment_ids": unknown_ids,
+        "reference_length_m": ref_value if ref_known else None,
+        "reference_source": ref_source,
+        "total_length_m": total_length if total_length > 0 else None,
+        "declared_length_m": declared_length if declared_length > 0 else None,
+    }
+
+    return {
+        "schema": SCHEMA_FREEBOARD,
+        "method": "declared_deck_segment_freeboard_v1",
+        "formula": ("weighted_mean_freeboard_m = Σ(length × (fb_aft + fb_fore)/2) "
+                    "/ Σ(length) over segments whose both endpoints declare a freeboard; "
+                    "unknown freeboards are excluded from numerator and denominator"),
+        "segments": segments_out,
+        "values": values,
+        "diagnostics": diagnostics,
+    }

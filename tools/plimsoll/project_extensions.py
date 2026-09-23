@@ -262,11 +262,16 @@ def _deck(deck, diagnostics):
     if not rows:
         _diag(diagnostics, path + ".points", "supplied deck requires at least one point")
     for point, p in rows:
-        _keys(point, {"id", "x_m", "y_m", "z_m", "source", "estimate"}, p, diagnostics)
+        _keys(point, {"id", "x_m", "y_m", "z_m", "source", "estimate", "freeboard_m"}, p, diagnostics)
         for key in ("x_m", "y_m", "z_m"):
             _value(point.get(key), "signed" if key != "z_m" else "nonnegative", p + "." + key, diagnostics)
         if "source" in point or "estimate" in point:
             _metadata(point, p, diagnostics)
+        if "freeboard_m" in point:
+            # Declared freeboard input (design view). value is a fact: finite and
+            # >= 0; null/unknown is allowed and must NOT be substituted with 0.
+            # z_m is never read as a freeboard source here.
+            _fact(point["freeboard_m"], "nonnegative", p + ".freeboard_m", diagnostics)
         if isinstance(point.get("id"), str):
             points[point["id"]] = point
     for segment, p in _rows(deck.get("segments", []), path + ".segments", diagnostics):
