@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-label="Plimsoll Datum 浅色舰船计算工作台设计概念图">
+  <defs>
+    <style>
+      text { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif; fill: #182A34; }
+      .small { font-size: 12px; fill: #60727D; }
+      .tiny { font-size: 10px; fill: #71838D; }
+      .label { font-size: 12px; font-weight: 650; }
+      .number { font-size: 27px; font-weight: 650; letter-spacing: -0.7px; font-variant-numeric: tabular-nums; }
+      .heading { font-size: 19px; font-weight: 660; letter-spacing: -.3px; }
+      .rule { stroke: #DCE4E8; stroke-width: 1; }
+      .water { stroke: #286D86; stroke-width: 2; }
+      .muted-water { stroke: #8CB9CA; stroke-width: 1; }
+      .on-accent { fill: #FFFFFF; }
+    </style>
+    <clipPath id="shipClip"><path d="M333 428 Q340 413 370 408 L516 403 L658 405 L772 400 L890 406 Q942 411 986 428 L973 453 Q863 467 699 469 L490 463 Q382 459 344 447 Z"/></clipPath>
+  </defs>
+
+  <rect width="1440" height="900" fill="#F5F7F8"/>
+  <rect x="20" y="20" width="1400" height="860" rx="17" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <path d="M37 20 H252 V880 H37 Q20 880 20 863 V37 Q20 20 37 20 Z" fill="#F0F4F5"/>
+  <path d="M252 20 V880" class="rule"/>
+
+  <!-- Brand and navigation -->
+  <circle cx="54" cy="65" r="16" fill="none" stroke="#286D86" stroke-width="2"/>
+  <path d="M34 65 H74" stroke="#286D86" stroke-width="3"/>
+  <path d="M54 49 V65" stroke="#286D86" stroke-width="2"/>
+  <text x="85" y="71" font-size="21" font-weight="700" letter-spacing="-.8">Plimsoll</text>
+  <text x="38" y="119" class="tiny" letter-spacing="1.6">WORKSPACE · 工作空间</text>
+  <rect x="30" y="373" width="212" height="34" rx="8" fill="#E0EDF0"/>
+  <text x="45" y="162" font-size="13" font-weight="600">项目库</text>
+  <text x="45" y="203" font-size="13" fill="#526672">最近计算</text>
+  <text x="45" y="233" font-size="13" fill="#526672">报告</text>
+  <path d="M38 259 H232" class="rule"/>
+  <text x="38" y="291" class="tiny" letter-spacing="1.3">当前项目</text>
+  <text x="45" y="324" font-size="13" font-weight="650">HMS Queen Mary</text>
+  <text x="45" y="347" class="small">1913 · 工程代理案例</text>
+  <text x="45" y="392" font-size="12" font-weight="650" fill="#286D86">概览</text>
+  <text x="45" y="423" class="small">船型与几何</text>
+  <text x="45" y="454" class="small">重量与载荷</text>
+  <text x="45" y="485" class="small">装甲与武备</text>
+  <text x="45" y="516" class="small">浮态与稳性</text>
+  <text x="45" y="547" class="small">阻力与功率</text>
+  <text x="45" y="578" class="small">破损研究</text>
+  <path d="M38 812 H232" class="rule"/>
+  <circle cx="50" cy="844" r="12" fill="#C9DDE4"/>
+  <text x="68" y="848" font-size="12" font-weight="600">我的工作空间</text>
+  <text x="225" y="848" class="small" text-anchor="end">⌘K</text>
+
+  <!-- Toolbar -->
+  <path d="M252 91 H1420" class="rule"/>
+  <text x="282" y="57" class="small">项目库</text>
+  <text x="331" y="57" class="small">/</text>
+  <text x="346" y="57" font-size="13" font-weight="600">HMS Queen Mary</text>
+  <circle cx="1114" cy="55" r="6" fill="#5F9B85"/>
+  <text x="1128" y="60" class="small">已保存</text>
+  <rect x="1190" y="36" width="114" height="38" rx="8" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="1206" y="60" font-size="12" font-weight="600">正常载荷</text>
+  <path d="M1286 50 l5 5 l-5 5" fill="none" stroke="#60727D" stroke-width="1.5"/>
+  <rect x="1318" y="36" width="82" height="38" rx="8" fill="#286D86"/>
+  <text x="1359" y="60" class="on-accent" font-size="12" font-weight="650" text-anchor="middle">运行计算</text>
+
+  <!-- Context and headline -->
+  <text x="282" y="135" class="tiny" letter-spacing="1.5">VESSEL / 001</text>
+  <text x="282" y="173" font-size="31" font-weight="690" letter-spacing="-.7">HMS Queen Mary</text>
+  <text x="282" y="198" class="small">1913 · 正常载荷 · 已选择请求 08 / 15 个分析阶段</text>
+  <rect x="879" y="155" width="166" height="26" rx="13" fill="#F7F0E6"/>
+  <circle cx="896" cy="168" r="4" fill="#9A713C"/>
+  <text x="908" y="172" font-size="11" font-weight="600" fill="#845D2F">工程代理 · 非史实认证</text>
+
+  <!-- Primary metrics -->
+  <rect x="282" y="224" width="238" height="112" rx="11" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="300" y="252" class="small">排水量</text>
+  <text x="300" y="294" class="number">27,851.6</text>
+  <text x="435" y="294" class="small">t</text>
+  <path d="M300 312 H330" stroke="#9A713C" stroke-dasharray="4 3" stroke-width="2"/>
+  <text x="338" y="317" class="tiny">工程估算 · 查看来源</text>
+  <rect x="532" y="224" width="238" height="112" rx="11" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="550" y="252" class="small">平均吃水</text>
+  <text x="550" y="294" class="number">—</text>
+  <circle cx="556" cy="313" r="5" fill="#FFFFFF" stroke="#71838D"/>
+  <text x="568" y="317" class="tiny">运行后显示</text>
+  <rect x="782" y="224" width="263" height="112" rx="11" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="800" y="252" class="small">装甲甲板覆盖率</text>
+  <text x="800" y="294" class="number">—</text>
+  <circle cx="807" cy="313" r="5" fill="#FFFFFF" stroke="#71838D"/>
+  <text x="819" y="317" class="tiny">未知 · 缺少来源面积</text>
+
+  <!-- Hull overview -->
+  <rect x="282" y="353" width="763" height="278" rx="11" fill="#FBFCFC" stroke="#DCE4E8"/>
+  <text x="302" y="382" class="heading">纵向概览</text>
+  <text x="1025" y="382" class="small" text-anchor="end">参考基线 z = 0 m</text>
+  <path d="M320 407 H1009 M320 460 H1009 M320 513 H1009" stroke="#E6ECEF" stroke-width="1"/>
+  <path d="M345 397 V529 M470 397 V529 M595 397 V529 M720 397 V529 M845 397 V529 M970 397 V529" stroke="#EEF2F3" stroke-width="1"/>
+  <path d="M333 428 Q340 413 370 408 L516 403 L658 405 L772 400 L890 406 Q942 411 986 428 L973 453 Q863 467 699 469 L490 463 Q382 459 344 447 Z" fill="#DCE6EA" stroke="#516B79" stroke-width="1.5"/>
+  <g clip-path="url(#shipClip)"><rect x="326" y="441" width="677" height="44" fill="#AED1DC" opacity=".62"/></g>
+  <path d="M329 441 H995" class="water"/>
+  <rect x="416" y="393" width="27" height="13" rx="5" fill="#7B939E"/>
+  <rect x="472" y="390" width="27" height="13" rx="5" fill="#7B939E"/>
+  <rect x="723" y="388" width="27" height="13" rx="5" fill="#7B939E"/>
+  <rect x="893" y="394" width="27" height="13" rx="5" fill="#7B939E"/>
+  <path d="M559 402 V365 H581 V405 M603 404 V359 H625 V405 M645 402 V371 H667 V406" fill="#B4C6CE" stroke="#607D89" stroke-width="1"/>
+  <path d="M535 402 L551 381 L584 381 L594 404" fill="#C6D5DA" stroke="#607D89"/>
+  <path d="M524 399 L542 345 L558 399 M684 404 L696 353 L710 404" fill="none" stroke="#6F8791" stroke-width="2"/>
+  <path d="M365 519 H983" stroke="#CBD9DF" stroke-width="1"/>
+  <text x="365" y="537" class="tiny">艉 −106.7 m</text>
+  <text x="673" y="537" class="tiny" text-anchor="middle">船中 0 m</text>
+  <text x="983" y="537" class="tiny" text-anchor="end">艏 +106.7 m</text>
+  <circle cx="335" cy="571" r="4" fill="#286D86"/>
+  <text x="346" y="575" class="small">水线示意</text>
+  <path d="M458 571 H487" stroke="#9A713C" stroke-width="2" stroke-dasharray="4 3"/>
+  <text x="494" y="575" class="small">估算几何</text>
+  <text x="1025" y="608" class="tiny" text-anchor="end">示意图 · 不按比例</text>
+
+  <!-- Right inspector -->
+  <rect x="1062" y="112" width="338" height="519" rx="11" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="1082" y="143" class="heading">来源与诊断</text>
+  <text x="1082" y="166" class="small">当前结果的可信范围</text>
+  <path d="M1082 187 H1380" class="rule"/>
+  <text x="1082" y="214" class="label">排水量</text>
+  <rect x="1313" y="199" width="64" height="22" rx="11" fill="#F7F0E6"/>
+  <text x="1345" y="214" font-size="10" font-weight="650" fill="#845D2F" text-anchor="middle">估算</text>
+  <text x="1082" y="239" class="small">已选载荷账本 · 27,851.6 t</text>
+  <text x="1082" y="258" class="tiny">来源：工程案例与明确场景载荷</text>
+  <path d="M1082 276 H1380" class="rule"/>
+  <text x="1082" y="303" class="label">装甲甲板覆盖率</text>
+  <rect x="1313" y="288" width="64" height="22" rx="11" fill="#EEF1F2"/>
+  <text x="1345" y="303" font-size="10" font-weight="650" fill="#60727D" text-anchor="middle">未知</text>
+  <text x="1082" y="328" class="small">缺少保护面积与参考平面面积</text>
+  <text x="1082" y="347" class="tiny">不会用装甲质量反推面积</text>
+  <path d="M1082 365 H1380" class="rule"/>
+  <text x="1082" y="392" class="label">方法适用性</text>
+  <circle cx="1088" cy="412" r="4" fill="#9A713C"/>
+  <text x="1101" y="416" class="small">几何采用估算型线</text>
+  <circle cx="1088" cy="439" r="4" fill="#9A713C"/>
+  <text x="1101" y="443" class="small">非实船稳性认证</text>
+  <path d="M1082 465 H1380" class="rule"/>
+  <text x="1082" y="493" class="label">请求身份</text>
+  <text x="1082" y="515" class="tiny">工况：normal · 方法版本已记录</text>
+  <text x="1082" y="537" class="tiny">Request fingerprint</text>
+  <text x="1082" y="555" font-size="11" font-family="Consolas, monospace" fill="#60727D">e941…2c7a</text>
+  <rect x="1082" y="579" width="296" height="32" rx="7" fill="#F0F6F8"/>
+  <text x="1230" y="599" font-size="11" font-weight="650" fill="#286D86" text-anchor="middle">打开完整来源与限制 →</text>
+
+  <!-- Bottom charts -->
+  <rect x="282" y="649" width="490" height="190" rx="11" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="302" y="678" class="heading">稳性曲线</text>
+  <text x="752" y="678" class="small" text-anchor="end">GZ · m</text>
+  <path d="M316 801 H748 M319 712 V802" stroke="#DCE4E8"/>
+  <path d="M320 796 C380 772 415 725 475 716 S590 746 648 764 S715 787 748 801" fill="none" stroke="#286D86" stroke-width="2.5"/>
+  <path d="M320 791 C385 768 427 731 480 728 S583 751 647 772 S718 792 748 806" fill="none" stroke="#9A713C" stroke-width="1.5" stroke-dasharray="5 4" opacity=".8"/>
+  <text x="319" y="820" class="tiny">0°</text>
+  <text x="525" y="820" class="tiny">45°</text>
+  <text x="737" y="820" class="tiny" text-anchor="end">90°</text>
+  <rect x="784" y="649" width="261" height="190" rx="11" fill="#FFFFFF" stroke="#DCE4E8"/>
+  <text x="804" y="678" class="heading">计算阶段</text>
+  <circle cx="812" cy="711" r="5" fill="#5F9B85"/><text x="826" y="715" class="small">载荷与质量矩</text><text x="1023" y="715" class="tiny" text-anchor="end">已完成</text>
+  <circle cx="812" cy="742" r="5" fill="#5F9B85"/><text x="826" y="746" class="small">浮态与静水力</text><text x="1023" y="746" class="tiny" text-anchor="end">已完成</text>
+  <circle cx="812" cy="773" r="5" fill="#9A713C"/><text x="826" y="777" class="small">阻力与功率</text><text x="1023" y="777" class="tiny" text-anchor="end">估算</text>
+  <circle cx="812" cy="804" r="5" fill="#FFFFFF" stroke="#71838D"/><text x="826" y="808" class="small">破损研究</text><text x="1023" y="808" class="tiny" text-anchor="end">未请求</text>
+  <rect x="1062" y="649" width="338" height="190" rx="11" fill="#F0F6F8" stroke="#D5E4E9"/>
+  <text x="1082" y="678" class="heading">下一步</text>
+  <text x="1082" y="709" class="small">为该工况补充有来源的装甲甲板</text>
+  <text x="1082" y="729" class="small">面积，或继续查看现有稳性结果。</text>
+  <rect x="1082" y="762" width="132" height="36" rx="7" fill="#286D86"/>
+  <text x="1148" y="785" class="on-accent" font-size="11" font-weight="650" text-anchor="middle">查看结果报告</text>
+  <text x="1233" y="785" font-size="11" fill="#286D86">编辑输入 →</text>
+
+  <text x="282" y="863" class="tiny" letter-spacing=".5">PLIMSOLL / DATUM · 设计概念稿，数值仅作布局示意</text>
+</svg>
