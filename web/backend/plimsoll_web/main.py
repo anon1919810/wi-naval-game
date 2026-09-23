@@ -1,13 +1,14 @@
 """FastAPI routes for the private Plimsoll workspace."""
 
 from typing import Literal
+import uuid
 
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from . import auth
+from . import auth, projects
 from .config import Settings
 from .db import get_db, make_session_factory
 from .mailer import mailer_from_settings
@@ -28,6 +29,18 @@ class Preferences(BaseModel):
     theme: Literal["light", "dark"]
 
 
+class ProjectCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    template: Literal["analytic_box", "generic_steamer", "queen_mary_1913"] | None
+    name: str = Field(min_length=1, max_length=200)
+
+
+class ProjectSave(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    base_revision: int = Field(ge=1)
+    project: dict
+
+
 def create_app(settings: Settings) -> FastAPI:
     app = FastAPI(title="Plimsoll")
     app.state.settings = settings
@@ -37,10 +50,15 @@ def create_app(settings: Settings) -> FastAPI:
     @app.middleware("http")
     async def require_browser_write_origin(request: Request, call_next):
         if request.url.path.startswith("/api/") and request.method not in {"GET", "HEAD", "OPTIONS"}:
+            content_length = request.headers.get("content-length")
+            if content_length is not None and content_length.isdigit() and int(content_length) > 8 * 1024 * 1024:
+                return JSONResponse(status_code=413, content={"detail": "request too large"})
             if request.headers.get("origin") not in settings.allowed_origins:
                 return JSONResponse(status_code=403, content={"detail": "untrusted request origin"})
             if request.headers.get("content-type", "").split(";", 1)[0].lower() != "application/json":
                 return JSONResponse(status_code=415, content={"detail": "JSON content type required"})
+            if len(await request.body()) > 8 * 1024 * 1024:
+                return JSONResponse(status_code=413, content={"detail": "request too large"})
         return await call_next(request)
 
     @app.get("/api/health")
@@ -86,5 +104,33 @@ def create_app(settings: Settings) -> FastAPI:
         db.commit()
         response.delete_cookie("plimsoll_session", path="/")
         return {"status": "signed_out"}
+
+    @app.get("/api/projects")
+    def list_projects(request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return projects.list_projects(user.id, db)
+
+    @app.post("/api/projects", status_code=201)
+    def create_project(body: ProjectCreate, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return projects.create_project(user.id, body.template, body.name, db)
+
+    @app.get("/api/projects/{project_id}")
+    def get_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return projects.get_project(user.id, project_id, db)
+
+    @app.put("/api/projects/{project_id}")
+    def save_project(project_id: uuid.UUID, body: ProjectSave, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        try:
+            return projects.save_project(user.id, project_id, body.base_revision, body.project, db)
+        except projects.RevisionConflict as error:
+            return JSONResponse(status_code=409, content={"current_revision": error.current_revision})
+
+    @app.delete("/api/projects/{project_id}", status_code=204)
+    def delete_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        projects.delete_project(user.id, project_id, db)
 
     return app
