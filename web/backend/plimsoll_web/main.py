@@ -5,10 +5,11 @@ import uuid
 
 from fastapi import Depends, FastAPI, Request, Response
 from fastapi.responses import JSONResponse
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from . import auth, projects
+from . import auth, projects, runs
 from .config import Settings
 from .db import get_db, make_session_factory
 from .mailer import mailer_from_settings
@@ -39,6 +40,13 @@ class ProjectSave(BaseModel):
     model_config = ConfigDict(extra="forbid")
     base_revision: int = Field(ge=1)
     project: dict
+
+
+class RunCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    revision: int = Field(ge=1)
+    condition_id: str
+    options: dict = Field(default_factory=dict)
 
 
 def create_app(settings: Settings) -> FastAPI:
@@ -132,5 +140,34 @@ def create_app(settings: Settings) -> FastAPI:
     def delete_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
         projects.delete_project(user.id, project_id, db)
+
+    @app.get("/api/projects/{project_id}/runs")
+    def list_runs(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return runs.list_runs(user.id, project_id, db)
+
+    @app.post("/api/projects/{project_id}/runs", status_code=202)
+    def enqueue_run(project_id: uuid.UUID, body: RunCreate, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        try:
+            return runs.enqueue_run(user.id, project_id, body.revision, body.condition_id, body.options, db)
+        except projects.RevisionConflict as error:
+            return JSONResponse(status_code=409, content={"current_revision": error.current_revision})
+
+    @app.get("/api/runs/{run_id}")
+    def get_run(run_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return runs.get_run(user.id, run_id, db)
+
+    @app.post("/api/runs/{run_id}/cancel")
+    def cancel_run(run_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return runs.cancel_run(user.id, run_id, db)
+
+    @app.get("/api/runs/{run_id}/export")
+    def export_run(run_id: uuid.UUID, format: str, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        data = runs.export_run(user.id, run_id, format, db)
+        return PlainTextResponse(data, media_type="application/json" if format == "json" else "text/csv; charset=utf-8")
 
     return app

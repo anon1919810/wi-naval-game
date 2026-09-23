@@ -88,3 +88,24 @@ def project_id(alice):
 @pytest.fixture
 def saved_document(alice, project_id):
     return alice.get(f"/api/projects/{project_id}").json()["project"]
+
+
+@pytest.fixture
+def worker_once(alice):
+    from plimsoll_web.worker import work_one
+
+    def once():
+        return work_one(alice.app.state.session_factory)
+
+    return once
+
+
+@pytest.fixture
+def run_id(alice, project_id, worker_once):
+    response = alice.post(f"/api/projects/{project_id}/runs", json={
+        "revision": 1, "condition_id": "loaded", "options": {"stages": ["loading"]},
+    })
+    assert response.status_code == 202
+    worker_once()
+    assert alice.get(f"/api/runs/{response.json()['id']}").json()["status"] == "completed"
+    return response.json()["id"]
