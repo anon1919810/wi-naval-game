@@ -148,6 +148,9 @@ input[aria-invalid='true'] { border-color: var(--error); }
 .run-history button:hover { background: var(--surface-soft); }
 .run-history strong { color: var(--accent); font-size: 10px; }
 .run-history small { color: var(--faint); font-size: 10px; }
+.status-badge { display: inline-flex; padding: 4px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); font-size: 10px; font-weight: 680; }
+.status-badge--partial, .status-badge--model_limit, .status-badge--unavailable { background: var(--warning-soft); color: var(--warning); }
+.status-badge--failed, .status-badge--canceled { background: var(--error-soft); color: var(--error); }
 .editor-section { padding: 24px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); }
 .section-intro { margin: -6px 0 27px; color: var(--muted); font-size: 11px; line-height: 1.7; }
 .field-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 25px 15px; }
@@ -220,6 +223,8 @@ input[aria-invalid='true'] { border-color: var(--error); }
 .stage-value small { color: var(--muted); font-size: 9px; }
 .stage-value em { color: var(--warning); font-size: 9px; font-style: normal; }
 .stage-diagnostics { margin-top: 13px; padding: 9px 12px; border-left: 2px solid var(--warning); background: var(--warning-soft); }
+.stage-diagnostics summary { cursor: pointer; color: var(--warning); font-size: 10px; font-weight: 680; }
+.stage-diagnostics > div { max-height: 250px; overflow: auto; margin-top: 9px; }
 .stage-diagnostics p { display: flex; flex-wrap: wrap; gap: 7px; margin: 4px 0; color: var(--ink); font-size: 10px; }
 .stage-diagnostics code, .stage-diagnostics small { color: var(--muted); font-family: Consolas, monospace; }
 .stage-method { margin: 13px 0 0; color: var(--faint); font-size: 9px; overflow-wrap: anywhere; }

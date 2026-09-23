@@ -17,6 +17,7 @@ class Settings:
     smtp_sender: str | None = None
     smtp_username: str | None = None
     smtp_password: str | None = None
+    local_mail_test: bool = False
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -33,4 +34,5 @@ class Settings:
             smtp_sender=os.environ.get("PLIMSOLL_SMTP_SENDER"),
             smtp_username=os.environ.get("PLIMSOLL_SMTP_USERNAME"),
             smtp_password=os.environ.get("PLIMSOLL_SMTP_PASSWORD"),
+            local_mail_test=os.environ.get("PLIMSOLL_LOCAL_MAIL_TEST") == "1",
         )

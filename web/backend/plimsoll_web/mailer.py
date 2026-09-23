@@ -5,6 +5,7 @@ from __future__ import annotations
 from email.message import EmailMessage
 import smtplib
 import ssl
+from urllib.parse import urlsplit
 
 from .config import Settings
 
@@ -16,6 +17,13 @@ class MailUnavailable(RuntimeError):
 class UnavailableMailer:
     def send_code(self, email: str, code: str) -> None:
         raise MailUnavailable("mail delivery is not configured")
+
+
+class ConsoleMailer:
+    """Explicit local-only development outbox; never send a real email."""
+
+    def send_code(self, email: str, code: str) -> None:
+        print(f"PLIMSOLL LOCAL TEST CODE for {email}: {code}", flush=True)
 
 
 class SMTPMailer:
@@ -46,7 +54,16 @@ class SMTPMailer:
             raise MailUnavailable("mail delivery failed") from error
 
 
-def mailer_from_settings(settings: Settings) -> SMTPMailer | UnavailableMailer:
+def mailer_from_settings(settings: Settings) -> SMTPMailer | UnavailableMailer | ConsoleMailer:
+    if settings.local_mail_test:
+        loopback_origins = bool(settings.allowed_origins) and all(
+            urlsplit(origin).scheme == "http"
+            and urlsplit(origin).hostname in {"localhost", "127.0.0.1", "[::1]", "::1"}
+            for origin in settings.allowed_origins
+        )
+        if not settings.allow_insecure_cookies or not loopback_origins:
+            raise MailUnavailable("local mail test requires loopback HTTP origins")
+        return ConsoleMailer()
     if settings.smtp_host and settings.smtp_sender:
         return SMTPMailer(settings)
     return UnavailableMailer()

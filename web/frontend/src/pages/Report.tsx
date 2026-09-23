@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import * as api from '../api';
 import { ShipProfile } from '../components/ShipProfile';
 import { SourceInspector } from '../components/SourceInspector';
-import { StageStatus, STAGE_LABELS } from '../components/StageStatus';
+import { StageStatus, STAGE_LABELS, STAGE_ORDER } from '../components/StageStatus';
 import { StabilityPlot } from '../components/StabilityPlot';
 import type { AnalysisResult, RunView } from '../types';
 
@@ -12,7 +12,12 @@ const RESULT_LABELS = { completed: '计算完成', partial: '部分完成', canc
 function compareCompatible(left: AnalysisResult, right: AnalysisResult): boolean {
   return left.condition_id === right.condition_id
     && JSON.stringify(left.units) === JSON.stringify(right.units)
-    && JSON.stringify(left.method_versions) === JSON.stringify(right.method_versions);
+    && JSON.stringify(left.method_versions) === JSON.stringify(right.method_versions)
+    && Object.entries(left.stages).every(([name, stage]) => {
+      const other = right.stages[name];
+      return !other || stage.status !== 'completed' || other.status !== 'completed'
+        || JSON.stringify(stage.method_versions) === JSON.stringify(other.method_versions);
+    });
 }
 
 function commonNumbers(left: AnalysisResult, right: AnalysisResult) {
@@ -32,7 +37,8 @@ function commonNumbers(left: AnalysisResult, right: AnalysisResult) {
 export function Report({ result, runId, compareResult, onBack }: {
   result: AnalysisResult; runId?: string; compareResult?: AnalysisResult; onBack?: () => void;
 }) {
-  const requested = Object.entries(result.stages).filter(([, stage]) => stage.requested);
+  const requested = Object.entries(result.stages).filter(([, stage]) => stage.requested)
+    .sort(([a], [b]) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
   const compatible = compareResult ? compareCompatible(result, compareResult) : false;
   const compared = compareResult && compatible ? commonNumbers(result, compareResult) : [];
   const name = result.input_snapshot?.name || result.project_id;
@@ -68,7 +74,8 @@ export function ReportPage({ runId, onBack }: { runId: string; onBack: () => voi
     api.getRun(runId).then(current => {
       if (!active) return;
       setRun(current);
-      return api.listRuns(current.project_id).then(items => { if (active) setHistory(items.filter(item => item.id !== runId && (item.status === 'completed' || item.status === 'partial'))); });
+      void api.listRuns(current.project_id).then(items => { if (active) setHistory(items.filter(item => item.id !== runId && (item.status === 'completed' || item.status === 'partial'))); })
+        .catch(() => { /* Comparison list is optional; the stored report remains available. */ });
     }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : '无法读取报告'); });
     return () => { active = false; };
   }, [runId]);

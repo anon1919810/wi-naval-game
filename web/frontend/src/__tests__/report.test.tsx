@@ -31,4 +31,11 @@ describe('stored report semantics', () => {
     expect(screen.getByText(/不可直接比较/)).toBeVisible();
     expect(screen.getByText(/request-456/)).toBeVisible();
   });
+
+  it('refuses deltas when a stage kernel version changed', () => {
+    const changed = structuredClone(completedFixture);
+    changed.stages.loading.method_versions = { kernel: 'new-kernel' };
+    render(<Report result={completedFixture} compareResult={changed} />);
+    expect(screen.getByText(/不可直接比较/)).toBeVisible();
+  });
 });

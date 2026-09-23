@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import * as api from '../api';
-import { StageStatus } from '../components/StageStatus';
+import { StageStatus, STAGE_ORDER } from '../components/StageStatus';
 import type { RunView } from '../types';
 
 const LABELS: Record<RunView['status'], string> = {
@@ -49,7 +49,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
       {(run.status === 'queued' || run.status === 'running') && <div className="run-pending"><span className="run-progress" aria-hidden="true"/><p>{run.status === 'queued' ? '已排队，等待计算工作进程。' : '计算正在后台执行，离开页面后可再打开此运行。'}</p><button className="button button--secondary" disabled={canceling || run.cancel_requested} onClick={cancel}>{run.cancel_requested ? '已请求取消' : '取消计算'}</button></div>}
       {run.error && <div className="notice notice--error" role="alert"><strong>{run.error.code}</strong><p>{run.error.message}</p></div>}
       {run.result && <><div className="run-result-heading"><div><span className="section-kicker">RESULT / 已存结果</span><h2>{run.result.status === 'partial' ? '部分结果可供复核' : run.result.status === 'canceled' ? '已保存取消前的结果' : '计算结果已保存'}</h2><p>计算完成不等于史实验证。逐阶段检查有效性、缺项与诊断。</p></div><button className="button button--primary" onClick={onReport}>查看完整报告 ↗</button></div>
-        <div className="run-stage-preview">{Object.entries(run.result.stages).filter(([, stage]) => stage.requested).slice(0, 4).map(([name, stage]) => <StageStatus key={name} name={name} stage={stage} />)}</div>
+        <div className="run-stage-preview">{Object.entries(run.result.stages).filter(([, stage]) => stage.requested).sort(([a], [b]) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b)).slice(0, 4).map(([name, stage]) => <StageStatus key={name} name={name} stage={stage} />)}</div>
       </>}
     </>}
   </main>;
