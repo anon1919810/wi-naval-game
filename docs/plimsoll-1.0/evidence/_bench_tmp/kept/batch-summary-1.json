@@ -1,0 +1,2459 @@
+{
+  "case_count": 6,
+  "cases": [
+    {
+      "condition_id": "loaded",
+      "declaration": {
+        "condition_id": "loaded",
+        "options": {
+          "stages": [
+            "loading",
+            "systems",
+            "equilibrium",
+            "hydrostatics"
+          ]
+        },
+        "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\analytic_box.project.json"
+      },
+      "diagnostics": [
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.sealed_envelope",
+          "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        }
+      ],
+      "id": "analytic_box-loaded",
+      "input_fingerprint": "0f3070f39a657c42473d2a4b57f54dd2eab3d37ed67bce7e591ad1b210d7dee6",
+      "ordinal": 1,
+      "persistence": {
+        "diagnostics": [],
+        "path": "0001.result.json",
+        "status": "saved"
+      },
+      "project_fingerprint": "c274387d6ee4f70300c587e9f2758ea1ca44c0f9c10f7c6beb35e0594fd6bc3d",
+      "project_id": "analytic-box-reference",
+      "request_fingerprint": "432f25cc0c05899523035e14d51d642f425f1e0ed50ebb6d6dacc4cd2a5e4835",
+      "result_path": "0001.result.json",
+      "status": "completed"
+    },
+    {
+      "condition_id": "light",
+      "declaration": {
+        "condition_id": "light",
+        "options": {
+          "stages": [
+            "loading",
+            "systems",
+            "equilibrium",
+            "hydrostatics"
+          ]
+        },
+        "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\analytic_box.project.json"
+      },
+      "diagnostics": [
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"box-ballast\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"box-ballast\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"box-ballast\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"box-ballast\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"box-ballast\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"box-ballast\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.sealed_envelope",
+          "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        }
+      ],
+      "id": "analytic_box-light",
+      "input_fingerprint": "2bf07f5c5c8001960606d94e061ce741602911f43e216fe6f360d47b970624d6",
+      "ordinal": 2,
+      "persistence": {
+        "diagnostics": [],
+        "path": "0002.result.json",
+        "status": "saved"
+      },
+      "project_fingerprint": "c274387d6ee4f70300c587e9f2758ea1ca44c0f9c10f7c6beb35e0594fd6bc3d",
+      "project_id": "analytic-box-reference",
+      "request_fingerprint": "826db909a2319b161a15468f7c42f8930708fe2655231a5b8ef61e3ce4141740",
+      "result_path": "0002.result.json",
+      "status": "completed"
+    },
+    {
+      "condition_id": "coastal",
+      "declaration": {
+        "condition_id": "coastal",
+        "options": {
+          "stages": [
+            "loading",
+            "systems",
+            "equilibrium",
+            "hydrostatics"
+          ]
+        },
+        "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\generic_steamer.project.json"
+      },
+      "diagnostics": [
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.sealed_envelope",
+          "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.inclined_reference",
+          "message": "inclined body-axis ratios are not upright empirical resistance inputs; BM/TPC are unavailable",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        }
+      ],
+      "id": "steamer-coastal",
+      "input_fingerprint": "a8be16909a3b66bcf56bebc80c90a5ca54dc370108b6069f9db054246462f126",
+      "ordinal": 3,
+      "persistence": {
+        "diagnostics": [],
+        "path": "0003.result.json",
+        "status": "saved"
+      },
+      "project_fingerprint": "062195cc08b7f595c02e584c00a0a58a984c568df210bf8c5122e88501609dab",
+      "project_id": "generic-steamer-reference",
+      "request_fingerprint": "4d68f1b220deac6e28d1c73a9d9f80ef678e804f1c143543cc755a6b21d6a2f9",
+      "result_path": "0003.result.json",
+      "status": "completed"
+    },
+    {
+      "condition_id": "loaded",
+      "declaration": {
+        "condition_id": "loaded",
+        "options": {
+          "stages": [
+            "loading",
+            "systems",
+            "equilibrium",
+            "hydrostatics"
+          ]
+        },
+        "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\generic_steamer.project.json"
+      },
+      "diagnostics": [
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-fuel\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-fuel\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-water\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-cargo\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-cargo\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-fuel\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-fuel\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-cargo\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-cargo\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-fuel\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-fuel\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"steamer-cargo\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"steamer-cargo\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.sealed_envelope",
+          "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.inclined_reference",
+          "message": "inclined body-axis ratios are not upright empirical resistance inputs; BM/TPC are unavailable",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        }
+      ],
+      "id": "steamer-loaded",
+      "input_fingerprint": "b071d0435e793ff002010f8110473939c8bcffb84a689004d3b568100f02a101",
+      "ordinal": 4,
+      "persistence": {
+        "diagnostics": [],
+        "path": "0004.result.json",
+        "status": "saved"
+      },
+      "project_fingerprint": "062195cc08b7f595c02e584c00a0a58a984c568df210bf8c5122e88501609dab",
+      "project_id": "generic-steamer-reference",
+      "request_fingerprint": "3e347c7a5aece9da06bbd148ddafa917b5bc6cde92032aacfc811c354a759b13",
+      "result_path": "0004.result.json",
+      "status": "completed"
+    },
+    {
+      "condition_id": "normal-engineering",
+      "declaration": {
+        "condition_id": "normal-engineering",
+        "options": {
+          "stages": [
+            "loading",
+            "systems",
+            "equilibrium",
+            "hydrostatics"
+          ]
+        },
+        "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\queen_mary_1913.project.json"
+      },
+      "diagnostics": [
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[0].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[0].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.value",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.source",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-belt-229mm-plate-mass-check' differs from ledger item 'armour-belt-229mm' by -0.0004500000000007276 t.",
+          "path": "$.systems.armour.fixed.mass_models[0]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[0]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-belt-taper-102mm-aft-plate-mass-check' differs from ledger item 'armour-belt-taper-102mm-aft' by -0.00020000000002085017 t.",
+          "path": "$.systems.armour.fixed.mass_models[1]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[1]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-belt-taper-102mm-fwd-plate-mass-check' differs from ledger item 'armour-belt-taper-102mm-fwd' by 0.00037999999995008693 t.",
+          "path": "$.systems.armour.fixed.mass_models[2]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[2]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-bulkhead-aft-plate-mass-check' differs from ledger item 'armour-bulkhead-aft' by -0.00287300000002233 t.",
+          "path": "$.systems.armour.fixed.mass_models[3]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[3]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-bulkhead-fwd-plate-mass-check' differs from ledger item 'armour-bulkhead-fwd' by -0.00273200000003726 t.",
+          "path": "$.systems.armour.fixed.mass_models[4]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[4]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-deck-25mm-plate-mass-check' differs from ledger item 'armour-deck-25mm' by -0.0005499999999756255 t.",
+          "path": "$.systems.armour.fixed.mass_models[5]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[5]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-deck-64mm-plate-mass-check' differs from ledger item 'armour-deck-64mm' by -8.799999977782136e-05 t.",
+          "path": "$.systems.armour.fixed.mass_models[6]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[6]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-upper-belt-152mm-plate-mass-check' differs from ledger item 'armour-upper-belt-152mm' by 0.0001199999999244028 t.",
+          "path": "$.systems.armour.fixed.mass_models[7]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[7]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-a-plate-mass-check' differs from ledger item 'barbette-a' by -0.006953000000009979 t.",
+          "path": "$.systems.armour.fixed.mass_models[8]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[8]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-b-plate-mass-check' differs from ledger item 'barbette-b' by -0.006953000000009979 t.",
+          "path": "$.systems.armour.fixed.mass_models[9]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[9]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-q-plate-mass-check' differs from ledger item 'barbette-q' by -0.006953000000009979 t.",
+          "path": "$.systems.armour.fixed.mass_models[10]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[10]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-x-plate-mass-check' differs from ledger item 'barbette-x' by -0.007376999999991085 t.",
+          "path": "$.systems.armour.fixed.mass_models[11]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[11]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'conning-tower-plate-mass-check' differs from ledger item 'conning-tower' by 0.007716999999956897 t.",
+          "path": "$.systems.armour.fixed.mass_models[12]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[12]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[0].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[0].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[0].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[0].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.sealed_envelope",
+          "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.inclined_reference",
+          "message": "inclined body-axis ratios are not upright empirical resistance inputs; BM/TPC are unavailable",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        }
+      ],
+      "id": "queen_mary-normal",
+      "input_fingerprint": "a0ce0ca43958a7fd18ef3eaa7fd0614d57b7c2bd531ed13e84fc5d0150d098f2",
+      "ordinal": 5,
+      "persistence": {
+        "diagnostics": [],
+        "path": "0005.result.json",
+        "status": "saved"
+      },
+      "project_fingerprint": "284e8dc4cdf5cfd055ad1c9c9e7962a57a8ca3b93d4d49518fb0d85ac11540b4",
+      "project_id": "hms-queen-mary-1913",
+      "request_fingerprint": "b217c430eeb3f029f28f5a0d30ea006df4b9820a3484825bc081340acb908517",
+      "result_path": "0005.result.json",
+      "status": "completed"
+    },
+    {
+      "condition_id": "deep-engineering",
+      "declaration": {
+        "condition_id": "deep-engineering",
+        "options": {
+          "stages": [
+            "loading",
+            "systems",
+            "equilibrium",
+            "hydrostatics"
+          ]
+        },
+        "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\queen_mary_1913.project.json"
+      },
+      "diagnostics": [
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[0].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[0].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.value",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.source",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "stage": "loading"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-belt-229mm-plate-mass-check' differs from ledger item 'armour-belt-229mm' by -0.0004500000000007276 t.",
+          "path": "$.systems.armour.fixed.mass_models[0]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[0]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-belt-taper-102mm-aft-plate-mass-check' differs from ledger item 'armour-belt-taper-102mm-aft' by -0.00020000000002085017 t.",
+          "path": "$.systems.armour.fixed.mass_models[1]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[1]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-belt-taper-102mm-fwd-plate-mass-check' differs from ledger item 'armour-belt-taper-102mm-fwd' by 0.00037999999995008693 t.",
+          "path": "$.systems.armour.fixed.mass_models[2]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[2]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-bulkhead-aft-plate-mass-check' differs from ledger item 'armour-bulkhead-aft' by -0.00287300000002233 t.",
+          "path": "$.systems.armour.fixed.mass_models[3]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[3]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-bulkhead-fwd-plate-mass-check' differs from ledger item 'armour-bulkhead-fwd' by -0.00273200000003726 t.",
+          "path": "$.systems.armour.fixed.mass_models[4]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[4]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-deck-25mm-plate-mass-check' differs from ledger item 'armour-deck-25mm' by -0.0005499999999756255 t.",
+          "path": "$.systems.armour.fixed.mass_models[5]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[5]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-deck-64mm-plate-mass-check' differs from ledger item 'armour-deck-64mm' by -8.799999977782136e-05 t.",
+          "path": "$.systems.armour.fixed.mass_models[6]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[6]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'armour-upper-belt-152mm-plate-mass-check' differs from ledger item 'armour-upper-belt-152mm' by 0.0001199999999244028 t.",
+          "path": "$.systems.armour.fixed.mass_models[7]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[7]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-a-plate-mass-check' differs from ledger item 'barbette-a' by -0.006953000000009979 t.",
+          "path": "$.systems.armour.fixed.mass_models[8]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[8]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-b-plate-mass-check' differs from ledger item 'barbette-b' by -0.006953000000009979 t.",
+          "path": "$.systems.armour.fixed.mass_models[9]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[9]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-q-plate-mass-check' differs from ledger item 'barbette-q' by -0.006953000000009979 t.",
+          "path": "$.systems.armour.fixed.mass_models[10]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[10]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'barbette-x-plate-mass-check' differs from ledger item 'barbette-x' by -0.007376999999991085 t.",
+          "path": "$.systems.armour.fixed.mass_models[11]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[11]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "systems.mass_mismatch",
+          "message": "Physical model 'conning-tower-plate-mass-check' differs from ledger item 'conning-tower' by 0.007716999999956897 t.",
+          "path": "$.systems.armour.fixed.mass_models[12]",
+          "severity": "warning",
+          "source_path": "$.systems.armour.fixed.mass_models[12]",
+          "stage": "systems"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[0].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[0].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[0].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[0].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "value.unknown",
+          "message": "value is unknown; downstream calculations must not substitute zero",
+          "path": "$.loading_conditions[1].reference_displacement_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].reference_displacement_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.cruise_speed_kn.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.value_unknown",
+          "message": "value is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.value",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.value",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "source provenance is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.source",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.source",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "extension.provenance_unknown",
+          "message": "estimate state is unknown",
+          "path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "severity": "warning",
+          "source_path": "$.systems.propulsion.facts.engine_built_year.estimate",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"coal\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"fuel-oil\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"reserve-feed-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"potable-water\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"provisions-stores\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].kg_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].mass_t",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].x_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.uncertainty_override_cleared",
+          "message": "base uncertainty was cleared because the field was overridden; update uncertainty metadata",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "loading.override_provenance_unknown",
+          "message": "override has unknown field provenance; base source is not inherited",
+          "path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "severity": "warning",
+          "source_path": "$.loading_conditions[1].overrides[\"crew-effects\"].y_m",
+          "stage": "equilibrium"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.sealed_envelope",
+          "message": "section polygons define a sealed integration envelope, not evidence of a watertight deck",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        },
+        {
+          "blocking": false,
+          "code": "geometry.inclined_reference",
+          "message": "inclined body-axis ratios are not upright empirical resistance inputs; BM/TPC are unavailable",
+          "path": "$.geometry",
+          "severity": "warning",
+          "source_path": "$.geometry",
+          "stage": "hydrostatics"
+        }
+      ],
+      "id": "queen_mary-deep",
+      "input_fingerprint": "24197991656333563ee72a18ef82049df69d62348d2b249b9f9fbc1d4368a5e4",
+      "ordinal": 6,
+      "persistence": {
+        "diagnostics": [],
+        "path": "0006.result.json",
+        "status": "saved"
+      },
+      "project_fingerprint": "284e8dc4cdf5cfd055ad1c9c9e7962a57a8ca3b93d4d49518fb0d85ac11540b4",
+      "project_id": "hms-queen-mary-1913",
+      "request_fingerprint": "bfae7c052194365e49254bc528ba56da9c5f853cb8596d8cdd67a742e4fd97fd",
+      "result_path": "0006.result.json",
+      "status": "completed"
+    }
+  ],
+  "manifest": {
+    "path": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\docs\\plimsoll-1.0\\evidence\\_bench_tmp\\batch-manifest.json",
+    "schema": "plimsoll-batch-1"
+  },
+  "schema": "plimsoll-batch-result-1",
+  "status": "completed"
+}

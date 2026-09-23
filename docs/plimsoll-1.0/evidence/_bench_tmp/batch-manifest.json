@@ -1,0 +1,83 @@
+{
+ "schema": "plimsoll-batch-1",
+ "cases": [
+  {
+   "id": "analytic_box-loaded",
+   "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\analytic_box.project.json",
+   "condition_id": "loaded",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   }
+  },
+  {
+   "id": "analytic_box-light",
+   "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\analytic_box.project.json",
+   "condition_id": "light",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   }
+  },
+  {
+   "id": "steamer-coastal",
+   "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\generic_steamer.project.json",
+   "condition_id": "coastal",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   }
+  },
+  {
+   "id": "steamer-loaded",
+   "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\generic_steamer.project.json",
+   "condition_id": "loaded",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   }
+  },
+  {
+   "id": "queen_mary-normal",
+   "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\queen_mary_1913.project.json",
+   "condition_id": "normal-engineering",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   }
+  },
+  {
+   "id": "queen_mary-deep",
+   "project": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\queen_mary_1913.project.json",
+   "condition_id": "deep-engineering",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   }
+  }
+ ]
+}

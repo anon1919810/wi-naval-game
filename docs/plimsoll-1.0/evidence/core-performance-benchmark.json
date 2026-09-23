@@ -1,0 +1,618 @@
+{
+ "schema": "plimsoll-core-performance-benchmark-1",
+ "protocol": "docs/plimsoll-1.0/core-performance-validation.md",
+ "measured_at_local": "2026-09-23T01:57:32+0800",
+ "worktree_head_commit": "15c5fcbad11485e228d13b9b922e506450d6876a",
+ "environment": {
+  "python_version": "3.13.14 (main, Jun 11 2026, 04:04:46) [MSC v.1944 64 bit (AMD64)]",
+  "python_executable": "C:\\Users\\杨睿\\.workbuddy\\binaries\\python\\versions\\3.13.12\\python.exe",
+  "python_executable_sha256": "ec8139feb5012b12a531196f257fddf53668f0109918d5d44ffa195cf352fdd6",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "processor": "AMD64 Family 25 Model 117 Stepping 2, AuthenticAMD",
+  "cpu_count": 16,
+  "total_ram_bytes": 29860155392,
+  "measured_clock": "time.perf_counter_ns",
+  "samples_per_workload": 3
+ },
+ "workloads": {
+  "cold_start": {
+   "samples_ns": [
+    249318200,
+    232490500,
+    229500700
+   ],
+   "samples_s": [
+    0.249318,
+    0.23249,
+    0.229501
+   ],
+   "median_s": 0.23249,
+   "min_s": 0.229501,
+   "max_s": 0.249318,
+   "workload": "cold_process_import_startup",
+   "inside_interval": "interpreter start + import of plimsoll.analysis",
+   "elapsed_s": 0.712
+  },
+  "single_condition": {
+   "samples_ns": [
+    2988748700,
+    2984795600,
+    3068647500
+   ],
+   "samples_s": [
+    2.988749,
+    2.984796,
+    3.068647
+   ],
+   "median_s": 2.988749,
+   "min_s": 2.984796,
+   "max_s": 3.068647,
+   "workload": "single_condition",
+   "project": "hms-queen-mary-1913",
+   "condition_id": "normal-engineering",
+   "options": {
+    "stages": [
+     "loading",
+     "systems",
+     "equilibrium",
+     "hydrostatics"
+    ]
+   },
+   "inside_interval": "analysis.compute_project only (no parse/serialize)",
+   "project_facts": {
+    "path": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\queen_mary_1913.project.json",
+    "bytes": 2547432,
+    "sha256": "43e0b01cf575d5e063a17cfd26801a5f486cb87fa4e36790592a84ffbb3d824e",
+    "project_id": "hms-queen-mary-1913",
+    "conditions": [
+     "normal-engineering",
+     "deep-engineering"
+    ],
+    "geometry_kind": "offsets",
+    "station_count": 141,
+    "schema": "plimsoll-project-1"
+   },
+   "result": {
+    "status": "completed",
+    "stages": {
+     "loading": {
+      "status": "completed",
+      "complete": true
+     },
+     "systems": {
+      "status": "completed",
+      "complete": true
+     },
+     "geometry": {
+      "status": "completed",
+      "complete": true
+     },
+     "equilibrium": {
+      "status": "completed",
+      "complete": true
+     },
+     "hydrostatics": {
+      "status": "completed",
+      "complete": true
+     }
+    },
+    "project_fingerprint": "284e8dc4cdf5cfd055ad1c9c9e7962a57a8ca3b93d4d49518fb0d85ac11540b4",
+    "input_fingerprint": "a0ce0ca43958a7fd18ef3eaa7fd0614d57b7c2bd531ed13e84fc5d0150d098f2",
+    "request_fingerprint": "b217c430eeb3f029f28f5a0d30ea006df4b9820a3484825bc081340acb908517",
+    "diagnostic_codes": [
+     "extension.provenance_unknown",
+     "extension.value_unknown",
+     "geometry.inclined_reference",
+     "geometry.sealed_envelope",
+     "systems.mass_mismatch",
+     "value.unknown"
+    ]
+   },
+   "elapsed_s": 9.192
+  },
+  "batch_cli": {
+   "samples_ns": [
+    9081362300,
+    9088328500,
+    9401018500
+   ],
+   "samples_s": [
+    9.081362,
+    9.088328,
+    9.401018
+   ],
+   "median_s": 9.088328,
+   "min_s": 9.081362,
+   "max_s": 9.401018,
+   "workload": "batch_cli",
+   "manifest": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\docs\\plimsoll-1.0\\evidence\\_bench_tmp\\batch-manifest.json",
+   "exit_codes": [
+    0,
+    0,
+    0
+   ],
+   "cases": 6,
+   "inside_interval": "whole subprocess: parse + calculate + serialize",
+   "summary_statuses": [
+    "completed",
+    "completed",
+    "completed"
+   ],
+   "identities_stable_across_samples": true,
+   "per_case_identity": {
+    "analytic_box-loaded": "432f25cc0c05899523035e14d51d642f425f1e0ed50ebb6d6dacc4cd2a5e4835",
+    "analytic_box-light": "826db909a2319b161a15468f7c42f8930708fe2655231a5b8ef61e3ce4141740",
+    "steamer-coastal": "4d68f1b220deac6e28d1c73a9d9f80ef678e804f1c143543cc755a6b21d6a2f9",
+    "steamer-loaded": "3e347c7a5aece9da06bbd148ddafa917b5bc6cde92032aacfc811c354a759b13",
+    "queen_mary-normal": "b217c430eeb3f029f28f5a0d30ea006df4b9820a3484825bc081340acb908517",
+    "queen_mary-deep": "bfae7c052194365e49254bc528ba56da9c5f853cb8596d8cdd67a742e4fd97fd"
+   },
+   "per_case_timing_limitation": "the batch summary carries no per-case elapsed time; per-case figures come from per_case_in_process below",
+   "elapsed_s": 27.606
+  },
+  "per_case_in_process": {
+   "workload": "per_case_in_process",
+   "elapsed_s": 24.519,
+   "cases": [
+    {
+     "case": "analytic_box-loaded",
+     "project": "analytic-box-reference",
+     "condition_id": "loaded",
+     "in_process": {
+      "samples_ns": [
+       4487000,
+       3876900,
+       4288100
+      ],
+      "samples_s": [
+       0.004487,
+       0.003877,
+       0.004288
+      ],
+      "median_s": 0.004288,
+      "min_s": 0.003877,
+      "max_s": 0.004487
+     },
+     "status": "completed",
+     "stages": {
+      "loading": {
+       "status": "completed",
+       "complete": true
+      },
+      "systems": {
+       "status": "completed",
+       "complete": true
+      },
+      "geometry": {
+       "status": "completed",
+       "complete": true
+      },
+      "equilibrium": {
+       "status": "completed",
+       "complete": true
+      },
+      "hydrostatics": {
+       "status": "completed",
+       "complete": true
+      }
+     }
+    },
+    {
+     "case": "analytic_box-light",
+     "project": "analytic-box-reference",
+     "condition_id": "light",
+     "in_process": {
+      "samples_ns": [
+       6030700,
+       5889600,
+       6353300
+      ],
+      "samples_s": [
+       0.006031,
+       0.00589,
+       0.006353
+      ],
+      "median_s": 0.006031,
+      "min_s": 0.00589,
+      "max_s": 0.006353
+     },
+     "status": "completed",
+     "stages": {
+      "loading": {
+       "status": "completed",
+       "complete": true
+      },
+      "systems": {
+       "status": "completed",
+       "complete": true
+      },
+      "geometry": {
+       "status": "completed",
+       "complete": true
+      },
+      "equilibrium": {
+       "status": "completed",
+       "complete": true
+      },
+      "hydrostatics": {
+       "status": "completed",
+       "complete": true
+      }
+     }
+    },
+    {
+     "case": "steamer-coastal",
+     "project": "generic-steamer-reference",
+     "condition_id": "coastal",
+     "in_process": {
+      "samples_ns": [
+       592779100,
+       520942800,
+       520565500
+      ],
+      "samples_s": [
+       0.592779,
+       0.520943,
+       0.520566
+      ],
+      "median_s": 0.520943,
+      "min_s": 0.520566,
+      "max_s": 0.592779
+     },
+     "status": "completed",
+     "stages": {
+      "loading": {
+       "status": "completed",
+       "complete": true
+      },
+      "systems": {
+       "status": "completed",
+       "complete": true
+      },
+      "geometry": {
+       "status": "completed",
+       "complete": true
+      },
+      "equilibrium": {
+       "status": "completed",
+       "complete": true
+      },
+      "hydrostatics": {
+       "status": "completed",
+       "complete": true
+      }
+     }
+    },
+    {
+     "case": "steamer-loaded",
+     "project": "generic-steamer-reference",
+     "condition_id": "loaded",
+     "in_process": {
+      "samples_ns": [
+       572422400,
+       581518100,
+       557042700
+      ],
+      "samples_s": [
+       0.572422,
+       0.581518,
+       0.557043
+      ],
+      "median_s": 0.572422,
+      "min_s": 0.557043,
+      "max_s": 0.581518
+     },
+     "status": "completed",
+     "stages": {
+      "loading": {
+       "status": "completed",
+       "complete": true
+      },
+      "systems": {
+       "status": "completed",
+       "complete": true
+      },
+      "geometry": {
+       "status": "completed",
+       "complete": true
+      },
+      "equilibrium": {
+       "status": "completed",
+       "complete": true
+      },
+      "hydrostatics": {
+       "status": "completed",
+       "complete": true
+      }
+     }
+    },
+    {
+     "case": "queen_mary-normal",
+     "project": "hms-queen-mary-1913",
+     "condition_id": "normal-engineering",
+     "in_process": {
+      "samples_ns": [
+       3085363300,
+       3103406100,
+       3446829600
+      ],
+      "samples_s": [
+       3.085363,
+       3.103406,
+       3.44683
+      ],
+      "median_s": 3.103406,
+      "min_s": 3.085363,
+      "max_s": 3.44683
+     },
+     "status": "completed",
+     "stages": {
+      "loading": {
+       "status": "completed",
+       "complete": true
+      },
+      "systems": {
+       "status": "completed",
+       "complete": true
+      },
+      "geometry": {
+       "status": "completed",
+       "complete": true
+      },
+      "equilibrium": {
+       "status": "completed",
+       "complete": true
+      },
+      "hydrostatics": {
+       "status": "completed",
+       "complete": true
+      }
+     }
+    },
+    {
+     "case": "queen_mary-deep",
+     "project": "hms-queen-mary-1913",
+     "condition_id": "deep-engineering",
+     "in_process": {
+      "samples_ns": [
+       3682154400,
+       3814521500,
+       3641251700
+      ],
+      "samples_s": [
+       3.682154,
+       3.814522,
+       3.641252
+      ],
+      "median_s": 3.682154,
+      "min_s": 3.641252,
+      "max_s": 3.814522
+     },
+     "status": "completed",
+     "stages": {
+      "loading": {
+       "status": "completed",
+       "complete": true
+      },
+      "systems": {
+       "status": "completed",
+       "complete": true
+      },
+      "geometry": {
+       "status": "completed",
+       "complete": true
+      },
+      "equilibrium": {
+       "status": "completed",
+       "complete": true
+      },
+      "hydrostatics": {
+       "status": "completed",
+       "complete": true
+      }
+     }
+    }
+   ]
+  },
+  "gz_curve": {
+   "samples_ns": [
+    20429459300,
+    19378579500,
+    17780851500
+   ],
+   "samples_s": [
+    20.429459,
+    19.37858,
+    17.780852
+   ],
+   "median_s": 19.37858,
+   "min_s": 17.780852,
+   "max_s": 20.429459,
+   "workload": "gz_curve",
+   "project": "hms-queen-mary-1913",
+   "condition_id": "normal-engineering",
+   "angles_deg": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30,
+    35,
+    40,
+    45,
+    50,
+    55,
+    60
+   ],
+   "inside_interval": "analysis.compute_project only (no parse/serialize)",
+   "project_facts": {
+    "path": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\tools\\plimsoll\\cases\\projects\\queen_mary_1913.project.json",
+    "bytes": 2547432,
+    "sha256": "43e0b01cf575d5e063a17cfd26801a5f486cb87fa4e36790592a84ffbb3d824e",
+    "project_id": "hms-queen-mary-1913",
+    "conditions": [
+     "normal-engineering",
+     "deep-engineering"
+    ],
+    "geometry_kind": "offsets",
+    "station_count": 141,
+    "schema": "plimsoll-project-1"
+   },
+   "result": {
+    "status": "completed",
+    "complete": true,
+    "converged": true,
+    "model_applicable": true,
+    "row_count": 13,
+    "angles_deg": [
+     0.0,
+     5.0,
+     10.0,
+     15.0,
+     20.0,
+     25.0,
+     30.0,
+     35.0,
+     40.0,
+     45.0,
+     50.0,
+     55.0,
+     60.0
+    ],
+    "rows_without_equilibrium": [],
+    "boundary_angles_deg": [],
+    "row_validity_summary": [
+     [
+      true,
+      true,
+      "unknown_no_explicit_deck_edges"
+     ]
+    ],
+    "max_abs_scaled_residual": 6.443907312886702e-13,
+    "gz_m_range": [
+     4.317664289246345e-18,
+     1.9414471139197065
+    ],
+    "maximum": {
+     "kind": "sampled_maximum",
+     "angle_deg": 35.0,
+     "gz_m": 1.9414471139197065
+    },
+    "avs_deg": null,
+    "zero_crossings": [],
+    "initial_stiffness_m": 4.284450220915109,
+    "endpoint": {
+     "kind": "positive_sample",
+     "angle_deg": 60.0,
+     "gz_m": 1.3344244452431882
+    },
+    "degraded_rows_note": "rows without equilibrium or with model_applicable/intact_valid false are retained above, not discarded",
+    "overall_status": "completed",
+    "request_fingerprint": "278fff78eecd600d04e1c5a0c076330abb1be41537b556ef8b5066c9de80088b",
+    "diagnostic_codes": [
+     "extension.provenance_unknown",
+     "extension.value_unknown",
+     "value.unknown"
+    ],
+    "curve_note": "processing completion is reported separately from physical validity: see complete/model_applicable above"
+   },
+   "elapsed_s": 57.777
+  },
+  "flooding_queen_mary_single_proxy_10s": {
+   "samples_ns": [
+    18626833700,
+    18735751400,
+    19874253100
+   ],
+   "samples_s": [
+    18.626834,
+    18.735751,
+    19.874253
+   ],
+   "median_s": 18.735751,
+   "min_s": 18.626834,
+   "max_s": 19.874253,
+   "workload": "flooding_queen_mary_single_proxy_10s",
+   "preset": "queen-mary-single-proxy",
+   "project": "hms-queen-mary-1913",
+   "condition_id": "normal-engineering",
+   "requested_duration_s": 10.0,
+   "requested_time_step_s": 1.0,
+   "inside_interval": "flooding.simulate_flooding only (no parse/serialize)",
+   "scenario_sha256": "2c0a8f9350e14da0fd3eac8b18db8d163ce3f3cbd637924b79ead7fd79a44708",
+   "scenario_source": {
+    "kind": "queen_mary_damage_proxy",
+    "limitations": "Engineering layout proxy; not surveyed subdivision or damage evidence."
+   },
+   "result": {
+    "status": "completed",
+    "stop_reason": "scheduled_completion",
+    "validity": {
+     "complete": true,
+     "model_applicable": true,
+     "numerical_convergence": true,
+     "historical_validated": null,
+     "safe": null
+    },
+    "requested_duration_s": 10.0,
+    "accepted_duration_s": 10.0,
+    "step_count": 10,
+    "actual_dt_s_min": 0.0,
+    "actual_dt_s_max": 1.0,
+    "step_halving_detected": true,
+    "failed_attempt": null,
+    "initial_water_volume_m3": 0.0,
+    "initial_water_mass_t": 0.0,
+    "final_onboard_water_mass_t": 63.61677218985074,
+    "mass_conservation_error_t": 0.0,
+    "volume_conservation_error_m3": 0.0,
+    "final_state_conservation_errors": {
+     "mass_t": 0.0,
+     "volume_m3": 0.0
+    },
+    "equilibrium_keys": [
+     "angle_convention",
+     "axes",
+     "buoyancy_centre_keel_m",
+     "buoyancy_centre_m",
+     "converged",
+     "diagnostics",
+     "effective_loading",
+     "fsc_policy",
+     "geometry",
+     "gz_m",
+     "heel_deg",
+     "input_fingerprint",
+     "method_version",
+     "mode",
+     "p",
+     "q",
+     "residuals",
+     "rho_t_m3",
+     "solver",
+     "target_volume_m3",
+     "trim_deg",
+     "validity",
+     "volume_m3",
+     "waterline_above_keel_m",
+     "waterline_d_m",
+     "waterplane_area_convention",
+     "waterplane_area_m2"
+    ],
+    "equilibrium_residual": null,
+    "equilibrium_converged": true,
+    "downflooding": null,
+    "diagnostic_codes": [],
+    "method_version": "connected-quasi-static-flooding-1",
+    "kernel_method_version": "vented-orifice-network-1",
+    "project_fingerprint": "284e8dc4cdf5cfd055ad1c9c9e7962a57a8ca3b93d4d49518fb0d85ac11540b4",
+    "input_fingerprint": "58bf1dfcef82495138e815e8050344f26e7e722bda531328e1a05ef1007706d7",
+    "timeline_length": 11
+   },
+   "elapsed_s": 57.271
+  }
+ }
+}
