@@ -16,7 +16,7 @@ function envelope(status: StageEnvelope['status'] = 'not_requested', requested =
 const base: AnalysisResult = {
   schema: 'plimsoll-analysis-1', status: 'completed', project_id: 'queen-mary', condition_id: 'normal-engineering',
   project_fingerprint: 'project-123', input_fingerprint: 'input-123', request_fingerprint: 'request-123',
-  request: { stages: ['loading', 'equilibrium', 'deck'] },
+  request: { stages: ['loading', 'equilibrium'] },
   input_snapshot: { schema: 'plimsoll-project-1', id: 'queen-mary', name: 'HMS Queen Mary', revision: 2, hull: { loa_m: 213.4, beam_m: 27.2 }, geometry: null, weight_groups: [], loading_conditions: [{ id: 'normal-engineering', label: '正常载荷' }] },
   units: { length: 'm', mass: 't' }, method_versions: { coordinator: 'selected-loading-analysis-1' },
   sources: {}, diagnostics: [],
@@ -27,12 +27,12 @@ const base: AnalysisResult = {
 export const completedFixture: AnalysisResult = structuredClone(base);
 completedFixture.stages.loading = envelope('completed', true, { total_mass_t: 27200, lcg_m: 0 });
 completedFixture.stages.equilibrium = envelope('completed', true, { draught_m: 9.9, heel_deg: 0 });
-completedFixture.stages.deck = envelope('unavailable', true);
-completedFixture.stages.deck.reason = '甲板端点资料不足';
 
 export const partialFixture: AnalysisResult = structuredClone(completedFixture);
 partialFixture.status = 'partial';
 partialFixture.validity.complete = false;
+partialFixture.stages.deck = envelope('unavailable', true);
+partialFixture.stages.deck.reason = '甲板端点资料不足';
 partialFixture.stages.equilibrium = envelope('model_limit', true);
 partialFixture.stages.equilibrium.reason = '超出方法适用范围';
 partialFixture.stages.equilibrium.diagnostics = [{ code: 'MODEL_LIMIT', severity: 'warning', path: '$.stages.equilibrium', message: '超出方法适用范围' }];

@@ -3,15 +3,18 @@ import { useEffect, useState } from 'react';
 import * as api from './api';
 import { Library } from './pages/Library';
 import { Login } from './pages/Login';
+import { ReportPage } from './pages/Report';
+import { Run } from './pages/Run';
 import { Workbench } from './pages/Workbench';
 import type { Theme, UserSession } from './types';
 
-type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string };
+type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string } | { kind: 'report'; id: string };
 
 function currentRoute(): Route {
   const path = window.location.hash.replace(/^#\/?/, '').split('/');
   if (path[0] === 'projects' && path[1]) return { kind: 'project', id: path[1] };
   if (path[0] === 'runs' && path[1]) return { kind: 'run', id: path[1] };
+  if (path[0] === 'reports' && path[1]) return { kind: 'report', id: path[1] };
   return { kind: 'library' };
 }
 
@@ -57,6 +60,7 @@ export default function App() {
     {message && <div className="connection-note" role="alert">{message}<button onClick={() => setMessage('')} aria-label="关闭提示">×</button></div>}
     {route.kind === 'library' && <Library onOpen={id => navigate(`/projects/${id}`)} />}
     {route.kind === 'project' && <Workbench key={route.id} projectId={route.id} onBack={() => navigate('/projects')} onRun={id => navigate(`/runs/${id}`)} />}
-    {route.kind === 'run' && <div className="page-pad"><span className="section-kicker">RUN / {route.id.slice(0, 8)}</span><h1>计算运行</h1><p>结果与报告视图正在接入。</p><button className="button button--secondary" onClick={() => navigate('/projects')}>返回项目库</button></div>}
+    {route.kind === 'run' && <Run key={route.id} runId={route.id} onBack={id => navigate(`/projects/${id}`)} onReport={() => navigate(`/reports/${route.id}`)} />}
+    {route.kind === 'report' && <ReportPage key={route.id} runId={route.id} onBack={() => navigate(`/runs/${route.id}`)} />}
   </div>;
 }

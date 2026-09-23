@@ -1,0 +1,90 @@
+import { useEffect, useState } from 'react';
+
+import * as api from '../api';
+import { ShipProfile } from '../components/ShipProfile';
+import { SourceInspector } from '../components/SourceInspector';
+import { StageStatus, STAGE_LABELS } from '../components/StageStatus';
+import { StabilityPlot } from '../components/StabilityPlot';
+import type { AnalysisResult, RunView } from '../types';
+
+const RESULT_LABELS = { completed: '计算完成', partial: '部分完成', canceled: '已取消' } as const;
+
+function compareCompatible(left: AnalysisResult, right: AnalysisResult): boolean {
+  return left.condition_id === right.condition_id
+    && JSON.stringify(left.units) === JSON.stringify(right.units)
+    && JSON.stringify(left.method_versions) === JSON.stringify(right.method_versions);
+}
+
+function commonNumbers(left: AnalysisResult, right: AnalysisResult) {
+  const rows: Array<{ name: string; left: number; right: number }> = [];
+  for (const [name, stage] of Object.entries(left.stages)) {
+    const counterpart = right.stages[name];
+    if (stage.status !== 'completed' || counterpart?.status !== 'completed' || !stage.data || !counterpart.data) continue;
+    for (const [key, value] of Object.entries(stage.data)) {
+      const other = counterpart.data[key];
+      if (typeof value === 'number' && typeof other === 'number') rows.push({ name: `${STAGE_LABELS[name] ?? name} / ${key}`, left: value, right: other });
+      if (rows.length >= 8) return rows;
+    }
+  }
+  return rows;
+}
+
+export function Report({ result, runId, compareResult, onBack }: {
+  result: AnalysisResult; runId?: string; compareResult?: AnalysisResult; onBack?: () => void;
+}) {
+  const requested = Object.entries(result.stages).filter(([, stage]) => stage.requested);
+  const compatible = compareResult ? compareCompatible(result, compareResult) : false;
+  const compared = compareResult && compatible ? commonNumbers(result, compareResult) : [];
+  const name = result.input_snapshot?.name || result.project_id;
+  return <div className="report-page page-pad">
+    <div className="report-actions no-print">{onBack && <button className="text-button" onClick={onBack}>← 返回运行</button>}<div>
+      {runId && <><a className="button button--secondary" href={api.exportUrl(runId, 'json')} download>导出 JSON</a><a className="button button--secondary" href={api.exportUrl(runId, 'csv')} download>导出 CSV</a></>}
+      <button className="button button--secondary" onClick={() => window.print()}>打印报告</button>
+    </div></div>
+    <header className="report-cover"><span className="section-kicker">PLIMSOLL / CALCULATION REPORT</span><span className="report-number">运行 {runId?.slice(0, 8) ?? '预览'}</span><h1>{name}</h1><p>工况 {result.condition_id} · 计算报告</p><div className="report-status-row"><span className={`stage-pill stage-pill--${result.status}`}>{RESULT_LABELS[result.status]}</span><span>所请求阶段 {requested.length} 个</span><span>史实验证：{result.validity.historical_validated === true ? '已声明验证' : '未验证 / 无结论'}</span></div>
+      {name.toLowerCase().includes('queen mary') && <div className="report-caveat">HMS Queen Mary 工程代理 · 史实未认证。资料不足的数值继续保持未知。</div>}
+      <ShipProfile />
+    </header>
+    <div className="report-columns"><main className="report-main"><section className="report-section"><div className="section-heading"><h2>本次计算</h2><span>{requested.length} / {Object.keys(result.stages).length} 阶段已请求</span></div><p className="report-intro">报告直接读取保存的不可变运行结果。灰色或警示状态不是零值，也不是“安全”结论。</p>
+      <div className="report-stage-list">{requested.map(([name, stage]) => <StageStatus key={name} name={name} stage={stage} />)}</div>
+      {requested.length === 0 && <p>本次结果没有请求阶段。</p>}
+    </section>
+    {result.stages.gz?.requested && <StabilityPlot stage={result.stages.gz} />}
+    {compareResult && <section className="report-section comparison-section"><div className="section-heading"><h2>两次运行对照</h2><span>先对齐口径，再比较值</span></div><div className="comparison-meta"><div><strong>当前运行</strong><span>工况 {result.condition_id}</span><span>单位 {JSON.stringify(result.units)}</span><span>方法 {JSON.stringify(result.method_versions)}</span><code>{result.request_fingerprint}</code></div><div><strong>对照运行</strong><span>工况 {compareResult.condition_id}</span><span>单位 {JSON.stringify(compareResult.units)}</span><span>方法 {JSON.stringify(compareResult.method_versions)}</span><code>{compareResult.request_fingerprint}</code></div></div>
+      {!compatible ? <p className="comparison-warning">不可直接比较：工况、单位或方法版本不同。</p> : compared.length === 0 ? <p className="comparison-warning">没有两次均有效的同名数值，可查看各自阶段结果。</p> : <table className="comparison-table"><thead><tr><th>指标</th><th>当前</th><th>对照</th><th>差值</th></tr></thead><tbody>{compared.map(row => <tr key={row.name}><th>{row.name}</th><td>{row.left}</td><td>{row.right}</td><td>{row.right - row.left}</td></tr>)}</tbody></table>}
+    </section>}
+    <footer className="report-footer">Plimsoll · 计算结果与来源保持同一请求指纹 · 本报告不替代史实或适航认证</footer></main><SourceInspector result={result} /></div>
+  </div>;
+}
+
+export function ReportPage({ runId, onBack }: { runId: string; onBack: () => void }) {
+  const [run, setRun] = useState<RunView | null>(null);
+  const [history, setHistory] = useState<RunView[]>([]);
+  const [compareResult, setCompareResult] = useState<AnalysisResult | undefined>();
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    api.getRun(runId).then(current => {
+      if (!active) return;
+      setRun(current);
+      return api.listRuns(current.project_id).then(items => { if (active) setHistory(items.filter(item => item.id !== runId && (item.status === 'completed' || item.status === 'partial'))); });
+    }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : '无法读取报告'); });
+    return () => { active = false; };
+  }, [runId]);
+
+  async function selectComparison(id: string) {
+    setCompareResult(undefined);
+    if (!id) return;
+    try {
+      const other = await api.getRun(id);
+      if (!other.result) throw new Error('对照运行尚无已保存结果');
+      setCompareResult(other.result);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : '无法读取对照运行'); }
+  }
+
+  if (error) return <div className="page-pad"><div className="notice notice--error" role="alert">{error}</div><button className="text-button" onClick={onBack}>← 返回运行</button></div>;
+  if (!run) return <div className="page-pad"><div className="loading-skeleton" aria-label="正在读取报告" /></div>;
+  if (!run.result) return <div className="page-pad"><h1>暂无计算报告</h1><p>此运行尚未保存结果，状态：{run.status}。</p><button className="text-button" onClick={onBack}>← 返回运行</button></div>;
+  return <><div className="report-compare-control no-print"><label htmlFor="compare-run">对照另一运行</label><select id="compare-run" defaultValue="" onChange={event => { void selectComparison(event.target.value); }}><option value="">暂不对照</option>{history.map(item => <option key={item.id} value={item.id}>修订 {item.revision} · {item.condition_id} · {item.id.slice(0, 8)}</option>)}</select></div><Report result={run.result} runId={runId} compareResult={compareResult} onBack={onBack} /></>;
+}
