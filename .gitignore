@@ -2,6 +2,12 @@
 __pycache__/
 *.pyc
 *.pyo
+.venv/
+*.egg-info/
+.pytest_cache/
+**/node_modules/
+web/frontend/dist/
+.env
 
 # Unity 工程产物（Library 动辄几百 MB，不进仓库）
 **/Library/
