@@ -36,7 +36,8 @@ def review(record):
     if identity.startswith("guns.weights."):
         field = identity.rsplit(".", 1)[-1]
         if field == "armour":
-            return "unavailable_component_split", None, "Rotating armour is included in mount ledger mass; no independent armour subtotal is sourced."
+            return "implemented_input_conditional", "$.stages.systems.data.page_rows[weapons.main].rotating_armour_component.rotating_armour_mass_t", \
+                "Optional sourced subcomponent of selected mount mass; never added to displacement. Queen Mary has no independent component source."
         if field in {"guns", "mounts", "magazine"}:
             row = "ammunition" if field == "magazine" else field
             return "implemented", f"$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row={row}].weight_t", \
@@ -82,7 +83,8 @@ def review(record):
         return "implemented", "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_tower].weight_t", \
             "Combined conning-tower ledger mass; fore/aft split unavailable."
     if identity == "armour.other.guns":
-        return "unavailable_component_split", None, "Rotating gunhouse armour is included in mount mass, without a sourced separate subtotal."
+        return "implemented_input_conditional", "$.stages.systems.data.page_rows[weapons.main].rotating_armour_component.rotating_armour_mass_t", \
+            "Read-only view of the same optional mount subcomponent; not a second fixed-armour ledger mass. Queen Mary remains unknown."
     if identity.startswith("armour.bulkhead_geometry."):
         field = {"main_belt_incline": "inclination_deg", "type": "construction_type",
                  "beam_between": "beam_between_m"}[identity.rsplit(".", 1)[-1]]

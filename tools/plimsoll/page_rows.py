@@ -315,6 +315,43 @@ def armour_rows(state, systems_result, declaration):
     return project_declared_rows(state, systems_result, "armour", "fixed", declaration)
 
 
+def rotating_armour_component(state, declaration, battery=None):
+    """Report a sourced subcomponent of one selected mounting item without adding mass."""
+    result = dict(status="unavailable", method="declared_nonadditive_mount_component_v1",
+                  mount_weight_item_id=None, mount_mass_t=None, declared_rotating_armour_mass_t=None,
+                  rotating_armour_mass_t=None, other_mount_mass_t=None,
+                  source=None, estimate=None, model_applicable=False, historical_validated=None,
+                  mass_accounting="informational split of one selected mounting item; never added to ship or fixed-armour mass",
+                  diagnostics=[],
+                  reason="no independent rotating-armour component declared")
+    if declaration is None:
+        return result
+    input_path = "$.systems.weapons.%s.rotating_armour_component" % (battery or "<battery>")
+    item_id = declaration["mount_weight_item_id"]
+    item = _item_index(state).get(item_id)
+    parent_mass = item.get("mass_t") if item else None
+    component_mass = declaration.get("mass_t")
+    result.update(mount_weight_item_id=item_id, mount_mass_t=parent_mass,
+                  declared_rotating_armour_mass_t=component_mass,
+                  source=declaration.get("source"), estimate=declaration.get("estimate"))
+    if component_mass is None or parent_mass is None:
+        result["reason"] = "declared component or selected mounting mass is unknown"
+        result["diagnostics"].append(_diagnostic(
+            "page_rows.rotating_armour_unknown", result["reason"],
+            input_path))
+        return result
+    if component_mass > parent_mass:
+        result["reason"] = "declared rotating armour exceeds selected mounting mass"
+        result["diagnostics"].append(_diagnostic(
+            "page_rows.rotating_armour_exceeds_mount", result["reason"],
+            input_path + ".mass_t"))
+        return result
+    result.update(status="completed", rotating_armour_mass_t=component_mass,
+                  other_mount_mass_t=max(0.0, parent_mass - component_mass),
+                  model_applicable=True, reason=None)
+    return result
+
+
 def deck_coverage(declaration):
     """Calculate declared protected plan area over its declared deck reference."""
     result = dict(status="unavailable", method="declared_protected_plan_area_ratio_v1",

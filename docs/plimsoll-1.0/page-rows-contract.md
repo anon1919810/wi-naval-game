@@ -73,7 +73,10 @@ has unknown mass; `null` is not zero or a passing reconciliation.
 * **No rotating turret armour on the armour page.** Rotating gunhouse armour is
   attributed to `armament.main.revolving-mounts` in the ledger; the armour page
   projection reports only what the declared rows bind, so the boundary is the
-  declaration rather than a convention.
+  declaration rather than a convention. A separately sourced
+  `rotating_armour_component` can display a nonadditive split of the selected
+  mounting item. Both SPS field references use that same value; Queen Mary has
+  no historical split input.
 
 ## Reusing it for other pages
 

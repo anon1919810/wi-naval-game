@@ -37,17 +37,16 @@
     "bound_requires_named_condition": 8,
     "bound_scenario_and_result": 1,
     "bound_selected_ledger_group": 2,
-    "computational_adapter_required": 2,
+    "computational_adapter_required": 1,
     "core_bound_presentation_deferred": 4,
     "core_inputs_bound_presentation_deferred": 1,
     "implemented": 5,
     "implemented_as_constraint_study": 1,
     "implemented_canonical_unit": 5,
-    "implemented_input_conditional": 86,
+    "implemented_input_conditional": 88,
     "observation_limited_schema_gap": 1,
     "presentation_deferred": 10,
-    "presentation_deferred_pending_typed_rows": 1,
-    "projection_adapter_required": 1
+    "presentation_deferred_pending_typed_rows": 1
   },
   "records": [
     {
@@ -2489,7 +2488,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "computational_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<battery_id>.facts"
@@ -2501,6 +2500,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<battery_id>].linked_items[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.main].rotating_armour_component.rotating_armour_mass_t"
         }
       ],
       "required_condition": null,
@@ -2522,9 +2524,9 @@
       ],
       "pre_reconciliation_disposition": "computational_adapter_required",
       "core_review": {
-        "status": "unavailable_component_split",
-        "result_path": null,
-        "limitation": "Rotating armour is included in mount ledger mass; no independent armour subtotal is sourced.",
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.main].rotating_armour_component.rotating_armour_mass_t",
+        "limitation": "Optional sourced subcomponent of selected mount mass; never added to displacement. Queen Mary has no independent component source.",
         "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
       }
     },
@@ -5950,11 +5952,14 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [],
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<battery_id>].linked_items[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.main].rotating_armour_component.rotating_armour_mass_t"
         }
       ],
       "required_condition": null,
@@ -5976,9 +5981,9 @@
       ],
       "pre_reconciliation_disposition": "projection_adapter_required",
       "core_review": {
-        "status": "unavailable_component_split",
-        "result_path": null,
-        "limitation": "Rotating gunhouse armour is included in mount mass, without a sourced separate subtotal.",
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.main].rotating_armour_component.rotating_armour_mass_t",
+        "limitation": "Read-only view of the same optional mount subcomponent; not a second fixed-armour ledger mass. Queen Mary remains unknown.",
         "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
       }
     },
@@ -8538,9 +8543,8 @@
     "implemented": 5,
     "implemented_as_constraint_study": 1,
     "implemented_canonical_unit": 5,
-    "implemented_input_conditional": 86,
+    "implemented_input_conditional": 88,
     "presentation_deferred": 16,
-    "unavailable_component_split": 2,
     "unavailable_method_undefined": 1,
     "unobserved_source_limit": 1
   }

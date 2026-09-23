@@ -101,6 +101,10 @@ armour, including a separately declared minimum-belt engineering estimate.
 It also contains `deck_coverage` with `coverage_pct = 100 × covered plan area /
 reference plan area` only when both sourced areas are known. Missing data yields
 `status="unavailable"` and `coverage_pct=null`; this study does not alter loading.
+For a weapons battery with a `mounts` page row, an optional
+`rotating_armour_component` reports sourced armour mass within one selected
+mounting item and the non-armour remainder. Missing or oversized subcomponent
+mass is unavailable; no subcomponent mass is added to the ship or armour ledger.
 The deck stage reports endpoint normal freeboards and reference-length shares.
 The propulsion stage contains `engine_page` with the explicitly classified
 selected variable load. Hydrostatics exposes a small-angle roll study only when

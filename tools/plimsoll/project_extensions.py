@@ -206,7 +206,7 @@ def _system_fields(systems, item_ids, diagnostics, weight_groups=()):
         for key, child in value.items():
             # These are leaf payloads, not nested systems; their own validators
             # retain authority over their contents (source remains opaque).
-            if key not in {"facts", "mass_models", "source", "fuel_bindings", "variable_load_groups", "page_rows"}:
+            if key not in {"facts", "mass_models", "source", "fuel_bindings", "variable_load_groups", "page_rows", "rotating_armour_component"}:
                 visit(child, f"{path}[{json.dumps(key, ensure_ascii=False)}]", fields,
                       below_leaf or boundary or "facts" in value)
     propulsion = systems.get("propulsion")
@@ -225,6 +225,29 @@ def _system_fields(systems, item_ids, diagnostics, weight_groups=()):
                 if not isinstance(ids, list) or not ids or any(not isinstance(i, str) or i not in groups for i in ids) or len(ids) != len(set(ids)):
                     _diag(diagnostics, path + ".group_ids", "must name unique existing loading groups")
     visit(systems.get("weapons"), "$.systems.weapons", WEAPON_FIELDS)
+    weapons = systems.get("weapons") or {}
+    if isinstance(weapons, dict):
+        for battery, leaf in weapons.items():
+            if not isinstance(leaf, dict) or leaf.get("rotating_armour_component") is None:
+                continue
+            path = f"$.systems.weapons.{battery}.rotating_armour_component"
+            component = leaf["rotating_armour_component"]
+            if not _object(component, path, diagnostics):
+                continue
+            _keys(component, {"mount_weight_item_id", "mass_t", "source", "estimate"}, path, diagnostics)
+            mount_id = component.get("mount_weight_item_id")
+            page_rows = leaf.get("page_rows")
+            mount_rows = [row for row in page_rows if isinstance(row, dict) and row.get("row") == "mounts"] \
+                if isinstance(page_rows, list) else []
+            bound = {item for row in mount_rows
+                     for item in (row.get("weight_item_ids") if isinstance(row.get("weight_item_ids"), list) else [])
+                     if isinstance(item, str)}
+            if (not isinstance(mount_id, str) or mount_id not in item_ids
+                    or mount_id not in (leaf.get("weight_item_ids") or []) or mount_id not in bound):
+                _diag(diagnostics, path + ".mount_weight_item_id",
+                      "must name an existing item in this battery's mounts page row")
+            _value(component.get("mass_t"), "nonnegative", path + ".mass_t", diagnostics)
+            _metadata(component, path, diagnostics, required=component.get("mass_t") is not None)
     visit(systems.get("armour"), "$.systems.armour", ARMOUR_FIELDS)
 
 

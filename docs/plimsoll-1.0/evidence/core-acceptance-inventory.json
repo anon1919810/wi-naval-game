@@ -350,7 +350,7 @@
         "page-rows-contract.md"
       ],
       "limitations": [
-        "Natural speed and the unsourced turret-armour split remain unavailable; one editor field was unobserved. This is not full SPS parity."
+        "Natural speed remains method-undefined and one editor field was unobserved. Optional turret-armour splitting does not supply Queen Mary history or full SPS parity."
       ],
       "current_disposition": "required_for_core",
       "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
@@ -366,7 +366,7 @@
         "../../tools/plimsoll/tests/test_completion_belt.py"
       ],
       "limitations": [
-        "Turret rotating armour is included in mount mass; no independent sourced gunhouse subtotal is invented."
+        "A sourced rotating-armour subcomponent is a nonadditive split of selected mount mass; Queen Mary has no independent sourced value."
       ],
       "current_disposition": "required_for_core",
       "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
@@ -538,10 +538,11 @@
         "../../tools/plimsoll/tests/test_generic_ship.py",
         "../../tools/plimsoll/tests/test_analysis_cases.py",
         "evidence/core-final-regression.log",
-        "evidence/deck-coverage-focused.log"
+        "evidence/deck-coverage-focused.log",
+        "evidence/mount-armour-focused.log"
       ],
       "limitations": [
-        "The 691-test full regression predates the deck-coverage increment; its affected paths passed a subsequent 97-test focused run."
+        "The 691-test full regression predates both later increments; affected paths passed subsequent 97-test and 116-test focused runs."
       ],
       "current_disposition": "required_for_core",
       "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
@@ -653,7 +654,7 @@
     "passed_core_scope": 6,
     "passed_with_limit": 9
   },
-  "audit_note": "Path evidence is attached per requirement. Historical input accuracy and full SPS field parity are not claimed. The local commit is verified from Git history. The full regression precedes the deck-coverage increment; a focused run follows it.",
+  "audit_note": "Path evidence is attached per requirement. Historical input accuracy and full SPS field parity are not claimed. The local commit is verified from Git history. The full regression precedes two bounded increments; focused runs follow each one.",
   "final_regression": {
     "run": 691,
     "fail": 0,
@@ -662,5 +663,9 @@
   "subsequent_focused_regression": {
     "run": 97,
     "evidence": "evidence/deck-coverage-focused.log"
+  },
+  "mount_armour_focused_regression": {
+    "run": 116,
+    "evidence": "evidence/mount-armour-focused.log"
   }
 }

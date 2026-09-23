@@ -22,11 +22,14 @@ def page_rows_for(project, state, summary):
             continue
         for leaf, payload in sections.items():
             if isinstance(payload, dict) and isinstance(payload.get("page_rows"), list):
-                declared["%s.%s" % (system, leaf)] = payload["page_rows"]
+                declared["%s.%s" % (system, leaf)] = payload
     views = {}
-    for key, declaration in declared.items():
+    for key, payload in declared.items():
         system, leaf = key.split(".", 1)
-        views[key] = page_rows.project_declared_rows(state, summary, system, leaf, declaration)
+        views[key] = page_rows.project_declared_rows(state, summary, system, leaf, payload["page_rows"])
+        if system == "weapons" and any(row.get("row") == "mounts" for row in payload["page_rows"]):
+            views[key]["rotating_armour_component"] = page_rows.rotating_armour_component(
+                state, payload.get("rotating_armour_component"), battery=leaf)
         if key == "armour.fixed":
             views[key]["minimum_main_belt"] = page_rows.minimum_main_belt(
                 project, (project["systems"]["armour"]["fixed"] or {}).get("minimum_main_belt"))

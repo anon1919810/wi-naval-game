@@ -92,6 +92,15 @@ covered area cannot exceed reference area. Missing areas remain unknown.
 This geometry ratio does not change armour mass or derive area from plate mass.
 It is a Plimsoll engineering definition, not a claimed SPS formula.
 
+`systems.weapons.<battery>.rotating_armour_component` may declare
+`{mount_weight_item_id, mass_t, source, estimate}`. The parent ID must belong
+to that battery's `mounts` page row. A known nonnegative component mass needs
+a nonempty source and boolean estimate; `mass_t: null` remains unknown. The
+selected loading ledger supplies the parent mounting mass. If the component
+exceeds that selected mass, the study is unavailable with a diagnostic.
+The component is a nonadditive split inside the parent item: it never creates
+another displacement or fixed-armour mass. Queen Mary has no sourced split.
+
 ## Resistance scenarios
 
 `resistance_scenarios` is an array (at most 201) of unique IDs, method,
