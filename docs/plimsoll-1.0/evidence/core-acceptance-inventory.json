@@ -350,7 +350,7 @@
         "page-rows-contract.md"
       ],
       "limitations": [
-        "Four observed SPS fields remain explicitly unavailable or unobserved; this is class-SPS core coverage, not full SPS parity."
+        "Natural speed and the unsourced turret-armour split remain unavailable; one editor field was unobserved. This is not full SPS parity."
       ],
       "current_disposition": "required_for_core",
       "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
@@ -532,14 +532,17 @@
       "id": "G1",
       "section": "独立验证与发布收尾",
       "requirement": "保留并扩展现有测试。解析方箱、非方箱/通用测试船、Queen Mary 分别用于公式、通用性和完整案例验证。",
-      "status": "passed",
+      "status": "passed_with_limit",
       "evidence": [
         "../../tools/plimsoll/run_all_tests.py",
         "../../tools/plimsoll/tests/test_generic_ship.py",
         "../../tools/plimsoll/tests/test_analysis_cases.py",
-        "evidence/core-final-regression.log"
+        "evidence/core-final-regression.log",
+        "evidence/deck-coverage-focused.log"
       ],
-      "limitations": [],
+      "limitations": [
+        "The 691-test full regression predates the deck-coverage increment; its affected paths passed a subsequent 97-test focused run."
+      ],
       "current_disposition": "required_for_core",
       "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
     },
@@ -646,14 +649,18 @@
   "note": "Core-only acceptance audited below. Deferred application and presentation requirements do not constitute a full Plimsoll 1.0 release or SPS parity.",
   "audit_status_counts": {
     "deferred_by_user": 4,
-    "passed": 27,
+    "passed": 26,
     "passed_core_scope": 6,
-    "passed_with_limit": 8
+    "passed_with_limit": 9
   },
-  "audit_note": "Path evidence is attached per requirement. Historical input accuracy and full SPS field parity are not claimed. The local commit is verified from Git history; final regression and bounded flooding timing are separately recorded.",
+  "audit_note": "Path evidence is attached per requirement. Historical input accuracy and full SPS field parity are not claimed. The local commit is verified from Git history. The full regression precedes the deck-coverage increment; a focused run follows it.",
   "final_regression": {
     "run": 691,
     "fail": 0,
     "evidence": "evidence/core-final-regression.log"
+  },
+  "subsequent_focused_regression": {
+    "run": 97,
+    "evidence": "evidence/deck-coverage-focused.log"
   }
 }

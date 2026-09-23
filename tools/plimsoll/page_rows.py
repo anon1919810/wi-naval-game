@@ -315,6 +315,38 @@ def armour_rows(state, systems_result, declaration):
     return project_declared_rows(state, systems_result, "armour", "fixed", declaration)
 
 
+def deck_coverage(declaration):
+    """Calculate declared protected plan area over its declared deck reference."""
+    result = dict(status="unavailable", method="declared_protected_plan_area_ratio_v1",
+                  formula="100 * covered_plan_area_m2 / reference_plan_area_m2",
+                  coverage_pct=None, covered_plan_area_m2=None, reference_plan_area_m2=None,
+                  source=None, estimate=None, model_applicable=False,
+                  reason="no deck coverage study declared")
+    if declaration is None:
+        return result
+    covered_fact = declaration.get("covered_plan_area_m2") or {}
+    reference_fact = declaration.get("reference_plan_area_m2") or {}
+    covered, reference = covered_fact.get("value"), reference_fact.get("value")
+    result.update(covered_plan_area_m2=covered, reference_plan_area_m2=reference,
+                  source={"covered_plan_area_m2": covered_fact.get("source"),
+                          "reference_plan_area_m2": reference_fact.get("source")},
+                  estimate=(covered_fact.get("estimate") or reference_fact.get("estimate"))
+                      if covered is not None and reference is not None else None)
+    missing = [key for key, value in (("covered_plan_area_m2", covered),
+                                      ("reference_plan_area_m2", reference)) if value is None]
+    if missing:
+        result["reason"] = "missing " + ", ".join(missing)
+        return result
+    if (not all(isinstance(value, (int, float)) and not isinstance(value, bool)
+                and math.isfinite(value) for value in (covered, reference))
+            or covered < 0 or reference <= 0 or covered > reference):
+        result["reason"] = "declared plan areas are invalid or inconsistent"
+        return result
+    result.update(status="completed", coverage_pct=100.0 * covered / reference,
+                  model_applicable=True, reason=None)
+    return result
+
+
 def minimum_main_belt(project, declaration):
     """Estimate the continuous length covering explicitly named vital compartments."""
     result = dict(status="unavailable", method="declared_compartment_extent_envelope_v1",

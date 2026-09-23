@@ -23,8 +23,6 @@ def page_rows_for(project, state, summary):
         for leaf, payload in sections.items():
             if isinstance(payload, dict) and isinstance(payload.get("page_rows"), list):
                 declared["%s.%s" % (system, leaf)] = payload["page_rows"]
-    if not declared:
-        return summary
     views = {}
     for key, declaration in declared.items():
         system, leaf = key.split(".", 1)
@@ -33,7 +31,10 @@ def page_rows_for(project, state, summary):
             views[key]["minimum_main_belt"] = page_rows.minimum_main_belt(
                 project, (project["systems"]["armour"]["fixed"] or {}).get("minimum_main_belt"))
     result = copy.deepcopy(summary)
-    result["page_rows"] = views
+    if views:
+        result["page_rows"] = views
+    fixed = ((project.get("systems") or {}).get("armour") or {}).get("fixed") or {}
+    result["deck_coverage"] = page_rows.deck_coverage(fixed.get("deck_coverage"))
     return result
 
 

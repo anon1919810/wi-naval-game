@@ -89,3 +89,9 @@ declared deck points; they are geometric results, not mass projections. The
 engine view reads declared facts, the installed machinery ledger subtotal and
 explicitly named selected loading groups. These are separate adapters and do
 not reuse `project_declared_rows`.
+
+Armour-deck coverage is another separate adapter under
+`stages.systems.data.deck_coverage`. It divides explicitly sourced protected
+plan area by explicitly sourced reference plan area. Plate surface area and
+ledger mass are not substitutes, and Queen Mary retains an unknown result until
+both plan areas are supplied.

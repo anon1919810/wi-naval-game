@@ -44,7 +44,7 @@ EVIDENCE = {
     "F1": ["analysis-api.md", "cli.md", "../../tools/plimsoll/tests/test_core_cli.py"],
     "F4": ["export-api.md", "../../tools/plimsoll/tests/test_exports.py"],
     "F6": ["package-api.md", "../../tools/plimsoll/tests/test_package_imports.py"],
-    "G1": ["../../tools/plimsoll/run_all_tests.py", "../../tools/plimsoll/tests/test_generic_ship.py", "../../tools/plimsoll/tests/test_analysis_cases.py", "evidence/core-final-regression.log"],
+    "G1": ["../../tools/plimsoll/run_all_tests.py", "../../tools/plimsoll/tests/test_generic_ship.py", "../../tools/plimsoll/tests/test_analysis_cases.py", "evidence/core-final-regression.log", "evidence/deck-coverage-focused.log"],
     "G2": ["resistance-benchmark-design.md", "geometry-analysis-validation.md", "evidence/task-4-numerical-evidence.json"],
     "G3": ["equilibrium-validation-design.md", "flooding-validation-design.md"],
     "G4": ["evidence/task-4-mutation-evidence.json", "evidence/task-4-numerical-evidence.json"],
@@ -61,12 +61,13 @@ LIMITS = {
     "B6": "Queen Mary positional miscellaneous stores and some historical centroids remain unknown; the ledger is operable, not historically validated.",
     "C4": "Selected small-angle roll is unavailable when GM or the sourced gyration radius is missing.",
     "D6": "Timeline and remaining-GZ data are delivered; graphical cutaway/highlighting is deferred with the UI.",
-    "E1": "Four observed SPS fields remain explicitly unavailable or unobserved; this is class-SPS core coverage, not full SPS parity.",
+    "E1": "Natural speed and the unsourced turret-armour split remain unavailable; one editor field was unobserved. This is not full SPS parity.",
     "E2": "Turret rotating armour is included in mount mass; no independent sourced gunhouse subtotal is invented.",
     "E4": "Strict Taylor lookup returns unavailable outside populated axes; no clipping or tuned historical match.",
     "E5": "Holtrop on selected trimmed proxies is marked nonprimary; only eligible upright method results can be primary.",
     "F4": "JSON/CSV only; HTML report is outside the current user scope.",
     "F6": "Python library/CLI offline; Windows installer and launcher are deferred.",
+    "G1": "The 691-test full regression predates the deck-coverage increment; its affected paths passed a subsequent 97-test focused run.",
     "G5": "Core timings only; browser responsiveness and visual progress are later-phase obligations.",
     "G7": "Core docs and handoff only; no packaged release directory is claimed.",
 }
@@ -97,11 +98,17 @@ def main():
         raise ValueError("final regression has no passing machine-readable summary")
     data["final_regression"] = {"run": int(match.group(1)), "fail": int(match.group(2)),
                                 "evidence": "evidence/core-final-regression.log"}
+    focused = (DOCS / "evidence/deck-coverage-focused.log").read_text(encoding="utf-8")
+    focused_count = re.search(r"Ran (\d+) tests", focused)
+    if not focused_count or "OK" not in focused or "FAILED" in focused:
+        raise ValueError("deck-coverage focused regression has no passing summary")
+    data["subsequent_focused_regression"] = {"run": int(focused_count.group(1)),
+                                              "evidence": "evidence/deck-coverage-focused.log"}
     data["note"] = ("Core-only acceptance audited below. Deferred application and presentation "
                     "requirements do not constitute a full Plimsoll 1.0 release or SPS parity.")
     data["audit_note"] = ("Path evidence is attached per requirement. Historical input accuracy and full SPS "
-                          "field parity are not claimed. The local commit is verified from Git history; "
-                          "final regression and bounded flooding timing are separately recorded.")
+                          "field parity are not claimed. The local commit is verified from Git history. "
+                          "The full regression precedes the deck-coverage increment; a focused run follows it.")
     INVENTORY.write_bytes((json.dumps(data, ensure_ascii=False, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
     print(json.dumps(data["audit_status_counts"], ensure_ascii=False))
 

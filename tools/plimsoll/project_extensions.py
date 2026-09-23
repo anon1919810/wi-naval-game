@@ -444,6 +444,25 @@ def validate_extensions(project, item_ids):
     _system_fields(project.get("systems"), item_ids, diagnostics, project.get("weight_groups", []))
     armour = (project.get("systems") or {}).get("armour") or {}
     fixed = armour.get("fixed") or {}
+    coverage = fixed.get("deck_coverage")
+    if coverage is not None:
+        path = "$.systems.armour.fixed.deck_coverage"
+        if _object(coverage, path, diagnostics):
+            fields = {"covered_plan_area_m2": "nonnegative", "reference_plan_area_m2": "positive"}
+            _keys(coverage, set(fields), path, diagnostics)
+            for key, kind in fields.items():
+                if key in coverage:
+                    fact = coverage[key]
+                    _fact(fact, kind, path + "." + key, diagnostics,
+                          required=isinstance(fact, dict) and fact.get("value") is not None)
+            covered_fact = coverage.get("covered_plan_area_m2")
+            reference_fact = coverage.get("reference_plan_area_m2")
+            covered = covered_fact.get("value") if isinstance(covered_fact, dict) else None
+            reference = reference_fact.get("value") if isinstance(reference_fact, dict) else None
+            if (all(isinstance(value, (int, float)) and not isinstance(value, bool)
+                    and math.isfinite(value) for value in (covered, reference))
+                    and covered > reference):
+                _diag(diagnostics, path, "covered plan area cannot exceed reference plan area")
     study = fixed.get("minimum_main_belt")
     if study is not None:
         path = "$.systems.armour.fixed.minimum_main_belt"

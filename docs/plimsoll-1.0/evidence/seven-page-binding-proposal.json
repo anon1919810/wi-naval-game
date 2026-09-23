@@ -23,7 +23,6 @@
   },
   "disposition_counts": {
     "accepted_exclusion": 26,
-    "armour_group_adapter_required": 1,
     "bound": 6,
     "bound_design_and_selected_result": 1,
     "bound_design_fact": 2,
@@ -44,7 +43,7 @@
     "implemented": 5,
     "implemented_as_constraint_study": 1,
     "implemented_canonical_unit": 5,
-    "implemented_input_conditional": 85,
+    "implemented_input_conditional": 86,
     "observation_limited_schema_gap": 1,
     "presentation_deferred": 10,
     "presentation_deferred_pending_typed_rows": 1,
@@ -6203,7 +6202,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -6218,6 +6217,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.deck_coverage.coverage_pct"
         }
       ],
       "required_condition": null,
@@ -6239,9 +6241,9 @@
       ],
       "pre_reconciliation_disposition": "armour_group_adapter_required",
       "core_review": {
-        "status": "unavailable_rule_undefined",
-        "result_path": null,
-        "limitation": "No sourced deck-area reference and coverage formula are declared.",
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.deck_coverage.coverage_pct",
+        "limitation": "100 × declared covered plan area / declared reference plan area; this is an explicit Plimsoll study, not a verified SPS formula. Queen Mary inputs remain unknown.",
         "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
       }
     },
@@ -8536,11 +8538,10 @@
     "implemented": 5,
     "implemented_as_constraint_study": 1,
     "implemented_canonical_unit": 5,
-    "implemented_input_conditional": 85,
+    "implemented_input_conditional": 86,
     "presentation_deferred": 16,
     "unavailable_component_split": 2,
     "unavailable_method_undefined": 1,
-    "unavailable_rule_undefined": 1,
     "unobserved_source_limit": 1
   }
 }

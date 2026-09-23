@@ -2,9 +2,9 @@
 
 These optional fields extend `plimsoll-project-1`; `project_extensions` validates
 them through `project_io.normalize_project`. It does not run calculators, read
-files, accept proposals, or provide a second mass authority. Runtime coordinator
-bindings are a later phase. This schema enables real bindings but is not evidence
-that all seven-page calculation outputs have been integrated.
+files, accept proposals, or provide a second mass authority. The coordinator
+consumes selected validated fields; a declared fact still needs an applicable
+method and sufficient input before it produces a number.
 
 Unknown values are null. Present numeric bool/nonfinite values are rejected.
 Unknown provenance is retained with diagnostics, not normalized to measured data.
@@ -83,6 +83,14 @@ heights, declare watertightness, or automatically become downflooding openings.
 The coordinator must reject incomplete geometry for clearance computation and
 label partial/overlapping profile coverage instead of assuming full coverage.
 No legacy upright B/2 immersion estimate is established by this schema.
+
+`systems.armour.fixed.deck_coverage` is an independent plan-area study with
+`covered_plan_area_m2` and `reference_plan_area_m2` facts. Each fact uses
+`{value, source, estimate}`. Known areas require a nonempty source and a boolean
+estimate flag; covered area may be zero, reference area must be positive, and
+covered area cannot exceed reference area. Missing areas remain unknown.
+This geometry ratio does not change armour mass or derive area from plate mass.
+It is a Plimsoll engineering definition, not a claimed SPS formula.
 
 ## Resistance scenarios
 

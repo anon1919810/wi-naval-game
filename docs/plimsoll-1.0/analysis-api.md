@@ -98,6 +98,9 @@ top-level flattened list carry the same records.
 
 The systems stage may contain selected-ledger `page_rows` for guns, weapons and
 armour, including a separately declared minimum-belt engineering estimate.
+It also contains `deck_coverage` with `coverage_pct = 100 × covered plan area /
+reference plan area` only when both sourced areas are known. Missing data yields
+`status="unavailable"` and `coverage_pct=null`; this study does not alter loading.
 The deck stage reports endpoint normal freeboards and reference-length shares.
 The propulsion stage contains `engine_page` with the explicitly classified
 selected variable load. Hydrostatics exposes a small-angle roll study only when

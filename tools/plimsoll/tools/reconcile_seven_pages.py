@@ -94,7 +94,8 @@ def review(record):
             return "implemented_input_conditional", "$.stages.systems.data.page_rows[armour.fixed].groups[deck].weight_t", \
                 "Sum of explicitly grouped nonoverlapping deck rows."
         if field == "coverage":
-            return "unavailable_rule_undefined", None, "No sourced deck-area reference and coverage formula are declared."
+            return "implemented_input_conditional", "$.stages.systems.data.deck_coverage.coverage_pct", \
+                "100 × declared covered plan area / declared reference plan area; this is an explicit Plimsoll study, not a verified SPS formula. Queen Mary inputs remain unknown."
         return "implemented_input_conditional", f"$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_{field}].weight_t", \
             "Requires separate sourced ledger row; Queen Mary currently supplies only one combined armour-deck row."
     if identity.startswith("armour.conning."):
