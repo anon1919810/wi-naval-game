@@ -41,7 +41,10 @@ class SMTPMailer:
         message.set_content(f"你的 Plimsoll 验证码是 {code}。10 分钟内有效，仅可使用一次。")
         try:
             if config.smtp_port == 465:
-                connection = smtplib.SMTP_SSL(config.smtp_host, config.smtp_port, timeout=10)
+                connection = smtplib.SMTP_SSL(
+                    config.smtp_host, config.smtp_port, timeout=10,
+                    context=ssl.create_default_context(),
+                )
             else:
                 connection = smtplib.SMTP(config.smtp_host, config.smtp_port, timeout=10)
             with connection as smtp:

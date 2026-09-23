@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { StageEnvelope, StageStatus as StageStatusCode } from '../types';
 
 export const STAGE_LABELS: Record<string, string> = {
@@ -78,15 +79,52 @@ function extract(data: Record<string, unknown> | null): Datum[] {
   return found;
 }
 
+function record(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function tableValue(value: unknown, unit?: string): string {
+  return `${display(value)}${value !== null && value !== undefined && unit ? ` ${unit}` : ''}`;
+}
+
+function ResistanceTables({ data }: { data: Record<string, unknown> }) {
+  const rows = Array.isArray(data.rows) ? data.rows.map(record) : [];
+  const powerRows = Array.isArray(data.power_rows) ? data.power_rows.map(record) : [];
+  const validity = record(data.validity);
+  const scenario = record(data.scenario);
+  if (rows.length === 0 && powerRows.length === 0) return null;
+  return <div className="resistance-results">
+    <p className="result-context">方法 {display(data.method)} · {data.estimate === true ? '工程估算' : '来源见输入'}
+      {validity.model_applicable === false && ' · 不在经验适用范围，仅供方法试算'}
+      {data.primary_result === false && ' · 非主结果'}</p>
+    {typeof scenario.source === 'string' && <p className="result-source">来源：{scenario.source}</p>}
+    {rows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>速度与阻力</caption><thead><tr><th>速度</th><th>总阻力</th><th>有效功率</th><th>解释</th></tr></thead><tbody>{rows.map((row, index) => <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
+      <td>{tableValue(row.speed_kn, 'kn')}</td><td>{tableValue(row.total_resistance_kn, 'kN')}</td><td>{tableValue(row.effective_power_kw, 'kW')}</td>
+      <td>{row.complete === false ? '未完整求得' : row.model_applicable === false ? '不在经验适用范围' : row.primary_result === false ? '非主结果' : '计算值'}{row.estimate === true && ' · 工程估算'}</td>
+    </tr>)}</tbody></table></div>}
+    {powerRows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>轴功率与推进系数</caption><thead><tr><th>速度</th><th>QPC</th><th>轴功率</th><th>轴马力</th><th>解释</th></tr></thead><tbody>{powerRows.map((row, index) => {
+      const qpc = record(row.qpc);
+      return <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
+        <td>{tableValue(row.speed_kn, 'kn')}</td><td>{tableValue(qpc.value)}{typeof qpc.source === 'string' && <small>{qpc.source}</small>}</td>
+        <td>{tableValue(row.shaft_power_kw, 'kW')}</td><td>{tableValue(row.shaft_power_shp, 'shp')}</td>
+        <td>{row.complete === false ? '未完整求得' : row.primary_result === false ? '非主结果' : '计算值'}{row.estimate === true && ' · 工程估算'}</td>
+      </tr>;
+    })}</tbody></table></div>}
+  </div>;
+}
+
 export function StageStatus({ name, stage }: { name: string; stage: StageEnvelope }) {
+  const [rawOpen, setRawOpen] = useState(false);
   const values = extract(stage.data);
   return <article className={`stage-card stage-card--${stage.status}`}>
     <div className="stage-card-header"><div><span className="section-kicker">{name.toUpperCase()}</span><h3>{STAGE_LABELS[name] ?? name}</h3></div><span className={`stage-pill stage-pill--${stage.status}`}>{STATUS_LABELS[stage.status] ?? stage.status}</span></div>
     {stage.reason && stage.status !== 'not_requested' && <p className="stage-reason">{stage.reason}</p>}
     {stage.status === 'not_requested' && <p className="stage-reason">这次请求没有运行该阶段。</p>}
     {values.length > 0 && <div className="stage-values">{values.map(item => <div className="stage-value" key={item.key}><span title={item.key}>{DATA_LABELS[item.key] ?? item.key}</span><strong>{display(item.value)}{item.value !== null && item.unit ? ` ${item.unit}` : ''}</strong>{item.source && <small>{item.source}</small>}{item.estimate && <em>工程估算</em>}</div>)}</div>}
+    {name === 'resistance' && stage.data && <ResistanceTables data={stage.data} />}
     {stage.diagnostics.length > 0 && <details className="stage-diagnostics"><summary>诊断与缺项 · {stage.diagnostics.length} 条</summary><div>{stage.diagnostics.map((item, index) => <p key={`${item.code ?? ''}-${index}`}><strong>{item.message === stage.reason ? item.code ?? '诊断' : item.message ?? item.code}</strong>{item.path && <code>{item.path}</code>}{item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}</p>)}</div></details>}
     {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">方法版本 · {Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(value)}`).join(' / ')}</p>}
     {stage.assumptions.length > 0 && <details className="stage-assumptions"><summary>假设与适用性</summary><pre>{JSON.stringify(stage.assumptions, null, 2)}</pre></details>}
+    {stage.data && <details className="stage-assumptions" onToggle={event => setRawOpen(event.currentTarget.open)}><summary>完整阶段数据与来源</summary>{rawOpen && <pre>{JSON.stringify(stage.data, null, 2)}</pre>}</details>}
   </article>;
 }

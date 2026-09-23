@@ -222,6 +222,15 @@ input[aria-invalid='true'] { border-color: var(--error); }
 .stage-value strong { font-size: 13px; font-weight: 670; }
 .stage-value small { color: var(--muted); font-size: 9px; }
 .stage-value em { color: var(--warning); font-size: 9px; font-style: normal; }
+.resistance-results { margin-top: 15px; }
+.result-context, .result-source { margin: 6px 0; color: var(--muted); font-size: 10px; line-height: 1.6; overflow-wrap: anywhere; }
+.result-context { color: var(--warning); }
+.stage-table-scroll { max-width: 100%; margin-top: 13px; overflow-x: auto; }
+.stage-table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 10px; }
+.stage-table caption { padding: 0 0 7px; color: var(--ink); font-weight: 700; text-align: left; }
+.stage-table th, .stage-table td { padding: 8px 7px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.stage-table th { color: var(--faint); font-weight: 600; }
+.stage-table td small { display: block; max-width: 190px; margin-top: 3px; color: var(--muted); overflow-wrap: anywhere; }
 .stage-diagnostics { margin-top: 13px; padding: 9px 12px; border-left: 2px solid var(--warning); background: var(--warning-soft); }
 .stage-diagnostics summary { cursor: pointer; color: var(--warning); font-size: 10px; font-weight: 680; }
 .stage-diagnostics > div { max-height: 250px; overflow: auto; margin-top: 9px; }

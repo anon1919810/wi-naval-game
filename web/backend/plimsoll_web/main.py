@@ -49,6 +49,9 @@ class RunCreate(BaseModel):
     options: dict = Field(default_factory=dict)
 
 
+MAX_REQUEST_BYTES = 8 * 1024 * 1024
+
+
 def create_app(settings: Settings) -> FastAPI:
     app = FastAPI(title="Plimsoll")
     app.state.settings = settings
@@ -59,14 +62,19 @@ def create_app(settings: Settings) -> FastAPI:
     async def require_browser_write_origin(request: Request, call_next):
         if request.url.path.startswith("/api/") and request.method not in {"GET", "HEAD", "OPTIONS"}:
             content_length = request.headers.get("content-length")
-            if content_length is not None and content_length.isdigit() and int(content_length) > 8 * 1024 * 1024:
+            if content_length is not None and content_length.isdigit() and int(content_length) > MAX_REQUEST_BYTES:
                 return JSONResponse(status_code=413, content={"detail": "request too large"})
             if request.headers.get("origin") not in settings.allowed_origins:
                 return JSONResponse(status_code=403, content={"detail": "untrusted request origin"})
             if request.headers.get("content-type", "").split(";", 1)[0].lower() != "application/json":
                 return JSONResponse(status_code=415, content={"detail": "JSON content type required"})
-            if len(await request.body()) > 8 * 1024 * 1024:
-                return JSONResponse(status_code=413, content={"detail": "request too large"})
+            body = bytearray()
+            async for chunk in request.stream():
+                if len(body) + len(chunk) > MAX_REQUEST_BYTES:
+                    return JSONResponse(status_code=413, content={"detail": "request too large"})
+                body.extend(chunk)
+            # Starlette's cached request body lets the route parse the same bounded bytes.
+            request._body = bytes(body)
         return await call_next(request)
 
     @app.get("/api/health")

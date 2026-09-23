@@ -1,6 +1,8 @@
 """Email-code login, session privacy, and browser write protection."""
 
 from datetime import timedelta
+import asyncio
+import ssl
 
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -8,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from plimsoll_web.config import Settings
 from plimsoll_web.main import create_app
+from plimsoll_web.mailer import SMTPMailer
 from plimsoll_web.models import EmailChallenge, User, UserSession, utc_now
 
 
@@ -109,3 +112,57 @@ def test_production_cookie_is_secure_and_logout_revokes_session(engine, outbox):
         browser.headers.update({"X-CSRF-Token": csrf})
         assert browser.post("/api/auth/logout", json={}).status_code == 200
         assert browser.get("/api/me").status_code == 401
+
+
+def test_smtp_implicit_tls_verifies_server_certificate(monkeypatch):
+    captured = {}
+
+    class FakeSMTP:
+        def __init__(self, host, port, *, timeout, context):
+            captured["context"] = context
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def send_message(self, message):
+            captured["message"] = message
+
+    monkeypatch.setattr("plimsoll_web.mailer.smtplib.SMTP_SSL", FakeSMTP)
+    settings = Settings(database_url="sqlite:///unused.db", secret_key="test-secret",
+                        smtp_host="mail.example.com", smtp_sender="sender@example.com")
+    SMTPMailer(settings).send_code("recipient@example.com", "123456")
+    assert captured["context"].verify_mode == ssl.CERT_REQUIRED
+    assert captured["context"].check_hostname is True
+    assert captured["message"]["To"] == "recipient@example.com"
+
+
+def test_chunked_request_stops_reading_at_limit(client):
+    async def exercise():
+        messages = []
+        received = 0
+        scope = {
+            "type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1",
+            "method": "POST", "scheme": "http", "path": "/api/auth/request-code",
+            "raw_path": b"/api/auth/request-code", "query_string": b"",
+            "root_path": "", "client": ("127.0.0.1", 1234), "server": ("testserver", 80),
+            "headers": [(b"origin", b"http://testserver"), (b"content-type", b"application/json")],
+        }
+
+        async def receive():
+            nonlocal received
+            received += 1
+            if received > 9:
+                raise AssertionError("body reader continued after size limit")
+            return {"type": "http.request", "body": b"x" * (1024 * 1024), "more_body": True}
+
+        async def send(message):
+            messages.append(message)
+
+        await client.app(scope, receive, send)
+        assert messages[0]["status"] == 413
+        assert received == 9
+
+    asyncio.run(exercise())

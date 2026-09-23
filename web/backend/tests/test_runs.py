@@ -96,12 +96,22 @@ def test_expired_worker_lease_becomes_failed(alice, project_id, engine):
         row.status = "running"
         row.lease_expires_at = utc_now() - timedelta(seconds=1)
         db.commit()
-    from plimsoll_web.worker import recover_expired_runs
-    assert recover_expired_runs(alice.app.state.session_factory) == 1
     read = alice.get(f"/api/runs/{run_id}").json()
     assert read["status"] == "failed"
     assert read["result"] is None
     assert read["error"]["code"] == "run.worker_lost"
+    assert queue(alice, project_id).status_code == 202
+
+
+def test_expired_lease_is_recovered_before_new_enqueue(alice, project_id, engine):
+    run_id = queue(alice, project_id).json()["id"]
+    with Session(engine) as db:
+        row = db.get(CalculationRun, uuid.UUID(run_id))
+        row.status = "running"
+        row.lease_expires_at = utc_now() - timedelta(seconds=1)
+        db.commit()
+    assert queue(alice, project_id).status_code == 202
+    assert alice.get(f"/api/runs/{run_id}").json()["status"] == "failed"
 
 
 def test_only_one_claim_of_queued_run(alice, project_id, engine):

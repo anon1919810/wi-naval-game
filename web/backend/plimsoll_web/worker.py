@@ -18,6 +18,7 @@ from .models import CalculationRun, utc_now
 
 
 MAX_SECONDS = 120
+LEASE_GRACE_SECONDS = 30
 MAX_RESULT_BYTES = 32 * 1024 * 1024
 CANCEL_GRACE_SECONDS = 2
 
@@ -48,7 +49,7 @@ def claim_next_run(db: Session) -> CalculationRun | None:
     if row is not None:
         row.status = "running"
         row.started_at = utc_now()
-        row.lease_expires_at = row.started_at + timedelta(seconds=MAX_SECONDS)
+        row.lease_expires_at = row.started_at + timedelta(seconds=MAX_SECONDS + LEASE_GRACE_SECONDS)
         db.flush()
     return row
 

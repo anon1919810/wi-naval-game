@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
 import { FactField } from '../components/FactField';
@@ -41,6 +41,25 @@ function validationDetails(cause: unknown): Array<{ path: string; message: strin
   });
 }
 
+function projectRenderError(value: unknown, projectId: string): string | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return '项目 JSON 根节点无效';
+  const row = value as Record<string, unknown>;
+  if (row.id !== projectId) return '项目 ID 必须与当前项目一致';
+  if (row.schema !== 'plimsoll-project-1') return '项目 schema 无效';
+  if (typeof row.name !== 'string' || !row.name.trim()) return '项目缺少有效舰名';
+  if (!row.hull || typeof row.hull !== 'object' || Array.isArray(row.hull)) return '项目缺少船型 hull';
+  if (!Array.isArray(row.loading_conditions) || !row.loading_conditions.every(
+    item => item && typeof item === 'object' && typeof item.id === 'string'
+      && (item.label === undefined || item.label === null || typeof item.label === 'string'),
+  )) return '项目缺少有效工况 loading_conditions';
+  if (!Array.isArray(row.weight_groups) || !row.weight_groups.every(
+    group => group && typeof group === 'object' && typeof group.id === 'string'
+      && (group.label === undefined || group.label === null || typeof group.label === 'string')
+      && Array.isArray(group.items) && group.items.every((item: unknown) => item && typeof item === 'object' && !Array.isArray(item)),
+  )) return '项目缺少有效重量分组 weight_groups';
+  return null;
+}
+
 export function Workbench({ projectId, onBack, onRun }: { projectId: string; onBack: () => void; onRun: (runId: string) => void }) {
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
@@ -55,6 +74,7 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
   const [fieldErrors, setFieldErrors] = useState<Array<{ path: string; message: string }>>([]);
   const [inspected, setInspected] = useState<{ label: string; source: string; estimate: boolean } | null>(null);
   const [runs, setRuns] = useState<RunView[]>([]);
+  const draftGeneration = useRef(0);
 
   useEffect(() => {
     let active = true;
@@ -84,6 +104,7 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
   }, [chapter, draft]);
 
   function updateDraft(next: ProjectDocument) {
+    draftGeneration.current += 1;
     setDraft(next);
     setDirty(true);
     setConflict(null);
@@ -107,13 +128,18 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
 
   async function save() {
     if (!view || !draft || !dirty) return;
+    const submittedGeneration = draftGeneration.current;
     setBusy(true);
     setError('');
     try {
       const saved = await api.saveProject(projectId, { base_revision: view.revision, project: draft });
       setView(saved);
-      setDraft(structuredClone(saved.project));
-      setDirty(false);
+      if (draftGeneration.current === submittedGeneration) {
+        setDraft(structuredClone(saved.project));
+        setDirty(false);
+      } else {
+        setDirty(true);
+      }
       setConflict(null);
       setFieldErrors([]);
     } catch (cause) {
@@ -155,7 +181,8 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
     try {
       const parsed: unknown = JSON.parse(jsonText);
       if (chapter === 'json') {
-        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || (parsed as ProjectDocument).id !== projectId) throw new Error('项目 ID 必须与当前项目一致');
+        const problem = projectRenderError(parsed, projectId);
+        if (problem) throw new Error(problem);
         updateDraft(parsed as ProjectDocument);
       } else {
         const section = CHAPTER_DATA[chapter];

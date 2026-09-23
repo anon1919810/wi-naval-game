@@ -18,6 +18,23 @@ from .projects import RevisionConflict, owned_project
 ACTIVE = ("queued", "running")
 
 
+def _expire_lost_runs(db: Session, owner_id: uuid.UUID) -> bool:
+    """Recover this owner's expired worker leases during ordinary API traffic."""
+    rows = db.scalars(select(CalculationRun).where(
+        CalculationRun.owner_id == owner_id,
+        CalculationRun.status == "running",
+        CalculationRun.lease_expires_at < utc_now(),
+    ).with_for_update(skip_locked=True)).all()
+    for row in rows:
+        row.status = "failed"
+        row.finished_at = utc_now()
+        row.lease_expires_at = None
+        row.error = {"code": "run.worker_lost", "message": "calculation worker stopped before reporting a result"}
+    if rows:
+        db.flush()
+    return bool(rows)
+
+
 def _run_view(row: CalculationRun, *, include_result: bool = True) -> dict:
     return {
         "id": str(row.id), "project_id": str(row.project_id), "revision": row.revision,
@@ -55,6 +72,7 @@ def enqueue_run(
     except _analysis_request.AnalysisInputError as error:
         raise HTTPException(status_code=422, detail=error.diagnostics) from error
     db.scalar(select(User).where(User.id == owner_id).with_for_update())
+    _expire_lost_runs(db, owner_id)
     active = db.scalar(select(func.count()).select_from(CalculationRun).where(
         CalculationRun.owner_id == owner_id, CalculationRun.status.in_(ACTIVE),
     ))
@@ -72,6 +90,8 @@ def enqueue_run(
 
 def list_runs(owner_id: uuid.UUID, project_id: uuid.UUID, db: Session) -> list[dict]:
     owned_project(db, owner_id, project_id)
+    if _expire_lost_runs(db, owner_id):
+        db.commit()
     rows = db.scalars(select(CalculationRun).where(
         CalculationRun.owner_id == owner_id, CalculationRun.project_id == project_id,
     ).order_by(CalculationRun.created_at.desc(), CalculationRun.id.desc())).all()
@@ -79,11 +99,16 @@ def list_runs(owner_id: uuid.UUID, project_id: uuid.UUID, db: Session) -> list[d
 
 
 def get_run(owner_id: uuid.UUID, run_id: uuid.UUID, db: Session) -> dict:
-    return _run_view(owned_run(db, owner_id, run_id))
+    row = owned_run(db, owner_id, run_id)
+    if _expire_lost_runs(db, owner_id):
+        db.commit()
+        db.refresh(row)
+    return _run_view(row)
 
 
 def cancel_run(owner_id: uuid.UUID, run_id: uuid.UUID, db: Session) -> dict:
     row = owned_run(db, owner_id, run_id, lock=True)
+    _expire_lost_runs(db, owner_id)
     if row.status == "queued":
         row.status = "canceled"
         row.finished_at = utc_now()
