@@ -46,6 +46,13 @@ def _deck(project, stages):
     plane = stages["equilibrium"]["data"]
     deck = project.get("deck")
     data = geometry_analysis.deck_clearance(deck, plane, keel_offset_m=geometry["keel_offset_m"])
+    # Declared-input freeboard projection (design view). This is a DISTINCT adapter
+    # from the flotation/measured normal_clearance computed above: it never depends
+    # on the equilibrium plane and is kept under its own key so the two calibrations
+    # (declared design freeboard vs measured current-flotation clearance) stay
+    # unmistakably separable. Absent deck -> key omitted, never null.
+    if deck is not None:
+        data["declared_freeboard"] = page_rows.freeboard_rows(deck)
     if data["status"] != "completed":
         return data, data["status"]
     points = {point["id"]: point for point in deck["points"]}

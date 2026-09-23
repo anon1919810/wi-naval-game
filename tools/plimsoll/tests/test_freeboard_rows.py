@@ -15,7 +15,9 @@ TOOLS = PKG.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
-from plimsoll import page_rows, project_store  # noqa: E402
+from plimsoll import analysis, loading, page_rows, project_store  # noqa: E402
+
+import json  # noqa: E402
 
 
 def fb(value, source="declared fixture", estimate=True):
@@ -148,6 +150,59 @@ class QueenMaryIntegrationTests(unittest.TestCase):
         # reference length is known for QM, so no reference_length_unknown warning
         self.assertNotIn("page_rows.reference_length_unknown",
                          {d["code"] for d in result["diagnostics"]})
+
+
+class DeckStageIntegrationTests(unittest.TestCase):
+    """The declared freeboard projection is exposed on the deck stage, alongside
+    (but under a distinct key from) the measured flotation clearance."""
+
+    @classmethod
+    def setUpClass(cls):
+        case = (PKG / "cases" / "projects" / "queen_mary_1913.project.json")
+        cls.project = project_store.load(case)
+
+    def _run(self, project, stages):
+        return analysis.compute_project(project, "normal-engineering", {"stages": stages})
+
+    def test_measured_and_declared_freeboard_are_both_present_and_distinct(self):
+        result = self._run(self.project, ["loading", "geometry", "equilibrium", "deck"])
+        deck_stage = result["stages"]["deck"]
+        self.assertEqual(deck_stage["status"], "completed")
+        data = deck_stage["data"]
+        # measured/flotation normal clearance lives under its own keys
+        self.assertIn("profile", data)
+        self.assertIn("points", data)
+        # declared design freeboard lives under its OWN distinct key
+        self.assertIn("declared_freeboard", data)
+        # the two calibrations are unmistakably different field names
+        self.assertNotIn("declared_freeboard", data["profile"])
+        self.assertNotIn("profile", data["declared_freeboard"])
+
+        df = data["declared_freeboard"]
+        self.assertEqual(df["schema"], "plimsoll-page-rows-freeboard-1")
+        self.assertIsNone(df["values"]["weighted_mean_freeboard_m"])
+        self.assertAlmostEqual(df["values"]["coverage_fraction"], 0.0, places=9)
+        self.assertIn("centreline-profile", df["values"]["unknown_segment_ids"])
+
+    def test_no_envelope_z_leaks_into_declared_freeboard(self):
+        result = self._run(self.project, ["loading", "geometry", "equilibrium", "deck"])
+        df = result["stages"]["deck"]["data"]["declared_freeboard"]
+        envelope_z = 15.0  # the sealed-envelope top; never a freeboard source
+        for seg in df["segments"]:
+            self.assertNotEqual(seg["freeboard_aft_m"], envelope_z)
+            self.assertNotEqual(seg["freeboard_fore_m"], envelope_z)
+            self.assertNotEqual(seg["segment_mean_freeboard_m"], envelope_z)
+        self.assertNotEqual(df["values"]["weighted_mean_freeboard_m"], envelope_z)
+
+    def test_project_without_deck_omits_the_key_and_keeps_stage_behaviour(self):
+        stripped = json.loads(json.dumps(self.project))
+        stripped.pop("deck", None)
+        result = self._run(stripped, ["loading", "geometry", "equilibrium", "deck"])
+        deck_stage = result["stages"]["deck"]
+        # key omitted entirely, never a null placeholder
+        self.assertNotIn("declared_freeboard", deck_stage["data"])
+        # the rest of the deck stage is unchanged: still reports deck unknown
+        self.assertEqual(deck_stage["status"], "unavailable")
 
 
 if __name__ == "__main__":
