@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
+import { DeckFreeboardEditor } from '../components/DeckFreeboardEditor';
+import { getDeck, type DeckInput } from '../components/deckModel';
 import { FactField } from '../components/FactField';
 import { ProjectNav, type Chapter } from '../components/ProjectNav';
 import { StatusBadge } from '../components/StatusBadge';
@@ -126,6 +128,23 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
     updateDraft(next);
   }
 
+  function patchDeck(next: DeckInput) {
+    if (!draft) return;
+    const prev = (draft as Record<string, unknown>).deck;
+    const prevTop = prev && typeof prev === 'object' ? { ...(prev as Record<string, unknown>) } : {};
+    const newDeck = {
+      ...prevTop,
+      estimate: next.estimate,
+      source: next.source,
+      points: next.points,
+      segments: next.segments,
+      reference_length_m: next.reference_length_m,
+    };
+    const clone = structuredClone(draft) as Record<string, unknown>;
+    clone.deck = newDeck;
+    updateDraft(clone as ProjectDocument);
+  }
+
   async function save() {
     if (!view || !draft || !dirty) return;
     const submittedGeneration = draftGeneration.current;
@@ -219,7 +238,8 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
         </div><div className="overview-panel"><div className="section-heading"><h2>纵向概览</h2><span>结构示意 · 不按比例</span></div><svg viewBox="0 0 780 180" role="img" aria-label="舰船轮廓示意，不按比例"><path className="ship-outline" d="M40 96 L72 74 L166 67 L255 64 L365 67 L470 65 L592 70 L705 78 L741 96 L726 118 Q450 143 101 118 Z"/><path className="ship-waterline" d="M28 105 H752"/><path className="ship-mast" d="M290 67 L314 13 L339 67 M311 65 L313 14 M510 67 L525 32 L541 68"/><rect className="ship-detail" x="353" y="35" width="22" height="31"/><rect className="ship-detail" x="402" y="25" width="24" height="40"/><rect className="ship-detail" x="466" y="34" width="22" height="31"/></svg><p className="diagram-caption">仅表达船体与水线阅读关系；真实型线以项目数据和计算结果为准。</p></div><div className="overview-callout"><span className="section-kicker">NEXT STEP / 下一步</span><h2>先确认输入，再看结果</h2><p>从左侧章节检查主尺度、载荷与来源。运行后可查看各阶段的结果、限制与报告。</p><button className="text-button" onClick={() => setChapter('hull')}>编辑船型数据 ↗</button></div>{runs.length > 0 && <div className="overview-panel"><div className="section-heading"><h2>最近运行</h2><span>保存的输入快照</span></div><div className="run-history">{runs.slice(0, 6).map(item => <button key={item.id} onClick={() => onRun(item.id)}><span>{item.condition_id} · 修订 {item.revision}</span><strong><StatusBadge status={item.status} /></strong><small>{new Date(item.created_at).toLocaleString('zh-CN')}</small><span aria-hidden="true">↗</span></button>)}</div></div>}</section>}
         {chapter === 'hull' && <section className="editor-section"><div className="section-heading"><h2>船型与几何</h2><span>单位以项目契约为准</span></div><p className="section-intro">主尺度只记录已知输入。留空表示未知，不自动补零。复杂型线可在“项目数据”中编辑。</p><div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const value = hull[key]; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`)); return <label className="field-label" key={field.key}>{field.label}<input type="number" step="any" aria-invalid={Boolean(issue)} value={typeof value === 'number' ? value : ''} onChange={event => updateHull(key, event.target.value)} placeholder="未知" onFocus={() => setInspected({ label: field.label, source: '当前项目输入；具体史料来源请在项目数据中声明', estimate: false })} /><small>{field.hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>; })}</div></section>}
         {chapter === 'weights' && <section className="editor-section"><div className="section-heading"><h2>重量与载荷</h2><span>{draft.weight_groups.length} 个分组</span></div><p className="section-intro">这里只修改已有条目。质量、重心和来源随项目修订保存；新增分组可通过“项目数据”编辑。</p>{draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>还没有重量分组</h3><p>空白项目可先从项目数据中添加账本结构。</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{group.items.length} 项</span></div><div className="weight-list">{group.items.map((item, itemIndex) => <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{String(item.id ?? `条目 ${itemIndex + 1}`)}</strong><label>质量 · t<input type="number" step="any" value={typeof item.mass_t === 'number' ? item.mass_t : ''} onChange={event => updateMass(groupIndex, itemIndex, 'mass_t', event.target.value)} /></label><label>纵向位置 · m<input type="number" step="any" value={typeof item.x_m === 'number' ? item.x_m : ''} onChange={event => updateMass(groupIndex, itemIndex, 'x_m', event.target.value)} /></label><label>来源<input value={typeof item.source === 'string' ? item.source : ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label></div>)}</div></div>)}</section>}
-        {(chapter === 'armour' || chapter === 'stability' || chapter === 'propulsion' || chapter === 'damage' || chapter === 'json') && <section className="editor-section"><div className="section-heading"><h2>{chapter === 'json' ? '完整项目数据' : CHAPTER_DATA[chapter]?.title}</h2><span>结构化 JSON</span></div><p className="section-intro">{chapter === 'json' ? '这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。' : CHAPTER_DATA[chapter]?.intro}</p><label className="field-label" htmlFor="chapter-json">{chapter === 'json' ? '项目 JSON' : '章节数据'}</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
+        {chapter === 'stability' && <section className="editor-section"><div className="section-heading"><h2>{CHAPTER_DATA[chapter]?.title}</h2><span>端点、干舷与参考长度</span></div><p className="section-intro">{CHAPTER_DATA[chapter]?.intro}</p><DeckFreeboardEditor deck={getDeck(draft)} runs={runs} onPatchDeck={patchDeck} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">用于编辑表单未覆盖的字段（如 y_m / z_m）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {(chapter === 'armour' || chapter === 'propulsion' || chapter === 'damage' || chapter === 'json') && <section className="editor-section"><div className="section-heading"><h2>{chapter === 'json' ? '完整项目数据' : CHAPTER_DATA[chapter]?.title}</h2><span>结构化 JSON</span></div><p className="section-intro">{chapter === 'json' ? '这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。' : CHAPTER_DATA[chapter]?.intro}</p><label className="field-label" htmlFor="chapter-json">{chapter === 'json' ? '项目 JSON' : '章节数据'}</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
       </div>
     </main>
     <aside className="inspector" aria-label="来源与诊断"><span className="section-kicker">TRACE / 来源与诊断</span><h2>{inspected?.label || '当前输入'}</h2><p>点击字段查看输入语义。计算完成后，结果来源与方法边界会在报告中逐项展开。</p><div className="inspector-rule" /><dl><dt>数据状态</dt><dd>{inspected?.estimate ? '工程估算' : '项目输入'}</dd><dt>来源</dt><dd>{inspected?.source || '请在项目中保留原始来源；未提供的事实保持未知'}</dd><dt>请求身份</dt><dd>运行后生成并固定指纹</dd></dl><div className="inspector-bottom">水线 / 来源 / 适用范围</div></aside>

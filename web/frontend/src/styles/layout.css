@@ -267,5 +267,23 @@ input[aria-invalid='true'] { border-color: var(--error); }
 @media (max-width: 650px) { .run-summary, .run-stage-preview, .comparison-meta { grid-template-columns: 1fr; } .run-summary > div:nth-child(2) { border: 0; border-top: 1px solid var(--line); padding: 16px 0 0; } .report-cover { padding: 35px 20px 20px; } .report-cover::before { left: 20px; right: 20px; } .report-number { top: 36px; right: 20px; } .report-actions { display: block; } .report-actions > div { flex-wrap: wrap; margin-top: 12px; } .report-status-row { flex-wrap: wrap; gap: 8px; } .report-section { padding: 19px; } .report-compare-control { padding: 0 20px; margin-bottom: -25px; } }
 @media print { :root { color-scheme: light; --canvas: white; --surface: white; --surface-soft: white; --ink: #14232d; --muted: #576874; --line: #cdd9df; --accent: #286d86; } body { background: white; } .no-print, .site-header, .report-compare-control { display: none !important; } .page-pad { max-width: none; padding: 0; } .report-cover, .report-section, .stage-card { break-inside: avoid; box-shadow: none; } .report-columns { grid-template-columns: 1fr; } .report-sources { position: static; } }
 @media (max-width: 1280px) { .workbench-layout { grid-template-columns: 190px minmax(0, 1fr); } .inspector { display: none; } }
+
+.deck-editor { display: grid; gap: 18px; }
+.deck-group { border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.deck-group-title { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--surface-soft); }
+.deck-group-title h3 { margin: 0; font-size: 13px; }
+.deck-group-title span { color: var(--faint); font-size: 10px; }
+.deck-empty { padding: 18px 16px; color: var(--muted); font-size: 11px; }
+.deck-empty p { margin: 0; }
+.deck-row { display: grid; grid-template-columns: minmax(110px, 1.2fr) repeat(4, minmax(80px, 1fr)); align-items: end; gap: 12px; padding: 10px 16px; border-top: 1px solid var(--line); }
+.deck-row--segment { grid-template-columns: minmax(110px, 1.2fr) repeat(2, minmax(100px, 1fr)) minmax(150px, 1.4fr) auto; }
+.deck-row label { display: grid; gap: 5px; color: var(--muted); font-size: 10px; }
+.deck-row input[type="text"], .deck-row input[type="number"], .deck-row select { width: 100%; height: 33px; padding: 0 9px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); outline: none; }
+.deck-row input[type="checkbox"] { width: 18px; height: 18px; align-self: center; }
+.deck-row .text-button { white-space: nowrap; }
+.deck-readonly { font-size: 11px; color: var(--muted); }
+.advanced-json { margin-top: 22px; padding-top: 14px; border-top: 1px dashed var(--line-strong); }
+.advanced-json summary { cursor: pointer; color: var(--muted); font-size: 12px; font-weight: 600; }
+.advanced-json .json-editor { min-height: 260px; margin-top: 12px; }
 @media (max-width: 850px) { .template-grid { grid-template-columns: 1fr; } .template-card { min-height: 160px; } .workbench-layout { display: block; } .project-nav { position: static; min-height: 0; padding: 13px 15px; border-right: 0; border-bottom: 1px solid var(--line); } .nav-return, .nav-project-name, .nav-section-label, .nav-bottom { display: none; } .project-nav nav { display: flex; gap: 5px; overflow-x: auto; } .nav-item { width: auto; flex: 0 0 auto; } .auth-layout { grid-template-columns: 1fr; gap: 30px; padding: 40px 0; } .auth-intro h1 { margin-top: 30px; } .auth-intro .eyebrow { margin-top: 25px; } .auth-rule { display: none; } .auth-panel { max-width: 480px; } }
 @media (max-width: 650px) { .page-pad { padding: 38px 20px 65px; } .site-header { padding: 0 16px; } .brand-suffix, .header-edition, .user-email { display: none; } .workbench-toolbar { flex-wrap: wrap; padding: 12px 18px; } .toolbar-actions { width: 100%; justify-content: space-between; } .workbench-content { padding: 29px 18px 70px; } .metric-grid, .field-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .condition-strip { flex-wrap: wrap; } .condition-strip select { width: 65%; } .condition-strip > span { width: 100%; margin-left: 0; } .blank-project { flex-wrap: wrap; } .blank-project input { width: 100%; } .auth-panel { padding: 30px 24px; } .weight-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } .run-history button { grid-template-columns: 1fr auto; } .run-history small { display: none; } }
