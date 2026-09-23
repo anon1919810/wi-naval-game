@@ -204,6 +204,12 @@ QM_ARMOUR_PAGE_ROWS = [
      "weight_item_ids": ["conning-tower"],
      "source": "SPS 司令塔行绑定；厚度为公布名义值（254 mm 前面）"},
 ]
+for _armour_row in QM_ARMOUR_PAGE_ROWS:
+    _armour_row["group"] = (
+        "belts" if _armour_row["row"] in {"main", "upper", "ends"} else
+        "bulkheads" if _armour_row["row"] == "torpedo_bulkhead" else
+        "deck" if _armour_row["row"] == "armour_deck" else
+        "barbettes" if _armour_row["row"] == "barbette" else "conning")
 
 
 # SPS Weapons 页的行声明。typed 字段为**声明输入**（不可由其它量推断）；缺失一律 null →
@@ -229,6 +235,25 @@ QM_WEAPONS_PAGE_ROWS = [
      "typed": {"count": None, "kind": None},
      "source": "深弹 1916 年才投入使用，本舰（1916-05 战沉）未见装备记录；未采集来源"},
 ]
+
+QM_MISC_WEIGHT_PAGE_ROWS = [
+    {"row": zone, "label": label, "weight_item_ids": [],
+     "typed": {"mass_t": None}, "source": "No positional miscellaneous-weight breakdown was located"}
+    for zone, label in (
+        ("hull_below", "Hull below water"), ("hull_above", "Hull above water"),
+        ("on_deck", "On deck"), ("above_deck", "Above deck"), ("void", "Void"))
+]
+
+
+def _battery_page_rows(battery):
+    return [
+        {"row": "guns", "weight_item_ids": [f"{battery}-guns"],
+         "source": "selected loading ledger: installed gun tubes"},
+        {"row": "mounts", "weight_item_ids": [f"{battery}-mounts"],
+         "source": "selected loading ledger: complete mount, including any rotating armour"},
+        {"row": "ammunition", "weight_item_ids": [f"{battery}-ammunition"],
+         "source": "selected loading ledger: complete ammunition outfit"},
+    ]
 
 
 def queen_mary_project() -> dict:
@@ -545,6 +570,7 @@ def queen_mary_project() -> dict:
         "weapons": {
             "main": {
                 "weight_item_ids": ["main-guns", "main-mounts", "main-ammunition"],
+                "page_rows": _battery_page_rows("main"),
                 "installed_guns": 8,
                 "broadside_guns": 8,
                 "rounds_per_gun": 80,
@@ -637,6 +663,7 @@ def queen_mary_project() -> dict:
             },
             "secondary": {
                 "weight_item_ids": ["secondary-guns", "secondary-mounts", "secondary-ammunition"],
+                "page_rows": _battery_page_rows("secondary"),
                 "installed_guns": 16,
                 "broadside_guns": 8,
                 "rounds_per_gun": 150,
@@ -726,6 +753,11 @@ def queen_mary_project() -> dict:
                 "weight_item_ids": ["torpedo-launch-outfit", "torpedoes"],
                 "installed_tubes": 2,
                 "page_rows": copy.deepcopy(QM_WEAPONS_PAGE_ROWS),
+            },
+            "misc_weight": {
+                "status": "absent",
+                "reason": "Positional miscellaneous-weight breakdown has no sourced ledger binding",
+                "page_rows": copy.deepcopy(QM_MISC_WEIGHT_PAGE_ROWS),
             },
         },
         "propulsion": {
@@ -859,16 +891,22 @@ def _add_core_study_inputs(project: dict) -> None:
             max_speed_kn=fact(inherited["max_speed_kn"], inherited["max_speed_source"], False),
             engine_description=fact(inherited["engine_type"], inherited["engine_type_source"], False),
             boiler_description=fact(inherited["boilers"]["type"], inherited["boilers_source"], False),
+            energy_source=fact("coal-fired steam with oil spray assistance", inherited["boilers_source"], False),
+            transmission=fact("direct-drive turbine", inherited["engine_type_source"], False),
             cruise_speed_kn=fact(None, None, None), engine_built_year=fact(None, None, None))
         prop["fuel_bindings"] = {name: dict(weight_item_ids=[identity], source="Explicit link to existing canonical fuel ledger", estimate=True)
             for name, identity in (("coal", "coal"), ("oil", "fuel-oil"))}
+        prop["variable_load_groups"] = dict(group_ids=["fuel", "water", "other_loads"],
+            source="Selected loading ledger groups; fuel, working water and other variable stores are mutually exclusive ledger categories",
+            estimate=True)
         project["sources"]["unbound_historical_performance"] = dict(
             trial_speed_kn=inherited["trial_speed_kn"], trial_power_shp=inherited["power_trial_shp"],
             source=inherited["power_trial_source"], condition_id=None,
             reason="trial loading condition is unknown; no automatic normal/deep comparison is permitted")
     else:
         prop["facts"] = dict(shafts=fact(1), boilers=fact(2), design_power_kw=fact(2000),
-                             max_speed_kn=fact(12), cruise_speed_kn=fact(10))
+                             max_speed_kn=fact(12), cruise_speed_kn=fact(10),
+                             energy_source=fact("coal-fired steam"), transmission=fact("direct"))
         prop["fuel_bindings"] = dict(coal=dict(weight_item_ids=["steamer-fuel"], source=study, estimate=True),
                                     oil=dict(weight_item_ids=[], absent=True, source=study, estimate=True))
     common = dict(source=study, estimate=True, attitude_policy="selected_plane_longitudinal_trim_proxy_v1",

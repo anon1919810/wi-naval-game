@@ -29,6 +29,9 @@ def page_rows_for(project, state, summary):
     for key, declaration in declared.items():
         system, leaf = key.split(".", 1)
         views[key] = page_rows.project_declared_rows(state, summary, system, leaf, declaration)
+        if key == "armour.fixed":
+            views[key]["minimum_main_belt"] = page_rows.minimum_main_belt(
+                project, (project["systems"]["armour"]["fixed"] or {}).get("minimum_main_belt"))
     result = copy.deepcopy(summary)
     result["page_rows"] = views
     return result
@@ -48,7 +51,11 @@ def _deck(project, stages):
         aft, fore = segment["aft_point_id"], segment["fore_point_id"]
         left, right = points[aft]["x_m"], points[fore]["x_m"]
         intervals.append((left, right))
+        reference = deck.get("reference_length_m", {}).get("value")
         rows.append(dict(id=segment["id"], length_m=right-left,
+            aft_point_id=aft, fore_point_id=fore,
+            aft_clearance_m=clearances[aft], fore_clearance_m=clearances[fore],
+            length_pct=100*(right-left)/reference if reference else None,
             mean_normal_clearance_m=(clearances[aft]+clearances[fore])/2,
             source=segment.get("source", deck.get("source")), estimate=segment.get("estimate", deck.get("estimate"))))
     intervals.sort()
@@ -108,6 +115,27 @@ def _propulsion(project, state, stages):
         case[legacy + "_source"] = fact.get("source")
     system = (stages["systems"]["data"] or {}).get("systems", {}).get("propulsion", {})
     mass = system.get("ledger_mass_t")
+    variable_binding = prop.get("variable_load_groups")
+    group_rows = {row["id"]: row for row in state["groups"]}
+    selected_groups = ([copy.deepcopy(group_rows[identity]) for identity in variable_binding["group_ids"]]
+                       if variable_binding is not None else [])
+    group_masses = [row["total_mass_t"] for row in selected_groups]
+    engine_page = dict(boilers_count=facts.get("boilers", {}).get("value"),
+        energy_source=facts.get("energy_source", {}).get("value"),
+        transmission=facts.get("transmission", {}).get("value"),
+        machinery_mass_t=mass, variable_group_ids=copy.deepcopy(variable_binding["group_ids"])
+            if variable_binding else [],
+        variable_load_t=sum(group_masses) if variable_binding is not None
+            and all(value is not None for value in group_masses) else None,
+        selected_variable_groups=selected_groups, variable_load_binding=copy.deepcopy(variable_binding),
+        status="completed" if variable_binding is not None and all(value is not None for value in group_masses)
+            else "unavailable", method="selected_loading_ledger_group_sum_v1",
+        boundary="machinery mass is a separate installed system ledger projection; variable groups are not added again to displacement")
+    coal, oil = values.get("coal_t"), values.get("oil_t")
+    engine_page["coal_share_of_declared_fuel_pct"] = (
+        100 * coal / (coal + oil) if coal is not None and oil is not None and coal + oil > 0
+        else None)
+    engine_page["coal_share_definition"] = "selected coal mass / (selected coal + selected oil mass); unknown when fuel inventory is incomplete or empty"
     if mass is not None and mass > 0:
         case["engine_weight_t"] = mass
         case["engine_weight_source"] = "selected linked propulsion ledger; not an independent mass estimate"
@@ -115,7 +143,7 @@ def _propulsion(project, state, stages):
     hydro = stages["hydrostatics"]["data"]
     if hydro is not None:
         case["lwl_m"] = hydro["values"]["waterline_length_body_x_m"]
-    known_facts = dict(facts=facts, fuel_bindings=fuels, effective_case=case,
+    known_facts = dict(facts=facts, fuel_bindings=fuels, effective_case=case, engine_page=engine_page,
         assumptions=["legacy displacement_normal_t adapter key contains the selected total mass",
                      "precise international horsepower and knot conversion"], input_fingerprint=state["input_fingerprint"])
     if case["shafts"] is None:

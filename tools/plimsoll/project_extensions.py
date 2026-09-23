@@ -8,7 +8,8 @@ METADATA_FIELDS = {"country": "text", "type": "text", "design_year": "integer",
                    "laid_down_year": "integer", "engine_built_year": "integer"}
 PROPULSION_FIELDS = {"shafts": "count", "boilers": "count", "design_power_kw": "positive",
     "trial_power_kw": "positive", "max_speed_kn": "positive", "cruise_speed_kn": "positive",
-    "engine_description": "text", "boiler_description": "text", "engine_built_year": "integer"}
+    "engine_description": "text", "boiler_description": "text", "engine_built_year": "integer",
+    "energy_source": "text", "transmission": "text"}
 WEAPON_FIELDS = {"calibre_m": "positive", "unit_mass_t": "nonnegative",
     "length_m": "positive", "diameter_m": "positive", "projectile_mass_kg": "nonnegative",
     "charge_mass_kg": "nonnegative", "rounds_per_gun": "integer", "mount_description": "text",
@@ -24,6 +25,12 @@ RESISTANCE_INPUTS = {"c_stern": "signed", "bulb_area_m2": "nonnegative",
     "x_fore_perpendicular_m": "signed", "x_aft_perpendicular_m": "signed",
     "density_kg_m3": "positive", "gravity_m_s2": "positive",
     "kinematic_viscosity_m2_s": "positive"}
+PAGE_ROW_TYPED_FIELDS = {"tubes": "integer", "carried": "integer", "sets": "integer",
+    "diameter_mm": "positive", "length_m": "positive", "arrangement": "text",
+    "count": "integer", "reloads": "integer", "kind": "text",
+    "unit_weight_kg": "nonnegative", "mass_t": "nonnegative",
+    "height_m": "positive", "inclination_deg": "signed", "beam_between_m": "positive",
+    "construction_type": "text", "coverage_pct": "nonnegative"}
 
 
 def _diag(diagnostics, path, message, code="extension.invalid", warning=False):
@@ -141,7 +148,41 @@ def _fuel_bindings(value, item_ids, path, diagnostics):
             _diag(diagnostics, p, "empty IDs require declared absence; absent fuel cannot own items")
 
 
-def _system_fields(systems, item_ids, diagnostics):
+def _page_rows(value, item_ids, path, diagnostics):
+    if not isinstance(value, list) or not value:
+        _diag(diagnostics, path, "page rows must be a nonempty array")
+        return
+    seen_rows, seen_items = set(), set()
+    for index, row in enumerate(value):
+        p = f"{path}[{index}]"
+        if not _object(row, p, diagnostics):
+            continue
+        name = row.get("row")
+        if not isinstance(name, str) or not name.strip() or name in seen_rows:
+            _diag(diagnostics, p + ".row", "row must have a unique nonempty identifier")
+        else:
+            seen_rows.add(name)
+        if "group" in row and (not isinstance(row["group"], str) or not row["group"].strip()):
+            _diag(diagnostics, p + ".group", "group must be a nonempty identifier")
+        ids = row.get("weight_item_ids", [])
+        if not isinstance(ids, list) or any(not isinstance(i, str) or i not in item_ids for i in ids):
+            _diag(diagnostics, p + ".weight_item_ids", "must name existing ledger items")
+        elif len(set(ids)) != len(ids) or seen_items.intersection(ids):
+            _diag(diagnostics, p + ".weight_item_ids", "an item may belong to only one row in a leaf")
+        else:
+            seen_items.update(ids)
+        typed = row.get("typed")
+        if typed is not None:
+            if not _object(typed, p + ".typed", diagnostics):
+                continue
+            _keys(typed, set(PAGE_ROW_TYPED_FIELDS), p + ".typed", diagnostics)
+            for field, supplied in typed.items():
+                if field in PAGE_ROW_TYPED_FIELDS and supplied is not None:
+                    _value(supplied, PAGE_ROW_TYPED_FIELDS[field], p + ".typed." + field,
+                           diagnostics, nullable=False)
+
+
+def _system_fields(systems, item_ids, diagnostics, weight_groups=()):
     if not isinstance(systems, dict):
         return
     def visit(value, path, fields, below_leaf=False):
@@ -160,10 +201,12 @@ def _system_fields(systems, item_ids, diagnostics):
                         or any(not isinstance(i, str) or not i or i not in item_ids for i in ids)
                         or len(set(ids)) != len(ids)):
                     _diag(diagnostics, path + ".weight_item_ids", "must link unique existing ledger item IDs")
+        if "page_rows" in value:
+            _page_rows(value["page_rows"], item_ids, path + ".page_rows", diagnostics)
         for key, child in value.items():
             # These are leaf payloads, not nested systems; their own validators
             # retain authority over their contents (source remains opaque).
-            if key not in {"facts", "mass_models", "source", "fuel_bindings"}:
+            if key not in {"facts", "mass_models", "source", "fuel_bindings", "variable_load_groups", "page_rows"}:
                 visit(child, f"{path}[{json.dumps(key, ensure_ascii=False)}]", fields,
                       below_leaf or boundary or "facts" in value)
     propulsion = systems.get("propulsion")
@@ -171,6 +214,16 @@ def _system_fields(systems, item_ids, diagnostics):
         visit(propulsion, "$.systems.propulsion", PROPULSION_FIELDS)
         if "fuel_bindings" in propulsion:
             _fuel_bindings(propulsion["fuel_bindings"], item_ids, "$.systems.propulsion.fuel_bindings", diagnostics)
+        variable = propulsion.get("variable_load_groups")
+        if variable is not None:
+            path = "$.systems.propulsion.variable_load_groups"
+            if _object(variable, path, diagnostics):
+                _keys(variable, {"group_ids", "source", "estimate"}, path, diagnostics)
+                _metadata(variable, path, diagnostics, required=True)
+                groups = {g.get("id") for g in weight_groups if isinstance(g, dict)}
+                ids = variable.get("group_ids")
+                if not isinstance(ids, list) or not ids or any(not isinstance(i, str) or i not in groups for i in ids) or len(ids) != len(set(ids)):
+                    _diag(diagnostics, path + ".group_ids", "must name unique existing loading groups")
     visit(systems.get("weapons"), "$.systems.weapons", WEAPON_FIELDS)
     visit(systems.get("armour"), "$.systems.armour", ARMOUR_FIELDS)
 
@@ -388,7 +441,28 @@ def validate_extensions(project, item_ids):
             for key in prefs.keys() & choices.keys():
                 if not isinstance(prefs[key], str) or prefs[key] not in choices[key]:
                     _diag(diagnostics, "$.display_preferences." + key, "unsupported display unit for this dimension")
-    _system_fields(project.get("systems"), item_ids, diagnostics)
+    _system_fields(project.get("systems"), item_ids, diagnostics, project.get("weight_groups", []))
+    armour = (project.get("systems") or {}).get("armour") or {}
+    fixed = armour.get("fixed") or {}
+    study = fixed.get("minimum_main_belt")
+    if study is not None:
+        path = "$.systems.armour.fixed.minimum_main_belt"
+        if _object(study, path, diagnostics):
+            _keys(study, {"protected_compartment_ids", "aft_margin_m", "fore_margin_m",
+                          "inventory_complete", "source", "estimate"}, path, diagnostics)
+            ids = study.get("protected_compartment_ids")
+            available = {c.get("id") for c in project.get("compartments", []) if isinstance(c, dict)}
+            if (not isinstance(ids, list) or not ids or any(not isinstance(i, str) or i not in available for i in ids)
+                    or len(ids) != len(set(ids))):
+                _diag(diagnostics, path + ".protected_compartment_ids",
+                      "must list unique existing protected compartment IDs")
+            for key in ("aft_margin_m", "fore_margin_m"):
+                _value(study.get(key), "nonnegative", path + "." + key, diagnostics, False)
+            if not isinstance(study.get("inventory_complete"), bool):
+                _diag(diagnostics, path + ".inventory_complete", "must explicitly state completeness")
+            _metadata(study, path, diagnostics, required=True)
+            if study.get("estimate") is not True:
+                _diag(diagnostics, path + ".estimate", "this independent engineering estimate must be marked estimated")
     if "deck" in project:
         _deck(project["deck"], diagnostics)
     conditions = project.get("loading_conditions")

@@ -1,6 +1,6 @@
 {
   "schema": "plimsoll-seven-page-binding-proposal-1",
-  "status": "provisional_pre_freeze_preparation",
+  "status": "core_binding_reconciled_with_declared_gaps",
   "completion_claim": false,
   "inventory": {
     "path": ".superpowers/sdd/2026-09-22-plimsoll-1.0/seven-page-fields.json",
@@ -12,10 +12,7 @@
     "approved_exclusion_count": 26
   },
   "checkpoint": {
-    "analysis_py_sha256": "249ff374d57926971911edc901812baa6b1dfa293a6697610730c460549588a5",
-    "project_extensions_py_sha256": "91040fc54849b387eb736cbbaa102c896f0450d7541b3cf5c31d124d60b2b14d",
-    "project_io_py_sha256": "aa87146c94b74acf670f9ef69f69eccdbeb8d18c4d4386fdc4896f8239d2460e",
-    "note": "Coordinator/CLI work was active. Reconcile paths and hashes after freeze before implementation."
+    "note": "Reconciled against current source and focused completion tests; final 45-item acceptance audit is separate."
   },
   "selector_semantics": {
     "array_id": "[id=<x>] selects exactly one object by its literal id; zero or multiple matches are unavailable/error, never index fallback.",
@@ -25,36 +22,33 @@
     "dynamic_system": "<battery_id>/<zone_id>/<store_id> are caller-defined canonical keys, not Queen Mary constants."
   },
   "disposition_counts": {
-    "presentation_deferred": 10,
-    "core_bound_presentation_deferred": 4,
-    "bound": 6,
-    "bound_nullable_fact": 10,
-    "bound_display_preference": 2,
-    "bound_input_snapshot": 2,
     "accepted_exclusion": 26,
-    "bound_design_fact": 2,
+    "armour_group_adapter_required": 1,
+    "bound": 6,
     "bound_design_and_selected_result": 1,
+    "bound_design_fact": 2,
+    "bound_display_preference": 2,
+    "bound_dynamic_system_rows": 1,
+    "bound_estimate": 2,
+    "bound_input_snapshot": 2,
+    "bound_ledger_mass": 2,
+    "bound_method_specific_resistance_row": 8,
+    "bound_nullable_fact": 10,
     "bound_requires_explicit_deep_condition": 1,
     "bound_requires_named_condition": 8,
-    "bound_estimate": 2,
-    "projection_adapter_required": 17,
-    "computational_adapter_required": 7,
-    "bound_dynamic_system_rows": 1,
-    "observation_limited_schema_gap": 1,
-    "bound_ledger_mass": 2,
-    "typed_schema_and_adapter_required": 37,
-    "presentation_deferred_pending_typed_rows": 1,
-    "unresolved_computational_gap": 1,
-    "armour_group_adapter_required": 32,
-    "bound_selected_ledger_group": 2,
-    "core_inputs_bound_presentation_deferred": 1,
-    "request_mode_adapter_required": 1,
-    "bound_method_specific_resistance_row": 8,
-    "typed_schema_gap": 2,
     "bound_scenario_and_result": 1,
-    "classification_adapter_required": 1,
-    "request_constraint_gap": 1,
-    "selected_loading_roll_adapter_required": 1
+    "bound_selected_ledger_group": 2,
+    "computational_adapter_required": 2,
+    "core_bound_presentation_deferred": 4,
+    "core_inputs_bound_presentation_deferred": 1,
+    "implemented": 5,
+    "implemented_as_constraint_study": 1,
+    "implemented_canonical_unit": 5,
+    "implemented_input_conditional": 85,
+    "observation_limited_schema_gap": 1,
+    "presentation_deferred": 10,
+    "presentation_deferred_pending_typed_rows": 1,
+    "projection_adapter_required": 1
   },
   "records": [
     {
@@ -75,7 +69,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "common.show_report",
@@ -95,7 +96,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "common.show_sidebar",
@@ -115,7 +123,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "common.page_tabs",
@@ -135,7 +150,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "common.diagnostics",
@@ -170,7 +192,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "core_bound_presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "common.dirty_state",
@@ -197,7 +226,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "common.make_report",
@@ -217,7 +253,14 @@
       "evidence": [
         "current-core-scope",
         "analysis-api.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.ship.name",
@@ -246,7 +289,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.project_id",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.ship.country",
@@ -281,7 +331,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.metadata.country.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.ship.type",
@@ -316,7 +373,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.metadata.type.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.ship.year",
@@ -351,7 +415,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.metadata.design_year.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.ship.laid_down",
@@ -386,7 +457,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.metadata.laid_down_year.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.ship.engine_built",
@@ -421,7 +499,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.metadata.engine_built_year.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.display_unit",
@@ -449,7 +534,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_display_preference",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.display_preferences.length",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.lwl",
@@ -486,7 +578,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.values.waterline_length_body_x_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.loa",
@@ -514,7 +613,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_input_snapshot",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.hull.loa_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.beam_hull",
@@ -551,7 +657,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.values.waterline_beam_body_y_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.beam_bulges",
@@ -570,7 +683,14 @@
       "limitation": "The separate SPS bulge-width parameterization is outside 1.0; explicit hull geometry may include bulges or other appendages when supplied.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.draught_normal",
@@ -598,7 +718,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_design_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.hull.draught_normal_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.dimensions.draught_max",
@@ -626,7 +753,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_design_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.hull.draught_deep_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.displacement.hullform_slider",
@@ -645,7 +779,14 @@
       "limitation": "The mapping from this categorical slider to hull geometry is not established from the available references; 1.0 uses explicit coefficients or offsets geometry.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.displacement.block_coeff_normal",
@@ -682,7 +823,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_design_and_selected_result",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.form_coefficients.values.cb",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.displacement.block_coeff_max",
@@ -715,7 +863,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_explicit_deep_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.form_coefficients.values.cb",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.displacement.mass_normal",
@@ -753,7 +908,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.values.total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.displacement.mass_max",
@@ -791,7 +953,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.values.total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.derived.waterplane_area",
@@ -824,7 +993,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.values.awp_m2",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.derived.wetted_surface_area",
@@ -860,7 +1036,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_estimate",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.wetted_surface.area_m2",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.derived.length_beam",
@@ -870,7 +1053,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented",
       "canonical_inputs": [],
       "result_bindings": [
         {
@@ -878,6 +1061,9 @@
         },
         {
           "path": "$.stages.hydrostatics.data.values.waterline_beam_body_y_m"
+        },
+        {
+          "path": "$.stages.l0.data.hull_ratios.design_lwl_over_beam"
         }
       ],
       "required_condition": null,
@@ -896,7 +1082,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented",
+        "result_path": "$.stages.l0.data.hull_ratios.design_lwl_over_beam",
+        "limitation": "Design LWL/beam and selected-plane body-axis ratio are separate.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "hull.derived.natural_speed",
@@ -919,7 +1112,14 @@
       "limitation": "Reviewed hull.natural_speed exists, but no coordinator stage exposes its sourced Froude and legacy 1.09√Lft outputs.",
       "evidence": [
         "hull.natural_speed"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "unavailable_method_undefined",
+        "result_path": null,
+        "limitation": "No agreed natural-speed definition or source; no number is fabricated.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.deck_form.type",
@@ -954,7 +1154,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.deck.facts.form.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.deck_form.depth_unlocked",
@@ -973,7 +1180,14 @@
       "limitation": "This is an SPS editing-mode control, not a physical datum or required 1.0 calculation.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.deck_form.profile",
@@ -1022,7 +1236,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "core_bound_presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.deck_form.save_picture",
@@ -1042,7 +1263,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.forecastle.length_pct",
@@ -1052,7 +1280,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=forecastle]",
@@ -1072,6 +1300,9 @@
         },
         {
           "path": "$.stages.deck.data.profile.reference_length_m"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=forecastle].length_pct"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1096,7 +1327,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=forecastle].length_pct",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.forecastle.forward",
@@ -1106,7 +1344,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=forecastle]",
@@ -1124,6 +1362,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=forecastle].fore_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=forecastle].fore_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1148,7 +1389,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=forecastle].fore_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.forecastle.aft",
@@ -1158,7 +1406,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=forecastle]",
@@ -1176,6 +1424,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=forecastle].aft_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=forecastle].aft_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1200,7 +1451,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=forecastle].aft_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.fore.length_pct",
@@ -1210,7 +1468,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=fore]",
@@ -1230,6 +1488,9 @@
         },
         {
           "path": "$.stages.deck.data.profile.reference_length_m"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=fore].length_pct"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1254,7 +1515,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=fore].length_pct",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.fore.forward",
@@ -1264,7 +1532,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=fore]",
@@ -1282,6 +1550,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=fore].fore_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=fore].fore_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1306,7 +1577,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=fore].fore_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.fore.aft",
@@ -1316,7 +1594,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=fore]",
@@ -1334,6 +1612,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=fore].aft_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=fore].aft_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1358,7 +1639,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=fore].aft_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.aft.length_pct",
@@ -1368,7 +1656,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=aft]",
@@ -1388,6 +1676,9 @@
         },
         {
           "path": "$.stages.deck.data.profile.reference_length_m"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=aft].length_pct"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1412,7 +1703,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=aft].length_pct",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.aft.forward",
@@ -1422,7 +1720,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=aft]",
@@ -1440,6 +1738,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=aft].fore_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=aft].fore_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1464,7 +1765,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=aft].fore_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.aft.aft",
@@ -1474,7 +1782,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=aft]",
@@ -1492,6 +1800,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=aft].aft_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=aft].aft_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1516,7 +1827,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=aft].aft_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.quarterdeck.length_pct",
@@ -1526,7 +1844,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=quarterdeck]",
@@ -1546,6 +1864,9 @@
         },
         {
           "path": "$.stages.deck.data.profile.reference_length_m"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=quarterdeck].length_pct"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1570,7 +1891,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=quarterdeck].length_pct",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.quarterdeck.forward",
@@ -1580,7 +1908,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=quarterdeck]",
@@ -1598,6 +1926,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=quarterdeck].fore_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=quarterdeck].fore_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1622,7 +1953,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=quarterdeck].fore_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.segments.quarterdeck.aft",
@@ -1632,7 +1970,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.deck.segments[id=quarterdeck]",
@@ -1650,6 +1988,9 @@
         {
           "path": "$.stages.deck.data.points[id=<endpoint ID>].normal_clearance_m",
           "selector": "join deck.segments[id=quarterdeck].aft_point_id"
+        },
+        {
+          "path": "$.stages.deck.data.profile.segments[id=quarterdeck].aft_clearance_m"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -1674,7 +2015,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.deck.data.profile.segments[id=quarterdeck].aft_clearance_m",
+        "limitation": "Only explicitly declared deck endpoints are evaluated; Queen Mary fixture has one centreline segment, not four historical SPS segments.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.bow_type",
@@ -1693,7 +2041,14 @@
       "limitation": "No approved 1.0 algorithm consumes the SPS categorical bow selector; geometry is authoritative.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.stern_type",
@@ -1712,7 +2067,14 @@
       "limitation": "No approved 1.0 algorithm consumes the SPS categorical stern selector; geometry is authoritative.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.waterline_length",
@@ -1749,7 +2111,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.values.waterline_length_body_x_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.bow_angle",
@@ -1768,7 +2137,14 @@
       "limitation": "The screenshot does not establish the geometric convention and 1.0 resistance uses explicit documented shape inputs instead.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.ram_length",
@@ -1787,7 +2163,14 @@
       "limitation": "Pure SPS design detail with no approved 1.0 calculation dependency.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.stern_overhang",
@@ -1806,7 +2189,14 @@
       "limitation": "Pure SPS design detail with no approved 1.0 calculation dependency.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.loa",
@@ -1834,7 +2224,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_input_snapshot",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.hull.loa_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "freeboard.ends.average",
@@ -1873,7 +2270,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_estimate",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.deck.data.profile.mean_normal_clearance_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.battery_selection.slots",
@@ -1911,7 +2315,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_dynamic_system_rows",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.systems.data.systems[<battery_id>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.battery_selection.shell_weight_lock",
@@ -1931,7 +2342,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.battery_selection.editor_fields_unknown",
@@ -1955,7 +2373,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "observation_limited_schema_gap",
+      "core_review": {
+        "status": "unobserved_source_limit",
+        "result_path": null,
+        "limitation": "This editor was not visible in the seven-page source capture.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.guns",
@@ -1965,7 +2390,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "computational_adapter_required",
+      "current_disposition": "implemented",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<battery_id>.facts"
@@ -1977,6 +2402,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<battery_id>].linked_items[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row=guns].weight_t"
         }
       ],
       "required_condition": null,
@@ -1995,7 +2423,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "implemented",
+        "result_path": "$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row=guns].weight_t",
+        "limitation": "Selected ledger projection; ammunition outfit is not fired broadside mass.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.mounts",
@@ -2005,7 +2440,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "computational_adapter_required",
+      "current_disposition": "implemented",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<battery_id>.facts"
@@ -2017,6 +2452,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<battery_id>].linked_items[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row=mounts].weight_t"
         }
       ],
       "required_condition": null,
@@ -2035,7 +2473,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "implemented",
+        "result_path": "$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row=mounts].weight_t",
+        "limitation": "Selected ledger projection; ammunition outfit is not fired broadside mass.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.armour",
@@ -2075,7 +2520,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "unavailable_component_split",
+        "result_path": null,
+        "limitation": "Rotating armour is included in mount ledger mass; no independent armour subtotal is sourced.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.total",
@@ -2112,7 +2564,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_ledger_mass",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.systems.data.systems[<battery_id>].ledger_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.broadside_lb",
@@ -2122,7 +2581,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "computational_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<battery_id>.facts"
@@ -2137,6 +2596,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<battery_id>].broadside_count"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.<battery_id>].broadside.mass_lb"
         }
       ],
       "required_condition": null,
@@ -2155,7 +2617,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.<battery_id>].broadside.mass_lb",
+        "limitation": "Requires sourced projectile mass and declared broadside gun count.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.broadside_kg",
@@ -2165,7 +2634,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "computational_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<battery_id>.facts"
@@ -2180,6 +2649,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<battery_id>].broadside_count"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.<battery_id>].broadside.mass_kg"
         }
       ],
       "required_condition": null,
@@ -2198,7 +2670,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.<battery_id>].broadside.mass_kg",
+        "limitation": "Requires sourced projectile mass and declared broadside gun count.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "guns.weights.magazine",
@@ -2208,7 +2687,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "computational_adapter_required",
+      "current_disposition": "implemented",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<battery_id>.facts"
@@ -2220,6 +2699,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<battery_id>].linked_items[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row=ammunition].weight_t"
         }
       ],
       "required_condition": null,
@@ -2238,7 +2720,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "computational_adapter_required",
+      "core_review": {
+        "status": "implemented",
+        "result_path": "$.stages.systems.data.page_rows[weapons.<battery_id>].rows[row=ammunition].weight_t",
+        "limitation": "Selected ledger projection; ammunition outfit is not fired broadside mass.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.number",
@@ -2248,7 +2737,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2258,6 +2747,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.tubes"
         }
       ],
       "required_condition": null,
@@ -2276,7 +2768,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.tubes",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.sets",
@@ -2286,7 +2785,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2296,6 +2795,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.sets"
         }
       ],
       "required_condition": null,
@@ -2314,7 +2816,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.sets",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.diameter",
@@ -2324,7 +2833,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2334,6 +2843,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.diameter_mm"
         }
       ],
       "required_condition": null,
@@ -2352,7 +2864,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.diameter_mm",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.diameter_unit",
@@ -2362,7 +2881,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_canonical_unit",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2390,7 +2909,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_canonical_unit",
+        "result_path": null,
+        "limitation": "Torpedo diameter is millimetres and store unit weight kilograms; display-unit control is deferred.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.length",
@@ -2400,7 +2926,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2410,6 +2936,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.length_m"
         }
       ],
       "required_condition": null,
@@ -2428,7 +2957,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.length_m",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.arrangement",
@@ -2438,7 +2974,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2448,6 +2984,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement"
         }
       ],
       "required_condition": null,
@@ -2466,7 +3005,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.main.weight",
@@ -2476,7 +3022,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2486,6 +3032,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -2504,7 +3053,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t",
+        "limitation": "Mass is linked from selected ledger only; absent bindings remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.number",
@@ -2514,7 +3070,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2524,6 +3080,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.tubes"
         }
       ],
       "required_condition": null,
@@ -2542,7 +3101,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.tubes",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.sets",
@@ -2552,7 +3118,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2562,6 +3128,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.sets"
         }
       ],
       "required_condition": null,
@@ -2580,7 +3149,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.sets",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.diameter",
@@ -2590,7 +3166,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2600,6 +3176,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.diameter_mm"
         }
       ],
       "required_condition": null,
@@ -2618,7 +3197,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.diameter_mm",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.diameter_unit",
@@ -2628,7 +3214,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_canonical_unit",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2656,7 +3242,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_canonical_unit",
+        "result_path": null,
+        "limitation": "Torpedo diameter is millimetres and store unit weight kilograms; display-unit control is deferred.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.length",
@@ -2666,7 +3259,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2676,6 +3269,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.length_m"
         }
       ],
       "required_condition": null,
@@ -2694,7 +3290,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.length_m",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.arrangement",
@@ -2704,7 +3307,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2714,6 +3317,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement"
         }
       ],
       "required_condition": null,
@@ -2732,7 +3338,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.torpedoes.second.weight",
@@ -2742,7 +3355,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2752,6 +3365,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -2770,7 +3386,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t",
+        "limitation": "Mass is linked from selected ledger only; absent bindings remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.mines.number",
@@ -2780,7 +3403,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2790,6 +3413,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.count"
         }
       ],
       "required_condition": null,
@@ -2808,7 +3434,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.count",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.mines.reloads",
@@ -2818,7 +3451,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2828,6 +3461,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.reloads"
         }
       ],
       "required_condition": null,
@@ -2846,7 +3482,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.reloads",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.mines.unit_weight",
@@ -2856,7 +3499,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2866,6 +3509,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.unit_weight_kg"
         }
       ],
       "required_condition": null,
@@ -2884,7 +3530,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.unit_weight_kg",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.mines.weight_unit",
@@ -2894,7 +3547,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_canonical_unit",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2922,7 +3575,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_canonical_unit",
+        "result_path": null,
+        "limitation": "Torpedo diameter is millimetres and store unit weight kilograms; display-unit control is deferred.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.mines.arrangement",
@@ -2932,7 +3592,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2942,6 +3602,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement"
         }
       ],
       "required_condition": null,
@@ -2960,7 +3623,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.mines.total_weight",
@@ -2970,7 +3640,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -2980,6 +3650,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -2998,7 +3671,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t",
+        "limitation": "Mass is linked from selected ledger only; absent bindings remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_main.number",
@@ -3008,7 +3688,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3018,6 +3698,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.count"
         }
       ],
       "required_condition": null,
@@ -3036,7 +3719,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.count",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_main.reloads",
@@ -3046,7 +3736,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3056,6 +3746,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.reloads"
         }
       ],
       "required_condition": null,
@@ -3074,7 +3767,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.reloads",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_main.unit_weight",
@@ -3084,7 +3784,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3094,6 +3794,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.unit_weight_kg"
         }
       ],
       "required_condition": null,
@@ -3112,7 +3815,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.unit_weight_kg",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_main.weight_unit",
@@ -3122,7 +3832,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_canonical_unit",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3150,7 +3860,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_canonical_unit",
+        "result_path": null,
+        "limitation": "Torpedo diameter is millimetres and store unit weight kilograms; display-unit control is deferred.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_main.arrangement",
@@ -3160,7 +3877,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3170,6 +3887,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement"
         }
       ],
       "required_condition": null,
@@ -3188,7 +3908,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_main.total_weight",
@@ -3198,7 +3925,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3208,6 +3935,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3226,7 +3956,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t",
+        "limitation": "Mass is linked from selected ledger only; absent bindings remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_second.number",
@@ -3236,7 +3973,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3246,6 +3983,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.count"
         }
       ],
       "required_condition": null,
@@ -3264,7 +4004,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.count",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_second.reloads",
@@ -3274,7 +4021,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3284,6 +4031,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.reloads"
         }
       ],
       "required_condition": null,
@@ -3302,7 +4052,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.reloads",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_second.unit_weight",
@@ -3312,7 +4069,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3322,6 +4079,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.unit_weight_kg"
         }
       ],
       "required_condition": null,
@@ -3340,7 +4100,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.unit_weight_kg",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_second.weight_unit",
@@ -3350,7 +4117,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_canonical_unit",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3378,7 +4145,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_canonical_unit",
+        "result_path": null,
+        "limitation": "Torpedo diameter is millimetres and store unit weight kilograms; display-unit control is deferred.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_second.arrangement",
@@ -3388,7 +4162,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3398,6 +4172,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement"
         }
       ],
       "required_condition": null,
@@ -3416,7 +4193,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].typed.arrangement",
+        "limitation": "Repeated, validated typed declarations are supported; historical unknown values remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.depth_charge_second.total_weight",
@@ -3426,7 +4210,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3436,6 +4220,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3454,7 +4241,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.torpedo].rows[row=<store_id>].weight_t",
+        "limitation": "Mass is linked from selected ledger only; absent bindings remain null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.hull_below",
@@ -3464,7 +4258,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3474,6 +4268,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3492,7 +4289,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t",
+        "limitation": "Five positional zones exist; Queen Mary has no sourced allocation, so all five masses are null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.hull_above",
@@ -3502,7 +4306,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3512,6 +4316,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3530,7 +4337,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t",
+        "limitation": "Five positional zones exist; Queen Mary has no sourced allocation, so all five masses are null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.on_deck",
@@ -3540,7 +4354,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3550,6 +4364,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3568,7 +4385,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t",
+        "limitation": "Five positional zones exist; Queen Mary has no sourced allocation, so all five masses are null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.above_deck",
@@ -3578,7 +4402,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3588,6 +4412,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3606,7 +4433,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t",
+        "limitation": "Five positional zones exist; Queen Mary has no sourced allocation, so all five masses are null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.void",
@@ -3616,7 +4450,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_and_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.weapons.<store_id>",
@@ -3626,6 +4460,9 @@
       "result_bindings": [
         {
           "path": "$.stages.systems.data.systems[<store_id>]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t"
         }
       ],
       "required_condition": null,
@@ -3644,7 +4481,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_and_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[weapons.misc_weight].rows[row=<zone_id>].weight_t",
+        "limitation": "Five positional zones exist; Queen Mary has no sourced allocation, so all five masses are null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.hull_space",
@@ -3663,7 +4507,14 @@
       "limitation": "The mapping for this room-allocation output is not established from the available references, and room ratings are outside 1.0; explicit compartments remain available separately.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.deck_space",
@@ -3682,7 +4533,14 @@
       "limitation": "The mapping for this room-allocation output is not established from the available references, and room ratings are outside 1.0.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "weapons.misc_weight.summary",
@@ -3702,7 +4560,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred_pending_typed_rows",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.settings.thickness_unit",
@@ -3730,7 +4595,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_display_preference",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.display_preferences.length",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.settings.minimum_main_belt_length",
@@ -3740,7 +4612,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "unresolved_computational_gap",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.compartments[*]"
@@ -3752,7 +4624,11 @@
           "path": "$.systems.weapons.<battery_id>"
         }
       ],
-      "result_bindings": [],
+      "result_bindings": [
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].minimum_main_belt.length_m"
+        }
+      ],
       "required_condition": null,
       "required_stages": [],
       "provenance_bindings": [],
@@ -3760,7 +4636,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "unresolved_computational_gap",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].minimum_main_belt.length_m",
+        "limitation": "Independent compartment-envelope engineering estimate; Queen Mary protected extents are not historically verified.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.settings.default_preset",
@@ -3779,7 +4662,14 @@
       "limitation": "The preset-to-armour mapping is not established from the available references; 1.0 uses explicit rows and provenance rather than recreating an opaque preset.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.main.thickness",
@@ -3789,7 +4679,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -3804,6 +4694,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].thickness_mm"
         }
       ],
       "required_condition": null,
@@ -3822,7 +4715,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].thickness_mm",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.main.length",
@@ -3832,7 +4732,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -3847,6 +4747,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].length_m"
         }
       ],
       "required_condition": null,
@@ -3865,7 +4768,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].length_m",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.main.height",
@@ -3875,7 +4785,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -3890,6 +4800,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].typed.height_m"
         }
       ],
       "required_condition": null,
@@ -3908,7 +4821,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].typed.height_m",
+        "limitation": "Typed height must be explicitly supplied; Queen Mary has no sourced height declaration.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.main.weight",
@@ -3918,7 +4838,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -3933,6 +4853,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].weight_t"
         }
       ],
       "required_condition": null,
@@ -3951,7 +4874,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=main].weight_t",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.ends.thickness",
@@ -3961,7 +4891,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -3976,6 +4906,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].thickness_mm"
         }
       ],
       "required_condition": null,
@@ -3994,7 +4927,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].thickness_mm",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.ends.length",
@@ -4004,7 +4944,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4019,6 +4959,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].length_m"
         }
       ],
       "required_condition": null,
@@ -4037,7 +4980,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].length_m",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.ends.height",
@@ -4047,7 +4997,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4062,6 +5012,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].typed.height_m"
         }
       ],
       "required_condition": null,
@@ -4080,7 +5033,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].typed.height_m",
+        "limitation": "Typed height must be explicitly supplied; Queen Mary has no sourced height declaration.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.ends.weight",
@@ -4090,7 +5050,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4105,6 +5065,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].weight_t"
         }
       ],
       "required_condition": null,
@@ -4123,7 +5086,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=ends].weight_t",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.upper.thickness",
@@ -4133,7 +5103,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4148,6 +5118,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].thickness_mm"
         }
       ],
       "required_condition": null,
@@ -4166,7 +5139,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].thickness_mm",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.upper.length",
@@ -4176,7 +5156,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4191,6 +5171,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].length_m"
         }
       ],
       "required_condition": null,
@@ -4209,7 +5192,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].length_m",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.upper.height",
@@ -4219,7 +5209,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4234,6 +5224,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].typed.height_m"
         }
       ],
       "required_condition": null,
@@ -4252,7 +5245,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].typed.height_m",
+        "limitation": "Typed height must be explicitly supplied; Queen Mary has no sourced height declaration.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.upper.weight",
@@ -4262,7 +5262,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4277,6 +5277,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].weight_t"
         }
       ],
       "required_condition": null,
@@ -4295,7 +5298,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=upper].weight_t",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.bulge.thickness",
@@ -4305,7 +5315,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4320,6 +5330,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].thickness_mm"
         }
       ],
       "required_condition": null,
@@ -4338,7 +5351,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].thickness_mm",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.bulge.length",
@@ -4348,7 +5368,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4363,6 +5383,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].length_m"
         }
       ],
       "required_condition": null,
@@ -4381,7 +5404,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].length_m",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.bulge.height",
@@ -4391,7 +5421,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4406,6 +5436,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].typed.height_m"
         }
       ],
       "required_condition": null,
@@ -4424,7 +5457,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].typed.height_m",
+        "limitation": "Typed height must be explicitly supplied; Queen Mary has no sourced height declaration.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.bulge.weight",
@@ -4434,7 +5474,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4449,6 +5489,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].weight_t"
         }
       ],
       "required_condition": null,
@@ -4467,7 +5510,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=bulge].weight_t",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.torpedo_bulkhead.thickness",
@@ -4477,7 +5527,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4492,6 +5542,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].thickness_mm"
         }
       ],
       "required_condition": null,
@@ -4510,7 +5563,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].thickness_mm",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.torpedo_bulkhead.length",
@@ -4520,7 +5580,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4535,6 +5595,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].length_m"
         }
       ],
       "required_condition": null,
@@ -4553,7 +5616,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].length_m",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.torpedo_bulkhead.height",
@@ -4563,7 +5633,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4578,6 +5648,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.height_m"
         }
       ],
       "required_condition": null,
@@ -4596,7 +5669,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.height_m",
+        "limitation": "Typed height must be explicitly supplied; Queen Mary has no sourced height declaration.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.torpedo_bulkhead.weight",
@@ -4606,7 +5686,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4621,6 +5701,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].weight_t"
         }
       ],
       "required_condition": null,
@@ -4639,7 +5722,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].weight_t",
+        "limitation": "Selected ledger weight/declared thickness; row or length remains null without sourced inputs.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.belts.total_weight",
@@ -4649,7 +5739,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4664,6 +5754,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].groups[belts].weight_t"
         }
       ],
       "required_condition": null,
@@ -4682,7 +5775,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].groups[belts].weight_t",
+        "limitation": "Only explicitly grouped, nonoverlapping declared belt rows are summed.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.bulkhead_geometry.main_belt_incline",
@@ -4692,7 +5792,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4707,6 +5807,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.inclination_deg"
         }
       ],
       "required_condition": null,
@@ -4725,7 +5828,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.inclination_deg",
+        "limitation": "Optional typed declaration; no historical value is inferred for Queen Mary.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.bulkhead_geometry.type",
@@ -4735,7 +5845,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4750,6 +5860,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.construction_type"
         }
       ],
       "required_condition": null,
@@ -4768,7 +5881,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.construction_type",
+        "limitation": "Optional typed declaration; no historical value is inferred for Queen Mary.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.bulkhead_geometry.beam_between",
@@ -4778,7 +5898,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4793,6 +5913,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.beam_between_m"
         }
       ],
       "required_condition": null,
@@ -4811,7 +5934,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=torpedo_bulkhead].typed.beam_between_m",
+        "limitation": "Optional typed declaration; no historical value is inferred for Queen Mary.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.other.guns",
@@ -4844,7 +5974,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "unavailable_component_split",
+        "result_path": null,
+        "limitation": "Rotating gunhouse armour is included in mount mass, without a sourced separate subtotal.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.deck.forecastle",
@@ -4854,7 +5991,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4869,6 +6006,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_forecastle].weight_t"
         }
       ],
       "required_condition": null,
@@ -4887,7 +6027,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_forecastle].weight_t",
+        "limitation": "Requires separate sourced ledger row; Queen Mary currently supplies only one combined armour-deck row.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.deck.fore_aft",
@@ -4897,7 +6044,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4912,6 +6059,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_fore_aft].weight_t"
         }
       ],
       "required_condition": null,
@@ -4930,7 +6080,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_fore_aft].weight_t",
+        "limitation": "Requires separate sourced ledger row; Queen Mary currently supplies only one combined armour-deck row.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.deck.quarter",
@@ -4940,7 +6097,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4955,6 +6112,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_quarter].weight_t"
         }
       ],
       "required_condition": null,
@@ -4973,7 +6133,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=deck_quarter].weight_t",
+        "limitation": "Requires separate sourced ledger row; Queen Mary currently supplies only one combined armour-deck row.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.deck.total",
@@ -4983,7 +6150,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -4998,6 +6165,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].groups[deck].weight_t"
         }
       ],
       "required_condition": null,
@@ -5016,7 +6186,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].groups[deck].weight_t",
+        "limitation": "Sum of explicitly grouped nonoverlapping deck rows.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.deck.coverage",
@@ -5059,7 +6236,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "unavailable_rule_undefined",
+        "result_path": null,
+        "limitation": "No sourced deck-area reference and coverage formula are declared.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.conning.forward",
@@ -5069,7 +6253,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -5084,6 +6268,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_forward].weight_t"
         }
       ],
       "required_condition": null,
@@ -5102,7 +6289,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_forward].weight_t",
+        "limitation": "Requires separate sourced forward/aft ledger items; Queen Mary only has combined mass.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.conning.aft",
@@ -5112,7 +6306,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -5127,6 +6321,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_aft].weight_t"
         }
       ],
       "required_condition": null,
@@ -5145,7 +6342,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_aft].weight_t",
+        "limitation": "Requires separate sourced forward/aft ledger items; Queen Mary only has combined mass.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.conning.total",
@@ -5155,7 +6359,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "armour_group_adapter_required",
+      "current_disposition": "implemented",
       "canonical_inputs": [
         {
           "path": "$.systems.armour.<zone_id>.facts"
@@ -5170,6 +6374,9 @@
         },
         {
           "path": "$.stages.systems.data.systems[<zone_id>].mass_models[*]"
+        },
+        {
+          "path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_tower].weight_t"
         }
       ],
       "required_condition": null,
@@ -5188,7 +6395,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "armour_group_adapter_required",
+      "core_review": {
+        "status": "implemented",
+        "result_path": "$.stages.systems.data.page_rows[armour.fixed].rows[row=conning_tower].weight_t",
+        "limitation": "Combined conning-tower ledger mass; fore/aft split unavailable.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.total",
@@ -5225,7 +6439,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_selected_ledger_group",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.groups[id=armour].total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "armour.diagram",
@@ -5268,7 +6489,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "core_inputs_bound_presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.max_speed",
@@ -5311,7 +6539,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.propulsion.data.facts.max_speed_kn.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.cruise_speed",
@@ -5354,7 +6589,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.propulsion.data.facts.cruise_speed_kn.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.shafts",
@@ -5397,7 +6639,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.propulsion.data.facts.shafts.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.lock_power",
@@ -5407,9 +6656,13 @@
       "io": "control",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "request_mode_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [],
-      "result_bindings": [],
+      "result_bindings": [
+        {
+          "path": "$.stages.resistance.data.fixed_power_study.speed_kn"
+        }
+      ],
       "required_condition": null,
       "required_stages": [],
       "provenance_bindings": [],
@@ -5417,7 +6670,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "request_mode_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.resistance.data.fixed_power_study.speed_kn",
+        "limitation": "Bracketed fixed-power request; outside method-valid bounds is unavailable/nonprimary.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.max_friction",
@@ -5465,7 +6725,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.max_wave",
@@ -5513,7 +6780,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.max_wave_power_pct",
@@ -5523,7 +6797,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.propulsion.facts.max_speed_kn"
@@ -5537,6 +6811,9 @@
         {
           "path": "$.stages.resistance.data.rows[*].kernel|kernel_row",
           "note": "method-specific reviewed residual/wave component"
+        },
+        {
+          "path": "$.stages.resistance.data.rows[speed_kn=<x>].components.wave_fraction_pct"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -5561,7 +6838,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<x>].components.wave_fraction_pct",
+        "limitation": "Taylor residual share or Holtrop RW share; these definitions are explicitly different.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.max_power_hp",
@@ -5611,7 +6895,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.max_power_kw",
@@ -5661,7 +6952,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.cruise_friction",
@@ -5709,7 +7007,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.cruise_wave",
@@ -5757,7 +7062,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.cruise_wave_power_pct",
@@ -5767,7 +7079,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.propulsion.facts.cruise_speed_kn"
@@ -5781,6 +7093,9 @@
         {
           "path": "$.stages.resistance.data.rows[*].kernel|kernel_row",
           "note": "method-specific reviewed residual/wave component"
+        },
+        {
+          "path": "$.stages.resistance.data.rows[speed_kn=<x>].components.wave_fraction_pct"
         }
       ],
       "required_condition": "selected explicit condition_id",
@@ -5805,7 +7120,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<x>].components.wave_fraction_pct",
+        "limitation": "Taylor residual share or Holtrop RW share; these definitions are explicitly different.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.cruise_power_hp",
@@ -5855,7 +7177,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.speed_power.cruise_power_kw",
@@ -5905,7 +7234,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_method_specific_resistance_row",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.resistance.data.rows[speed_kn=<selected speed>]",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.configuration.energy_source",
@@ -5915,13 +7251,17 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_gap",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.propulsion"
         }
       ],
-      "result_bindings": [],
+      "result_bindings": [
+        {
+          "path": "$.stages.propulsion.data.engine_page.energy_source"
+        }
+      ],
       "required_condition": null,
       "required_stages": [],
       "provenance_bindings": [],
@@ -5929,7 +7269,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_gap",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.propulsion.data.engine_page.energy_source",
+        "limitation": "Explicit sourced text fact; absent input remains null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.configuration.prime_mover",
@@ -5964,7 +7311,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_nullable_fact",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.input_snapshot.systems.propulsion.facts.engine_description.value",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.configuration.transmission",
@@ -5974,13 +7328,17 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "typed_schema_gap",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.propulsion"
         }
       ],
-      "result_bindings": [],
+      "result_bindings": [
+        {
+          "path": "$.stages.propulsion.data.engine_page.transmission"
+        }
+      ],
       "required_condition": null,
       "required_stages": [],
       "provenance_bindings": [],
@@ -5988,7 +7346,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "typed_schema_gap",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.propulsion.data.engine_page.transmission",
+        "limitation": "Explicit sourced text fact; absent input remains null.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.configuration.summary",
@@ -6012,7 +7377,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.engine_factor",
@@ -6031,7 +7403,14 @@
       "limitation": "The SPS factor definition is not established. 1.0 uses explicit sourced or ranged machinery weight items, so the slider must not be recreated with an invented formula.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.range",
@@ -6069,7 +7448,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_scenario_and_result",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.endurance.data.values.range_nm",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.pct_coal",
@@ -6079,7 +7465,7 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "existing",
-      "current_disposition": "projection_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.systems.propulsion.fuel_bindings.coal"
@@ -6094,6 +7480,9 @@
         },
         {
           "path": "$.stages.propulsion.data.values.oil_t"
+        },
+        {
+          "path": "$.stages.propulsion.data.engine_page.coal_share_of_declared_fuel_pct"
         }
       ],
       "required_condition": null,
@@ -6112,7 +7501,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "projection_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.propulsion.data.engine_page.coal_share_of_declared_fuel_pct",
+        "limitation": "Selected coal/(coal+oil); unknown when fuel bindings incomplete.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.displacement_for_machinery",
@@ -6131,7 +7527,14 @@
       "limitation": "The displacement-allocation mapping is not established from the available references; 1.0 uses explicit compartment volumes and machinery weights rather than a substitute score.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.engine",
@@ -6164,7 +7567,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_ledger_mass",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.systems.data.systems[propulsion].ledger_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.bunker_max",
@@ -6197,7 +7607,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.groups[id=fuel].total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.bunker_normal",
@@ -6230,7 +7647,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.groups[id=fuel].total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.load",
@@ -6240,11 +7664,14 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "classification_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [],
       "result_bindings": [
         {
           "path": "$.stages.loading.data.groups[*]"
+        },
+        {
+          "path": "$.stages.propulsion.data.engine_page.variable_load_t"
         }
       ],
       "required_condition": null,
@@ -6263,7 +7690,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "classification_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.propulsion.data.engine_page.variable_load_t",
+        "limitation": "Only explicitly named mutually exclusive selected loading groups are summed.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.hull",
@@ -6296,7 +7730,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_selected_ledger_group",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.groups[id=hull].total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "engines.weights.displacement_factor",
@@ -6315,7 +7756,14 @@
       "limitation": "The SPS factor definition is not established; show actual group totals and selected displacement instead of an invented score.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.set_trim",
@@ -6325,11 +7773,17 @@
       "io": "input",
       "seen": "observed",
       "original_treatment": "new_binding",
-      "current_disposition": "request_constraint_gap",
+      "current_disposition": "implemented_as_constraint_study",
       "canonical_inputs": [],
       "result_bindings": [
         {
           "path": "$.stages.equilibrium.data.trim_deg"
+        },
+        {
+          "path": "$.stages.equilibrium.data.trim_target_study.required_longitudinal_moment_t_m"
+        },
+        {
+          "path": "$.stages.equilibrium.data.trim_target_study.required_longitudinal_moment_kNm"
         }
       ],
       "required_condition": null,
@@ -6348,7 +7802,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "request_constraint_gap",
+      "core_review": {
+        "status": "implemented_as_constraint_study",
+        "result_path": "$.stages.equilibrium.data.trim_target_study.required_longitudinal_moment_kNm",
+        "limitation": "Independent target-moment study; free equilibrium is unchanged.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.stability",
@@ -6400,7 +7861,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "core_bound_presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.recoil",
@@ -6419,7 +7887,14 @@
       "limitation": "A numeric recoil rating requires weapon impulse, mount dynamics and acceptance criteria outside the approved 1.0 scope; no zero or decorative score.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.flotation",
@@ -6478,7 +7953,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "core_bound_presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.steadiness",
@@ -6488,7 +7970,7 @@
       "io": "output",
       "seen": "observed",
       "original_treatment": "calculated_estimate",
-      "current_disposition": "selected_loading_roll_adapter_required",
+      "current_disposition": "implemented_input_conditional",
       "canonical_inputs": [
         {
           "path": "$.hull.roll_gyration_coeff"
@@ -6497,6 +7979,9 @@
       "result_bindings": [
         {
           "path": "$.stages.hydrostatics.data.values.gm_t_m"
+        },
+        {
+          "path": "$.stages.hydrostatics.data.loaded_roll.period_s"
         }
       ],
       "required_condition": null,
@@ -6515,7 +8000,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "selected_loading_roll_adapter_required",
+      "core_review": {
+        "status": "implemented_input_conditional",
+        "result_path": "$.stages.hydrostatics.data.loaded_roll.period_s",
+        "limitation": "Needs positive selected GM and sourced gyration coefficient; Queen Mary selected GM is unavailable.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.metacentric_height",
@@ -6548,7 +8040,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.hydrostatics.data.values.gm_t_m",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.seakeeping",
@@ -6567,7 +8066,14 @@
       "limitation": "Complete seakeeping is outside 1.0; roll-period and stability results must not be relabelled as a seakeeping score.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.damage.shell_hits",
@@ -6586,7 +8092,14 @@
       "limitation": "Hit-count survivability needs penetration, damage mapping and combat assumptions outside 1.0. The approved damage tool reports explicit flooded scenarios and residual stability instead.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.damage.torpedo_hits",
@@ -6605,7 +8118,14 @@
       "limitation": "Torpedo-hit counts are not equivalent to the approved compartment/opening flooding simulation and require an out-of-scope weapon-damage model.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.room.machinery_storage_compartmentation",
@@ -6624,7 +8144,14 @@
       "limitation": "The rating mapping is not established from the available references, and room ratings are outside 1.0; explicit compartment geometry remains available without a decorative score.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.room.accommodation_workspace",
@@ -6643,7 +8170,14 @@
       "limitation": "Habitability/room ratings are outside 1.0 and the current project has no complete accommodation model.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.displacement.maximum",
@@ -6676,7 +8210,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.values.total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.displacement.normal",
@@ -6709,7 +8250,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.values.total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.displacement.standard",
@@ -6742,7 +8290,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.values.total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.displacement.light",
@@ -6775,7 +8330,14 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "bound_requires_named_condition",
+      "core_review": {
+        "status": "existing_binding_conditioned",
+        "result_path": "$.stages.loading.data.values.total_mass_t",
+        "limitation": "Existing binding retained; case values and method applicability are assessed separately.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.displacement.weight_per_hull_area",
@@ -6794,7 +8356,14 @@
       "limitation": "The screenshot does not define the hull-area denominator and 1.0 has no approved structural-strength use for this SPS ratio.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.cost_gbp",
@@ -6813,7 +8382,14 @@
       "limitation": "Historical cost modelling is outside 1.0 and would require year/currency/scope normalization.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.cost_usd",
@@ -6832,7 +8408,14 @@
       "limitation": "Historical cost and currency conversion are outside 1.0; no current-rate or nominal placeholder is appropriate.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.strength.cross_sectional",
@@ -6851,7 +8434,14 @@
       "limitation": "Structural strength/finite-element assessment is outside 1.0 and the SPS scoring formula is unknown.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.strength.longitudinal",
@@ -6870,7 +8460,14 @@
       "limitation": "Longitudinal strength requires a structural model and load cases outside 1.0.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.strength.composite",
@@ -6889,7 +8486,14 @@
       "limitation": "No auditable composition rule exists and structural strength is outside 1.0.",
       "evidence": [
         "immutable inventory: one of 26 previously approved exclusions"
-      ]
+      ],
+      "pre_reconciliation_disposition": "accepted_exclusion",
+      "core_review": {
+        "status": "excluded_by_approved_scope",
+        "result_path": null,
+        "limitation": "User-approved non-calculation control or formula exclusion.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     },
     {
       "id": "performance.design_assessment",
@@ -6916,7 +8520,27 @@
       "evidence": [
         "analysis-api.md",
         "project-extensions.md"
-      ]
+      ],
+      "pre_reconciliation_disposition": "presentation_deferred",
+      "core_review": {
+        "status": "presentation_deferred",
+        "result_path": null,
+        "limitation": "Core-only phase; presentation is not delivered.",
+        "evidence": "tools/plimsoll/analysis.py and tools/plimsoll/tests/test_completion_*.py"
+      }
     }
-  ]
+  ],
+  "core_review_counts": {
+    "excluded_by_approved_scope": 26,
+    "existing_binding_conditioned": 48,
+    "implemented": 5,
+    "implemented_as_constraint_study": 1,
+    "implemented_canonical_unit": 5,
+    "implemented_input_conditional": 85,
+    "presentation_deferred": 16,
+    "unavailable_component_split": 2,
+    "unavailable_method_undefined": 1,
+    "unavailable_rule_undefined": 1,
+    "unobserved_source_limit": 1
+  }
 }

@@ -24486,6 +24486,11 @@
           "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
           "value": 2000
         },
+        "energy_source": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": "coal-fired steam"
+        },
         "max_speed_kn": {
           "estimate": true,
           "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
@@ -24495,6 +24500,11 @@
           "estimate": true,
           "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
           "value": 1
+        },
+        "transmission": {
+          "estimate": true,
+          "source": "Explicit illustrative core-integration study; not surveyed equipment, historical performance, or a fitted result",
+          "value": "direct"
         }
       },
       "fuel_bindings": {

@@ -343,7 +343,7 @@ def flooding_workload(preset_id, label, duration_s=None):
     final_state = result.get("final_state") or {}
     equilibrium = final_state.get("equilibrium") or {}
     time_steps = [row.get("actual_dt_s") for row in timeline
-                  if isinstance(row.get("actual_dt_s"), (int, float))]
+                  if isinstance(row.get("actual_dt_s"), (int, float)) and row["actual_dt_s"] > 0]
     entry["result"] = {
         "status": result.get("status"),
         "stop_reason": result.get("stop_reason"),
@@ -365,7 +365,7 @@ def flooding_workload(preset_id, label, duration_s=None):
             "volume_m3": final_state.get("volume_conservation_error_m3"),
         },
         "equilibrium_keys": sorted(equilibrium),
-        "equilibrium_residual": equilibrium.get("residual"),
+        "equilibrium_residuals": equilibrium.get("residuals"),
         "equilibrium_converged": equilibrium.get("converged"),
         "downflooding": result.get("downflooding"),
         "diagnostic_codes": sorted({item["code"] for item in result.get("diagnostics", [])}),
@@ -399,7 +399,7 @@ def main():
          lambda: flooding_workload("queen-mary-single-proxy",
                                    "flooding_queen_mary_single_proxy_10s", duration_s=10.0)),
         ("flooding_generic_two_connected",
-         lambda: flooding_workload("generic-two-connected", "flooding_generic_two_connected")),
+         lambda: flooding_workload("generic-two-connected", "flooding_generic_two_connected", duration_s=10.0)),
     ]
     # Write after every workload: an interruption must not lose earlier evidence.
     out_json = HERE / "core-performance-benchmark.json"
@@ -419,8 +419,7 @@ def main():
             # Some workloads (per-case tables) are arrays; keep them addressable.
             evidence["workloads"][name] = {"workload": name, "elapsed_s": elapsed,
                                            "cases": entry}
-        out_json.write_text(json.dumps(evidence, ensure_ascii=False, indent=1),
-                            encoding="utf-8")
+        out_json.write_bytes(json.dumps(evidence, ensure_ascii=False, indent=1).replace("\n", "\r\n").encode("utf-8"))
         print(json.dumps(evidence["workloads"][name], ensure_ascii=False)[:300], flush=True)
 
     print(f"\nwritten {out_json}")

@@ -3,8 +3,7 @@
 Thin CLI adapter over the reviewed Plimsoll calculation core. This document
 records the command surface and, in particular, the **exit-code contract** and
 the `import-geometry` semantics. It describes observed, acceptance-tested
-behaviour; it does not assert that every success path is fully verified
-(see the *Status* notes per command).
+behaviour of the calculation-only CLI.
 
 All commands are invoked as a module: `python -m plimsoll <command> ...`.
 On any error the CLI writes a single structured JSON object to **stderr** whose
@@ -84,12 +83,9 @@ total grid of ≤1000 points; every value must be finite and positive, and
 persisted independently; exit `0` only when every point completed *and* was
 persisted, otherwise exit `1`.
 
-> **Status — not fully acceptance-verified.** The success path of `sweep`
-> (a valid grid producing `exit 0` with a `"completed"` summary) is **not**
-> covered by the current test suite. Existing tests verify only the axis /
-> schema validation failures (exit `2`, `cli.schema_invalid`) and the
-> no-output-before-validation guarantee. Treat `sweep`'s happy path as
-> implemented-but-not-yet-confirmed until a full-grid acceptance test lands.
+The success path is covered by `test_core_cli.py` tests for a completed grid,
+deterministic request identity, and a method-limited grid. The strict method
+still reports an unavailable/model-limited point rather than inventing a value.
 
 Invalid axes or schema → exit `2` (`plimsoll-cli-error-1`, `cli.schema_invalid`).
 

@@ -375,6 +375,46 @@ def _solve(prepared, state, options):
             intercept_support_m=list(support(p,q))))
 
 
+def trim_target_study(hull, solved, target_trim_deg):
+    """Find displacement intercept at fixed trim and report required moment."""
+    result = dict(status='unavailable', target_trim_deg=target_trim_deg,
+                  required_longitudinal_moment_kNm=None, waterline_d_m=None,
+                  source='selected loading and materialized hull', estimate=True,
+                  method='constrained_trim_moment_study_v1',
+                  reason='nonzero liquid loads are outside this fixed-attitude study')
+    if solved.get('liquids'):
+        return result
+    prepared, vertices, _, _ = prepare_geometry(hull)
+    p, q = math.tan(math.radians(target_trim_deg)), solved['q']
+    target = solved['target_volume_m3']
+    supports = [z-p*x-q*y for x,y,z in vertices]
+    span = max(supports)-min(supports)
+    lo, hi = min(supports)-max(span*1e-9,1e-9), max(supports)+max(span*1e-9,1e-9)
+    for _ in range(50):
+        d = (lo+hi)/2
+        hydro = prepared.integrate(math.atan(q), d, math.atan(p))
+        if hydro['volume'] < target:
+            lo = d
+        else:
+            hi = d
+    d = (lo+hi)/2
+    hydro = prepared.integrate(math.atan(q), d, math.atan(p))
+    if abs(hydro['volume']-target) > max(1e-8, target*1e-8):
+        result['reason'] = 'fixed-trim displacement root did not meet volume tolerance'
+        return result
+    buoyancy = [hydro['xlcb'], hydro['yb'], hydro['zb']]
+    cg = solved['effective_loading']['cg_m']
+    longitudinal = _axes(p,q)[0]
+    moment = _dot([a-b for a,b in zip(buoyancy,cg)], longitudinal)
+    moment *= solved['effective_loading']['total_mass_t']*9.80665
+    result.update(status='completed', reason=None, waterline_d_m=d,
+                  volume_m3=hydro['volume'], target_volume_m3=target,
+                  required_longitudinal_moment_kNm=moment,
+                  model_applicable=True,
+                  meaning='external trim moment required at this attitude; selected loading was not altered')
+    return result
+
+
 def _failed(state, error):
     supplied = state.get('diagnostics',[]) if isinstance(state,dict) else []
     # Keep usable upstream diagnostics and retain the entire malformed payload

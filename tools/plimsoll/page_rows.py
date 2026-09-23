@@ -98,8 +98,8 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
     bound_ids = leaf_payload.get("linked_items")
     if isinstance(bound_ids, list) and bound_ids and isinstance(bound_ids[0], dict):
         bound_ids = [entry.get("id") for entry in bound_ids]
-    if not isinstance(bound_ids, list) or not bound_ids:
-        raise ValueError("systems.%s.linked_items must be a nonempty array" % leaf_key)
+    if not isinstance(bound_ids, list) or (not bound_ids and leaf_payload.get("status") != "absent"):
+        raise ValueError("systems.%s.linked_items must be a nonempty array for a present leaf" % leaf_key)
     models = _plate_models({leaf_key: leaf_payload})
 
     diagnostics: list[dict] = []
@@ -119,7 +119,8 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             raise ValueError("%s.weight_item_ids must be an array" % path)
 
         mass = 0.0
-        areas, thicknesses, estimates, sources = [], [], [], []
+        mass_complete = True
+        areas, thicknesses, estimates, sources, boundaries = [], [], [], [], []
         for item_id in ids:
             if item_id in used:
                 diagnostics.append(_diagnostic(
@@ -139,6 +140,7 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             if isinstance(value, (int, float)) and not isinstance(value, bool):
                 mass += float(value)
             else:
+                mass_complete = False
                 diagnostics.append(_diagnostic(
                     "page_rows.item_mass_unknown",
                     "item %r has no known mass; row total is incomplete" % item_id,
@@ -150,8 +152,13 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
                     areas.append(float(model["area_m2"]))
                 if isinstance(model["thickness_mm"], (int, float)):
                     thicknesses.append(float(model["thickness_mm"]))
-            if isinstance(item.get("source"), str):
-                sources.append(item["source"])
+            provenance = item.get("provenance") or {}
+            source = provenance.get("source", item.get("source"))
+            if source is not None:
+                sources.append(source)
+            for model in leaf_payload.get("mass_models", []):
+                if model.get("linked_weight_item_id") == item_id and model.get("boundary"):
+                    boundaries.append(model["boundary"])
 
         declared_thickness = entry.get("thickness_mm")
         thickness_mm = float(declared_thickness) if isinstance(
@@ -184,10 +191,12 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
 
         rows_out.append({
             "row": row_name,
+            "group": entry.get("group"),
             "label": entry.get("label"),
             # A row that binds no ledger item has no mass: unknown, never zero.
-            "weight_t": mass if ids else None,
-            "mass_status": "ledger_bound" if ids else "no_ledger_binding",
+            "weight_t": mass if ids and mass_complete else None,
+            "mass_status": ("ledger_bound" if mass_complete else "ledger_mass_unknown")
+                if ids else "no_ledger_binding",
             "item_ids": list(ids),
             "item_count": len(ids),
             "thickness_mm": thickness_mm if ids else entry.get("thickness_mm"),
@@ -200,12 +209,15 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             "typed_unknown_fields": typed_unknown,
             "typed_status": typed_status,
             "estimate": all(estimates) if estimates else None,
-            "sources": sorted(set(sources)),
+            "sources": sources,
+            "declaration_source": entry.get("source"),
+            "declaration_estimate": entry.get("estimate"),
+            "model_boundaries": boundaries,
         })
         trace.append({
             "key": "page_row.%s.weight_t" % row_name,
             # A row with no ledger binding has unknown mass; the trace must not say 0.
-            "value": mass if ids else None,
+            "value": mass if ids and mass_complete else None,
             "formula": ("Σ 声明条目的账本 mass_t（不重算）" if ids
                         else "no ledger binding → mass unknown"),
             "source": "selected loading weight ledger; declared binding by weight_item_ids",
@@ -219,12 +231,14 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             "armour ledger items are not declared by any page row: %r" % (uncovered,),
             "$.page_rows"))
 
-    total = sum(row["weight_t"] for row in rows_out if row["weight_t"] is not None)
+    total = (sum(row["weight_t"] for row in rows_out if row["weight_t"] is not None)
+             if all(row["weight_t"] is not None for row in rows_out if row["item_ids"])
+             else None)
     bound = leaf_payload.get("ledger_mass_t")
-    matches = (isinstance(bound, (int, float)) and not isinstance(bound, bool)
+    matches = (total is not None and isinstance(bound, (int, float)) and not isinstance(bound, bool)
                and math.isclose(total, float(bound), rel_tol=MASS_TOLERANCE_T,
                                 abs_tol=MASS_TOLERANCE_T))
-    if not matches and not uncovered:
+    if not matches and not uncovered and bound is not None and total is not None:
         diagnostics.append(_diagnostic(
             "page_rows.mass_mismatch",
             "declared rows total %.9f t but %s.%s ledger mass is %r"
@@ -237,7 +251,7 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
         "estimate": None,
     })
 
-    return {
+    result = {
         "schema": SCHEMA,
         "system": system,
         "leaf": leaf,
@@ -250,13 +264,79 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             "declared_rows_total_t": total,
             "ledger_leaf_mass_t": float(bound) if isinstance(bound, (int, float))
             and not isinstance(bound, bool) else None,
-            "matches_ledger_mass": bool(matches),
+            "matches_ledger_mass": bool(matches) if bound is not None and total is not None else None,
         },
         "trace": trace,
         "diagnostics": diagnostics,
     }
+    grouped = {}
+    for row in rows_out:
+        group_id = row["group"] or "unclassified"
+        grouped.setdefault(group_id, []).append(row)
+    result["groups"] = {group_id: dict(
+        row_ids=[row["row"] for row in members],
+        weight_t=sum(row["weight_t"] for row in members)
+            if all(row["weight_t"] is not None for row in members) else None,
+        status="ledger_bound" if all(row["weight_t"] is not None for row in members)
+            else "unavailable",
+        method="declared_nonoverlapping_page_row_sum_v1")
+        for group_id, members in grouped.items()}
+    if system == "weapons" and leaf_payload.get("broadside_count") is not None:
+        models = [m for m in leaf_payload.get("mass_models", [])
+                  if m.get("method") == "counted_ammunition_mass"]
+        if len(models) == 1:
+            model = models[0]
+            projectile = model.get("inputs", {}).get("projectile_mass_kg")
+            provenance = (model.get("input_provenance") or {}).get("projectile_mass_kg")
+        else:
+            projectile, provenance = None, None
+        count = leaf_payload["broadside_count"]
+        valid = (isinstance(projectile, (int, float)) and not isinstance(projectile, bool)
+                 and math.isfinite(projectile) and projectile >= 0 and provenance)
+        mass = count * projectile if valid else None
+        result["broadside"] = {
+            "count": count, "projectile_mass_kg": projectile if valid else None,
+            "mass_kg": mass, "mass_lb": mass / 0.45359237 if mass is not None else None,
+            "source": provenance if valid else None,
+            "estimate": provenance.get("estimate") if valid else None,
+            "status": "completed" if valid else "unavailable",
+            "formula": "broadside_count × projectile_mass_kg; excludes charge and ammunition outfit",
+        }
+        if not valid:
+            result["diagnostics"].append(_diagnostic(
+                "page_rows.broadside_unknown",
+                "a single sourced projectile mass model is required for broadside mass",
+                "$.page_rows", False))
+    return result
 
 
 def armour_rows(state, systems_result, declaration):
     """Armour page rows (SPS Belts & Bulkheads / deck / towers) from the ledger."""
     return project_declared_rows(state, systems_result, "armour", "fixed", declaration)
+
+
+def minimum_main_belt(project, declaration):
+    """Estimate the continuous length covering explicitly named vital compartments."""
+    result = dict(status="unavailable", method="declared_compartment_extent_envelope_v1",
+                  length_m=None, declared_span_m=None, protected_compartments=[],
+                  source=None, estimate=True, model_applicable=False,
+                  reason="no protected-compartment study declared")
+    if declaration is None:
+        return result
+    compartments = {row["id"]: row for row in project["compartments"]}
+    listed = [compartments[item_id] for item_id in declaration["protected_compartment_ids"]]
+    extents = [dict(id=row["id"], aft_m=row["x_m"] - row["length_m"] / 2,
+                    fore_m=row["x_m"] + row["length_m"] / 2,
+                    source=row.get("source"), estimate=row.get("estimate")) for row in listed]
+    aft = min(row["aft_m"] for row in extents)
+    fore = max(row["fore_m"] for row in extents)
+    result.update(declared_span_m=fore - aft, protected_compartments=extents,
+                  source=declaration["source"],
+                  estimate=declaration["estimate"] or any(row.get("estimate") for row in listed),
+                  aft_margin_m=declaration["aft_margin_m"], fore_margin_m=declaration["fore_margin_m"])
+    if not declaration["inventory_complete"]:
+        result["reason"] = "declared protected compartments are not a complete inventory"
+        return result
+    result.update(status="completed", reason=None, model_applicable=True,
+                  length_m=fore - aft + declaration["aft_margin_m"] + declaration["fore_margin_m"])
+    return result

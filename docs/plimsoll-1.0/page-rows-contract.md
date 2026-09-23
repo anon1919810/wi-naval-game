@@ -1,6 +1,7 @@
 # Declared page rows (ledger projection)
 
-Status: v0, armour implemented (`tools/plimsoll/page_rows.py` + `systems.armour.fixed.page_rows`).
+Status: declared row projection used by fixed armour, main/secondary guns,
+torpedo/mine/depth-charge groups and the five miscellaneous-weight zones.
 This document is the contract for every SPS page that needs "page rows": it says
 what a declared row is, which invariants the projection must enforce, and what it
 must refuse to invent.
@@ -37,6 +38,12 @@ The projection (`page_rows.project_declared_rows`) then:
    `plate_area_thickness_density_mass` models when the row does not declare a thickness;
 3. reports unknowns as unknown.
 
+Rows may declare a `group` identifier. The projection reports a subtotal only
+from the rows in that group; if any member mass is unknown the subtotal is
+`null`. A ledger item can belong to only one row in a leaf, so grouping never
+creates a second physical mass. Queen Mary declares separate belts, bulkheads,
+deck, barbette and conning groups.
+
 ## Invariants (diagnostics, not silent behaviour)
 
 | code | blocking | meaning |
@@ -48,15 +55,18 @@ The projection (`page_rows.project_declared_rows`) then:
 | `page_rows.item_mass_unknown` | no | an item has no known mass, so the row total is incomplete |
 | `page_rows.extent_invalid` | no | `extents_m` is present but does not declare finite `aft_m`/`fore_m` |
 
-`values.matches_ledger_mass` is the single boolean a caller can check; it is true
-only when the declared rows cover the leaf exactly and sum to its ledger mass.
+`values.matches_ledger_mass` is true only when the declared rows cover the leaf
+exactly and sum to its ledger mass. It is `null` when the leaf or a linked item
+has unknown mass; `null` is not zero or a passing reconciliation.
 
 ## What it refuses to invent
 
 * **No length from a centroid.** With no declared `extents_m`, `length_m` stays
   `null` and `segment_status` is `unknown_no_declared_extent`. Queen Mary's belt
-  length therefore remains unknown on this page — the documented 176 m extent
-  would have to be declared with its own source before it may appear.
+  length therefore remains unknown on this page. The separate minimum-belt
+  study takes an explicitly complete set of protected compartment extents and
+  end margins; it is an engineering estimate, not an SPS formula or a substitute
+  for the physical belt extent.
 * **No area-as-length substitution**, no per-segment mass inferred from
   proportions, no smoothing of coverage gaps: `item_uncovered` names the items
   instead.
@@ -67,8 +77,15 @@ only when the declared rows cover the leaf exactly and sum to its ledger mass.
 
 ## Reusing it for other pages
 
-Weapons (typed rows for torpedoes/mines/misc weight), freeboard (deck segments)
-and engines (power/boiler rows) follow the same shape: declare the row bindings on
-the corresponding `systems.*` leaf, then call `project_declared_rows` with that
-leaf. The core stays ship-agnostic: it knows only ids, the ledger, and the
-invariants above.
+Weapons use the same selected-ledger row projection. Repeated torpedo, mine and
+depth-charge rows accept typed declarations (counts, dimensions, arrangement),
+and reject invalid numeric fields and duplicate item bindings. Their mass still
+comes only from the linked ledger item; a typed unit weight never silently adds
+mass. The five positional miscellaneous rows remain unknown for Queen Mary
+because their ledger allocations are not sourced.
+
+Deck endpoint freeboards are computed from the selected flotation plane and
+declared deck points; they are geometric results, not mass projections. The
+engine view reads declared facts, the installed machinery ledger subtotal and
+explicitly named selected loading groups. These are separate adapters and do
+not reuse `project_declared_rows`.

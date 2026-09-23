@@ -1,8 +1,7 @@
 # Selected-loading analysis API
 
-Integration contract frozen for the coordinator, serializers and thin CLI.
-Implementation/acceptance evidence is recorded separately; this document does
-not assert that pending coordinator code is already complete.
+Integration contract for the implemented coordinator, serializers and CLI.
+Acceptance and remaining method limits are recorded separately.
 
 `analysis.compute_project(project, condition_id, options=None, *, cancel_check=None)`
 returns one JSON-compatible `plimsoll-analysis-1` result. It performs no caller
@@ -24,6 +23,8 @@ invalid project/request input. Missing calculable data returns stage envelopes.
   geometry, equilibrium, hydrostatics, deck and propulsion. Dependencies may run
   with `requested=false`; every stage is present in the result.
 - `equilibrium`: validated solver options. Effective defaults are echoed.
+  Optional `target_trim_deg` requests a **separate** longitudinal-moment study
+  at that trim; it does not move ballast or replace the freely solved attitude.
 - `gz_angles_deg`: 1..201 finite strictly increasing values, when GZ is requested.
 - `hydrostatic_waterlines_above_keel_m`, `bonjean_waterlines_above_keel_m`:
   explicit 1..201 strictly increasing waterline grids for the respective stages.
@@ -32,6 +33,10 @@ invalid project/request input. Missing calculable data returns stage envelopes.
   `{value,source,estimate}` with positive value, meaningful source and boolean
   estimate. Otherwise use the scenario QPC/sensitivity. This is the exact sweep
   override path; no project mutation is needed. Speed × QPC count is <=1000.
+  `mode="predict_power"` is the default. `mode="fixed_power"` requires
+  `fixed_shaft_power_kw`, a sourced single `qpc_override`, and at least two
+  speeds bracketing the requested power. It never extrapolates beyond the
+  submitted speed grid, and preserves nonprimary applicability on trim proxies.
 - `endurance_scenario_id`: existing project scenario ID for endurance.
 - `flooding`: `{scenario, options}` using the reviewed native scenario and
   bounded serializable native options. Runtime cancel_check belongs to the
@@ -91,10 +96,18 @@ Diagnostic records retain code/severity/path/message/blocking, add stage and
 source_path, and are never coalesced by message. Stage diagnostics and the
 top-level flattened list carry the same records.
 
-Serializers must serialize this already-computed result without calculator calls.
-JSON preserves nulls. CSV may generically flatten every stage/data path and must
+The systems stage may contain selected-ledger `page_rows` for guns, weapons and
+armour, including a separately declared minimum-belt engineering estimate.
+The deck stage reports endpoint normal freeboards and reference-length shares.
+The propulsion stage contains `engine_page` with the explicitly classified
+selected variable load. Hydrostatics exposes a small-angle roll study only when
+selected GM and a sourced gyration coefficient are available. Missing inputs
+produce unavailable/null study results, not substituted design facts.
+
+Serializers serialize this already-computed result without calculator calls.
+JSON preserves nulls. CSV generically flattens every stage/data path and must
 carry stage status, units, identities, provenance and all diagnostic rows; no
-fixed numeric row assumptions are needed to begin serializer implementation.
+fixed numeric row assumptions are needed.
 Exit-success requires top-level completed; partial/canceled are unsuccessful
 calculation outcomes even when useful loading outputs exist.
 

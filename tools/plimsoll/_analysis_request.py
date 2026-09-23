@@ -67,8 +67,8 @@ def grid(value, path, positive=False, limit=201):
 
 
 def equilibrium_options(value, path="$.options.equilibrium"):
-    obj(value, {"rho_t_m3", "heel_bounds_deg", "trim_bounds_deg", "heel_deg", "max_iterations",
-                "initial", "liquid_loads"}, path)
+    obj(value, {"rho_t_m3", "heel_bounds_deg", "trim_bounds_deg", "heel_deg", "target_trim_deg",
+                "max_iterations", "initial", "liquid_loads"}, path)
     result = copy.deepcopy(value)
     result["rho_t_m3"] = number(result.get("rho_t_m3", 1.025), path + ".rho_t_m3", True)
     for key, default in (("heel_bounds_deg", [-85, 85]), ("trim_bounds_deg", [-45, 45])):
@@ -90,6 +90,10 @@ def equilibrium_options(value, path="$.options.equilibrium"):
         angle = number(result["heel_deg"], path + ".heel_deg")
         if not result["heel_bounds_deg"][0] <= angle <= result["heel_bounds_deg"][1]:
             reject("prescribed heel outside declared bounds", path + ".heel_deg")
+    if "target_trim_deg" in result:
+        target = number(result["target_trim_deg"], path + ".target_trim_deg")
+        if not result["trim_bounds_deg"][0] <= target <= result["trim_bounds_deg"][1]:
+            reject("target trim outside declared bounds", path + ".target_trim_deg")
     if not isinstance(result.setdefault("liquid_loads", []), list):
         reject("liquid_loads must be an array", path + ".liquid_loads")
     return result
@@ -120,10 +124,23 @@ def normalize(project, condition_id, options=None):
         reject("requested resistance requires explicit scenario and speeds", "$.options.resistance")
     if result["resistance"] is not None:
         res = result["resistance"]
-        obj(res, {"scenario_id", "scenario", "speeds_kn", "qpc_override"}, "$.options.resistance")
+        obj(res, {"scenario_id", "scenario", "speeds_kn", "qpc_override", "mode",
+                  "fixed_shaft_power_kw"}, "$.options.resistance")
+        res.setdefault("mode", "predict_power")
+        if res["mode"] not in ("predict_power", "fixed_power"):
+            reject("mode must be predict_power or fixed_power", "$.options.resistance.mode")
         if ("scenario_id" in res) == ("scenario" in res):
             reject("choose exactly one scenario_id or scenario", "$.options.resistance")
         res["speeds_kn"] = grid(res.get("speeds_kn"), "$.options.resistance.speeds_kn", True)
+        if res["mode"] == "fixed_power":
+            if len(res["speeds_kn"]) < 2 or "qpc_override" not in res:
+                reject("fixed power needs at least two bracketing speeds and one explicit QPC",
+                       "$.options.resistance")
+            res["fixed_shaft_power_kw"] = number(
+                res.get("fixed_shaft_power_kw"), "$.options.resistance.fixed_shaft_power_kw", True)
+        elif "fixed_shaft_power_kw" in res:
+            reject("fixed_shaft_power_kw requires fixed_power mode",
+                   "$.options.resistance.fixed_shaft_power_kw")
         if "scenario_id" in res:
             matches = [s for s in snapshot.get("resistance_scenarios", []) if s["id"] == res["scenario_id"]]
             if not matches:

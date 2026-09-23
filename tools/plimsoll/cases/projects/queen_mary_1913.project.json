@@ -111286,6 +111286,7 @@
         ],
         "page_rows": [
           {
+            "group": "belts",
             "label": "Main belt",
             "row": "main",
             "source": "SPS Belts & Bulkheads 行绑定；厚度为公布名义值（Navypedia / 维基）",
@@ -111295,6 +111296,7 @@
             ]
           },
           {
+            "group": "belts",
             "label": "Upper belt",
             "row": "upper",
             "source": "SPS Belts & Bulkheads 行绑定；厚度为公布名义值",
@@ -111304,6 +111306,7 @@
             ]
           },
           {
+            "group": "belts",
             "label": "Belt ends (tapered 102 mm)",
             "row": "ends",
             "source": "SPS Belts & Bulkheads 行绑定；艏艉各一，合并为 ends 行",
@@ -111314,6 +111317,7 @@
             ]
           },
           {
+            "group": "bulkheads",
             "label": "Bulkheads (102 mm)",
             "row": "torpedo_bulkhead",
             "source": "SPS Belts & Bulkheads 行绑定（案例原声明即前/后两道 102 mm 隔舱壁）",
@@ -111324,6 +111328,7 @@
             ]
           },
           {
+            "group": "deck",
             "label": "Armour deck",
             "row": "armour_deck",
             "source": "SPS Armour deck 行绑定；行厚度取其中较厚的 64 mm，25 mm 为下层甲板",
@@ -111334,6 +111339,7 @@
             ]
           },
           {
+            "group": "barbettes",
             "label": "Barbettes",
             "row": "barbette",
             "source": "SPS 炮座行绑定；四座炮座（A/B/Q/X）合并",
@@ -111346,6 +111352,7 @@
             ]
           },
           {
+            "group": "conning",
             "label": "Conning tower",
             "row": "conning_tower",
             "source": "SPS 司令塔行绑定；厚度为公布名义值（254 mm 前面）",
@@ -111396,6 +111403,11 @@
           "source": "Navypedia 75,000 hp；维基 75,000 shp（两源一致）",
           "value": 55927.49036867027
         },
+        "energy_source": {
+          "estimate": false,
+          "source": "Navypedia: 42 Yarrow boilers；维基 42 台锅炉",
+          "value": "coal-fired steam with oil spray assistance"
+        },
         "engine_built_year": {
           "estimate": null,
           "source": null,
@@ -111415,6 +111427,11 @@
           "estimate": false,
           "source": "Navypedia: No of shafts 4",
           "value": 4
+        },
+        "transmission": {
+          "estimate": false,
+          "source": "Navypedia: 4 Parsons steam turbines；维基同",
+          "value": "direct-drive turbine"
         },
         "trial_power_kw": {
           "estimate": false,
@@ -111442,6 +111459,15 @@
         "source": "Navypedia and inherited engines case",
         "unit": "shp",
         "value": 75000
+      },
+      "variable_load_groups": {
+        "estimate": true,
+        "group_ids": [
+          "fuel",
+          "water",
+          "other_loads"
+        ],
+        "source": "Selected loading ledger groups; fuel, working water and other variable stores are mutually exclusive ledger categories"
       },
       "weight_item_ids": [
         "boilers-uptakes",
@@ -111547,12 +111573,86 @@
             "source": "NavWeaps ammunition outfit and projectile/charge values (secondary compilation)"
           }
         ],
+        "page_rows": [
+          {
+            "row": "guns",
+            "source": "selected loading ledger: installed gun tubes",
+            "weight_item_ids": [
+              "main-guns"
+            ]
+          },
+          {
+            "row": "mounts",
+            "source": "selected loading ledger: complete mount, including any rotating armour",
+            "weight_item_ids": [
+              "main-mounts"
+            ]
+          },
+          {
+            "row": "ammunition",
+            "source": "selected loading ledger: complete ammunition outfit",
+            "weight_item_ids": [
+              "main-ammunition"
+            ]
+          }
+        ],
         "rounds_per_gun": 80,
         "weight_item_ids": [
           "main-guns",
           "main-mounts",
           "main-ammunition"
         ]
+      },
+      "misc_weight": {
+        "page_rows": [
+          {
+            "label": "Hull below water",
+            "row": "hull_below",
+            "source": "No positional miscellaneous-weight breakdown was located",
+            "typed": {
+              "mass_t": null
+            },
+            "weight_item_ids": []
+          },
+          {
+            "label": "Hull above water",
+            "row": "hull_above",
+            "source": "No positional miscellaneous-weight breakdown was located",
+            "typed": {
+              "mass_t": null
+            },
+            "weight_item_ids": []
+          },
+          {
+            "label": "On deck",
+            "row": "on_deck",
+            "source": "No positional miscellaneous-weight breakdown was located",
+            "typed": {
+              "mass_t": null
+            },
+            "weight_item_ids": []
+          },
+          {
+            "label": "Above deck",
+            "row": "above_deck",
+            "source": "No positional miscellaneous-weight breakdown was located",
+            "typed": {
+              "mass_t": null
+            },
+            "weight_item_ids": []
+          },
+          {
+            "label": "Void",
+            "row": "void",
+            "source": "No positional miscellaneous-weight breakdown was located",
+            "typed": {
+              "mass_t": null
+            },
+            "weight_item_ids": []
+          }
+        ],
+        "reason": "Positional miscellaneous-weight breakdown has no sourced ledger binding",
+        "status": "absent"
       },
       "secondary": {
         "broadside_guns": 8,
@@ -111645,6 +111745,29 @@
             "linked_weight_item_id": "secondary-ammunition",
             "method": "counted_ammunition_mass",
             "source": "Task 3 exact projectile and charge formula from cited ammunition references"
+          }
+        ],
+        "page_rows": [
+          {
+            "row": "guns",
+            "source": "selected loading ledger: installed gun tubes",
+            "weight_item_ids": [
+              "secondary-guns"
+            ]
+          },
+          {
+            "row": "mounts",
+            "source": "selected loading ledger: complete mount, including any rotating armour",
+            "weight_item_ids": [
+              "secondary-mounts"
+            ]
+          },
+          {
+            "row": "ammunition",
+            "source": "selected loading ledger: complete ammunition outfit",
+            "weight_item_ids": [
+              "secondary-ammunition"
+            ]
           }
         ],
         "rounds_per_gun": 150,

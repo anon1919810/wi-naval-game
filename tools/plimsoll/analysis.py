@@ -1,6 +1,7 @@
 """Coordinate reviewed kernels against one immutable selected loading."""
 import copy
 import json
+import math
 
 try:
     from . import _analysis_request as request_api
@@ -126,6 +127,10 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                 _finish(envelope, name, data, complete=data["complete"])
             elif name == "l0":
                 data = geometry_analysis.parameterized_hydrostatics(snapshot["hull"])
+                data["hull_ratios"] = dict(
+                    design_lwl_over_beam=snapshot["hull"]["lwl_m"] / snapshot["hull"]["beam_m"],
+                    numerator="hull.lwl_m", denominator="hull.beam_m",
+                    method="declared_design_dimensions_ratio_v1")
                 _finish(envelope, name, data, data["status"])
             elif name == "geometry":
                 if not isinstance(geometry, dict) or geometry.get("kind") != "offsets":
@@ -136,6 +141,9 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                 _finish(envelope, name, data, applicable=True)
             elif name == "equilibrium":
                 data = stability.solve_loaded_equilibrium(geometry, state, opts["equilibrium"])
+                if data["converged"] and "target_trim_deg" in opts["equilibrium"]:
+                    data["trim_target_study"] = stability.trim_target_study(
+                        geometry, data, opts["equilibrium"]["target_trim_deg"])
                 _finish(envelope, name, data, "completed" if data["converged"] else "failed")
             elif name == "hydrostatics":
                 equilibrium = stages["equilibrium"]["data"]
@@ -143,7 +151,30 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                 data = geometry_analysis.measures_at_plane(geometry, plane, rho_t_m3=rho)
                 km = data["values"]["km_t_m"]
                 data["values"]["gm_t_m"] = None if km is None else km - equilibrium["effective_loading"]["cg_keel_m"][2]
+                selected_length = data["values"].get("waterline_length_body_x_m")
+                selected_beam = data["values"].get("waterline_beam_body_y_m")
+                data["selected_length_beam_ratio"] = dict(
+                    value=selected_length / selected_beam if selected_length is not None
+                        and selected_beam is not None and selected_beam > 0 else None,
+                    numerator="selected_plane_waterline_length_body_x_m",
+                    denominator="selected_plane_waterline_beam_body_y_m",
+                    method="selected_plane_body_axis_dimensions_ratio_v1")
                 data["gm_definition"] = "upright geometric KM minus effective KG; unavailable for inclined/contact states"
+                coefficient = snapshot["hull"].get("roll_gyration_coeff")
+                source = (snapshot["hull"].get("sources") or {}).get("roll_gyration_coeff")
+                beam = data["values"].get("waterline_beam_body_y_m")
+                gm = data["values"]["gm_t_m"]
+                roll_available = (data["status"] == "completed" and
+                    all(isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+                        for value in (coefficient, beam, gm)) and bool(source) and
+                    abs(equilibrium.get("heel_deg", 0)) < 1e-8)
+                data["loaded_roll"] = dict(
+                    status="completed" if roll_available else "unavailable",
+                    period_s=2*math.pi*coefficient*beam/math.sqrt(9.80665*gm) if roll_available else None,
+                    selected_gm_m=gm, selected_beam_m=beam,
+                    gyration_coeff=coefficient, source=source,
+                    estimate=True, method="selected_loading_small_angle_roll_v1",
+                    reason=None if roll_available else "positive selected GM and an explicitly sourced gyration coefficient are required")
                 data["input_fingerprint"] = state["input_fingerprint"]
                 _finish(envelope, name, data, data["status"])
             elif name == "gz":

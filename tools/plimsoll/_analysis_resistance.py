@@ -39,6 +39,50 @@ def _unavailable(data, reason, path="$.options.resistance"):
     return data, "unavailable"
 
 
+def _fixed_power_study(data, project, state, options, stages):
+    """Bracket and bisect a declared shaft power on one selected QPC curve."""
+    request = options["resistance"]
+    target = request["fixed_shaft_power_kw"]
+    study = dict(status="unavailable", requested_shaft_power_kw=target,
+                 speed_kn=None, model_applicable=False, primary_result=False,
+                 method="bracketed_selected_plane_shaft_power_v1",
+                 reason="no complete monotone power bracket inside the supplied speed grid")
+    rows = data["power_rows"]
+    if len(rows) < 2 or any(row["shaft_power_kw"] is None for row in rows):
+        return study
+    if any(right["shaft_power_kw"] <= left["shaft_power_kw"]
+           for left, right in zip(rows, rows[1:])):
+        return study
+    pair = next(((left, right) for left, right in zip(rows, rows[1:])
+                 if left["shaft_power_kw"] <= target <= right["shaft_power_kw"]), None)
+    if pair is None:
+        return study
+    low, high = pair[0]["speed_kn"], pair[1]["speed_kn"]
+    applicable = pair[0]["primary_result"] and pair[1]["primary_result"]
+    for _ in range(16):
+        mid = (low + high) / 2
+        trial_options = copy.deepcopy(options)
+        trial_request = trial_options["resistance"]
+        trial_request["mode"] = "predict_power"
+        trial_request.pop("fixed_shaft_power_kw", None)
+        trial_request["speeds_kn"] = [mid]
+        trial, _ = compute(project, state, trial_options, stages)
+        trial_row = trial["power_rows"][0]
+        if trial_row["shaft_power_kw"] is None:
+            study["reason"] = "resistance method became unavailable inside the bracket"
+            return study
+        applicable = applicable and trial_row["primary_result"]
+        if trial_row["shaft_power_kw"] < target:
+            low = mid
+        else:
+            high = mid
+    study.update(status="completed" if applicable else "estimated_nonprimary",
+                 speed_kn=(low+high)/2, bracket_speeds_kn=[pair[0]["speed_kn"], pair[1]["speed_kn"]],
+                 model_applicable=bool(applicable), primary_result=bool(applicable),
+                 estimate=True, reason=None if applicable else "selected-plane proxy is non-primary")
+    return study
+
+
 def compute(project, state, options, stages):
     request = options["resistance"]
     scenario = copy.deepcopy(request.get("scenario") or next(s for s in project["resistance_scenarios"] if s["id"] == request["scenario_id"]))
@@ -112,7 +156,11 @@ def compute(project, state, options, stages):
             data["rows"].append(dict(speed_kn=row["speed_kn"], total_resistance_kn=row["rt_kN"],
                 effective_power_kw=row["pe_kw"], complete=row["complete"],
                 primary_result=row["complete"] and not proxy, model_applicable=row["complete"] and not proxy,
-                estimate=True, kernel_row=row))
+                estimate=True, kernel_row=row,
+                components=dict(friction_kn=row.get("rf_kN"), wave_kn=row.get("rr_kN"),
+                    wave_fraction_pct=100*row["rr_kN"]/row["rt_kN"]
+                        if row.get("rr_kN") is not None and row.get("rt_kN") else None,
+                    wave_definition="Taylor residual resistance; includes non-friction residual effects")))
     else:
         aft, fore = inputs.pop("x_aft_perpendicular_m"), inputs.pop("x_fore_perpendicular_m")
         if not math.isclose(fore-aft, length, rel_tol=1e-10, abs_tol=1e-10):
@@ -136,7 +184,11 @@ def compute(project, state, options, stages):
                 primary = native["applicability"]["primary_result"] and not proxy
                 data["rows"].append(dict(speed_kn=speed, total_resistance_kn=native["values"]["total_resistance_kn"],
                     effective_power_kw=native["values"]["effective_power_kw"], complete=native["scenario"]["complete"],
-                    primary_result=primary, model_applicable=primary, estimate=True, kernel=native))
+                    primary_result=primary, model_applicable=primary, estimate=True, kernel=native,
+                    components=dict(friction_kn=native["values"]["rf_kn"], wave_kn=native["values"]["rw_kn"],
+                        wave_fraction_pct=100*native["values"]["rw_kn"]/native["values"]["total_resistance_kn"]
+                            if native["values"]["total_resistance_kn"] else None,
+                        wave_definition="Holtrop RW term only; other resistance terms excluded")))
             except holtrop.HoltropError as error:
                 data["rows"].append(dict(speed_kn=speed, total_resistance_kn=None, effective_power_kw=None,
                     complete=False, primary_result=False, model_applicable=False, estimate=True, diagnostics=error.diagnostics))
@@ -150,6 +202,12 @@ def compute(project, state, options, stages):
                 formula="shaft_power_kw=effective_power_kw/qpc; shaft_power_shp=units.convert(kW,shp)"))
     complete = all(row["complete"] for row in data["rows"])
     data["primary_result"] = all(row["primary_result"] for row in data["rows"])
+    if request["mode"] == "fixed_power":
+        data["fixed_power_study"] = _fixed_power_study(data, project, state, options, stages)
+        if data["fixed_power_study"]["speed_kn"] is None:
+            data["diagnostics"].append(diagnostic("analysis.fixed_power_no_bracket",
+                data["fixed_power_study"]["reason"], "$.options.resistance", False))
+            complete = False
     data["validity"] = dict(complete=complete, numerical_convergence=None,
         model_applicable=data["primary_result"], historical_validated=None)
     return data, "completed" if complete else "model_limit"

@@ -180,7 +180,8 @@ class QueenMaryIntegrationTests(unittest.TestCase):
     def test_a_project_without_a_declaration_gains_no_invented_rows(self):
         stripped = json.loads(json.dumps(self.project))
         stripped["systems"]["armour"]["fixed"].pop("page_rows")
-        stripped["systems"]["weapons"]["torpedo"].pop("page_rows")
+        for leaf in stripped["systems"]["weapons"].values():
+            leaf.pop("page_rows", None)
         result = analysis.compute_project(
             stripped, "normal-engineering", {"stages": ["loading", "systems"]})
         self.assertNotIn("page_rows", result["stages"]["systems"]["data"])
@@ -264,7 +265,9 @@ class QueenMaryWeaponsTests(unittest.TestCase):
         result = analysis.compute_project(
             self.project, "normal-engineering", {"stages": ["loading", "systems"]})
         views = result["stages"]["systems"]["data"]["page_rows"]
-        self.assertEqual(sorted(views), ["armour.fixed", "weapons.torpedo"])
+        self.assertEqual(sorted(views), ["armour.fixed", "weapons.main",
+                                         "weapons.misc_weight", "weapons.secondary",
+                                         "weapons.torpedo"])
         self.assertTrue(views["armour.fixed"]["values"]["matches_ledger_mass"])
         self.assertTrue(views["weapons.torpedo"]["values"]["matches_ledger_mass"])
 

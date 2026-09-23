@@ -148,6 +148,10 @@ clamp. The coupled driver then resolves full equilibrium and reevaluates all
 heads. It halves and retries before accepting a head reversal, unsupported
 aperture state, unresolved liquid geometry, or failed equilibrium. Exhausting
 the explicit retry bound stops visibly and retains the last accepted state.
+For the coupled model, open-edge head differences at or below 1×10⁻⁸ m are
+treated as numerical hydraulic equilibrium. This prevents repeated halving
+around a physically negligible reversal. The result records the threshold and
+last maximum head difference; it does **not** claim the requested duration ran.
 
 The time method is bounded first-order explicit Euler. Refinement evidence is
 reported separately from exact arithmetic conservation; numerical ODE error
@@ -181,6 +185,7 @@ Statuses and stop reasons are distinct:
 | --- | --- |
 | `completed` / `scheduled_completion` | Requested duration reached |
 | `completed` / `equal_heads_or_no_open_flow` | Network reached zero active flow |
+| `completed` / `hydraulic_equilibrium_tolerance` | All active open-edge heads were within the declared 1×10⁻⁸ m numerical tolerance; accepted time may be shorter than requested duration |
 | `canceled` | Callback requested cancellation after the last accepted state |
 | `equilibrium_failure` | No acceptable Task 4 solution within bounded retries |
 | `model_limit` | Capacity, dry-out, partial aperture, timestep or step limit |

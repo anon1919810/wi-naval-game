@@ -34,7 +34,9 @@ limit is inferred from a single machine.
    from availability of a physically valid full curve.
 4. Flooding: the delivered `queen-mary-single-proxy` scenario with a clearly
    recorded performance-request duration of 10 seconds and step of 1 second,
-   plus the delivered generic two-connected scenario with its own fixture.
+   plus the delivered generic two-connected scenario shortened to 10 seconds
+   at 0.5 second steps. The full 60-second generic stress request is outside
+   the class-SPS core performance gate.
    Report scenario hash/source, initial volumes, requested and accepted duration,
    step count, retries, stop reason, conservation and equilibrium residuals.
    The shortened Queen Mary request measures a declared workload, not the
@@ -76,24 +78,32 @@ reported (never only the fastest).
 | per-case in-process, 18 runs (6 pairs × 3) | 24.5 s total | — | calculation only |
 | GZ curve 0–60° step 5° (13 angles) | 19.379 s | 20.429 s | calculation only |
 | flooding `queen-mary-single-proxy` requested 10 s / 1 s | 18.736 s | 19.874 s | calculation only |
+| generic two-connected, requested 10 s / 0.5 s (post-fix) | 4.035 s | 4.055 s | calculation only |
 
-**Not measured in this sample: the delivered generic two-connected flooding
-scenario (60 s at 0.5 s = 120 steps).** A one-off probe of that fixture measured
-0.37 s per step, so three samples are expected to need roughly 2 minutes; the run
-was interrupted before it reached that workload. This is a disclosed gap, not a
-passing result. Finish it with:
+The first six rows are pre-fix samples and remain representative, not an exact
+final-source benchmark. The short generic row was measured after the numerical
+hydraulic-equilibrium fix. The 60-second stress run was deliberately canceled;
+it is not counted as a passing performance sample. The final full regression
+contains 691 passing tests, including a bounded 60-second-request correctness
+check that exits at hydraulic equilibrium without claiming elapsed time.
+
+The original 60-second three-repeat generic stress measurement was stopped after
+nearly 50 minutes. A bounded diagnostic traced the cost to flow-reversal step
+halving near hydraulic equilibrium: at 20.33 s the two tanks held about 6 m³
+each, while the remaining head difference was about 3×10⁻¹⁰ m. The method now
+reports a separate tolerance-based hydraulic-equilibrium stop at a declared
+1×10⁻⁸ m head difference, preserving conservation and actual accepted duration.
+The class-SPS core benchmark uses 10 s for the generic fixture. Reproduce with:
 
 ```
 PYTHONPATH=tools python -B docs/plimsoll-1.0/evidence/core_performance_benchmark.py
 ```
 
-(the script now writes its JSON after **every** workload, so an interruption
-keeps everything measured so far; the earlier all-at-the-end write lost a
-2-hour run). Raw evidence: `evidence/core-performance-benchmark.json`; batch
+(the script writes its JSON after **every** workload, so an interruption
+keeps everything measured so far). Raw evidence: `evidence/core-performance-benchmark.json`; batch
 manifest and the first two batch summaries are kept under
 `evidence/_bench_tmp/kept/` (the per-case result files were removed as scratch —
 25 MB — and are reproducible from the manifest).
 
 Nothing here is a hardware-independent response-time limit, and unit-test
 elapsed time is not an application benchmark.
-

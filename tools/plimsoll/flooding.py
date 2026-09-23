@@ -19,9 +19,10 @@ except ImportError:  # Preserve direct-module imports used by repository tests.
 
 SCHEMA = 'plimsoll-flooding-result-1'
 SCENARIO_SCHEMA = 'plimsoll-flooding-scenario-1'
-METHOD_VERSION = 'connected-quasi-static-flooding-1'
+METHOD_VERSION = 'connected-quasi-static-flooding-2'
 DEFAULT_MAX_STEPS = 100000
 DEFAULT_MAX_STEP_HALVINGS = 40
+HYDRAULIC_HEAD_TOLERANCE_M = 1e-8
 
 
 class FloodingInputError(ValueError):
@@ -511,6 +512,13 @@ def _remaining_gz(geometry, loading_state, tanks, volumes, sea_density,
         geometry, loading_state, angles, openings=openings, options=options)
 
 
+def _maximum_active_head_difference(evaluation):
+    """Return the largest modeled open-orifice head difference, if any."""
+    differences = [abs(edge['from_head_m']-edge['to_head_m'])
+                   for edge in evaluation['edges'] if edge['status'] == 'flowing']
+    return max(differences) if differences else None
+
+
 def simulate_flooding(project, condition_id, scenario, options=None):
     """Simulate a connected vented flooding scenario with repeated equilibrium.
 
@@ -613,6 +621,7 @@ def simulate_flooding(project, condition_id, scenario, options=None):
 
     time_s = cumulative_sea = cumulative_sea_mass = 0.0
     steps = 0
+    terminal_head_difference = None
     while status == 'running':
         if cancel_check is not None:
             try:
@@ -626,6 +635,14 @@ def simulate_flooding(project, condition_id, scenario, options=None):
             if canceled:
                 status, stop_reason = 'canceled', 'canceled'
                 break
+        head_difference = _maximum_active_head_difference(evaluation)
+        if head_difference is not None and head_difference <= HYDRAULIC_HEAD_TOLERANCE_M:
+            terminal_head_difference = head_difference
+            status, stop_reason = 'completed', 'hydraulic_equilibrium_tolerance'
+            diagnostics.append(_diagnostic(
+                'flooding.hydraulic_equilibrium_tolerance', 'warning', '$.scenario.connections',
+                'Flow stopped within the declared numerical head tolerance; requested duration was not fully elapsed.'))
+            break
         if steps >= max_steps:
             diagnostics.append(_diagnostic(
                 'flooding.step_limit', 'error', '$.options.max_steps',
@@ -749,6 +766,8 @@ def simulate_flooding(project, condition_id, scenario, options=None):
         'scenario': copy.deepcopy(normalized_scenario),
         'openings_origin': openings_origin,
         'timeline': timeline, 'final_state': final_state,
+        'terminal_head_tolerance_m': HYDRAULIC_HEAD_TOLERANCE_M,
+        'terminal_max_head_difference_m': terminal_head_difference,
         'failed_attempt': failed_attempt,
         'downflooding': downflooding,
         'remaining_gz': remaining_gz, 'gz_snapshots': gz_snapshots,
