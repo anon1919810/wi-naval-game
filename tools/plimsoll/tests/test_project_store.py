@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -292,7 +293,8 @@ class TestProjectStore(unittest.TestCase):
                 )
                 completed = subprocess.run(
                     [sys.executable, "-B", "-c", script, str(search_path), module, str(self.path)],
-                    cwd=self.directory, capture_output=True, text=True, encoding="utf-8", check=False,
+                    cwd=self.directory, env=dict(os.environ, PYTHONIOENCODING="utf-8"),
+                    capture_output=True, text=True, encoding="utf-8", check=False,
                 )
                 self.assertEqual(completed.returncode, 0, completed.stderr)
                 self.assertEqual(json.loads(completed.stdout)["name"], "子进程")

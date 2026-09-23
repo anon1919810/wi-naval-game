@@ -164,6 +164,8 @@ unallocated displacement item is present.
 ### Historical validation gaps
 
 The following remain unresolved and prevent historical validation:
+Their impact on current outputs and the suggested order for gathering sources
+are recorded in the [Queen Mary input-readiness note](queen-mary-input-readiness.md).
 
 1. A builder or Admiralty weight return with category definitions and unit
    convention.

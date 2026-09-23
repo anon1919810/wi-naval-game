@@ -44,7 +44,7 @@ EVIDENCE = {
     "F1": ["analysis-api.md", "cli.md", "../../tools/plimsoll/tests/test_core_cli.py"],
     "F4": ["export-api.md", "../../tools/plimsoll/tests/test_exports.py"],
     "F6": ["package-api.md", "../../tools/plimsoll/tests/test_package_imports.py"],
-    "G1": ["../../tools/plimsoll/run_all_tests.py", "../../tools/plimsoll/tests/test_generic_ship.py", "../../tools/plimsoll/tests/test_analysis_cases.py", "evidence/core-final-regression.log", "evidence/deck-coverage-focused.log", "evidence/mount-armour-focused.log"],
+    "G1": ["../../tools/plimsoll/run_all_tests.py", "../../tools/plimsoll/tests/test_generic_ship.py", "../../tools/plimsoll/tests/test_analysis_cases.py", "evidence/core-full-regression-after-increments.log", "evidence/deck-coverage-focused.log", "evidence/mount-armour-focused.log"],
     "G2": ["resistance-benchmark-design.md", "geometry-analysis-validation.md", "evidence/task-4-numerical-evidence.json"],
     "G3": ["equilibrium-validation-design.md", "flooding-validation-design.md"],
     "G4": ["evidence/task-4-mutation-evidence.json", "evidence/task-4-numerical-evidence.json"],
@@ -67,7 +67,6 @@ LIMITS = {
     "E5": "Holtrop on selected trimmed proxies is marked nonprimary; only eligible upright method results can be primary.",
     "F4": "JSON/CSV only; HTML report is outside the current user scope.",
     "F6": "Python library/CLI offline; Windows installer and launcher are deferred.",
-    "G1": "The 691-test full regression predates both later increments; affected paths passed subsequent 97-test and 116-test focused runs.",
     "G5": "Core timings only; browser responsiveness and visual progress are later-phase obligations.",
     "G7": "Core docs and handoff only; no packaged release directory is claimed.",
 }
@@ -92,12 +91,12 @@ def main():
         row.update(status=status, evidence=paths,
                    limitations=[LIMITS[identity]] if identity in LIMITS else [])
     data["audit_status_counts"] = dict(sorted(Counter(row["status"] for row in rows).items()))
-    log = (DOCS / "evidence/core-final-regression.log").read_text(encoding="utf-8")
+    log = (DOCS / "evidence/core-full-regression-after-increments.log").read_text(encoding="utf-8")
     match = re.search(r"PLIMSOLL_REGRESSION run=(\d+) fail=(\d+)", log)
     if not match or int(match.group(2)) != 0:
         raise ValueError("final regression has no passing machine-readable summary")
     data["final_regression"] = {"run": int(match.group(1)), "fail": int(match.group(2)),
-                                "evidence": "evidence/core-final-regression.log"}
+                                "evidence": "evidence/core-full-regression-after-increments.log"}
     focused = (DOCS / "evidence/deck-coverage-focused.log").read_text(encoding="utf-8")
     focused_count = re.search(r"Ran (\d+) tests", focused)
     if not focused_count or "OK" not in focused or "FAILED" in focused:
@@ -114,7 +113,7 @@ def main():
                     "requirements do not constitute a full Plimsoll 1.0 release or SPS parity.")
     data["audit_note"] = ("Path evidence is attached per requirement. Historical input accuracy and full SPS "
                           "field parity are not claimed. The local commit is verified from Git history. "
-                          "The full regression precedes two bounded increments; focused runs follow each one.")
+                          "The full regression includes both bounded increments and the Windows UTF-8 test-harness fix.")
     INVENTORY.write_bytes((json.dumps(data, ensure_ascii=False, indent=2) + "\n").replace("\n", "\r\n").encode("utf-8"))
     print(json.dumps(data["audit_status_counts"], ensure_ascii=False))
 

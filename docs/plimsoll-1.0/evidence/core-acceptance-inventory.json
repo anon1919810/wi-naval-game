@@ -532,18 +532,16 @@
       "id": "G1",
       "section": "独立验证与发布收尾",
       "requirement": "保留并扩展现有测试。解析方箱、非方箱/通用测试船、Queen Mary 分别用于公式、通用性和完整案例验证。",
-      "status": "passed_with_limit",
+      "status": "passed",
       "evidence": [
         "../../tools/plimsoll/run_all_tests.py",
         "../../tools/plimsoll/tests/test_generic_ship.py",
         "../../tools/plimsoll/tests/test_analysis_cases.py",
-        "evidence/core-final-regression.log",
+        "evidence/core-full-regression-after-increments.log",
         "evidence/deck-coverage-focused.log",
         "evidence/mount-armour-focused.log"
       ],
-      "limitations": [
-        "The 691-test full regression predates both later increments; affected paths passed subsequent 97-test and 116-test focused runs."
-      ],
+      "limitations": [],
       "current_disposition": "required_for_core",
       "current_treatment": "按原要求验证本轮计算核心；不引入新界面或独立打包义务。"
     },
@@ -650,15 +648,15 @@
   "note": "Core-only acceptance audited below. Deferred application and presentation requirements do not constitute a full Plimsoll 1.0 release or SPS parity.",
   "audit_status_counts": {
     "deferred_by_user": 4,
-    "passed": 26,
+    "passed": 27,
     "passed_core_scope": 6,
-    "passed_with_limit": 9
+    "passed_with_limit": 8
   },
-  "audit_note": "Path evidence is attached per requirement. Historical input accuracy and full SPS field parity are not claimed. The local commit is verified from Git history. The full regression precedes two bounded increments; focused runs follow each one.",
+  "audit_note": "Path evidence is attached per requirement. Historical input accuracy and full SPS field parity are not claimed. The local commit is verified from Git history. The full regression includes both bounded increments and the Windows UTF-8 test-harness fix.",
   "final_regression": {
-    "run": 691,
+    "run": 700,
     "fail": 0,
-    "evidence": "evidence/core-final-regression.log"
+    "evidence": "evidence/core-full-regression-after-increments.log"
   },
   "subsequent_focused_regression": {
     "run": 97,
