@@ -39,3 +39,11 @@ desktop.ini
 
 # 临时日志（会话里的一次性校验输出）
 /_*.log
+
+# Plimsoll local web development
+/web/frontend/node_modules/
+/web/frontend/dist/
+/web/frontend/*.tsbuildinfo
+/web/backend/.venv/
+/web/**/.env
+/web/**/.env.*
