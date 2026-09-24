@@ -27,6 +27,8 @@ def page_rows_for(project, state, summary):
     for key, payload in declared.items():
         system, leaf = key.split(".", 1)
         views[key] = page_rows.project_declared_rows(state, summary, system, leaf, payload["page_rows"])
+        if system == "weapons":
+            views[key]["guns"] = page_rows.guns_rows(state, summary, system, leaf, payload)
         if system == "weapons" and any(row.get("row") == "mounts" for row in payload["page_rows"]):
             views[key]["rotating_armour_component"] = page_rows.rotating_armour_component(
                 state, payload.get("rotating_armour_component"), battery=leaf)

@@ -611,3 +611,130 @@ def freeboard_rows(deck):
         "values": values,
         "diagnostics": diagnostics,
     }
+
+
+def guns_rows(state, systems_result, system, leaf, payload):
+    """Project a weapon battery's declared inputs and its broadside shell weight.
+
+    Pure ``dict -> dict`` projection (freeboard/armour style). It never invents a
+    projectile mass and never derives one from the ledger: the single-shell mass
+    is read from the battery's ``counted_ammunition_mass`` model — the *same*
+    declared input that drives the ledger ammunition outfit, so the two can never
+    diverge. Adding a parallel ``facts`` entry would create a second, conflicting
+    source and is deliberately avoided.
+
+    Per battery it reports:
+
+      * ``installed_guns`` / ``broadside_guns`` / ``rounds_per_gun`` — declared counts.
+      * ``shell_mass_kg`` — the declared single projectile mass with its source/estimate.
+      * ``broadside_mass_kg`` = ``shell_mass_kg × broadside_guns`` — the weight fired
+        in one broadside; explicitly excludes charge and the ship-wide outfit.
+      * ``per_gun_shell_kg`` = ``rounds_per_gun × shell_mass_kg`` — shells only.
+      * ``ship_wide_ammunition_t`` — the selected-ledger ammunition outfit mass,
+        kept distinct from the broadside shell weight (never summed into it).
+      * ``ledger_mass_t`` — the whole battery's selected-ledger mass and its source.
+      * ``status`` / ``formula`` / ``diagnostics``.
+
+    Diagnostics (non-blocking, ``page_rows.*`` naming): a missing sourced single
+    projectile mass makes the broadside/per-gun weights unknown; a missing
+    broadside count or rounds count makes the respective weight unknown. The
+    rotating-armour split is reported separately by the existing
+    ``rotating_armour_component`` projection and is not recomputed here.
+    """
+    leaf_key = "%s.%s" % (system, leaf)
+    leaf_payload = (systems_result or {}).get("systems", {}).get(leaf_key)
+    if not isinstance(leaf_payload, dict):
+        raise ValueError("systems.%s is missing from the systems result" % leaf_key)
+
+    diagnostics: list[dict] = []
+    installed = leaf_payload.get("installed_count")
+    broadside = leaf_payload.get("broadside_count")
+    rounds = payload.get("rounds_per_gun") if isinstance(payload, dict) else None
+
+    # Single-shell mass: the one declared in the counted_ammunition_mass model.
+    ammo_models = [m for m in (leaf_payload.get("mass_models") or [])
+                   if isinstance(m, dict) and m.get("method") == "counted_ammunition_mass"]
+    if len(ammo_models) == 1:
+        ammo = ammo_models[0]
+        projectile = (ammo.get("inputs") or {}).get("projectile_mass_kg")
+        provenance = (ammo.get("input_provenance") or {}).get("projectile_mass_kg") or {}
+        shell_source = provenance.get("source") if isinstance(provenance, dict) else None
+        shell_estimate = provenance.get("estimate") if isinstance(provenance, dict) else None
+    else:
+        projectile, shell_source, shell_estimate = None, None, None
+
+    p_valid = (isinstance(projectile, (int, float)) and not isinstance(projectile, bool)
+               and math.isfinite(projectile) and projectile >= 0 and isinstance(shell_source, str)
+               and bool(shell_source.strip()))
+    b_valid = isinstance(broadside, int) and broadside >= 0
+    r_valid = isinstance(rounds, int) and rounds >= 0
+
+    broadside_mass_kg = broadside * projectile if (p_valid and b_valid) else None
+    broadside_mass_lb = broadside_mass_kg / 0.45359237 if broadside_mass_kg is not None else None
+    per_gun_shell_kg = rounds * projectile if (p_valid and r_valid) else None
+
+    # Ship-wide ammunition outfit: the selected-ledger mass of the ammunition row,
+    # kept distinct from the broadside shell weight (never summed into it).
+    ship_wide_t = None
+    ship_wide_source = None
+    ammo_row = next((r for r in (payload.get("page_rows") or [])
+                     if isinstance(r, dict) and r.get("row") == "ammunition"), None)
+    ammo_ids = (ammo_row.get("weight_item_ids") or []) if isinstance(ammo_row, dict) else []
+    for item in (leaf_payload.get("linked_items") or []):
+        if isinstance(item, dict) and item.get("id") in ammo_ids:
+            ship_wide_t = item.get("mass_t") if item.get("mass_t") is not None else None
+            prov = item.get("provenance") or {}
+            ship_wide_source = prov.get("source") if isinstance(prov, dict) else None
+            break
+
+    ledger_mass_t = leaf_payload.get("ledger_mass_t")
+    ledger_source = leaf_payload.get("source")
+
+    if not p_valid:
+        diagnostics.append(_diagnostic(
+            "page_rows.guns_shell_mass_unknown",
+            "a single sourced projectile mass is required for broadside and per-gun shell weight",
+            "$.systems.%s" % leaf_key, False))
+    if not b_valid:
+        diagnostics.append(_diagnostic(
+            "page_rows.guns_broadside_count_unknown",
+            "a declared broadside gun count is required for the broadside shell weight",
+            "$.systems.%s" % leaf_key, False))
+    if not r_valid:
+        diagnostics.append(_diagnostic(
+            "page_rows.guns_rounds_unknown",
+            "a declared rounds_per_gun is required for the per-gun carried shell weight",
+            "$.systems.%s" % leaf_key, False))
+    if ammo_row is not None and ship_wide_t is None:
+        diagnostics.append(_diagnostic(
+            "page_rows.guns_ammunition_unknown",
+            "the ammunition outfit ledger mass is unknown",
+            "$.systems.%s" % leaf_key, False))
+
+    status = "completed" if (p_valid and b_valid) else "unavailable"
+    return {
+        "schema": SCHEMA,
+        "method": "declared_weapon_battery_inputs_v1",
+        "battery": leaf,
+        "installed_guns": installed if isinstance(installed, int) else None,
+        "broadside_guns": broadside if isinstance(broadside, int) else None,
+        "rounds_per_gun": rounds if isinstance(rounds, int) else None,
+        "shell_mass_kg": {
+            "value": projectile if p_valid else None,
+            "source": shell_source if p_valid else None,
+            "estimate": bool(shell_estimate) if isinstance(shell_estimate, bool) else None,
+            "status": "declared" if p_valid else "unknown_no_sourced_projectile_mass",
+        },
+        "broadside_mass_kg": broadside_mass_kg,
+        "broadside_mass_lb": broadside_mass_lb,
+        "per_gun_shell_kg": per_gun_shell_kg,
+        "ship_wide_ammunition_t": ship_wide_t,
+        "ship_wide_ammunition_source": ship_wide_source,
+        "ledger_mass_t": ledger_mass_t,
+        "ledger_source": ledger_source,
+        "status": status,
+        "formula": ("broadside_mass_kg = shell_mass_kg × broadside_guns; "
+                    "per_gun_shell_kg = rounds_per_gun × shell_mass_kg; "
+                    "both exclude charge and the ship-wide ammunition outfit"),
+        "diagnostics": diagnostics,
+    }
