@@ -738,3 +738,46 @@ def guns_rows(state, systems_result, system, leaf, payload):
                     "both exclude charge and the ship-wide ammunition outfit"),
         "diagnostics": diagnostics,
     }
+
+
+def weapons_rows(state, systems_result, leaf, payload):
+    """Weapon-leaf page rows for torpedo, mines, depth charges and misc zones.
+
+    Reuses the generic declared-row projector for the mechanical ledger binding,
+    then layers a weapons-specific summary and an honest, non-blocking diagnostic
+    for the positional miscellaneous zones that have no sourced ledger mass: they
+    stay unknown and are NEVER reverse-inferred from displacement or any other
+    total. This guards the SPS seven-page discipline that misc-zone mass must not
+    be back-filled from displacement.
+
+    A positional-misc row is a row that binds no ledger item and whose only
+    declared quantity is a ``mass_t`` fact (the five QM zones). A count-only row
+    (torpedo_secondary / mines / depth_charges) binds no item and declares only a
+    count, so it carries no mass and must not enter any mass total.
+    """
+    base = project_declared_rows(state, systems_result, "weapons", leaf, payload.get("page_rows") or [])
+    rows = base.get("rows") or []
+    misc_rows = [r for r in rows
+                 if r.get("item_ids") in ([], None)
+                 and isinstance(r.get("typed"), dict)
+                 and "mass_t" in (r.get("typed") or {})]
+    declared_misc = [r for r in misc_rows
+                     if (r.get("typed") or {}).get("mass_t") is not None]
+    if misc_rows and len(declared_misc) < len(misc_rows):
+        base["diagnostics"].append(_diagnostic(
+            "page_rows.weapons_misc_zone_unknown",
+            "positional miscellaneous zones without a declared mass_t stay unknown; "
+            "they are not reverse-inferred from displacement or any other total",
+            "$.systems.weapons.%s.page_rows" % leaf, False))
+    misc_ids = {id(r) for r in misc_rows}
+    count_only = [r for r in rows
+                  if r.get("item_ids") in ([], None) and id(r) not in misc_ids]
+    base["weapons"] = {
+        "leaf": leaf,
+        "row_count": len(rows),
+        "ledger_bound_row_count": sum(1 for r in rows if r.get("weight_t") is not None),
+        "count_only_row_count": len(count_only),
+        "misc_zone_mass_declared_count": len(declared_misc),
+        "misc_zone_mass_unknown_count": len(misc_rows) - len(declared_misc),
+    }
+    return base

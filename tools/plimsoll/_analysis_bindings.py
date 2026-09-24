@@ -26,9 +26,14 @@ def page_rows_for(project, state, summary):
     views = {}
     for key, payload in declared.items():
         system, leaf = key.split(".", 1)
-        views[key] = page_rows.project_declared_rows(state, summary, system, leaf, payload["page_rows"])
         if system == "weapons":
+            # weapons leaves reuse the generic declared-row projector (exposed as
+            # the row payload) and additionally get a guns view and a weapons
+            # summary that reports misc-zone unknowns without reverse inference.
+            views[key] = page_rows.weapons_rows(state, summary, leaf, payload)
             views[key]["guns"] = page_rows.guns_rows(state, summary, system, leaf, payload)
+        else:
+            views[key] = page_rows.project_declared_rows(state, summary, system, leaf, payload["page_rows"])
         if system == "weapons" and any(row.get("row") == "mounts" for row in payload["page_rows"]):
             views[key]["rotating_armour_component"] = page_rows.rotating_armour_component(
                 state, payload.get("rotating_armour_component"), battery=leaf)
