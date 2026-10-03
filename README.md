@@ -6,7 +6,7 @@
 
 Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md) · [2026-09-23 类 SPS 核心交接](docs/plimsoll-1.0/交接_类SPS计算核心_2026-09-23.md) · [Queen Mary 输入资料准备度](docs/plimsoll-1.0/queen-mary-input-readiness.md) · [原 2026-09-22 报告](docs/plimsoll-1.0/项目报告_Plimsoll计算核心_2026-09-22.md)。
 
-网站：[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md) · [产品与视觉规格](docs/superpowers/specs/2026-09-23-plimsoll-web-design.md) · [浅色工作台概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench.png) · [深色概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench-dark.png)。
+网站：[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md) · [六页输入表单交接](docs/plimsoll-1.0/forms-handoff-2026-10-03.md) · [产品与视觉规格](docs/superpowers/specs/2026-09-23-plimsoll-web-design.md) · [浅色工作台概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench.png) · [深色概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench-dark.png)。
 
 当前**玩法运行时**模型为 v4：`Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` 由 `queen_mary_v4/QueenMary_v4_Gameplay.fbx` 构建（`unity/Editor/ShipRuntimeBuilder.cs:190-203`，找不到 v4 时才回退到契约里的 v3 FBX）。v3 灰盒（`queen_mary_v3/queen_mary.py`，101 对象、85 网格、31,164 三角形）保留为历史资产与**契约数据来源**——碰撞代理、14 个舱室、LOD 剖面等仍从 `queen_mary_v3/` 读取。
 
