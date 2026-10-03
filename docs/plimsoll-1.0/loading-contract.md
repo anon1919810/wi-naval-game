@@ -68,3 +68,18 @@ overlap prevents the affected full CG interval from being certified.
 An override clears any inherited interval for the overridden field and emits
 `loading.uncertainty_override_cleared`; the base interval describes the base
 value and is not silently widened or reused as override-specific evidence.
+
+## Explicit Standard and Light studies
+
+An optional `loading_conditions[].definition` declares `kind` (`standard` or
+`light`), `base_condition_id`, `excluded_item_ids`, a nonempty `source`, and
+boolean `estimate`. The base must be another existing non-derived condition;
+chaining and simultaneous overrides/override provenance are rejected. Exclusions
+are unique existing ledger item IDs. An explicit empty list means no removal.
+
+Resolution deep-copies the base condition's overrides and provenance, then sets
+only the named items' selected mass to zero with rule provenance. Neither base
+ledger items nor the base condition change. Position and unrelated overrides
+remain inherited; the usual zero-mass and uncertainty rules still apply. The
+result includes `definition.method = explicit_base_loading_item_exclusion_v1`.
+These are user-defined subtraction studies, not automatic SPS category rules.

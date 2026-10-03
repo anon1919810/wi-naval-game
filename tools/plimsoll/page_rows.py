@@ -412,6 +412,22 @@ def minimum_main_belt(project, declaration):
     return result
 
 
+def _known_source(value):
+    """Return the source when it declares real provenance, else None.
+
+    The contract accepts a source string, a structured object, or null
+    (``project_extensions._metadata``), which treats every nonempty object as
+    valid provenance and its contents as opaque. This mirrors that rule exactly:
+    only a blank string, an empty object or a missing/other value is unknown, so
+    a nested provenance document is never misreported as unsourced.
+    """
+    if isinstance(value, str):
+        return value if value.strip() else None
+    if isinstance(value, dict):
+        return value if value else None
+    return None
+
+
 def _point_freeboard(point):
     """Return (value, source, estimate) of a deck point's declared freeboard fact.
 
@@ -626,7 +642,11 @@ def guns_rows(state, systems_result, system, leaf, payload):
     Per battery it reports:
 
       * ``installed_guns`` / ``broadside_guns`` / ``rounds_per_gun`` — declared counts.
-      * ``shell_mass_kg`` — the declared single projectile mass with its source/estimate.
+      * ``shell_mass_kg`` — the single projectile mass with its source/estimate, taken from the
+        battery's ``counted_ammunition_mass`` model when one exists (the same declared input that
+        drives the ledger outfit) and otherwise from the optional ``facts.projectile_mass_kg``
+        declaration. The fact is a **reporting** input: without an ammunition model the ship-wide
+        outfit, charge and magazine stay unknown, and nothing is added to ledger mass.
       * ``broadside_mass_kg`` = ``shell_mass_kg × broadside_guns`` — the weight fired
         in one broadside; explicitly excludes charge and the ship-wide outfit.
       * ``per_gun_shell_kg`` = ``rounds_per_gun × shell_mass_kg`` — shells only.
@@ -651,21 +671,44 @@ def guns_rows(state, systems_result, system, leaf, payload):
     broadside = leaf_payload.get("broadside_count")
     rounds = payload.get("rounds_per_gun") if isinstance(payload, dict) else None
 
-    # Single-shell mass: the one declared in the counted_ammunition_mass model.
+    # Single-shell mass authority, in strict order:
+    #   1. the counted_ammunition_mass model — the declared input that also drives
+    #      the ledger ammunition outfit, so the two can never diverge;
+    #   2. otherwise the optional `facts.projectile_mass_kg` declaration, used for
+    #      broadside/per-gun *reporting* only.
+    # A declared fact never becomes ledger mass: without an ammunition model the
+    # ship-wide outfit, charge and magazine all stay unknown.
     ammo_models = [m for m in (leaf_payload.get("mass_models") or [])
                    if isinstance(m, dict) and m.get("method") == "counted_ammunition_mass"]
+    declared_fact = (payload.get("facts") or {}).get("projectile_mass_kg") \
+        if isinstance(payload, dict) else None
+    fact_source = _known_source(declared_fact.get("source")) if isinstance(declared_fact, dict) else None
+    fact_valid = (isinstance(declared_fact, dict)
+                  and isinstance(declared_fact.get("value"), (int, float))
+                  and not isinstance(declared_fact.get("value"), bool)
+                  and math.isfinite(declared_fact["value"]) and declared_fact["value"] >= 0
+                  and fact_source is not None
+                  and isinstance(declared_fact.get("estimate"), bool))
     if len(ammo_models) == 1:
         ammo = ammo_models[0]
         projectile = (ammo.get("inputs") or {}).get("projectile_mass_kg")
         provenance = (ammo.get("input_provenance") or {}).get("projectile_mass_kg") or {}
-        shell_source = provenance.get("source") if isinstance(provenance, dict) else None
+        shell_source = _known_source(provenance.get("source")) if isinstance(provenance, dict) else None
         shell_estimate = provenance.get("estimate") if isinstance(provenance, dict) else None
+        shell_origin = "counted_ammunition_mass_model"
+    elif not ammo_models and fact_valid:
+        # Fallback applies only to a battery with NO ammunition model: the model
+        # remains the sole authority wherever it is declared.
+        projectile = declared_fact["value"]
+        shell_source = fact_source
+        shell_estimate = declared_fact["estimate"]
+        shell_origin = "declared_projectile_mass_kg_fact"
     else:
         projectile, shell_source, shell_estimate = None, None, None
+        shell_origin = None
 
     p_valid = (isinstance(projectile, (int, float)) and not isinstance(projectile, bool)
-               and math.isfinite(projectile) and projectile >= 0 and isinstance(shell_source, str)
-               and bool(shell_source.strip()))
+               and math.isfinite(projectile) and projectile >= 0 and shell_source is not None)
     b_valid = isinstance(broadside, int) and broadside >= 0
     r_valid = isinstance(rounds, int) and rounds >= 0
 
@@ -724,6 +767,16 @@ def guns_rows(state, systems_result, system, leaf, payload):
             "source": shell_source if p_valid else None,
             "estimate": bool(shell_estimate) if isinstance(shell_estimate, bool) else None,
             "status": "declared" if p_valid else "unknown_no_sourced_projectile_mass",
+            "origin": shell_origin,
+            "mass_authority": ("counted_ammunition_mass model" if shell_origin == "counted_ammunition_mass_model"
+                               else "declared reporting fact; not a ledger mass model" if shell_origin
+                               else None),
+        },
+        "declared_projectile_mass_kg": {
+            "value": declared_fact.get("value") if fact_valid else None,
+            "source": declared_fact.get("source") if fact_valid else None,
+            "estimate": declared_fact.get("estimate") if fact_valid else None,
+            "status": "declared" if fact_valid else "absent_or_incomplete",
         },
         "broadside_mass_kg": broadside_mass_kg,
         "broadside_mass_lb": broadside_mass_lb,
@@ -736,6 +789,9 @@ def guns_rows(state, systems_result, system, leaf, payload):
         "formula": ("broadside_mass_kg = shell_mass_kg × broadside_guns; "
                     "per_gun_shell_kg = rounds_per_gun × shell_mass_kg; "
                     "both exclude charge and the ship-wide ammunition outfit"),
+        "shell_mass_boundary": ("the counted_ammunition_mass model drives both the ledger ammunition "
+                                "outfit and this projection; a declared projectile fact is reporting "
+                                "only and never adds ledger mass, charge or magazine"),
         "diagnostics": diagnostics,
     }
 

@@ -6,6 +6,8 @@ import math
 
 METADATA_FIELDS = {"country": "text", "type": "text", "design_year": "integer",
                    "laid_down_year": "integer", "engine_built_year": "integer"}
+HULL_DESIGN_FIELDS = {"block_coeff_deep": "positive", "reference_displacement_normal_t": "nonnegative",
+                      "reference_displacement_deep_t": "nonnegative"}
 PROPULSION_FIELDS = {"shafts": "count", "boilers": "count", "design_power_kw": "positive",
     "trial_power_kw": "positive", "max_speed_kn": "positive", "cruise_speed_kn": "positive",
     "engine_description": "text", "boiler_description": "text", "engine_built_year": "integer",
@@ -171,6 +173,18 @@ def _page_rows(value, item_ids, path, diagnostics):
             _diag(diagnostics, p + ".weight_item_ids", "an item may belong to only one row in a leaf")
         else:
             seen_items.update(ids)
+        if "thickness_mm" in row:
+            _value(row["thickness_mm"], "nonnegative", p + ".thickness_mm", diagnostics)
+        extents = row.get("extents_m")
+        if extents is not None and _object(extents, p + ".extents_m", diagnostics):
+            _keys(extents, {"aft_m", "fore_m"}, p + ".extents_m", diagnostics)
+            for key in ("aft_m", "fore_m"):
+                _value(extents.get(key), "signed", p + ".extents_m." + key, diagnostics)
+            aft, fore = extents.get("aft_m"), extents.get("fore_m")
+            if (all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                    and math.isfinite(v) for v in (aft, fore)) and fore <= aft):
+                _diag(diagnostics, p + ".extents_m", "fore endpoint must be greater than aft endpoint")
+        _metadata(row, p, diagnostics)
         typed = row.get("typed")
         if typed is not None:
             if not _object(typed, p + ".typed", diagnostics):
@@ -455,11 +469,48 @@ def validate_acceptance(record, condition_id, field, nominal, path):
     return diagnostics
 
 
+def _condition_definitions(project, item_ids, diagnostics):
+    conditions = project.get("loading_conditions")
+    if not isinstance(conditions, list):
+        return
+    by_id = {c.get("id"): c for c in conditions if isinstance(c, dict) and isinstance(c.get("id"), str)}
+    for index, condition in enumerate(conditions):
+        if not isinstance(condition, dict) or "definition" not in condition:
+            continue
+        definition = condition["definition"]
+        path = f"$.loading_conditions[{index}].definition"
+        if not _object(definition, path, diagnostics):
+            continue
+        _keys(definition, {"kind", "base_condition_id", "excluded_item_ids", "source", "estimate"}, path, diagnostics)
+        if definition.get("kind") not in ("standard", "light"):
+            _diag(diagnostics, path + ".kind", "must explicitly declare standard or light study")
+        base_id = definition.get("base_condition_id")
+        base = by_id.get(base_id) if isinstance(base_id, str) else None
+        if base is None or base is condition or "definition" in base:
+            _diag(diagnostics, path + ".base_condition_id", "must name another non-derived loading condition; chaining is not supported")
+        ids = definition.get("excluded_item_ids")
+        if (not isinstance(ids, list) or any(not isinstance(i, str) or i not in item_ids for i in ids)
+                or len(set(ids)) != len(ids)):
+            _diag(diagnostics, path + ".excluded_item_ids", "must explicitly list unique existing ledger items; an empty list means no deduction")
+        if condition.get("overrides") or condition.get("override_provenance"):
+            _diag(diagnostics, path, "a subtraction definition cannot also supply overrides or override provenance")
+        _metadata(definition, path, diagnostics, required=True)
+
+
 def validate_extensions(project, item_ids):
     """Return all optional-field diagnostics; never mutate or calculate the project."""
     diagnostics = []
     if "metadata" in project:
         _facts(project["metadata"], METADATA_FIELDS, "$.metadata", diagnostics)
+    hull = project.get("hull")
+    if isinstance(hull, dict) and "design_facts" in hull:
+        _facts(hull["design_facts"], HULL_DESIGN_FIELDS, "$.hull.design_facts", diagnostics)
+        supplied = hull["design_facts"]
+        coefficient = supplied.get("block_coeff_deep", {}) if isinstance(supplied, dict) else {}
+        value = coefficient.get("value") if isinstance(coefficient, dict) else None
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 1:
+            _diag(diagnostics, "$.hull.design_facts.block_coeff_deep.value", "block coefficient must not exceed one")
+    _condition_definitions(project, item_ids, diagnostics)
     if "display_preferences" in project:
         prefs = project["display_preferences"]
         if _object(prefs, "$.display_preferences", diagnostics):

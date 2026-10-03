@@ -367,6 +367,18 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
     if condition is None:
         raise LoadingConditionError(condition_id)
     condition_index = normalized["loading_conditions"].index(condition)
+    definition = condition.get("definition")
+    if definition is not None:
+        # A validated one-level rule inherits the selected base's overrides,
+        # then removes only the explicitly named items. No category is guessed.
+        base = next(c for c in normalized["loading_conditions"] if c["id"] == definition["base_condition_id"])
+        condition = copy.deepcopy(condition)
+        condition["overrides"] = copy.deepcopy(base["overrides"])
+        condition["override_provenance"] = copy.deepcopy(base.get("override_provenance", {}))
+        for item_id in definition["excluded_item_ids"]:
+            condition["overrides"].setdefault(item_id, {})["mass_t"] = 0.0
+            condition["override_provenance"].setdefault(item_id, {})["mass_t"] = {
+                "source": copy.deepcopy(definition["source"]), "estimate": definition["estimate"]}
 
     diagnostics = copy.deepcopy(project_io.validate_project(normalized))
     effective_items = []
@@ -522,7 +534,7 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
     )
     diagnostics.extend(uncertainty_diagnostics)
     project_fingerprint = project_io.input_fingerprint(normalized)
-    return {
+    result = {
         "schema": SCHEMA,
         "project_id": normalized["id"],
         "condition_id": condition_id,
@@ -543,3 +555,7 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
         and all(axis_complete.values()),
         "diagnostics": diagnostics,
     }
+    if definition is not None:
+        result["definition"] = dict(copy.deepcopy(definition), method="explicit_base_loading_item_exclusion_v1",
+                                    boundary="user-defined subtraction study; no automatic SPS category deductions")
+    return result

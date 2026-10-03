@@ -50,6 +50,38 @@ class MinimumBeltStudyTests(unittest.TestCase):
         self.assertIsNone(study["length_m"])
         self.assertAlmostEqual(study["declared_span_m"], 131.75, places=8)
 
+    def test_belt_study_is_projected_without_any_armour_page_rows(self):
+        """The study depends on compartment geometry, not on armour rows."""
+        project = self._project(True)
+        del project["systems"]["armour"]["fixed"]["page_rows"]
+        result = analysis.compute_project(project, "normal-engineering",
+                                          {"stages": ["loading", "systems"]})
+        data = result["stages"]["systems"]["data"]
+        self.assertEqual(result["stages"]["systems"]["status"], "completed")
+        # Available at the documented independent path...
+        study = data["minimum_main_belt"]
+        self.assertEqual(study["status"], "completed")
+        self.assertAlmostEqual(study["length_m"], 143.75, places=8)
+        # ...and not hidden behind a page-row view that does not exist.
+        self.assertNotIn("armour.fixed", data.get("page_rows") or {})
+
+    def test_belt_study_paths_agree_when_page_rows_exist(self):
+        data = analysis.compute_project(self._project(True), "normal-engineering",
+                                        {"stages": ["loading", "systems"]})["stages"]["systems"]["data"]
+        self.assertEqual(data["minimum_main_belt"]["length_m"],
+                         data["page_rows"]["armour.fixed"]["minimum_main_belt"]["length_m"])
+
+    def test_absent_study_reports_its_reason_in_both_paths(self):
+        project = self._project(True)
+        del project["systems"]["armour"]["fixed"]["minimum_main_belt"]
+        data = analysis.compute_project(project, "normal-engineering",
+                                        {"stages": ["loading", "systems"]})["stages"]["systems"]["data"]
+        for study in (data["minimum_main_belt"],
+                      data["page_rows"]["armour.fixed"]["minimum_main_belt"]):
+            self.assertEqual(study["status"], "unavailable")
+            self.assertIsNone(study["length_m"])
+            self.assertEqual(study["reason"], "no protected-compartment study declared")
+
     def test_unknown_compartment_is_rejected_before_calculation(self):
         project = self._project(True)
         project["systems"]["armour"]["fixed"]["minimum_main_belt"]["protected_compartment_ids"] = ["ghost"]

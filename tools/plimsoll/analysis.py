@@ -127,6 +127,10 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                 _finish(envelope, name, data, complete=data["complete"])
             elif name == "l0":
                 data = geometry_analysis.parameterized_hydrostatics(snapshot["hull"])
+                data["declared_hull"] = dict(metadata=copy.deepcopy(snapshot.get("metadata", {})),
+                    design_facts=copy.deepcopy(snapshot["hull"].get("design_facts", {})),
+                    display_preferences=copy.deepcopy(snapshot.get("display_preferences", {})),
+                    boundary="optional design declarations; reference displacement is not selected ledger mass; deep Cb is not inferred geometry")
                 data["hull_ratios"] = dict(
                     design_lwl_over_beam=snapshot["hull"]["lwl_m"] / snapshot["hull"]["beam_m"],
                     numerator="hull.lwl_m", denominator="hull.beam_m",

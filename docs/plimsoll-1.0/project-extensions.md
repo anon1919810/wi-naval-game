@@ -176,3 +176,22 @@ request/options, compare its binding, and recompute the actual systems proposal
 and source from the current project before changing a selected-condition mass.
 Comparing two echoed client hashes is insufficient. Schema validation does not
 implement the application operation or rewrite any base/other-condition item.
+
+## Optional design declarations and loading definitions
+
+`hull.design_facts` accepts sourced `{value, source, estimate}` declarations for
+`block_coeff_deep` (known value in `(0, 1]`),
+`reference_displacement_normal_t` and `reference_displacement_deep_t` (known
+values nonnegative). Null or missing values remain unknown. The L0 adapter
+echoes them with metadata and display preferences under `declared_hull`; they
+never replace selected ledger mass, flotation geometry or resistance inputs.
+
+The optional Standard/Light `loading_conditions[].definition` is described in
+[loading-contract.md](loading-contract.md#explicit-standard-and-light-studies).
+It requires an explicit base, exclusion list, source and boolean estimate.
+Existing projects without these fields retain their previous semantics.
+
+Page row thickness is nonnegative; finite signed longitudinal extents require
+`fore_m > aft_m` when both endpoints are known. Row provenance retains the
+existing three-state estimate contract. Empty declarations omit `page_rows`
+rather than writing an invalid empty array.

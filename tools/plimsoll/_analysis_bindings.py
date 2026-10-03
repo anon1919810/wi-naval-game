@@ -40,11 +40,33 @@ def page_rows_for(project, state, summary):
         if key == "armour.fixed":
             views[key]["minimum_main_belt"] = page_rows.minimum_main_belt(
                 project, (project["systems"]["armour"]["fixed"] or {}).get("minimum_main_belt"))
+    # A gun battery may declare the reporting-only projectile fact without any
+    # page rows (a battery still being built). Give it a guns view so the
+    # declared shell mass is visible; no rows are invented for it.
+    for system, sections in (project.get("systems") or {}).items():
+        if system != "weapons" or not isinstance(sections, dict):
+            continue
+        for leaf, payload in sections.items():
+            key = "%s.%s" % (system, leaf)
+            if key in views or not isinstance(payload, dict):
+                continue
+            if "projectile_mass_kg" not in (payload.get("facts") or {}):
+                continue
+            views[key] = {"guns": page_rows.guns_rows(state, summary, system, leaf, payload)}
     result = copy.deepcopy(summary)
     if views:
         result["page_rows"] = views
     fixed = ((project.get("systems") or {}).get("armour") or {}).get("fixed") or {}
     result["deck_coverage"] = page_rows.deck_coverage(fixed.get("deck_coverage"))
+    # The belt study is derived from the declared compartment geometry, not from
+    # armour page rows, so it is projected independently of the page-row loop and
+    # remains available for a project that declares the study without any rows.
+    # The same payload is also mirrored into the armour.fixed page-row view when
+    # that view exists, so both documented paths carry one consistent result.
+    belt = page_rows.minimum_main_belt(project, fixed.get("minimum_main_belt"))
+    result["minimum_main_belt"] = belt
+    if "armour.fixed" in views:
+        views["armour.fixed"]["minimum_main_belt"] = belt
     return result
 
 

@@ -98,3 +98,23 @@ Armour-deck coverage is another separate adapter under
 plan area by explicitly sourced reference plan area. Plate surface area and
 ledger mass are not substitutes, and Queen Mary retains an unknown result until
 both plan areas are supplied.
+
+## Gun reporting fact fallback
+
+An existing `counted_ammunition_mass` model remains the authority for single
+projectile mass. Multiple models are ambiguous; an optional fact does not
+override that ambiguity. Only when no such model is declared may
+`systems.weapons.<battery>.facts.projectile_mass_kg` supply a sourced nonnegative
+projectile mass for report-only broadside and per-gun shell weight. The source
+may be a nonempty string or a nonempty opaque source object.
+
+This fallback creates no ammunition model, charge mass, ledger mass or whole
+ship ammunition inventory. A fact-bearing battery receives a guns projection
+even without page rows. An unknown count is omitted, not written as zero;
+known zero retains its ordinary meaning. Derived shell figures inherit the
+projectile fact's estimate status.
+
+The independent minimum-belt result is always available at
+`stages.systems.data.minimum_main_belt`, including projects without Armour
+page rows; when that page view exists the same result is mirrored under
+`page_rows["armour.fixed"].minimum_main_belt` for compatibility.

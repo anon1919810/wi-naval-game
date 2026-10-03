@@ -23,7 +23,7 @@ TOOLS = Path(__file__).resolve().parents[2]
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
-from plimsoll import analysis, loading, project_store  # noqa: E402
+from plimsoll import analysis, loading, project_io, project_store  # noqa: E402
 
 
 QM = Path(__file__).resolve().parents[1] / "cases/projects/queen_mary_1913.project.json"
@@ -94,6 +94,24 @@ class WeaponsPageRowsTests(unittest.TestCase):
         main = rows["torpedo_main"]
         self.assertIsNotNone(main["weight_t"])
         self.assertAlmostEqual(view["values"]["declared_rows_total_t"], main["weight_t"])
+
+    def test_empty_declaration_omits_page_rows_and_still_validates(self):
+        """`page_rows: []` is rejected by the contract; the key must be absent."""
+        project = copy.deepcopy(self.project)
+        leaf = project["systems"]["weapons"]["torpedo"]
+        leaf["page_rows"] = []
+        blocking = [d for d in project_io.validate_project(project) if d["blocking"]]
+        self.assertTrue(any("page_rows" in d["path"] for d in blocking),
+                        "an empty page_rows array must be rejected")
+        # Omitting the key is the valid empty declaration and must still validate.
+        del leaf["page_rows"]
+        blocking = [d for d in project_io.validate_project(project) if d["blocking"]]
+        self.assertFalse([d for d in blocking if "torpedo" in d["path"]],
+                         "an omitted page_rows key must not block")
+        # And no view is produced for a leaf that declares no rows.
+        data = self._systems(project)
+        self.assertNotIn("weapons.torpedo", data["page_rows"])
+        self.assertIn("weapons.misc_weight", data["page_rows"])
 
     def test_misc_zone_declared_mass_reported_and_not_reverse_filled(self):
         project = copy.deepcopy(self.project)

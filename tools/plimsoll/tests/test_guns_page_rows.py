@@ -96,6 +96,141 @@ class GunsPageRowsTests(unittest.TestCase):
         for leaf in ("main", "secondary", "torpedo", "misc_weight"):
             self.assertIn("guns", views[f"weapons.{leaf}"], "missing guns view for %s" % leaf)
 
+    def test_declared_projectile_fact_reports_broadside_without_ledger_mass(self):
+        """A no-model battery may declare a sourced shell mass for reporting only."""
+        project = copy.deepcopy(self.project)
+        battery = project["systems"]["weapons"]["secondary"]
+        battery["mass_models"] = [m for m in battery["mass_models"]
+                                  if m.get("method") != "counted_ammunition_mass"]
+        baseline = self._guns()["weapons.secondary"]["guns"]
+        battery["facts"] = {"projectile_mass_kg": dict(
+            value=45.0, source="NavWeaps 6-inch shell converted with 0.45359237 kg/lb", estimate=True)}
+        g = self._guns(project)["weapons.secondary"]["guns"]
+        self.assertAlmostEqual(g["shell_mass_kg"]["value"], 45.0)
+        self.assertEqual(g["shell_mass_kg"]["origin"], "declared_projectile_mass_kg_fact")
+        self.assertAlmostEqual(g["broadside_mass_kg"], g["broadside_guns"] * 45.0)
+        self.assertNotIn("page_rows.guns_shell_mass_unknown",
+                         {d["code"] for d in g["diagnostics"]})
+        # Reporting only: the ledger battery mass is untouched by the declaration,
+        # so removing the model leaves the outfit exactly as the ledger reports it
+        # and no ammunition mass was derived from the declared shell value.
+        self.assertEqual(g["ship_wide_ammunition_t"], baseline["ship_wide_ammunition_t"])
+        self.assertEqual(g["ledger_mass_t"], baseline["ledger_mass_t"])
+        self.assertLess(g["broadside_mass_kg"] / 1000.0, g["ship_wide_ammunition_t"])
+        # The declared value is echoed separately from the resolved shell mass.
+        self.assertAlmostEqual(g["declared_projectile_mass_kg"]["value"], 45.0)
+        self.assertEqual(g["declared_projectile_mass_kg"]["source"],
+                         "NavWeaps 6-inch shell converted with 0.45359237 kg/lb")
+
+    def test_incomplete_projectile_fact_stays_unknown(self):
+        for patch in ({"value": 45.0}, {"value": 45.0, "source": "s"},
+                      {"value": None, "source": "s", "estimate": True},
+                      {"value": 45.0, "source": "s", "estimate": None}):
+            with self.subTest(patch=patch):
+                project = copy.deepcopy(self.project)
+                battery = project["systems"]["weapons"]["secondary"]
+                battery["mass_models"] = [m for m in battery["mass_models"]
+                                         if m.get("method") != "counted_ammunition_mass"]
+                battery["facts"] = {"projectile_mass_kg": dict(patch)}
+                g = self._guns(project)["weapons.secondary"]["guns"]
+                self.assertIsNone(g["shell_mass_kg"]["value"])
+                self.assertIn("page_rows.guns_shell_mass_unknown",
+                              {d["code"] for d in g["diagnostics"]})
+
+    def test_ammunition_model_remains_the_shell_mass_authority(self):
+        """A declared fact must not override or duplicate the model that drives mass."""
+        project = copy.deepcopy(self.project)
+        battery = project["systems"]["weapons"]["main"]
+        model_mass = next(m for m in battery["mass_models"]
+                          if m.get("method") == "counted_ammunition_mass")["inputs"]["projectile_mass_kg"]
+        battery["facts"] = {"projectile_mass_kg": dict(value=999.0, source="contradicting", estimate=False)}
+        g = self._guns(project)["weapons.main"]["guns"]
+        self.assertEqual(g["shell_mass_kg"]["origin"], "counted_ammunition_mass_model")
+        self.assertAlmostEqual(g["shell_mass_kg"]["value"], model_mass)
+        # The declared fact is still reported, clearly separate from the authority.
+        self.assertAlmostEqual(g["declared_projectile_mass_kg"]["value"], 999.0)
+
+    def test_structured_source_counts_as_declared_provenance(self):
+        """The contract accepts a structured source object; it must not read unknown."""
+        for source in ({"publication": "NavWeaps", "conversion": "kg/lb"},
+                       {"publication": "NavWeaps"}):
+            with self.subTest(source=source):
+                project = copy.deepcopy(self.project)
+                battery = project["systems"]["weapons"]["secondary"]
+                battery["mass_models"] = [m for m in battery["mass_models"]
+                                         if m.get("method") != "counted_ammunition_mass"]
+                battery["facts"] = {"projectile_mass_kg": dict(value=45.0, source=source, estimate=False)}
+                g = self._guns(project)["weapons.secondary"]["guns"]
+                self.assertAlmostEqual(g["shell_mass_kg"]["value"], 45.0)
+                self.assertEqual(g["shell_mass_kg"]["source"], source)
+                self.assertNotIn("page_rows.guns_shell_mass_unknown",
+                                 {d["code"] for d in g["diagnostics"]})
+
+    def test_nested_structured_source_counts_as_declared_provenance(self):
+        """The validator treats a nonempty source object as opaque provenance."""
+        source = {"citation": {"title": "Naval Annual", "page": 12}}
+        project = copy.deepcopy(self.project)
+        battery = project["systems"]["weapons"]["secondary"]
+        battery["mass_models"] = [m for m in battery["mass_models"]
+                                 if m.get("method") != "counted_ammunition_mass"]
+        battery["facts"] = {"projectile_mass_kg": dict(value=45.0, source=source, estimate=True)}
+        g = self._guns(project)["weapons.secondary"]["guns"]
+        self.assertAlmostEqual(g["shell_mass_kg"]["value"], 45.0)
+        self.assertEqual(g["shell_mass_kg"]["source"], source)
+        self.assertNotIn("page_rows.guns_shell_mass_unknown",
+                         {d["code"] for d in g["diagnostics"]})
+
+    def test_empty_structured_source_is_unknown_provenance(self):
+        for source in ({}, "", "   ", None):
+            with self.subTest(source=source):
+                project = copy.deepcopy(self.project)
+                battery = project["systems"]["weapons"]["secondary"]
+                battery["mass_models"] = [m for m in battery["mass_models"]
+                                         if m.get("method") != "counted_ammunition_mass"]
+                battery["facts"] = {"projectile_mass_kg": dict(value=45.0, source=source, estimate=False)}
+                g = self._guns(project)["weapons.secondary"]["guns"]
+                self.assertIsNone(g["shell_mass_kg"]["value"])
+                self.assertIn("page_rows.guns_shell_mass_unknown",
+                              {d["code"] for d in g["diagnostics"]})
+
+    def test_ambiguous_ammunition_models_block_the_fact_fallback(self):
+        """More than one ammunition model is ambiguous: stay unknown, do not guess."""
+        project = copy.deepcopy(self.project)
+        battery = project["systems"]["weapons"]["secondary"]
+        model = next(m for m in battery["mass_models"]
+                     if m.get("method") == "counted_ammunition_mass")
+        duplicate = dict(model, id=model["id"] + "-duplicate")
+        battery["mass_models"] = [m for m in battery["mass_models"]
+                                 if m.get("method") != "counted_ammunition_mass"] + [model, duplicate]
+        battery["facts"] = {"projectile_mass_kg": dict(value=45.0, source="declared", estimate=True)}
+        g = self._guns(project)["weapons.secondary"]["guns"]
+        self.assertIsNone(g["shell_mass_kg"]["value"])
+        self.assertIn("page_rows.guns_shell_mass_unknown",
+                      {d["code"] for d in g["diagnostics"]})
+
+    def test_guns_view_without_page_rows_for_a_new_battery(self):
+        """A battery built from a reporting fact alone still exposes a guns view."""
+        project = copy.deepcopy(self.project)
+        # A battery under construction owns exactly one ledger item of its own.
+        project["weight_groups"].append(dict(id="tertiary", label="Tertiary", items=[
+            dict(id="tertiary-guns", mass_t=90.0, x_m=0.0, y_m=0.0, kg_m=1.0,
+                 source="fixture", estimate=False)]))
+        project["systems"]["weapons"]["battery_3"] = {
+            "installed_guns": 4, "broadside_guns": 2, "rounds_per_gun": 60,
+            "weight_item_ids": ["tertiary-guns"],
+            "facts": {"projectile_mass_kg": dict(value=30.0, source="declared 6-inch shell", estimate=False)},
+        }
+        views = self._guns(project)
+        self.assertIn("guns", views["weapons.battery_3"])
+        g = views["weapons.battery_3"]["guns"]
+        self.assertEqual(g["installed_guns"], 4)
+        self.assertAlmostEqual(g["broadside_mass_kg"], 60.0)
+        self.assertAlmostEqual(g["ledger_mass_t"], 90.0)
+        # No ammunition ledger row was invented, so the outfit stays unknown.
+        self.assertIsNone(g["ship_wide_ammunition_t"])
+        # No page rows are invented for a battery that declares none.
+        self.assertNotIn("rows", views["weapons.battery_3"])
+
 
 if __name__ == "__main__":
     unittest.main()
