@@ -90,7 +90,16 @@ export function GunsEditor({ weapons, runs, onPatchBattery }: {
   runs: RunView[];
   onPatchBattery: (id: string, next: GunBattery) => void;
 }) {
-  const batteryIds = Object.keys(weapons).filter(id => id.length > 0);
+  // Only the gun batteries declare a counted-ammunition/shell mass model; the
+  // torpedo and misc_weight leaves are edited on the Weapons page, not here.
+  const batteryIds = Object.keys(weapons).filter(id => {
+    if (!id) return false;
+    const leaf = weapons[id];
+    if (!leaf || typeof leaf !== 'object') return false;
+    const models = (leaf as Raw).mass_models;
+    return Array.isArray(models) && models.some(
+      m => !!m && typeof m === 'object' && (m as Raw).method === 'counted_ammunition_mass');
+  });
   const [selected, setSelected] = useState<string>(batteryIds[0] ?? '');
   const batteryId = batteryIds.includes(selected) ? selected : (batteryIds[0] ?? '');
   const battery = batteryIds.length > 0 ? (weapons[batteryId] as GunBattery | null) : null;
