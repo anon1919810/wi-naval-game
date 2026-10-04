@@ -1,12 +1,12 @@
 # 《敌前转向》（Gefahrwend）· 一战舰船游戏资产
 
 > 项目名取自 1916 年日德兰海战中舍尔的敌前转向（*Gefechtskehrtwendung*）——三次 180° 转向让公海舰队从英军战列线前脱险。
-> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；本地私有项目网站首版见[运行与交接](docs/plimsoll-1.0/web-local-operations.md)，公网尚未部署。
+> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；网站首版见[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md)。2026-10-04 已在 `119.91.211.156` 完成生产部署（nginx 已切换、本机 TLS 与 API 健康检查通过、数据库已迁移并验证备份恢复），计划地址 `https://119.91.211.156`；**公网 443 入口不通、需核对云防火墙，本轮公网浏览器验收尚未通过，站点未公开上线**。
 > 命名约定：**平台用历史意象命名，模块用方法命名**（`plimsoll.bonjean` / `.stability` / `.damage`）。
 
 Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md) · [2026-09-23 类 SPS 核心交接](docs/plimsoll-1.0/交接_类SPS计算核心_2026-09-23.md) · [Queen Mary 输入资料准备度](docs/plimsoll-1.0/queen-mary-input-readiness.md) · [原 2026-09-22 报告](docs/plimsoll-1.0/项目报告_Plimsoll计算核心_2026-09-22.md)。
 
-网站：[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md) · [生产部署与运维](docs/plimsoll-1.0/web-production-operations.md) · [六页输入表单交接](docs/plimsoll-1.0/forms-handoff-2026-10-03.md) · [产品与视觉规格](docs/superpowers/specs/2026-09-23-plimsoll-web-design.md) · [浅色工作台概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench.png) · [深色概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench-dark.png)。
+网站：[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md) · [生产部署与运维](docs/plimsoll-1.0/web-production-operations.md) · [2026-10-04 生产部署交接](docs/plimsoll-1.0/web-production-handoff-2026-10-04.md) · [六页输入表单交接](docs/plimsoll-1.0/forms-handoff-2026-10-03.md) · [产品与视觉规格](docs/superpowers/specs/2026-09-23-plimsoll-web-design.md) · [浅色工作台概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench.png) · [深色概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench-dark.png)。
 
 高级输入：[2026-10-04 最新交接与验收](docs/plimsoll-1.0/advanced-workflow-handoff-2026-10-04.md) · [阻力与质量模型、舱室、破损和显示单位操作](docs/plimsoll-1.0/advanced-input-workflow.md) · [实施计划](docs/plimsoll-1.0/advanced-workflow-plan-2026-10-04.md)。
 
