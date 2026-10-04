@@ -1,7 +1,7 @@
 # 《敌前转向》（Gefahrwend）· 一战舰船游戏资产
 
 > 项目名取自 1916 年日德兰海战中舍尔的敌前转向（*Gefechtskehrtwendung*）——三次 180° 转向让公海舰队从英军战列线前脱险。
-> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；网站首版见[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md)。2026-10-04 已在 `119.91.211.156` 完成生产部署（nginx 已切换、本机 TLS 与 API 健康检查通过、数据库已迁移并验证备份恢复），计划地址 `https://119.91.211.156`；**公网 443 入口不通、需核对云防火墙，本轮公网浏览器验收尚未通过，站点未公开上线**。
+> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；网站首版见[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md)。2026-10-04 生产部署与公网验收均已完成，站点地址 **[https://119.91.211.156](https://119.91.211.156)**（直接用 IP 访问，未绑定域名）。生产以匿名模式运行，无邮箱登录。
 > 命名约定：**平台用历史意象命名，模块用方法命名**（`plimsoll.bonjean` / `.stability` / `.damage`）。
 
 Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md) · [2026-09-23 类 SPS 核心交接](docs/plimsoll-1.0/交接_类SPS计算核心_2026-09-23.md) · [Queen Mary 输入资料准备度](docs/plimsoll-1.0/queen-mary-input-readiness.md) · [原 2026-09-22 报告](docs/plimsoll-1.0/项目报告_Plimsoll计算核心_2026-09-22.md)。

@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-04",
+  "origin": "https://119.91.211.156",
+  "runtime_commit": "6dea93c",
+  "project_id": "a00cfe7a-81ac-448c-9261-2f585f6ac930",
+  "run_id": "90e0e7d9-142e-4a30-a024-67c17468e0fa",
+  "revision": 2,
+  "condition_id": "coastal",
+  "request_fingerprint": "f8d6d194f1a923583ffac3d0cd13a572b3566eb79750523c70226c68c34ff1c0",
+  "status": "completed",
+  "stage_statuses": {
+    "bonjean": "not_requested",
+    "deck": "completed",
+    "endurance": "not_requested",
+    "equilibrium": "completed",
+    "flooding": "not_requested",
+    "geometry": "completed",
+    "gz": "not_requested",
+    "historical": "not_requested",
+    "hydrostatic_curve": "not_requested",
+    "hydrostatics": "completed",
+    "l0": "completed",
+    "loading": "completed",
+    "propulsion": "completed",
+    "resistance": "not_requested",
+    "systems": "completed"
+  },
+  "checks": [
+    "public_https_health_without_certificate_bypass",
+    "browser_anonymous_workspace",
+    "project_edit_save",
+    "browser_reload_preserves_revision",
+    "browser_calculation_and_report",
+    "json_download",
+    "csv_download",
+    "light_dark_toggle"
+  ],
+  "exports": {
+    "json": {
+      "bytes": 708739,
+      "sha256": "0ed4d042724e6fdeee4bcbc6b99ec5d064b2dbda4d8d7cfe38cfddf5dfd4061e"
+    },
+    "csv": {
+      "bytes": 11069804,
+      "sha256": "6b4f6ccc70c20e5478ca60789100457ddf12f1ad37699e538a9e18d5ac7f0dc0"
+    }
+  },
+  "screenshot": "public-report-2026-10-04.jpg",
+  "notes": [
+    "CSV download exceeded initial 15-second automation wait; subsequently completed and validated.",
+    "Eight stages were requested; seven others correctly remain not_requested.",
+    "This is deployment smoke acceptance, not another full computation-core regression."
+  ]
+}
