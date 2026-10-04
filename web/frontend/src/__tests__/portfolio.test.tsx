@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { Profiler, StrictMode } from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
@@ -6,6 +6,7 @@ import { diagonalClip, introFrame, INTRO_DURATION } from '../portfolio/motion';
 import { classifyHash } from '../portfolio/routes';
 import { PLAN_SHEETS, sheetViewBox } from '../portfolio/plans';
 import { THEME_KEY } from '../portfolio/theme';
+import { IMAGE_TIMEOUT } from '../portfolio/images';
 import * as api from '../api';
 
 vi.mock('../api', async importOriginal => ({
@@ -25,6 +26,7 @@ beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
   media();
+  vi.stubGlobal('Image', class { src = ''; decode = () => Promise.resolve(); });
   vi.stubGlobal('scrollTo', vi.fn());
   vi.mocked(api.authConfig).mockResolvedValue({ mode: 'anonymous' });
   vi.mocked(api.me).mockResolvedValue({ id: 'existing', email: 'existing@anonymous.invalid', theme: 'light', csrf_token: 'test', mode: 'anonymous', label: '本浏览器工作区' });
@@ -110,39 +112,120 @@ describe('public portfolio boundary', () => {
   });
 });
 
+function controlledImage() {
+  let resolve!: () => void, reject!: (error: Error) => void;
+  const pending = new Promise<void>((yes, no) => { resolve = yes; reject = no; });
+  const decode = vi.fn(() => pending);
+  vi.stubGlobal('Image', class { src = ''; decode = decode; });
+  return { resolve, reject, decode };
+}
+function fakeFrames() {
+  vi.useFakeTimers();
+  vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => window.setTimeout(() => cb(performance.now()), 16));
+  vi.stubGlobal('cancelAnimationFrame', (id: number) => window.clearTimeout(id));
+}
+
 describe('opening lifecycle', () => {
-  it('bypasses motion immediately for a reduced-motion preference', () => {
-    media(true);
-    render(<StrictMode><Portfolio /></StrictMode>);
-    expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
-    expect(screen.getByRole('heading', { name: 'Plimsoll' })).toBeVisible();
+  it('bypasses both waiting and motion for reduced motion, including replay', () => {
+    media(true); controlledImage();
+    const { unmount } = render(<StrictMode><Portfolio /></StrictMode>);
+    expect(screen.queryByRole('status')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'REPLAY INTRO' }));
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(document.body.style.overflow).not.toBe('hidden');
+    unmount();
   });
 
-  it('starts without JS image loading, finishes under StrictMode, and internal return does not replay', () => {
-    vi.useFakeTimers();
-    // The exhibit draws the scan with <image>, which the browser fetches without
-    // the Image constructor; this guards against reintroducing a JS preload path.
-    const imageConstructor = vi.fn(() => { throw new Error('The intro must not preload bitmaps through JS'); });
-    vi.stubGlobal('Image', imageConstructor);
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => window.setTimeout(() => cb(performance.now()), 16));
-    vi.stubGlobal('cancelAnimationFrame', (id: number) => window.clearTimeout(id));
-    render(<StrictMode><Portfolio /></StrictMode>);
-    expect(screen.getByRole('status', { name: 'Opening Y’s Formfield' })).toBeInTheDocument();
-    act(() => { vi.advanceTimersByTime(INTRO_DURATION + 32); });
+  it('waits for decoding before the full intro and does not rerender each animation frame', async () => {
+    fakeFrames();
+    const image = controlledImage();
+    const commits = vi.fn();
+    document.body.style.overflow = 'auto';
+    render(<StrictMode><Profiler id="portfolio" onRender={commits}><Portfolio /></Profiler></StrictMode>);
+    expect(screen.getByRole('status', { name: 'Loading reference' })).toBeVisible();
+    expect(document.body.style.overflow).toBe('hidden');
+    act(() => { vi.advanceTimersByTime(3000); });
     expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
-    expect(imageConstructor).not.toHaveBeenCalled();
+    expect(image.decode).toHaveBeenCalledTimes(1);
+    await act(async () => { image.resolve(); });
+    expect(screen.getByRole('status', { name: 'Opening Y’s Formfield' })).toHaveAttribute('data-phase', 'black');
+    const before = commits.mock.calls.length;
+    act(() => { vi.advanceTimersByTime(1000); });
+    expect(commits.mock.calls.length).toBe(before);
+    expect(screen.getByRole('status', { name: 'Opening Y’s Formfield' })).toHaveAttribute('data-phase', 'hold');
+    await act(async () => { vi.advanceTimersByTime(1532); });
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(document.body.style.overflow).toBe('auto');
     follow('About'); follow('Work 01');
-    expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
     expect(api.authConfig).not.toHaveBeenCalled();
+    document.body.style.overflow = '';
   });
 
-  it('allows Escape to skip the introduction', () => {
+  it.each(['reject', 'timeout'] as const)('releases the page on image %s without scanning empty artwork', async mode => {
+    fakeFrames(); const image = controlledImage();
     render(<Portfolio />);
+    await act(async () => { if (mode === 'reject') image.reject(new Error('network')); else vi.advanceTimersByTime(IMAGE_TIMEOUT + 1); });
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.getByRole('alert')).toHaveTextContent('could not be loaded');
+    expect(document.body.style.overflow).not.toBe('hidden');
+  });
+
+  it('ignores a stale decode after leaving home and restores scroll on unmount', async () => {
+    const image = controlledImage();
+    const { unmount } = render(<Portfolio />);
+    follow('About');
+    await act(async () => { image.resolve(); });
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(document.body.style.overflow).not.toBe('hidden');
+    fireEvent.click(screen.getByRole('button', { name: 'REPLAY INTRO' }));
+    unmount();
+    expect(document.body.style.overflow).not.toBe('hidden');
+  });
+
+  it('allows Escape to skip waiting without a later decode restarting the intro', async () => {
+    const image = controlledImage(); render(<Portfolio />);
     fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
+    await act(async () => { image.resolve(); });
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(document.body.style.overflow).not.toBe('hidden');
+  });
+
+  it('coalesces pointer movement without React commits and resets on keyboard Home', async () => {
+    fakeFrames(); const commits = vi.fn();
+    const { container } = render(<Profiler id="portfolio" onRender={commits}><Portfolio introEnabled={false} /></Profiler>);
+    await act(async () => {});
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 400));
+    const art = container.querySelector('.ff-artwork > g')!;
+    const initial = art.getAttribute('transform');
+    const before = commits.mock.calls.length;
+    for (let i = 0; i < 20; i++) {
+      const event = new Event('pointermove', { bubbles: true });
+      Object.assign(event, { pointerType: 'mouse', clientX: 700, clientY: 300 });
+      fireEvent(exhibit, event);
+    }
+    expect(art.getAttribute('transform')).toBe(initial);
+    act(() => { vi.advanceTimersByTime(16); });
+    expect(art.getAttribute('transform')).not.toBe(initial);
+    expect(commits.mock.calls.length).toBe(before);
+    fireEvent.keyDown(exhibit, { key: 'Home' });
+    expect(art.getAttribute('transform')).toBe(initial);
+  });
+
+  it('updates public chrome colors and restores previous metadata on exit', () => {
+    const meta = document.createElement('meta'); meta.name = 'theme-color'; meta.content = '#abcdef'; document.head.append(meta);
+    document.documentElement.style.colorScheme = 'normal';
+    const { unmount } = render(<Portfolio introEnabled={false} />);
+    fireEvent.change(screen.getByLabelText('Color theme'), { target: { value: 'dark' } });
+    expect(meta.content).toBe('#101110');
+    expect(document.documentElement.style.colorScheme).toBe('dark');
+    follow('EXPLORE PROJECT');
+    expect(meta.content).toBe('#abcdef');
+    expect(document.documentElement.style.colorScheme).toBe('normal');
+    unmount(); meta.remove(); document.documentElement.style.colorScheme = '';
   });
 });
-
 describe('routing and visual contracts', () => {
   it.each(['#/plimsoll', '#/projects', '#/projects/p1', '#/runs/r1', '#/reports/r1'])('preserves the existing app bookmark %s', hash => {
     expect(classifyHash(hash)).toEqual({ kind: 'app' });

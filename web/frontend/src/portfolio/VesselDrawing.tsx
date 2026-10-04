@@ -57,13 +57,13 @@ function InkFilter({ id, ink }: { id: string; ink: string }) {
 }
 
 /** Shared placement registers silhouette masking, exhibit and both scan layers. */
-export function VesselDrawing({ sheet, ink = 'currentColor', silhouette = false }: { sheet: PlanSheet; ink?: string; silhouette?: boolean }) {
+export function VesselDrawing({ sheet, ink = 'currentColor', silhouette = false, opacity = 1 }: { sheet: PlanSheet; ink?: string; silhouette?: boolean; opacity?: number }) {
   const id = useId().replace(/:/g, '');
   const hull = MASK_HULLS[sheet.id] ?? MASK_HULLS['01'];
   return <svg className="ff-vessel-drawing" x={COMPOSITION.x} y={COMPOSITION.y} width={COMPOSITION.width} height={COMPOSITION.height} viewBox={`0 0 ${COMPOSITION.viewWidth} ${COMPOSITION.viewHeight}`} aria-hidden="true" focusable="false">
     {silhouette ? <path d={hull} fill="black" stroke="black" strokeWidth="14" /> : <>
       <defs><InkFilter id={`${id}-ink`} ink={ink} /></defs>
-      <g className="ff-vessel" data-study={sheet.id} filter={`url(#${id}-ink)`}>
+      <g className="ff-vessel" data-study={sheet.id} opacity={opacity} filter={`url(#${id}-ink)`}>
         <svg className="ff-vessel-sheet" x="0" y="0" width={COMPOSITION.viewWidth} height={COMPOSITION.viewHeight} viewBox={sheetViewBox(sheet)} preserveAspectRatio="xMidYMid meet" overflow="hidden">
           {/* Clip in source-sheet coordinates: `overflow` bounds the viewport,
             not the requested crop, so the letterboxed band above the top view
