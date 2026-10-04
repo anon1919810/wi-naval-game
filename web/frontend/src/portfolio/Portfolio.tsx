@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
-import { Artwork, artworkTransform } from './Artwork';
+import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
 import { Splash } from './Splash';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
@@ -27,7 +27,11 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const pan = useRef(zero);
   const focus = useRef({ x: 50, y: 50 });
   const composition = useRef<SVGGElement>(null);
+  const geometry = useRef<SVGGElement>(null);
+  const maskTrack = useRef<SVGGElement>(null);
   const inspection = useRef<HTMLDivElement>(null);
+  const cursor = useRef<HTMLDivElement>(null);
+  const cursorOn = useRef(false);
   const panFrame = useRef(0);
   const imageCache = useRef<ImageCache>(new Map());
   const [readyHref, setReadyHref] = useState<string | null>(null);
@@ -81,7 +85,10 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
 
   const paintPan = useCallback(() => {
     composition.current?.setAttribute('transform', artworkTransform(-12, 1, pan.current));
+    geometry.current?.setAttribute('transform', artworkTransform(-12, 1, { x: pan.current.x * GEOMETRY_PARALLAX, y: pan.current.y * GEOMETRY_PARALLAX }));
+    maskTrack.current?.setAttribute('transform', maskTrackTransform(pan.current));
     if (inspection.current) { inspection.current.style.left = `${focus.current.x}%`; inspection.current.style.top = `${focus.current.y}%`; }
+    if (cursor.current) { cursor.current.hidden = !cursorOn.current; cursor.current.style.left = `${focus.current.x}%`; cursor.current.style.top = `${focus.current.y}%`; }
   }, []);
   const resetPan = useCallback(() => {
     cancelAnimationFrame(panFrame.current); panFrame.current = 0;
@@ -156,9 +163,10 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       <main className="ff-main" inert={opening}>
         <section className="ff-home" hidden={about} aria-label="Selected work">
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
-          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label="Interactive top-view drawing. Use arrow keys to explore, Home to reset." onKeyDown={keyboard} onPointerMove={explore} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
-            <div className="ff-art-scene"><Artwork compositionRef={composition} sheet={sheet} dark={dark} details={details} /></div>
+          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label="Interactive top-view drawing. Use arrow keys to explore, Home to reset." onKeyDown={keyboard} onPointerMove={explore} onPointerEnter={e => { if (e.pointerType === 'mouse') { cursorOn.current = true; paintPan(); } }} onPointerLeave={() => { cursorOn.current = false; paintPan(); }} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
+            <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
             {inspect && <div ref={inspection} className="ff-inspection" aria-hidden="true"><span>REFERENCE {sheet.id}</span></div>}
+            {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><i /></div>}
             <span className="ff-corner ff-corner-tl" /><span className="ff-corner ff-corner-tr" /><span className="ff-corner ff-corner-bl" /><span className="ff-corner ff-corner-br" />
             <div className="ff-exhibit-note"><span>PLIMSOLL / DRAWING {sheet.id}</span><span>{inspect ? 'INSPECTION ON' : 'MOVE TO EXPLORE'}</span></div>
           </div>

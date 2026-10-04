@@ -11,6 +11,8 @@ export function Splash({ sheet, target, dark, details, onDone, onSettle }: Props
   const reverse = useRef<HTMLDivElement>(null);
   const firstArt = useRef<SVGGElement>(null);
   const secondArt = useRef<SVGGElement>(null);
+  const firstGeo = useRef<SVGGElement>(null);
+  const secondGeo = useRef<SVGGElement>(null);
   const skip = useRef<HTMLButtonElement>(null);
   useLayoutEffect(() => {
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { onDone(); return; }
@@ -33,6 +35,8 @@ export function Splash({ sheet, target, dark, details, onDone, onSettle }: Props
       const transform = artworkTransform(f.angle, f.scale);
       firstArt.current!.setAttribute('transform', transform);
       secondArt.current!.setAttribute('transform', transform);
+      firstGeo.current!.setAttribute('transform', transform);
+      secondGeo.current!.setAttribute('transform', transform);
       skip.current!.hidden = elapsed <= 100 || u > 0;
     };
     measure(); paint(0);
@@ -54,8 +58,8 @@ export function Splash({ sheet, target, dark, details, onDone, onSettle }: Props
   }, [sheet, target, onDone, onSettle]);
   return <div ref={root} className="ff-splash" data-phase="black" role="status" aria-label="Opening Y’s Formfield">
     <div ref={panel} className="ff-splash-panel">
-      <div ref={reveal} className="ff-scan-layer ff-scan-dark"><Artwork compositionRef={firstArt} sheet={sheet} dark details={details} angle={-28} scale={1.85} /></div>
-      <div ref={reverse} className={`ff-scan-layer ${dark ? 'ff-scan-dark' : 'ff-scan-light'}`}><Artwork compositionRef={secondArt} sheet={sheet} dark={dark} details={details} angle={-28} scale={1.85} /></div>
+      <div ref={reveal} className="ff-scan-layer ff-scan-dark"><Artwork compositionRef={firstArt} geometryRef={firstGeo} sheet={sheet} dark details={details} angle={-28} scale={1.85} /></div>
+      <div ref={reverse} className={`ff-scan-layer ${dark ? 'ff-scan-dark' : 'ff-scan-light'}`}><Artwork compositionRef={secondArt} geometryRef={secondGeo} sheet={sheet} dark={dark} details={details} angle={-28} scale={1.85} /></div>
     </div>
     <button ref={skip} hidden className="ff-skip" onClick={onDone}>SKIP INTRO <span>↗</span></button>
   </div>;

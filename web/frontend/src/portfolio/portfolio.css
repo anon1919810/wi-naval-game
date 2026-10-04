@@ -21,15 +21,16 @@
 .ff-header nav a { padding: 14px 0; color: var(--ff-muted); transition: color .16s; }
 .ff-header nav a[aria-current], .ff-header nav a:hover { color: var(--ff-ink); }
 .ff-header nav span { font-size: 9px; margin-left: 4px; color: var(--ff-accent); vertical-align: super; }
-.ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; }
+.ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; position: relative; }
 .ff-theme-symbol { font-size: 18px; }
-.ff-theme select { min-height: 44px; width: 76px; border: none; padding: 4px 8px; }
+.ff-theme select { min-height: 44px; width: 76px; border: none; padding: 4px 22px 4px 8px; appearance: none; -webkit-appearance: none; }
+.ff-theme::after { content: ''; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; border-right: 1.5px solid var(--ff-muted); border-bottom: 1.5px solid var(--ff-muted); transform: translateY(-70%) rotate(45deg); pointer-events: none; }
 .ff-theme option { color: var(--ff-ink); background: var(--ff-panel); }
 .ff-main { max-width: 1460px; margin: auto; }
 .ff-exhibit-label { display: flex; justify-content: space-between; align-items: center; padding: 27px 0 19px; font: 10px 'SFMono-Regular', Consolas, monospace; letter-spacing: .11em; color: var(--ff-muted); }
 .ff-exhibit-label span:first-child { display: flex; align-items: center; gap: 8px; color: var(--ff-ink); }
 .ff-live-dot { width: 5px; height: 5px; background: var(--ff-accent); border-radius: 50%; }
-.ff-exhibit { position: relative; width: 100%; height: clamp(320px, 51vw, 570px); overflow: hidden; background: var(--ff-panel); touch-action: pan-y; }
+.ff-exhibit { position: relative; width: 100%; aspect-ratio: 16 / 7; max-height: 620px; overflow: hidden; background: var(--ff-panel); touch-action: pan-y; cursor: none; }
 .ff-art-scene, .ff-artwork { display: block; width: 100%; height: 100%; }
 .ff-artwork { overflow: hidden; }
 .ff-art-scene { transition: opacity .2s; }
@@ -44,6 +45,11 @@
 .ff-inspection::before { width: 110px; height: 1px; left: -11px; top: 44px; }
 .ff-inspection::after { height: 110px; width: 1px; top: -11px; left: 44px; }
 .ff-inspection span { position: absolute; left: 96px; top: 10px; font: 8px Consolas, monospace; color: var(--ff-accent); width: 90px; }
+.ff-cursor { position: absolute; width: 26px; height: 26px; border: 1px solid var(--ff-accent); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: .85; }
+.ff-cursor::before, .ff-cursor::after { content: ''; position: absolute; background: var(--ff-accent); }
+.ff-cursor::before { width: 38px; height: 1px; left: -6px; top: 12.5px; }
+.ff-cursor::after { width: 1px; height: 38px; left: 12.5px; top: -6px; }
+.ff-cursor i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--ff-accent); left: 11.5px; top: 11.5px; }
 .ff-work-info { display: flex; justify-content: space-between; gap: 30px; align-items: center; padding: 26px 0 24px; }
 .ff-work-heading { display: flex; align-items: baseline; gap: 20px; }
 .ff-work-index { font: 12px Consolas, monospace; color: var(--ff-muted); }
@@ -85,7 +91,6 @@
 .ff-shell[data-opening='true'][data-settling='false'] :is(.ff-header,.ff-exhibit-label,.ff-work-info,.ff-work-controls,.ff-footer) { opacity: 0; transform: translateY(10px); }
 .ff-tool-return { display: block; background: #f6f6f3; color: #191b19; text-decoration: none; padding: 15px 4vw; font: 12px Arial,sans-serif; border-bottom: 1px solid #d6d9d2; }
 .ff-tool-return:focus-visible { outline: 2px solid #3857e7; outline-offset: -5px; }
-@media (min-width: 1800px) { .ff-exhibit { height: 650px; } }
 @media (max-width: 650px) {
   .ff-shell { padding: 0 6vw; }
   .ff-header { height: 82px; gap: 12px; grid-template-columns: 1fr auto; }
@@ -94,7 +99,7 @@
   .ff-header nav a { padding: 0 0 10px; }
   .ff-theme { grid-column: 2; grid-row: 1 / 3; }
   .ff-exhibit-label { font-size: 8px; padding: 22px 0 15px; gap: 12px; }
-  .ff-exhibit-label span:last-child { max-width: 140px; text-align: right; line-height: 1.6; }
+  .ff-exhibit-label span:last-child { display: none; }
   .ff-exhibit { height: 330px; }
   .ff-artwork { width: 125%; margin-left: -12.5%; }
   .ff-exhibit-note { left: 13px; right: 13px; bottom: 16px; font-size: 7px; letter-spacing: .04em; }

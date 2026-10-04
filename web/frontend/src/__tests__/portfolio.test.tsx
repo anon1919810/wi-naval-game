@@ -83,16 +83,38 @@ describe('public portfolio boundary', () => {
   it('supports keyboard exploration, reset and geometry visibility', () => {
     const { container } = render(<Portfolio introEnabled={false} />);
     const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
-    const composition = () => container.querySelector('.ff-artwork > g')!;
-    const resting = composition().getAttribute('transform');
+    const vessel = () => container.querySelector('.ff-layer-vessel')!;
+    const plate = () => container.querySelector('.ff-layer-geometry')!;
+    const resting = vessel().getAttribute('transform');
+    const restingPlate = plate().getAttribute('transform');
     fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
-    expect(composition().getAttribute('transform')).not.toBe(resting);
+    // The construction plate floats at GEOMETRY_PARALLAX of the vessel's pan.
+    expect(vessel().getAttribute('transform')).toBe('translate(815 350) rotate(-12) scale(1) translate(-800 -350)');
+    expect(plate().getAttribute('transform')).toBe('translate(806.75 350) rotate(-12) scale(1) translate(-800 -350)');
+    // The deck mask tracks the vessel's actual position in plate coordinates.
+    expect(container.querySelector('.ff-mask-track')!.getAttribute('transform')).toBe('translate(8.07 1.72)');
     fireEvent.keyDown(exhibit, { key: 'Home' });
-    expect(composition().getAttribute('transform')).toBe(resting);
+    expect(vessel().getAttribute('transform')).toBe(resting);
+    expect(plate().getAttribute('transform')).toBe(restingPlate);
     fireEvent.click(screen.getByRole('button', { name: 'Geometry On' }));
-    expect(composition().firstElementChild).toHaveAttribute('opacity', '0');
+    expect(plate().firstElementChild).toHaveAttribute('opacity', '0');
     fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
     expect(screen.getByRole('button', { name: 'Inspect On' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('shows the blueprint cursor inside the exhibit for mouse pointers only', () => {
+    const { container } = render(<Portfolio introEnabled={false} />);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    const cursor = () => container.querySelector<HTMLDivElement>('.ff-cursor')!;
+    expect(cursor().hidden).toBe(true);
+    const over = new Event('pointerover', { bubbles: true });
+    Object.assign(over, { pointerType: 'mouse', clientX: 20, clientY: 20 });
+    fireEvent(exhibit, over);
+    expect(cursor().hidden).toBe(false);
+    const out = new Event('pointerout', { bubbles: true });
+    Object.assign(out, { pointerType: 'mouse' });
+    fireEvent(exhibit, out);
+    expect(cursor().hidden).toBe(true);
   });
 
   it('resolves the system preference locally and restores a saved theme', () => {
@@ -197,8 +219,10 @@ describe('opening lifecycle', () => {
     await act(async () => {});
     const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
     vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 400));
-    const art = container.querySelector('.ff-artwork > g')!;
+    const art = container.querySelector('.ff-layer-vessel')!;
+    const plate = container.querySelector('.ff-layer-geometry')!;
     const initial = art.getAttribute('transform');
+    const initialPlate = plate.getAttribute('transform');
     const before = commits.mock.calls.length;
     for (let i = 0; i < 20; i++) {
       const event = new Event('pointermove', { bubbles: true });
@@ -208,6 +232,8 @@ describe('opening lifecycle', () => {
     expect(art.getAttribute('transform')).toBe(initial);
     act(() => { vi.advanceTimersByTime(16); });
     expect(art.getAttribute('transform')).not.toBe(initial);
+    expect(plate.getAttribute('transform')).not.toBe(initialPlate);
+    expect(plate.getAttribute('transform')).not.toBe(art.getAttribute('transform'));
     expect(commits.mock.calls.length).toBe(before);
     fireEvent.keyDown(exhibit, { key: 'Home' });
     expect(art.getAttribute('transform')).toBe(initial);
@@ -306,8 +332,14 @@ describe('routing and visual contracts', () => {
     }
     const clean = target.querySelector('feComponentTransfer feFuncA')!;
     expect(clean).toHaveAttribute('type', 'linear');
-    expect(Number(clean.getAttribute('slope'))).toBeCloseTo(1.08);
-    expect(Number(clean.getAttribute('intercept'))).toBeCloseTo(-0.035);
+    // Light theme firms the curve up; dark keeps the milder original values.
+    expect(Number(clean.getAttribute('slope'))).toBeCloseTo(1.2);
+    expect(Number(clean.getAttribute('intercept'))).toBeCloseTo(-0.05);
+    fireEvent.change(screen.getByLabelText('Color theme'), { target: { value: 'dark' } });
+    const darkFilter = container.querySelector('.ff-vessel')!.getAttribute('filter')!;
+    const darkClean = container.querySelector(`${darkFilter.slice(4, -1)} feComponentTransfer feFuncA`)!;
+    expect(Number(darkClean.getAttribute('slope'))).toBeCloseTo(1.08);
+    expect(Number(darkClean.getAttribute('intercept'))).toBeCloseTo(-0.035);
     expect(container.querySelectorAll('image').length).toBeGreaterThan(0);
   });
 });

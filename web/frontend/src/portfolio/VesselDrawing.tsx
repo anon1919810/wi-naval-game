@@ -9,7 +9,7 @@ import { sheetViewBox, type PlanSheet } from './plans';
  * hatching, fittings, shading, plate seams and fine marks — survives at the
  * source's own resolution.
  */
-const COMPOSITION = { x: 145, y: 344, width: 1310, height: 236, viewWidth: 1000, viewHeight: 180 };
+const COMPOSITION = { x: 145, y: 232, width: 1310, height: 236, viewWidth: 1000, viewHeight: 180 };
 
 /**
  * Decoration-mask hulls, used only by the `silhouette` branch so Artwork's
@@ -31,21 +31,24 @@ const MASK_HULLS: Record<string, string> = {
  *    transparent, solid black ink becomes opaque, and every intermediate gray
  *    is retained as its own ink density. The source's own gray fills therefore
  *    survive as proportionally lighter ink.
- * 2. `feComponentTransfer` applies a single mild tone curve (slope 1.08,
- *    intercept -0.035) that lifts mid ink and suppresses near-paper speckle.
- *    It reconstructs no geometry; as any tonal threshold does, it can
- *    attenuate marks fainter than the cleaned threshold.
+ * 2. `feComponentTransfer` applies a single mild tone curve per theme
+ *    (light: slope 1.2, intercept -0.05; dark: slope 1.08, intercept -0.035)
+ *    that lifts mid ink and suppresses near-paper speckle. The light theme
+ *    needs the firmer curve because dark ink on paper reads weaker than
+ *    light ink on a dark field at equal density. It reconstructs no geometry;
+ *    as any tonal threshold does, it can attenuate marks fainter than the
+ *    cleaned threshold.
  * 3. `feFlood` + `feComposite operator="in"` paint that density in the theme
  *    ink color.
  *
  * There is deliberately no blur, morphological filter, convolution or edge
  * detection, and no enhancement of the source's intrinsic resolution.
  */
-function InkFilter({ id, ink }: { id: string; ink: string }) {
+function InkFilter({ id, ink, slope, intercept }: { id: string; ink: string; slope: number; intercept: number }) {
   return <filter id={id} colorInterpolationFilters="sRGB">
     <feColorMatrix type="matrix" result="density" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -0.3333 -0.3333 -0.3333 0 1" />
     <feComponentTransfer in="density" result="clean-density">
-      <feFuncA type="linear" slope="1.08" intercept="-0.035" />
+      <feFuncA type="linear" slope={slope} intercept={intercept} />
     </feComponentTransfer>
     {/* SourceAlpha bounds the result: without it the inverse-luminance matrix
       resolves fully transparent, out-of-image pixels to alpha 1 and floods the
@@ -57,12 +60,12 @@ function InkFilter({ id, ink }: { id: string; ink: string }) {
 }
 
 /** Shared placement registers silhouette masking, exhibit and both scan layers. */
-export function VesselDrawing({ sheet, ink = 'currentColor', silhouette = false, opacity = 1 }: { sheet: PlanSheet; ink?: string; silhouette?: boolean; opacity?: number }) {
+export function VesselDrawing({ sheet, ink = 'currentColor', silhouette = false, opacity = 1, slope = 1.08, intercept = -0.035 }: { sheet: PlanSheet; ink?: string; silhouette?: boolean; opacity?: number; slope?: number; intercept?: number }) {
   const id = useId().replace(/:/g, '');
   const hull = MASK_HULLS[sheet.id] ?? MASK_HULLS['01'];
   return <svg className="ff-vessel-drawing" x={COMPOSITION.x} y={COMPOSITION.y} width={COMPOSITION.width} height={COMPOSITION.height} viewBox={`0 0 ${COMPOSITION.viewWidth} ${COMPOSITION.viewHeight}`} aria-hidden="true" focusable="false">
     {silhouette ? <path d={hull} fill="black" stroke="black" strokeWidth="14" /> : <>
-      <defs><InkFilter id={`${id}-ink`} ink={ink} /></defs>
+      <defs><InkFilter id={`${id}-ink`} ink={ink} slope={slope} intercept={intercept} /></defs>
       <g className="ff-vessel" data-study={sheet.id} opacity={opacity} filter={`url(#${id}-ink)`}>
         <svg className="ff-vessel-sheet" x="0" y="0" width={COMPOSITION.viewWidth} height={COMPOSITION.viewHeight} viewBox={sheetViewBox(sheet)} preserveAspectRatio="xMidYMid meet" overflow="hidden">
           {/* Clip in source-sheet coordinates: `overflow` bounds the viewport,
