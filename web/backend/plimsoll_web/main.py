@@ -3,7 +3,7 @@
 from typing import Literal
 import uuid
 
-from fastapi import Depends, FastAPI, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
@@ -49,6 +49,12 @@ class RunCreate(BaseModel):
     options: dict = Field(default_factory=dict)
 
 
+class AnonymousRequest(BaseModel):
+    """No fields: the workspace identity is minted by the server, never supplied."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
 MAX_REQUEST_BYTES = 8 * 1024 * 1024
 
 
@@ -57,6 +63,10 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.settings = settings
     app.state.session_factory = make_session_factory(settings.database_url)
     app.state.mailer = mailer_from_settings(settings)
+
+    def require_email_mode() -> None:
+        if settings.auth_mode != "email":
+            raise HTTPException(status_code=404, detail="email login is not available")
 
     @app.middleware("http")
     async def require_browser_write_origin(request: Request, call_next):
@@ -81,8 +91,28 @@ def create_app(settings: Settings) -> FastAPI:
     def health() -> dict[str, str]:
         return {"service": "plimsoll-web", "status": "ok"}
 
+    @app.get("/api/auth/config")
+    def auth_config() -> dict[str, str]:
+        return {"mode": settings.auth_mode}
+
+    @app.post("/api/auth/anonymous")
+    def anonymous(body: AnonymousRequest, request: Request, response: Response, db: Session = Depends(get_db)):
+        if settings.auth_mode != "anonymous":
+            raise HTTPException(status_code=404, detail="anonymous workspace is not available")
+        login = auth.anonymous_workspace(
+            request.client.host if request.client else "unknown", db, request,
+        )
+        response.set_cookie(
+            "plimsoll_session", login.token, httponly=True,
+            secure=not settings.allow_insecure_cookies, samesite="lax",
+            max_age=int(auth.ANONYMOUS_SESSION_LIFETIME.total_seconds()), path="/",
+        )
+        return {"id": str(login.user.id), "email": login.user.email, "theme": login.user.theme,
+                "csrf_token": login.csrf_token, "mode": "anonymous", "label": auth.ANONYMOUS_LABEL}
+
     @app.post("/api/auth/request-code", status_code=202)
     def request_code(body: CodeRequest, request: Request, db: Session = Depends(get_db)):
+        require_email_mode()
         auth.request_code(
             body.email, request.client.host if request.client else "unknown", db,
             request.app.state.mailer, settings,
@@ -91,6 +121,7 @@ def create_app(settings: Settings) -> FastAPI:
 
     @app.post("/api/auth/verify-code")
     def verify_code(body: CodeVerification, response: Response, db: Session = Depends(get_db)):
+        require_email_mode()
         login = auth.verify_code(body.email, body.code, db, settings)
         response.set_cookie(
             "plimsoll_session", login.token, httponly=True,
@@ -98,13 +129,16 @@ def create_app(settings: Settings) -> FastAPI:
             max_age=int(auth.SESSION_LIFETIME.total_seconds()), path="/",
         )
         return {"id": str(login.user.id), "email": login.user.email, "theme": login.user.theme,
-                "csrf_token": login.csrf_token}
+                "csrf_token": login.csrf_token, "mode": "email", "label": login.user.email}
 
     @app.get("/api/me")
     def me(request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
+        anonymous_owner = auth.is_anonymous_user(user)
         return {"id": str(user.id), "email": user.email, "theme": user.theme,
-                "csrf_token": request.state.user_session.csrf_token}
+                "csrf_token": request.state.user_session.csrf_token,
+                "mode": "anonymous" if anonymous_owner else "email",
+                "label": auth.ANONYMOUS_LABEL if anonymous_owner else user.email}
 
     @app.patch("/api/me/preferences")
     def preferences(body: Preferences, request: Request, db: Session = Depends(get_db)):

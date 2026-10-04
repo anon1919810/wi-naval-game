@@ -1,0 +1,111 @@
+# Plimsoll production stack: PostgreSQL 16 + one-shot Alembic migration + API + worker.
+#
+# Every command in the runbook must pass the operator secret file explicitly:
+#   docker compose --env-file /etc/plimsoll/production.env -f web/deploy/compose.yaml ...
+# Secrets are never inline defaults here; missing values abort interpolation.
+#
+# Resources are sized for 2 vCPU / 2 GiB: db 384M + api 256M + worker 768M.
+# migrate is transient (256M, restart: "no") and exits 0 once the schema is at head.
+
+name: plimsoll
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# One image, built once, shared by migrate/api/worker.
+# The compose file sits in web/deploy, so the build context is the repo/release root
+# (../..) and the Dockerfile path stays relative to that context.
+x-runtime: &runtime
+  image: plimsoll/runtime:local
+  build:
+    context: ../..
+    dockerfile: web/deploy/Dockerfile
+  environment: &runtime-environment
+    PLIMSOLL_DATABASE_URL: "postgresql+psycopg://${POSTGRES_USER:?POSTGRES_USER is required in /etc/plimsoll/production.env}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD (URL-safe hex) is required in /etc/plimsoll/production.env}@db:5432/${POSTGRES_DB:?POSTGRES_DB is required in /etc/plimsoll/production.env}"
+    PLIMSOLL_SECRET_KEY: "${PLIMSOLL_SECRET_KEY:?PLIMSOLL_SECRET_KEY is required in /etc/plimsoll/production.env}"
+    PLIMSOLL_ALLOWED_ORIGINS: "${PLIMSOLL_ALLOWED_ORIGINS:?set the exact https origin, e.g. https://119.91.211.156 or https://plimsoll.example.com}"
+    # Anonymous workspaces are the production auth mode. No SMTP variables and no
+    # PLIMSOLL_LOCAL_HTTP / PLIMSOLL_LOCAL_MAIL_TEST: those are local-only flags.
+    PLIMSOLL_AUTH_MODE: anonymous
+  logging: *logging
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - max_connections=30
+      - -c
+      - shared_buffers=64MB
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:?POSTGRES_DB is required in /etc/plimsoll/production.env}"
+      POSTGRES_USER: "${POSTGRES_USER:?POSTGRES_USER is required in /etc/plimsoll/production.env}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD (URL-safe hex) is required in /etc/plimsoll/production.env}"
+      # Anonymous workspaces only: this database never receives mail credentials.
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    mem_limit: 384m
+    logging: *logging
+    # No ports: PostgreSQL is only reachable on the compose network.
+
+  migrate:
+    <<: *runtime
+    restart: "no"
+    command: ["alembic", "-c", "web/backend/alembic.ini", "upgrade", "head"]
+    # The image HEALTHCHECK probes the API endpoint; this container exits after migrating.
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 256m
+
+  api:
+    <<: *runtime
+    restart: unless-stopped
+    command:
+      - uvicorn
+      - plimsoll_web.asgi:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --proxy-headers
+      - --forwarded-allow-ips=*
+    ports:
+      - "127.0.0.1:18000:8000" # nginx is the only public entry point
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 256m
+
+  worker:
+    <<: *runtime
+    restart: unless-stopped
+    command: ["python", "-m", "plimsoll_web.worker"]
+    # The image HEALTHCHECK probes /api/health, which the worker does not serve.
+    healthcheck:
+      disable: true
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    mem_limit: 768m
+
+volumes:
+  db-data:

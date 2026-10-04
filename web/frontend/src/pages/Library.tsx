@@ -9,7 +9,7 @@ const templates = [
   { key: 'queen_mary_1913', name: 'HMS Queen Mary', tag: '史实未认证代理', text: '一战战列巡洋舰工程代理。所有估算和史料缺口均保留标记。' },
 ] as const;
 
-export function Library({ onOpen }: { onOpen: (id: string) => void }) {
+export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) => void; anonymous?: boolean }) {
   const [projects, setProjects] = useState<ProjectSummary[] | null>(null);
   const [error, setError] = useState('');
   const [creating, setCreating] = useState<string | null>(null);
@@ -41,6 +41,10 @@ export function Library({ onOpen }: { onOpen: (id: string) => void }) {
       <span className="heading-rule" aria-hidden="true" />
     </div>
     {error && <div className="notice notice--error" role="alert">{error}</div>}
+    {anonymous && <div className="notice notice--info workspace-notice" role="note">
+      <strong>本浏览器工作区</strong>
+      <p>项目保存在这台设备的浏览器 Cookie 身份下，只有这个浏览器能看到它们。清除 Cookie、使用无痕窗口或换一台设备，都无法自动找回原来的工作区。需要留存时，请在项目页用「下载项目 JSON」保存完整文档。手工恢复时，先创建新项目，将备份的顶层 id 改为新项目的 id，再粘入「完整项目数据」并保存。运行页导出的 JSON/CSV 是计算报告，不是项目备份。</p>
+    </div>}
     <section className="library-section" aria-labelledby="my-projects-title">
       <div className="section-heading"><h2 id="my-projects-title">我的舰船</h2><span>{projects === null ? '读取中' : `${projects.length} 个项目`}</span></div>
       {projects === null ? <div className="loading-skeleton" aria-label="正在读取项目" /> : projects.length === 0

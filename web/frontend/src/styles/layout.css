@@ -132,6 +132,9 @@ input[aria-invalid='true'] { border-color: var(--error); }
 .notice { margin: 14px 0; padding: 14px 17px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; }
 .notice--error { border-color: var(--error); background: var(--error-soft); color: var(--error); }
 .notice--conflict { border-color: var(--warning); background: var(--warning-soft); color: var(--ink); }
+.workspace-notice { border-left: 2px solid var(--accent); color: var(--ink); }
+.workspace-notice strong { font-size: 12px; letter-spacing: 0.04em; }
+.workspace-notice p { margin: 7px 0 0; }
 .notice p { margin: 7px 0 12px; line-height: 1.6; }
 .notice-actions { display: flex; gap: 9px; }
 .overview-grid { display: grid; gap: 18px; }

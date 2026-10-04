@@ -1,10 +1,17 @@
 export type Theme = 'light' | 'dark';
+export type AuthMode = 'email' | 'anonymous';
+
+export interface AuthConfig {
+  mode: AuthMode;
+}
 
 export interface UserSession {
   id: string;
   email: string;
   theme: Theme;
   csrf_token: string;
+  mode?: AuthMode;
+  label?: string;
 }
 
 export interface ProjectDocument {

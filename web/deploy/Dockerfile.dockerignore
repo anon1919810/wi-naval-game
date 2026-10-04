@@ -1,0 +1,17 @@
+# Docker looks for <dockerfile-path>.dockerignore next to the Dockerfile.
+# The release archive already excludes these; this keeps a manual `docker build`
+# from a working checkout small and secret-free.
+.git
+.superpowers
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/*.egg-info
+**/node_modules
+web/backend/tests
+tools/plimsoll/tests
+**/.env
+**/.env.*
+**/production.env

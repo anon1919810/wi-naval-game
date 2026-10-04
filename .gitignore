@@ -48,3 +48,7 @@ desktop.ini
 /web/**/.env
 /web/**/.env.*
 /.superpowers/
+
+# 部署模板要进版本库，真实密钥文件不能进（/web/**/.env.* 会命中示例名，需显式放行）
+!/web/deploy/production.env.example
+/web/deploy/production.env

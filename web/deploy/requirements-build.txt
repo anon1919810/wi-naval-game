@@ -1,0 +1,3 @@
+# Build-only pin for web/backend/pyproject.toml (setuptools>=75). Installed into the
+# image so `pip install --no-build-isolation ./web/backend` resolves the declared backend.
+setuptools==80.9.0

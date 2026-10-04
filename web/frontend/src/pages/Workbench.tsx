@@ -249,6 +249,21 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
     updateDraft(clone as ProjectDocument);
   }
 
+  // Portable copy of the editable project document, not the calculation report:
+  // a lost browser workspace can be recovered by pasting this JSON back in.
+  function downloadProject() {
+    if (!draft || !view) return;
+    const payload = JSON.stringify(draft, null, 2);
+    const url = URL.createObjectURL(new Blob([payload], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${draft.name || 'project'}-r${view.revision}${dirty ? '-draft' : ''}.json`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   async function save() {
     if (!view || !draft || !dirty) return;
     const submittedGeneration = draftGeneration.current;
@@ -336,6 +351,10 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
     <main className="workbench-main">
       <div className="workbench-toolbar"><div className="breadcrumbs"><button onClick={onBack}>项目库</button><span>/</span><strong>{draft.name}</strong></div>
         <div className="toolbar-actions"><span className={`save-state ${dirty ? 'save-state--dirty' : ''}`}><i aria-hidden="true" />{dirty ? '未保存修改' : `已保存 · 修订 ${view.revision}`}</span>
+          <button className="button button--secondary" onClick={downloadProject}
+            title={dirty ? '下载当前草稿文档（含未保存修改）' : `下载已保存的修订 ${view.revision} 项目文档`}>
+            下载项目 JSON
+          </button>
           <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>保存修订</button>
           <button className="button button--primary" onClick={run} disabled={dirty || !conditionId || busy || !!runError} title={dirty ? '先保存当前修改再运行计算' : runError || undefined}>{busy ? '请稍候…' : '运行计算 ↗'}</button></div>
       </div>

@@ -1,4 +1,4 @@
-import type { ProjectDocument, ProjectSummary, ProjectView, RunView, Theme, UserSession } from './types';
+import type { AuthConfig, ProjectDocument, ProjectSummary, ProjectView, RunView, Theme, UserSession } from './types';
 
 export class ApiError extends Error {
   constructor(public status: number, public detail: unknown) {
@@ -39,9 +39,21 @@ export async function me(): Promise<UserSession> {
   return user;
 }
 
-export async function requestCode(email: string): Promise<void> {
-  await call('/auth/request-code', { method: 'POST', body: JSON.stringify({ email }) });
+export const authConfig = () => call<AuthConfig>('/auth/config');
+
+let anonymousBootstrap: Promise<UserSession> | null = null;
+
+/** Single-flight so a remount or retry never mints a second workspace. */
+export function bootstrapAnonymous(): Promise<UserSession> {
+  anonymousBootstrap ??= call<UserSession>('/auth/anonymous', { method: 'POST', body: '{}' })
+    .then(session => { setSession(session); return session; })
+    .catch((cause: unknown) => { anonymousBootstrap = null; throw cause; });
+  return anonymousBootstrap;
 }
+
+export const requestCode = async (email: string): Promise<void> => {
+  await call('/auth/request-code', { method: 'POST', body: JSON.stringify({ email }) });
+};
 
 export async function verifyCode(email: string, code: string): Promise<UserSession> {
   const session = await call<UserSession>('/auth/verify-code', {

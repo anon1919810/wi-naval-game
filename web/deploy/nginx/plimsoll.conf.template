@@ -1,0 +1,97 @@
+# Plimsoll production vhost TEMPLATE.
+#
+# Render every __PLIMSOLL_*__ token before installing (see
+# docs/plimsoll-1.0/web-production-operations.md). Tokens:
+#   __PLIMSOLL_SERVER_NAME__ 119.91.211.156 or the DNS name
+#   __PLIMSOLL_TLS_CERT__    /etc/letsencrypt/live/plimsoll-ip/fullchain.pem
+#   __PLIMSOLL_TLS_KEY__      /etc/letsencrypt/live/plimsoll-ip/privkey.pem
+#   __PLIMSOLL_ACME_ROOT__    /var/www/acme
+#
+# This file replaces exactly ONE already-named old site (backup first, inventory with
+# `nginx -T | grep -n server_name`). Do not install it as an additional server block
+# next to the old site, and do not install the HTTPS block before the certificate files
+# exist: nginx -t will fail and the old site stays offline.
+
+upstream plimsoll_api {
+    server 127.0.0.1:18000;
+    keepalive 8;
+}
+
+# Port 80: ACME HTTP-01 only, everything else jumps to the canonical https origin.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __PLIMSOLL_SERVER_NAME__;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root __PLIMSOLL_ACME_ROOT__;
+        default_type "text/plain";
+    }
+
+    # Canonical target is the rendered server_name, never the request Host header:
+    # $host would let an unknown Host redirect visitors to an attacker's domain.
+    location / {
+        return 308 https://__PLIMSOLL_SERVER_NAME__$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name __PLIMSOLL_SERVER_NAME__;
+
+    ssl_certificate     __PLIMSOLL_TLS_CERT__;
+    ssl_certificate_key __PLIMSOLL_TLS_KEY__;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:PlimsollTLS:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    root /opt/plimsoll/current/web/frontend/dist;
+    index index.html;
+    client_max_body_size 8m;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options SAMEORIGIN always;
+    add_header Referrer-Policy same-origin always;
+
+    # Optional coarse limits. Enable only after installing rate-limit-zones.conf:
+    # include /etc/nginx/conf.d/plimsoll-rate-limit-zones.conf;
+
+    # API: keep the /api prefix (proxy_pass has no trailing URI) and overwrite
+    # X-Forwarded-For with the real peer address.
+    location /api/ {
+        # limit_req zone=plimsoll_general burst=20 nodelay;
+        proxy_pass http://127.0.0.1:18000;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 180s;
+        proxy_send_timeout 180s;
+    }
+
+    # Unknown /api paths must stay API 404s, never the SPA shell.
+    location = /api {
+        return 308 /api/;
+    }
+
+    # Hashed build assets are immutable.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
+        try_files $uri =404;
+    }
+
+    # The shell must always be revalidated so a new release is picked up.
+    location = /index.html {
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # SPA fallback for client-side routes only.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
