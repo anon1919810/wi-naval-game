@@ -12,14 +12,14 @@
 |---|---|---|---|
 | `db` | `postgres:16-alpine`，`max_connections=30`、`shared_buffers=64MB` | 384M | 无（仅 compose 网络） |
 | `migrate` | 一次性 `alembic -c web/backend/alembic.ini upgrade head` | 256M | 无 |
-| `api` | `uvicorn plimsoll_web.asgi:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=*` | 256M | `127.0.0.1:18000` |
-| `worker` | `python -m plimsoll_web.worker` | 768M | 无 |
+| `api` | `uvicorn plimsoll_web.asgi:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=*` | 512M | `127.0.0.1:18000` |
+| `worker` | `python -m plimsoll_web.worker` | 640M | 无 |
 
 三个 Python 服务共用同一镜像 `plimsoll/runtime:local`，只构建一次。数据库数据在命名卷 `plimsoll_db-data` 中持久化。所有服务日志为 `json-file`，`max-size=10m`、`max-file=3`。
 
 `api` 与 `worker` 依赖 `migrate` 的 `service_completed_successfully`；`migrate` 依赖 `db` 的 `service_healthy`。这一依赖顺序遵循 Compose 的启动顺序机制：<https://docs.docker.com/compose/how-tos/startup-order/>。worker 与 migrate 显式 `healthcheck: disable: true`，因为镜像自带的 `HEALTHCHECK` 探测 `/api/health`，而这两个容器不提供该端点。
 
-内存合计上限约 1.6 GiB，为 2 GiB 主机留出余量；实际占用需在远端验收时用 `docker stats` 复核。
+常驻容器上限合计 1536 MiB，迁移容器退出后不占常驻预算。Queen Mary 大型 CSV 导出在原 API 256 MiB 上限下触发了容器 OOM，因此 API 调整为 512 MiB，单 worker 为 640 MiB。实际运行峰值仍需测量，并保留每次发布的验收记录。
 
 ## 生产环境变量
 

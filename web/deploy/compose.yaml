@@ -4,7 +4,7 @@
 #   docker compose --env-file /etc/plimsoll/production.env -f web/deploy/compose.yaml ...
 # Secrets are never inline defaults here; missing values abort interpolation.
 #
-# Resources are sized for 2 vCPU / 2 GiB: db 384M + api 256M + worker 768M.
+# Resources are sized for 2 vCPU / 2 GiB: db 384M + api 512M + worker 640M.
 # migrate is transient (256M, restart: "no") and exits 0 once the schema is at head.
 
 name: plimsoll
@@ -91,7 +91,8 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    mem_limit: 256m
+    # Queen Mary report serialization exceeds the earlier 256M cap.
+    mem_limit: 512m
 
   worker:
     <<: *runtime
@@ -105,7 +106,7 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    mem_limit: 768m
+    mem_limit: 640m
 
 volumes:
   db-data:
