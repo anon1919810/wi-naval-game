@@ -1,20 +1,26 @@
 import type { ReactNode } from 'react';
 import { FactField } from './FactField';
 import { number, object, type Raw } from './formModel';
+import type { Dimension } from './units';
 
-export function Metric({ label, value, unit = '', estimate, source }: {
-  label: string; value: unknown; unit?: string; estimate?: unknown; source?: string | null;
+export function Metric({ label, value, unit = '', dimension, storedUnit, estimate, source }: {
+  label: string; value: unknown; unit?: string; dimension?: Dimension; storedUnit?: string;
+  estimate?: unknown; source?: string | null;
 }) {
   const known = number(value) !== null;
-  return <FactField label={label} value={number(value)} unit={unit} source={source ?? '当前工况运行结果'}
+  return <FactField label={label} value={number(value)} unit={unit} dimension={dimension} storedUnit={storedUnit}
+    source={source ?? '当前工况运行结果'}
     status={!known ? 'unknown' : estimate === true ? 'estimate' : 'known'} />;
 }
 
 // A declared fact carries its own value/source/estimate; a fact with no value
 // stays unknown rather than defaulting to a number or to zero.
-export function DeclaredFact({ label, unit, fact: supplied }: { label: string; unit: string; fact: unknown }) {
+export function DeclaredFact({ label, unit, fact: supplied, dimension, storedUnit }: {
+  label: string; unit: string; fact: unknown; dimension?: Dimension; storedUnit?: string;
+}) {
   const entry = object(supplied);
-  return <Metric label={label} value={entry.value} unit={unit} estimate={entry.estimate}
+  return <Metric label={label} value={entry.value} unit={unit} dimension={dimension} storedUnit={storedUnit}
+    estimate={entry.estimate}
     source={typeof entry.source === 'string' && entry.source ? entry.source : '未声明来源'} />;
 }
 export function ResultSection({ available, children }: { available: boolean; children: ReactNode }) {
@@ -30,7 +36,9 @@ export function Diagnostics({ value }: { value: unknown }) {
 // valid non-primary result: the value is shown, labelled as an estimate and
 // accompanied by the backend's reason and applicability flags.
 const PRESENTED = new Set(['completed', 'estimated_nonprimary']);
-export function StudyResult({ label, data, metrics }: { label: string; data: unknown; metrics: Array<[string, string, string?]> }) {
+export function StudyResult({ label, data, metrics }: {
+  label: string; data: unknown; metrics: Array<[string, string, string?, Dimension?, string?]>;
+}) {
   const study = object(data);
   const status = typeof study.status === 'string' ? study.status : null;
   const available = status !== null && PRESENTED.has(status);
@@ -40,8 +48,8 @@ export function StudyResult({ label, data, metrics }: { label: string; data: unk
     : typeof study.method === 'string' && study.method ? study.method : null;
   return <div className="study-result"><h4>{label} <span>{status ?? (Object.keys(study).length ? 'declared' : '未请求')}</span></h4>
     {study.reason != null && <p>{String(study.reason)}</p>}
-    <div className="metric-grid">{metrics.map(([key, name, unit]) =>
-      <Metric key={key} label={name} value={available ? study[key] : null} unit={unit}
+    <div className="metric-grid">{metrics.map(([key, name, unit, dimension, storedUnit]) =>
+      <Metric key={key} label={name} value={available ? study[key] : null} unit={unit} dimension={dimension} storedUnit={storedUnit}
         estimate={available ? estimated : undefined}
         source={available ? source : '该研究未完成，结果未知'} />)}</div>
     {available && estimated && <p className="form-hint">该结果为工程估算 / 非主工况结果，仅供比较，不得当作确认值。</p>}
@@ -50,6 +58,7 @@ export function StudyResult({ label, data, metrics }: { label: string; data: unk
     <Diagnostics value={study.diagnostics} /></div>;
 }
 export function RowResults({ view }: { view: Raw }) {
-  return <><div className="metric-grid">{Object.entries(object(view.groups)).map(([id, row]) => <Metric key={id} label={`${id} 小计`} value={object(row).weight_t} unit="t" />)}</div>
+  return <><div className="metric-grid">{Object.entries(object(view.groups)).map(([id, row]) =>
+    <Metric key={id} label={`${id} 小计`} value={object(row).weight_t} unit="t" dimension="mass" />)}</div>
     <Diagnostics value={view.diagnostics} /></>;
 }

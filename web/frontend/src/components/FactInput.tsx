@@ -1,4 +1,6 @@
-import { fact, inputNumber, sourceText, type Raw } from './formModel';
+import { QuantityField } from './QuantityField';
+import { number, object, type Raw } from './formModel';
+import type { Dimension } from './units';
 
 export function EstimateInput({ label, value, onChange }: { label: string; value: unknown; onChange: (value: boolean | null) => void }) {
   return <label className="field-label">估算状态<select aria-label={label} value={value === true ? 'estimate' : value === false ? 'confirmed' : 'unknown'}
@@ -7,15 +9,34 @@ export function EstimateInput({ label, value, onChange }: { label: string; value
   </select></label>;
 }
 
-export function FactInput({ label, value, kind = 'number', onChange }: {
-  label: string; value: unknown; kind?: 'number' | 'integer' | 'text'; onChange: (value: Raw) => void;
-}) {
-  const entry = fact(value);
+export interface FactInputProps {
+  label: string;
+  value: unknown;
+  onChange: (value: Raw) => void;
+  kind?: 'number' | 'integer' | 'text';
+  /** Reading dimension; the fact value is stored in `storedUnit`. */
+  dimension?: Dimension;
+  storedUnit?: string;
+  hint?: string;
+}
+
+/**
+ * A sourced fact: value, source and three-state estimate. With a convertible
+ * dimension the value speaks the reader's unit while `{value}` stays canonical;
+ * `storedUnit` declares the unit the fact is actually stored in.
+ */
+export function FactInput({ label, value, kind = 'number', dimension, storedUnit, onChange, hint }: FactInputProps) {
+  const entry = object(value);
   return <fieldset className="fact-input"><legend>{label}</legend><div className="form-grid">
-    <label className="field-label">值<input aria-label={`${label} 值`} type={kind === 'text' ? 'text' : 'number'} step={kind === 'integer' ? 1 : 'any'}
-      placeholder="未知" value={typeof entry.value === 'number' || typeof entry.value === 'string' ? entry.value : ''}
-      onChange={e => onChange({ ...entry, value: kind === 'text' ? e.target.value.trim() === '' ? null : e.target.value : inputNumber(e.target.value) })} /></label>
-    <label className="field-label">来源<input aria-label={`${label} 来源`} value={sourceText(entry.source)} placeholder="待补充来源"
+    {dimension && kind !== 'text'
+      ? <QuantityField label={label} ariaLabel={`${label} 值`} dimension={dimension} storedUnit={storedUnit}
+        value={number(entry.value)} kind={kind === 'integer' ? 'integer' : 'signed'} hint={hint}
+        onChange={next => onChange({ ...entry, value: next })} />
+      : <label className="field-label">值<input aria-label={`${label} 值`} type={kind === 'text' ? 'text' : 'number'} step={kind === 'integer' ? 1 : 'any'}
+        placeholder="未知" value={typeof entry.value === 'number' || typeof entry.value === 'string' ? entry.value : ''}
+        onChange={e => onChange({ ...entry, value: kind === 'text' ? e.target.value.trim() === '' ? null : e.target.value : number(e.target.value.trim() === '' ? null : Number(e.target.value)) })} />
+        {hint && <small>{hint}</small>}</label>}
+    <label className="field-label">来源<input aria-label={`${label} 来源`} value={typeof entry.source === 'string' ? entry.source : ''} placeholder="待补充来源"
       onChange={e => onChange({ ...entry, source: e.target.value.trim() === '' ? null : e.target.value })} /></label>
     <EstimateInput label={`${label} 估算状态`} value={entry.estimate} onChange={estimate => onChange({ ...entry, estimate })} />
   </div></fieldset>;

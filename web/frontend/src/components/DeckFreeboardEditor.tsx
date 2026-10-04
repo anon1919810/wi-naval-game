@@ -1,5 +1,7 @@
 import type { RunView } from '../types';
 import { FactField } from './FactField';
+import { QuantityField } from './QuantityField';
+import { useUnits } from './UnitProvider';
 import type { DeckInput, DeckPoint, DeckSegment, MeasureField } from './deckModel';
 
 interface DeclaredFreeboard {
@@ -51,6 +53,7 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
   onPatchDeck: (next: DeckInput) => void;
 }) {
   const fb = pickDeclaredFreeboard(runs);
+  const units = useUnits();
   const pointOptions = deck.points.map(p => p.id).filter(id => id.length > 0);
 
   function updatePoint(index: number, patch: Partial<DeckPoint>) {
@@ -98,8 +101,14 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
         : deck.points.map((point, index) => (
           <div className="deck-row" key={index}>
             <label>点 id<input type="text" value={point.id} onChange={e => updatePoint(index, { id: e.target.value })} placeholder="如 aft-centre" /></label>
-            <label>x · m<input type="number" step="any" value={point.x_m ?? ''} onChange={e => updatePoint(index, { x_m: e.target.value.trim() === '' ? null : Number(e.target.value) })} placeholder="未知" /></label>
-            <label>干舷值 · m<input type="number" step="any" aria-label={`点 ${point.id} 干舷值`} value={point.freeboard_m.value ?? ''} onChange={e => updatePointFreeboard(index, { value: e.target.value.trim() === '' ? null : Number(e.target.value) })} placeholder="未知" /></label>
+            <QuantityField small label="x" aria-label={`点 ${point.id} x`} value={point.x_m} dimension="length"
+              onChange={value => updatePoint(index, { x_m: value })} />
+            <QuantityField small label="y" aria-label={`点 ${point.id} y`} value={point.y_m} dimension="length"
+              onChange={value => updatePoint(index, { y_m: value })} />
+            <QuantityField small label="z" aria-label={`点 ${point.id} z`} value={point.z_m} dimension="length" kind="nonnegative"
+              onChange={value => updatePoint(index, { z_m: value })} />
+            <QuantityField small label="干舷值" aria-label={`点 ${point.id} 干舷值`} value={point.freeboard_m.value} dimension="length" kind="nonnegative"
+              onChange={value => updatePointFreeboard(index, { value })} />
             <label>干舷来源<input type="text" aria-label={`点 ${point.id} 干舷来源`} value={point.freeboard_m.source ?? ''} onChange={e => updatePointFreeboard(index, { source: e.target.value })} placeholder="来源" /></label>
             <label>估算<EstimateCheckbox value={point.freeboard_m.estimate} onChange={next => updatePointFreeboard(index, { estimate: next })} /></label>
             <button type="button" className="text-button deck-remove" onClick={() => removePoint(index)} aria-label={`删除点 ${point.id || index}`}>删除</button>
@@ -118,15 +127,15 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
           return (
             <div className="deck-row deck-row--segment" key={index}>
               <label>段 id<input type="text" value={segment.id} onChange={e => updateSegment(index, { id: e.target.value })} placeholder="如 centreline-profile" /></label>
-              <label>艏端点<select value={segment.aft_point_id ?? ''} onChange={e => updateSegment(index, { aft_point_id: e.target.value || null })}>
+              <label>艉端点<select aria-label={`段 ${segment.id} 艉端点`} value={segment.aft_point_id ?? ''} onChange={e => updateSegment(index, { aft_point_id: e.target.value || null })}>
                 <option value="">未选择</option>
                 {pointOptions.map(id => <option key={id} value={id}>{id}</option>)}
               </select></label>
-              <label>艉端点<select value={segment.fore_point_id ?? ''} onChange={e => updateSegment(index, { fore_point_id: e.target.value || null })}>
+              <label>艏端点<select aria-label={`段 ${segment.id} 艏端点`} value={segment.fore_point_id ?? ''} onChange={e => updateSegment(index, { fore_point_id: e.target.value || null })}>
                 <option value="">未选择</option>
                 {pointOptions.map(id => <option key={id} value={id}>{id}</option>)}
               </select></label>
-              <span className="deck-readonly">长度：<strong>{lengthM === null ? '—' : `${lengthM} m`}</strong> · 占比：<strong>{lengthPct === null ? '—' : `${lengthPct} %`}</strong></span>
+              <span className="deck-readonly">长度：<strong>{units.text(lengthM, 'length')}</strong> · 占比：<strong>{lengthPct === null ? '—' : `${lengthPct} %`}</strong></span>
               <button type="button" className="text-button deck-remove" onClick={() => removeSegment(index)} aria-label={`删除段 ${segment.id || index}`}>删除</button>
             </div>
           );
@@ -136,7 +145,8 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
     <div className="deck-group">
       <div className="deck-group-title"><h3>参考长度</h3></div>
       <div className="deck-row">
-        <label>参考长度 · m<input type="number" step="any" aria-label="参考长度值" value={deck.reference_length_m.value ?? ''} onChange={e => updateReference({ value: e.target.value.trim() === '' ? null : Number(e.target.value) })} placeholder="未知" /></label>
+        <QuantityField small label="参考长度" aria-label="参考长度值" value={deck.reference_length_m.value} dimension="length" kind="positive"
+          onChange={value => updateReference({ value })} />
         <label>来源<input type="text" aria-label="参考长度来源" value={deck.reference_length_m.source ?? ''} onChange={e => updateReference({ source: e.target.value })} placeholder="来源" /></label>
         <label>估算<EstimateCheckbox value={deck.reference_length_m.estimate} onChange={next => updateReference({ estimate: next })} /></label>
       </div>
@@ -149,7 +159,7 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
           <FactField
             label="加权平均干舷"
             value={numeric(fb.values.weighted_mean_freeboard_m)}
-            unit="m"
+            dimension="length"
             status={fb.values.weighted_mean_freeboard_m == null ? 'unknown' : fb.values.weighted_mean_estimate ? 'estimate' : 'known'}
             source={typeof fb.values.weighted_mean_source === 'string' ? fb.values.weighted_mean_source : null}
           />
@@ -162,7 +172,7 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
           <FactField
             label="参考长度"
             value={numeric(fb.values.reference_length_m)}
-            unit="m"
+            dimension="length"
             status={fb.values.reference_length_m == null ? 'unknown' : 'known'}
             source={typeof fb.values.reference_source === 'string' ? fb.values.reference_source : null}
           />

@@ -2,8 +2,11 @@ import { useState } from 'react';
 
 import type { RunView } from '../types';
 import { EstimateInput, IdPicker } from './FactInput';
+import { QuantityField } from './QuantityField';
+import { useUnits } from './UnitProvider';
+import type { Dimension } from './units';
 import { ResultSection } from './FormResults';
-import { object, rows, sourceText, stringList, unassignedIds, uniqueId, type Raw } from './formModel';
+import { number, object, rows, sourceText, stringList, unassignedIds, uniqueId, type Raw } from './formModel';
 import {
   declaredMass, declaredRows, MISC_LEAF, rowBoundIds, TYPED_FIELDS,
   templatesFor, TORPEDO_LEAF, typedProblem, typedValue,
@@ -58,6 +61,7 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   const leafId = (choice && available.includes(choice) ? choice : available[0]) ?? TORPEDO_LEAF;
   const leaf = object(weapons[leafId]);
   const declared = declaredRows(leaf);
+  const units = useUnits();
   const [problems, setProblems] = useState<Record<string, string>>({});
   const bound = rowBoundIds(declared);
   const unassigned = unassignedIds(stringList(leaf.weight_item_ids), bound);
@@ -143,12 +147,18 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
                 const key = `${leafId} ${String(row.row)} ${spec.label}`;
                 const value = typed[field];
                 const problem = problems[`${leafId}/${String(row.row)}/${field}`];
-                return <label className="field-label" key={field}>{spec.label}
+                if (!spec.dimension) return <label className="field-label" key={field}>{spec.label}
                   <input type={spec.kind === 'text' ? 'text' : 'number'} step={spec.kind === 'integer' ? 1 : 'any'}
                     min={spec.kind === 'signed' ? undefined : 0} placeholder="未知" aria-label={key}
                     aria-invalid={Boolean(problem)} value={value == null ? '' : String(value)}
                     onChange={e => setTyped(index, field, e.target.value)} />
                   {problem && <span className="field-error" role="alert">{problem}</span>}</label>;
+                // A convertible quantity is typed in the reader's unit and stored
+                // canonically; the domain is still checked on the stored value.
+                return <QuantityField key={field} label={spec.label} ariaLabel={key} value={number(value)}
+                  dimension={spec.dimension} storedUnit={spec.storedUnit} kind={spec.kind === 'integer' ? 'integer' : spec.kind === 'positive' ? 'positive' : spec.kind === 'nonnegative' ? 'nonnegative' : 'signed'}
+                  invalid={Boolean(problem)}
+                  onChange={next => setTyped(index, field, next === null ? '' : String(next))} />;
               })}
               <label className="field-label">行来源<input aria-label={`${leafId} ${String(row.row)} 行来源`}
                 value={sourceText(row.source)} placeholder="待补充来源"
@@ -205,9 +215,9 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
               const mass = numeric(row.weight_t);
               const declaredValue = declaredMass(row);
               return <div key={String(row.row ?? index)} className="metric-grid">
-                <ResultFact label={`${name} · 账本质量`} value={mass} unit="t"
+                <ResultFact label={`${name} · 账本质量`} value={mass} unit="t" dimension="mass"
                   note={row.mass_status === 'ledger_bound' ? null : '未绑定账本条目'} />
-                {declaredValue !== null && <ResultFact label={`${name} · 声明质量`} value={declaredValue} unit="t"
+                {declaredValue !== null && <ResultFact label={`${name} · 声明质量`} value={declaredValue} unit="t" dimension="mass"
                   note="仅信息，不计入排水量" />}
               </div>;
             })}
@@ -220,10 +230,13 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   </div>;
 }
 
-function ResultFact({ label, value, unit, note }: { label: string; value: number | null; unit: string; note: string | null }) {
+function ResultFact({ label, value, unit, note, dimension }: {
+  label: string; value: number | null; unit: string; note: string | null; dimension?: Dimension;
+}) {
+  const units = useUnits();
   return <div className={`fact-field fact-field--${value === null ? 'unknown' : 'known'}`}>
     <span className="fact-label">{label}</span>
-    <strong className="fact-value">{value === null ? '未知' : `${value} ${unit}`}</strong>
+    <strong className="fact-value">{value === null ? '未知' : dimension ? units.text(value, dimension) : `${value} ${unit}`}</strong>
     <span className="fact-meta">{note ?? '当前工况运行结果'}</span>
   </div>;
 }

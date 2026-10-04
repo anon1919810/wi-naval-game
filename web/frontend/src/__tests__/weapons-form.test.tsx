@@ -104,7 +104,7 @@ describe('weapons page form', () => {
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '鱼雷与水雷武备' }));
     fireEvent.change(screen.getByLabelText('选择武器分区'), { target: { value: 'misc_weight' } });
-    const input = await screen.findByLabelText('misc_weight hull_below 质量 · t');
+    const input = await screen.findByLabelText('misc_weight hull_below 质量');
     fireEvent.change(input, { target: { value: '12.5' } });
     fireEvent.click(screen.getByRole('button', { name: '保存修订' }));
 
@@ -125,7 +125,7 @@ describe('weapons page form', () => {
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '鱼雷与水雷武备' }));
     fireEvent.change(screen.getByLabelText('选择武器分区'), { target: { value: 'misc_weight' } });
-    const input = await screen.findByLabelText('misc_weight hull_below 质量 · t');
+    const input = await screen.findByLabelText('misc_weight hull_below 质量');
     fireEvent.change(input, { target: { value: '12.5' } });
     fireEvent.change(input, { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: '保存修订' }));
@@ -182,7 +182,7 @@ describe('weapons page form', () => {
       fireEvent.click(await screen.findByRole('button', { name: '添加杂项分区' }));
       fireEvent.change(screen.getByLabelText('新增行模板'), { target: { value: 'hull_below' } });
       fireEvent.click(screen.getByRole('button', { name: '添加声明行' }));
-      fireEvent.change(screen.getByLabelText('misc_weight hull_below 质量 · t'), { target: { value: '12.5' } });
+      fireEvent.change(screen.getByLabelText('misc_weight hull_below 质量'), { target: { value: '12.5' } });
       await saveDraft();
       const misc = savedLeaf('misc_weight');
       expect((misc.page_rows as Array<Record<string, unknown>>)[0].row).toBe('hull_below');

@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import type { StageEnvelope, StageStatus as StageStatusCode } from '../types';
+import { FloodingResults } from './FloodingResults';
+import { useUnits } from './UnitProvider';
+import { classifyKey, type Dimension, type QuantityKey } from './units';
 
 export const STAGE_LABELS: Record<string, string> = {
   loading: '载荷与重心', systems: '系统与分项', l0: '设计基线', geometry: '型线几何',
@@ -26,20 +29,26 @@ const DATA_LABELS: Record<string, string> = {
   awp_m2: '水线面积', roll_period_s: '横摇周期',
 };
 
-function inferredUnit(key: string): string | undefined {
-  if (key === 'rho_t_m3') return 't/m³';
-  if (key.startsWith('pct_')) return '%';
-  if (key.endsWith('_kn')) return 'kn';
-  if (key.endsWith('_nm')) return 'nmi';
-  if (key.endsWith('_kw')) return 'kW';
-  if (key.endsWith('_m4')) return 'm⁴';
-  if (key.endsWith('_m')) return 'm';
-  if (key.endsWith('_t')) return 't';
-  if (key.endsWith('_deg')) return '°';
-  if (key.endsWith('_m2')) return 'm²';
-  if (key.endsWith('_m3')) return 'm³';
-  if (key.endsWith('_s')) return 's';
-  return undefined;
+// Units are only inferred from reliable, unambiguous key names: a force in kN,
+// a time in s, a density in kg/m³ and every other canonical-only quantity keeps
+// its stored label and value instead of borrowing a convertible suffix.
+function inferredUnit(key: string): { label: string; dimension?: Dimension; storedUnit?: string } | null {
+  const kind: QuantityKey | null = classifyKey(key);
+  if (kind) return { label: '', dimension: kind.dimension, storedUnit: kind.storedUnit };
+  // Densities, viscosities and rates keep their canonical compound unit.
+  if (key === 'rho_t_m3') return { label: 't/m³' };
+  if (key.endsWith('_kg_m3')) return { label: 'kg/m³' };
+  if (key.endsWith('_t_m3')) return { label: 't/m³' };
+  if (key.endsWith('_m2_s')) return { label: 'm²/s' };
+  if (key.endsWith('_t_per_day')) return { label: 't/day' };
+  if (key.endsWith('_m3_s') || key.endsWith('_m3_per_s')) return { label: 'm³/s' };
+  if (key.endsWith('_kg')) return { label: 'kg' };
+  if (key.endsWith('_kn')) return { label: 'kN' };
+  if (key.endsWith('_s')) return { label: 's' };
+  if (key.startsWith('pct_')) return { label: '%' };
+  if (key.endsWith('_nm')) return { label: 'nmi' };
+  if (key.endsWith('_pa')) return { label: 'Pa' };
+  return null;
 }
 
 function display(value: unknown): string {
@@ -53,7 +62,12 @@ function display(value: unknown): string {
   return String(value);
 }
 
-interface Datum { key: string; value: unknown; unit?: string; source?: string; estimate?: boolean }
+interface Datum { key: string; value: unknown; unit?: string; dimension?: Dimension; storedUnit?: string; source?: string; estimate?: boolean }
+
+function datumFor(key: string, value: unknown): Datum {
+  const unit = inferredUnit(key);
+  return { key, value, unit: unit?.dimension ? undefined : unit?.label, dimension: unit?.dimension, storedUnit: unit?.storedUnit };
+}
 
 function extract(data: Record<string, unknown> | null): Datum[] {
   if (!data) return [];
@@ -61,15 +75,17 @@ function extract(data: Record<string, unknown> | null): Datum[] {
   for (const [key, value] of Object.entries(data)) {
     if (key === 'diagnostics' || key === 'assumptions' || key === 'method_version') continue;
     if (typeof value === 'number' || value === null) {
-      found.push({ key, value, unit: inferredUnit(key) });
+      found.push(datumFor(key, value));
     } else if (value && typeof value === 'object' && !Array.isArray(value)) {
       const row = value as Record<string, unknown>;
       if ('value' in row && (typeof row.value === 'number' || row.value === null)) {
-        found.push({ key, value: row.value, unit: typeof row.unit === 'string' ? row.unit : inferredUnit(key),
+        const declared = typeof row.unit === 'string' ? { label: row.unit } : inferredUnit(key);
+        found.push({ key, value: row.value, unit: declared?.dimension ? undefined : declared?.label,
+          dimension: declared?.dimension, storedUnit: declared?.storedUnit,
           source: typeof row.source === 'string' ? row.source : undefined, estimate: row.estimate === true });
       } else if (key === 'values') {
         for (const [subkey, subvalue] of Object.entries(row)) {
-          if (typeof subvalue === 'number' || subvalue === null) found.push({ key: subkey, value: subvalue, unit: inferredUnit(subkey) });
+          if (typeof subvalue === 'number' || subvalue === null) found.push(datumFor(subkey, subvalue));
           if (found.length >= 8) break;
         }
       }
@@ -83,30 +99,40 @@ function record(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : {};
 }
 
-function tableValue(value: unknown, unit?: string): string {
-  return `${display(value)}${value !== null && value !== undefined && unit ? ` ${unit}` : ''}`;
+// A table cell that follows the reader's units when the key is a reliable
+// quantity name, and keeps the canonical unit otherwise (for example kN).
+function tableValue(units: ReturnType<typeof useUnits>, key: string, value: unknown, canonicalUnit?: string): string {
+  if (value === null || value === undefined) return '未知';
+  const kind = classifyKey(key);
+  if (kind) return units.keyed(key, value);
+  return `${display(value)}${canonicalUnit ? ` ${canonicalUnit}` : ''}`;
 }
 
 function ResistanceTables({ data }: { data: Record<string, unknown> }) {
+  const units = useUnits();
   const rows = Array.isArray(data.rows) ? data.rows.map(record) : [];
   const powerRows = Array.isArray(data.power_rows) ? data.power_rows.map(record) : [];
   const validity = record(data.validity);
   const scenario = record(data.scenario);
   if (rows.length === 0 && powerRows.length === 0) return null;
+  const powerUnit = units.unit('power');
   return <div className="resistance-results">
     <p className="result-context">方法 {display(data.method)} · {data.estimate === true ? '工程估算' : '来源见输入'}
       {validity.model_applicable === false && ' · 不在经验适用范围，仅供方法试算'}
       {data.primary_result === false && ' · 非主结果'}</p>
     {typeof scenario.source === 'string' && <p className="result-source">来源：{scenario.source}</p>}
     {rows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>速度与阻力</caption><thead><tr><th>速度</th><th>总阻力</th><th>有效功率</th><th>解释</th></tr></thead><tbody>{rows.map((row, index) => <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
-      <td>{tableValue(row.speed_kn, 'kn')}</td><td>{tableValue(row.total_resistance_kn, 'kN')}</td><td>{tableValue(row.effective_power_kw, 'kW')}</td>
+      <td>{tableValue(units, 'speed_kn', row.speed_kn)}</td><td>{tableValue(units, 'total_resistance_kn', row.total_resistance_kn, 'kN')}</td>
+      <td>{tableValue(units, 'effective_power_kw', row.effective_power_kw)}</td>
       <td>{row.complete === false ? '未完整求得' : row.model_applicable === false ? '不在经验适用范围' : row.primary_result === false ? '非主结果' : '计算值'}{row.estimate === true && ' · 工程估算'}</td>
     </tr>)}</tbody></table></div>}
-    {powerRows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>轴功率与推进系数</caption><thead><tr><th>速度</th><th>QPC</th><th>轴功率</th><th>轴马力</th><th>解释</th></tr></thead><tbody>{powerRows.map((row, index) => {
+    {powerRows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>轴功率与推进系数</caption><thead><tr><th>速度</th><th>QPC</th><th>轴功率</th><th>解释</th></tr></thead><tbody>{powerRows.map((row, index) => {
       const qpc = record(row.qpc);
       return <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
-        <td>{tableValue(row.speed_kn, 'kn')}</td><td>{tableValue(qpc.value)}{typeof qpc.source === 'string' && <small>{qpc.source}</small>}</td>
-        <td>{tableValue(row.shaft_power_kw, 'kW')}</td><td>{tableValue(row.shaft_power_shp, 'shp')}</td>
+        <td>{tableValue(units, 'speed_kn', row.speed_kn)}</td><td>{tableValue(units, 'qpc', qpc.value)}{typeof qpc.source === 'string' && <small>{qpc.source}</small>}</td>
+        {/* One shaft-power column in the reader's unit; the stored kW and shp
+            values are the same quantity and must not be shown side by side. */}
+        <td>{tableValue(units, 'shaft_power_kw', row.shaft_power_kw)}<small>{powerUnit}</small></td>
         <td>{row.complete === false ? '未完整求得' : row.primary_result === false ? '非主结果' : '计算值'}{row.estimate === true && ' · 工程估算'}</td>
       </tr>;
     })}</tbody></table></div>}
@@ -115,13 +141,20 @@ function ResistanceTables({ data }: { data: Record<string, unknown> }) {
 
 export function StageStatus({ name, stage }: { name: string; stage: StageEnvelope }) {
   const [rawOpen, setRawOpen] = useState(false);
+  const units = useUnits();
   const values = extract(stage.data);
   return <article className={`stage-card stage-card--${stage.status}`}>
     <div className="stage-card-header"><div><span className="section-kicker">{name.toUpperCase()}</span><h3>{STAGE_LABELS[name] ?? name}</h3></div><span className={`stage-pill stage-pill--${stage.status}`}>{STATUS_LABELS[stage.status] ?? stage.status}</span></div>
     {stage.reason && stage.status !== 'not_requested' && <p className="stage-reason">{stage.reason}</p>}
     {stage.status === 'not_requested' && <p className="stage-reason">这次请求没有运行该阶段。</p>}
-    {values.length > 0 && <div className="stage-values">{values.map(item => <div className="stage-value" key={item.key}><span title={item.key}>{DATA_LABELS[item.key] ?? item.key}</span><strong>{display(item.value)}{item.value !== null && item.unit ? ` ${item.unit}` : ''}</strong>{item.source && <small>{item.source}</small>}{item.estimate && <em>工程估算</em>}</div>)}</div>}
+    {values.length > 0 && <div className="stage-values">{values.map(item => {
+      const shown = item.dimension ? units.text(item.value, item.dimension, item.storedUnit) : display(item.value);
+      return <div className="stage-value" key={item.key}><span title={item.key}>{DATA_LABELS[item.key] ?? item.key}</span>
+        <strong>{shown}{!item.dimension && item.value !== null && item.unit ? ` ${item.unit}` : ''}</strong>
+        {item.source && <small>{item.source}</small>}{item.estimate && <em>工程估算</em>}</div>;
+    })}</div>}
     {name === 'resistance' && stage.data && <ResistanceTables data={stage.data} />}
+    {name === 'flooding' && stage.data && typeof record(stage.data).status === 'string' && <FloodingResults data={record(stage.data)} />}
     {stage.diagnostics.length > 0 && <details className="stage-diagnostics"><summary>诊断与缺项 · {stage.diagnostics.length} 条</summary><div>{stage.diagnostics.map((item, index) => <p key={`${item.code ?? ''}-${index}`}><strong>{item.message === stage.reason ? item.code ?? '诊断' : item.message ?? item.code}</strong>{item.path && <code>{item.path}</code>}{item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}</p>)}</div></details>}
     {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">方法版本 · {Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(value)}`).join(' / ')}</p>}
     {stage.assumptions.length > 0 && <details className="stage-assumptions"><summary>假设与适用性</summary><pre>{JSON.stringify(stage.assumptions, null, 2)}</pre></details>}

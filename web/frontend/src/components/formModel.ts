@@ -68,3 +68,23 @@ export function uniqueId(base: string, taken: ReadonlyArray<unknown>): string {
   while (taken.includes(`${base}_${n}`)) n += 1;
   return `${base}_${n}`;
 }
+
+// Mirrors the numeric domains of tools/plimsoll/project_extensions.py and the
+// mass-model checks in tools/plimsoll/systems.py. An empty input means unknown
+// and stays unknown; a typed out-of-domain value is refused with a message
+// instead of being written into the project.
+export type NumericDomain = 'signed' | 'nonnegative' | 'positive' | 'integer';
+
+export function numericProblem(kind: NumericDomain, raw: string): string | null {
+  if (raw.trim() === '') return null;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return '必须是有限数值';
+  if (kind === 'integer') return Number.isInteger(value) && value >= 0 ? null : '必须是非负整数';
+  if (kind === 'positive') return value > 0 ? null : '必须是正数';
+  if (kind === 'nonnegative') return value >= 0 ? null : '不能为负数';
+  return null;
+}
+
+export function numericValue(raw: string): number | null {
+  return raw.trim() === '' ? null : Number(raw);
+}

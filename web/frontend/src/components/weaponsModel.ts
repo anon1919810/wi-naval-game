@@ -1,4 +1,5 @@
 import { object, rows, stringList, type Raw } from './formModel';
+import type { Dimension } from './units';
 
 // Weapons-page contract helpers.
 //
@@ -15,21 +16,25 @@ import { object, rows, stringList, type Raw } from './formModel';
 
 export type TypedKind = 'text' | 'integer' | 'positive' | 'nonnegative' | 'signed';
 
-export const TYPED_FIELDS: Record<string, { label: string; kind: TypedKind }> = {
+export interface TypedSpec { label: string; kind: TypedKind; dimension?: Dimension; storedUnit?: string }
+
+/** Mirrors PAGE_ROW_TYPED_FIELDS including each field's numeric domain and the
+ *  unit the value is stored in; dimension marks a convertible quantity. */
+export const TYPED_FIELDS: Record<string, TypedSpec> = {
   tubes: { label: '管数', kind: 'integer' },
   carried: { label: '携带数', kind: 'integer' },
   sets: { label: '组数', kind: 'integer' },
-  diameter_mm: { label: '雷径 · mm', kind: 'positive' },
-  length_m: { label: '雷长 · m', kind: 'positive' },
+  diameter_mm: { label: '雷径', kind: 'positive', dimension: 'length', storedUnit: 'mm' },
+  length_m: { label: '雷长', kind: 'positive', dimension: 'length' },
   arrangement: { label: '布置', kind: 'text' },
   count: { label: '数量', kind: 'integer' },
   reloads: { label: '再装填', kind: 'integer' },
   kind: { label: '类型', kind: 'text' },
-  unit_weight_kg: { label: '单具质量 · kg', kind: 'nonnegative' },
-  mass_t: { label: '质量 · t', kind: 'nonnegative' },
-  height_m: { label: '高度 · m', kind: 'positive' },
-  inclination_deg: { label: '倾角 · °', kind: 'signed' },
-  beam_between_m: { label: '间距 · m', kind: 'positive' },
+  unit_weight_kg: { label: '单具质量', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
+  mass_t: { label: '质量', kind: 'nonnegative', dimension: 'mass' },
+  height_m: { label: '高度', kind: 'positive', dimension: 'length' },
+  inclination_deg: { label: '倾角', kind: 'signed', dimension: 'angle' },
+  beam_between_m: { label: '间距', kind: 'positive', dimension: 'length' },
   construction_type: { label: '构造型式', kind: 'text' },
   coverage_pct: { label: '覆盖度 · %', kind: 'nonnegative' },
 };

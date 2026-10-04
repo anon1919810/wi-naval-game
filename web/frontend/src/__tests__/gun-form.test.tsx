@@ -117,7 +117,8 @@ describe('guns battery form', () => {
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '火炮武备' }));
     const input = await screen.findByLabelText('main 单发弹重');
-    fireEvent.change(input, { target: { value: '600' } });
+    // The default reader unit is tonnes; the ammunition model stores kilograms.
+    fireEvent.change(input, { target: { value: '0.6' } });
     fireEvent.click(screen.getByRole('button', { name: '保存修订' }));
 
     await waitFor(() => expect(api.saveProject).toHaveBeenCalled());
@@ -168,8 +169,8 @@ describe('guns battery form', () => {
 
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '火炮武备' }));
-    expect(await screen.findByText('5080.234544 kg')).toBeVisible();
-    expect(screen.getByText('50802.34544 kg')).toBeVisible();
+    expect(await screen.findByText('5.080235 t')).toBeVisible();
+    expect(screen.getByText('50.802345 t')).toBeVisible();
     expect(screen.getByText('492 t')).toBeVisible();
   });
 });

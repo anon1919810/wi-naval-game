@@ -20,6 +20,13 @@
 .icon-button { width: 32px; height: 32px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--surface); font-size: 19px; line-height: 1; }
 .icon-button:hover { color: var(--ink); border-color: var(--line-strong); }
 .field-label { display: grid; gap: 8px; color: var(--ink); font-size: 12px; font-weight: 670; }
+/* The displayed unit sits next to a quantity input; the canonical unit stays in
+   the accessible label of the control itself. */
+.field-unit { font-size: 10px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.field-label--inline { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.field-label--inline input { width: 90px; }
+.report-units { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; margin: 14px 0; padding: 12px; border: 1px solid var(--line); border-radius: 3px; }
+.report-units small { flex-basis: 100%; color: var(--faint); font-size: 10px; }
 .field-label input, .field-label select, input, select, textarea { color: var(--ink); }
 .field-label input, .field-grid input, .blank-project input, .condition-strip select, .weight-row input { width: 100%; height: 39px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); outline: none; }
 input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -93,7 +100,7 @@ input[aria-invalid='true'] { border-color: var(--error); }
 .auth-panel .text-button { margin-top: 13px; }
 .auth-note { margin: 46px 0 0; padding-top: 15px; border-top: 1px solid var(--line); color: var(--faint); font-size: 10px; line-height: 1.7; }
 .workbench-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr) 275px; min-height: calc(100vh - 62px); }
-.project-nav { position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; min-height: calc(100vh - 62px); padding: 24px 14px; background: var(--surface); border-right: 1px solid var(--line); }
+.project-nav { position: sticky; top: 0; align-self: start; display: flex; flex-direction: column; min-height: calc(100vh - 62px); max-height: 100vh; overflow-y: auto; padding: 24px 14px; background: var(--surface); border-right: 1px solid var(--line); }
 .nav-return, .nav-item { width: 100%; border: 0; background: none; color: var(--muted); text-align: left; }
 .nav-return { padding: 9px 11px; font-size: 11px; }
 .nav-return:hover { color: var(--accent); }

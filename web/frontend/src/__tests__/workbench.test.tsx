@@ -51,7 +51,7 @@ describe('workbench entry', () => {
     vi.mocked(api.saveProject).mockRejectedValue(new api.ApiError(409, { current_revision: 2 }));
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '船型与几何' }));
-    const length = await screen.findByLabelText(/船长 · m/);
+    const length = await screen.findByLabelText('船长');
     fireEvent.change(length, { target: { value: '91' } });
     expect(screen.getByText('未保存修改')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: '保存修订' }));
@@ -67,12 +67,12 @@ describe('workbench entry', () => {
     vi.mocked(api.saveProject).mockImplementation(() => new Promise(resolve => { finishSave = resolve; }));
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '船型与几何' }));
-    fireEvent.change(screen.getByLabelText(/船长 · m/), { target: { value: '91' } });
+    fireEvent.change(screen.getByLabelText('船长'), { target: { value: '91' } });
     fireEvent.click(screen.getByRole('button', { name: '保存修订' }));
     await waitFor(() => expect(api.saveProject).toHaveBeenCalled());
-    fireEvent.change(screen.getByLabelText(/型宽 · m/), { target: { value: '21' } });
+    fireEvent.change(screen.getByLabelText('型宽'), { target: { value: '21' } });
     finishSave({ project_id: 'p1', revision: 2, project: { ...box, hull: { ...box.hull, length_m: 91 } } });
-    await waitFor(() => expect(screen.getByLabelText(/型宽 · m/)).toHaveValue(21));
+    await waitFor(() => expect(screen.getByLabelText('型宽')).toHaveValue(21));
     expect(screen.getByText('未保存修改')).toBeVisible();
   });
 

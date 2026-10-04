@@ -1,5 +1,7 @@
 # Plimsoll 六页输入表单交接
 
+后续高级输入、破损操作和显示单位已于 2026-10-04 补齐，见[最新交接](advanced-workflow-handoff-2026-10-04.md)。下文是本轮六页表单完成时的历史状态。
+
 2026-10-03，本轮完成 [六页表单计划](long-task-sps-pages.md) 的 Guns、Weapons、Armour、Engines、Performance、Hull 输入与结果展示范围。已有 Weapons 改动先提交为 `f0556e0`。新实现保留既有 Freeboard 表单、主尺度六项输入、Python/API 入口与 15 阶段计算协调器；没有新增数值求解器。
 
 仓库为 `C:\Users\杨睿\Documents\Codex\2026-09-17\shi\work\plimsoll-1.0`，分支 `feature/plimsoll-1.0`。本轮仅保存本地提交；桌面主资产仓库、Unity、服务器不在此次修改范围。

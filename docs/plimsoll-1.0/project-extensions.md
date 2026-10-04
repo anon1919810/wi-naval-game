@@ -48,6 +48,12 @@ the explicit mapping and provenance rather than create a second contribution.
 speed kn/m_s and angle deg/rad. These are display/import choices only; canonical
 `units` remain fixed. No values are converted during schema validation.
 
+Project compartment IDs must be nonempty and unique. This prevents a protected
+compartment range from being silently overwritten by another row with the same
+ID in a main-belt estimate. The compartment editor keeps established identities
+immutable and requires references to be removed before deletion. Geometry does
+not introduce ledger mass.
+
 ## Fuel ownership
 
 `systems.propulsion.fuel_bindings` has optional coal/oil entries:
@@ -155,6 +161,37 @@ an explicit positive speed_kn; other quantities may include it. Optional raw
 value/unit preserve original attribution. Unknown value/provenance remains
 unknown. Later comparison requires exact condition/speed, compatible conversion
 and explicit diagnostics; no historical-validation claim follows from a match.
+
+## Saved flooding scenario drafts
+
+`flooding_scenarios` is an optional array (at most 201) of unique nonempty IDs
+holding saved damage-case drafts. Each draft is a
+`plimsoll-flooding-scenario-1` scenario: optional `label`, `duration_s`
+(nonnegative), `time_step_s` (positive), `source`, `estimate`, a `sea` node
+(`id`, `fluid_density_t_m3`, provenance), `tanks`, `connections` and optional
+`openings`. It is research input for one damage case, not a second weight ledger
+and not a computed result.
+
+Validation is structural only. No solver runs on save, no capacity or head is
+computed, and unknown stays unknown: a supplied null is diagnosed as unknown
+instead of being filled. Tank and connection domains are checked when the key is
+present, so an incomplete draft remains saveable while remaining unrunnable.
+Every tank, connection and supplied opening requires its own source and estimate
+state, exactly as the kernel requires at run time.
+
+References are structural: connection endpoints must resolve to the scenario sea
+node or a declared tank, and the two ends must differ. A tank ID must differ from
+the sea ID and must not collide with a ledger weight item ID, which is the
+direct duplicate-water path. Numeric domains follow the tank and connection
+contracts, discharge coefficients and permeability stay within `[0, 1]`, and
+pressure fields remain unsupported. Optional `openings` may be `null` (the
+sanctioned unknown bridge), `[]` (supplied knowledge of no open point) or a list
+of declared points.
+
+The run remains authoritative: `analysis` reads the selected scenario through
+`options.flooding`, `flooding.simulate_flooding` validates it in full, and an
+incomplete draft returns `invalid_input` with a diagnostic. Older projects
+without the field keep their previous meaning; no scenario is inferred.
 
 ## Stored acceptance audit
 

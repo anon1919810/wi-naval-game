@@ -33,6 +33,13 @@ PAGE_ROW_TYPED_FIELDS = {"tubes": "integer", "carried": "integer", "sets": "inte
     "unit_weight_kg": "nonnegative", "mass_t": "nonnegative",
     "height_m": "positive", "inclination_deg": "signed", "beam_between_m": "positive",
     "construction_type": "text", "coverage_pct": "nonnegative"}
+FLOODING_SCENARIO_SCHEMA = "plimsoll-flooding-scenario-1"
+FLOODING_TANK_FIELDS = {"length_m": "positive", "beam_m": "positive", "height_m": "positive",
+    "x_m": "signed", "y_m": "signed", "keel_to_bottom_m": "nonnegative",
+    "fluid_density_t_m3": "positive", "initial_volume_m3": "nonnegative"}
+FLOODING_CONNECTION_FIELDS = {"x_m": "signed", "y_m": "signed", "z_m": "signed",
+    "area_m2": "nonnegative", "discharge_coefficient": "nonnegative",
+    "fluid_density_t_m3": "positive", "aperture_height_m": "positive"}
 
 
 def _diag(diagnostics, path, message, code="extension.invalid", warning=False):
@@ -434,6 +441,151 @@ def _endurance(rows, diagnostics):
                 _diag(diagnostics, fp, "positive burn requires required=true")
 
 
+def _flooding_sea(value, path, diagnostics):
+    if not _object(value, path, diagnostics):
+        return None
+    _keys(value, {"id", "fluid_density_t_m3", "source", "estimate"}, path, diagnostics)
+    identity = value.get("id")
+    if not isinstance(identity, str) or not identity.strip():
+        _diag(diagnostics, path + ".id", "sea must declare a nonempty id")
+        identity = None
+    if "fluid_density_t_m3" in value:
+        _value(value["fluid_density_t_m3"], "positive", path + ".fluid_density_t_m3", diagnostics)
+    _metadata(value, path, diagnostics)
+    return identity
+
+
+def _flooding_tanks(value, sea_id, item_ids, path, diagnostics):
+    """Return declared tank IDs; unknown geometry is retained, never substituted."""
+    if not isinstance(value, list):
+        _diag(diagnostics, path, "scenario tanks must be an array (absent is unknown)",
+              "extension.value_unknown", True)
+        return set()
+    declared, seen = set(), set()
+    for index, tank in enumerate(value):
+        p = f"{path}[{index}]"
+        if not _object(tank, p, diagnostics):
+            continue
+        identity = tank.get("id")
+        if not isinstance(identity, str) or not identity.strip():
+            _diag(diagnostics, p + ".id", "tank must declare a nonempty id")
+            continue
+        if identity in seen:
+            _diag(diagnostics, p + ".id", "tank IDs must be unique within the scenario")
+        seen.add(identity)
+        declared.add(identity)
+        if identity == sea_id:
+            _diag(diagnostics, p + ".id", "tank ID must differ from the sea node ID")
+        if identity in item_ids:
+            _diag(diagnostics, p + ".id",
+                  "tank ID collides with a ledger weight item; scenario water is additional mass "
+                  "and the same liquid must not be counted twice")
+        _keys(tank, {"id", "label"} | set(FLOODING_TANK_FIELDS)
+              | {"permeability", "free_surface", "source", "estimate"}, p, diagnostics)
+        for key, kind in FLOODING_TANK_FIELDS.items():
+            if key in tank:
+                _value(tank[key], kind, f"{p}.{key}", diagnostics)
+        if "permeability" in tank:
+            _value(tank["permeability"], "nonnegative", p + ".permeability", diagnostics)
+            permeability = tank["permeability"]
+            if (isinstance(permeability, (int, float)) and not isinstance(permeability, bool)
+                    and permeability > 1):
+                _diag(diagnostics, p + ".permeability", "permeability must be within [0, 1]")
+        if tank.get("free_surface") is not None and not isinstance(tank["free_surface"], bool):
+            _diag(diagnostics, p + ".free_surface", "free surface state must be boolean or null")
+        _metadata(tank, p, diagnostics)
+    return declared
+
+
+def _flooding_connections(value, node_ids, path, diagnostics):
+    if not isinstance(value, list):
+        _diag(diagnostics, path, "scenario connections must be an array (absent is unknown)",
+              "extension.value_unknown", True)
+        return
+    seen = set()
+    for index, edge in enumerate(value):
+        p = f"{path}[{index}]"
+        if not _object(edge, p, diagnostics):
+            continue
+        identity = edge.get("id")
+        if not isinstance(identity, str) or not identity.strip():
+            _diag(diagnostics, p + ".id", "connection must declare a nonempty id")
+        elif identity in seen:
+            _diag(diagnostics, p + ".id", "connection IDs must be unique within the scenario")
+        else:
+            seen.add(identity)
+        _keys(edge, {"id", "from", "to", "open", "source", "estimate"}
+              | set(FLOODING_CONNECTION_FIELDS), p, diagnostics)
+        for field in ("from", "to"):
+            reference = edge.get(field)
+            if not isinstance(reference, str) or reference not in node_ids:
+                _diag(diagnostics, f"{p}.{field}",
+                      "endpoint must reference the scenario sea node or a declared tank")
+        if isinstance(edge.get("from"), str) and edge.get("from") == edge.get("to"):
+            _diag(diagnostics, p, "connection must join two distinct nodes")
+        for key, kind in FLOODING_CONNECTION_FIELDS.items():
+            if key in edge:
+                _value(edge[key], kind, f"{p}.{key}", diagnostics)
+        if "discharge_coefficient" in edge:
+            coefficient = edge["discharge_coefficient"]
+            if (isinstance(coefficient, (int, float)) and not isinstance(coefficient, bool)
+                    and coefficient > 1):
+                _diag(diagnostics, p + ".discharge_coefficient",
+                      "discharge coefficient must be within [0, 1]")
+        if edge.get("open") is not None and not isinstance(edge["open"], bool):
+            _diag(diagnostics, p + ".open", "connection open state must be boolean")
+        _metadata(edge, p, diagnostics)
+
+
+def _flooding_openings(value, path, diagnostics):
+    # An explicit null is the sanctioned bridge for preserved unknown opening
+    # knowledge; an array is supplied knowledge (possibly of no open point).
+    if value is None:
+        return
+    if not isinstance(value, list):
+        _diag(diagnostics, path, "scenario openings must be an array or null")
+        return
+    seen = set()
+    for index, opening in enumerate(value):
+        p = f"{path}[{index}]"
+        if not _object(opening, p, diagnostics):
+            continue
+        _keys(opening, {"id", "open", "x_m", "y_m", "z_m", "kind", "source", "estimate"},
+              p, diagnostics)
+        identity = opening.get("id")
+        if not isinstance(identity, str) or not identity.strip():
+            _diag(diagnostics, p + ".id", "opening must declare a nonempty id")
+        elif identity in seen:
+            _diag(diagnostics, p + ".id", "opening IDs must be unique")
+        else:
+            seen.add(identity)
+        if not isinstance(opening.get("open"), bool):
+            _diag(diagnostics, p + ".open", "opening state must be explicitly boolean")
+        for key in ("x_m", "y_m", "z_m"):
+            _value(opening.get(key), "signed", f"{p}.{key}", diagnostics)
+        _metadata(opening, p, diagnostics)
+
+
+def _flooding_scenarios(value, item_ids, diagnostics):
+    """Structurally validate saved flooding scenario drafts without solving."""
+    for row, p in _rows(value, "$.flooding_scenarios", diagnostics, 201):
+        _keys(row, {"id", "schema", "label", "duration_s", "time_step_s", "source", "estimate",
+                    "sea", "tanks", "connections", "openings"}, p, diagnostics)
+        if row.get("schema") != FLOODING_SCENARIO_SCHEMA:
+            _diag(diagnostics, p + ".schema",
+                  f"flooding scenario schema must be {FLOODING_SCENARIO_SCHEMA!r}")
+        for key, kind in (("duration_s", "nonnegative"), ("time_step_s", "positive")):
+            if key in row:
+                _value(row[key], kind, f"{p}.{key}", diagnostics)
+        _metadata(row, p, diagnostics)
+        sea_id = _flooding_sea(row.get("sea"), p + ".sea", diagnostics)
+        tank_ids = _flooding_tanks(row.get("tanks"), sea_id, item_ids, p + ".tanks", diagnostics)
+        node_ids = tank_ids | ({sea_id} if isinstance(sea_id, str) else set())
+        _flooding_connections(row.get("connections"), node_ids, p + ".connections", diagnostics)
+        if "openings" in row:
+            _flooding_openings(row["openings"], p + ".openings", diagnostics)
+
+
 def validate_acceptance(record, condition_id, field, nominal, path):
     """Validate a stored audit record; this is not authorization to apply a proposal."""
     diagnostics = []
@@ -500,6 +652,20 @@ def _condition_definitions(project, item_ids, diagnostics):
 def validate_extensions(project, item_ids):
     """Return all optional-field diagnostics; never mutate or calculate the project."""
     diagnostics = []
+    compartments = project.get("compartments")
+    if isinstance(compartments, list):
+        seen = set()
+        for index, compartment in enumerate(compartments):
+            path = f"$.compartments[{index}]"
+            if not _object(compartment, path, diagnostics):
+                continue
+            identity = compartment.get("id")
+            if not isinstance(identity, str) or not identity.strip():
+                _diag(diagnostics, path + ".id", "compartment must declare a nonempty id")
+            elif identity in seen:
+                _diag(diagnostics, path + ".id", "compartment IDs must be unique")
+            else:
+                seen.add(identity)
     if "metadata" in project:
         _facts(project["metadata"], METADATA_FIELDS, "$.metadata", diagnostics)
     hull = project.get("hull")
@@ -571,4 +737,6 @@ def validate_extensions(project, item_ids):
         _resistance(project["resistance_scenarios"], diagnostics)
     if "endurance_scenarios" in project:
         _endurance(project["endurance_scenarios"], diagnostics)
+    if "flooding_scenarios" in project:
+        _flooding_scenarios(project["flooding_scenarios"], item_ids, diagnostics)
     return diagnostics

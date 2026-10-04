@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
 import * as api from '../api';
+import { FloodingResults } from '../components/FloodingResults';
 import { StageStatus, STAGE_ORDER } from '../components/StageStatus';
+import { UnitProvider } from '../components/UnitProvider';
 import type { RunView } from '../types';
 
 const LABELS: Record<RunView['status'], string> = {
@@ -9,6 +11,14 @@ const LABELS: Record<RunView['status'], string> = {
 };
 
 const TERMINAL = new Set<RunView['status']>(['completed', 'partial', 'canceled', 'failed']);
+
+// Only a requested flooding stage with a stored payload is presented; a run
+// without it keeps exactly the previous behaviour.
+function floodingData(result: NonNullable<RunView['result']>): Record<string, unknown> | null {
+  const stage = result.stages.flooding;
+  if (!stage?.requested || !stage.data || typeof stage.data.status !== 'string') return null;
+  return stage.data as Record<string, unknown>;
+}
 
 export function Run({ runId, onBack, onReport }: { runId: string; onBack: (projectId: string) => void; onReport: () => void }) {
   const [run, setRun] = useState<RunView | null>(null);
@@ -42,7 +52,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
     finally { setCanceling(false); }
   }
 
-  return <main className="run-page page-pad"><button className="text-button" onClick={() => run && onBack(run.project_id)}>← 返回舰船</button><span className="section-kicker">RUN / {runId.slice(0, 8).toUpperCase()}</span><h1>计算运行</h1>
+  const page = <main className="run-page page-pad"><button className="text-button" onClick={() => run && onBack(run.project_id)}>← 返回舰船</button><span className="section-kicker">RUN / {runId.slice(0, 8).toUpperCase()}</span><h1>计算运行</h1>
     {error && <div className="notice notice--error" role="alert">{error}</div>}
     {!run ? <div className="loading-skeleton" aria-label="正在读取运行" /> : <>
       <div className="run-summary"><div><span className="section-kicker">STATUS / 当前状态</span><h2>{LABELS[run.status]}</h2><p>工况 {run.condition_id} · 项目修订 {run.revision}</p></div><div><span>请求指纹</span><code>{run.request_fingerprint}</code><small>保存的输入快照不会随项目后续编辑变化</small></div></div>
@@ -50,7 +60,14 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
       {run.error && <div className="notice notice--error" role="alert"><strong>{run.error.code}</strong><p>{run.error.message}</p></div>}
       {run.result && <><div className="run-result-heading"><div><span className="section-kicker">RESULT / 已存结果</span><h2>{run.result.status === 'partial' ? '部分结果可供复核' : run.result.status === 'canceled' ? '已保存取消前的结果' : '计算结果已保存'}</h2><p>计算完成不等于史实验证。逐阶段检查有效性、缺项与诊断。</p></div><button className="button button--primary" onClick={onReport}>查看完整报告 ↗</button></div>
         <div className="run-stage-preview">{Object.entries(run.result.stages).filter(([, stage]) => stage.requested).sort(([a], [b]) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b)).slice(0, 4).map(([name, stage]) => <StageStatus key={name} name={name} stage={stage} />)}</div>
+        {/* The damage stage sits last in the stage order, so its stop reason and
+            conservation evidence are also shown directly on the run page. */}
+        {floodingData(run.result) && <section className="report-section"><div className="section-heading"><h2>破损进水</h2><span>停止原因 · 守恒 · 剩余稳性</span></div>
+          <FloodingResults data={floodingData(run.result)!} /></section>}
       </>}
     </>}
   </main>;
+  // Display units come from the run's own stored snapshot, so a saved run always
+  // reads the way it was analysed.
+  return <UnitProvider preferences={run?.result?.input_snapshot?.display_preferences}>{page}</UnitProvider>;
 }

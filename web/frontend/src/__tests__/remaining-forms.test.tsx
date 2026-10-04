@@ -43,11 +43,11 @@ async function saved() {
 
 it('saves armour thickness, declared extents and coverage provenance without changing ledger mass', async () => {
   await open('装甲与武备');
-  fireEvent.change(screen.getByLabelText('main 厚度 · mm'), { target: { value: '200' } });
+  fireEvent.change(screen.getByLabelText('main 厚度 · mm'), { target: { value: '0.2' } });
   fireEvent.change(screen.getByLabelText('main 艉端 · m'), { target: { value: '-5' } });
   fireEvent.change(screen.getByLabelText('main 艏端 · m'), { target: { value: '5' } });
-  fireEvent.change(screen.getByLabelText('受保护平面面积 · m² 值'), { target: { value: '100' } });
-  fireEvent.change(screen.getByLabelText('受保护平面面积 · m² 来源'), { target: { value: 'deck plan' } });
+  fireEvent.change(screen.getByLabelText('受保护平面面积 值'), { target: { value: '100' } });
+  fireEvent.change(screen.getByLabelText('受保护平面面积 来源'), { target: { value: 'deck plan' } });
   const p = await saved(); const fixed = (p.systems as any).armour.fixed;
   expect(fixed.page_rows[0].thickness_mm).toBe(200);
   expect(fixed.page_rows[0].extents_m).toEqual({ aft_m: -5, fore_m: 5 });
@@ -83,12 +83,12 @@ it('submits an explicit fixed-power request with bracket, QPC and target trim', 
   await open('性能与工况');
   fireEvent.change(screen.getByLabelText('阻力研究场景'), { target: { value: 'study' } });
   fireEvent.change(screen.getByLabelText('功率请求模式'), { target: { value: 'fixed_power' } });
-  fireEvent.change(screen.getByLabelText('速度采样 · kn'), { target: { value: '10, 20' } });
-  fireEvent.change(screen.getByLabelText('给定轴功率 · kW'), { target: { value: '1000' } });
+  fireEvent.change(screen.getByLabelText('速度采样'), { target: { value: '10, 20' } });
+  fireEvent.change(screen.getByLabelText('给定轴功率'), { target: { value: '1000' } });
   fireEvent.change(screen.getByLabelText('QPC 值'), { target: { value: '.55' } });
   fireEvent.change(screen.getByLabelText('QPC 来源'), { target: { value: 'declared QPC' } });
   fireEvent.change(screen.getByLabelText('QPC 估算状态'), { target: { value: 'estimate' } });
-  fireEvent.change(screen.getByLabelText('目标纵倾 · °'), { target: { value: '1' } });
+  fireEvent.change(screen.getByLabelText('目标纵倾'), { target: { value: '1' } });
   fireEvent.click(screen.getByRole('button', { name: '运行计算 ↗' }));
   await waitFor(() => expect(api.enqueueRun).toHaveBeenCalled());
   const opts = vi.mocked(api.enqueueRun).mock.calls[0][1].options as any;
@@ -226,7 +226,7 @@ it('records display preferences without converting any declared design input', a
   // Design inputs remain canonical SI; the preference is display-only.
   expect(p.hull.lwl_m).toBe(20);
   expect(p.hull.draught_normal_m).toBe(4);
-  expect(screen.getByText(/所有设计输入与计算结果仍为规范 SI/)).toBeVisible();
+  expect(screen.getByText(/保存与计算仍为规范单位/)).toBeVisible();
 });
 
 it('surfaces hull measures from the real hydrostatics result keys', async () => {
@@ -238,8 +238,8 @@ it('surfaces hull measures from the real hydrostatics result keys', async () => 
     result })]);
   await open('船型与几何');
   expect(await screen.findByText('480.5 m²')).toBeVisible();
-  expect(screen.getByText('2100.25 m²')).toBeVisible();
-  expect(screen.getByText('1265.3 t')).toBeVisible();
+  expect(screen.getByText('2,100.25 m²')).toBeVisible();
+  expect(screen.getByText('1,265.3 t')).toBeVisible();
   expect(screen.getByText('6.25')).toBeVisible();
   expect(vi.mocked(api.getRun)).not.toHaveBeenCalled();
 });
