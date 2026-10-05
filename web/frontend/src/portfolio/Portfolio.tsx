@@ -450,13 +450,15 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
-        <nav aria-label="Main navigation"><a href={publicHref('home')} aria-current={!about ? 'page' : undefined}>Work <span>01</span></a><a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a></nav>
         <div className="ff-theme-group">
           <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}><span className="ff-theme-symbol" aria-hidden="true">◐</span><span className="ff-theme-mode">{dark ? 'DARK' : 'LIGHT'}</span></button>
           <button className="ff-theme-system" onClick={followSystem} aria-pressed={theme === 'system'} title="Follow system theme">SYSTEM</button>
         </div>
       </header>
 
+      {/* The rail is a sibling of `main`, not a child of it: the Work/About cut is
+          scoped to `.ff-main`, so this navigation is never named, never moves and
+          keeps focus across the page change. It stays mounted on both views. */}
       <main className="ff-main" inert={opening}>
         <section className="ff-home" hidden={about} aria-label="Selected work">
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
@@ -493,6 +495,11 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           <div className="ff-about-work"><span>FIRST WORK / 01</span><h2>Plimsoll</h2><p>A naval design and analysis tool for studying ship projects, loading conditions, stability, resistance, and simplified damage.</p><a href={publicHref('home')}>BACK TO THE WORK <span aria-hidden="true">↗</span></a></div>
         </section>
       </main>
+
+      <nav className="ff-rail" aria-label="Main navigation" inert={opening}>
+        <a href={publicHref('home')} aria-current={!about ? 'page' : undefined}>Work <span>01</span></a>
+        <a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a>
+      </nav>
 
       <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button></footer>
       {opening && publicActive && (readyHref === sheet.href

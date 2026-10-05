@@ -2,8 +2,13 @@
 :root[data-formfield-surface='public'][data-theme='dark'] body { background: #101110; }
 .ff-shell {
   --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #70736e; --ff-line: #d6d9d2; --ff-accent: #3857e7;
-  min-height: 100svh; background: var(--ff-bg); color: var(--ff-ink); padding: 0 4.5vw;
-  font-family: var(--font-sans); letter-spacing: -.025em;
+  --ff-pad: clamp(18px, 2.6vw, 48px);
+  min-height: 100svh; background: var(--ff-bg); color: var(--ff-ink); padding: 0 var(--ff-pad);
+  font-family: var(--font-sans);
+  /* Desktop composition: one wide column for the exhibit beside a fixed-width
+     rail. The header and footer span both, so the drawing keeps every pixel the
+     rail does not claim. */
+  display: grid; grid-template-columns: minmax(0, 1fr) clamp(230px, 20vw, 320px); column-gap: clamp(40px, 4vw, 88px); align-content: start;
 }
 .ff-shell[data-ff-theme='dark'] { --ff-bg: #101110; --ff-panel: #141514; --ff-ink: #f1f2ec; --ff-muted: #a0a39c; --ff-line: #343830; --ff-accent: #a1afff; }
 .ff-shell[hidden], .ff-shell [hidden] { display: none !important; }
@@ -13,27 +18,41 @@
 .ff-shell button { border: 0; box-shadow: none; border-radius: 0; padding: 0; }
 .ff-shell button:disabled { cursor: default; }
 .ff-shell :focus-visible { outline: 2px solid var(--ff-accent); outline-offset: 5px; }
-.ff-header { height: 100px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--ff-line); gap: 32px; }
-/* Swiss hierarchy: brand and nav carry real weight now that the family is
-   variable, while the drawing itself stays the only mass on the page. */
-.ff-wordmark { font-size: 24px; font-weight: 620; display: flex; gap: 5px; align-items: baseline; width: fit-content; }
-.ff-wordmark span { font-weight: 750; letter-spacing: -.055em; }
+.ff-header { grid-area: 1 / 1 / 2 / -1; height: 100px; display: grid; grid-template-columns: 1fr auto; align-items: center; border-bottom: 1px solid var(--ff-line); gap: 32px; }
+/* Swiss hierarchy: the brand carries real weight, and the navigation weight now
+   lives in the rail, where it is the largest type on the page. */
+.ff-wordmark { font-size: 24px; font-weight: 600; letter-spacing: -.015em; display: flex; gap: 5px; align-items: baseline; width: fit-content; }
+.ff-wordmark span { font-weight: 700; letter-spacing: -.015em; }
 .ff-wordmark i { font-size: 20px; color: var(--ff-accent); font-style: normal; margin-left: 6px; }
-.ff-header nav { display: flex; gap: 36px; font-size: 14px; font-weight: 620; align-items: center; }
-.ff-header nav a { padding: 14px 0; color: var(--ff-muted); transition: color .16s; }
-.ff-header nav a[aria-current], .ff-header nav a:hover { color: var(--ff-ink); }
-.ff-header nav span { font-size: 9px; font-weight: 650; margin-left: 4px; color: var(--ff-accent); vertical-align: super; font-variant-numeric: tabular-nums; }
+/* The rail: Work/About stacked at display size on the right, quiet until asked.
+   It is inert while the splash owns the screen and sits outside `.ff-main`, so
+   the 260 ms page cut cannot move it and it keeps keyboard focus across routes. */
+.ff-rail { grid-area: 2 / 2 / 3 / 3; align-self: start; justify-self: end; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
+.ff-rail a { display: flex; align-items: flex-start; gap: .06em; position: relative; white-space: nowrap; font-size: clamp(74px, 7.6vw, 110px); font-weight: 700; line-height: .86; letter-spacing: -.025em; text-transform: lowercase; color: var(--ff-muted); transition: color .2s; padding: 0 0 clamp(2px, .3vw, 6px); }
+.ff-rail a[aria-current] { color: var(--ff-ink); }
+/* The accent stripe sits under the word and never across it, so legibility is
+   untouched. It is decoration only: the focus outline is still the focus cue. */
+.ff-rail a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ff-accent); transform: scaleX(0); transform-origin: left center; transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+.ff-rail a[aria-current]::after { transform: scaleX(.22); background: var(--ff-ink); }
+.ff-rail a:hover { color: var(--ff-ink); }
+.ff-rail a:hover::after, .ff-rail a:focus-visible::after { transform: scaleX(1); }
+/* Truthful 01 badge, kept from the header navigation: one work exists. It is a
+   flex item beside the word — never a line of its own — and sits in the x-height
+   band at the word's shoulder. */
+.ff-rail a span { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-top: .16em; border-radius: 50%; background: var(--ff-accent); color: var(--ff-bg); font-size: 10px; font-weight: 600; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; }
 .ff-shell .ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; min-height: 44px; padding: 4px 10px; transition: color .16s; }
 .ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 6px; }
-.ff-shell .ff-theme-system { font-size: 10px; font-weight: 620; letter-spacing: .1em; font-variant-numeric: tabular-nums; color: var(--ff-muted); border: 1px solid var(--ff-line); padding: 6px 8px; min-height: 30px; transition: color .16s, border-color .16s; }
+.ff-shell .ff-theme-system { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); border: 1px solid var(--ff-line); padding: 6px 8px; min-height: 30px; transition: color .16s, border-color .16s; }
 .ff-shell .ff-theme-system:hover { color: var(--ff-ink); border-color: var(--ff-muted); }
 .ff-shell .ff-theme-system[aria-pressed='true'] { color: var(--ff-ink); border-color: var(--ff-accent); }
 .ff-theme-symbol { font-size: 18px; line-height: 1; display: inline-block; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
 .ff-shell[data-ff-theme='dark'] .ff-theme-symbol { transform: rotate(180deg); }
-.ff-theme-mode { font-size: 10px; font-weight: 620; letter-spacing: .1em; font-variant-numeric: tabular-nums; color: var(--ff-muted); transition: color .16s; }
+.ff-theme-mode { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); transition: color .16s; }
 .ff-shell .ff-theme:hover .ff-theme-mode { color: var(--ff-ink); }
-.ff-main { max-width: 1460px; margin: auto; }
-.ff-exhibit-label { display: flex; justify-content: space-between; align-items: center; padding: 27px 0 19px; font-size: 10px; font-weight: 620; font-variant-numeric: tabular-nums; letter-spacing: .12em; color: var(--ff-muted); }
+/* The drawing column fills the track it is given: no auto margins, no shrink, so
+   the exhibit never collapses to a thumbnail inside the grid area. */
+.ff-main { grid-area: 2 / 1 / 3 / 2; width: 100%; min-width: 0; }
+.ff-exhibit-label { display: flex; justify-content: space-between; align-items: center; padding: 27px 0 19px; font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-muted); }
 .ff-exhibit-label span:first-child { display: flex; align-items: center; gap: 8px; color: var(--ff-ink); }
 .ff-live-dot { width: 5px; height: 5px; background: var(--ff-accent); border-radius: 50%; }
 .ff-exhibit { position: relative; width: 100%; aspect-ratio: 16 / 7; max-height: 620px; overflow: hidden; background: var(--ff-panel); touch-action: pan-y; cursor: none; }
@@ -45,7 +64,7 @@
 .ff-corner-tr { right: 0; top: 0; border-width: 1px 1px 0 0; }
 .ff-corner-bl { left: 0; bottom: 0; border-width: 0 0 1px 1px; }
 .ff-corner-br { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
-.ff-exhibit-note { position: absolute; left: 25px; right: 25px; bottom: 23px; display: flex; justify-content: space-between; font-size: 9px; font-weight: 620; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .13em; pointer-events: none; }
+.ff-exhibit-note { position: absolute; left: 25px; right: 25px; bottom: 23px; display: flex; justify-content: space-between; font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; pointer-events: none; }
 /* Bounded inspection lens: a 2x window onto the same rendered artwork, never a
    second render, so it adds no resolution and measures nothing. Position and
    viewBox are written by the coalesced frame loop, so nothing transitions here. */
@@ -59,7 +78,7 @@
 .ff-lens-mark::before, .ff-lens-mark::after { content: ''; position: absolute; background: var(--ff-accent); }
 .ff-lens-mark::before { width: 13px; height: 1px; left: -6px; top: 0; }
 .ff-lens-mark::after { height: 13px; width: 1px; top: -6px; left: 0; }
-.ff-lens-label { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); display: flex; align-items: baseline; gap: 5px; padding: 1px 5px; font-size: 10px; font-weight: 620; font-variant-numeric: tabular-nums; letter-spacing: .07em; color: var(--ff-accent); background: color-mix(in srgb, var(--ff-panel) 82%, transparent); white-space: nowrap; }
+.ff-lens-label { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); display: flex; align-items: baseline; gap: 5px; padding: 1px 5px; font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-accent); background: color-mix(in srgb, var(--ff-panel) 82%, transparent); white-space: nowrap; }
 .ff-lens-label i { font-style: normal; font-size: 9px; opacity: .85; }
 /* Switching references is the one moment the lens and the blueprint cursor are
    withdrawn: both sample the artwork that is being cut away. */
@@ -73,55 +92,67 @@
 .ff-cursor i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--ff-accent); left: 11.5px; top: 11.5px; }
 .ff-work-info { display: flex; justify-content: space-between; gap: 30px; align-items: center; padding: 26px 0 24px; }
 .ff-work-heading { display: flex; align-items: baseline; gap: 20px; }
-.ff-work-index { font-size: 12px; font-weight: 620; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .04em; }
-.ff-work-heading h1 { margin: 0; font-size: clamp(35px, 4vw, 54px); font-weight: 780; line-height: 1.1; letter-spacing: -.045em; }
-.ff-work-heading p { margin: 8px 0 0; color: var(--ff-muted); font-size: 14px; font-weight: 450; letter-spacing: -.01em; }
+.ff-work-index { font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
+.ff-work-heading h1 { margin: 0; font-size: clamp(35px, 4vw, 54px); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.ff-work-heading p { margin: 8px 0 0; color: var(--ff-muted); font-size: 14px; font-weight: 400; letter-spacing: normal; }
 /* The way out of the exhibit is a framed, weighted block, so it can never be
    mistaken for the quiet reference squares beside it. */
-.ff-explore-link { font-size: 12px; font-weight: 700; letter-spacing: .08em; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 22px; min-height: 50px; border: 1px solid var(--ff-ink); padding: 0 18px; transition: color .15s, gap .2s, border-color .15s; }
+.ff-explore-link { font-size: 12px; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 22px; min-height: 50px; border: 1px solid var(--ff-ink); padding: 0 18px; transition: color .15s, gap .2s, border-color .15s; }
 .ff-explore-link span { font-size: 24px; font-weight: 500; }
 .ff-explore-link:hover { gap: 32px; color: var(--ff-accent); border-color: var(--ff-accent); }
 .ff-work-controls { padding: 16px 0; border-top: 1px solid var(--ff-line); display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .ff-sheet-picker, .ff-exhibit-tools { display: flex; gap: 8px; align-items: center; }
-.ff-sheet-picker > span { font-size: 9px; font-weight: 620; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .13em; margin-right: 12px; }
+.ff-sheet-picker > span { font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; margin-right: 12px; }
 .ff-sheet-picker button { width: 44px; height: 44px; border: 1px solid transparent; font-size: 11px; font-weight: 620; font-variant-numeric: tabular-nums; letter-spacing: .04em; transition: border-color .18s, color .18s; color: var(--ff-muted); }
 .ff-sheet-picker button[aria-pressed='true'] { border-color: var(--ff-ink); color: var(--ff-ink); }
 .ff-sheet-picker button:hover { border-color: var(--ff-line); }
 .ff-exhibit-tools button { min-height: 44px; padding: 0 12px; font-size: 11px; font-weight: 550; letter-spacing: .04em; color: var(--ff-muted); }
 .ff-exhibit-tools button:hover, .ff-exhibit-tools button[aria-pressed='true'] { color: var(--ff-ink); }
 .ff-exhibit-tools button:last-child { margin-left: 10px; }
-.ff-footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 35px; padding: 24px 0; border-top: 1px solid var(--ff-line); font-size: 9px; font-weight: 620; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .11em; }
-.ff-footer button { min-height: 30px; font: inherit; font-weight: 650; letter-spacing: inherit; }
+.ff-footer { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 20px; margin-top: 35px; padding: 24px 0; border-top: 1px solid var(--ff-line); font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
+.ff-footer button { min-height: 30px; font: inherit; font-weight: 600; letter-spacing: inherit; }
 .ff-footer button:hover { color: var(--ff-ink); }
 .ff-about { padding: 70px 0 90px; max-width: 850px; }
-.ff-eyebrow { font-size: 10px; font-weight: 620; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .13em; }
-.ff-about h1 { font-size: clamp(54px, 7vw, 96px); letter-spacing: -.055em; line-height: 1; font-weight: 800; margin: 32px 0; }
-.ff-about > p { font-size: 20px; font-weight: 450; line-height: 1.6; max-width: 590px; color: var(--ff-muted); }
+.ff-eyebrow { font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
+.ff-about h1 { font-size: clamp(54px, 7vw, 96px); letter-spacing: -.02em; line-height: 1; font-weight: 700; margin: 32px 0; }
+.ff-about > p { font-size: 20px; font-weight: 400; line-height: 1.6; max-width: 590px; color: var(--ff-muted); }
 .ff-about-work { border-top: 1px solid var(--ff-line); margin-top: 60px; padding-top: 28px; }
-.ff-about-work > span { font-size: 10px; font-weight: 620; font-variant-numeric: tabular-nums; letter-spacing: .1em; }
-.ff-about-work h2 { font-size: 32px; font-weight: 720; letter-spacing: -.035em; margin: 18px 0 10px; }
+.ff-about-work > span { font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; }
+.ff-about-work h2 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin: 18px 0 10px; }
 .ff-about-work p { max-width: 550px; line-height: 1.7; color: var(--ff-muted); }
-.ff-about-work a { display: inline-block; margin-top: 25px; padding: 15px 0; border-bottom: 1px solid var(--ff-ink); font-size: 11px; font-weight: 700; letter-spacing: .07em; }
+.ff-about-work a { display: inline-block; margin-top: 25px; padding: 15px 0; border-bottom: 1px solid var(--ff-ink); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
 .ff-splash { position: fixed; inset: 0; z-index: 1000; background: #000; overflow: hidden; }
 .ff-splash-settle { background: transparent; }
 .ff-splash-panel { position: absolute; background: #000; overflow: hidden; }
 .ff-scan-layer { position: absolute; inset: 0; will-change: clip-path; }
 .ff-scan-dark { background: #000; }
 .ff-scan-light { background: #fff; }
-.ff-skip { position: absolute; bottom: 30px; right: 4.5vw; min-height: 44px; color: #c5c5c5 !important; font-family: var(--font-sans) !important; font-size: 10px !important; font-weight: 650 !important; letter-spacing: .12em; font-variant-numeric: tabular-nums; mix-blend-mode: difference; }
+.ff-skip { position: absolute; bottom: 30px; right: var(--ff-pad); min-height: 44px; color: #c5c5c5 !important; font-family: var(--font-sans) !important; font-size: 10px !important; font-weight: 500 !important; letter-spacing: .05em; font-variant-numeric: tabular-nums; mix-blend-mode: difference; }
 .ff-skip span { margin-left: 20px; }
-.ff-header, .ff-exhibit-label, .ff-work-info, .ff-work-controls, .ff-footer { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1); }
-.ff-shell[data-opening='true'][data-settling='false'] :is(.ff-header,.ff-exhibit-label,.ff-work-info,.ff-work-controls,.ff-footer) { opacity: 0; transform: translateY(10px); }
+.ff-header, .ff-rail, .ff-exhibit-label, .ff-work-info, .ff-work-controls, .ff-footer { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1); }
+.ff-shell[data-opening='true'][data-settling='false'] :is(.ff-header,.ff-rail,.ff-exhibit-label,.ff-work-info,.ff-work-controls,.ff-footer) { opacity: 0; transform: translateY(10px); }
 .ff-workspace { min-height: 100vh; background: var(--canvas, #f5f7f8); }
 .ff-tool-return { display: block; background: #f6f6f3; color: #191b19; text-decoration: none; padding: 15px 4vw; font-family: var(--font-sans); font-size: 12px; font-weight: 620; letter-spacing: .02em; border-bottom: 1px solid #d6d9d2; }
 .ff-tool-return:focus-visible { outline: 2px solid #3857e7; outline-offset: -5px; }
+/* Let the control groups wrap in narrow desktop windows without moving the rail. */
+@media (min-width: 651px) and (max-width: 1100px) {
+  .ff-work-controls { flex-wrap: wrap; }
+  .ff-exhibit-tools { margin-left: auto; }
+}
+/* The desktop composition holds from 651px up. Below that the rail drops under
+   the drawing as one row: a fallback, not a separate mobile design campaign. */
+@media (max-width: 650px) {
+  .ff-shell { grid-template-columns: minmax(0, 1fr); row-gap: 26px; }
+  .ff-header, .ff-main, .ff-rail, .ff-footer { grid-area: auto; }
+  .ff-rail { flex-direction: row; align-items: center; gap: 22px; padding: 16px 0 0; border-top: 1px solid var(--ff-line); }
+  .ff-rail a { font-size: clamp(40px, 10vw, 60px); line-height: .9; }
+  .ff-rail a span { width: 20px; height: 20px; font-size: 9px; margin-top: 0; }
+}
 @media (max-width: 650px) {
   .ff-shell { padding: 0 6vw; }
   .ff-header { height: 82px; gap: 12px; grid-template-columns: 1fr auto; }
   .ff-wordmark { font-size: 21px; }
-  .ff-header nav { grid-column: 1; grid-row: 2; gap: 24px; font-size: 12px; }
-  .ff-header nav a { padding: 0 0 10px; }
-  .ff-theme-group { grid-column: 2; grid-row: 1 / 3; }
+  .ff-theme-group { grid-column: 2; grid-row: 1; }
   .ff-exhibit-label { font-size: 8px; padding: 22px 0 15px; gap: 12px; }
   .ff-exhibit-label span:last-child { display: none; }
   .ff-exhibit { height: 330px; }
@@ -151,7 +182,7 @@
   .ff-shell *, .ff-shell *::before, .ff-shell *::after { transition: none !important; animation: none !important; }
 }
 
-.ff-image-wait { color: #c5c5c5; display: grid; place-items: center; font-family: var(--font-sans); font-size: 11px; font-weight: 620; font-variant-numeric: tabular-nums; letter-spacing: .13em; }
+.ff-image-wait { color: #c5c5c5; display: grid; place-items: center; font-family: var(--font-sans); font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; }
 /* Radial theme switch: keep both root snapshots unscaled and unmoved, clip only
    the incoming one, and stay off the Plimsoll application's own transitions. */
 :root[data-formfield-surface='public']::view-transition-old(root),
@@ -226,6 +257,6 @@
   from { clip-path: polygon(100% 100%, 100% 100%, 100% 100%); }
   to { clip-path: polygon(100% 100%, -100% 100%, 100% -100%); }
 }
-.ff-image-error { padding: 12px 0; font-size: 13px; font-weight: 450; color: var(--ff-muted); }
-.ff-image-error button { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--ff-accent); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.ff-image-error { padding: 12px 0; font-size: 13px; font-weight: 400; color: var(--ff-muted); }
+.ff-image-error button { font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--ff-accent); border-bottom: 1px solid currentColor; padding-bottom: 1px; }
 .ff-skip[hidden] { display: none; }
