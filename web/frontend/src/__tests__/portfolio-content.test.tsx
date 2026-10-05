@@ -325,7 +325,7 @@ describe('home and detail navigation', () => {
     fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[1].label }));
     await flush();
     await vt.last().capture(); await vt.last().finish();
-    fireEvent.click(screen.getByRole('button', { name: 'Geometry On' }));
+    expect(screen.queryByRole('button', { name: /Geometry/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
     const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
     vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
@@ -349,7 +349,7 @@ describe('home and detail navigation', () => {
     expect(detailVisible()).toBe(false);
     // The exhibit came back exactly as it was left.
     expect(screen.getByRole('button', { name: PLAN_SHEETS[1].label })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Geometry Off' })).toHaveAttribute('aria-pressed', 'false');
+    expect(Number(document.querySelector('.ff-layer-geometry > g')!.getAttribute('opacity'))).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Inspect On' })).toHaveAttribute('aria-pressed', 'true');
     expect(pan()).toBe(keptPan);
     expect(sample()).toBe(keptSample);

@@ -1,0 +1,40 @@
+/* Exhibit chrome stays inside its surface. Typography comes from the shell. */
+.ff-shell .ff-board-icon { position: absolute; z-index: 4; width: 44px; height: 44px; display: grid; place-items: center; color: var(--ff-muted); cursor: pointer; background: color-mix(in srgb, var(--ff-panel) 92%, transparent); transition: color .16s, background .16s; }
+.ff-board-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.ff-shell .ff-board-icon:hover, .ff-shell .ff-board-icon[aria-pressed='true'] { color: var(--ff-accent); }
+.ff-board-inspect { top: 12px; left: 12px; }
+.ff-board-reset { bottom: 12px; right: 12px; }
+.ff-board-caption { position: absolute; right: 23px; top: 28px; font-size: 9px; color: var(--ff-muted); letter-spacing: .05em; pointer-events: none; font-variant-numeric: tabular-nums; }
+.ff-board-picker { position: absolute; z-index: 4; left: 12px; bottom: 12px; display: flex; background: color-mix(in srgb, var(--ff-panel) 94%, transparent); cursor: default; }
+.ff-shell .ff-board-picker button { position: relative; width: 44px; height: 44px; color: var(--ff-muted); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: .02em; cursor: pointer; }
+.ff-board-picker button::after { content: ''; position: absolute; height: 1px; bottom: 6px; left: 14px; right: 14px; background: var(--ff-accent); transform: scaleX(0); transition: transform .18s; }
+.ff-shell .ff-board-picker button[aria-pressed='true'], .ff-shell .ff-board-picker button:hover { color: var(--ff-ink); }
+.ff-board-picker button[aria-pressed='true']::after { transform: scaleX(1); }
+.ff-shell[data-opening='true'][data-settling='false'] :is(.ff-board-icon, .ff-board-picker, .ff-board-caption) { visibility: hidden; }
+.ff-board-error { position: absolute; z-index: 5; bottom: 65px; left: 20px; right: 20px; margin: 0; padding: 12px; max-height: calc(100% - 79px); overflow: auto; background: var(--ff-panel); border-left: 1px solid var(--ff-accent); cursor: auto; }
+/* One information row, with the project name taking precedence over actions. */
+@media (min-width: 651px) {
+  .ff-home .ff-work-info { padding: 24px 0 12px; gap: 20px; flex-wrap: wrap; }
+  .ff-home .ff-work-heading { gap: 14px; }
+  .ff-home .ff-work-heading h1 { font-size: clamp(36px, 3.6vw, 52px); }
+  .ff-home .ff-work-heading p { font-size: 13px; margin-top: 6px; }
+  .ff-home .ff-work-entries { gap: 20px; }
+  .ff-home .ff-explore-link { min-height: 46px; padding: 0 14px; font-size: 11px; gap: 16px; }
+  .ff-home .ff-project-link { font-size: 10px; min-height: 42px; }
+}
+/* Sparse construction marks stay in margins and divider ends, never under text. */
+.ff-site-geometry { display: block; fill: none; stroke: var(--ff-muted); stroke-width: .8; pointer-events: none; opacity: .35; }
+.ff-site-geometry--section { position: absolute; top: -14px; right: 0; width: 100px; height: 36px; }
+.ff-detail-section { position: relative; }
+.ff-detail-section > .ff-site-geometry--section { top: -28px; }
+.ff-detail-section h2 { padding-right: 110px; }
+.ff-about { position: relative; }
+.ff-about > .ff-site-geometry--margin { position: absolute; width: 150px; height: 185px; right: 0; top: 70px; opacity: .2; }
+.ff-about-author, .ff-about-built { position: relative; }
+.ff-about-author > .ff-site-geometry--section, .ff-about-built > .ff-site-geometry--section { top: -28px; }
+.ff-footer { position: relative; }
+.ff-footer > .ff-site-geometry--rule { position: absolute; left: 0; top: -1px; width: 120px; height: 20px; }
+.ff-shell[data-ff-theme='dark'] .ff-site-geometry { opacity: .28; }
+@media (max-width: 1100px) { .ff-about > .ff-site-geometry--margin { display: none; } }
+@media (max-width: 650px) { .ff-site-geometry--section { width: 70px; } .ff-detail-section h2 { padding-right: 75px; } }
+@media (prefers-reduced-motion: reduce) { .ff-board-icon, .ff-board-picker button::after { transition: none !important; } }

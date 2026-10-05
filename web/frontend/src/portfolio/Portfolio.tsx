@@ -7,17 +7,20 @@ import { readyImage, type ImageCache } from './images';
 import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
 import { ProjectDetail } from './ProjectDetail';
 import { Splash } from './Splash';
+import { SiteGeometry } from './SiteGeometry';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
 import { APP_ENTRY_LINK, classifyHash, publicHref, WORK_DETAIL_LINK, type PortfolioRoute, type PublicView } from './routes';
 import { resolveTheme, storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
 import { animateTheme, cancelTransitions, runTransition, TRANSITION_MS, transitionsActive, type TransitionKind, type TransitionOptions } from './transitions';
 import './portfolio.css';
 import './content.css';
+import './exhibit.css';
 
 const Plimsoll = lazy(() => import('../App'));
 const zero = { x: 0, y: 0 };
 const limit = (value: number) => Math.max(-70, Math.min(70, value));
 const inside = (value: number) => Math.max(0, Math.min(100, value));
+const isExhibitControl = (target: EventTarget | null) => target instanceof Element && !!target.closest('[data-exhibit-ui]');
 /** Pan step, in composition units, for the explore keys. */
 const PAN_MOVES: Record<string, [number, number]> = { ArrowLeft: [-15, 0], ArrowRight: [15, 0], ArrowUp: [0, -15], ArrowDown: [0, 15] };
 /** Sample step, in per cent of the exhibit, for the inspect keys. */
@@ -47,7 +50,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const sheetRequest = useRef(0);
   const busy = useRef(false);
   const sheetIndexRef = useRef(0);
-  const [details, setDetails] = useState(true);
+  const details = true;
   const [inspect, setInspect] = useState(false);
   const pan = useRef(zero);
   const focus = useRef({ x: 50, y: 50 });
@@ -408,8 +411,10 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   }, [theme]);
 
   const explore = (e: PointerEvent<HTMLDivElement>) => {
+    if (isExhibitControl(e.target)) { hovered.current = false; keysOn.current = false; paint(); return; }
     if (busy.current) return;
     if (e.pointerType !== 'mouse' && e.buttons === 0) return;
+    hovered.current = e.pointerType === 'mouse';
     keysOn.current = false;
     const r = e.currentTarget.getBoundingClientRect();
     if (!r.width || !r.height) return;
@@ -421,11 +426,13 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     schedule();
   };
   const keyboard = (e: KeyboardEvent<HTMLDivElement>) => {
-    keysOn.current = true;
+    if (e.target !== e.currentTarget) return;
     // A reference cut owns the exhibit while it runs.
     if (busy.current) return;
     // Inspect mode hands the arrows to the sample; explore mode keeps panning.
     const move = (inspectOn.current ? SAMPLE_MOVES : PAN_MOVES)[e.key];
+    if (!move && e.key !== 'Home' && e.key !== 'Escape') return;
+    keysOn.current = true;
     if (move) {
       e.preventDefault();
       cancelAnimationFrame(panFrame.current); panFrame.current = 0;
@@ -496,6 +503,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     finish();
   }, [finish, prefetchApp]);
 
+  const withdrawDrawingCursor = () => { hovered.current = false; keysOn.current = false; paint(); };
+
   return <>
     <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
       <header className="ff-header" inert={opening}>
@@ -512,7 +521,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       <main className="ff-main" inert={opening}>
         <section className="ff-home" hidden={!onWork || detail} aria-label="Selected work">
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
-          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
+          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (isExhibitControl(e.target)) withdrawDrawingCursor(); else if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (isExhibitControl(e.target)) return; if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
             <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
             {inspect && <div ref={lens} className="ff-lens" aria-hidden="true">
               <span className="ff-lens-port">
@@ -524,7 +533,18 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             </div>}
             {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><span className="ff-cursor-cross" /><i /></div>}
             <span className="ff-corner ff-corner-tl" /><span className="ff-corner ff-corner-tr" /><span className="ff-corner ff-corner-bl" /><span className="ff-corner ff-corner-br" />
-            <div className="ff-exhibit-note"><span>PLIMSOLL / DRAWING {sheet.id}</span><span>{inspect ? `INSPECT 2× / REF ${sheet.id}` : 'MOVE TO EXPLORE'}</span></div>
+            <button className="ff-board-icon ff-board-inspect" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={() => setInspect(v => !v)} aria-label={`Inspect ${inspect ? 'On' : 'Off'}`} aria-pressed={inspect} title={inspect ? 'Leave inspection' : 'Inspect drawing · 2×'}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5 M7.5 10.5h6 M10.5 7.5v6" /></svg>
+            </button>
+            <span className="ff-board-caption">DRAWING {sheet.id} / 03</span>
+            <div className="ff-board-picker" data-exhibit-ui role="group" aria-label="Reference drawing" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>
+              {PLAN_SHEETS.map((s, i) => <button key={s.id} onClick={() => chooseReference(i)} aria-label={s.label} aria-pressed={i === marked} title={`View drawing ${s.shortLabel}`}>{s.shortLabel}</button>)}
+            </div>
+            <button className="ff-board-icon ff-board-reset" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={reset} aria-label="Reset view" title="Reset view">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9a8 8 0 1 1-.5 6 M5 3v6h6" /></svg>
+            </button>
+            {switchError !== null && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>Reference {PLAN_SHEETS[switchError].shortLabel} could not be loaded, so {sheet.shortLabel} stays on the exhibit. <button onClick={() => chooseReference(switchError)}>RETRY {PLAN_SHEETS[switchError].shortLabel}</button> or choose another reference.</p>}
+            {imageError && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert">The reference could not be loaded. Choose another reference or use Replay Intro to retry.</p>}
           </div>
 
           <div className="ff-work-info">
@@ -536,12 +556,6 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
               <a className="ff-project-link" href={WORK_DETAIL_LINK}>VIEW PROJECT <span aria-hidden="true">↗</span></a>
             </div>
           </div>
-          <div className="ff-work-controls">
-            <div className="ff-sheet-picker" role="group" aria-label="Reference drawing"><span>REFERENCE {sheet.shortLabel} / {String(PLAN_SHEETS.length).padStart(2, '0')}</span>{PLAN_SHEETS.map((s, i) => <button key={s.id} onClick={() => chooseReference(i)} aria-label={s.label} aria-pressed={i === marked}>{s.shortLabel}</button>)}</div>
-            <div className="ff-exhibit-tools"><button onClick={() => setDetails(v => !v)} aria-pressed={details}>Geometry {details ? 'On' : 'Off'}</button><button onClick={() => setInspect(v => !v)} aria-pressed={inspect}>Inspect {inspect ? 'On' : 'Off'}</button><button onClick={reset}>Reset view <span aria-hidden="true">↺</span></button></div>
-          </div>
-          {switchError !== null && <p className="ff-image-error" role="alert">Reference {PLAN_SHEETS[switchError].shortLabel} could not be loaded, so {sheet.shortLabel} stays on the exhibit. <button onClick={() => chooseReference(switchError)}>RETRY {PLAN_SHEETS[switchError].shortLabel}</button> or choose another reference.</p>}
-          {imageError && <p className="ff-image-error" role="alert">The reference could not be loaded. Choose another reference or use Replay Intro to retry.</p>}
         </section>
 
         {/* The detail and About mount only when they are the visible view. Keeping
@@ -566,7 +580,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
         <a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a>
       </nav>
 
-      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button></footer>
+      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button><SiteGeometry variant="rule" /></footer>
       {opening && publicActive && (readyHref === sheet.href
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
         : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}

@@ -1,5 +1,6 @@
 import type { MouseEventHandler, RefObject } from 'react';
 import { Artwork } from './Artwork';
+import { SiteGeometry } from './SiteGeometry';
 import { APP_ENTRY_LINK, publicHref } from './routes';
 import type { PlanSheet } from './plans';
 
@@ -119,6 +120,7 @@ export function ProjectDetail({ sheet, dark, details, headingRef, ctaRef, prefet
 
     <div className="ff-detail-body">
       {SECTIONS.map(section => <section key={section.index} className="ff-detail-section" aria-labelledby={`ff-detail-${section.index}`}>
+        <SiteGeometry />
         <h2 id={`ff-detail-${section.index}`}><span>{section.index}</span>{section.title}</h2>
         <dl className="ff-detail-rows">
           {section.body.map(row => <div className="ff-detail-row" key={row.label}>

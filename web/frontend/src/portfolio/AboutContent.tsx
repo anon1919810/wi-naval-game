@@ -1,5 +1,6 @@
 import type { RefObject } from 'react';
 import { Contact } from './Contact';
+import { SiteGeometry } from './SiteGeometry';
 import { publicHref } from './routes';
 
 /** What this specific site is built from, so the claim stays checkable. */
@@ -23,11 +24,13 @@ interface Props {
  */
 export function AboutContent({ headingRef }: Props) {
   return <article className="ff-about" aria-label="About Y’s Formfield">
+    <SiteGeometry variant="margin" />
     <span className="ff-eyebrow">ABOUT THE COLLECTION</span>
     <h1 ref={headingRef} tabIndex={-1}>A field for<br />useful ideas.</h1>
     <p>Y’s Formfield is Yang Duanming’s collection of tools and experiments. A place to build, explore, and keep making things better.</p>
 
     <section className="ff-about-author" aria-labelledby="ff-about-author-title">
+      <SiteGeometry />
       <h2 id="ff-about-author-title">The person behind it</h2>
       <p>My name is Yang Duanming. I build tools and explore interface design.</p>
       <p>This collection brings together practical software and visual experiments. Plimsoll is the first featured project.</p>
@@ -41,6 +44,7 @@ export function AboutContent({ headingRef }: Props) {
     </div>
 
     <section className="ff-about-built" aria-labelledby="ff-about-built-title">
+      <SiteGeometry />
       <h2 id="ff-about-built-title">Built with</h2>
       <dl className="ff-about-rows">
         {BUILT_WITH.map(row => <div className="ff-about-row" key={row.label}>

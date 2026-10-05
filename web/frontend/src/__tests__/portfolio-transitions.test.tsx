@@ -141,7 +141,7 @@ describe('desktop transitions', () => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
     fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[1].label })); await flush();
     const sheet = vt.last(); await sheet.capture(); await sheet.finish();
-    fireEvent.click(screen.getByRole('button', { name: 'Geometry On' }));
+    expect(screen.queryByRole('button', { name: /Geometry/ })).toBeNull();
     const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
     fireEvent.keyDown(exhibit, { key: 'ArrowRight' }); const pan = transform();
     fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
@@ -154,7 +154,7 @@ describe('desktop transitions', () => {
     const arrival = animations.find(call => call.options.pseudoElement === '::view-transition-new(ff-scan)')!;
     expect(arrival.options.fill).toBe('both'); expect(arrival.options.delay).toBe(140);
     expect(screen.getByRole('button', { name: PLAN_SHEETS[1].label })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('button', { name: 'Geometry Off' })).toHaveAttribute('aria-pressed', 'false');
+    expect(Number(document.querySelector('.ff-layer-geometry > g')!.getAttribute('opacity'))).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Inspect On' })).toHaveAttribute('aria-pressed', 'true');
     expect(transform()).toBe(pan); expect(document.querySelector('.ff-lens-view')!.getAttribute('viewBox')).toBe(sample);
     expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();

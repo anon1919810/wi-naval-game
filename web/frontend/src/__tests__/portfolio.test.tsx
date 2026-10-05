@@ -115,10 +115,63 @@ describe('public portfolio boundary', () => {
     fireEvent.keyDown(exhibit, { key: 'Home' });
     expect(vessel().getAttribute('transform')).toBe(resting);
     expect(plate().getAttribute('transform')).toBe(restingPlate);
-    fireEvent.click(screen.getByRole('button', { name: 'Geometry On' }));
-    expect(plate().firstElementChild).toHaveAttribute('opacity', '0');
+    expect(screen.queryByRole('button', { name: /Geometry/ })).toBeNull();
+    expect(Number(plate().firstElementChild!.getAttribute('opacity'))).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
     expect(screen.getByRole('button', { name: 'Inspect On' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps the drawing controls inside the exhibit and the construction plate always visible', async () => {
+    const { container } = render(<Portfolio introEnabled={false} />);
+    await act(async () => {});
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    for (const name of ['Inspect Off', 'Reset view', ...PLAN_SHEETS.map(sheet => sheet.label)]) {
+      expect(exhibit).toContainElement(screen.getByRole('button', { name }));
+    }
+    expect(container.querySelector('.ff-work-controls')).toBeNull();
+    expect(container.querySelector('.ff-exhibit-tools')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Geometry/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[1].label }));
+    await act(async () => {});
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+    expect(Number(container.querySelector('.ff-layer-geometry > g')!.getAttribute('opacity'))).toBeGreaterThan(0);
+  });
+
+  it('isolates control keys and pointer capture from drawing exploration', () => {
+    const { container } = render(<Portfolio introEnabled={false} />);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
+    const capture = vi.fn();
+    Object.defineProperty(exhibit, 'setPointerCapture', { value: capture, configurable: true });
+    const transform = () => container.querySelector('.ff-layer-vessel')!.getAttribute('transform');
+    const pointer = (target: Element, type: string, pointerType = 'mouse') => {
+      const event = new Event(type, { bubbles: true });
+      Object.assign(event, { pointerType, pointerId: 7, buttons: 1, clientX: 30, clientY: 20 });
+      fireEvent(target, event);
+    };
+    fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
+    const kept = transform();
+    const inspect = screen.getByRole('button', { name: 'Inspect Off' });
+    for (const key of ['ArrowRight', 'Home', 'Escape', 'Enter', ' ']) fireEvent.keyDown(inspect, { key });
+    pointer(inspect.querySelector('svg')!, 'pointerdown', 'touch');
+    pointer(inspect, 'pointermove');
+    expect(capture).not.toHaveBeenCalled();
+    expect(transform()).toBe(kept);
+    fireEvent.click(inspect);
+    const lens = container.querySelector<HTMLElement>('.ff-lens')!;
+    pointer(exhibit, 'pointerover');
+    expect(lens.hidden).toBe(false);
+    pointer(screen.getByRole('button', { name: 'Reset view' }), 'pointermove');
+    expect(lens.hidden).toBe(true);
+    expect(transform()).toBe(kept);
+    const sample = container.querySelector('.ff-lens-view')!.getAttribute('viewBox');
+    for (const key of ['ArrowLeft', 'Home', 'Escape']) fireEvent.keyDown(screen.getByRole('button', { name: 'Inspect On' }), { key });
+    expect(container.querySelector('.ff-lens-view')).toHaveAttribute('viewBox', sample);
+    expect(screen.getByRole('button', { name: 'Inspect On' })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(screen.getByRole('button', { name: 'Reset view' }));
+    expect(transform()).not.toBe(kept);
+    fireEvent.keyDown(exhibit, { key: 'Tab' });
+    expect(lens.hidden).toBe(true);
   });
 
   it('shows the blueprint cursor inside the exhibit for mouse pointers only', () => {
