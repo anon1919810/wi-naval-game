@@ -10,9 +10,12 @@
  * 3. **page / page-back** — content-only (260 ms). The header and footer stay
  *    put, so this must not snapshot the page at all: it sets one attribute and
  *    lets a plain CSS animation move the section that appeared.
- * 4. **tool** — the exhibit frame morphs into the workspace (450 ms).
+ * 4. **detail** — the exhibit's artwork and the work detail's hero are the same
+ *    shared drawing, so one named group morphs between them (400 ms) while the
+ *    persistent chrome stays still.
+ * 5. **tool** — the exhibit frame morphs into the workspace (450 ms).
  *
- * What the controller guarantees for all four:
+ * What the controller guarantees for all five:
  *
  * - **Feature detection, never assumptions.** `document.startViewTransition` is
  *   checked at call time; reduced motion and an unsupported browser both fall
@@ -29,7 +32,7 @@
  * - **No waiting.** Nothing here waits for a module, an image or a response.
  */
 
-export type TransitionKind = 'theme' | 'sheet' | 'sheet-back' | 'page' | 'page-back' | 'tool' | 'tool-back';
+export type TransitionKind = 'theme' | 'sheet' | 'sheet-back' | 'page' | 'page-back' | 'detail' | 'tool' | 'tool-back';
 
 /** Choreography, in milliseconds. These are the only moving durations in the shell. */
 export const TRANSITION_MS = {
@@ -39,6 +42,8 @@ export const TRANSITION_MS = {
   sheet: 360,
   /** Content-only Work/About move. */
   page: 260,
+  /** Exhibit artwork morphing into the work detail's hero. */
+  detail: 400,
   /** Exhibit frame expanding into the workspace. */
   tool: 450,
 } as const;

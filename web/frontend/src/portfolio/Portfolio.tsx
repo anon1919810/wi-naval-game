@@ -1,14 +1,18 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type KeyboardEvent } from 'react';
 import { flushSync } from 'react-dom';
+import { AboutContent } from './AboutContent';
+import { CONTACT_EMAIL } from './Contact';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
 import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
+import { ProjectDetail } from './ProjectDetail';
 import { Splash } from './Splash';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
-import { APP_ENTRY_LINK, classifyHash, publicHref, type PortfolioRoute } from './routes';
+import { APP_ENTRY_LINK, classifyHash, publicHref, WORK_DETAIL_LINK, type PortfolioRoute, type PublicView } from './routes';
 import { resolveTheme, storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
 import { animateTheme, cancelTransitions, runTransition, TRANSITION_MS, transitionsActive, type TransitionKind, type TransitionOptions } from './transitions';
 import './portfolio.css';
+import './content.css';
 
 const Plimsoll = lazy(() => import('../App'));
 const zero = { x: 0, y: 0 };
@@ -70,7 +74,17 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const cta = useRef<HTMLAnchorElement>(null);
   const homeHeading = useRef<HTMLHeadingElement>(null);
   const aboutHeading = useRef<HTMLHeadingElement>(null);
+  const detailHeading = useRef<HTMLHeadingElement>(null);
+  const detailCta = useRef<HTMLAnchorElement>(null);
   const cut = useRef(0);
+  /**
+   * Where the visitor was when they left for the workspace, and how far down the
+   * exhibit they had scrolled. A long page replacing a short one must not strand
+   * the reader halfway down the new page, so the position is recorded on the way
+   * out and re-applied on the way back.
+   */
+  const publicOrigin = useRef<PublicView>('home');
+  const homeScroll = useRef(0);
   /** The route React has actually committed, which the async listener compares against. */
   const committed = useRef(route);
   const finish = useCallback(() => { setOpening(false); setSettling(false); }, []);
@@ -107,19 +121,22 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const marked = requested ?? sheetIndex;
   const publicActive = route.kind === 'public';
   const about = publicActive && route.view === 'about';
+  const detail = publicActive && route.view === 'project';
+  /** Work owns the exhibit and its detail; both of them need the reference bitmap. */
+  const onWork = publicActive && !about;
 
   useEffect(() => {
-    if (!publicActive || about) return;
+    if (!onWork) return;
     let active = true;
     setReadyHref(null); setImageError(false);
     readyImage(sheet.href, imageCache.current).then(() => {
       if (active) setReadyHref(sheet.href);
     }, () => { if (active) { setImageError(true); finish(); } });
     return () => { active = false; };
-  }, [sheet.href, publicActive, about, loadAttempt, finish]);
+  }, [sheet.href, onWork, loadAttempt, finish]);
 
   useEffect(() => {
-    if (!publicActive || about || readyHref !== sheet.href) return;
+    if (!onWork || readyHref !== sheet.href) return;
     const prefetch = () => {
       for (const other of PLAN_SHEETS) if (other.href !== sheet.href) void readyImage(other.href, imageCache.current).catch(() => {});
     };
@@ -129,7 +146,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     }
     const timer = window.setTimeout(prefetch, 1500);
     return () => window.clearTimeout(timer);
-  }, [readyHref, sheet.href, publicActive, about]);
+  }, [readyHref, sheet.href, onWork]);
 
   useLayoutEffect(() => {
     if (!opening || !publicActive) return;
@@ -194,23 +211,39 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   useLayoutEffect(() => { reset(); return () => cancelAnimationFrame(panFrame.current); }, [sheetIndex, reset]);
   // Leaving for About or for the application is not a new reference and not an
   // explicit reset, so the view is only repainted on the way back — never
-  // recentred behind the visitor's back.
-  useLayoutEffect(() => { if (publicActive && !about) paint(); }, [publicActive, about, paint]);
+  // recentred behind the visitor's back. The detail keeps the exhibit's state
+  // untouched for the same reason.
+  useLayoutEffect(() => { if (onWork && !detail) paint(); }, [onWork, detail, paint]);
 
   /**
    * Focus only ever moves when the browser would otherwise have stranded it: the
    * element that held it just unmounted, or is hidden by the page that replaced
-   * it. The persistent header keeps the focus through a normal nav click, so the
-   * heading is only claimed when nothing visible still holds it. Coming back
-   * from the workspace returns focus to the way out of the exhibit.
+   * it. The persistent header and rail keep the focus through a normal nav click,
+   * so the heading is only claimed when nothing visible still holds it. Coming
+   * back from the workspace returns focus to the way out of the view it left.
    */
   const restoreFocus = useCallback((next: PortfolioRoute, returningFromTool: boolean) => {
     if (next.kind === 'app') return;
     const active = document.activeElement as HTMLElement | null;
     const stranded = !active || active === document.body || !active.isConnected || !!active.closest('[hidden]');
     if (!stranded) return;
-    const target = returningFromTool ? cta.current : (next.view === 'about' ? aboutHeading.current : homeHeading.current);
+    const fromDetail = next.view === 'project';
+    const target = returningFromTool
+      ? (fromDetail ? detailCta.current : cta.current)
+      : (next.view === 'about' ? aboutHeading.current : fromDetail ? detailHeading.current : homeHeading.current);
     target?.focus({ preventScroll: true });
+  }, []);
+
+  /**
+   * Every public page is entered at its own top, except the exhibit, which gets
+   * back the position it was left at — whether the visitor left it for the
+   * detail, for About or for the workspace. The position is read before the
+   * transition starts, so the outgoing snapshot still shows the page they were
+   * reading. The workspace is a different surface, so it always starts at its top.
+   */
+  const place = useCallback((next: PortfolioRoute) => {
+    const backToExhibit = next.kind === 'public' && next.view === 'home';
+    window.scrollTo({ top: backToExhibit ? homeScroll.current : 0, behavior: 'auto' });
   }, []);
 
   /**
@@ -219,7 +252,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
    * through the same `hashchange`. `applyRoute` therefore never writes the hash
    * itself, which is what keeps one navigation to one transition.
    */
-  const applyRoute = useCallback((next: PortfolioRoute) => {
+  const applyRoute = useCallback((next: PortfolioRoute, immediate = false) => {
     const current = committed.current;
     const same = current.kind === next.kind
       && (current.kind === 'app' || next.kind === 'app' || current.view === next.view);
@@ -236,18 +269,36 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     setSwitchError(null);
     retire();
     const returningFromTool = current.kind === 'app' && next.kind === 'public';
+    // Leaving the exhibit records its scroll position, so every way back lands
+    // where the visitor was; leaving for the workspace also records the page, so
+    // the return goes there rather than to a fixed one.
+    if (current.kind === 'public' && current.view === 'home') homeScroll.current = window.scrollY;
+    if (next.kind === 'app' && current.kind === 'public') publicOrigin.current = current.view;
     if (next.kind === 'app' || next.view !== 'home') finish();
-    // Leaving and re-entering the workspace are the same geometric move, only
-    // in opposite directions.
+    // The artwork morph is the move between the exhibit and its own detail, in
+    // either direction. Work/About stays the cheap content-only cut.
+    const fromView = current.kind === 'public' ? current.view : null;
     const kind: TransitionKind = next.kind === 'app' ? 'tool'
       : returningFromTool ? 'tool-back'
+      : (next.view === 'project' || fromView === 'project') ? 'detail'
       : (next.view === 'about' ? 'page' : 'page-back');
-    void change(kind, () => {
+    const commit = () => {
       committed.current = next;
       flushSync(() => setRoute(next));
+      place(next);
       restoreFocus(next, returningFromTool);
-    });
-  }, [change, finish, restoreFocus, retire]);
+    };
+    if (immediate) commit();
+    else void change(kind, commit);
+  }, [change, finish, place, restoreFocus, retire]);
+
+  // A preference change can cancel a native capture before its route callback
+  // runs. Keep the requested URL authoritative, then apply the preference.
+  // Route supersession and unmount still use retire() to discard obsolete work.
+  const settleRequestedRoute = useCallback(() => {
+    retire();
+    applyRoute(classifyHash(window.location.hash), true);
+  }, [applyRoute, retire]);
 
   /**
    * Decode-gated reference selection. Pressing a reference marks it immediately;
@@ -261,7 +312,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     // sheet that is already displayed: that cancels a pending request instead of
     // letting a stale decode swap the artwork afterwards.
     sheetRequest.current++;
-    retire();
+    settleRequestedRoute();
     if (index === sheetIndexRef.current) {
       setRequested(null);
       setSwitchError(null);
@@ -282,7 +333,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       setRequested(null);
       setSwitchError(index);
     });
-  }, [change, retire]);
+  }, [change, settleRequestedRoute]);
   // Re-register the lens and cursor nodes and restate their visibility whenever
   // anything that changes the rendered surface changes.
   useLayoutEffect(() => { inspectOn.current = inspect; paint(); }, [inspect, sheet, dark, details, paint]);
@@ -293,11 +344,11 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     const change = (e: MediaQueryListEvent) => {
       still.current = e.matches;
-      if (e.matches) retire();
+      if (e.matches) settleRequestedRoute();
     };
     media?.addEventListener?.('change', change);
     return () => { media?.removeEventListener?.('change', change); };
-  }, [retire]);
+  }, [settleRequestedRoute]);
 
   useEffect(() => {
     if (!publicActive) return;
@@ -328,18 +379,20 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     window.addEventListener('hashchange', update);
     const media = window.matchMedia?.('(prefers-color-scheme: dark)');
     const change = (e: MediaQueryListEvent) => {
-      if (theme === 'system') retire();
+      if (theme === 'system') settleRequestedRoute();
       setSystemDark(e.matches);
     };
     media?.addEventListener?.('change', change);
     return () => { window.removeEventListener('hashchange', update); media?.removeEventListener?.('change', change); };
-  }, [applyRoute, retire, theme]);
+  }, [applyRoute, settleRequestedRoute, theme]);
   useEffect(() => {
-    document.title = route.kind === 'app' ? 'Plimsoll · 舰船计算工作台' : 'Y’s Formfield — Tools & Experiments';
+    document.title = route.kind === 'app' ? 'Plimsoll · 舰船计算工作台'
+      : route.view === 'project' ? 'Plimsoll — Y’s Formfield'
+      : 'Y’s Formfield — Tools & Experiments';
     document.documentElement.lang = route.kind === 'app' ? 'zh-CN' : 'en';
     document.documentElement.dataset.formfieldSurface = route.kind;
     if (route.kind === 'public') document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  }, [dark, route.kind]);
+  }, [dark, route]);
   useEffect(() => {
     if (!publicActive) return;
     const root = document.documentElement;
@@ -406,11 +459,12 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const followSystem = useCallback(() => {
     // Following the OS re-resolves the theme from scratch, so any cut in flight
     // is retired rather than left to overwrite the value it just changed.
-    retire();
+    settleRequestedRoute();
     setTheme(previous => (previous === 'system' ? resolved : 'system'));
-  }, [resolved, retire]);
+  }, [resolved, settleRequestedRoute]);
 
   const toggleTheme = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    settleRequestedRoute();
     const next = dark ? 'light' : 'dark';
     // Keyboard-triggered clicks report 0,0 — fall back to the button's own center.
     const rect = e.currentTarget.getBoundingClientRect();
@@ -418,7 +472,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     const y = e.clientY || rect.top + rect.height / 2;
     const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
     void change('theme', () => { flushSync(() => setTheme(next)); }, { animate: () => animateTheme({ x, y }, radius) });
-  }, [change, dark]);
+  }, [change, dark, settleRequestedRoute]);
 
   /**
    * The workspace module is fetched, never mounted: the lazy factory is the
@@ -433,18 +487,14 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
    * Modified clicks, middle clicks and new tabs keep the browser's own
    * behaviour. Everything else is left to the anchor too: its navigation is the
    * single route trigger, and `applyRoute` runs the transition from the
-   * `hashchange` it raises. Interrupting the current route first means a press
-   * during another cut is retires rather than queued.
+   * `hashchange` it raises. Retirement belongs to that route change: a repeated
+   * click on the same hash must not cancel a pending entry with no new trigger.
    */
   const enterTool = useCallback((e: MouseEvent<HTMLAnchorElement>) => {
     prefetchApp();
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     finish();
-    sheetRequest.current++;
-    setRequested(null);
-    setSwitchError(null);
-    retire();
-  }, [finish, prefetchApp, retire]);
+  }, [finish, prefetchApp]);
 
   return <>
     <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
@@ -458,9 +508,9 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
 
       {/* The rail is a sibling of `main`, not a child of it: the Work/About cut is
           scoped to `.ff-main`, so this navigation is never named, never moves and
-          keeps focus across the page change. It stays mounted on both views. */}
+          keeps focus across the page change. It stays mounted on every view. */}
       <main className="ff-main" inert={opening}>
-        <section className="ff-home" hidden={about} aria-label="Selected work">
+        <section className="ff-home" hidden={!onWork || detail} aria-label="Selected work">
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
           <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
             <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
@@ -479,7 +529,12 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
 
           <div className="ff-work-info">
             <div className="ff-work-heading"><span className="ff-work-index">01 /</span><div><h1 ref={homeHeading} tabIndex={-1}>Plimsoll</h1><p>Naval design, made explorable.</p></div></div>
-            <a className="ff-explore-link" ref={cta} href={APP_ENTRY_LINK} onClick={enterTool} onPointerEnter={prefetchApp} onFocus={prefetchApp}>OPEN PLIMSOLL <span aria-hidden="true">↗</span></a>
+            {/* Two ways out, and they stay visibly different: the framed block opens
+                the tool, the ruled text reads the project first. */}
+            <div className="ff-work-entries">
+              <a className="ff-explore-link" ref={cta} href={APP_ENTRY_LINK} onClick={enterTool} onPointerEnter={prefetchApp} onFocus={prefetchApp}>OPEN PLIMSOLL <span aria-hidden="true">↗</span></a>
+              <a className="ff-project-link" href={WORK_DETAIL_LINK}>VIEW PROJECT <span aria-hidden="true">↗</span></a>
+            </div>
           </div>
           <div className="ff-work-controls">
             <div className="ff-sheet-picker" role="group" aria-label="Reference drawing"><span>REFERENCE {sheet.shortLabel} / {String(PLAN_SHEETS.length).padStart(2, '0')}</span>{PLAN_SHEETS.map((s, i) => <button key={s.id} onClick={() => chooseReference(i)} aria-label={s.label} aria-pressed={i === marked}>{s.shortLabel}</button>)}</div>
@@ -489,26 +544,37 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           {imageError && <p className="ff-image-error" role="alert">The reference could not be loaded. Choose another reference or use Replay Intro to retry.</p>}
         </section>
 
-        <section className="ff-about" hidden={!about}>
-          <span className="ff-eyebrow">ABOUT THE COLLECTION</span><h1 ref={aboutHeading} tabIndex={-1}>A field for<br />useful ideas.</h1>
-          <p>Y’s Formfield is Yang Duanming’s collection of tools and experiments. A place to build, explore, and keep making things better.</p>
-          <div className="ff-about-work"><span>FIRST WORK / 01</span><h2>Plimsoll</h2><p>A naval design and analysis tool for studying ship projects, loading conditions, stability, resistance, and simplified damage.</p><a href={publicHref('home')}>BACK TO THE WORK <span aria-hidden="true">↗</span></a></div>
-        </section>
+        {/* The detail and About mount only when they are the visible view. Keeping
+            a hidden copy of the detail alive would put a second full copy of the
+            artwork in the document — a third `view-transition-name` candidate, a
+            third filter id and a second `img` that no test or reader ever wanted.
+            All the exhibit's own state lives in refs and state above, so it is
+            already intact when this view comes back. */}
+        {detail && <section className="ff-detail-slot">
+          <ProjectDetail sheet={sheet} dark={dark} details={details} headingRef={detailHeading} ctaRef={detailCta} prefetchApp={prefetchApp} onEnterTool={enterTool} />
+        </section>}
+
+        {about && <section className="ff-about-slot">
+          <AboutContent headingRef={aboutHeading} />
+        </section>}
       </main>
 
       <nav className="ff-rail" aria-label="Main navigation" inert={opening}>
+        {/* Work owns the exhibit and the work detail, so it stays the current page
+            on both; the detail is reached from the exhibit, not from the rail. */}
         <a href={publicHref('home')} aria-current={!about ? 'page' : undefined}>Work <span>01</span></a>
         <a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a>
       </nav>
 
-      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button></footer>
+      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button></footer>
       {opening && publicActive && (readyHref === sheet.href
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
         : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}
     </div>
     {/* The fallback is the workspace's own shell, so the frame morph lands on a
         surface that looks like the destination instead of a bare message. The
-        application is still lazy: it mounts only on the committed app route. */}
-    {route.kind === 'app' && <div className="ff-tool-shell"><a className="ff-tool-return" href={publicHref('home')}>↖ Y’s Formfield</a><div className="ff-workspace"><Suspense fallback={<div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在加载工作空间</small></div>}><Plimsoll /></Suspense></div></div>}
+        application is still lazy: it mounts only on the committed app route. The
+        way out goes back to the public view the visitor actually left. */}
+    {route.kind === 'app' && <div className="ff-tool-shell"><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>↖ Y’s Formfield</a><div className="ff-workspace"><Suspense fallback={<div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在加载工作空间</small></div>}><Plimsoll /></Suspense></div></div>}
   </>;
 }

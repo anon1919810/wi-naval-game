@@ -1,0 +1,135 @@
+/* Scoped presentation for the public content pages: the work detail and the
+   About/contact column. Everything here is a supplement to portfolio.css, which
+   keeps the shell, the exhibit and the splash untouched. Shared primitives stay
+   shared on purpose: `.ff-eyebrow` and `.ff-explore-link` are the same words and
+   the same block on the exhibit and here, so this file only adds the new shapes.
+
+   Typography is the shell's: Space Grotesk through `--font-display` for headings
+   and accent labels, Inter through `--font-sans` for everything read. The new
+   micro-label sizes sit between the shell's 9px and 12px, never below 10px. */
+
+/* ---- Work detail --------------------------------------------------------- */
+
+:root[data-formfield-surface='public'] { scrollbar-gutter: stable; }
+@media (min-width: 651px) {
+  .ff-rail { position: sticky; top: 32px; align-self: start; }
+}
+.ff-footer a { color: inherit; }
+.ff-footer a:hover { color: var(--ff-accent); }
+
+.ff-detail { padding: clamp(28px, 3vw, 52px) 0 90px; max-width: 1000px; }
+.ff-detail-back { display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; letter-spacing: .05em; color: var(--ff-muted); padding: 6px 0; transition: color .16s, gap .2s; }
+.ff-detail-back span { font-size: 15px; }
+.ff-detail-back:hover { color: var(--ff-ink); gap: 15px; }
+.ff-detail > .ff-eyebrow { display: block; margin-top: clamp(26px, 3vw, 46px); }
+.ff-detail h1 { margin: 14px 0 0; font-family: var(--font-display); font-size: clamp(54px, 7.6vw, 108px); font-weight: 700; line-height: 1; letter-spacing: -.025em; }
+.ff-detail-lede { margin: 22px 0 0; max-width: 620px; font-size: clamp(16px, 1.35vw, 19px); line-height: 1.65; color: var(--ff-muted); }
+
+/* The hero is the exhibit's own composition at a smaller size, and it carries the
+   same `.ff-art-scene` class, so the 400 ms detail morph has exactly one named
+   node in the document at any moment. */
+.ff-detail-hero { position: relative; margin-top: clamp(30px, 3.4vw, 52px); aspect-ratio: 16 / 7; max-height: 340px; overflow: hidden; background: var(--ff-panel); }
+.ff-detail-hero .ff-art-scene { background: var(--ff-panel); }
+.ff-detail-hero-note { position: absolute; left: 20px; right: 20px; bottom: 17px; display: block; font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-muted); pointer-events: none; }
+.ff-detail-entries { display: flex; align-items: center; gap: 26px; padding: 24px 0 8px; }
+
+/* Numbered editorial sections: flat rows and hairline rules, no card wall. The
+   number is set in display type on the left and the title follows it, so the
+   section head reads as one line rather than a stack of labels. */
+.ff-detail-section { border-top: 1px solid var(--ff-line); margin-top: clamp(38px, 4vw, 62px); padding-top: 26px; scroll-margin-top: 24px; }
+.ff-detail-section h2 { display: flex; align-items: baseline; gap: 18px; margin: 0 0 22px; font-family: var(--font-display); font-size: clamp(24px, 2.4vw, 34px); font-weight: 700; line-height: 1.05; letter-spacing: -.02em; }
+.ff-detail-section h2 span { font-family: var(--font-sans); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-accent); }
+.ff-detail-rows { margin: 0; }
+.ff-detail-row { display: grid; grid-template-columns: minmax(150px, 210px) minmax(0, 1fr); gap: 8px 34px; padding: 17px 0; border-top: 1px solid var(--ff-line); }
+.ff-detail-rows > .ff-detail-row:first-child { border-top: 0; padding-top: 0; }
+.ff-detail-row dt { font-size: 11px; font-weight: 600; letter-spacing: .03em; color: var(--ff-ink); }
+.ff-detail-row dd { margin: 0; font-size: 14px; line-height: 1.72; color: var(--ff-muted); }
+
+/* The real report screenshot, at its own 856×751 and unretouched. A fixed
+   intrinsic size keeps the caption from sliding when the bitmap arrives. */
+.ff-report { margin: 30px 0 0; border: 1px solid var(--ff-line); background: var(--ff-panel); }
+.ff-report img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--ff-line); background: #fff; }
+.ff-report figcaption { padding: 16px 18px 18px; font-size: 12px; line-height: 1.68; color: var(--ff-muted); }
+
+/* ---- About and contact --------------------------------------------------- */
+
+.ff-about-author { border-top: 1px solid var(--ff-line); margin-top: 46px; padding-top: 26px; }
+.ff-about-author h2, .ff-about-built h2, .ff-contact h2 { margin: 0 0 16px; font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ff-muted); }
+.ff-about-author p { max-width: 590px; margin: 0 0 14px; font-size: 15px; line-height: 1.72; color: var(--ff-muted); }
+.ff-about-work a { display: inline-block; margin-top: 25px; padding: 15px 0; border-bottom: 1px solid var(--ff-ink); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
+.ff-about-work a:hover { color: var(--ff-accent); border-color: var(--ff-accent); }
+.ff-about-built { border-top: 1px solid var(--ff-line); margin-top: 52px; padding-top: 26px; }
+.ff-about-rows { margin: 0; }
+.ff-about-row { display: grid; grid-template-columns: minmax(140px, 200px) minmax(0, 1fr); gap: 6px 30px; padding: 14px 0; border-top: 1px solid var(--ff-line); }
+.ff-about-rows > .ff-about-row:first-child { border-top: 0; padding-top: 0; }
+.ff-about-row dt { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.ff-about-row dd { margin: 0; font-size: 13px; line-height: 1.68; color: var(--ff-muted); }
+
+/* Contact: the address is a real mail link and stays usable whatever the
+   clipboard does, so the copy control is a convenience beside it, never the
+   only way to reach anyone. */
+.ff-contact { border-top: 1px solid var(--ff-line); margin-top: 52px; padding-top: 26px; }
+.ff-contact-note { max-width: 520px; margin: 0 0 20px; font-size: 14px; line-height: 1.7; color: var(--ff-muted); }
+.ff-contact-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 26px; }
+.ff-contact-mail { font-family: var(--font-display); font-size: clamp(24px, 2.6vw, 40px); font-weight: 500; letter-spacing: -.015em; border-bottom: 1px solid var(--ff-line); padding-bottom: 3px; word-break: break-all; transition: color .16s, border-color .16s; }
+.ff-contact-mail:hover { color: var(--ff-accent); border-color: var(--ff-accent); }
+.ff-shell .ff-contact-copy { min-height: 44px; padding: 0 16px; border: 1px solid var(--ff-ink); font-size: 11px; font-weight: 600; letter-spacing: .04em; transition: color .15s, border-color .15s; }
+.ff-shell .ff-contact-copy:hover { color: var(--ff-accent); border-color: var(--ff-accent); }
+.ff-contact-profile { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--ff-muted); transition: color .16s, gap .2s; }
+.ff-contact-profile span { font-size: 16px; }
+.ff-contact-profile:hover { color: var(--ff-ink); gap: 17px; }
+.ff-contact-status { margin: 18px 0 0; font-size: 12px; line-height: 1.6; color: var(--ff-muted); }
+.ff-contact-status--failed { color: var(--ff-ink); }
+
+/* ---- Narrow-width fallback ----------------------------------------------- */
+/* Same rule as the shell: desktop composition holds above 650px, and below it
+   the existing single-column fallback applies. This is a floor, not a redesign. */
+@media (max-width: 900px) {
+  .ff-detail-row, .ff-about-row { grid-template-columns: minmax(0, 1fr); }
+  .ff-detail-row dt, .ff-about-row dt { color: var(--ff-muted); }
+}
+@media (max-width: 650px) {
+  .ff-detail { padding-bottom: 60px; }
+  .ff-detail-hero { aspect-ratio: 16 / 9; }
+  .ff-detail-hero-note { left: 13px; right: 13px; bottom: 12px; font-size: 8px; }
+  .ff-work-entries { flex-wrap: wrap; gap: 8px 16px; }
+  .ff-contact-actions { gap: 12px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-detail *, .ff-about *, .ff-contact * { transition: none !important; }
+}
+
+/* ---- The two ways out of the exhibit ------------------------------------- */
+/* The framed block stays the direct entry to the tool. The project read is a
+   ruled text link, so it can never be mistaken for it or for the quiet
+   reference squares, and it keeps the same accent on hover. */
+.ff-work-entries { display: flex; align-items: center; gap: 24px; }
+.ff-project-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding-bottom: 2px; border-bottom: 1px solid var(--ff-line); font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--ff-muted); transition: color .16s, gap .2s, border-color .16s; }
+.ff-project-link span { font-size: 16px; }
+.ff-project-link:hover { color: var(--ff-accent); gap: 18px; border-color: var(--ff-accent); }
+
+/* ---- Home -> detail artwork morph ---------------------------------------- */
+/* Exactly one named group, and only while the controller owns the transition.
+   The home stays mounted, so the rules are scoped by the section that is
+   actually showing: naming a hidden node as well would give two elements the
+   same `view-transition-name` and the browser would drop the whole cut. The
+   400 ms matches TRANSITION_MS.detail in transitions.ts, the single source of
+   truth for the number. */
+:root[data-ff-transition='detail'] .ff-home:not([hidden]) .ff-art-scene,
+:root[data-ff-transition='detail'] .ff-detail-slot:not([hidden]) .ff-art-scene { view-transition-name: ff-artwork; }
+:root[data-ff-transition='detail']::view-transition-group(ff-artwork) { animation-duration: 400ms; animation-timing-function: cubic-bezier(.22,1,.36,1); }
+:root[data-ff-transition='detail'] .ff-detail-slot:not([hidden]) .ff-detail-body { view-transition-name: ff-detail-body; }
+/* The body group exists only on the detail, so there is nothing to morph it
+   from; its new snapshot is what moves, and it moves the same 400 ms. */
+:root[data-ff-transition='detail']::view-transition-old(ff-artwork) { animation: none; opacity: 1; mix-blend-mode: normal; }
+:root[data-ff-transition='detail']::view-transition-new(ff-artwork) { animation: none; opacity: 1; mix-blend-mode: normal; }
+:root[data-ff-transition='detail']::view-transition-new(ff-detail-body) { animation: ff-detail-rise 400ms cubic-bezier(.22,1,.36,1) both; }
+:root[data-ff-transition='detail']::view-transition-old(ff-detail-body) { animation: ff-detail-exit 140ms linear both; }
+@keyframes ff-detail-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes ff-detail-exit { from { opacity: 1; } to { opacity: 0; } }
+/* The persistent chrome must not move or cross-fade: both root snapshots stay
+   still and the new one simply covers the old, exactly as the sheet cut does. */
+:root[data-ff-transition='detail']::view-transition-old(root),
+:root[data-ff-transition='detail']::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+:root[data-ff-transition='detail']::view-transition-old(root) { z-index: 1; }
+:root[data-ff-transition='detail']::view-transition-new(root) { z-index: 2; }

@@ -1,5 +1,11 @@
 # Reference artwork
 
+## Report screenshot
+
+`plimsoll-report.jpg` is a byte-for-byte copy of `docs/plimsoll-1.0/evidence/public-report-2026-10-04.jpg` (41094 bytes, 856×751, SHA-256 `790e2a70c02a44e26a1566bca0e49b24fc52e391bf6d1ea5df9150853cf25e61`), made on 2026-10-05 for the work detail page. It is a real screenshot of a real report from the public deployment, taken during the 2026-10-04 launch acceptance. It carries no credentials, tokens or personal data: the visible content is the report header, the display-unit selectors and a hull section outline. Nothing is redrawn, retouched or cropped. Its page caption carries no file paths; this file and the constant in `src/portfolio/ProjectDetail.tsx` are the provenance.
+
+## Line sheets
+
 The three PNG sheets were supplied by the user for this portfolio on 2026-10-04:
 
 - ship-plan-01.png: 1fd9fa6e3e59c33810b83d592c6f0445.png, 1000×451.

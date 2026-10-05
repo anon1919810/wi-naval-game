@@ -10,7 +10,7 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 高级输入：[2026-10-04 最新交接与验收](docs/plimsoll-1.0/advanced-workflow-handoff-2026-10-04.md) · [阻力与质量模型、舱室、破损和显示单位操作](docs/plimsoll-1.0/advanced-input-workflow.md) · [实施计划](docs/plimsoll-1.0/advanced-workflow-plan-2026-10-04.md)。
 
-总站 **Y’s Formfield**：[2026-10-05 桌面转场与字体](docs/formfield/transitions-typography-2026-10-05.md) · [2026-10-05 桌面局部放大与色调](docs/formfield/inspect-lens-2026-10-05.md) · [2026-10-05 加载与渲染修正](docs/formfield/review-hardening-2026-10-05.md) · [首页与资产交接](docs/formfield/交接_Formfield首页与资产_2026-10-04.md) · [本地使用说明](docs/formfield-homepage.md)。首页及原图资产已由本地提交 `fc71434` 保存，尚未部署；原图解码完成后起播，保留详细原稿与温和净底处理。
+总站 **Y’s Formfield**：[2026-10-05 项目详情、作者与联系](docs/formfield/project-detail-and-contact-2026-10-05.md) · [2026-10-05 桌面转场与字体](docs/formfield/transitions-typography-2026-10-05.md) · [2026-10-05 桌面局部放大与色调](docs/formfield/inspect-lens-2026-10-05.md) · [2026-10-05 加载与渲染修正](docs/formfield/review-hardening-2026-10-05.md) · [首页与资产交接](docs/formfield/交接_Formfield首页与资产_2026-10-04.md) · [本地使用说明](docs/formfield-homepage.md)。首页、原图资产与公共详情已保存本地提交，尚未部署；原图解码完成后起播，保留详细原稿与温和净底处理。
 
 当前**玩法运行时**模型为 v4：`Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` 由 `queen_mary_v4/QueenMary_v4_Gameplay.fbx` 构建（`unity/Editor/ShipRuntimeBuilder.cs:190-203`，找不到 v4 时才回退到契约里的 v3 FBX）。v3 灰盒（`queen_mary_v3/queen_mary.py`，101 对象、85 网格、31,164 三角形）保留为历史资产与**契约数据来源**——碰撞代理、14 个舱室、LOD 剖面等仍从 `queen_mary_v3/` 读取。
 
