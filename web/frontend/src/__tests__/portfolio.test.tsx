@@ -48,7 +48,7 @@ describe('public portfolio boundary', () => {
   it('browses references, themes and About without creating or fetching a workspace', async () => {
     render(<Portfolio introEnabled={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Reference sheet 03' }));
-    fireEvent.change(screen.getByLabelText('Color theme'), { target: { value: 'dark' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     follow('About');
     expect(screen.getByRole('heading', { name: /A field for\s*useful ideas\./ })).toBeVisible();
     follow('Work 01');
@@ -121,7 +121,7 @@ describe('public portfolio boundary', () => {
     media(false, true);
     localStorage.setItem(THEME_KEY, 'system');
     render(<Portfolio introEnabled={false} />);
-    expect(screen.getByLabelText('Color theme')).toHaveValue('system');
+    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(api.authConfig).not.toHaveBeenCalled();
   });
@@ -243,7 +243,7 @@ describe('opening lifecycle', () => {
     const meta = document.createElement('meta'); meta.name = 'theme-color'; meta.content = '#abcdef'; document.head.append(meta);
     document.documentElement.style.colorScheme = 'normal';
     const { unmount } = render(<Portfolio introEnabled={false} />);
-    fireEvent.change(screen.getByLabelText('Color theme'), { target: { value: 'dark' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(meta.content).toBe('#101110');
     expect(document.documentElement.style.colorScheme).toBe('dark');
     follow('EXPLORE PROJECT');
@@ -335,7 +335,7 @@ describe('routing and visual contracts', () => {
     // Light theme firms the curve up; dark keeps the milder original values.
     expect(Number(clean.getAttribute('slope'))).toBeCloseTo(1.2);
     expect(Number(clean.getAttribute('intercept'))).toBeCloseTo(-0.05);
-    fireEvent.change(screen.getByLabelText('Color theme'), { target: { value: 'dark' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     const darkFilter = container.querySelector('.ff-vessel')!.getAttribute('filter')!;
     const darkClean = container.querySelector(`${darkFilter.slice(4, -1)} feComponentTransfer feFuncA`)!;
     expect(Number(darkClean.getAttribute('slope'))).toBeCloseTo(1.08);

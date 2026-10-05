@@ -1,4 +1,5 @@
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type KeyboardEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type KeyboardEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
 import { Splash } from './Splash';
@@ -152,12 +153,30 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     setOpening(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   };
 
+  const toggleTheme = useCallback((e: MouseEvent<HTMLButtonElement>) => {
+    const next = dark ? 'light' : 'dark';
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || typeof document.startViewTransition !== 'function') { setTheme(next); return; }
+    // Keyboard-triggered clicks report 0,0 — fall back to the button's own center.
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX || rect.left + rect.width / 2;
+    const y = e.clientY || rect.top + rect.height / 2;
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+    const transition = document.startViewTransition(() => { flushSync(() => setTheme(next)); });
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 560, easing: 'cubic-bezier(.22,1,.36,1)', pseudoElement: '::view-transition-new(root)' },
+      );
+    }, () => {});
+  }, [dark]);
+
   return <>
     <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} hidden={!publicActive}>
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
         <nav aria-label="Main navigation"><a href={publicHref('home')} aria-current={!about ? 'page' : undefined}>Work <span>01</span></a><a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a></nav>
-        <label className="ff-theme"><span className="ff-theme-symbol" aria-hidden="true">◐</span><select aria-label="Color theme" value={theme} onChange={e => setTheme(e.target.value as PortfolioTheme)}><option value="light">Light</option><option value="dark">Dark</option><option value="system">System</option></select></label>
+        <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}><span className="ff-theme-symbol" aria-hidden="true">◐</span><span className="ff-theme-mode">{dark ? 'DARK' : 'LIGHT'}</span></button>
       </header>
 
       <main className="ff-main" inert={opening}>
@@ -166,7 +185,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label="Interactive top-view drawing. Use arrow keys to explore, Home to reset." onKeyDown={keyboard} onPointerMove={explore} onPointerEnter={e => { if (e.pointerType === 'mouse') { cursorOn.current = true; paintPan(); } }} onPointerLeave={() => { cursorOn.current = false; paintPan(); }} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
             <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
             {inspect && <div ref={inspection} className="ff-inspection" aria-hidden="true"><span>REFERENCE {sheet.id}</span></div>}
-            {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><i /></div>}
+            {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><span className="ff-cursor-breath" /><i /></div>}
             <span className="ff-corner ff-corner-tl" /><span className="ff-corner ff-corner-tr" /><span className="ff-corner ff-corner-bl" /><span className="ff-corner ff-corner-br" />
             <div className="ff-exhibit-note"><span>PLIMSOLL / DRAWING {sheet.id}</span><span>{inspect ? 'INSPECTION ON' : 'MOVE TO EXPLORE'}</span></div>
           </div>

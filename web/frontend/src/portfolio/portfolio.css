@@ -9,7 +9,7 @@
 .ff-shell[hidden], .ff-shell [hidden] { display: none !important; }
 .ff-shell *, .ff-shell *::before, .ff-shell *::after { box-sizing: border-box; }
 .ff-shell a { color: inherit; text-decoration: none; }
-.ff-shell button, .ff-shell select { font: inherit; color: inherit; background: transparent; cursor: pointer; }
+.ff-shell button { font: inherit; color: inherit; background: transparent; cursor: pointer; }
 .ff-shell button { border: 0; box-shadow: none; border-radius: 0; padding: 0; }
 .ff-shell button:disabled { cursor: default; }
 .ff-shell :focus-visible { outline: 2px solid var(--ff-accent); outline-offset: 5px; }
@@ -21,11 +21,11 @@
 .ff-header nav a { padding: 14px 0; color: var(--ff-muted); transition: color .16s; }
 .ff-header nav a[aria-current], .ff-header nav a:hover { color: var(--ff-ink); }
 .ff-header nav span { font-size: 9px; margin-left: 4px; color: var(--ff-accent); vertical-align: super; }
-.ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; position: relative; }
-.ff-theme-symbol { font-size: 18px; }
-.ff-theme select { min-height: 44px; width: 76px; border: none; padding: 4px 22px 4px 8px; appearance: none; -webkit-appearance: none; }
-.ff-theme::after { content: ''; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; border-right: 1.5px solid var(--ff-muted); border-bottom: 1.5px solid var(--ff-muted); transform: translateY(-70%) rotate(45deg); pointer-events: none; }
-.ff-theme option { color: var(--ff-ink); background: var(--ff-panel); }
+.ff-shell .ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; min-height: 44px; padding: 4px 10px; transition: color .16s; }
+.ff-theme-symbol { font-size: 18px; line-height: 1; display: inline-block; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+.ff-shell[data-ff-theme='dark'] .ff-theme-symbol { transform: rotate(180deg); }
+.ff-theme-mode { font: 10px 'SFMono-Regular', Consolas, monospace; letter-spacing: .11em; color: var(--ff-muted); transition: color .16s; }
+.ff-shell .ff-theme:hover .ff-theme-mode { color: var(--ff-ink); }
 .ff-main { max-width: 1460px; margin: auto; }
 .ff-exhibit-label { display: flex; justify-content: space-between; align-items: center; padding: 27px 0 19px; font: 10px 'SFMono-Regular', Consolas, monospace; letter-spacing: .11em; color: var(--ff-muted); }
 .ff-exhibit-label span:first-child { display: flex; align-items: center; gap: 8px; color: var(--ff-ink); }
@@ -45,11 +45,13 @@
 .ff-inspection::before { width: 110px; height: 1px; left: -11px; top: 44px; }
 .ff-inspection::after { height: 110px; width: 1px; top: -11px; left: 44px; }
 .ff-inspection span { position: absolute; left: 96px; top: 10px; font: 8px Consolas, monospace; color: var(--ff-accent); width: 90px; }
-.ff-cursor { position: absolute; width: 26px; height: 26px; border: 1px solid var(--ff-accent); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; opacity: .85; }
-.ff-cursor::before, .ff-cursor::after { content: ''; position: absolute; background: var(--ff-accent); }
-.ff-cursor::before { width: 38px; height: 1px; left: -6px; top: 12.5px; }
-.ff-cursor::after { width: 1px; height: 38px; left: 12.5px; top: -6px; }
+.ff-cursor { position: absolute; width: 26px; height: 26px; transform: translate(-50%, -50%); pointer-events: none; opacity: .85; }
+.ff-cursor-breath { position: absolute; inset: 0; border: 1px solid var(--ff-accent); border-radius: 50%; animation: ff-breathe 2.8s ease-in-out infinite; }
+.ff-cursor-breath::before, .ff-cursor-breath::after { content: ''; position: absolute; background: var(--ff-accent); }
+.ff-cursor-breath::before { width: 38px; height: 1px; left: -6px; top: 12.5px; }
+.ff-cursor-breath::after { width: 1px; height: 38px; left: 12.5px; top: -6px; }
 .ff-cursor i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--ff-accent); left: 11.5px; top: 11.5px; }
+@keyframes ff-breathe { 0%, 100% { transform: scale(1); opacity: .75; } 50% { transform: scale(1.16); opacity: 1; } }
 .ff-work-info { display: flex; justify-content: space-between; gap: 30px; align-items: center; padding: 26px 0 24px; }
 .ff-work-heading { display: flex; align-items: baseline; gap: 20px; }
 .ff-work-index { font: 12px Consolas, monospace; color: var(--ff-muted); }
@@ -128,5 +130,9 @@
 }
 
 .ff-image-wait { color: #c5c5c5; display: grid; place-items: center; font: 11px Consolas, monospace; letter-spacing: .12em; }
+/* Radial theme switch: keep both snapshots unscaled, clip only the incoming one. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
 .ff-image-error { padding: 12px 0; font-size: 13px; color: var(--ff-muted); }
 .ff-skip[hidden] { display: none; }
