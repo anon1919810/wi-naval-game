@@ -51,6 +51,8 @@ describe('anonymous browser workspace', () => {
     expect(api.bootstrapAnonymous).toHaveBeenCalledTimes(1);
     expect(api.me).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('button', { name: '退出' })).toBeNull();
+    expect(screen.getByText(/仅当前浏览器可见/)).toBeVisible();
+    fireEvent.click(screen.getByText('保存与恢复说明'));
     expect(screen.getByText(/清除 Cookie/)).toBeVisible();
     expect(screen.queryByLabelText('邮箱地址')).toBeNull();
   });
@@ -105,7 +107,9 @@ describe('library workspace note', () => {
   it('separates the project document from report exports', async () => {
     render(<Library onOpen={vi.fn()} anonymous />);
     expect(await screen.findByText('本浏览器工作区')).toBeVisible();
-    expect(screen.getByText(/下载项目 JSON/)).toBeVisible();
+    expect(screen.getByText(/运行页导出的 JSON\/CSV 是计算报告，不是项目备份/)).not.toBeVisible();
+    fireEvent.click(screen.getByText('保存与恢复说明'));
+    expect(screen.getByText(/「下载项目 JSON」/)).toBeVisible();
     expect(screen.getByText(/运行页导出的 JSON\/CSV 是计算报告，不是项目备份/)).toBeVisible();
   });
 

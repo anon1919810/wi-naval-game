@@ -8,6 +8,7 @@ import { Run } from './pages/Run';
 import { Workbench } from './pages/Workbench';
 import { isAppHash } from './portfolio/routes';
 import type { AuthMode, Theme, UserSession } from './types';
+import './styles/workspace.css';
 
 type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string } | { kind: 'report'; id: string };
 
@@ -105,7 +106,7 @@ export default function App() {
   }} />{message && <div className="connection-note" role="alert">{message}</div>}</>;
 
   return <div className="app-shell">
-    <header className="site-header"><button className="brand brand-button" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ 工作空间</span></button>
+    <header className="site-header"><button className="brand brand-button" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ WORKSPACE</span></button>
       <div className="header-actions"><span className="header-edition">DESIGN DESK · 1.0</span><button className="icon-button" aria-label={user.theme === 'light' ? '切换到深色主题' : '切换到浅色主题'} onClick={changeTheme}>{user.theme === 'light' ? '◐' : '◑'}</button><span className="user-email" title={identity}>{identity}</span>{!anonymous && <button className="text-button" onClick={signOut}>退出</button>}</div>
     </header>
     {message && <div className="connection-note" role="alert">{message}<button onClick={() => setMessage('')} aria-label="关闭提示">×</button></div>}
