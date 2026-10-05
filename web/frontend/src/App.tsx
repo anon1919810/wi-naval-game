@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import * as api from './api';
 import { Library } from './pages/Library';
@@ -6,6 +6,7 @@ import { Login } from './pages/Login';
 import { ReportPage } from './pages/Report';
 import { Run } from './pages/Run';
 import { Workbench } from './pages/Workbench';
+import { isAppHash } from './portfolio/routes';
 import type { AuthMode, Theme, UserSession } from './types';
 
 type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string } | { kind: 'report'; id: string };
@@ -27,9 +28,18 @@ export default function App() {
   const [route, setRoute] = useState<Route>(currentRoute);
   const [message, setMessage] = useState('');
 
+  // The public shell owns the document root once the route leaves the
+  // application. A request still in flight at that moment must not mint another
+  // identity or repaint the root theme behind the portfolio's back.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
   useEffect(() => {
     let active = true;
-    const update = () => setRoute(currentRoute());
+    const update = () => { if (isAppHash(window.location.hash)) setRoute(currentRoute()); };
     window.addEventListener('hashchange', update);
 
     function apply(session: UserSession) {
@@ -53,6 +63,10 @@ export default function App() {
         apply(await api.me());
       } catch (cause) {
         if (!(cause instanceof api.ApiError && cause.status === 401)) throw cause;
+        // A 401 can arrive after the route has already left the application, so
+        // the follow-on bootstrap is gated: returning to the portfolio must stop
+        // the workspace calls instead of continuing into a second one.
+        if (!active) return;
         apply(await api.bootstrapAnonymous());
       }
     }
@@ -67,14 +81,15 @@ export default function App() {
     const theme: Theme = user.theme === 'light' ? 'dark' : 'light';
     try {
       await api.setTheme(theme);
+      if (!mounted.current) return;
       setUser({ ...user, theme });
       document.documentElement.dataset.theme = theme;
-    } catch { setMessage('主题设置未保存。'); }
+    } catch { if (mounted.current) setMessage('主题设置未保存。'); }
   }
 
   async function signOut() {
-    try { await api.logout(); setUser(null); navigate('/projects'); }
-    catch { setMessage('退出登录失败，请重试。'); }
+    try { await api.logout(); if (!mounted.current) return; setUser(null); navigate('/projects'); }
+    catch { if (mounted.current) setMessage('退出登录失败，请重试。'); }
   }
 
   const anonymous = mode === 'anonymous';
@@ -82,7 +97,12 @@ export default function App() {
 
   if (loading) return <div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在连接工作空间</small></div>;
   if (!user && mode !== 'email') return <div className="app-loading"><span className="brand-mark" />Plimsoll <small>{message || '正在建立本浏览器工作区'}</small></div>;
-  if (!user) return <><Login onAuthenticated={() => { void api.me().then(session => { setUser(session); document.documentElement.dataset.theme = session.theme; }); }} />{message && <div className="connection-note" role="alert">{message}</div>}</>;
+  if (!user) return <><Login onAuthenticated={() => {
+    // Gated before the request, not only after it: a stale callback from a form
+    // that was already replaced must not start another identity lookup.
+    if (!mounted.current) return;
+    void api.me().then(session => { if (!mounted.current) return; setUser(session); document.documentElement.dataset.theme = session.theme; });
+  }} />{message && <div className="connection-note" role="alert">{message}</div>}</>;
 
   return <div className="app-shell">
     <header className="site-header"><button className="brand brand-button" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ 工作空间</span></button>

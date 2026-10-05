@@ -64,6 +64,8 @@ describe('public portfolio boundary', () => {
   it('browses references, themes and About without creating or fetching a workspace', async () => {
     render(<Portfolio introEnabled={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Reference sheet 03' }));
+    // A reference only settles once its bitmap has decoded.
+    await act(async () => {});
     fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     follow('About');
     expect(screen.getByRole('heading', { name: /A field for\s*useful ideas\./ })).toBeVisible();
@@ -83,7 +85,8 @@ describe('public portfolio boundary', () => {
   it('opens the real app explicitly, and preserves the exhibit on return', async () => {
     render(<Portfolio introEnabled={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Reference sheet 02' }));
-    follow('EXPLORE PROJECT');
+    await act(async () => {});
+    follow('OPEN PLIMSOLL');
     await waitFor(() => expect(api.authConfig).toHaveBeenCalledTimes(1));
     expect(await screen.findByTitle('本浏览器工作区')).toBeVisible();
     expect(document.documentElement.dataset.formfieldSurface).toBe('app');
@@ -194,6 +197,27 @@ function controlledImage() {
   vi.stubGlobal('Image', class { src = ''; decode = decode; });
   return { resolve, reject, decode };
 }
+/**
+ * One decode gate per href, so a test can hold a specific reference open while
+ * others resolve, which is what makes "the old drawing stays until the target
+ * decodes" observable rather than instantaneous.
+ */
+function deferredImages() {
+  const pending = new Map<string, { resolve: () => void; reject: (error: Error) => void }>();
+  vi.stubGlobal('Image', class {
+    private url = '';
+    decode = () => new Promise<void>((resolve, reject) => {
+      const gate = pending.get(this.url)!;
+      gate.resolve = resolve; gate.reject = reject;
+    });
+    set src(value: string) { this.url = value; if (!pending.has(value)) pending.set(value, { resolve: () => {}, reject: () => {} }); }
+    get src() { return this.url; }
+  });
+  return {
+    async release(href: string) { await act(async () => { pending.get(href)!.resolve(); }); },
+    async fail(href: string) { await act(async () => { pending.get(href)!.reject(new Error('decode failed')); }); },
+  };
+}
 function fakeFrames() {
   vi.useFakeTimers();
   vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => window.setTimeout(() => cb(performance.now()), 16));
@@ -292,16 +316,19 @@ describe('opening lifecycle', () => {
     expect(art.getAttribute('transform')).toBe(initial);
   });
 
-  it('updates public chrome colors and restores previous metadata on exit', () => {
+  it('updates public chrome colors and restores previous metadata on exit', async () => {
     const meta = document.createElement('meta'); meta.name = 'theme-color'; meta.content = '#abcdef'; document.head.append(meta);
     document.documentElement.style.colorScheme = 'normal';
     const { unmount } = render(<Portfolio introEnabled={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(meta.content).toBe('#101110');
     expect(document.documentElement.style.colorScheme).toBe('dark');
-    follow('EXPLORE PROJECT');
+    follow('OPEN PLIMSOLL');
     expect(meta.content).toBe('#abcdef');
     expect(document.documentElement.style.colorScheme).toBe('normal');
+    // Clicking an anchor queues a navigation in jsdom. Let it land inside this
+    // test, so the next one cannot inherit the application route.
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 0)); });
     unmount(); meta.remove(); document.documentElement.style.colorScheme = '';
   });
 });
@@ -341,11 +368,14 @@ describe('routing and visual contracts', () => {
     }
   });
 
-  it('embeds each original reference sheet cropped to its metadata, without geometric redraw', () => {
+  it('embeds each original reference sheet cropped to its metadata, without geometric redraw', async () => {
     const { container } = render(<Portfolio introEnabled={false} />);
     const seen = new Set<string>();
     for (const sheet of PLAN_SHEETS) {
       fireEvent.click(screen.getByRole('button', { name: sheet.label }));
+      // Selection is decode-gated: the swap happens on the microtask after the
+      // press, so the artwork is settled before it is inspected.
+      await act(async () => {});
       const drawing = container.querySelector('.ff-vessel')!;
       expect(drawing).toHaveAttribute('data-study', sheet.id);
       // The nested crop window is the source sheet's own coordinates.
@@ -369,6 +399,130 @@ describe('routing and visual contracts', () => {
     }
     expect(seen.size).toBe(PLAN_SHEETS.length);
     for (const sheet of PLAN_SHEETS) expect(seen.has(sheet.href)).toBe(true);
+  });
+
+  it('marks the pressed reference immediately while the old drawing stays on the exhibit', async () => {
+    const gate = deferredImages();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    await act(async () => {});
+    const study = () => container.querySelector('.ff-layer-vessel .ff-vessel')!.getAttribute('data-study');
+    expect(study()).toBe(PLAN_SHEETS[0].id);
+
+    const target = PLAN_SHEETS[1];
+    fireEvent.click(screen.getByRole('button', { name: target.label }));
+    // The button answers at once; the artwork has not decoded, so it cannot move.
+    expect(screen.getByRole('button', { name: target.label })).toHaveAttribute('aria-pressed', 'true');
+    expect(study()).toBe(PLAN_SHEETS[0].id);
+
+    await gate.release(target.href);
+    expect(study()).toBe(target.id);
+    // The mark settles onto the sheet that is actually displayed.
+    expect(screen.getByRole('button', { name: target.label })).toHaveAttribute('aria-pressed', 'true');
+    expect(api.listProjects).not.toHaveBeenCalled();
+  });
+
+  it('lets the newest press win and never runs an abandoned selection', async () => {
+    const gate = deferredImages();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    await act(async () => {});
+    const study = () => container.querySelector('.ff-layer-vessel .ff-vessel')!.getAttribute('data-study');
+    const [first, second] = [PLAN_SHEETS[1], PLAN_SHEETS[2]];
+    fireEvent.click(screen.getByRole('button', { name: first.label }));
+    fireEvent.click(screen.getByRole('button', { name: second.label }));
+    // The first request was retired by the second press, so its late decode is
+    // never allowed to commit: only the newest press decides what is shown.
+    await gate.release(first.href);
+    expect(study()).toBe(PLAN_SHEETS[0].id);
+    await gate.release(second.href);
+    expect(study()).toBe(second.id);
+    expect(screen.getByRole('button', { name: first.label })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: second.label })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('keeps the current drawing and offers a retry when a new reference fails', async () => {
+    const gate = deferredImages();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    await act(async () => {});
+    const study = () => container.querySelector('.ff-layer-vessel .ff-vessel')!.getAttribute('data-study');
+    const target = PLAN_SHEETS[2];
+    fireEvent.click(screen.getByRole('button', { name: target.label }));
+    await gate.fail(target.href);
+    // A failed switch is never a blank exhibit: the old drawing is untouched
+    // and the alert names both the failure and the way out.
+    expect(study()).toBe(PLAN_SHEETS[0].id);
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveTextContent('could not be loaded');
+    expect(alert).toHaveTextContent(`${PLAN_SHEETS[0].shortLabel} stays on the exhibit`);
+    expect(screen.getByRole('button', { name: 'Reference sheet 03' })).toHaveAttribute('aria-pressed', 'false');
+    // Retry re-requests the same sheet and succeeds.
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /RETRY/ })); });
+    await gate.release(target.href);
+    expect(study()).toBe(target.id);
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('cancels a pending request when the displayed reference is pressed again', async () => {
+    const gate = deferredImages();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    await act(async () => {});
+    const study = () => container.querySelector('.ff-layer-vessel .ff-vessel')!.getAttribute('data-study');
+    const shown = screen.getByRole('button', { name: PLAN_SHEETS[0].label });
+    fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[1].label }));
+    expect(shown).toHaveAttribute('aria-pressed', 'false');
+    // Pressing the sheet that is already on the exhibit withdraws the request
+    // rather than doing nothing, so a late decode cannot still swap it in.
+    fireEvent.click(shown);
+    expect(shown).toHaveAttribute('aria-pressed', 'true');
+    await gate.release(PLAN_SHEETS[1].href);
+    expect(study()).toBe(PLAN_SHEETS[0].id);
+    expect(screen.getByRole('button', { name: PLAN_SHEETS[1].label })).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('clears its own transition attribute when a pending switch is cancelled', async () => {
+    const gates = new Map<string, () => void>();
+    vi.stubGlobal('Image', class {
+      private url = '';
+      set src(value: string) { this.url = value; if (!gates.has(value)) gates.set(value, () => {}); }
+      get src() { return this.url; }
+      decode = () => new Promise<void>(resolve => { gates.set(this.url, resolve); });
+    });
+    const skipped = vi.fn();
+    let settle!: () => void;
+    const finished = new Promise<void>(resolve => { settle = resolve; });
+    const started = vi.fn(() => ({ ready: new Promise<void>(() => {}), finished, skipTransition: skipped }));
+    const surface = document as { startViewTransition?: unknown };
+    surface.startViewTransition = started;
+    try {
+      const { unmount } = render(<Portfolio introEnabled={false} />);
+      await act(async () => {});
+      fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[1].label }));
+      await act(async () => { gates.get(PLAN_SHEETS[1].href)!(); });
+      expect(started).toHaveBeenCalledTimes(1);
+      expect(document.documentElement.dataset.ffTransition).toBe('sheet');
+      // Unmounting cancels the snapshot and takes its attribute with it, even
+      // though the browser still runs the update callback and resolves after.
+      unmount();
+      expect(skipped).toHaveBeenCalledTimes(1);
+      expect(document.documentElement.dataset.ffTransition).toBeUndefined();
+      await act(async () => { settle(); });
+      expect(document.documentElement.dataset.ffTransition).toBeUndefined();
+    } finally {
+      delete surface.startViewTransition;
+    }
+  });
+
+  it('drops a pending reference request when the visitor leaves the exhibit', async () => {
+    const gate = deferredImages();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    await act(async () => {});
+    const study = () => container.querySelector('.ff-layer-vessel .ff-vessel')!.getAttribute('data-study');
+    fireEvent.click(screen.getByRole('button', { name: 'Reference sheet 02' }));
+    follow('About');
+    await gate.release(PLAN_SHEETS[1].href);
+    follow('Work 01');
+    // Coming back shows the sheet the exhibit settled on, never the late one.
+    expect(study()).toBe(PLAN_SHEETS[0].id);
+    expect(screen.getByRole('button', { name: 'Reference sheet 02' })).toHaveAttribute('aria-pressed', 'false');
   });
 
   it('themes the scan with tonal cleanup only, never convolution or edge detection', () => {
@@ -402,7 +556,7 @@ describe('routing and visual contracts', () => {
     expect(container.querySelectorAll('image').length).toBeGreaterThan(0);
   });
 
-  it('shares one tonal profile per sheet between the exhibit and the lens', () => {
+  it('shares one tonal profile per sheet between the exhibit and the lens', async () => {
     for (const sheet of PLAN_SHEETS) {
       for (const theme of ['light', 'dark'] as const) {
         const profile = sheetTone(sheet, theme === 'dark');
@@ -435,6 +589,7 @@ describe('routing and visual contracts', () => {
     });
     for (const sheet of PLAN_SHEETS) {
       fireEvent.click(screen.getByRole('button', { name: sheet.label }));
+      await act(async () => {});
       // Exhibit and lens carry the same curve, and no third copy is invented.
       expect(filters()).toHaveLength(2);
       expect(params()[0]).toEqual(params()[1]);

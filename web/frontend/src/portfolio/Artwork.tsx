@@ -113,7 +113,7 @@ export function Artwork({ sheet, angle = -12, scale = 1, pan = { x: 0, y: 0 }, d
         <rect x="180" y="441" width="372" height="115" fill={`url(#${id}-grid)`} stroke="none" opacity={dark ? .55 : .7} />
         <rect x="1150" y="142" width="210" height="98" fill={`url(#${id}-grid)`} stroke="none" opacity={dark ? .55 : .7} />
       </g>
-      <g fill={ink} opacity={details ? .48 : 0} fontFamily="'SFMono-Regular',Consolas,monospace" fontSize="11" letterSpacing="2">
+      <g fill={ink} opacity={details ? .48 : 0} fontFamily="Archivo, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" fontWeight="600" fontSize="11" letterSpacing="2" style={{ fontVariantNumeric: 'tabular-nums' }}>
         <text x="180" y="560">TOP VIEW / REFERENCE {sheet.id}</text>
         <text x="1110" y="117">FORM / FIELD</text>
         <text x="826" y="150">SEC A—A</text>
