@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
 import { diagonalClip, introFrame, INTRO_DURATION } from '../portfolio/motion';
 import { classifyHash } from '../portfolio/routes';
-import { PLAN_SHEETS, sheetViewBox } from '../portfolio/plans';
+import { PLAN_SHEETS, sheetTone, sheetViewBox } from '../portfolio/plans';
+import { lensFrame, LENS_MAGNIFICATION, samplePoint } from '../portfolio/lens';
 import { THEME_KEY } from '../portfolio/theme';
 import { IMAGE_TIMEOUT } from '../portfolio/images';
 import * as api from '../api';
@@ -14,11 +15,26 @@ vi.mock('../api', async importOriginal => ({
   authConfig: vi.fn(), me: vi.fn(), bootstrapAnonymous: vi.fn(), listProjects: vi.fn(),
 }));
 
+type MediaHandler = (event: MediaQueryListEvent) => void;
+const mediaListeners = new Map<string, Set<MediaHandler>>();
+
 function media(reduced = false, dark = false) {
-  vi.stubGlobal('matchMedia', vi.fn((query: string) => ({
-    matches: query.includes('reduced-motion') ? reduced : dark,
-    media: query, addEventListener: vi.fn(), removeEventListener: vi.fn(),
-  })));
+  mediaListeners.clear();
+  vi.stubGlobal('matchMedia', vi.fn((query: string) => {
+    const handlers = mediaListeners.get(query) ?? new Set<MediaHandler>();
+    mediaListeners.set(query, handlers);
+    return {
+      matches: query.includes('reduced-motion') ? reduced : dark,
+      media: query,
+      addEventListener: (_: string, handler: MediaHandler) => { handlers.add(handler); },
+      removeEventListener: (_: string, handler: MediaHandler) => { handlers.delete(handler); },
+    };
+  }));
+}
+
+/** Flip a media query and notify its listeners, the way a browser does. */
+function changeMedia(query: string, matches: boolean) {
+  act(() => { for (const handler of mediaListeners.get(query) ?? []) handler({ matches } as MediaQueryListEvent); });
 }
 
 beforeEach(() => {
@@ -124,6 +140,43 @@ describe('public portfolio boundary', () => {
     expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
     expect(document.documentElement.dataset.theme).toBe('dark');
     expect(api.authConfig).not.toHaveBeenCalled();
+  });
+
+  it('offers a compact System entry that follows the OS and yields to the primary toggle', () => {
+    render(<Portfolio introEnabled={false} />);
+    const system = screen.getByRole('button', { name: 'SYSTEM' });
+    fireEvent.click(system);
+    expect(system).toHaveAttribute('title', 'Follow system theme');
+    expect(system).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem(THEME_KEY)).toBe('system');
+    // Following the OS means following it live, with no reload and no workspace.
+    changeMedia('(prefers-color-scheme: dark)', true);
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
+    changeMedia('(prefers-color-scheme: dark)', false);
+    expect(document.documentElement.dataset.theme).toBe('light');
+    // The explicit toggle leaves system mode behind and persists the choice.
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+    expect(system).toHaveAttribute('aria-pressed', 'false');
+    expect(localStorage.getItem(THEME_KEY)).toBe('dark');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    // System re-enters on demand; pressing it while following pins what the
+    // system resolves to right now, not the opposite of it.
+    fireEvent.click(system);
+    expect(system).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(system);
+    expect(system).toHaveAttribute('aria-pressed', 'false');
+    expect(localStorage.getItem(THEME_KEY)).toBe('light');
+    changeMedia('(prefers-color-scheme: dark)', true);
+    fireEvent.click(system);
+    expect(system).toHaveAttribute('aria-pressed', 'true');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    fireEvent.click(system);
+    expect(system).toHaveAttribute('aria-pressed', 'false');
+    expect(localStorage.getItem(THEME_KEY)).toBe('dark');
+    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(api.authConfig).not.toHaveBeenCalled();
+    expect(api.listProjects).not.toHaveBeenCalled();
   });
 
   it('does not collapse the splash into a hidden exhibit on a direct About link', () => {
@@ -330,16 +383,228 @@ describe('routing and visual contracts', () => {
     for (const forbidden of ['feConvolveMatrix', 'feGaussianBlur', 'feMorphology', 'feEdgeDetect', 'feTile', 'feDisplacementMap']) {
       expect(target.querySelector(forbidden)).toBeNull();
     }
-    const clean = target.querySelector('feComponentTransfer feFuncA')!;
-    expect(clean).toHaveAttribute('type', 'linear');
-    // Light theme firms the curve up; dark keeps the milder original values.
-    expect(Number(clean.getAttribute('slope'))).toBeCloseTo(1.2);
-    expect(Number(clean.getAttribute('intercept'))).toBeCloseTo(-0.05);
+    const curve = target.querySelectorAll('feComponentTransfer feFuncA');
+    // One function per channel: a second feFuncA would replace it, not follow it.
+    expect(curve).toHaveLength(1);
+    expect(curve[0]).toHaveAttribute('type', 'gamma');
+    // Sheet 01 keeps the values it shipped with: gamma 1, 1.2/-0.05 in light.
+    expect(Number(curve[0].getAttribute('exponent'))).toBe(1);
+    expect(Number(curve[0].getAttribute('amplitude'))).toBeCloseTo(1.2);
+    expect(Number(curve[0].getAttribute('offset'))).toBeCloseTo(-0.05);
     fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
-    const darkFilter = container.querySelector('.ff-vessel')!.getAttribute('filter')!;
-    const darkClean = container.querySelector(`${darkFilter.slice(4, -1)} feComponentTransfer feFuncA`)!;
-    expect(Number(darkClean.getAttribute('slope'))).toBeCloseTo(1.08);
-    expect(Number(darkClean.getAttribute('intercept'))).toBeCloseTo(-0.035);
+    const darkDrawing = container.querySelector('.ff-vessel')!;
+    const darkTarget = container.querySelector(`${darkDrawing.getAttribute('filter')!.slice(4, -1)}`)!;
+    const darkCurve = darkTarget.querySelectorAll('feComponentTransfer feFuncA');
+    expect(darkCurve).toHaveLength(1);
+    expect(Number(darkCurve[0].getAttribute('exponent'))).toBe(1);
+    expect(Number(darkCurve[0].getAttribute('amplitude'))).toBeCloseTo(1.08);
+    expect(Number(darkCurve[0].getAttribute('offset'))).toBeCloseTo(-0.035);
     expect(container.querySelectorAll('image').length).toBeGreaterThan(0);
+  });
+
+  it('shares one tonal profile per sheet between the exhibit and the lens', () => {
+    for (const sheet of PLAN_SHEETS) {
+      for (const theme of ['light', 'dark'] as const) {
+        const profile = sheetTone(sheet, theme === 'dark');
+        // Monotone, non-destructive controls: no geometry, no new detail.
+        expect(profile.gamma).toBeGreaterThan(0);
+        expect(profile.slope).toBeGreaterThan(0);
+        expect(profile.opacity).toBeGreaterThan(0);
+        expect(profile.opacity).toBeLessThanOrEqual(1);
+      }
+    }
+    // Sheet 01 is the reference appearance and must not move.
+    expect(sheetTone(PLAN_SHEETS[0], false)).toMatchObject({ slope: 1.2, intercept: -0.05, gamma: 1 });
+    expect(sheetTone(PLAN_SHEETS[0], true)).toMatchObject({ slope: 1.08, intercept: -0.035, gamma: 1 });
+    // 02 carries the dense deck hatch, so its midtones are pulled down hardest,
+    // and 03's flat gray fills are eased to sit in the same hierarchy.
+    const reference = sheetTone(PLAN_SHEETS[0], true);
+    const dense = sheetTone(PLAN_SHEETS[1], true);
+    const filled = sheetTone(PLAN_SHEETS[2], true);
+    expect(dense.gamma).toBeGreaterThan(reference.gamma);
+    expect(dense.slope).toBeLessThan(reference.slope);
+    expect(filled.gamma).toBeGreaterThan(reference.gamma);
+    expect(sheetTone(PLAN_SHEETS[1], false).gamma).toBeGreaterThan(reference.gamma);
+    expect(sheetTone(PLAN_SHEETS[2], false).gamma).toBeGreaterThan(reference.gamma);
+    const { container } = render(<Portfolio introEnabled={false} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
+    const filters = () => [...container.querySelectorAll('.ff-vessel')].map(node => node.getAttribute('filter')!);
+    const params = () => filters().map(id => {
+      const func = container.querySelector(`${id.slice(4, -1)} feComponentTransfer feFuncA`)!;
+      return [func.getAttribute('type'), func.getAttribute('amplitude'), func.getAttribute('exponent'), func.getAttribute('offset')];
+    });
+    for (const sheet of PLAN_SHEETS) {
+      fireEvent.click(screen.getByRole('button', { name: sheet.label }));
+      // Exhibit and lens carry the same curve, and no third copy is invented.
+      expect(filters()).toHaveLength(2);
+      expect(params()[0]).toEqual(params()[1]);
+      const [type, amplitude, exponent, offset] = params()[0];
+      expect(type).toBe('gamma');
+      expect(Number(amplitude)).toBe(sheetTone(sheet, false).slope);
+      expect(Number(exponent)).toBe(sheetTone(sheet, false).gamma);
+      expect(Number(offset)).toBe(sheetTone(sheet, false).intercept);
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
+    const last = PLAN_SHEETS[PLAN_SHEETS.length - 1];
+    expect(params()[0]).toEqual([ 'gamma', String(sheetTone(last, true).slope), String(sheetTone(last, true).gamma), String(sheetTone(last, true).intercept) ]);
+  });
+});
+
+describe('inspection lens', () => {
+  it('samples the composition under the pointer, letterboxing included', () => {
+    // 800x350 is exactly 16:7, so the frame fills the exhibit and the mapping is
+    // the plain scale: half across 400 CSS px is composition 800.
+    expect(samplePoint({ left: 0, top: 0, width: 800, height: 350 }, .5, .5)).toMatchObject({ x: 800, y: 350 });
+    expect(samplePoint({ left: 0, top: 0, width: 800, height: 350 }, .5, .25)).toMatchObject({ x: 800, y: 175 });
+    // 1600x900 is wider than 16:7: `meet` letterboxes 100px top and bottom, so a
+    // quarter down the rectangle is composition y=125 rather than y=225.
+    expect(samplePoint({ left: 0, top: 0, width: 1600, height: 900 }, .5, .25)).toMatchObject({ x: 800, y: 125 });
+  });
+
+  it('magnifies exactly twice and clamps the circle while pointing at the sample', () => {
+    expect(LENS_MAGNIFICATION).toBe(2);
+    const centred = lensFrame({ left: 0, top: 0, width: 800, height: 350 }, .5, .5);
+    // 200px of lens at 2x over a 0.5 scale shows 200/2/0.5 = 200 composition units.
+    expect(centred).toMatchObject({ viewBox: '700 250 200 200', span: 200, size: 200, cx: 400, cy: 175, ox: 0, oy: 0 });
+    // Letterboxed exhibit: scale 1, so 200px of lens at 2x shows 100 units.
+    expect(lensFrame({ left: 0, top: 0, width: 1600, height: 900 }, .5, .25)).toMatchObject({ viewBox: '750 75 100 100', size: 200 });
+    // At the top-left corner the circle is pushed inside, and the sample rides
+    // its rim: y=0 of the rectangle is above the letterboxed artwork.
+    expect(lensFrame({ left: 0, top: 0, width: 1600, height: 900 }, 0, 0)).toMatchObject({ viewBox: '-50 -150 100 100', cx: 100, cy: 100, ox: -100, oy: -100 });
+    // An exhibit smaller than the lens shrinks it rather than overflowing.
+    expect(lensFrame({ left: 0, top: 0, width: 160, height: 90 }, .5, .5)).toMatchObject({ size: 90, cx: 80, cy: 45 });
+    // Unmeasured (zero) rectangles fall back to the resting view instead of NaN.
+    expect(lensFrame({ left: 0, top: 0, width: 0, height: 0 }, .5, .5).viewBox).toBe('400 -50 800 800');
+  });
+
+  it('magnifies the registered scan, moves by keyboard and leaves on Escape', () => {
+    const { container } = render(<Portfolio introEnabled={false} />);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
+    const lens = container.querySelector<HTMLElement>('.ff-lens')!;
+    const view = container.querySelector<SVGElement>('.ff-lens-view')!;
+    // A local window onto the same Artwork, tone and all: two copies, not two renderers.
+    const scans = container.querySelectorAll('.ff-vessel');
+    expect(scans.length).toBe(2);
+    expect(scans[0].getAttribute('data-study')).toBe(scans[1].getAttribute('data-study'));
+    const filters = [...scans].map(node => node.getAttribute('filter')!);
+    // Two copies, two filter ids: the lens never shares the exhibit's defs.
+    expect(new Set(filters).size).toBe(2);
+    for (const filter of filters) {
+      expect(container.querySelector(`${filter.slice(4, -1)} feComponentTransfer feFuncA`)).toHaveAttribute('type', 'gamma');
+    }
+    expect(container.querySelectorAll('image').length).toBe(2);
+    // The lens keeps the frame's own pixel box, so 1 unit = 1 CSS px inside it
+    // and the outer viewBox window alone decides the 2x.
+    const lensArt = lens.querySelector('.ff-artwork')!;
+    expect(lensArt).toHaveAttribute('width', '1600');
+    expect(lensArt).toHaveAttribute('height', '700');
+    const layers = () => [...container.querySelectorAll('.ff-layer-vessel')].map(node => node.getAttribute('transform'));
+    // Keyboard alone brings the lens up, and the arrows move the sample, not the pan.
+    const resting = layers()[0];
+    fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
+    expect(lens.hidden).toBe(false);
+    // 4% of 800px is 32 CSS px, which is 64 composition units at scale 0.5.
+    expect(view.getAttribute('viewBox')).toBe('764 250 200 200');
+    expect(layers()[0]).toBe(resting);
+    expect(layers()[0]).toBe(layers()[1]);
+    fireEvent.keyDown(exhibit, { key: 'Home' });
+    expect(view.getAttribute('viewBox')).toBe('700 250 200 200');
+    // Escape leaves inspection; the exhibit keeps its normal explore keys.
+    fireEvent.keyDown(exhibit, { key: 'Escape' });
+    expect(screen.getByRole('button', { name: 'Inspect Off' })).toHaveAttribute('aria-pressed', 'false');
+    expect(container.querySelector('.ff-lens')).toBeNull();
+    fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
+    expect(layers()[0]).not.toBe(resting);
+  });
+
+  it('shows the lens only while the pointer or the keyboard asks for it', () => {
+    const { container } = render(<Portfolio introEnabled={false} />);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
+    const pointer = (type: string) => { const event = new Event(type, { bubbles: true }); Object.assign(event, { pointerType: 'mouse' }); fireEvent(exhibit, event); };
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
+    const lens = container.querySelector<HTMLElement>('.ff-lens')!;
+    expect(lens.hidden).toBe(true);
+    pointer('pointerover');
+    expect(lens.hidden).toBe(false);
+    pointer('pointerout');
+    expect(lens.hidden).toBe(true);
+    // Focus alone is not consent: a key is, and losing focus takes it back.
+    fireEvent.keyDown(exhibit, { key: 'Home' });
+    expect(lens.hidden).toBe(false);
+    // A real pointer movement takes over from keyboard inspection. Leaving
+    // afterwards must hide the lens even if the exhibit still has focus.
+    const move = new Event('pointermove', { bubbles: true });
+    Object.assign(move, { pointerType: 'mouse', clientX: 300, clientY: 150 });
+    fireEvent(exhibit, move);
+    pointer('pointerout');
+    expect(lens.hidden).toBe(true);
+    fireEvent.keyDown(exhibit, { key: 'Home' });
+    expect(lens.hidden).toBe(false);
+    fireEvent.focusOut(exhibit);
+    expect(lens.hidden).toBe(true);
+    // Explore mode keeps the stable cursor instead, never both at once.
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect On' }));
+    expect(container.querySelector('.ff-lens')).toBeNull();
+    const cursor = container.querySelector<HTMLElement>('.ff-cursor')!;
+    pointer('pointerover');
+    expect(cursor.hidden).toBe(false);
+    pointer('pointerout');
+    expect(cursor.hidden).toBe(true);
+  });
+
+  it('keeps hover-pan still under reduced motion while inspection still samples', () => {
+    media(true); fakeFrames();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
+    const art = container.querySelector('.ff-layer-vessel')!;
+    const view = container.querySelector('.ff-lens-view')!;
+    const resting = art.getAttribute('transform');
+    const move = new Event('pointermove', { bubbles: true });
+    Object.assign(move, { pointerType: 'mouse', clientX: 700, clientY: 300 });
+    fireEvent(exhibit, move);
+    act(() => { vi.advanceTimersByTime(16); });
+    // The hover pan is frozen...
+    expect(art.getAttribute('transform')).toBe(resting);
+    // ...but the lens still samples the pointer: (700,300)px is composition (1400,600).
+    expect(view.getAttribute('viewBox')).toBe('1300 500 200 200');
+    // In inspect mode the arrows are the sample's, and Escape hands panning back.
+    fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
+    expect(view.getAttribute('viewBox')).toBe('1364 500 200 200');
+    expect(art.getAttribute('transform')).toBe(resting);
+    fireEvent.keyDown(exhibit, { key: 'Escape' });
+    fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
+    expect(art.getAttribute('transform')).not.toBe(resting);
+  });
+
+  it('repaints the lens per frame without React commits', async () => {
+    fakeFrames();
+    const commits = vi.fn();
+    const { container } = render(<Profiler id="portfolio" onRender={commits}><Portfolio introEnabled={false} /></Profiler>);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
+    await act(async () => {});
+    const view = container.querySelector<SVGElement>('.ff-lens-view')!;
+    // Let the decode gate settle before measuring steady-state frames.
+    act(() => { vi.advanceTimersByTime(16); });
+    const before = commits.mock.calls.length;
+    for (let i = 0; i < 20; i++) {
+      const event = new Event('pointermove', { bubbles: true });
+      Object.assign(event, { pointerType: 'mouse', clientX: 300, clientY: 120 });
+      fireEvent(exhibit, event);
+    }
+    expect(view.getAttribute('viewBox')).toBe('700 250 200 200');
+    expect(commits.mock.calls.length).toBe(before);
+    const looped = commits.mock.calls.length;
+    act(() => { vi.advanceTimersByTime(16); });
+    // The sample sits at (300,120) CSS px = composition (600,240) at scale 0.5.
+    expect(view.getAttribute('viewBox')).toBe('500 140 200 200');
+    // Painting the frame must not reach React: any phase here is a commit.
+    expect(commits.mock.calls.slice(looped).map(call => call[1])).toEqual([]);
   });
 });

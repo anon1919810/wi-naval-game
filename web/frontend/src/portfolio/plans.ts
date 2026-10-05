@@ -20,6 +20,24 @@ export interface PlanCrop {
   readonly height: number;
 }
 
+/**
+ * Per-sheet, per-theme tone control. The scan's own pixels decide everything:
+ * `gamma` bends the density around the midtones before the linear term lifts or
+ * firms the ink, and `opacity` scales the finished group. Nothing here reads,
+ * writes or resamples the source, and every curve stays monotone, so no detail
+ * is invented — but, as with any tonal threshold, marks fainter than the
+ * cleaned threshold can attenuate. A denser sheet is only made calmer.
+ */
+export interface TonalProfile {
+  /** Density curve: ink = clamp(slope · (1 − luminance) ^ gamma + intercept). */
+  readonly slope: number;
+  readonly intercept: number;
+  /** > 1 pulls mid ink down while leaving the deepest marks strongest. */
+  readonly gamma: number;
+  /** Multiplier on the theme's base group opacity (1 = unchanged). */
+  readonly opacity: number;
+}
+
 export interface PlanSheet {
   readonly id: string;
   readonly label: string;
@@ -29,6 +47,19 @@ export interface PlanSheet {
   readonly sourceHeight: number;
   /** Lower top-view band of the archived reference, used verbatim as the viewBox. */
   readonly crop: PlanCrop;
+  /**
+   * Tonal profiles shared by the splash, the exhibit and the inspection lens, so
+   * a sheet never changes weight between those three surfaces.
+   *
+   * Measured on the archived bands (`docs/formfield/inspect-lens-2026-10-05.md`):
+   * 01 is a line drawing on white paper (77% of its band is bare paper) and is
+   * left exactly as before. 02 carries a dense dark deck hatch covering the whole
+   * hull, which inverse luminance turned into one solid field of ink, so its
+   * midtones are pulled down hardest while its line cores keep the darkest ink.
+   * 03's flat gray fills are eased a little further to sit in the same
+   * hierarchy as 02.
+   */
+  readonly tone: { readonly light: TonalProfile; readonly dark: TonalProfile };
 }
 
 export const PLAN_SHEETS: readonly PlanSheet[] = [
@@ -40,6 +71,10 @@ export const PLAN_SHEETS: readonly PlanSheet[] = [
     sourceWidth: 1000,
     sourceHeight: 451,
     crop: { x: 0, y: 290, width: 1000, height: 161 },
+    tone: {
+      light: { slope: 1.2, intercept: -0.05, gamma: 1, opacity: 1 },
+      dark: { slope: 1.08, intercept: -0.035, gamma: 1, opacity: 1 },
+    },
   },
   {
     id: '02',
@@ -49,6 +84,10 @@ export const PLAN_SHEETS: readonly PlanSheet[] = [
     sourceWidth: 1018,
     sourceHeight: 451,
     crop: { x: 0, y: 290, width: 1018, height: 161 },
+    tone: {
+      light: { slope: 0.72, intercept: -0.02, gamma: 1.35, opacity: 0.9 },
+      dark: { slope: 0.95, intercept: -0.02, gamma: 1.8, opacity: 0.95 },
+    },
   },
   {
     id: '03',
@@ -58,6 +97,10 @@ export const PLAN_SHEETS: readonly PlanSheet[] = [
     sourceWidth: 1063,
     sourceHeight: 542,
     crop: { x: 0, y: 360, width: 1063, height: 182 },
+    tone: {
+      light: { slope: 0.92, intercept: -0.02, gamma: 1.15, opacity: 0.92 },
+      dark: { slope: 0.92, intercept: -0.03, gamma: 1.2, opacity: 0.9 },
+    },
   },
 ];
 
@@ -73,6 +116,11 @@ export function sheetBeam(sheet: PlanSheet): number {
 export function sheetByIndex(index: number): PlanSheet {
   const safe = Number.isFinite(index) ? Math.trunc(index) : DEFAULT_SHEET_INDEX;
   return PLAN_SHEETS[Math.min(Math.max(safe, 0), PLAN_SHEETS.length - 1)];
+}
+
+/** The one tonal profile for a sheet in the given theme; splash, exhibit and lens all use it. */
+export function sheetTone(sheet: PlanSheet, dark: boolean): TonalProfile {
+  return dark ? sheet.tone.dark : sheet.tone.light;
 }
 
 export function sheetViewBox(sheet: PlanSheet): string {

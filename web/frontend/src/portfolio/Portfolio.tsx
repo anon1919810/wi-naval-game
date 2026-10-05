@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useSta
 import { flushSync } from 'react-dom';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
+import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
 import { Splash } from './Splash';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
 import { APP_ENTRY_LINK, classifyHash, publicHref } from './routes';
@@ -11,12 +12,18 @@ import './portfolio.css';
 const Plimsoll = lazy(() => import('../App'));
 const zero = { x: 0, y: 0 };
 const limit = (value: number) => Math.max(-70, Math.min(70, value));
+const inside = (value: number) => Math.max(0, Math.min(100, value));
+/** Pan step, in composition units, for the explore keys. */
+const PAN_MOVES: Record<string, [number, number]> = { ArrowLeft: [-15, 0], ArrowRight: [15, 0], ArrowUp: [0, -15], ArrowDown: [0, 15] };
+/** Sample step, in per cent of the exhibit, for the inspect keys. */
+const SAMPLE_MOVES: Record<string, [number, number]> = { ArrowLeft: [-4, 0], ArrowRight: [4, 0], ArrowUp: [0, -4], ArrowDown: [0, 4] };
 
 export default function Portfolio({ introEnabled = true }: { introEnabled?: boolean }) {
   const [route, setRoute] = useState(() => classifyHash(window.location.hash));
   const [theme, setTheme] = useState<PortfolioTheme>(storedTheme);
   const [systemDark, setSystemDark] = useState(() => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false);
-  const dark = resolveTheme(theme, systemDark) === 'dark';
+  const resolved = resolveTheme(theme, systemDark);
+  const dark = resolved === 'dark';
   const [opening, setOpening] = useState(() => {
     const initial = classifyHash(window.location.hash);
     return introEnabled && initial.kind === 'public' && initial.view === 'home' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -30,9 +37,17 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const composition = useRef<SVGGElement>(null);
   const geometry = useRef<SVGGElement>(null);
   const maskTrack = useRef<SVGGElement>(null);
-  const inspection = useRef<HTMLDivElement>(null);
+  const lens = useRef<HTMLDivElement>(null);
+  const lensView = useRef<SVGSVGElement>(null);
+  const lensComposition = useRef<SVGGElement>(null);
+  const lensGeometry = useRef<SVGGElement>(null);
+  const lensMask = useRef<SVGGElement>(null);
   const cursor = useRef<HTMLDivElement>(null);
-  const cursorOn = useRef(false);
+  const hovered = useRef(false);
+  const keysOn = useRef(false);
+  const inspectOn = useRef(false);
+  const still = useRef(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
+  const exhibitBox = useRef<ExhibitRect>({ left: 0, top: 0, width: 0, height: 0 });
   const panFrame = useRef(0);
   const imageCache = useRef<ImageCache>(new Map());
   const [readyHref, setReadyHref] = useState<string | null>(null);
@@ -84,19 +99,64 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     };
   }, [opening, publicActive, finish]);
 
-  const paintPan = useCallback(() => {
-    composition.current?.setAttribute('transform', artworkTransform(-12, 1, pan.current));
-    geometry.current?.setAttribute('transform', artworkTransform(-12, 1, { x: pan.current.x * GEOMETRY_PARALLAX, y: pan.current.y * GEOMETRY_PARALLAX }));
-    maskTrack.current?.setAttribute('transform', maskTrackTransform(pan.current));
-    if (inspection.current) { inspection.current.style.left = `${focus.current.x}%`; inspection.current.style.top = `${focus.current.y}%`; }
-    if (cursor.current) { cursor.current.hidden = !cursorOn.current; cursor.current.style.left = `${focus.current.x}%`; cursor.current.style.top = `${focus.current.y}%`; }
+  /**
+   * One frame of direct-DOM painting, shared by the exhibit and the lens. Reads
+   * the exhibit rectangle at most once per frame (never during render), then
+   * writes the layer transforms, the lens viewBox and the cursor straight to the
+   * DOM: React never commits for pointer, keyboard or resize work.
+   */
+  const paint = useCallback(() => {
+    const box = exhibit.current?.getBoundingClientRect();
+    if (box) exhibitBox.current = { left: box.left, top: box.top, width: box.width, height: box.height };
+    const vesselTransform = artworkTransform(-12, 1, pan.current);
+    const plateTransform = artworkTransform(-12, 1, { x: pan.current.x * GEOMETRY_PARALLAX, y: pan.current.y * GEOMETRY_PARALLAX });
+    const trackTransform = maskTrackTransform(pan.current);
+    for (const node of [composition.current, lensComposition.current]) node?.setAttribute('transform', vesselTransform);
+    for (const node of [geometry.current, lensGeometry.current]) node?.setAttribute('transform', plateTransform);
+    for (const node of [maskTrack.current, lensMask.current]) node?.setAttribute('transform', trackTransform);
+    const rect = exhibitBox.current;
+    if (cursor.current) {
+      // Mouse only, and never beside the lens: the lens is the inspect cursor.
+      cursor.current.hidden = !hovered.current || inspectOn.current;
+      cursor.current.style.left = `${focus.current.x}%`;
+      cursor.current.style.top = `${focus.current.y}%`;
+    }
+    const lensNode = lens.current;
+    if (!lensNode) return;
+    const frame = lensFrame(rect, focus.current.x / 100, focus.current.y / 100);
+    // The lens follows the pointer or the keyboard and is gone when neither is
+    // asking for it, so nothing is ever left floating offstage. Its geometry is
+    // still written while hidden, so it is correct the instant it appears.
+    lensNode.hidden = !(hovered.current || keysOn.current);
+    lensNode.style.width = lensNode.style.height = `${frame.size}px`;
+    lensNode.style.transform = `translate(${frame.cx - frame.size / 2}px, ${frame.cy - frame.size / 2}px)`;
+    lensView.current?.setAttribute('viewBox', frame.viewBox);
+    // The viewBox centres the sampled detail even when the lens itself is
+    // clamped, so its reticle must stay at the centre of the magnified image.
   }, []);
-  const resetPan = useCallback(() => {
+  const schedule = useCallback(() => {
+    if (!panFrame.current) panFrame.current = requestAnimationFrame(() => { panFrame.current = 0; paint(); });
+  }, [paint]);
+  const reset = useCallback(() => {
     cancelAnimationFrame(panFrame.current); panFrame.current = 0;
-    pan.current = zero; focus.current = { x: 50, y: 50 }; paintPan();
-  }, [paintPan]);
-  useLayoutEffect(() => { resetPan(); return () => cancelAnimationFrame(panFrame.current); }, [sheetIndex, publicActive, about, resetPan]);
-  useLayoutEffect(paintPan, [inspect, paintPan]);
+    pan.current = zero; focus.current = { x: 50, y: 50 };
+    paint();
+  }, [paint]);
+  useLayoutEffect(() => { reset(); return () => cancelAnimationFrame(panFrame.current); }, [sheetIndex, publicActive, about, reset]);
+  // Re-register the lens and cursor nodes and restate their visibility whenever
+  // anything that changes the rendered surface changes.
+  useLayoutEffect(() => { inspectOn.current = inspect; paint(); }, [inspect, sheet, dark, details, paint]);
+  useEffect(() => {
+    if (!publicActive) return;
+    const node = exhibit.current;
+    if (!node) return;
+    const update = () => schedule();
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(update) : null;
+    observer?.observe(node);
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, { passive: true });
+    return () => { observer?.disconnect(); window.removeEventListener('resize', update); window.removeEventListener('scroll', update); };
+  }, [publicActive, schedule]);
 
   useEffect(() => {
     const update = () => {
@@ -132,26 +192,44 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
 
   const explore = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== 'mouse' && e.buttons === 0) return;
+    keysOn.current = false;
     const r = e.currentTarget.getBoundingClientRect();
+    if (!r.width || !r.height) return;
     const x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
     const y = Math.max(0, Math.min(1, (e.clientY - r.top) / r.height));
-    pan.current = { x: (x - .5) * -90, y: (y - .5) * -60 };
+    // Reduced motion keeps hover-pan still; the sample still follows the pointer.
+    if (!still.current) pan.current = { x: (x - .5) * -90, y: (y - .5) * -60 };
     focus.current = { x: x * 100, y: y * 100 };
-    if (!panFrame.current) panFrame.current = requestAnimationFrame(() => { panFrame.current = 0; paintPan(); });
+    schedule();
   };
   const keyboard = (e: KeyboardEvent<HTMLDivElement>) => {
-    const moves: Record<string, [number, number]> = { ArrowLeft: [-15, 0], ArrowRight: [15, 0], ArrowUp: [0, -15], ArrowDown: [0, 15] };
-    const move = moves[e.key];
-    if (move) { e.preventDefault(); cancelAnimationFrame(panFrame.current); panFrame.current = 0; pan.current = { x: limit(pan.current.x + move[0]), y: limit(pan.current.y + move[1]) }; paintPan(); }
-    if (e.key === 'Home' || e.key === 'Escape') resetPan();
+    keysOn.current = true;
+    // Inspect mode hands the arrows to the sample; explore mode keeps panning.
+    const move = (inspectOn.current ? SAMPLE_MOVES : PAN_MOVES)[e.key];
+    if (move) {
+      e.preventDefault();
+      cancelAnimationFrame(panFrame.current); panFrame.current = 0;
+      if (inspectOn.current) focus.current = { x: inside(focus.current.x + move[0]), y: inside(focus.current.y + move[1]) };
+      else pan.current = { x: limit(pan.current.x + move[0]), y: limit(pan.current.y + move[1]) };
+      paint();
+    }
+    if (e.key === 'Home') {
+      e.preventDefault();
+      if (inspectOn.current) { focus.current = { x: 50, y: 50 }; paint(); } else reset();
+    }
+    // Escape leaves inspection, or resets the view when nothing is inspected.
+    if (e.key === 'Escape') { e.preventDefault(); if (inspectOn.current) setInspect(false); else reset(); }
   };
   const replay = () => {
     window.location.hash = publicHref('home').slice(1);
     setRoute({ kind: 'public', view: 'home' });
     window.scrollTo({ top: 0, behavior: 'auto' });
-    resetPan(); setSettling(false); setLoadAttempt(v => v + 1);
+    reset(); setSettling(false); setLoadAttempt(v => v + 1);
     setOpening(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   };
+
+  /** Compact companion to the primary toggle: follow the OS, or pin what it resolves to now. */
+  const followSystem = useCallback(() => setTheme(previous => (previous === 'system' ? resolved : 'system')), [resolved]);
 
   const toggleTheme = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     const next = dark ? 'light' : 'dark';
@@ -176,18 +254,28 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
         <nav aria-label="Main navigation"><a href={publicHref('home')} aria-current={!about ? 'page' : undefined}>Work <span>01</span></a><a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a></nav>
-        <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}><span className="ff-theme-symbol" aria-hidden="true">◐</span><span className="ff-theme-mode">{dark ? 'DARK' : 'LIGHT'}</span></button>
+        <div className="ff-theme-group">
+          <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}><span className="ff-theme-symbol" aria-hidden="true">◐</span><span className="ff-theme-mode">{dark ? 'DARK' : 'LIGHT'}</span></button>
+          <button className="ff-theme-system" onClick={followSystem} aria-pressed={theme === 'system'} title="Follow system theme">SYSTEM</button>
+        </div>
       </header>
 
       <main className="ff-main" inert={opening}>
         <section className="ff-home" hidden={about} aria-label="Selected work">
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
-          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label="Interactive top-view drawing. Use arrow keys to explore, Home to reset." onKeyDown={keyboard} onPointerMove={explore} onPointerEnter={e => { if (e.pointerType === 'mouse') { cursorOn.current = true; paintPan(); } }} onPointerLeave={() => { cursorOn.current = false; paintPan(); }} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
+          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
             <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
-            {inspect && <div ref={inspection} className="ff-inspection" aria-hidden="true"><span>REFERENCE {sheet.id}</span></div>}
-            {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><span className="ff-cursor-breath" /><i /></div>}
+            {inspect && <div ref={lens} className="ff-lens" aria-hidden="true">
+              <span className="ff-lens-port">
+                {/* The same Artwork composition, narrowed by viewBox: no second renderer, no second tone. */}
+                <svg ref={lensView} className="ff-lens-view" viewBox={RESTING_VIEW_BOX} preserveAspectRatio="xMidYMid meet"><Artwork pixelFrame compositionRef={lensComposition} geometryRef={lensGeometry} maskRef={lensMask} sheet={sheet} dark={dark} details={details} /></svg>
+                <span className="ff-lens-mark" />
+              </span>
+              <span className="ff-lens-label">2×<i>REF {sheet.id}</i></span>
+            </div>}
+            {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><span className="ff-cursor-cross" /><i /></div>}
             <span className="ff-corner ff-corner-tl" /><span className="ff-corner ff-corner-tr" /><span className="ff-corner ff-corner-bl" /><span className="ff-corner ff-corner-br" />
-            <div className="ff-exhibit-note"><span>PLIMSOLL / DRAWING {sheet.id}</span><span>{inspect ? 'INSPECTION ON' : 'MOVE TO EXPLORE'}</span></div>
+            <div className="ff-exhibit-note"><span>PLIMSOLL / DRAWING {sheet.id}</span><span>{inspect ? `INSPECT 2× / REF ${sheet.id}` : 'MOVE TO EXPLORE'}</span></div>
           </div>
 
           <div className="ff-work-info">
@@ -195,8 +283,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             <a className="ff-explore-link" href={APP_ENTRY_LINK}>EXPLORE PROJECT <span aria-hidden="true">↗</span></a>
           </div>
           <div className="ff-work-controls">
-            <div className="ff-sheet-picker" role="group" aria-label="Reference drawing"><span>REFERENCE</span>{PLAN_SHEETS.map((s, i) => <button key={s.id} onClick={() => { setSheetIndex(i); resetPan(); }} aria-label={s.label} aria-pressed={i === sheetIndex}>{s.shortLabel}</button>)}</div>
-            <div className="ff-exhibit-tools"><button onClick={() => setDetails(v => !v)} aria-pressed={details}>Geometry {details ? 'On' : 'Off'}</button><button onClick={() => setInspect(v => !v)} aria-pressed={inspect}>Inspect {inspect ? 'On' : 'Off'}</button><button onClick={resetPan}>Reset view <span aria-hidden="true">↺</span></button></div>
+            <div className="ff-sheet-picker" role="group" aria-label="Reference drawing"><span>REFERENCE</span>{PLAN_SHEETS.map((s, i) => <button key={s.id} onClick={() => { setSheetIndex(i); reset(); }} aria-label={s.label} aria-pressed={i === sheetIndex}>{s.shortLabel}</button>)}</div>
+            <div className="ff-exhibit-tools"><button onClick={() => setDetails(v => !v)} aria-pressed={details}>Geometry {details ? 'On' : 'Off'}</button><button onClick={() => setInspect(v => !v)} aria-pressed={inspect}>Inspect {inspect ? 'On' : 'Off'}</button><button onClick={reset}>Reset view <span aria-hidden="true">↺</span></button></div>
           </div>
           {imageError && <p className="ff-image-error" role="alert">The reference could not be loaded. Choose another reference or use Replay Intro to retry.</p>}
         </section>

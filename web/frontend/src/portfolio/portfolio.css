@@ -22,6 +22,10 @@
 .ff-header nav a[aria-current], .ff-header nav a:hover { color: var(--ff-ink); }
 .ff-header nav span { font-size: 9px; margin-left: 4px; color: var(--ff-accent); vertical-align: super; }
 .ff-shell .ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; min-height: 44px; padding: 4px 10px; transition: color .16s; }
+.ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 6px; }
+.ff-shell .ff-theme-system { font: 10px 'SFMono-Regular', Consolas, monospace; letter-spacing: .11em; color: var(--ff-muted); border: 1px solid var(--ff-line); padding: 6px 8px; min-height: 30px; transition: color .16s, border-color .16s; }
+.ff-shell .ff-theme-system:hover { color: var(--ff-ink); border-color: var(--ff-muted); }
+.ff-shell .ff-theme-system[aria-pressed='true'] { color: var(--ff-ink); border-color: var(--ff-accent); }
 .ff-theme-symbol { font-size: 18px; line-height: 1; display: inline-block; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
 .ff-shell[data-ff-theme='dark'] .ff-theme-symbol { transform: rotate(180deg); }
 .ff-theme-mode { font: 10px 'SFMono-Regular', Consolas, monospace; letter-spacing: .11em; color: var(--ff-muted); transition: color .16s; }
@@ -40,18 +44,28 @@
 .ff-corner-bl { left: 0; bottom: 0; border-width: 0 0 1px 1px; }
 .ff-corner-br { right: 0; bottom: 0; border-width: 0 1px 1px 0; }
 .ff-exhibit-note { position: absolute; left: 25px; right: 25px; bottom: 23px; display: flex; justify-content: space-between; font: 9px 'SFMono-Regular', Consolas, monospace; color: var(--ff-muted); letter-spacing: .12em; pointer-events: none; }
-.ff-inspection { position: absolute; width: 90px; height: 90px; border: 1px solid var(--ff-accent); border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; background: color-mix(in srgb, var(--ff-accent) 5%, transparent); }
-.ff-inspection::before, .ff-inspection::after { content: ''; position: absolute; background: var(--ff-accent); }
-.ff-inspection::before { width: 110px; height: 1px; left: -11px; top: 44px; }
-.ff-inspection::after { height: 110px; width: 1px; top: -11px; left: 44px; }
-.ff-inspection span { position: absolute; left: 96px; top: 10px; font: 8px Consolas, monospace; color: var(--ff-accent); width: 90px; }
+/* Bounded inspection lens: a 2x window onto the same rendered artwork, never a
+   second render, so it adds no resolution and measures nothing. Position and
+   viewBox are written by the coalesced frame loop, so nothing transitions here. */
+.ff-lens { position: absolute; left: 0; top: 0; width: 200px; height: 200px; pointer-events: none; }
+.ff-lens-port { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: var(--ff-panel); box-shadow: 0 0 0 1px var(--ff-accent), 0 0 0 2px var(--ff-panel), 0 0 0 3px color-mix(in srgb, var(--ff-accent) 40%, transparent); }
+.ff-lens-view { display: block; width: 100%; height: 100%; }
+/* Inside the lens the composition frame keeps 1px = 1 composition unit, so the
+   outer viewBox window alone decides the 2x. That is ARTWORK_FRAME in CSS. */
+.ff-lens-view .ff-artwork { position: absolute; left: 0; top: 0; width: 1600px; height: 700px; }
+.ff-lens-mark { position: absolute; left: 50%; top: 50%; width: 1px; height: 1px; }
+.ff-lens-mark::before, .ff-lens-mark::after { content: ''; position: absolute; background: var(--ff-accent); }
+.ff-lens-mark::before { width: 13px; height: 1px; left: -6px; top: 0; }
+.ff-lens-mark::after { height: 13px; width: 1px; top: -6px; left: 0; }
+.ff-lens-label { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); display: flex; align-items: baseline; gap: 5px; padding: 1px 5px; font: 10px 'SFMono-Regular', Consolas, monospace; letter-spacing: .06em; color: var(--ff-accent); background: color-mix(in srgb, var(--ff-panel) 82%, transparent); white-space: nowrap; }
+.ff-lens-label i { font-style: normal; font-size: 9px; opacity: .85; }
+/* Stable blueprint crosshair: no idle animation of any kind. */
 .ff-cursor { position: absolute; width: 26px; height: 26px; transform: translate(-50%, -50%); pointer-events: none; opacity: .85; }
-.ff-cursor-breath { position: absolute; inset: 0; border: 1px solid var(--ff-accent); border-radius: 50%; animation: ff-breathe 2.8s ease-in-out infinite; }
-.ff-cursor-breath::before, .ff-cursor-breath::after { content: ''; position: absolute; background: var(--ff-accent); }
-.ff-cursor-breath::before { width: 38px; height: 1px; left: -6px; top: 12.5px; }
-.ff-cursor-breath::after { width: 1px; height: 38px; left: 12.5px; top: -6px; }
+.ff-cursor-cross { position: absolute; inset: 0; border: 1px solid var(--ff-accent); border-radius: 50%; }
+.ff-cursor-cross::before, .ff-cursor-cross::after { content: ''; position: absolute; background: var(--ff-accent); }
+.ff-cursor-cross::before { width: 38px; height: 1px; left: -6px; top: 12.5px; }
+.ff-cursor-cross::after { height: 38px; width: 1px; left: 12.5px; top: -6px; }
 .ff-cursor i { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: var(--ff-accent); left: 11.5px; top: 11.5px; }
-@keyframes ff-breathe { 0%, 100% { transform: scale(1); opacity: .75; } 50% { transform: scale(1.16); opacity: 1; } }
 .ff-work-info { display: flex; justify-content: space-between; gap: 30px; align-items: center; padding: 26px 0 24px; }
 .ff-work-heading { display: flex; align-items: baseline; gap: 20px; }
 .ff-work-index { font: 12px Consolas, monospace; color: var(--ff-muted); }
@@ -99,7 +113,7 @@
   .ff-wordmark { font-size: 21px; }
   .ff-header nav { grid-column: 1; grid-row: 2; gap: 24px; font-size: 12px; }
   .ff-header nav a { padding: 0 0 10px; }
-  .ff-theme { grid-column: 2; grid-row: 1 / 3; }
+  .ff-theme-group { grid-column: 2; grid-row: 1 / 3; }
   .ff-exhibit-label { font-size: 8px; padding: 22px 0 15px; gap: 12px; }
   .ff-exhibit-label span:last-child { display: none; }
   .ff-exhibit { height: 330px; }
@@ -130,9 +144,11 @@
 }
 
 .ff-image-wait { color: #c5c5c5; display: grid; place-items: center; font: 11px Consolas, monospace; letter-spacing: .12em; }
-/* Radial theme switch: keep both snapshots unscaled, clip only the incoming one. */
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-::view-transition-old(root) { z-index: 1; }
-::view-transition-new(root) { z-index: 2; }
+/* Radial theme switch: keep both snapshots unscaled, clip only the incoming
+   one, and stay off the Plimsoll application's own view transitions. */
+:root[data-formfield-surface='public']::view-transition-old(root),
+:root[data-formfield-surface='public']::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+:root[data-formfield-surface='public']::view-transition-old(root) { z-index: 1; }
+:root[data-formfield-surface='public']::view-transition-new(root) { z-index: 2; }
 .ff-image-error { padding: 12px 0; font-size: 13px; color: var(--ff-muted); }
 .ff-skip[hidden] { display: none; }

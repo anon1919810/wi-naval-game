@@ -1,5 +1,5 @@
 import { useId, type Ref } from 'react';
-import type { PlanSheet } from './plans';
+import { sheetTone, type PlanSheet } from './plans';
 import { VesselDrawing } from './VesselDrawing';
 
 export interface ArtworkProps {
@@ -9,14 +9,19 @@ export interface ArtworkProps {
   pan?: { x: number; y: number };
   dark?: boolean;
   details?: boolean;
+  /** Give the root <svg> the frame's own pixel box, so 1 unit = 1 CSS pixel. */
+  pixelFrame?: boolean;
   compositionRef?: Ref<SVGGElement>;
   geometryRef?: Ref<SVGGElement>;
   maskRef?: Ref<SVGGElement>;
 }
 
+/** The panoramic composition frame every surface shares, in composition units. */
+export const ARTWORK_FRAME = { width: 1600, height: 700 } as const;
+
 /** Composition pivot: the centre of the 1600×700 panoramic frame. */
 export function artworkTransform(angle = -12, scale = 1, pan = { x: 0, y: 0 }) {
-  return `translate(${800 + pan.x} ${350 + pan.y}) rotate(${angle}) scale(${scale}) translate(-800 -350)`;
+  return `translate(${ARTWORK_FRAME.width / 2 + pan.x} ${ARTWORK_FRAME.height / 2 + pan.y}) rotate(${angle}) scale(${scale}) translate(-800 -350)`;
 }
 
 /** The construction layer floats at this fraction of the vessel layer's pan. */
@@ -63,15 +68,20 @@ const ROSE_TICKS = Array.from({ length: 12 }, (_, k) => {
  * GEOMETRY_PARALLAX so the plate floats gently against the drawing; during
  * the intro both layers are painted with the same angle and scale.
  *
+ * `pixelFrame` is for the inspection lens, which narrows an enclosing viewBox:
+ * without the frame's own pixel box the nested <svg> would be fitted to the
+ * lens square a second time and the lens would zoom out instead of in.
+ *
  * Light mode needs both a firmer ink curve on the scan and slightly stronger
  * construction lines: on paper, dark ink and thin strokes read weaker than
  * their light-on-dark equivalents at equal opacity.
  */
-export function Artwork({ sheet, angle = -12, scale = 1, pan = { x: 0, y: 0 }, dark = false, details = true, compositionRef, geometryRef, maskRef }: ArtworkProps) {
+export function Artwork({ sheet, angle = -12, scale = 1, pan = { x: 0, y: 0 }, dark = false, details = true, pixelFrame = false, compositionRef, geometryRef, maskRef }: ArtworkProps) {
   const id = useId().replace(/:/g, '');
   const ink = dark ? '#f2f2ee' : '#171817';
+  const tone = sheetTone(sheet, dark);
   const geometryPan = { x: pan.x * GEOMETRY_PARALLAX, y: pan.y * GEOMETRY_PARALLAX };
-  return <svg className="ff-artwork" viewBox="0 0 1600 700" aria-hidden="true" focusable="false">
+  return <svg className="ff-artwork" viewBox={`0 0 ${ARTWORK_FRAME.width} ${ARTWORK_FRAME.height}`} {...(pixelFrame ? { x: 0, y: 0, width: ARTWORK_FRAME.width, height: ARTWORK_FRAME.height } : {})} aria-hidden="true" focusable="false">
     <defs>
       <mask id={`${id}-clear-deck`} maskUnits="userSpaceOnUse" x="-200" y="-200" width="2000" height="1400">
         <rect x="-200" y="-200" width="2000" height="1400" fill="white" />
@@ -115,7 +125,8 @@ export function Artwork({ sheet, angle = -12, scale = 1, pan = { x: 0, y: 0 }, d
       </g>
     </g>
     <g className="ff-layer-vessel" ref={compositionRef} transform={artworkTransform(angle, scale, pan)}>
-      <VesselDrawing sheet={sheet} ink={ink} opacity={dark ? .85 : 1} slope={dark ? 1.08 : 1.2} intercept={dark ? -0.035 : -0.05} />
+      {/* One tonal profile per sheet and theme, shared with the splash and the lens. */}
+      <VesselDrawing sheet={sheet} ink={ink} opacity={(dark ? .85 : 1) * tone.opacity} tone={tone} />
     </g>
   </svg>;
 }
