@@ -7,9 +7,10 @@
  * 1. **theme** — the radial clip of the incoming root snapshot (560 ms).
  * 2. **sheet / sheet-back** — a sharp diagonal wipe of the artwork snapshot
  *    (360 ms), opposite edge for the direction of the reference change.
- * 3. **page / page-back** — content-only (260 ms). The header and footer stay
- *    put, so this must not snapshot the page at all: it sets one attribute and
- *    lets a plain CSS animation move the section that appeared.
+ * 3. **page / page-back** — the circular reveal (500 ms), which is ours rather
+ *    than the browser's: the destination appears inside an expanding circle
+ *    over a bounded copy of the page leaving, so the header, rail and footer are
+ *    never captured and never move. See circularReveal.ts.
  * 4. **detail** — the exhibit's artwork and the work detail's hero are the same
  *    shared drawing, so one named group morphs between them (400 ms) while the
  *    persistent chrome stays still.
@@ -33,6 +34,8 @@
  * - **No waiting.** Nothing here waits for a module, an image or a response.
  */
 
+import { startCircularReveal, REVEAL_MS, type RevealRequest } from './circularReveal';
+
 export type TransitionKind = 'theme' | 'sheet' | 'sheet-back' | 'page' | 'page-back' | 'detail' | 'tool' | 'tool-back' | 'app-route';
 
 /** Choreography, in milliseconds. These are the only moving durations in the shell. */
@@ -41,8 +44,8 @@ export const TRANSITION_MS = {
   theme: 560,
   /** Sharp diagonal reference switch. */
   sheet: 360,
-  /** Content-only Work/About move. */
-  page: 260,
+  /** Work/About: one circular reveal, in both directions. */
+  page: REVEAL_MS,
   /** Exhibit artwork morphing into the work detail's hero. */
   detail: 400,
   /** Exhibit frame expanding into the workspace. */
@@ -61,16 +64,18 @@ export const TOOL_SURFACE_MS = 240;
 /**
  * Kinds that set one attribute on the root and let plain CSS move a section.
  *
- * `page`, `page-back` and `app-route` are here for the same reason: these pages
- * can each be thousands of lines — a full report, a tall About — and a named-group
- * morph would have to snapshot the whole of them, which is expensive and would
- * distort the text as it moved. So nothing is captured, and the content changes
- * as the attribute is set. Identity is carried by the header and the rail, which
- * are outside `.ff-main` and hold still, and the arrival is a plain CSS animation
- * with the shared chrome sitting still beside it.
+ * Only `app-route` is here now. The Work/About move used to be one of these: a
+ * `data-ff-page` attribute and a 12 px rise. It is a circular reveal instead —
+ * a real clip on the live region over a copy of the page leaving — which cannot
+ * be expressed as an attribute because the origin and the radius are read from
+ * the destination word's own box on every navigation.
+ *
+ * `app-route` stays for the same reason it always did: a workspace page can be
+ * thousands of lines, and a named-group morph would have to snapshot the whole
+ * of it, which is expensive and would distort the text as it moved.
  */
 interface AttributeKind {
-  readonly attribute: 'ffPage' | 'ffAppRoute';
+  readonly attribute: 'ffAppRoute';
   /** The value the attribute takes while the move runs. */
   readonly value: string;
   /** How long the attribute is held before it is released. */
@@ -78,12 +83,10 @@ interface AttributeKind {
 }
 
 const ATTRIBUTE_KINDS: ReadonlyMap<TransitionKind, AttributeKind> = new Map([
-  // Work→About: the section that appeared rises into place.
-  ['page', { attribute: 'ffPage', value: 'in', duration: TRANSITION_MS.page }],
-  // About→Work: the same cut, entering from the other side.
-  ['page-back', { attribute: 'ffPage', value: 'out', duration: TRANSITION_MS.page }],
   ['app-route', { attribute: 'ffAppRoute', value: 'in', duration: TRANSITION_MS.appRoute }],
 ]);
+/** The two Work/About directions, both the same circular reveal. */
+const REVEAL_KINDS: ReadonlySet<TransitionKind> = new Set<TransitionKind>(['page', 'page-back']);
 /** Kinds that move the exhibit frame and the workspace surface. */
 const TOOL_KINDS: ReadonlySet<TransitionKind> = new Set<TransitionKind>(['tool', 'tool-back']);
 
@@ -197,6 +200,13 @@ export interface TransitionOptions {
    * the choreography of the kind, so callers never repeat a duration.
    */
   animate?: () => void;
+  /**
+   * The circular reveal's own inputs, read only by `page` / `page-back`: the
+   * host for its two layers, the region it clips, and where the destination
+   * word's circle opens. Without them the move commits at once rather than
+   * guessing geometry.
+   */
+  reveal?: RevealRequest;
 }
 
 /**
@@ -230,6 +240,30 @@ export async function runTransition(kind: TransitionKind, update: () => void, op
     // Reduced motion and an unsupported browser both reach the page at once, and
     // that is still a move with an end: anything waiting on this one is released.
     announce(mine, kind);
+    return;
+  }
+
+  if (REVEAL_KINDS.has(kind)) {
+    // The reveal owns its own clock, its own layers and its own listeners, and
+    // it ends by itself for every reason there is: finished, cancelled by a
+    // newer move, a resize, the page being hidden, reduced motion arriving
+    // mid-move, or unmount. What this controller contributes is the generation
+    // — so a superseded move's commit can never land and a late cleanup can
+    // never clear a newer one — and the single announcement that everything
+    // else is already listening for.
+    const reveal = startCircularReveal({
+      request: options.reveal ?? { shell: null, source: null, origin: null },
+      commit,
+      duration: options.duration ?? TRANSITION_MS.page,
+    });
+    const end = () => { reveal.cancel(); if (mine === generation) active = null; announce(mine, kind); };
+    if (!reveal.animated) { announce(mine, kind); return; }
+    active = { clean: end, cancel: reveal.cancel };
+    await reveal.finished;
+    // Cancellation settles the promise too, so this only runs for a move that
+    // reached its end on its own; the generation guard keeps it from touching a
+    // successor's state if one has already taken over.
+    if (mine === generation) end();
     return;
   }
 

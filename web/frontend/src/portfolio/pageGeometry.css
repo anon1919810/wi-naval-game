@@ -1,0 +1,153 @@
+/* The page order and the public studies. Everything here is scoped to the
+   shell's own tokens: no colour, font or size is introduced that portfolio.css
+   and content.css do not already own.
+
+   Two concerns live in this file: the pale field and focal drawing behind each
+   page, and the About page's editorial grid — twelve columns, one shared left
+   edge, a giant title against a compact body — with its typeset mathematics. */
+
+.ff-field { pointer-events: none; color: var(--ff-muted); }
+.ff-field-draw { display: block; width: 100%; height: 100%; overflow: hidden; fill: none; }
+.ff-field-draw *, .ff-curve *, .ff-study-draw * { vector-effect: non-scaling-stroke; }
+.ff-field--shell { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+.ff-field--shell .ff-field-draw { height: auto; }
+.ff-field--shell::after { content: ''; position: absolute; inset: 0 24px; border-left: 1px solid color-mix(in srgb, var(--ff-ink) 4%, transparent); border-right: 1px solid color-mix(in srgb, var(--ff-ink) 4%, transparent); }
+.ff-paper-rule { stroke: var(--ff-ink); stroke-width: .6; opacity: .065; }
+.ff-paper-arc { stroke: var(--ff-ink); stroke-width: .7; opacity: .045; }
+.ff-field-rule { stroke: var(--ff-line); stroke-width: .7; }
+.ff-field-tick { stroke: var(--ff-muted); stroke-width: .65; opacity: .36; }
+.ff-field-arc { stroke: var(--ff-muted); stroke-width: .7; opacity: .24; }
+.ff-field-arc--draft { opacity: .1; }
+.ff-field-arc--main { stroke: var(--ff-ink); stroke-width: 1; opacity: .62; }
+.ff-field-tick--arc { stroke: var(--ff-ink); opacity: .5; }
+.ff-field-tangent { stroke: var(--ff-muted); stroke-width: .6; opacity: .28; }
+.ff-field-cross { stroke: var(--ff-ink); stroke-width: .8; opacity: .6; }
+.ff-field-point { fill: color-mix(in srgb, var(--ff-accent) 50%, var(--ff-muted)); stroke: none; }
+.ff-study-caption { display: block; font-size: 9px; letter-spacing: .12em; color: var(--ff-muted); font-weight: 500; }
+
+/* ---- Work: the compass field ------------------------------------------------ */
+/* A child of `main`, so it takes the whole width main spans — rail included — and
+   the arc runs out past the reading column into the navigation's side. Absolutely
+   positioned, it adds no height, and its own box crops the drawing: the only
+   boundary the art meets is the viewport's. */
+.ff-field--work { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+/* The exposed strip below the work rows, where the lower arc is actually seen. */
+.ff-home { padding-bottom: 110px; }
+.ff-home > * { position: relative; z-index: 1; }
+/* Same-paper clearance for the reading zones, the way the About sections use it:
+   the arc is stopped by a margin rather than crossing a word. */
+.ff-home > .ff-exhibit-label, .ff-home > .ff-work-info, .ff-home > .ff-work-controls { background: var(--ff-bg); box-shadow: 0 0 0 14px var(--ff-bg); }
+
+/* ---- About: the pale field --------------------------------------------------- */
+.ff-field--about { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.ff-about > :not(.ff-field) { position: relative; z-index: 1; }
+.ff-about > :not(.ff-field):not(.ff-about-masthead), .ff-about-intro { background: var(--ff-bg); box-shadow: 0 0 0 14px var(--ff-bg); }
+.ff-about-masthead { background: transparent; }
+
+/* ---- About: the Lissajous hero ---------------------------------------------- */
+.ff-about-figure { margin: 0; min-width: 0; width: 100%; padding-top: 6px; background: var(--ff-bg); }
+.ff-curve { display: block; width: 100%; height: auto; fill: none; margin-top: 20px; }
+.ff-curve-ruler { stroke: var(--ff-muted); stroke-width: .65; opacity: .22; }
+.ff-curve-tick { stroke: var(--ff-muted); stroke-width: .7; opacity: .4; }
+.ff-curve-main { stroke: var(--ff-ink); stroke-width: 1.05; opacity: .75; }
+.ff-curve-soft { stroke: var(--ff-muted); stroke-width: .6; opacity: .25; }
+
+/* ---- Typeset mathematics ----------------------------------------------------- */
+/* Serif maths with real fractions and radicals. No renderer, no installed font:
+   the stack names the faces a reader's system already has, best first. Each
+   formula carries an authored name, because a fraction of spans is otherwise
+   announced as a run of unrelated letters. */
+.ff-math {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: .28em .34em; margin: 26px 0 0;
+  font-family: 'Cambria Math', 'STIX Two Math', 'Latin Modern Math', 'TeX Gyre Termes Math', Cambria, Georgia, 'Times New Roman', serif;
+  font-size: clamp(28px, 2.3vw, 34px); line-height: 1.1; font-weight: 400; letter-spacing: 0; color: var(--ff-ink);
+}
+/* The section's own body rule would otherwise swallow the formula: same element,
+   so the formula states its size and colour after it. */
+.ff-about-study p.ff-math { font-size: clamp(28px, 2.3vw, 34px); color: var(--ff-ink); margin: 30px 0 0; }
+.ff-math i { font-style: italic; }
+.ff-math sub, .ff-math sup { font-size: .6em; line-height: 0; }
+/* One equation, one unit: it wraps whole or not at all, so a narrow measure can
+   never leave a right-hand side stranded on its own line. */
+.ff-equation { display: inline-flex; align-items: center; gap: .34em; white-space: nowrap; }
+.ff-frac { display: inline-flex; flex-direction: column; align-items: stretch; justify-content: center; text-align: center; font-size: .84em; margin: 0 .12em; }
+.ff-frac-num { padding: 0 .3em .14em; }
+.ff-frac-den { padding: .14em .3em 0; border-top: 1px solid currentColor; }
+.ff-radic { display: inline-flex; align-items: baseline; }
+.ff-radic::before { content: '√'; font-size: 1.05em; line-height: 1; }
+.ff-radic-in { border-top: 1px solid currentColor; padding: .06em .12em 0; margin-left: .04em; }
+/* The hero's parameters stay compact, and each family gets one line. */
+.ff-math--compact { flex-direction: column; align-items: flex-start; gap: 6px; margin: 14px 0 0; font-size: clamp(15px, 1.2vw, 18px); }
+
+/* ---- About: the three naval studies ------------------------------------------ */
+/* One editorial section each, not a tile. The figure is a sibling of the text, so
+   the section's own columns place the two: text on the low columns, drawing on
+   the high ones. One left edge, a deliberate asymmetry, never a card grid. */
+.ff-about-study { display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--ff-line); margin-top: clamp(46px, 5vw, 92px); padding-top: clamp(26px, 2.4vw, 40px); }
+.ff-about-study-text { min-width: 0; }
+.ff-about-study .ff-eyebrow { display: block; color: var(--ff-accent); }
+.ff-about-study h2 { margin: 18px 0 0; font-family: var(--font-display); font-size: clamp(46px, 5.4vw, 84px); font-weight: 700; line-height: .94; letter-spacing: -.03em; }
+.ff-about-study p { max-width: 42ch; margin: 20px 0 0; font-size: clamp(16px, 1.25vw, 19px); line-height: 1.62; color: var(--ff-muted); }
+.ff-about-study .ff-study-note { font-size: 12px; line-height: 1.6; max-width: 52ch; }
+.ff-about-study p cite { font-style: normal; }
+.ff-legend { display: flex; flex-wrap: wrap; gap: 6px 26px; margin: 18px 0 0; padding: 14px 0 0; list-style: none; border-top: 1px solid var(--ff-line); font-size: 11px; letter-spacing: .04em; color: var(--ff-muted); }
+.ff-legend i { font-family: 'Cambria Math', 'STIX Two Math', Cambria, Georgia, serif; font-style: italic; font-size: 13px; }
+.ff-legend sub { font-size: .62em; }
+.ff-about-study-figure { grid-column: 1; margin: 34px 0 0; min-width: 0; background: var(--ff-bg); }
+.ff-study-draw { display: block; width: 100%; height: auto; fill: none; margin-top: 18px; }
+.ff-study-guide { stroke: var(--ff-line); stroke-width: .8; }
+.ff-study-grid { stroke: var(--ff-line); stroke-width: .6; }
+.ff-study-tick { stroke: var(--ff-muted); stroke-width: .7; opacity: .55; }
+.ff-study-wave { stroke: var(--ff-muted); stroke-width: .8; opacity: .5; }
+.ff-study-body { stroke: var(--ff-ink); stroke-width: 1.1; fill: none; }
+.ff-study-vector { stroke: var(--ff-ink); stroke-width: 1.1; }
+.ff-study-vector--back { stroke: var(--ff-muted); }
+.ff-study-dimension { stroke: var(--ff-muted); stroke-width: .8; }
+.ff-study-curve { stroke: var(--ff-ink); stroke-width: 1.6; }
+.ff-study-tag { fill: var(--ff-muted); stroke: none; font-family: var(--font-sans); font-size: 11px; font-weight: 500; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.ff-study-tag--name { fill: var(--ff-ink); }
+.ff-about-study-figure figcaption { max-width: 46ch; margin: 16px 0 0; font-size: 12px; line-height: 1.62; color: var(--ff-muted); }
+
+@media (min-width: 901px) {
+  .ff-about-study { grid-template-columns: repeat(var(--ff-cols, 12), minmax(0, 1fr)); column-gap: var(--ff-col-gap, 24px); }
+  .ff-about-study-text { grid-column: 1 / span 6; }
+  .ff-about-study-figure { grid-column: 8 / span 5; margin: 6px 0 0; }
+  .ff-about-study p { max-width: 46ch; }
+  /* The middle study turns around, so the drawings do not march down one side. */
+  .ff-about-study--flip .ff-about-study-text { grid-column: 7 / span 6; grid-row: 1; }
+  .ff-about-study--flip .ff-about-study-figure { grid-column: 1 / span 5; grid-row: 1; }
+}
+
+/* ---- The About editorial grid ------------------------------------------------ */
+/* The masthead repeats the page's own tracks, so the hero figure starts on column
+   8 exactly as the studies' drawings do. A fractional track pair cannot do that:
+   it puts the figure a few pixels off the shared left edges. */
+.ff-about { max-width: none; }
+@media (min-width: 901px) {
+  .ff-about-masthead {
+    display: grid; grid-template-columns: repeat(var(--ff-cols, 12), minmax(0, 1fr));
+    column-gap: var(--ff-col-gap, 24px); row-gap: 0; align-items: start;
+  }
+  .ff-about-intro { grid-column: 1 / -1; }
+  .ff-about-figure { grid-column: 7 / span 6; margin: 34px 0 0; }
+  .ff-about-intro > p, .ff-about-figure, .ff-about-figure figcaption { text-align: left; justify-self: start; }
+}
+@media (min-width: 1181px) {
+  .ff-about-intro { grid-column: 1 / span 7; }
+  .ff-about-figure { grid-column: 8 / span 5; margin: 0; }
+  .ff-about h1 { font-size: clamp(54px, 5.8vw, 84px); }
+}
+@media (min-width: 651px) and (max-width: 900px) {
+  .ff-about-masthead { grid-template-columns: minmax(0, 1fr); }
+  .ff-about-figure { width: 340px; max-width: 100%; margin: 34px 0 0 auto; }
+}
+@media (max-width: 650px) {
+  .ff-about-study-figure { width: 340px; max-width: 100%; }
+  /* The rail sits under the drawing in its own row below the desktop floor, so
+     nothing overlaps and the same-paper clearance has nothing to do. */
+  .ff-home { padding-bottom: 2px; }
+  .ff-home > .ff-exhibit-label, .ff-home > .ff-work-info, .ff-home > .ff-work-controls { box-shadow: none; }
+}
+.ff-shell .ff-reveal-wave { stroke: var(--ff-ink); stroke-width: 1.1; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .ff-rail-badge { transition: none; } }

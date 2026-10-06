@@ -13,8 +13,11 @@
  *   the first hover is silent and there is no autoplay, no retry loop and no
  *   other way around the browser's own gesture requirement.
  * - **Once per destination, throttled, never overlapping.** The throttle window
- *   is longer than the tap itself, so two taps can never sound at once, and a
- *   pointer that swings between the two words cannot machine-gun.
+ *   is longer than the longest of the two voices, so two taps can never sound at
+ *   once, and a pointer that swings between the two words cannot machine-gun.
+ * - **The voice says which way it is.** Work's is shorter, lower and more exact;
+ *   About's is the same quiet register for a little longer. Both peaks sit inside
+ *   one narrow range, so neither destination can be louder than the other.
  * - **Nothing here can break the page.** A missing context, a refused resume or a
  *   throwing node marks the sound dead for the session and returns; the visual
  *   preview and the navigation are untouched.
@@ -22,23 +25,51 @@
 
 export const PREVIEW_SOUND_KEY = 'formfield-preview-sound';
 
-/** The envelope, in the units the Web Audio API actually takes. */
-export const PREVIEW_TAP = {
-  /** Peak gain: a tap under a conversation, never a chime. */
-  peak: 0.05,
-  /** Length of the tap, in milliseconds. */
-  ms: 110,
-  /** Attack time, in seconds — long enough to sound soft, short enough to snap. */
-  attack: 0.006,
-  /** A small downward glide takes the edge off the onset. */
-  fromHz: 620,
-  toHz: 520,
-  /** Nothing above this is worth hearing for a tap. */
-  cutoffHz: 2400,
-} as const;
+/**
+ * One voice per destination, so the tap says which way the visitor is going.
+ *
+ * Work is the shorter, lower, more exact of the two — a small closed tap, a
+ * steeper fall, a shorter attack. About is the same quiet register for a little
+ * longer, a touch softer and rounder. Both peaks stay inside one narrow range
+ * below a fifth of full scale, so neither can be louder than the other and
+ * neither can become a chime.
+ */
+export type PreviewVoice = 'work' | 'about';
 
-/** Longer than one tap, so two taps can never overlap. */
-export const PREVIEW_SOUND_THROTTLE_MS = 140;
+interface TapProfile {
+  /** Peak gain: a tap under a conversation, never a chime. */
+  readonly peak: number;
+  /** Length of the tap, in milliseconds. */
+  readonly ms: number;
+  /** Attack time, in seconds — long enough to sound soft, short enough to snap. */
+  readonly attack: number;
+  /** A small downward glide takes the edge off the onset. */
+  readonly fromHz: number;
+  readonly toHz: number;
+  /** Nothing above this is worth hearing for a tap. */
+  readonly cutoffHz: number;
+}
+
+export const PREVIEW_TAP: Readonly<Record<PreviewVoice, TapProfile>> = {
+  work: { peak: 0.05, ms: 84, attack: 0.004, fromHz: 540, toHz: 440, cutoffHz: 2600 },
+  about: { peak: 0.046, ms: 124, attack: 0.009, fromHz: 620, toHz: 500, cutoffHz: 2000 },
+};
+
+/** The envelope, in the units the Web Audio API actually takes. */
+export const PREVIEW_TAP_DEFAULT: PreviewVoice = 'work';
+
+/** Longer than the longest voice, so two taps can never overlap. */
+export const PREVIEW_SOUND_THROTTLE_MS = 200;
+
+/** The longest voice in the set: the throttle and any lifetime must exceed it. */
+export function longestVoiceMs(): number {
+  return Math.max(...Object.values(PREVIEW_TAP).map(profile => profile.ms));
+}
+
+/** The loudest voice in the set: nothing may exceed it. */
+export function loudestVoicePeak(): number {
+  return Math.max(...Object.values(PREVIEW_TAP).map(profile => profile.peak));
+}
 
 type AudioContextCtor = new () => AudioContext;
 
@@ -63,8 +94,12 @@ export interface PreviewSound {
   setMuted(muted: boolean): void;
   /** Call from a real gesture handler and nowhere else. */
   unlock(): void;
-  /** One tap. Silent until unlocked, silent while muted, throttled, never throws. */
-  tap(): void;
+  /**
+   * One tap for one destination. Silent until unlocked, silent while muted,
+   * throttled, never throws. Returns whether it actually sounded, which is what
+   * tells a caller that a silent preview must not count as one that happened.
+   */
+  tap(voice?: PreviewVoice): boolean;
   /** Release the voice and the context. The sound can be unlocked again later. */
   dispose(): void;
 }
@@ -117,14 +152,15 @@ export function createPreviewSound(options: PreviewSoundOptions = {}): PreviewSo
     resume(opened);
   };
 
-  const tap = () => {
-    if (broken || muted || !context) return;
+  const tap = (which: PreviewVoice = PREVIEW_TAP_DEFAULT): boolean => {
+    if (broken || muted || !context) return false;
     const stamp = now();
-    // The window is longer than the tap, so this also rules out any overlap.
-    if (stamp - last < PREVIEW_SOUND_THROTTLE_MS) return;
+    // The window is longer than the longest voice, so this also rules out any overlap.
+    if (stamp - last < PREVIEW_SOUND_THROTTLE_MS) return false;
     last = stamp;
     silence();
-    const seconds = PREVIEW_TAP.ms / 1000;
+    const profile = PREVIEW_TAP[which] ?? PREVIEW_TAP[PREVIEW_TAP_DEFAULT];
+    const seconds = profile.ms / 1000;
     try {
       const at = context.currentTime;
       const source = context.createOscillator();
@@ -134,13 +170,13 @@ export function createPreviewSound(options: PreviewSoundOptions = {}): PreviewSo
       const gain = context.createGain();
       voice.nodes.push(gain);
       source.type = 'sine';
-      source.frequency.setValueAtTime(PREVIEW_TAP.fromHz, at);
-      source.frequency.exponentialRampToValueAtTime(PREVIEW_TAP.toHz, at + seconds);
+      source.frequency.setValueAtTime(profile.fromHz, at);
+      source.frequency.exponentialRampToValueAtTime(profile.toHz, at + seconds);
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(PREVIEW_TAP.cutoffHz, at);
+      filter.frequency.setValueAtTime(profile.cutoffHz, at);
       // Never from silence to full: an exponential ramp from zero is not a ramp.
       gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.exponentialRampToValueAtTime(PREVIEW_TAP.peak, at + PREVIEW_TAP.attack);
+      gain.gain.exponentialRampToValueAtTime(profile.peak, at + profile.attack);
       gain.gain.exponentialRampToValueAtTime(0.0001, at + seconds);
       source.connect(filter);
       filter.connect(gain);
@@ -153,7 +189,11 @@ export function createPreviewSound(options: PreviewSoundOptions = {}): PreviewSo
     } catch {
       broken = true;
       silence();
+      // A tap that could not be built did not sound, and saying otherwise would
+      // let a caller believe it never has to try again.
+      return false;
     }
+    return true;
   };
 
   const setMuted = (next: boolean) => {

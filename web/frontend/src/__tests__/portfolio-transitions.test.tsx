@@ -1,3 +1,4 @@
+import { revealClock, revealGeometry, revealing } from './reveal-fixture';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
@@ -20,6 +21,7 @@ const animations: { keyframes: unknown; options: KeyframeAnimationOptions }[] = 
 beforeEach(() => {
   window.history.replaceState(null, '', '/');
   localStorage.clear();
+  revealGeometry(); revealClock();
   vi.clearAllMocks();
   listeners.clear(); preferences.clear(); animations.length = 0;
   delete (document as { startViewTransition?: unknown }).startViewTransition;
@@ -43,7 +45,7 @@ beforeEach(() => {
   vi.mocked(api.listProjects).mockResolvedValue([]);
 });
 afterEach(() => {
-  cleanup(); vi.useRealTimers(); vi.unstubAllGlobals();
+  cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks();
   delete (Element.prototype as { animate?: unknown }).animate;
   delete (document as { startViewTransition?: unknown }).startViewTransition;
 });
@@ -107,7 +109,7 @@ function native() {
 const study = () => document.querySelector('.ff-layer-vessel .ff-vessel')!.getAttribute('data-study');
 const transform = () => document.querySelector('.ff-layer-vessel')!.getAttribute('transform');
 
-describe('desktop transitions', () => {
+describe('desktop transitions', async () => {
   it('prefetches on hover/focus without mounting the app or calling its API', async () => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
     const entry = screen.getByRole('link', { name: 'OPEN PLIMSOLL' });
@@ -161,17 +163,17 @@ describe('desktop transitions', () => {
     expect(document.activeElement).toBe(screen.getByRole('link', { name: 'OPEN PLIMSOLL' }));
   });
 
-  it('animates Work/About content for 260 ms while keeping persistent navigation focus', async () => {
-    vi.useFakeTimers(); const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
+  it('animates Work/About content for 500 ms while keeping persistent navigation focus', async () => {
+    vi.useFakeTimers(); revealClock(); const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
     const about = screen.getByRole('link', { name: 'About' }); about.focus();
-    follow('About'); expect(document.documentElement.dataset.ffPage).toBe('in');
+    follow('About'); expect(revealing()).toMatch(/^circle\(/);
     // The content changes in the same synchronous step that sets the attribute:
     // there is no deferred commit and nothing covers the column while it settles.
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible(); expect(document.activeElement).toBe(about);
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page - 1)); expect(document.documentElement.dataset.ffPage).toBe('in');
-    act(() => vi.advanceTimersByTime(1)); expect(document.documentElement.dataset.ffPage).toBeUndefined();
-    follow('Work 01'); expect(document.documentElement.dataset.ffPage).toBe('out');
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page - 1); }); expect(revealing()).toMatch(/^circle\(/);
+    await act(async () => { vi.advanceTimersByTime(1); }); expect(revealing()).toBeUndefined();
+    follow('Work 01'); expect(revealing()).toMatch(/^circle\(/);
     expect(screen.getByRole('heading', { name: 'Plimsoll' })).toBeVisible(); expect(nav).toBeInTheDocument();
     // No sheet, no paper and no overlay exist anywhere on the public shell.
     expect(vt.captures).toHaveLength(0);
@@ -231,7 +233,7 @@ describe('desktop transitions', () => {
     follow('About'); follow('Work 01'); follow('OPEN PLIMSOLL');
     await screen.findByTitle('本浏览器工作区'); follow('↖ Y’s Formfield'); await flush();
     expect(document.documentElement.dataset.formfieldSurface).toBe('public');
-    expect(document.documentElement.dataset.ffPage).toBeUndefined(); expect(document.documentElement.dataset.ffTransition).toBeUndefined();
+    expect(revealing()).toBeUndefined(); expect(document.documentElement.dataset.ffTransition).toBeUndefined();
     expect(animations).toHaveLength(0);
   });
 
@@ -254,7 +256,7 @@ describe('desktop transitions', () => {
   });
 });
 
-describe('application isolation', () => {
+describe('application isolation', async () => {
   it('does not bootstrap after a pending identity lookup returns 401 following exit', async () => {
     const vt = native(); window.history.replaceState(null, '', '/#/plimsoll');
     let reject!: (cause: unknown) => void;

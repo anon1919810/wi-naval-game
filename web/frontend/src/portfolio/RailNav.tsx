@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
 import { classifyHash, publicHref, type PublicView } from './routes';
-import { entryPoint, previewTarget, railView, revealRadius, wordCentre, type NavPoint, type RailView } from './navPreview';
+import { destinationOrigin, entryPoint, previewTarget, railView, revealRadius, wordCentre, type NavPoint, type RailView } from './navPreview';
 import { onTransitionEnd, transitionGeneration } from './transitions';
-import type { PreviewSound } from './previewAudio';
+import type { PreviewSound, PreviewVoice } from './previewAudio';
 
 /**
  * The rail: Work and About, and nothing else.
@@ -31,6 +31,10 @@ import type { PreviewSound } from './previewAudio';
  *   width of its first glyph to the whole word, and its colour goes ink to blue in
  *   the same move, so the rule shortens onto the first glyph rather than
  *   disappearing and another one taking its place.
+ * - **The count answers for its own destination.** Work's 01 badge crossfades to
+ *   red while Work is being previewed, which is a signal about the move rather
+ *   than about the page: `aria-current` never follows it, and About's preview
+ *   leaves it blue.
  *
  * The blue duplicate is hidden from assistive technology and never a pointer
  * target, and the link names itself outright, so the rail keeps exactly one
@@ -42,12 +46,17 @@ interface Entry {
   readonly label: string;
   /** One work exists, so Work carries the truthful count. */
   readonly badge?: string;
+  /** Which voice this destination's preview answers with. */
+  readonly voice: PreviewVoice;
 }
 
 const ENTRIES: readonly Entry[] = [
-  { view: 'home', label: 'Work', badge: '01' },
-  { view: 'about', label: 'About' },
+  { view: 'home', label: 'Work', badge: '01', voice: 'work' },
+  { view: 'about', label: 'About', voice: 'about' },
 ];
+
+/** The page reveal asks the rail where a destination's circle should open. */
+export type DestinationOrigin = (view: RailView, centreOnly?: boolean) => NavPoint | null;
 
 interface Props {
   /** The route React has committed. Work owns the detail as well as the exhibit. */
@@ -59,6 +68,13 @@ interface Props {
    * travelling away from this page is now obsolete.
    */
   onCurrentPagePress: () => void;
+  /**
+   * Where the page reveal reads a destination's circle origin from. The rail owns
+   * every measurement of its own words, so it answers the question rather than
+   * being asked to re-measure. `revealOrigins` is the name because the rail also
+   * keeps its own per-word entry points, which is a different thing.
+   */
+  revealOrigins?: { current: DestinationOrigin | null };
   /** The splash owns the screen while it is open. */
   inert?: boolean;
 }
@@ -81,7 +97,7 @@ function firstGlyphWidth(word: HTMLElement): number {
   return typeof range.getBoundingClientRect === 'function' ? range.getBoundingClientRect().width : 0;
 }
 
-export function RailNav({ current, sound, onCurrentPagePress, inert }: Props) {
+export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, inert }: Props) {
   const [hover, setHover] = useState<RailView | null>(null);
   const [focus, setFocus] = useState<RailView | null>(null);
   /** A destination that has been pressed and whose move is still running. */
@@ -94,6 +110,16 @@ export function RailNav({ current, sound, onCurrentPagePress, inert }: Props) {
   const binders = useRef(new Map<RailView, (node: HTMLElement | null) => void>());
   const initialized = useRef(new Set<RailView>());
   const tapped = useRef<RailView | null>(null);
+  /**
+   * A press whose origin the page reveal has already read.
+   *
+   * The origin is a property of *that* press: a pointer's entry point describes
+   * where the visitor went in, and it says nothing about where they went next.
+   * So the reveal reads it once and spends it, and the next move for the same
+   * destination — a Back an hour later, a second press — falls back to the middle
+   * of the word rather than reopening from a place nobody chose this time.
+   */
+  const spent = useRef<RailView | null>(null);
   /** The controller's generation at the moment a destination was requested. */
   const heldFrom = useRef(0);
   /**
@@ -200,7 +226,7 @@ export function RailNav({ current, sound, onCurrentPagePress, inert }: Props) {
   }, [reveal]);
 
   // A requested destination is held for the whole move, not just to the arrival:
-// the destination page is already on screen while its 260 ms entrance is still
+// the destination page is already on screen while its 500 ms reveal is still
 // running, and a pointer that drifted back onto the outgoing word must not take
 // the blue back for the rest of it. The hold ends when the controller's move
 // ends — finished, cancelled or reached at once — and only for a move that
@@ -228,13 +254,21 @@ export function RailNav({ current, sound, onCurrentPagePress, inert }: Props) {
   }, [held]);
 
   // One tap per real change of destination. Looking at the page already on screen,
-  // or leaving, is not a change of destination.
+  // or leaving, is not a change of destination. A press is not a second tap: the
+  // preview that led to it already sounded, and asking again would answer the same
+  // intention twice. A press that arrived with no preview at all — a finger, or a
+  // click with the pointer never over the word — does get its one tap, once the
+  // gesture that carries it has unlocked the context.
+  /** Each destination's own voice; Work's is the shorter, lower one. */
+  const voiceOf = (view: RailView) => ENTRIES.find(entry => entry.view === view)!.voice;
   useEffect(() => {
     if (held !== null) return;
     if (preview === null || preview === here) { tapped.current = null; return; }
     if (tapped.current === preview) return;
-    tapped.current = preview;
-    sound.tap();
+    // Only a tap that actually sounded counts as having happened, so the first
+    // silent preview — before any gesture has unlocked the context — does not
+    // stand in for the tap a later real press still owes.
+    if (sound.tap(voiceOf(preview))) tapped.current = preview;
   }, [preview, here, held, sound]);
 
   const enter = (view: RailView) => (event: PointerEvent<HTMLAnchorElement>) => {
@@ -264,18 +298,58 @@ export function RailNav({ current, sound, onCurrentPagePress, inert }: Props) {
       // The address will not change, so no route will arrive either: drop
       // whatever is still travelling away from this page, and drop any hold with
       // it — this press asks for the page already on screen, not for the word
-      // that was blue a moment ago.
+      // that was blue a moment ago. Nothing is tapped: this is not a destination.
+      tapped.current = null;
       setHeld(null);
       onCurrentPagePress();
       return;
     }
+    // A press that has not *already sounded* gets exactly one tap now, which is
+    // the case for a finger, for a click with the pointer never over the word, and
+    // — importantly — for a preview that was still silent because the context was
+    // not unlocked yet. A preview that did sound does not get a second one: that
+    // would answer the same intention twice.
+    if (tapped.current !== view && sound.tap(voiceOf(view))) tapped.current = view;
     // Pressing the same destination again asks for nothing new: the hold already
     // belongs to the move that is running, so its generation must stand.
     if (held !== view) {
       heldFrom.current = transitionGeneration();
+      spent.current = null;
       setHeld(view);
     }
   };
+
+  /**
+   * The page reveal asks one question: where does this destination's circle open?
+   *
+   * The rail answers it from what it already knows, and answers from *this*
+   * press: only a destination that is actually held continues its own preview
+   * origin, so Back, Forward and a typed address get the middle of the word
+   * rather than wherever a pointer was the last time someone happened to be
+   * here. Measured at call time, not cached, so a word that has moved — or is not
+   * on screen at all — simply has no answer and the caller falls back.
+   */
+  useEffect(() => {
+    if (!revealOrigins) return;
+    const read: DestinationOrigin = (view, centreOnly = false) => {
+      const word = words.current.get(view);
+      if (!word) return null;
+      const box = word.getBoundingClientRect();
+      // A centre-only read happens after route placement. An ordinary read only
+      // consumes the entry point of a fresh press, so history cannot reuse it.
+      if (centreOnly) {
+        return destinationOrigin({ left: box.left, top: box.top, width: box.width, height: box.height }, false);
+      }
+      if (held !== view || spent.current === view) return null;
+      // Reading it spends it. The reveal asks once per route change and commits
+      // immediately, so the next move for this destination cannot reopen from a
+      // place the visitor chose for the move before it. A new press arms it again.
+      spent.current = view;
+      return destinationOrigin({ left: box.left, top: box.top, width: box.width, height: box.height }, true, origins.current.get(view));
+    };
+    revealOrigins.current = read;
+    return () => { if (revealOrigins.current === read) revealOrigins.current = null; };
+  }, [revealOrigins, held]);
 
   return (
     <nav
@@ -289,11 +363,18 @@ export function RailNav({ current, sound, onCurrentPagePress, inert }: Props) {
         // Named outright, because the word is split across elements for the reveal
         // and a reader must never see "w ork" or a name that counts twice.
         const name = entry.badge ? `${entry.label} ${entry.badge}` : entry.label;
+        // The badge answers for its own destination only. Work's count turns red
+        // while Work itself is being previewed — Work's own pointer, Work's own
+        // keyboard focus, or a Work press that is still travelling. About's
+        // preview is about About and says nothing about Work's count, and the
+        // page on screen never changes what is current.
+        const previewing = entry.badge ? entry.view === (held ?? hover ?? focus) : false;
         return <a
           key={entry.view}
           className="ff-rail-link"
           data-ff-nav={selected ? 'selected' : 'rest'}
           data-ff-nav-held={held === entry.view ? 'true' : undefined}
+          data-ff-badge={entry.badge ? (previewing ? 'preview' : 'idle') : undefined}
           href={publicHref(entry.view)}
           aria-label={name}
           aria-current={entry.view === here ? 'page' : undefined}

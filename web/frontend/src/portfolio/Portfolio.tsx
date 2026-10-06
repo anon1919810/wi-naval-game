@@ -8,11 +8,12 @@ import { introPlayed, markIntroPlayed } from './intro';
 import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
 import { createPreviewSound, storedMuted } from './previewAudio';
 import { ProjectDetail } from './ProjectDetail';
-import { RailNav } from './RailNav';
+import { RailNav, type DestinationOrigin } from './RailNav';
 import { Splash } from './Splash';
-import { SiteGeometry } from './SiteGeometry';
+import { PageField, ShellField } from './pageGeometry';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
 import { APP_ENTRY_LINK, classifyHash, publicHref, WORK_DETAIL_LINK, type PortfolioRoute, type PublicView } from './routes';
+import { railView } from './navPreview';
 import { resolveTheme, storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
 import { ToolModuleBoundary } from './ToolModule';
 import { animateTheme, cancelTransitions, runTransition, TRANSITION_MS, transitionsActive, type TransitionKind, type TransitionOptions } from './transitions';
@@ -24,6 +25,7 @@ import '../leaveGuard';
 import './portfolio.css';
 import './content.css';
 import './exhibit.css';
+import './pageGeometry.css';
 
 /**
  * The workspace chunk, fetched once and mounted only on the committed app route.
@@ -105,6 +107,12 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const detailHeading = useRef<HTMLHeadingElement>(null);
   const detailCta = useRef<HTMLAnchorElement>(null);
   const cut = useRef(0);
+  /** The shell, which owns the theme tokens the reveal's layers are drawn in. */
+  const shellRef = useRef<HTMLDivElement>(null);
+  /** The public content region, and the only thing the reveal ever clips. */
+  const mainRef = useRef<HTMLElement>(null);
+  /** Where the rail says each destination's circle should open. */
+  const railOrigins = useRef<DestinationOrigin | null>(null);
   /**
    * Where the visitor was when they left for the workspace, and how far down the
    * exhibit they had scrolled. A long page replacing a short one must not strand
@@ -331,7 +339,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     if (next.kind === 'app' && current.kind === 'public') publicOrigin.current = current.view;
     if (next.kind === 'app' || next.view !== 'home') finish();
     // The artwork morph is the move between the exhibit and its own detail, in
-    // either direction. Work/About stays the cheap content-only cut.
+    // either direction. Work/About uses the bounded circular reveal.
     const fromView = current.kind === 'public' ? current.view : null;
     const kind: TransitionKind = next.kind === 'app' ? 'tool'
       : returningFromTool ? 'tool-back'
@@ -344,7 +352,19 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       restoreFocus(next, returningFromTool);
     };
     if (immediate) commit();
-    else void change(kind, commit);
+    // Preserve a real press's entry point before route placement changes scroll.
+    // History has no press: measure its destination word after the commit instead.
+    else if (kind === 'page' || kind === 'page-back') {
+      const destination = next.kind === 'public' ? railView(next.view) : null;
+      const pressedOrigin = destination ? railOrigins.current?.(destination) : null;
+      void change(kind, commit, {
+        reveal: {
+          shell: shellRef.current,
+          source: mainRef.current,
+          origin: pressedOrigin ?? (() => destination ? railOrigins.current?.(destination, true) ?? null : null),
+        },
+      });
+    } else void change(kind, commit);
   }, [change, finish, place, restoreFocus, retire]);
 
   // A preference change can cancel a native capture before its route callback
@@ -566,7 +586,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const withdrawDrawingCursor = () => { hovered.current = false; keysOn.current = false; paint(); };
 
   return <>
-    <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive} onPointerDownCapture={() => sound.unlock()} onKeyDownCapture={() => sound.unlock()}>
+    <div className="ff-shell" ref={shellRef} data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive} onPointerDownCapture={() => sound.unlock()} onKeyDownCapture={() => sound.unlock()}>
+      <ShellField />
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
         <div className="ff-theme-group">
@@ -581,11 +602,22 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
         </div>
       </header>
 
-      {/* The rail is a sibling of `main`, not a child of it: the Work/About cut is
-          scoped to `.ff-main`, so this navigation is never named, never moves and
-          keeps focus across the page change. It stays mounted on every view. */}
-      <main className="ff-main" inert={opening}>
+      {/* The rail is a sibling of `main`, not a child of it: the circular reveal is
+          scoped to `.ff-main`, so this navigation is never copied, never clipped
+          and keeps focus across the page change. It stays mounted on every view. */}
+      <main className="ff-main" ref={mainRef} inert={opening}>
+        {/* The compass study is a child of `main`, not of the Work section: it needs
+            the whole width `main` spans — rail included — so the arc can run out
+            past the content column. Absolutely positioned, it adds no height, and
+            the reveal's clip covers it exactly as it covers everything else here.
+            It is the exhibit's own background, however: its own box is filled by
+            `main`, so on the much longer detail it would stretch the drawing down
+            the whole page and across its reading columns. The detail reads under
+            the shell's faint field instead, and clears the paper under each of its
+            own blocks. */}
+        {onWork && !detail && <PageField page="work" />}
         <section className="ff-home" hidden={!onWork || detail} aria-label="Selected work">
+          {/* The shared pale field surrounds the exhibit. */}
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
           <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (isExhibitControl(e.target)) withdrawDrawingCursor(); else if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (isExhibitControl(e.target)) return; if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
             <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
@@ -654,9 +686,9 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           press on the page already on screen raises no address and therefore no
           route, so it is answered here instead: it drops whatever is still
           travelling away from it. */}
-      <RailNav current={railCurrent} sound={sound} onCurrentPagePress={retire} inert={opening} />
+      <RailNav current={railCurrent} sound={sound} onCurrentPagePress={retire} revealOrigins={railOrigins} inert={opening} />
 
-      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button><SiteGeometry variant="rule" /></footer>
+      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button></footer>
       {opening && publicActive && (readyHref === sheet.href
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
         : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}

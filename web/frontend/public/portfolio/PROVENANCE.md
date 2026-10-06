@@ -2,6 +2,8 @@
 
 ## Report screenshot
 
+Retired from the project detail on 2026-10-07. The screenshot and its caption are no longer rendered, and the `REPORT_IMAGE` constant has been removed. The original asset remains unchanged as historical evidence; the paragraph below records its original use.
+
 `plimsoll-report.jpg` is a byte-for-byte copy of `docs/plimsoll-1.0/evidence/public-report-2026-10-04.jpg` (41094 bytes, 856×751, SHA-256 `790e2a70c02a44e26a1566bca0e49b24fc52e391bf6d1ea5df9150853cf25e61`), made on 2026-10-05 for the work detail page. It is a real screenshot of a real report from the public deployment, taken during the 2026-10-04 launch acceptance. It carries no credentials, tokens or personal data: the visible content is the report header, the display-unit selectors and a hull section outline. Nothing is redrawn, retouched or cropped. Its page caption carries no file paths; this file and the constant in `src/portfolio/ProjectDetail.tsx` are the provenance.
 
 ## Line sheets

@@ -1,19 +1,10 @@
+import { MAIN, RAIL, revealClock, revealGeometry, revealing } from './reveal-fixture';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
 import * as transitions from '../portfolio/transitions';
 import { TRANSITION_MS, transitionsActive } from '../portfolio/transitions';
 import * as api from '../api';
-
-/**
- * The Work/About move, as it now stands.
- *
- * This file replaces the exhibition-sheet cover suite that was implemented and
- * then rejected: it covered the content column with a paper sheet for 520 ms and
- * deferred the content change to a timer. That candidate is gone from the source
- * — no `.ff-cover`, no `data-ff-cover`, no deferred commit — and these are the
- * regressions that keep the restored 260 ms content-only cut honest.
- */
 
 vi.mock('../api', async importOriginal => ({
   ...await importOriginal<typeof import('../api')>(),
@@ -27,6 +18,7 @@ const reducedQuery = '(prefers-reduced-motion: reduce)';
 beforeEach(() => {
   window.history.replaceState(null, '', '/');
   localStorage.clear();
+  revealGeometry({ railWords: true }); revealClock();
   vi.clearAllMocks();
   listeners.clear(); preferences.clear();
   delete (document as { startViewTransition?: unknown }).startViewTransition;
@@ -47,7 +39,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  cleanup(); vi.useRealTimers(); vi.unstubAllGlobals();
+  cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks();
   delete (document as { startViewTransition?: unknown }).startViewTransition;
 });
 
@@ -83,78 +75,127 @@ function follow(name: string) {
   hash(link.getAttribute('href')!);
 }
 
-/** A press on a link without the navigation a browser would raise after it. */
 function pressOnly(name: string) {
   fireEvent(screen.getByRole('link', { name }), new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 }));
 }
 
-const page = () => document.documentElement.dataset.ffPage;
+const page = revealing;
 const main = () => document.querySelector<HTMLElement>('.ff-main')!;
+/** The circle the reveal has actually written on `main`. */
+const clipOf = (node: HTMLElement) => {
+  const match = node.style.clipPath.match(/^circle\(([\d.]+)px at (-?[\d.]+)px (-?[\d.]+)px\)$/);
+  if (!match) throw new Error(`no circle on ${node.style.clipPath}`);
+  return { radius: Number(match[1]), x: Number(match[2]), y: Number(match[3]) };
+};
 const homeVisible = () => !document.querySelector<HTMLElement>('.ff-home')!.hidden;
 const aboutVisible = () => screen.queryByRole('heading', { name: /A field for/ }) !== null;
 
-/**
- * Nothing of the rejected cover exists anywhere: no attribute on the root, no
- * element in the column, no sheet node. `data-ff-page` is the *restored* cut and
- * is deliberately not asserted here — it is present while a cut runs.
- */
 function expectNoCover() {
   expect(document.documentElement.dataset.ffCover).toBeUndefined();
   expect(document.querySelector('.ff-cover')).toBeNull();
   expect(document.querySelector('.ff-cover-sheet')).toBeNull();
 }
 
-describe('Work/About content cut', () => {
-  it('owns 260 ms for the page cut, and no cover constants at all', () => {
-    expect(TRANSITION_MS.page).toBe(260);
-    // The rejected candidate's numbers are gone from the module, not merely unused.
+describe('Work/About circular reveal', async () => {
+  it('owns 500 ms for the page reveal, and no cover constants at all', async () => {
+    expect(TRANSITION_MS.page).toBe(500);
     expect(Object.keys(transitions).filter(name => /cover/i.test(name))).toEqual([]);
   });
 
-  it('swaps the page in the same step that sets the attribute, and holds nothing back', () => {
-    vi.useFakeTimers(); native();
+  it('commits the destination synchronously under the outgoing copy', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     expect(homeVisible()).toBe(true);
     expect(aboutVisible()).toBe(false);
     follow('About');
-    // One synchronous step: the attribute is set and the content has changed. There
-    // is no sheet over the column and no instant at which the outgoing page is
-    // still the page while a timer has not yet fired.
-    expect(page()).toBe('in');
+    expect(page()).toMatch(/^circle\(/);
     expect(aboutVisible()).toBe(true);
     expect(homeVisible()).toBe(false);
     expectNoCover();
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page - 1));
-    expect(page()).toBe('in');
-    act(() => vi.advanceTimersByTime(1));
+    expect(document.querySelectorAll('.ff-reveal-out')).toHaveLength(1);
+    expect(main().style.zIndex).toBe('2');
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page - 1); });
+    expect(page()).toMatch(/^circle\(/);
+    await act(async () => { vi.advanceTimersByTime(1); });
     expect(page()).toBeUndefined();
     expect(transitionsActive()).toBe(false);
   });
 
-  it('runs the same cut the other way from About to Work', () => {
-    vi.useFakeTimers(); native();
+  it('covers the whole width main spans, including the arc that reaches the rail', async () => {
+    vi.useFakeTimers(); revealClock(); native();
+    render(<Portfolio introEnabled={false} />);
+    const field = main().querySelector('.ff-field--work')!;
+    expect(field).not.toBeNull();
+    // The drawing is a child of `main`, not of the Work section: it needs the
+    // width main spans — rail included — so the arc can run out past the reading
+    // column rather than being cut off at it.
+    expect(field.parentElement).toBe(main());
+    expect(main().querySelector('.ff-home')!.contains(field)).toBe(false);
+
+    follow('About');
+    // The circle opens at the About word, which sits in the rail — to the right
+    // of main's own left edge, so the origin is written in region-local
+    // coordinates and is positive.
+    expect(clipOf(main()).x).toBeGreaterThan(0);
+    // The reveal's own bounds are the shared region, never wider than the page.
+    const copy = document.querySelector<HTMLElement>('.ff-reveal-out');
+    expect(copy).not.toBeNull();
+    const span = Number.parseFloat(copy!.style.left) + Number.parseFloat(copy!.style.width);
+    expect(span).toBeLessThanOrEqual(MAIN.left + MAIN.width);
+
+    // Partway through, the circle is genuinely crossing the rail column: the
+    // opening word is there, and the drawing reaches further right still, which
+    // is only true because `main` is no longer cut off at the reading column.
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page / 2); });
+    const opened = clipOf(main());
+    expect(opened.radius).toBeGreaterThan(0);
+    // The origin is the rail word's own centre, read from the rail's own box.
+    const railCentre = RAIL.left + RAIL.width / 2 - MAIN.left;
+    expect(opened.x).toBeCloseTo(railCentre, 0);
+    // The rim travels the same number the clip does, on every frame.
+    const rim = document.querySelector('.ff-reveal-rim circle')!;
+    expect(Number(rim.getAttribute('r'))).toBeCloseTo(opened.radius, 2);
+    // Partway through it is still travelling across the page from the rail, and
+    // by the end it has covered the far side — the distance that only exists
+    // because main spans the whole width, rail included.
+    expect(opened.radius).toBeGreaterThan(railCentre / 2);
+    // The circle keeps opening and grows monotonically to the far side of the
+    // page, a distance that only exists because main spans the rail as well.
+    let last = opened.radius;
+    for (let step = 0; step < 6; step += 1) {
+      await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page / 12); });
+      const next = clipOf(main()).radius;
+      expect(next).toBeGreaterThanOrEqual(last);
+      last = next;
+    }
+    // Well past the rail itself: the circle reaches the far side of the content
+    // column, not just across the navigation.
+    expect(last).toBeGreaterThan(MAIN.width - RAIL.width - RAIL.gap);
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
+    expect(page()).toBeUndefined();
+  });
+
+  it('runs the same reveal the other way from About to Work', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     window.history.replaceState(null, '', '/#/about');
     render(<Portfolio introEnabled={false} />);
     expect(aboutVisible()).toBe(true);
     follow('Work 01');
-    // The same immediate swap and the same 260 ms, entering from the other side.
-    expect(page()).toBe('out');
+    expect(page()).toMatch(/^circle\(/);
     expect(homeVisible()).toBe(true);
     expect(aboutVisible()).toBe(false);
     expectNoCover();
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page - 1));
-    expect(page()).toBe('out');
-    act(() => vi.advanceTimersByTime(1));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page - 1); });
+    expect(page()).toMatch(/^circle\(/);
+    await act(async () => { vi.advanceTimersByTime(1); });
     expect(page()).toBeUndefined();
     expect(transitionsActive()).toBe(false);
   });
 
-  it('moves content only: the chrome is outside the column, never captured, never wrapped', () => {
-    vi.useFakeTimers(); native();
+  it('moves content only: the chrome is outside the column, never captured, never wrapped', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     const { container } = render(<Portfolio introEnabled={false} />);
     follow('About');
-    // The header, the rail and the footer are siblings of the column, so the cut
-    // cannot move them, cannot make them unclickable and cannot capture them.
     for (const chrome of ['.ff-header', '.ff-rail', '.ff-footer']) {
       const node = container.querySelector<HTMLElement>(chrome)!;
       expect(node).toBeInTheDocument();
@@ -165,44 +206,36 @@ describe('Work/About content cut', () => {
     expect(about.closest('[inert]')).toBeNull();
     expect(container.querySelector('.ff-rail')!.closest('[inert]')).toBeNull();
     expect(container.querySelector('.ff-header button')!.closest('[inert]')).toBeNull();
-    // Nothing is layered over the column: the cut is the attribute and the CSS
-    // animation on the section that appeared, nothing else.
     expect(main().querySelectorAll('.ff-cover, .ff-cover-sheet')).toHaveLength(0);
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expectNoCover();
   });
 
-  it('drops the attribute and the pending move when a second navigation supersedes it', () => {
-    vi.useFakeTimers(); native();
+  it('removes the visual layers and the pending move when a second navigation supersedes it', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     follow('About');
-    expect(page()).toBe('in');
-    // Work is asked for while the cut is still running. About is already committed,
-    // so this is an ordinary second route, and the newest one is the one that stands.
+    expect(page()).toMatch(/^circle\(/);
     follow('Work 01');
-    expect(page()).toBe('out');
+    expect(page()).toMatch(/^circle\(/);
     expect(homeVisible()).toBe(true);
     expect(aboutVisible()).toBe(false);
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page - 1));
-    expect(page()).toBe('out');
-    act(() => vi.advanceTimersByTime(1));
-    // The superseded cut left nothing behind: one attribute, one release, no cover.
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page - 1); });
+    expect(page()).toMatch(/^circle\(/);
+    await act(async () => { vi.advanceTimersByTime(1); });
     expect(page()).toBeUndefined();
     expect(transitionsActive()).toBe(false);
     expectNoCover();
   });
 
-  it('cancels a pending obsolete cut when the page already on screen is pressed', () => {
-    vi.useFakeTimers(); native();
+  it('cancels a pending obsolete reveal when the page already on screen is pressed', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     follow('About');
-    expect(page()).toBe('in');
-    // About is the committed page now, so this press raises no address and
-    // therefore no route. It is answered by dropping the attribute the cut still
-    // holds, and the About that is on screen is left exactly where it is.
+    expect(page()).toMatch(/^circle\(/);
     pressOnly('About');
     expect(page()).toBeUndefined();
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(page()).toBeUndefined();
     expect(aboutVisible()).toBe(true);
     expect(homeVisible()).toBe(false);
@@ -210,57 +243,50 @@ describe('Work/About content cut', () => {
     expectNoCover();
   });
 
-  it('settles on the requested address through Back, Forward and a hurried pair', () => {
-    vi.useFakeTimers(); native();
+  it('settles on the requested address through Back, Forward and a hurried pair', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
-    // Forward asked for before the cut finished: the requested address is Work,
-    // which is where we already are, so nothing is left behind.
     hash('#/about');
     hash('#/work');
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(aboutVisible()).toBe(false);
     expect(homeVisible()).toBe(true);
-    // Back again, given its full 260 ms this time.
     hash('#/about');
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(aboutVisible()).toBe(true);
     expect(page()).toBeUndefined();
-    // The detail-less pair, in the other direction.
     hash('#/work');
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(homeVisible()).toBe(true);
     expect(aboutVisible()).toBe(false);
-    // And the last of three hurried requests is the one that stands.
     hash('#/about'); hash('#/work'); hash('#/about');
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(aboutVisible()).toBe(true);
     expect(page()).toBeUndefined();
     expect(window.location.hash).toBe('#/about');
   });
 
-  it('releases the attribute on unmount, and leaves no timer behind', () => {
-    vi.useFakeTimers(); native();
+  it('removes the visual layers on unmount, and leaves no timer behind', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     const { unmount } = render(<Portfolio introEnabled={false} />);
     follow('About');
-    expect(page()).toBe('in');
+    expect(page()).toMatch(/^circle\(/);
     unmount();
     expect(page()).toBeUndefined();
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(page()).toBeUndefined();
     expect(transitionsActive()).toBe(false);
     expect(api.listProjects).not.toHaveBeenCalled();
   });
 
   it.each([
-    ['no view transitions at all', () => { delete (document as { startViewTransition?: unknown }).startViewTransition; }],
-    ['reduced motion requested', () => { preferences.set(reducedQuery, true); native(); }],
+    ['no view transitions at all', async () => { delete (document as { startViewTransition?: unknown }).startViewTransition; }],
+    ['reduced motion requested', async () => { preferences.set(reducedQuery, true); native(); }],
   ])('reaches the page at once with %s', async (_label, arrange) => {
     arrange();
     render(<Portfolio introEnabled={false} />);
     await flush();
     follow('About');
-    // The same contract as before this move existed: an immediate, un-animated
-    // commit, with no attribute and nothing layered over the column.
     expect(aboutVisible()).toBe(true);
     expect(page()).toBeUndefined();
     expectNoCover();

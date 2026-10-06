@@ -1,3 +1,4 @@
+import { revealClock, revealGeometry, revealing } from './reveal-fixture';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
@@ -25,6 +26,7 @@ const GLYPH: Record<string, number> = { Work: 74, About: 70 };
 beforeEach(() => {
   window.history.replaceState(null, '', '/');
   localStorage.clear();
+  revealGeometry(); revealClock();
   vi.clearAllMocks();
   listeners.clear(); preferences.clear();
   delete (document as { startViewTransition?: unknown }).startViewTransition;
@@ -55,12 +57,51 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks();
+  cleanup(); vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); vi.restoreAllMocks();
   delete (Range.prototype as { getBoundingClientRect?: unknown }).getBoundingClientRect;
   delete (document as { startViewTransition?: unknown }).startViewTransition;
 });
 
 const flush = () => act(async () => {});
+
+describe('Work badge preview', () => {
+  it('answers only Work hover and restores on leave without changing the route', () => {
+    render(<Portfolio introEnabled={false} />);
+    layout();
+    const work = screen.getByRole('link', { name: 'Work 01' });
+    expect(work).toHaveAttribute('data-ff-badge', 'idle');
+    hover('About', 1020, 240);
+    expect(work).toHaveAttribute('data-ff-badge', 'idle');
+    unhover('About');
+    hover('Work 01', 1020, 145);
+    expect(work).toHaveAttribute('data-ff-badge', 'preview');
+    expect(work).toHaveAttribute('aria-current', 'page');
+    unhover('Work 01');
+    expect(work).toHaveAttribute('data-ff-badge', 'idle');
+  });
+  it('answers keyboard focus under reduced motion', () => {
+    media(reducedQuery, true);
+    render(<Portfolio introEnabled={false} />);
+    const work = screen.getByRole('link', { name: 'Work 01' });
+    key('Work 01'); fireEvent.focus(work);
+    expect(work).toHaveAttribute('data-ff-badge', 'preview');
+    fireEvent.blur(work);
+    expect(work).toHaveAttribute('data-ff-badge', 'idle');
+  });
+  it('keeps a held Work preview red when the pointer moves to About', async () => {
+    native();
+    window.history.replaceState(null, '', '/#/about');
+    render(<Portfolio introEnabled={false} />);
+    layout();
+    hover('Work 01', 1020, 145);
+    press('Work 01');
+    unhover('Work 01'); hover('About', 1020, 240);
+    const work = screen.getByRole('link', { name: 'Work 01' });
+    expect(work).toHaveAttribute('data-ff-nav-held', 'true');
+    expect(work).toHaveAttribute('data-ff-badge', 'preview');
+    await flush();
+  });
+});
 
 function native() {
   const captures: { kind: string; skipped: boolean; capture: () => Promise<void>; finish: () => Promise<void> }[] = [];
@@ -114,7 +155,7 @@ function media(query: string, matches: boolean) {
 function layout() {
   for (const word of document.querySelectorAll<HTMLElement>('.ff-rail-word')) {
     const label = word.querySelector('.ff-rail-ink')!.textContent!;
-    vi.spyOn(word, 'getBoundingClientRect').mockReturnValue(label === 'Work' ? WORK_BOX : ABOUT_BOX);
+    Object.defineProperty(word, 'getBoundingClientRect', { configurable: true, value: () => label === 'Work' ? WORK_BOX : ABOUT_BOX });
   }
   // The shell measured an empty document on its way in; a resize is what a real
   // viewport does anyway, and it re-measures both words against the real rail.
@@ -156,8 +197,8 @@ function key(name: string, value = 'Tab') {
   fireEvent.keyDown(screen.getByRole('link', { name }), { key: value });
 }
 
-describe('navigation preview geometry', () => {
-  it('reads the entry point, the word centre and the far corner as three separate things', () => {
+describe('navigation preview geometry', async () => {
+  it('reads the entry point, the word centre and the far corner as three separate things', async () => {
     expect(entryPoint({ left: 1000, top: 216, width: 340, height: 86 }, 1010, 260)).toEqual({ x: 10, y: 44 });
     // A pointer outside the word is clamped into it rather than opening the circle
     // from somewhere the visitor cannot see.
@@ -173,7 +214,7 @@ describe('navigation preview geometry', () => {
     expect(revealRadius({ left: 0, top: 0, width: 0, height: 0 }, { x: 0, y: 0 })).toBe(0);
   });
 
-  it('puts authority in a fixed order, so a pointer, a key and a press each win', () => {
+  it('puts authority in a fixed order, so a pointer, a key and a press each win', async () => {
     // Work owns the detail, so any public view that is not About is Work.
     expect(railView('home')).toBe('home');
     expect(railView('project')).toBe('home');
@@ -188,7 +229,7 @@ describe('navigation preview geometry', () => {
     expect(previewTarget('home', 'home', 'home', 'about')).toBe('about');
   });
 
-  it('hands over in one damped move, with no bounce to interrupt it', () => {
+  it('hands over in one damped move, with no bounce to interrupt it', async () => {
     expect(NAV_PREVIEW_MS).toBe(300);
     // A monotonic easing: every control point inside the unit square, so the value
     // never overshoots and the handover cannot bounce back.
@@ -198,8 +239,8 @@ describe('navigation preview geometry', () => {
   });
 });
 
-describe('work and about navigation', () => {
-  it('stays native, semantic and keyboard reachable, with one honest name each', () => {
+describe('work and about navigation', async () => {
+  it('stays native, semantic and keyboard reachable, with one honest name each', async () => {
     render(<Portfolio introEnabled={false} />);
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
     const work = screen.getByRole('link', { name: 'Work 01' });
@@ -227,7 +268,7 @@ describe('work and about navigation', () => {
     expect(nav).toBeInTheDocument();
   });
 
-  it('paints the page on screen blue with a full rule, and every other word ink with the rule on its first glyph', () => {
+  it('paints the page on screen blue with a full rule, and every other word ink with the rule on its first glyph', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     // The current word's circle is already open before the first paint: measured in
@@ -245,7 +286,7 @@ describe('work and about navigation', () => {
     expect(word('About').querySelector('.ff-rail-ink')!.className).toBe('ff-rail-ink');
   });
 
-  it('opens the circle from the pointer entry point, closing it first so only the radius moves', () => {
+  it('opens the circle from the pointer entry point, closing it first so only the radius moves', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -258,7 +299,7 @@ describe('work and about navigation', () => {
     expect(screen.getByRole('link', { name: 'Work 01' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('never moves the origin while the pointer moves inside the same word', () => {
+  it('never moves the origin while the pointer moves inside the same word', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -269,7 +310,7 @@ describe('work and about navigation', () => {
     expect(radius('About')).toBe(`${revealRadius({ left: 0, top: 0, width: 340, height: 86 }, { x: 10, y: 44 })}px`);
   });
 
-  it('resumes an open circle on a reversal rather than starting it again', () => {
+  it('resumes an open circle on a reversal rather than starting it again', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -296,7 +337,7 @@ describe('work and about navigation', () => {
     expect(radius('About')).toBe(opened.radius);
   });
 
-  it('accepts keyboard focus arriving from outside after pointer input', () => {
+  it('accepts keyboard focus arriving from outside after pointer input', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     fireEvent.pointerDown(screen.getByRole('button', { name: 'Preview sound' }));
@@ -306,8 +347,8 @@ describe('work and about navigation', () => {
     expect(origin('About')).toEqual({ x: '170px', y: '43px' });
   });
 
-  it('keeps a held destination silent when the route commits under it', () => {
-    const sound: PreviewSound = { muted: false, unlocked: true, unlock: vi.fn(), tap: vi.fn(), setMuted: vi.fn(), dispose: vi.fn() };
+  it('keeps a held destination silent when the route commits under it', async () => {
+    const sound: PreviewSound = { muted: false, unlocked: true, unlock: vi.fn(), tap: vi.fn().mockReturnValue(true), setMuted: vi.fn(), dispose: vi.fn() };
     const props = { sound, onCurrentPagePress: vi.fn() };
     const view = render(<RailNav current="home" {...props} />);
     layout();
@@ -321,7 +362,19 @@ describe('work and about navigation', () => {
     expect(sound.tap).toHaveBeenCalledTimes(1);
   });
 
-  it('releases the requested word when native transition startup throws', () => {
+  it('answers a real click after a cold silent hover', async () => {
+    const sound: PreviewSound = { muted: false, unlocked: false, unlock: vi.fn(), tap: vi.fn().mockReturnValueOnce(false).mockReturnValue(true), setMuted: vi.fn(), dispose: vi.fn() };
+    render(<RailNav current="home" sound={sound} onCurrentPagePress={vi.fn()} />);
+    layout();
+    hover('About', 1010, 260);
+    down('About');
+    press('About');
+    expect(sound.unlock).toHaveBeenCalled();
+    expect(sound.tap).toHaveBeenCalledTimes(2);
+    expect(sound.tap).toHaveBeenLastCalledWith('about');
+  });
+
+  it('releases the requested word when native transition startup throws', async () => {
     window.history.replaceState(null, '', '/#/work/plimsoll');
     (document as { startViewTransition?: unknown }).startViewTransition = vi.fn(() => { throw new Error('unavailable'); });
     render(<Portfolio introEnabled={false} />);
@@ -333,7 +386,7 @@ describe('work and about navigation', () => {
     expect(state('Work 01')).toBe('selected');
   });
 
-  it('unlocks sound on the same click that unmutes a cold stored preference', () => {
+  it('unlocks sound on the same click that unmutes a cold stored preference', async () => {
     localStorage.setItem('formfield-preview-sound', 'muted');
     const opened = vi.fn();
     vi.stubGlobal('AudioContext', class {
@@ -347,7 +400,7 @@ describe('work and about navigation', () => {
     expect(screen.getByRole('button', { name: 'Preview sound' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('restores the truthful route when the pointer leaves, including from About', () => {
+  it('restores the truthful route when the pointer leaves, including from About', async () => {
     window.history.replaceState(null, '', '/#/about');
     render(<Portfolio introEnabled={false} />);
     layout();
@@ -368,7 +421,7 @@ describe('work and about navigation', () => {
     expect(Number.parseFloat(radius('About'))).toBeGreaterThan(0);
   });
 
-  it('previews from the middle of the word for a key, and stops when the focus goes', () => {
+  it('previews from the middle of the word for a key, and stops when the focus goes', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     const about = screen.getByRole('link', { name: 'About' });
@@ -388,7 +441,7 @@ describe('work and about navigation', () => {
     expect(state('About')).toBe('rest');
   });
 
-  it('does not let a click’s own focus outlive the pointer that caused it', () => {
+  it('does not let a click’s own focus outlive the pointer that caused it', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     const about = screen.getByRole('link', { name: 'About' });
@@ -407,7 +460,7 @@ describe('work and about navigation', () => {
     expect(origin('About')).toEqual({ x: '170px', y: '43px' });
   });
 
-  it('leaves a modified press to the browser, and locks no local state with it', () => {
+  it('leaves a modified press to the browser, and locks no local state with it', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -415,15 +468,15 @@ describe('work and about navigation', () => {
       expect(modifiedPress('About', detail).defaultPrevented).toBe(false);
     }
     expect(held('About')).toBeNull();
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
+    expect(revealing()).toBeUndefined();
     unhover('About');
     // Nothing about a new tab follows this tab: no hold, no blue, no page cut.
     expect(state('About')).toBe('rest');
     expect(held('About')).toBeNull();
   });
 
-  it('holds the requested destination for the whole page cut, and commits without a restart', () => {
-    vi.useFakeTimers(); native();
+  it('holds the requested destination for the whole page cut, and commits without a restart', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -432,15 +485,15 @@ describe('work and about navigation', () => {
     // The content changes as the attribute is set, and the word it was asked for
     // keeps exactly the blue it had attained: the preview is not restarted, and the
     // requested page is already on screen while its entrance is still running.
-    expect(document.documentElement.dataset.ffPage).toBe('in');
+    expect(revealing()).toMatch(/^circle\(/);
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
     expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'page');
     expect(held('About')).toBe('true');
     expect(state('About')).toBe('selected');
     expect(radius('About')).toBe(attained);
     expect(state('Work 01')).toBe('rest');
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page - 1));
-    expect(document.documentElement.dataset.ffPage).toBe('in');
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page - 1); });
+    expect(revealing()).toMatch(/^circle\(/);
     expect(state('About')).toBe('selected');
     expect(radius('About')).toBe(attained);
     // Partway through the entrance the pointer drifts back onto the outgoing word.
@@ -449,15 +502,15 @@ describe('work and about navigation', () => {
     expect(state('About')).toBe('selected');
     expect(radius('About')).toBe(attained);
     expect(state('Work 01')).toBe('rest');
-    act(() => vi.advanceTimersByTime(1));
-    // The move is over at 260 ms, so the hold is released and the pointer leads again.
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
+    await act(async () => { vi.advanceTimersByTime(1); });
+    // The move is over at 500 ms, so the hold is released and the pointer leads again.
+    expect(revealing()).toBeUndefined();
     expect(held('About')).toBeNull();
     expect(state('Work 01')).toBe('selected');
   });
 
-  it('releases the hold when the destination is pressed again once it is the committed page', () => {
-    vi.useFakeTimers(); native();
+  it('releases the hold when the destination is pressed again once it is the committed page', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -469,15 +522,15 @@ describe('work and about navigation', () => {
     // and the cut it belonged to is retired rather than left to finish.
     press('About');
     expect(held('About')).toBeNull();
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
+    expect(revealing()).toBeUndefined();
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
+    expect(revealing()).toBeUndefined();
     expect(state('About')).toBe('selected');
     expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('drops a hold the address has already abandoned', () => {
-    vi.useFakeTimers(); native();
+  it('drops a hold the address has already abandoned', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     layout();
     hover('About', 1010, 260);
@@ -486,12 +539,12 @@ describe('work and about navigation', () => {
     // Back before the cut finished: the address says Work, so the requested
     // destination is abandoned rather than held on to.
     hash('#/work');
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
     expect(held('About')).toBeNull();
     expect(screen.getByRole('link', { name: 'Work 01' })).toHaveAttribute('aria-current', 'page');
   });
 
-  it('reaches the page at once under reduced motion, and still answers a preview', () => {
+  it('reaches the page at once under reduced motion, and still answers a preview', async () => {
     preferences.set(reducedQuery, true);
     native();
     render(<Portfolio introEnabled={false} />);
@@ -501,7 +554,7 @@ describe('work and about navigation', () => {
     expect(radius('About')).toBe(`${revealRadius({ left: 0, top: 0, width: 340, height: 86 }, { x: 10, y: 44 })}px`);
     press('About');
     // No attribute is ever set, so nothing animates: the page is simply there.
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
+    expect(revealing()).toBeUndefined();
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
     expect(screen.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'page');
     expect(state('About')).toBe('selected');
@@ -510,20 +563,20 @@ describe('work and about navigation', () => {
     expect(state('About')).toBe('selected');
   });
 
-  it('settles the requested route when the preference is turned on mid-cut', () => {
-    vi.useFakeTimers(); native();
+  it('settles the requested route when the preference is turned on mid-cut', async () => {
+    vi.useFakeTimers(); revealClock(); native();
     render(<Portfolio introEnabled={false} />);
     layout();
     press('About');
-    expect(document.documentElement.dataset.ffPage).toBe('in');
+    expect(revealing()).toMatch(/^circle\(/);
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
     media(reducedQuery, true);
     // The requested URL is still the authority: the page stays, and the attribute
     // is released rather than left behind.
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
-    act(() => vi.advanceTimersByTime(TRANSITION_MS.page));
-    expect(document.documentElement.dataset.ffPage).toBeUndefined();
+    expect(revealing()).toBeUndefined();
+    await act(async () => { vi.advanceTimersByTime(TRANSITION_MS.page); });
+    expect(revealing()).toBeUndefined();
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
     void flush();
   });

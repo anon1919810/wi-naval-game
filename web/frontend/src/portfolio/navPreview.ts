@@ -17,6 +17,10 @@
  * - **The circle stops at the far corner.** That is the smallest radius that has
  *   actually covered the whole word, so the reveal ends exactly when the word is
  *   blue and not one frame earlier.
+ * - **A destination nobody pressed has no entry point.** A history entry or a
+ *   typed address opens from the middle of the word rather than from wherever a
+ *   pointer last happened to be, which is what keeps a stale press out of the
+ *   next move.
  */
 
 /** One duration for the whole preview exchange, in milliseconds. */
@@ -88,4 +92,36 @@ export function revealRadius(box: NavBox, origin: NavPoint): number {
     Math.hypot(width - origin.x, height - origin.y),
   );
   return round(far);
+}
+
+/**
+ * A word-local point in page coordinates.
+ *
+ * The preview's origin is stored relative to the word's own box, because that is
+ * what the reveal radius is measured from. The page reveal needs the same place
+ * in the coordinate system everything else on screen uses, and the word sits
+ * outside the content region it opens: adding the box's own origin is what keeps
+ * the circle at the word the visitor pressed instead of at the top-left of the
+ * column. Clamped, because a box measured before a resize may be stale.
+ */
+export function pageOrigin(box: NavBox, local: NavPoint): NavPoint {
+  return {
+    x: round(box.left + clamp(local.x, 0, Math.max(0, box.width))),
+    y: round(box.top + clamp(local.y, 0, Math.max(0, box.height))),
+  };
+}
+
+/**
+ * Where a destination's page circle should open, in page coordinates.
+ *
+ * A destination that is being pressed continues its own preview origin: the
+ * pointer's entry point, or the middle of the word under the keyboard. A
+ * destination that nobody pressed — Back, Forward, a typed address, a reload —
+ * has no entry point of its own and must not inherit the last press's, so it
+ * opens from the middle of the word instead. `null` means the word has no box to
+ * read at all, and the caller falls back to the middle of the destination region.
+ */
+export function destinationOrigin(box: NavBox | null, pressed: boolean, remembered?: NavPoint): NavPoint | null {
+  if (!box || !(box.width > 0) || !(box.height > 0)) return null;
+  return pageOrigin(box, pressed && remembered ? remembered : wordCentre(box));
 }

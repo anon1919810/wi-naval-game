@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createPreviewSound, PREVIEW_SOUND_KEY, PREVIEW_SOUND_THROTTLE_MS } from '../portfolio/previewAudio';
+import { createPreviewSound, PREVIEW_SOUND_KEY, PREVIEW_SOUND_THROTTLE_MS, PREVIEW_TAP } from '../portfolio/previewAudio';
 
 const param = () => ({ setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() });
 function audio(state = 'running') {
@@ -14,6 +14,24 @@ beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
 
 describe('preview tap lifecycle', () => {
+  it('distinguishes silent attempts and uses a lower, shorter Work voice', () => {
+    const graph = audio(); let time = 0;
+    const sound = createPreviewSound({ create: graph.create, now: () => time });
+    expect(sound.tap('about')).toBe(false);
+    sound.unlock();
+    expect(sound.tap('work')).toBe(true);
+    expect(graph.source.frequency.setValueAtTime).toHaveBeenLastCalledWith(PREVIEW_TAP.work.fromHz, 12);
+    expect(graph.source.stop).toHaveBeenLastCalledWith(12 + PREVIEW_TAP.work.ms / 1000);
+    expect(sound.tap('about')).toBe(false);
+    time = PREVIEW_SOUND_THROTTLE_MS;
+    expect(sound.tap('about')).toBe(true);
+    expect(graph.source.frequency.setValueAtTime).toHaveBeenLastCalledWith(PREVIEW_TAP.about.fromHz, 12);
+    expect(PREVIEW_TAP.work.fromHz).toBeLessThan(PREVIEW_TAP.about.fromHz);
+    expect(PREVIEW_TAP.work.ms).toBeLessThan(PREVIEW_TAP.about.ms);
+    expect(PREVIEW_TAP.about.peak).toBeLessThan(PREVIEW_TAP.work.peak);
+    expect(PREVIEW_SOUND_THROTTLE_MS).toBeGreaterThan(PREVIEW_TAP.about.ms);
+    sound.dispose();
+  });
   it('stays silent until a gesture unlocks it, then throttles repeated previews', () => {
     const graph = audio(); let time = 0;
     const sound = createPreviewSound({ create: graph.create, now: () => time });

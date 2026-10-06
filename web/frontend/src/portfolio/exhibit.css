@@ -22,19 +22,15 @@
   .ff-home .ff-explore-link { min-height: 46px; padding: 0 14px; font-size: 11px; gap: 16px; }
   .ff-home .ff-project-link { font-size: 10px; min-height: 42px; }
 }
-/* Sparse construction marks stay in margins and divider ends, never under text. */
+/* The page order lives in pageGeometry.tsx / pageGeometry.css: a pale field per
+   page and one focal drawing per page, placed behind the reading. The exhibit's own
+   chrome rules above are unchanged. Both pages are their own positioning context so
+   the field is bounded by the page and extends only as far as the shell's padding. */
+.ff-home, .ff-about { position: relative; }
+/* Retained for Library's shared, existing geometry; public pages use pageGeometry. */
 .ff-site-geometry { display: block; fill: none; stroke: var(--ff-muted); stroke-width: .8; pointer-events: none; opacity: .35; }
 .ff-site-geometry--section { position: absolute; top: -14px; right: 0; width: 100px; height: 36px; }
-.ff-detail-section { position: relative; }
-.ff-detail-section > .ff-site-geometry--section { top: -28px; }
-.ff-detail-section h2 { padding-right: 110px; }
-.ff-about { position: relative; }
-.ff-about > .ff-site-geometry--margin { position: absolute; width: 150px; height: 185px; right: 0; top: 70px; opacity: .2; }
-.ff-about-author, .ff-about-built { position: relative; }
-.ff-about-author > .ff-site-geometry--section, .ff-about-built > .ff-site-geometry--section { top: -28px; }
-.ff-footer { position: relative; }
-.ff-footer > .ff-site-geometry--rule { position: absolute; left: 0; top: -1px; width: 120px; height: 20px; }
-.ff-shell[data-ff-theme='dark'] .ff-site-geometry { opacity: .28; }
-@media (max-width: 1100px) { .ff-about > .ff-site-geometry--margin { display: none; } }
-@media (max-width: 650px) { .ff-site-geometry--section { width: 70px; } .ff-detail-section h2 { padding-right: 75px; } }
+/* Work's field is bounded by the page and by the shell's padding, so it reaches
+   into the empty side margins without ever widening the document. */
+.ff-home { padding-bottom: 2px; }
 @media (prefers-reduced-motion: reduce) { .ff-board-icon, .ff-board-picker button::after { transition: none !important; } }

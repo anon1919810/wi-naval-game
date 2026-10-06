@@ -2,7 +2,6 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
 import { classifyHash, PUBLIC_WORK_DETAIL_HASH, publicHref } from '../portfolio/routes';
-import { REPORT_IMAGE } from '../portfolio/ProjectDetail';
 import { CONTACT_EMAIL, CONTACT_PROFILE } from '../portfolio/Contact';
 import { TRANSITION_MS, transitionsActive } from '../portfolio/transitions';
 import { PLAN_SHEETS } from '../portfolio/plans';
@@ -121,6 +120,12 @@ describe('work detail routing', () => {
     expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
     expect(screen.queryByRole('status', { name: 'Loading reference' })).toBeNull();
     expect(document.querySelector('.ff-tool-shell')).toBeNull();
+    // The exhibit's compass study fills `main`, so it is the exhibit's own
+    // background: mounted here it would stretch down the longer detail page and
+    // draw across its reading columns. The detail reads under the shell's faint
+    // field alone.
+    expect(document.querySelector('.ff-field--work')).toBeNull();
+    expect(document.querySelector('.ff-field--shell')).not.toBeNull();
     expect(document.title).toBe('Plimsoll — Y’s Formfield');
     // Work stays the current rail item: the detail belongs to Work, not to About.
     expect(screen.getByRole('link', { name: 'Work 01' })).toHaveAttribute('aria-current', 'page');
@@ -140,29 +145,21 @@ describe('work detail content', () => {
     await flush();
   });
 
-  it('reads as numbered editorial sections with the report screenshot in the workflow', () => {
+  it('reads as numbered editorial sections, with the exhibit drawing as the only picture', () => {
     const heads = screen.getAllByRole('heading', { level: 2 }).map(node => node.textContent);
     expect(heads.filter(text => /^\d\d/.test(text ?? ''))).toEqual(['01Overview', '02Capabilities', '03Workflow', '04Technology', '05Methods & Limits']);
-    // The real report, at the file's own intrinsic size and with real alt text.
-    const image = screen.getByRole('img', { name: /Plimsoll calculation report/ }) as HTMLImageElement;
-    expect(image.getAttribute('src')).toBe(REPORT_IMAGE.src);
-    expect(REPORT_IMAGE.src).toBe('/portfolio/plimsoll-report.jpg');
-    expect(image).toHaveAttribute('width', String(REPORT_IMAGE.width));
-    expect(image).toHaveAttribute('height', String(REPORT_IMAGE.height));
-    expect(image.getAttribute('alt')).toBeTruthy();
-    // The caption claims the screenshot honestly and exposes no file path.
-    const caption = document.querySelector('.ff-report figcaption')!.textContent!;
-    expect(caption).toMatch(/captured on 4 October 2026/);
-    expect(caption).toMatch(/without recalculating/);
-    expect(caption).not.toMatch(/docs\/|\.jpg/);
+    // No report bitmap on the page at all: the reference sheet is the one picture.
+    expect(document.querySelector('img')).toBeNull();
+    expect(detail().querySelectorAll('.ff-report')).toHaveLength(0);
     // No visitor-visible file paths anywhere on the page.
     expect(detail().textContent).not.toMatch(/docs\/plimsoll|\.json|\.py\b/);
+    expect(detail().textContent).not.toMatch(/\.(jpg|png)\b/);
   });
 
   it('states the manifest stack, the capabilities and the method limits without overclaiming', () => {
     const text = detail().textContent!;
     // Technology: what the actual manifests declare, each with its use.
-    for (const row of ['A React and TypeScript interface built with Vite', 'Python calculation core', 'FastAPI serves the application; SQLAlchemy manages stored data, and Alembic versions the database schema.', 'PostgreSQL', 'Independent worker']) {
+    for (const row of ['React · TypeScript · Vite', 'Python calculation core', 'FastAPI serves the application; SQLAlchemy manages stored data, and Alembic versions the database schema.', 'PostgreSQL', 'Independent worker']) {
       expect(text).toContain(row);
     }
     // Capabilities, in the approved wording.
@@ -414,7 +411,7 @@ describe('home and detail navigation', () => {
     const about = screen.getByRole('link', { name: 'About' });
     about.focus();
     follow('About');
-    expect(document.documentElement.dataset.ffPage).toBe('in');
+    expect(document.documentElement.dataset.ffPage).toBeUndefined();
     expect(vt.captures).toHaveLength(0);
     // The rail is a sibling of main, so it keeps its own focus across the change.
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
@@ -422,7 +419,7 @@ describe('home and detail navigation', () => {
     // Coming back through the exhibit, nothing visible took the rail away, so
     // focus is still there and the exhibit does not steal it.
     follow('Work 01');
-    expect(document.documentElement.dataset.ffPage).toBe('out');
+    expect(document.documentElement.dataset.ffPage).toBeUndefined();
     expect(screen.getByRole('heading', { name: 'Plimsoll' })).toBeVisible();
     expect(document.activeElement).toBe(about);
     // Entering the detail from the exhibit does strand the VIEW PROJECT link — it

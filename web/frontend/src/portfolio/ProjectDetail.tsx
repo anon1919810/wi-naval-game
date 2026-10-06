@@ -1,23 +1,7 @@
 import type { MouseEventHandler, RefObject } from 'react';
 import { Artwork } from './Artwork';
-import { SiteGeometry } from './SiteGeometry';
 import { APP_ENTRY_LINK, publicHref } from './routes';
 import type { PlanSheet } from './plans';
-
-/**
- * The one real screenshot on the site, copied byte-for-byte from
- * `docs/plimsoll-1.0/evidence/public-report-2026-10-04.jpg` to
- * `public/portfolio/plimsoll-report.jpg` on 2026-10-05. It shows a run from the
- * public deployment: nothing is redrawn, staged or retouched, and the 856×751
- * frame is the file's own intrinsic size. Provenance lives here and in
- * `public/portfolio/PROVENANCE.md`; the page itself carries no file paths.
- */
-export const REPORT_IMAGE = {
-  src: '/portfolio/plimsoll-report.jpg',
-  width: 856,
-  height: 751,
-  alt: 'Screenshot of a Plimsoll calculation report: a run marked complete, display-unit selectors for length, mass, power, speed and angle, and a hull section outline.',
-} as const;
 
 interface Row {
   readonly label: string;
@@ -56,7 +40,7 @@ const WORKFLOW: readonly Row[] = [
 ];
 
 const TECHNOLOGY: readonly Row[] = [
-  { label: 'A React and TypeScript interface built with Vite', text: 'Original reference scans are presented with SVG framing and tonal treatment, so each sheet reads as the archived drawing it is.' },
+  { label: 'React · TypeScript · Vite', text: 'The public shell: one hash router, the exhibit, this detail and About. The workspace is a separate chunk fetched on demand, so no page here can reach the API.' },
   { label: 'Python calculation core', text: 'Project, loading, hydrostatics, stability, resistance and flooding kernels. The API, the command line and the web service all call this one module.' },
   { label: 'FastAPI · SQLAlchemy · Alembic', text: 'FastAPI serves the application; SQLAlchemy manages stored data, and Alembic versions the database schema.' },
   { label: 'PostgreSQL', text: 'Project storage, immutable revisions, the calculation queue and stored results.' },
@@ -95,11 +79,11 @@ interface Props {
 }
 
 /**
- * The one work detail. Editorial rather than decorative: a flat numbered list of
- * rows, hairline rules and the existing accent, with the shared artwork as the
- * only picture. Every claim here is either what the repository actually does or
- * an explicitly stated limit, with no invented statistics, credentials or
- * project repositories.
+ * The one work detail. Editorial rather than decorative: five numbered sections on
+ * the About page's own twelve columns, flat rows, hairline rules and the existing
+ * accent, with the selected reference sheet as the only picture. Every claim here
+ * is either what the repository actually does or an explicitly stated limit, with
+ * no invented statistics, credentials or project repositories.
  */
 export function ProjectDetail({ sheet, dark, details, headingRef, ctaRef, prefetchApp, onEnterTool }: Props) {
   return <article className="ff-detail" aria-label="Plimsoll, project detail">
@@ -120,20 +104,12 @@ export function ProjectDetail({ sheet, dark, details, headingRef, ctaRef, prefet
 
     <div className="ff-detail-body">
       {SECTIONS.map(section => <section key={section.index} className="ff-detail-section" aria-labelledby={`ff-detail-${section.index}`}>
-        <SiteGeometry />
         <h2 id={`ff-detail-${section.index}`}><span>{section.index}</span>{section.title}</h2>
         <dl className="ff-detail-rows">
           {section.body.map(row => <div className="ff-detail-row" key={row.label}>
             <dt>{row.label}</dt><dd>{row.text}</dd>
           </div>)}
         </dl>
-        {section.index === '03' && <figure className="ff-report" id="report">
-          {/* Eager, not lazy: this bitmap is content of the page being entered, and a
-              snapshot taken during the 400 ms morph would otherwise capture an empty
-              box and pop the picture in afterwards. */}
-          <img src={REPORT_IMAGE.src} width={REPORT_IMAGE.width} height={REPORT_IMAGE.height} alt={REPORT_IMAGE.alt} decoding="async" />
-          <figcaption>A real Plimsoll report, captured on 4 October 2026. Display units can be changed without recalculating. The report retains its validation limits.</figcaption>
-        </figure>}
       </section>)}
     </div>
   </article>;
