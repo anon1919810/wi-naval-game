@@ -83,7 +83,10 @@ describe('workbench entry', () => {
     fireEvent.change(screen.getByLabelText('项目 JSON'), { target: { value: '{"id":"p1"}' } });
     fireEvent.click(screen.getByRole('button', { name: '应用到草稿' }));
     expect(screen.getByRole('alert')).toHaveTextContent(/缺少|无效/);
-    expect(screen.getByRole('heading', { name: '解析方箱' })).toBeVisible();
+    // The refused payload never reached the draft: the chapter still leads with
+    // its English title and still names the vessel it is editing.
+    expect(screen.getByRole('heading', { level: 1, name: 'Project Data' })).toBeVisible();
+    expect(document.querySelector('.chapter-context .chapter-vessel')).toHaveTextContent('解析方箱');
     fireEvent.change(screen.getByLabelText('项目 JSON'), { target: { value: JSON.stringify({
       ...box, loading_conditions: [{ id: 'loaded', label: { invalid: true } }],
     }) } });

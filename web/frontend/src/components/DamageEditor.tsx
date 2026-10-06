@@ -329,35 +329,6 @@ export function DamageEditor({ project, run, request, onChange, onRequestChange,
         </div>)}
       </div>
 
-      <div className="form-card"><h3>本次破损计算请求</h3>
-        <p>请求随运行记录保存，不会改动场景本身。未选择场景时不请求破损阶段；选择后按同一修订与工况提交。</p>
-        <div className="form-grid">
-          <label className="field-label">破损场景<select aria-label="请求破损场景" value={request.scenario}
-            onChange={event => onRequestChange({ ...request, scenario: event.target.value })}>
-            <option value="">不请求破损研究</option>
-            {scenarios.map(row => <option key={String(row.id)} value={String(row.id)}>{String(row.id)}</option>)}
-          </select></label>
-          {/* Density is canonical: it is never scaled by a display preference. */}
-          <label className="field-label">环境与海水密度 · t/m³<input type="number" step="any" placeholder={`默认 ${EQUILIBRIUM_RHO_T_M3}`}
-            aria-label="破损环境密度" value={request.rho}
-            onChange={event => onRequestChange({ ...request, rho: event.target.value })} /></label>
-          <label className="field-label">最大接受步数<input type="number" step="1" placeholder="内核默认 10000" aria-label="破损最大接受步数"
-            value={request.steps} onChange={event => onRequestChange({ ...request, steps: event.target.value })} /></label>
-          <label className="field-label">每步减半重试次数<input type="number" step="1" placeholder="内核默认 40" aria-label="破损减半重试次数"
-            value={request.halvings} onChange={event => onRequestChange({ ...request, halvings: event.target.value })} /></label>
-          <label className="field-label">重力加速度 · m/s²<input type="number" step="any" placeholder="内核默认 9.80665" aria-label="破损重力加速度"
-            value={request.gravity} onChange={event => onRequestChange({ ...request, gravity: event.target.value })} /></label>
-          <QuantityListField label="剩余稳性采样" value={request.gzAngles} dimension="angle" placeholder="例如 10, 20, 30, 40, 50"
-            onChange={values => onRequestChange({ ...request, gzAngles: values })} />
-          <label className="field-label">剩余稳性快照<select aria-label="破损剩余稳性快照" value={request.gzSnapshot}
-            onChange={event => onRequestChange({ ...request, gzSnapshot: event.target.value as FloodingRequest['gzSnapshot'] })}>
-            <option value="final">仅最终状态</option><option value="each_state">每个已接受状态</option>
-          </select></label>
-        </div>
-        {requestError && <p className="form-error" role="alert">{requestError}</p>}
-        <p className="form-hint">环境密度是显式请求选择：留空时内核对本次请求的全部阶段使用默认海水密度 {EQUILIBRIUM_RHO_T_M3} t/m³（淡水等研究需显式填写，并与海水节点一致）。剩余稳性使用与进水相同的密度、基准与边界条件；曲线是剩余稳性事实，不是安全性结论。</p>
-      </div>
-
       <div className="form-card"><h3>移除场景</h3>
         <p>移除只影响当前草稿；已保存运行仍引用它当时的请求身份与指纹，不会被改写。</p>
         <button className="text-button" type="button"
@@ -401,6 +372,40 @@ export function DamageEditor({ project, run, request, onChange, onRequestChange,
             onClick={() => emitCompartments(compartments.filter((_, i) => i !== index))}>移除项目舱室 {String(compartment.id)}</button>
         </div></details>)}
     </div>
+
+    {selected && <>
+      <div className="form-card"><h3>本次破损计算请求</h3>
+        <p>请求随运行记录保存，不会改动场景本身。未选择场景时不请求破损阶段；选择后按同一修订与工况提交。</p>
+        <div className="form-grid">
+          <label className="field-label">破损场景<select aria-label="请求破损场景" value={request.scenario}
+            onChange={event => onRequestChange({ ...request, scenario: event.target.value })}>
+            <option value="">不请求破损研究</option>
+            {scenarios.map(row => <option key={String(row.id)} value={String(row.id)}>{String(row.id)}</option>)}
+          </select></label>
+          {/* Density is canonical: it is never scaled by a display preference. */}
+          <label className="field-label">环境与海水密度 · t/m³<input type="number" step="any" placeholder={`默认 ${EQUILIBRIUM_RHO_T_M3}`}
+            aria-label="破损环境密度" value={request.rho}
+            onChange={event => onRequestChange({ ...request, rho: event.target.value })} /></label>
+          <label className="field-label">最大接受步数<input type="number" step="1" placeholder="内核默认 10000" aria-label="破损最大接受步数"
+            value={request.steps} onChange={event => onRequestChange({ ...request, steps: event.target.value })} /></label>
+          <label className="field-label">每步减半重试次数<input type="number" step="1" placeholder="内核默认 40" aria-label="破损减半重试次数"
+            value={request.halvings} onChange={event => onRequestChange({ ...request, halvings: event.target.value })} /></label>
+          <label className="field-label">重力加速度 · m/s²<input type="number" step="any" placeholder="内核默认 9.80665" aria-label="破损重力加速度"
+            value={request.gravity} onChange={event => onRequestChange({ ...request, gravity: event.target.value })} /></label>
+          <QuantityListField label="剩余稳性采样" value={request.gzAngles} dimension="angle" placeholder="例如 10, 20, 30, 40, 50"
+            onChange={values => onRequestChange({ ...request, gzAngles: values })} />
+          <label className="field-label">剩余稳性快照<select aria-label="破损剩余稳性快照" value={request.gzSnapshot}
+            onChange={event => onRequestChange({ ...request, gzSnapshot: event.target.value as FloodingRequest['gzSnapshot'] })}>
+            <option value="final">仅最终状态</option><option value="each_state">每个已接受状态</option>
+          </select></label>
+        </div>
+        {/* The operation bar announces the request failure as the one alert;
+            this copy keeps it next to the controls that caused it. */}
+        {requestError && <p className="form-error">{requestError}</p>}
+        <p className="form-hint">环境密度是显式请求选择：留空时内核对本次请求的全部阶段使用默认海水密度 {EQUILIBRIUM_RHO_T_M3} t/m³（淡水等研究需显式填写，并与海水节点一致）。剩余稳性使用与进水相同的密度、基准与边界条件；曲线是剩余稳性事实，不是安全性结论。</p>
+      </div>
+
+    </>}
 
     <ResultSection available={!!run}>
       {!!run && data.status != null && <p className="result-context">已保存运行 {run.id} · 场景 {String(object(data.scenario).id ?? '未知')} · 请求指纹 {run.request_fingerprint}。下方是该运行的结果；修改当前场景选择或请求不会重算这些结果。</p>}

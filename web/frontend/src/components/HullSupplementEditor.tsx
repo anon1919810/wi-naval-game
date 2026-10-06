@@ -34,7 +34,8 @@ export function HullSupplementEditor({ project, run, onChange }: { project: Proj
         onChange={value => onChange({ ...project, hull: { ...hull, design_facts: { ...facts, [key]: value } } })} />)}
     <p className="form-hint">这些是独立声明的设计事实，不是所选载荷账本的质量，也不会用来反推几何。</p>
   </div><div className="form-card"><h3>显示偏好</h3>
-    <p>记录你阅读时偏好的单位。输入框按该偏好显示与接收数值，保存、计算、JSON/CSV 导出与请求指纹<strong>始终为规范单位</strong>；密度、黏度、时间与力保持各自的规范单位。</p>
+    <p>输入框按显示偏好读取数值；保存与计算<strong>始终为规范单位</strong>。</p>
+    <details className="form-help"><summary>单位与导出说明</summary><p>显示偏好记录在项目中。JSON/CSV 导出与请求指纹保留规范单位；密度、黏度、时间与力保持各自的规范单位。</p></details>
     <div className="form-grid">{DIMENSION_KEYS.map(key => <label className="field-label" key={key}>{PREFERENCE_LABELS[key]}显示单位
       <select aria-label={`${PREFERENCE_LABELS[key]}显示单位`} value={typeof preferences[key] === 'string' ? String(preferences[key]) : 'project_default'}
         onChange={e => patchPreference(key, e.target.value)}>

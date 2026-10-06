@@ -44,9 +44,12 @@
   --error-soft: #402b2d;
 }
 .ff-tool-shell { min-height: 100svh; }
-.ff-tool-shell .ff-workspace { min-height: calc(100svh - 40px); }
-.ff-tool-shell .ff-tool-return { padding: 12px clamp(24px, 3vw, 52px); border-color: var(--line); background: var(--canvas); color: var(--muted); font-family: var(--workspace-body); font-weight: 500; letter-spacing: 0; }
-.app-shell { min-height: calc(100svh - 40px); }
+.ff-tool-shell .ff-workspace { min-height: 100svh; }
+.app-shell { min-height: 100svh; }
+/* The public return is rendered inside the application header: the real origin
+   href, the same semantics as the previous standalone bar, no second row. */
+.app-shell .site-header .ff-tool-return { display: inline-flex; align-items: center; align-self: stretch; margin-right: 18px; padding: 0; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font-family: var(--workspace-body); font-size: 11px; font-weight: 500; letter-spacing: 0; }
+.app-shell .site-header .ff-tool-return:hover { color: var(--ink); }
 .app-shell :is(button, input, select, textarea) { font-family: inherit; }
 .app-shell :is(h1, h2, h3, .brand, .fact-value) { font-family: var(--workspace-display); letter-spacing: -.025em; }
 .app-shell .brand { gap: 12px; font-size: 24px; font-weight: 700; }
@@ -112,26 +115,120 @@
 .app-shell .blank-project { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(140px, 240px) auto; gap: 20px; margin-top: 22px; padding: 18px 0; border: 0; border-radius: 0; background: transparent; }
 .app-shell .blank-project input { width: 100%; min-width: 0; height: 36px; }
 .app-shell .library-body .loading-skeleton { height: 115px; border-radius: 0; }
-/* Editing surfaces use the same material, while protecting the input width. */
-.app-shell .workbench-layout { grid-template-columns: 204px minmax(0, 1fr) 230px; min-height: calc(100svh - 108px); }
-.app-shell .project-nav { padding: 24px 12px; background: var(--canvas); min-height: calc(100svh - 108px); }
+/* Editing surfaces use the same material, while protecting the input width.
+   The Trace rail is a real third column on wide desktops; at 1280 and below the
+   same panel leaves the grid and sits above the inputs in normal flow, so it
+   never squeezes a form column, never overlays one and never clips a field. */
+.app-shell .workbench-layout { grid-template-columns: 200px minmax(0, 1fr) 96px; min-height: calc(100svh - 69px); }
+.app-shell .workbench-layout[data-trace='open'] { grid-template-columns: 200px minmax(0, 1fr) 240px; }
+.app-shell .project-nav { grid-column: 1; grid-row: 1; padding: 24px 12px; background: var(--canvas); min-height: calc(100svh - 69px); }
+.app-shell .workbench-main { grid-column: 2; grid-row: 1; min-width: 0; }
+/* The index carries a static number; the Chinese label remains the name. */
+.app-shell .nav-item { display: flex; align-items: baseline; gap: 9px; }
+.app-shell .nav-index { flex: 0 0 auto; width: 17px; color: var(--faint); font-family: var(--workspace-display); font-size: 10px; font-variant-numeric: tabular-nums; }
+.app-shell .nav-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-shell .nav-item--active .nav-index { color: var(--accent); }
 .app-shell .nav-item--active { border-left: 2px solid var(--accent); padding-left: 10px; background: var(--surface-tint); }
 .app-shell .nav-project-name { font-family: var(--workspace-display); font-weight: 600; }
 .app-shell .nav-section-label { letter-spacing: .04em; font-weight: 500; }
-.app-shell .workbench-toolbar { flex-wrap: wrap; gap: 12px; padding: 14px 24px; background: var(--canvas); }
-.app-shell .breadcrumbs { flex: 1 1 160px; }
+/* One compact operation bar carries condition, saved revision, draft state and
+   the two primary actions. Errors sit directly under it, never inside help. */
+.app-shell .workbench-toolbar { position: sticky; top: 0; z-index: 2; flex-wrap: wrap; gap: 0; padding: 0; background: var(--canvas); }
+.app-shell .operation-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; width: 100%; padding: 12px 24px; border-bottom: 1px solid var(--line); }
+.app-shell .operation-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; min-width: 0; }
+.app-shell .operation-identity label { color: var(--muted); font-size: 10px; font-weight: 500; white-space: nowrap; }
+.app-shell .operation-identity select { min-width: 150px; max-width: 280px; height: 34px; }
+.app-shell .operation-identity .save-state { margin: 0; }
 .app-shell .toolbar-actions { flex-wrap: wrap; flex-shrink: 1; gap: 8px; }
-.app-shell .workbench-content { padding: 28px 24px 72px; }
+.app-shell .workbench-alerts { padding: 0 24px; }
+.app-shell .workbench-alerts:empty { display: none; }
+.app-shell .workbench-alerts .notice { margin: 12px 0 0; }
+/* Secondary actions collapse instead of taking a permanent slot in the bar. */
+.app-shell .secondary-actions { position: relative; }
+.app-shell .secondary-actions > summary { display: inline-flex; align-items: center; min-height: 36px; padding: 0 13px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font-size: 12px; cursor: pointer; list-style: none; }
+.app-shell .secondary-actions > summary::-webkit-details-marker { display: none; }
+.app-shell .secondary-actions-panel { position: absolute; top: calc(100% + 6px); right: 0; z-index: 3; display: grid; gap: 9px; min-width: 232px; padding: 13px; border: 1px solid var(--line); background: var(--surface); }
+.app-shell .secondary-actions-panel p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+/* The chapter heading changes with context: the Overview names the vessel, every
+   other chapter leads with its English title and keeps the vessel as context. */
+.app-shell .workbench-content { padding: 30px 24px 72px; }
+.app-shell .chapter-head { padding-bottom: 20px; border-bottom: 1px solid var(--line-strong); }
+.app-shell .chapter-head h1 { margin: 12px 0 8px; font-size: clamp(28px, 2.6vw, 38px); font-weight: 600; letter-spacing: -.03em; }
+.app-shell .chapter-head--vessel h1 { font-size: clamp(28px, 2.5vw, 38px); }
+.app-shell .chapter-head p { margin: 0; color: var(--muted); font-size: 12px; }
+.app-shell .chapter-context { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; color: var(--faint); font-size: 11px; }
+.app-shell .chapter-vessel { color: var(--muted); font-weight: 500; }
+.app-shell .chapter-purpose { margin-top: 8px !important; max-width: 68ch; line-height: 1.75; }
 .app-shell .vessel-title-row { flex-wrap: wrap; gap: 10px; }
 .app-shell .vessel-header h1 { font-size: clamp(28px, 2.5vw, 38px); font-weight: 600; letter-spacing: -.025em; }
-.app-shell .condition-strip { flex-wrap: wrap; margin: 24px 0; background: transparent; padding: 12px 0; border-width: 1px 0; }
-.app-shell .condition-strip select { min-width: 160px; height: 36px; }
-.app-shell .condition-strip > span { white-space: normal; }
+/* Overview groups: numbered first-level input groups separated by a thin rule. */
+.app-shell .overview-page { display: grid; gap: 26px; margin-top: 26px; }
+.app-shell .chapter-group { display: grid; gap: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
+.app-shell .group-head { display: flex; align-items: baseline; gap: 12px; }
+.app-shell .group-index { color: var(--faint); font-family: var(--workspace-display); font-size: 10px; font-variant-numeric: tabular-nums; }
+.app-shell .group-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.app-shell .group-head > span:last-child { color: var(--faint); font-size: 10px; }
+.app-shell .group-note { margin: 0; color: var(--faint); font-size: 10px; line-height: 1.7; }
+.app-shell .overview-identity { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin: 0; }
+.app-shell .overview-identity dt { margin: 0 0 5px; color: var(--faint); font-size: 10px; }
+.app-shell .overview-identity dd { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
+.app-shell .result-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; color: var(--muted); font-size: 10px; }
+.app-shell .result-identity code { font-family: 'Cascadia Code', Consolas, monospace; }
+.app-shell .result-absent p { margin: 0 0 6px; color: var(--muted); font-size: 12px; }
+.app-shell .stage-status-list { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; list-style: none; }
+.app-shell .stage-status-list li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
+.app-shell .stage-status-list small { color: var(--faint); }
+.app-shell .stage-diagnostics-open { display: grid; gap: 6px; padding: 12px 14px; border-left: 2px solid var(--error); background: var(--error-soft); color: var(--error); font-size: 11px; }
+.app-shell .stage-diagnostics-open p { margin: 0; color: var(--ink); font-size: 10px; line-height: 1.6; }
+/* First-level input groups: a number and a thin rule do the dividing, so the
+   nested cards inside a group stop repeating heavy frames of their own. */
+.app-shell .input-group-head { display: flex; align-items: baseline; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.app-shell .input-group-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.app-shell .group-note-inline { color: var(--faint); font-size: 10px; }
+.app-shell .editor-section .form-card { padding: 16px 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; }
+.app-shell .editor-section .form-card:last-child { border-bottom: 0; }
+.app-shell .editor-section .form-card .form-card { padding: 12px 0; }
+.app-shell .editor-section .fact-input, .app-shell .editor-section .id-picker { margin: 0; padding: 12px 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.app-shell .editor-section .resistance-results, .app-shell .editor-section .study-result { border-top: 1px solid var(--line); }
+/* Per-field provenance: a marker sits next to the control it describes. */
+.app-shell .traced-field { display: grid; gap: 5px; min-width: 0; }
+.app-shell .weight-row .traced-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.app-shell .field-provenance { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+.app-shell .source-mark { font-size: 9px; letter-spacing: .03em; }
+.app-shell .source-mark--declared { color: var(--accent); }
+.app-shell .source-mark--estimate { color: var(--warning); }
+.app-shell .source-mark--unknown, .app-shell .source-mark--none { color: var(--faint); }
+.app-shell .trace-pick { padding: 1px 6px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 9px; cursor: pointer; }
+.app-shell .trace-pick--active { border-color: var(--accent); color: var(--accent); }
+.app-shell .traced-field--active > .field-provenance .trace-pick { background: var(--accent-soft); }
+.app-shell .deck-segment-source { display: flex; align-items: baseline; gap: 6px; font-size: 9px; color: var(--muted); }
+.app-shell .deck-segment-source-value { color: var(--ink); overflow-wrap: anywhere; }
+.app-shell .save-dot { width: 6px; height: 6px; border-radius: 50%; background: #74a58b; }
+.app-shell .save-dot--dirty { background: var(--warning); }
+.app-shell .save-revision { color: var(--faint); }
+/* The Trace panel. It is a grid column on wide desktops and an ordinary block in
+   the document flow below 1280; it never uses a fixed overlay position. */
+.app-shell .trace-panel { grid-column: 3; grid-row: 1; position: sticky; top: 69px; scroll-margin-top: 80px; align-self: start; max-height: calc(100svh - 69px); overflow-y: auto; padding: 22px 18px; border-left: 1px solid var(--line); background: var(--canvas); }
+.app-shell .workbench-layout[data-trace='closed'] .trace-panel { border-left: 0; padding: 22px 12px; background: transparent; }
+.app-shell .workbench-layout[data-trace='closed'] .trace-head { flex-direction: column; gap: 8px; align-items: flex-start; }
+.app-shell .trace-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.app-shell .trace-toggle { padding: 4px 10px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font-size: 10px; cursor: pointer; }
+.app-shell .trace-body h2 { margin: 16px 0 10px; font-size: 15px; font-weight: 600; }
+.app-shell .trace-body dl { display: grid; gap: 6px; margin: 0; }
+.app-shell .trace-body dt { margin-top: 10px; color: var(--faint); font-size: 9px; }
+.app-shell .trace-body dd { margin: 0; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.app-shell .trace-body p { color: var(--muted); font-size: 11px; line-height: 1.7; }
+.app-shell .trace-body code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 9px; }
+.app-shell .trace-note { padding-top: 12px; border-top: 1px solid var(--line); }
+.app-shell .result-identity code { overflow-wrap: anywhere; }
+.app-shell .form-help { margin: 10px 0 16px; color: var(--muted); font-size: 11px; }
+.app-shell .form-help summary { cursor: pointer; }
+.app-shell .trace-panel[data-narrow='true'] { position: static; max-height: none; border: 0; border-bottom: 1px solid var(--line); }
 .app-shell .fact-field { padding: 14px; min-width: 0; min-height: 94px; }
 .app-shell .fact-value { font-size: clamp(17px, 1.7vw, 23px); font-weight: 600; font-variant-numeric: tabular-nums; white-space: normal; overflow-wrap: anywhere; }
-.app-shell .editor-section { padding: 22px; }
+.app-shell .editor-section { padding: 22px 0; background: transparent; border: 0; border-top: 1px solid var(--line); }
 .app-shell .editor-section + .editor-section { margin-top: 20px; }
-.app-shell .inspector { background: var(--canvas); padding: 28px 18px; min-height: calc(100svh - 108px); }
+.app-shell .inspector { background: var(--canvas); padding: 28px 18px; min-height: calc(100svh - 69px); }
 .app-shell .weight-group, .app-shell .deck-group { overflow-x: auto; }
 .app-shell :is(.weight-row, .deck-row) { min-width: 550px; }
 .app-shell .form-grid > *, .app-shell .field-grid > * { min-width: 0; }
@@ -148,7 +245,16 @@
 :root[data-theme='dark'] .app-shell .stage-pill--completed { color: #a5d5b7; border-color: #3d6650; background: #20362b; }
 .ff-tool-shell .app-loading { min-height: calc(100svh - 40px); font-family: var(--workspace-display); background: var(--canvas); color: var(--ink); }
 .ff-tool-shell .app-loading small { font-family: var(--workspace-body); }
-@media (max-width: 1280px) { .app-shell .workbench-layout { grid-template-columns: 190px minmax(0, 1fr); } }
+/* Below 1281 the Trace panel returns to normal flow and spans the centre column,
+   above the inputs: no overlay, no third column, no squeezed form. */
+@media (max-width: 1280px) {
+  .app-shell .workbench-layout, .app-shell .workbench-layout[data-trace='open'] { grid-template-columns: 200px minmax(0, 1fr); }
+  .app-shell .trace-panel { position: static; grid-column: 2; grid-row: 1; max-height: none; overflow: visible; padding: 16px 24px; border-left: 0; border-bottom: 1px solid var(--line); }
+  .app-shell .workbench-layout[data-trace='closed'] .trace-panel { padding: 12px 24px; }
+  .app-shell .workbench-layout[data-trace='closed'] .trace-head { flex-direction: row; align-items: center; }
+  .app-shell .project-nav { grid-row: 1 / span 2; }
+  .app-shell .workbench-main { grid-row: 2; }
+}
 @media (max-width: 1100px) {
   .app-shell .library-page { grid-template-columns: 190px minmax(0, 1fr); gap: 36px; }
   .app-shell .template-card { grid-template-columns: 24px minmax(0, 1fr) 90px; gap: 12px; }
@@ -158,7 +264,7 @@
   .app-shell .blank-project > div { grid-column: 1 / -1; }
 }
 @media (max-width: 850px) {
-  .app-shell .workbench-layout { display: block; }
+  .app-shell .workbench-layout, .app-shell .workbench-layout[data-trace='open'] { display: block; }
   .app-shell .project-nav { min-height: 0; }
   .app-shell .library-page { display: block; }
   .library-context { margin-bottom: 32px; }
@@ -175,6 +281,109 @@
   .app-shell .brand-suffix, .app-shell .header-edition, .app-shell .user-email { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .app-shell :is(.button, .loading-skeleton) { animation: none; transition: none; } }
+/* Run page: identity, real status and the stage index. A number and a thin rule
+   do the dividing, so the run reads as one column of stages and not as a stack
+   of framed panels. */
+.app-shell .run-identity { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; padding: 20px 0 16px; border-bottom: 1px solid var(--line); }
+.app-shell .run-identity-lead { display: grid; gap: 4px; min-width: 0; }
+.app-shell .run-identity-lead h1 { margin: 0; font-size: 22px; letter-spacing: -.04em; }
+.app-shell .run-identity-ship { margin: 0; color: var(--muted); font-size: 12px; }
+.app-shell .run-identity-facts { display: grid; gap: 7px; margin: 0; min-width: 0; }
+.app-shell .run-identity-facts > div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.app-shell .run-identity-facts dt { color: var(--faint); font-size: 10px; }
+.app-shell .run-identity-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; font-size: 11px; }
+.app-shell .run-identity-facts code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 10px; }
+.app-shell .run-status { display: grid; gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.app-shell .run-status h2 { margin: 0; font-size: 19px; letter-spacing: -.03em; }
+.app-shell .run-status-note { margin: 0; color: var(--warning); font-size: 11px; }
+.app-shell .run-pending { margin: 0; }
+.app-shell .run-meta { padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.app-shell .run-meta summary { cursor: pointer; color: var(--faint); }
+.app-shell .run-meta dl { display: grid; gap: 7px; margin: 12px 0 0; }
+.app-shell .run-meta dl > div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.app-shell .run-meta dt { color: var(--faint); font-size: 10px; }
+.app-shell .run-meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.app-shell .run-stage-list { display: grid; gap: 18px; margin-top: 18px; }
+/* A run that never loaded has nothing to show, so the failure itself is the
+   content: the reason, and one explicit way to try again. */
+.app-shell .run-read-failed { display: grid; gap: 10px; justify-items: start; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.app-shell .run-read-failed p { margin: 0; color: var(--error); font-size: 11px; }
+.app-shell .stage-card h3:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.app-shell .stage-diagnostics-repeat { margin: 8px 0 0; color: var(--faint); font-size: 10px; }
+/* The stage index locates; it never becomes a tab bar or a second column of
+   content, and it disappears with the controls when printing. */
+.app-shell .stage-index { margin: 18px 0 0; padding: 12px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.app-shell .stage-index ol { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 0; padding: 0; list-style: none; }
+.app-shell .stage-index li { min-width: 0; }
+.app-shell .stage-index a, .app-shell .stage-index button { font-size: 11px; }
+/* Report: identity first, then six saved readings, then one continuous body
+   with a narrow index beside it. The audit trail is the last thing in the
+   column, so 1440 and 1024 both keep a real reading measure. */
+.app-shell .report-actions { gap: 10px; margin-bottom: 14px; }
+.app-shell .report-action-group { display: flex; gap: 6px; }
+.app-shell .report-cover { padding: 20px 0 16px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; overflow: visible; }
+.app-shell .report-cover::before { display: none; }
+.app-shell .report-cover h1 { margin: 6px 0 5px; font-size: clamp(24px, 3vw, 34px); letter-spacing: -.05em; }
+.app-shell .report-cover > p { margin: 0; color: var(--muted); font-size: 12px; }
+.app-shell .report-status-row { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 0; color: var(--muted); font-size: 10px; }
+.app-shell .report-caveat { margin: 10px 0 0; color: var(--faint); font-size: 10px; }
+.app-shell .report-units { gap: 14px 18px; margin: 12px 0 0; padding: 10px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+.app-shell .report-units .field-label { gap: 6px; font-size: 10px; font-weight: 600; }
+/* A <select> inside a .field-label has no height or surface of its own, which
+   leaves the report's own unit controls unreadable. These are the only two
+   selects the report owns, and both follow the current theme's surface. */
+.app-shell :is(.report-units, .report-compare-control) select { height: 32px; min-height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 2px; background-color: var(--surface); color: var(--ink); }
+.app-shell :is(.report-units, .report-compare-control) option { background-color: var(--surface); color: var(--ink); }
+.app-shell .report-units select { min-width: 92px; }
+.app-shell .report-compare-control { gap: 12px; }
+.app-shell .report-compare-control select { min-width: 220px; }
+.app-shell .report-readings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 18px 0 0; border: 1px solid var(--line); background: var(--line); }
+.app-shell .report-reading { display: grid; gap: 4px; align-content: start; min-width: 0; padding: 13px 15px; background: var(--surface); }
+.app-shell .report-reading-label { color: var(--faint); font-size: 10px; }
+.app-shell .report-reading-value { font-size: 19px; font-weight: 600; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.app-shell .report-reading-context { color: var(--faint); font-size: 10px; }
+.app-shell .report-reading-reason, .app-shell .report-reading-source { color: var(--muted); font-size: 10px; line-height: 1.65; overflow-wrap: anywhere; }
+.app-shell .report-reading-source { font-family: 'Cascadia Code', Consolas, monospace; }
+.app-shell .report-reading-estimate { justify-self: start; padding: 1px 6px; border: 1px solid var(--line); border-radius: 2px; color: var(--muted); font-size: 9px; }
+.app-shell .report-reading--unknown .report-reading-value, .app-shell .report-reading--not_requested .report-reading-value, .app-shell .report-reading--unavailable .report-reading-value, .app-shell .report-reading--model_limit .report-reading-value, .app-shell .report-reading--failed .report-reading-value, .app-shell .report-reading--canceled .report-reading-value, .app-shell .report-reading--multiple .report-reading-value { color: var(--faint); font-weight: 500; }
+.app-shell .report-root-diagnostics { margin: 18px 0 0; }
+.app-shell .report-root-diagnostics-fold { margin-top: 10px; padding: 10px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; }
+.app-shell .report-root-diagnostics-fold p { margin: 8px 0 0; }
+.app-shell .report-root-diagnostics code { overflow-wrap: anywhere; color: var(--accent); font-family: 'Cascadia Code', Consolas, monospace; font-size: 10px; }
+.app-shell .report-diagnostic-stage { margin-left: 6px; color: var(--faint); }
+.app-shell .report-columns { grid-template-columns: 200px minmax(0, 1fr); gap: 26px; align-items: start; margin-top: 22px; }
+.app-shell .report-columns > .stage-index { position: sticky; top: 14px; margin-top: 0; padding-top: 0; border-top: 0; }
+.app-shell .report-columns > .stage-index ol { display: grid; gap: 7px; }
+.app-shell .report-main { display: grid; gap: 22px; min-width: 0; }
+.app-shell .report-main .report-section { padding: 20px 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.app-shell .report-main .report-section:first-child { border-top: 0; }
+/* A stage heading is a real focus target, and a sticky header never covers it. */
+.app-shell .report-main .stage-card, .app-shell .run-stage-list .stage-card { scroll-margin-top: 64px; }
+.app-shell .report-sources.report-audit { position: static; padding: 18px 0 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
+.app-shell .report-audit .section-heading h2 { margin: 0; font-size: 14px; }
+.app-shell .report-audit-facts { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 8px 16px; margin: 14px 0 0; }
+.app-shell .report-audit-facts dt { margin: 0; color: var(--faint); font-size: 10px; }
+.app-shell .report-audit-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; font-size: 10px; }
+/* Audit folds and the provenance appendix. A declaration can be a long
+   structured statement, so the group summary is capped on screen and scrolls,
+   while every path wraps instead of pushing the column wide. */
+.app-shell .report-audit-fold > summary { cursor: pointer; color: var(--muted); font-size: 11px; }
+.app-shell .report-audit-fold > pre { max-height: 220px; }
+.app-shell .report-audit-group { display: grid; min-width: 0; }
+.app-shell .report-audit-group > summary { display: grid; gap: 4px; min-width: 0; padding: 9px 0; cursor: pointer; }
+.app-shell .report-audit-declaration { display: block; min-width: 0; max-height: 4.5em; overflow: auto; overflow-wrap: anywhere; word-break: break-word; color: var(--ink); font-family: 'Cascadia Code', Consolas, monospace; font-size: 10px; line-height: 1.5; }
+.app-shell .report-audit-estimate { color: var(--muted); font-size: 10px; }
+.app-shell .report-audit-count { color: var(--faint); font-size: 10px; }
+.app-shell .report-audit-paths { display: grid; gap: 4px; min-width: 0; margin: 0 0 10px; padding-left: 18px; }
+.app-shell .report-audit-paths code { overflow-wrap: anywhere; word-break: break-word; font-size: 10px; }
+.app-shell .report-audit-empty { margin: 8px 0 0; color: var(--faint); font-size: 10px; }
+.app-shell .report-compare-busy { color: var(--faint); font-size: 10px; }
+@media (max-width: 1100px) {
+  .app-shell .report-readings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 940px) {
+  .app-shell .report-columns > .stage-index { position: static; }
+}
 @media print {
   :root[data-formfield-surface='app'], :root[data-formfield-surface='app'][data-theme='dark'], .ff-tool-shell, .app-shell, :root[data-theme='dark'] :is(.ff-tool-shell, .app-shell) {
     color-scheme: light; --canvas: #fff; --surface: #fff; --surface-soft: #fff; --surface-tint: #fff; --ink: #191b19; --muted: #686d66; --faint: #686d66; --line: #d6d9d2; --line-strong: #b9bfb4; --accent: #3857e7; --accent-soft: #edf0ff; --warning: #936023; --warning-soft: #fcf3e8; --error: #a34242; --error-soft: #fff0ef;
@@ -182,4 +391,51 @@
   .ff-tool-return, .app-shell .ff-site-geometry, .app-shell .no-print { display: none !important; }
   .app-shell .page-pad { max-width: none; padding: 0; }
   :root[data-theme='dark'] .app-shell .stage-pill--completed { color: #327856; border-color: #afcfc0; background: #edf7f1; }
+}
+
+/* Printing this report. Paper is always light: a dark screen must not print as
+   a dark sheet, and the readings above the audit trail must read the same way.
+   The controls, the index and the raw stage payload are screen material. */
+@media print {
+  :root[data-theme='dark'] .app-shell {
+    color-scheme: light; --canvas: #fff; --surface: #fff; --surface-soft: #fff; --surface-tint: #fff;
+    --ink: #191b19; --muted: #4f544e; --faint: #4f544e; --line: #c9ccc5; --line-strong: #aeb3aa;
+    --accent: #2f46b8; --accent-soft: #eef1ff; --warning: #7a4d18; --warning-soft: #fdf4e9;
+    --error: #8f3636; --error-soft: #fdefee;
+  }
+  .app-shell .report-page { max-width: none; padding: 0; }
+  /* Screen furniture: navigation, the stage index, every control and the raw
+     stage payload. The raw payload is megabytes of saved arrays; it belongs in
+     the JSON or CSV export, not on paper. */
+  .app-shell :is(.site-header, .stage-index, .report-actions, .report-units, .report-compare-control, .stage-raw-data) { display: none !important; }
+  /* One continuous column. The index is gone, so nothing is beside the body. */
+  .app-shell .report-columns { grid-template-columns: minmax(0, 1fr); }
+  .app-shell .report-main { display: block; }
+  .app-shell .report-section, .app-shell .report-audit, .app-shell .report-footer { margin: 0 0 18px; padding: 0; border: 0; background: transparent; }
+  /* A long stage or a long provenance group is allowed to break across pages;
+     the inherited keep-together rule would otherwise push whole cards to a new
+     sheet and leave blank half pages behind. */
+  .app-shell :is(.stage-card, .report-section, .report-audit-group, .report-sources) { break-inside: auto; page-break-inside: auto; }
+  /* Headings stay with what they introduce; tables repeat their header row. */
+  .app-shell :is(h1, h2, h3, .section-heading, summary, .report-reading) { break-after: avoid; page-break-after: avoid; }
+  .app-shell thead { display: table-header-group; }
+  .app-shell :is(th, td) { break-inside: avoid; page-break-inside: avoid; }
+  /* Nothing is cut off or scrolled away: every folded region prints at its full
+     height, and long paths and fingerprints wrap instead of being clipped. */
+  /* Every bounded wrapper in the printed tree is unbounded, so no text is
+     painted outside a retained height and nothing is clipped. These selectors
+     are at or above the screen rules they undo. */
+  .app-shell pre, .app-shell .stage-assumptions > pre, .app-shell .report-audit-fold > pre,
+  .app-shell .stage-diagnostics > div, .app-shell .stage-diagnostics-open,
+  .app-shell .stage-table-scroll, .app-shell .report-audit-declaration,
+  .app-shell .report-audit-group, .app-shell .stage-values, .app-shell .report-readings {
+    max-height: none; overflow: visible;
+  }
+  .app-shell .stage-value span { max-width: none; overflow: visible; white-space: normal; text-overflow: clip; }
+  .app-shell :is(code, .report-audit-paths, .report-audit-declaration, .report-audit-facts dd, .stage-source, .report-reading-reason, .report-reading-source) { overflow-wrap: anywhere; word-break: break-word; white-space: pre-wrap; }
+  .app-shell .report-readings { border: 0; background: transparent; gap: 0; }
+  .app-shell .report-reading { border: 0; padding: 0 0 10px; }
+  .app-shell .stage-diagnostics-open { border-left: 1px solid var(--line-strong); background: transparent; color: var(--ink); }
+  .app-shell .stability-plot, .app-shell .comparison-table, .app-shell .stage-table { break-inside: auto; }
+  .app-shell .report-audit-fold > summary, .app-shell .stage-assumptions > summary { list-style: none; }
 }

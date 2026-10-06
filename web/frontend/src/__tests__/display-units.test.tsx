@@ -355,4 +355,47 @@ describe('stored results and the immutable report', () => {
     expect(JSON.stringify(snapshot)).not.toContain('27200000');
     expect(JSON.stringify(data)).toBe(original);
   });
+
+  it('converts the report\'s own readings and leaves a range in nautical miles', async () => {
+    const { Report } = await import('../pages/Report');
+    const data = structuredClone(completedFixture);
+    data.input_snapshot = { ...data.input_snapshot, display_preferences: { length: 'ft', mass: 'kg' } };
+    const delivered = (name: string, payload: Record<string, unknown>) => {
+      data.stages[name] = {
+        status: 'completed', requested: true, reason: null,
+        validity: { complete: true, converged: true, model_applicable: true, historical_validated: null },
+        method_versions: {}, assumptions: [], diagnostics: [], data: payload,
+      };
+    };
+    delivered('loading', { values: { total_mass_t: 27200 } });
+    delivered('equilibrium', { waterline_above_keel_m: 9.92, heel_deg: 0 });
+    delivered('endurance', { values: { range_nm: 5760, speed_kn: 24, source: 'fuel study', estimate: true } });
+    render(<Report result={data} runId="run-8" />);
+
+    const readings = within(document.querySelector('.report-readings') as HTMLElement);
+    const card = (label: string) => readings.getByText(label).closest('.report-reading') as HTMLElement;
+    // A stored metre or tonne follows the reader's choice on this page...
+    expect(card('龙骨基准水线高度').textContent).toMatch(/[\d.,]+ ft/);
+    expect(card('所选工况总质量').textContent).toContain('27,200,000 kg');
+    // ...and a nautical mile is not a length, so the range never converts.
+    expect(card('稳态续航').textContent).toContain('5,760 nmi');
+    expect(card('稳态续航').textContent).not.toContain(' ft');
+    expect(card('稳态续航').textContent).toContain('来源 fuel study');
+    expect(card('稳态续航').textContent).toContain('工程估算');
+
+    // Back to the canonical reading of the same saved numbers.
+    fireEvent.change(screen.getByLabelText('报告length显示单位'), { target: { value: 'm' } });
+    fireEvent.change(screen.getByLabelText('报告mass显示单位'), { target: { value: 't' } });
+    expect(card('龙骨基准水线高度').textContent).toContain('9.92 m');
+    expect(card('所选工况总质量').textContent).toContain('27,200 t');
+    expect(card('稳态续航').textContent).toContain('5,760 nmi');
+
+    // The stored snapshot keeps the values the run was analysed with.
+    const loadingValues = (data.stages.loading.data as { values: { total_mass_t: number } }).values;
+    const enduranceValues = (data.stages.endurance.data as { values: { range_nm: number } }).values;
+    const balance = data.stages.equilibrium.data as { waterline_above_keel_m: number };
+    expect(balance.waterline_above_keel_m).toBe(9.92);
+    expect(loadingValues.total_mass_t).toBe(27200);
+    expect(enduranceValues.range_nm).toBe(5760);
+  });
 });

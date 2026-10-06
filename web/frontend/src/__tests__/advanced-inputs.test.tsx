@@ -88,7 +88,8 @@ beforeEach(() => {
 async function open(chapter: string) {
   render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
   fireEvent.click(await screen.findByRole('button', { name: chapter }));
-  return screen.findByRole('heading', { name: /破损研究|性能与工况|重量与载荷|火炮武备/ });
+  // Chapters lead with their English structural title; the index keeps Chinese.
+  return screen.findByRole('heading', { level: 1, name: /Damage|Performance|Weights|Gunnery/ });
 }
 
 async function persist(): Promise<ProjectDocument> {

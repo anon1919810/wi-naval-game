@@ -49,7 +49,7 @@ export interface StageEnvelope {
   validity: { complete: boolean; converged: boolean | null; model_applicable: boolean | null; historical_validated: boolean | null };
   method_versions: Record<string, unknown>;
   assumptions: unknown[];
-  diagnostics: Array<{ code?: string; severity?: string; path?: string; message?: string; stage?: string; source_path?: string }>;
+  diagnostics: Array<{ code?: string; severity?: string; /** Set when the diagnostic decides whether this stage may show a result. */ blocking?: boolean; path?: string; message?: string; stage?: string; source_path?: string }>;
   data: Record<string, unknown> | null;
   [key: string]: unknown;
 }

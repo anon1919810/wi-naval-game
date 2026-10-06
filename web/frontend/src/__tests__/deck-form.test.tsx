@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Workbench } from '../pages/Workbench';
@@ -66,6 +66,29 @@ function runWithFreeboard(): RunView {
 beforeEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe('deck freeboard form', () => {
+  it('traces source text and preserves an untouched structured declaration on save', async () => {
+    const input = structuredClone(deckProject);
+    const deck = input.deck as typeof deckProject.deck & { reference_length_m: { source: unknown } };
+    deck.reference_length_m.source = { id: 'drawing', page: '第六页' };
+    vi.mocked(api.getProject).mockResolvedValue({ project_id: 'p1', revision: 1, project: input });
+    vi.mocked(api.listRuns).mockResolvedValue([]);
+    vi.mocked(api.saveProject).mockResolvedValue({ project_id: 'p1', revision: 2, project: input });
+    render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('button', { name: '浮态与稳性' }));
+    const source = await screen.findByLabelText('点 aft-centre 干舷来源');
+    fireEvent.focus(source);
+    const trace = screen.getByLabelText('输入来源');
+    // Both current value and declared source describe this text control.
+    expect(within(trace).getAllByText('manual')).toHaveLength(2);
+    fireEvent.change(source, { target: { value: '   ' } });
+    expect(within(trace).getByText('未声明来源')).toBeVisible();
+    fireEvent.focus(screen.getByLabelText('参考长度来源'));
+    expect(trace.textContent).toContain('第六页');
+    fireEvent.click(screen.getByRole('button', { name: '保存修订' }));
+    await waitFor(() => expect(api.saveProject).toHaveBeenCalled());
+    const saved = vi.mocked(api.saveProject).mock.calls[0][1].project;
+    expect((saved.deck as { reference_length_m: { source: unknown } }).reference_length_m.source).toEqual({ id: 'drawing', page: '第六页' });
+  });
   it('writes the declared freeboard value and keeps source/estimate on save', async () => {
     vi.mocked(api.getProject).mockResolvedValue({ project_id: 'p1', revision: 1, project: deckProject });
     vi.mocked(api.listRuns).mockResolvedValue([]);

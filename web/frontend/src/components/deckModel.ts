@@ -3,9 +3,14 @@ import type { ProjectDocument } from '../types';
 // Declared deck freeboard input (draft.deck) and its typed accessors.
 // `null` always means "unknown" — it must never be coerced to 0 when serialised.
 
+type SourceDeclaration = string | Record<string, unknown> | null;
+function sourceDeclaration(raw: unknown): SourceDeclaration {
+  return typeof raw === 'string' ? raw : raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : null;
+}
+
 export interface MeasureField {
   value: number | null;
-  source: string | null;
+  source: SourceDeclaration;
   estimate: boolean | null;
 }
 
@@ -21,13 +26,13 @@ export interface DeckSegment {
   id: string;
   aft_point_id: string | null;
   fore_point_id: string | null;
-  source: string | null;
+  source: SourceDeclaration;
   estimate: boolean | null;
 }
 
 export interface DeckInput {
   estimate: boolean | null;
-  source: string | null;
+  source: SourceDeclaration;
   points: DeckPoint[];
   segments: DeckSegment[];
   reference_length_m: MeasureField;
@@ -38,7 +43,7 @@ export function normalizeMeasure(raw: unknown): MeasureField {
   const r = raw as Record<string, unknown>;
   const estimate = r.estimate === true ? true : r.estimate === false ? false : null;
   const value = typeof r.value === 'number' && Number.isFinite(r.value) ? r.value : null;
-  const source = typeof r.source === 'string' ? r.source : null;
+  const source = sourceDeclaration(r.source);
   return { value, source, estimate };
 }
 
@@ -68,7 +73,7 @@ export function normalizeSegment(raw: unknown): DeckSegment {
     id: str(r.id) ?? '',
     aft_point_id: str(r.aft_point_id),
     fore_point_id: str(r.fore_point_id),
-    source: str(r.source),
+    source: sourceDeclaration(r.source),
     estimate,
   };
 }
@@ -88,7 +93,7 @@ export function getDeck(draft: ProjectDocument): DeckInput {
   if (!raw || typeof raw !== 'object') return emptyDeck();
   const r = raw as Record<string, unknown>;
   const estimate = r.estimate === true ? true : r.estimate === false ? false : null;
-  const source = typeof r.source === 'string' ? r.source : null;
+  const source = sourceDeclaration(r.source);
   return {
     estimate,
     source,

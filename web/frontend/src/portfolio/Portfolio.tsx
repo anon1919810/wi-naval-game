@@ -585,10 +585,19 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
         : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}
     </div>
+
     {/* The fallback is the workspace's own shell, so the frame morph lands on a
         surface that looks like the destination instead of a bare message. The
         application is still lazy: it mounts only on the committed app route. The
-        way out goes back to the public view the visitor actually left. */}
-    {route.kind === 'app' && <div className="ff-tool-shell"><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>↖ Y’s Formfield</a><div className="ff-workspace"><Suspense fallback={<div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在加载工作空间</small></div>}><Plimsoll /></Suspense></div></div>}
+        way out is the real public view the visitor left, and it is rendered by
+        the application header itself — there is no second return bar here. */}
+    {route.kind === 'app' && <div className="ff-tool-shell"><div className="ff-workspace">
+      {/* The application chunk is still loading: its header cannot be on screen
+          yet, so the same real return href is rendered here. When the app mounts,
+          it owns the anchor and this fallback leaves with it. */}
+      <Suspense fallback={<><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>↖ Y’s Formfield</a><div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在加载工作空间</small></div></>}>
+        <Plimsoll returnHref={publicHref(publicOrigin.current)} />
+      </Suspense>
+    </div></div>}
   </>;
 }

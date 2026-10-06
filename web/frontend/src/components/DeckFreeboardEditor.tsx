@@ -2,7 +2,18 @@ import type { RunView } from '../types';
 import { FactField } from './FactField';
 import { QuantityField } from './QuantityField';
 import { useUnits } from './UnitProvider';
+import { declaredSource, TracedField, type TraceFact } from './InputTrace';
+import type { Dimension } from './units';
 import type { DeckInput, DeckPoint, DeckSegment, MeasureField } from './deckModel';
+
+// A deck measure's provenance is exactly what it stores: the value, the declared
+// source and the tri-state estimate. Nothing is inferred from a sibling measure.
+function measureFact(key: string, label: string, measure: MeasureField,
+  dimension?: Dimension, storedUnit?: string, sourceOverride?: MeasureField['source']): TraceFact {
+  const source = declaredSource(sourceOverride !== undefined ? sourceOverride : measure.source);
+  return { key, label, value: sourceOverride !== undefined ? source : measure.value, dimension, storedUnit, source,
+    estimate: measure.estimate === true ? true : measure.estimate === false ? false : null, path: key };
+}
 
 interface DeclaredFreeboard {
   values: Record<string, unknown>;
@@ -107,9 +118,15 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
               onChange={value => updatePoint(index, { y_m: value })} />
             <QuantityField small label="z" aria-label={`点 ${point.id} z`} value={point.z_m} dimension="length" kind="nonnegative"
               onChange={value => updatePoint(index, { z_m: value })} />
+            {/* Each endpoint measures its own provenance: this point's freeboard
+                never borrows the deck-level or segment-level source. */}
+            <TracedField fact={measureFact(`deck.points[${point.id}].freeboard_m`, `点 ${point.id} 干舷`, point.freeboard_m, 'length', 'm')}>
             <QuantityField small label="干舷值" aria-label={`点 ${point.id} 干舷值`} value={point.freeboard_m.value} dimension="length" kind="nonnegative"
               onChange={value => updatePointFreeboard(index, { value })} />
-            <label>干舷来源<input type="text" aria-label={`点 ${point.id} 干舷来源`} value={point.freeboard_m.source ?? ''} onChange={e => updatePointFreeboard(index, { source: e.target.value })} placeholder="来源" /></label>
+            </TracedField>
+            <TracedField fact={measureFact(`deck.points[${point.id}].freeboard_m.source`, `点 ${point.id} 干舷来源`, point.freeboard_m, undefined, undefined, point.freeboard_m.source ?? null)}>
+            <label>干舷来源<input type="text" aria-label={`点 ${point.id} 干舷来源`} value={declaredSource(point.freeboard_m.source) ?? ''} onChange={e => updatePointFreeboard(index, { source: e.target.value })} placeholder="来源" /></label>
+            </TracedField>
             <label>估算<EstimateCheckbox value={point.freeboard_m.estimate} onChange={next => updatePointFreeboard(index, { estimate: next })} /></label>
             <button type="button" className="text-button deck-remove" onClick={() => removePoint(index)} aria-label={`删除点 ${point.id || index}`}>删除</button>
           </div>
@@ -136,6 +153,14 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
                 {pointOptions.map(id => <option key={id} value={id}>{id}</option>)}
               </select></label>
               <span className="deck-readonly">长度：<strong>{units.text(lengthM, 'length')}</strong> · 占比：<strong>{lengthPct === null ? '—' : `${lengthPct} %`}</strong></span>
+              {/* A segment declares its own source; it is not the point's. */}
+              <TracedField fact={{ key: `deck.segments[${segment.id}].source`, label: `段 ${segment.id} 来源`,
+                value: declaredSource(segment.source), source: declaredSource(segment.source), estimate: segment.estimate, path: `deck.segments[${segment.id}].source` }}>
+                <span className="deck-segment-source">
+                  <span>来源</span>
+                  <span className="deck-segment-source-value">{declaredSource(segment.source) ?? '未声明'}</span>
+                </span>
+              </TracedField>
               <button type="button" className="text-button deck-remove" onClick={() => removeSegment(index)} aria-label={`删除段 ${segment.id || index}`}>删除</button>
             </div>
           );
@@ -145,9 +170,13 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
     <div className="deck-group">
       <div className="deck-group-title"><h3>参考长度</h3></div>
       <div className="deck-row">
+        <TracedField fact={measureFact('deck.reference_length_m', '参考长度', deck.reference_length_m, 'length', 'm')}>
         <QuantityField small label="参考长度" aria-label="参考长度值" value={deck.reference_length_m.value} dimension="length" kind="positive"
           onChange={value => updateReference({ value })} />
-        <label>来源<input type="text" aria-label="参考长度来源" value={deck.reference_length_m.source ?? ''} onChange={e => updateReference({ source: e.target.value })} placeholder="来源" /></label>
+        </TracedField>
+        <TracedField fact={measureFact('deck.reference_length_m.source', '参考长度来源', deck.reference_length_m, undefined, undefined, deck.reference_length_m.source ?? null)}>
+        <label>来源<input type="text" aria-label="参考长度来源" value={declaredSource(deck.reference_length_m.source) ?? ''} onChange={e => updateReference({ source: e.target.value })} placeholder="来源" /></label>
+        </TracedField>
         <label>估算<EstimateCheckbox value={deck.reference_length_m.estimate} onChange={next => updateReference({ estimate: next })} /></label>
       </div>
     </div>

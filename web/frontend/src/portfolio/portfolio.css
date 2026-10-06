@@ -1,8 +1,16 @@
 :root[data-formfield-surface='public'] body { min-width: 0; background: #f6f6f3; }
 :root[data-formfield-surface='public'][data-theme='dark'] body { background: #101110; }
+/* Body text is Inter; display headings are Space Grotesk. Both are self-hosted
+   variable fonts declared in src/styles/tokens.css (SIL OFL 1.1, Latin subset),
+   replacing the earlier unbundled Suisse Int'l aspiration: the stack now names
+   only faces we actually ship. `--font-sans`/`--font-display` are redefined
+   *inside* the public shell only, so the Splash text and the SVG metadata follow
+   them while the Plimsoll app keeps its own tokens. */
 .ff-shell {
   --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #70736e; --ff-line: #d6d9d2; --ff-accent: #3857e7;
   --ff-pad: clamp(18px, 2.6vw, 48px);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   min-height: 100svh; background: var(--ff-bg); color: var(--ff-ink); padding: 0 var(--ff-pad);
   font-family: var(--font-sans);
   /* Desktop composition: one wide column for the exhibit beside a fixed-width
@@ -21,14 +29,14 @@
 .ff-header { grid-area: 1 / 1 / 2 / -1; height: 100px; display: grid; grid-template-columns: 1fr auto; align-items: center; border-bottom: 1px solid var(--ff-line); gap: 32px; }
 /* Swiss hierarchy: the brand carries real weight, and the navigation weight now
    lives in the rail, where it is the largest type on the page. */
-.ff-wordmark { font-size: 24px; font-weight: 600; letter-spacing: -.015em; display: flex; gap: 5px; align-items: baseline; width: fit-content; }
+.ff-wordmark { font-family: var(--font-display); font-size: 24px; font-weight: 600; letter-spacing: -.015em; display: flex; gap: 5px; align-items: baseline; width: fit-content; }
 .ff-wordmark span { font-weight: 700; letter-spacing: -.015em; }
 .ff-wordmark i { font-size: 20px; color: var(--ff-accent); font-style: normal; margin-left: 6px; }
 /* The rail: Work/About stacked at display size on the right, quiet until asked.
    It is inert while the splash owns the screen and sits outside `.ff-main`, so
    the 260 ms page cut cannot move it and it keeps keyboard focus across routes. */
 .ff-rail { grid-area: 2 / 2 / 3 / 3; align-self: start; justify-self: end; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
-.ff-rail a { display: flex; align-items: flex-start; gap: .06em; position: relative; white-space: nowrap; font-size: clamp(74px, 7.6vw, 110px); font-weight: 700; line-height: .86; letter-spacing: -.025em; text-transform: lowercase; color: var(--ff-muted); transition: color .2s; padding: 0 0 clamp(2px, .3vw, 6px); }
+.ff-rail a { display: flex; align-items: flex-start; gap: .06em; position: relative; white-space: nowrap; font-family: var(--font-display); font-size: clamp(74px, 7.6vw, 110px); font-weight: 700; line-height: .86; letter-spacing: -.025em; text-transform: lowercase; color: var(--ff-muted); transition: color .2s; padding: 0 0 clamp(2px, .3vw, 6px); }
 .ff-rail a[aria-current] { color: var(--ff-ink); }
 /* The accent stripe sits under the word and never across it, so legibility is
    untouched. It is decoration only: the focus outline is still the focus cue. */
@@ -93,7 +101,7 @@
 .ff-work-info { display: flex; justify-content: space-between; gap: 30px; align-items: center; padding: 26px 0 24px; }
 .ff-work-heading { display: flex; align-items: baseline; gap: 20px; }
 .ff-work-index { font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
-.ff-work-heading h1 { margin: 0; font-size: clamp(35px, 4vw, 54px); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
+.ff-work-heading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(35px, 4vw, 54px); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
 .ff-work-heading p { margin: 8px 0 0; color: var(--ff-muted); font-size: 14px; font-weight: 400; letter-spacing: normal; }
 /* The way out of the exhibit is a framed, weighted block, so it can never be
    mistaken for the quiet reference squares beside it. */
@@ -114,11 +122,11 @@
 .ff-footer button:hover { color: var(--ff-ink); }
 .ff-about { padding: 70px 0 90px; max-width: 850px; }
 .ff-eyebrow { font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
-.ff-about h1 { font-size: clamp(54px, 7vw, 96px); letter-spacing: -.02em; line-height: 1; font-weight: 700; margin: 32px 0; }
+.ff-about h1 { font-family: var(--font-display); font-size: clamp(54px, 7vw, 96px); letter-spacing: -.02em; line-height: 1; font-weight: 700; margin: 32px 0; }
 .ff-about > p { font-size: 20px; font-weight: 400; line-height: 1.6; max-width: 590px; color: var(--ff-muted); }
 .ff-about-work { border-top: 1px solid var(--ff-line); margin-top: 60px; padding-top: 28px; }
 .ff-about-work > span { font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; }
-.ff-about-work h2 { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin: 18px 0 10px; }
+.ff-about-work h2 { font-family: var(--font-display); font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin: 18px 0 10px; }
 .ff-about-work p { max-width: 550px; line-height: 1.7; color: var(--ff-muted); }
 .ff-about-work a { display: inline-block; margin-top: 25px; padding: 15px 0; border-bottom: 1px solid var(--ff-ink); font-size: 11px; font-weight: 600; letter-spacing: .02em; }
 .ff-splash { position: fixed; inset: 0; z-index: 1000; background: #000; overflow: hidden; }

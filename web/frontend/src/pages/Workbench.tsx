@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import * as api from '../api';
 import { DeckFreeboardEditor } from '../components/DeckFreeboardEditor';
@@ -10,15 +10,15 @@ import { WeaponsEditor } from '../components/WeaponsEditor';
 import { ArmourEditor } from '../components/ArmourEditor';
 import { EnginesEditor } from '../components/EnginesEditor';
 import { HullSupplementEditor } from '../components/HullSupplementEditor';
-import { PerformanceEditor, EMPTY_REQUEST, buildOptions, type RequestDraft } from '../components/PerformanceEditor';
+import { EMPTY_REQUEST, PerformanceInputs, PerformanceRequest, PerformanceResults, buildOptions, type RequestDraft } from '../components/PerformanceEditor';
 import { buildFloodingRequest, EMPTY_FLOODING_REQUEST, type FloodingRequest } from '../components/floodingModel';
 import { currentRun, eligibleResultRun, ledgerItems, RESULT_STATUSES } from '../components/formModel';
 import { getDeck, type DeckInput } from '../components/deckModel';
-import { FactField } from '../components/FactField';
-import { ProjectNav, type Chapter } from '../components/ProjectNav';
+import { declaredSource, InputTraceProvider, TracePanel, useInputTrace, TracedField, type TraceFact } from '../components/InputTrace';
+import { CHAPTERS, chapterNumber, chapterOf, ProjectNav, type Chapter } from '../components/ProjectNav';
 import { QuantityField } from '../components/QuantityField';
-import { StatusBadge } from '../components/StatusBadge';
 import { UnitProvider } from '../components/UnitProvider';
+import { WorkbenchOverview } from '../components/WorkbenchOverview';
 import type { ProjectDocument, ProjectView, RunView } from '../types';
 
 // Dimensionless coefficients keep a plain number input; lengths speak the
@@ -32,14 +32,11 @@ const HULL_FIELDS = [
   { key: 'waterplane_coeff', label: '水线面系数', hint: '无量纲', dimension: null },
 ] as const;
 
-const CHAPTER_DATA: Partial<Record<Chapter, { key: string; title: string; intro: string }>> = {
-  armour: { key: 'systems', title: '装甲与武备', intro: '这里编辑系统事实；质量仍须在所选载荷账本中明确绑定，不能重复计重。' },
-  guns: { key: 'systems', title: '火炮武备', intro: '声明炮数与每炮携弹数；单发弹重优先取自账本弹药模型，没有模型时可声明仅用于报告的弹丸质量。全舰携带量仍取自账本。' },
-  weapons: { key: 'systems', title: '鱼雷与水雷武备', intro: '声明鱼雷、水雷、深弹及五个杂项位置分区；系统质量取自所选载荷账本，位置分区声明质量仅用于报告，不另加排水量。' },
-  stability: { key: 'deck', title: '甲板与稳性输入', intro: '端点、干舷与参考长度需要独立来源。未知值请保持空缺。' },
-  propulsion: { key: 'systems', title: '动力系统', intro: '锅炉、燃料和传动事实来自项目输入；计算结果只出现在运行记录里。' },
-  damage: { key: 'flooding_scenarios', title: '破损研究', intro: '场景声明舱室、连接与开口；它是研究输入，不是第二份重量账本。项目舱室仍决定主带研究范围。' },
-};
+// The chapter that owns a raw-JSON view, and the project section it edits.
+// A chapter without a `jsonKey` has no contract fragment of its own.
+const CHAPTER_JSON: Partial<Record<Chapter, string>> = Object.fromEntries(
+  CHAPTERS.filter(entry => entry[3]).map(entry => [entry[0], entry[3] as string]),
+);
 
 function numeric(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
@@ -68,6 +65,46 @@ function matchesRun(run: RunView | null | undefined, projectId: string, revision
     && run.condition_id === conditionId && RESULT_STATUSES.includes(run.status) && !!run.result;
 }
 
+/**
+ * A numbered first-level group. The number and the thin rule do the dividing, so
+ * nested cards inside a group do not need to repeat their own heavy frames.
+ */
+function InputGroup({ index, title, note }: { index: string; title: string; note?: string }) {
+  return <div className="input-group-head">
+    <span className="group-index" aria-hidden="true">{index}</span>
+    <h2>{title}</h2>
+    {note && <span className="group-note-inline">{note}</span>}
+  </div>;
+}
+
+/**
+ * The chapter heading follows the reader's context: the vessel names itself in
+ * the Overview, while every other chapter leads with its English structural
+ * title and keeps the vessel as a small, secondary identity line.
+ */
+function ChapterHead({ chapter, name, projectId, revision, proxy }: {
+  chapter: Chapter; name: string; projectId: string; revision: number; proxy: boolean;
+}) {
+  const definition = chapterOf(chapter);
+  if (chapter === 'overview') {
+    return <header className="chapter-head chapter-head--vessel">
+      <span className="section-kicker">{definition.title.toUpperCase()} / {projectId.slice(0, 8).toUpperCase()}</span>
+      <div className="vessel-title-row"><h1>{name}</h1>
+        <span className="proxy-label">{proxy ? '工程代理 · 非史实认证' : '项目输入'}</span></div>
+      <p>{definition.purpose}</p>
+    </header>;
+  }
+  return <header className="chapter-head">
+    <span className="section-kicker">{chapterNumber(chapter)} / {definition.title.toUpperCase()}</span>
+    <h1>{definition.title}</h1>
+    <p className="chapter-context"><span className="chapter-vessel">{name}</span>
+      <span>修订 {revision}</span>
+      <span>{projectId.slice(0, 8).toUpperCase()}</span>
+    </p>
+    {definition.purpose && <p className="chapter-purpose">{definition.purpose}</p>}
+  </header>;
+}
+
 function projectRenderError(value: unknown, projectId: string): string | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return '项目 JSON 根节点无效';
   const row = value as Record<string, unknown>;
@@ -87,10 +124,31 @@ function projectRenderError(value: unknown, projectId: string): string | null {
   return null;
 }
 
+// Wide desktops have room for a third column; at 1024 the same panel opens above
+// the inputs instead, so the trace never squeezes or covers the form.
+function traceDefaultsOpen(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true;
+  return !window.matchMedia('(max-width: 1280px)').matches;
+}
+
+/**
+ * Trace selection belongs to one project chapter. Switching either clears it, so
+ * a fact can never be read against a chapter it does not belong to. This is view
+ * state only: it never writes to the project or marks the draft as edited.
+ */
+function TraceScope({ scopeKey, children }: { scopeKey: string; children: ReactNode }) {
+  const { clear } = useInputTrace();
+  useEffect(() => { clear(); }, [scopeKey, clear]);
+  return <>{children}</>;
+}
+
+
+
 export function Workbench({ projectId, onBack, onRun }: { projectId: string; onBack: () => void; onRun: (runId: string) => void }) {
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
   const [chapter, setChapter] = useState<Chapter>('overview');
+  const [traceOpen, setTraceOpen] = useState(traceDefaultsOpen);
   const [conditionId, setConditionId] = useState('');
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -173,8 +231,8 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
 
   useEffect(() => {
     if (!draft) return;
-    const section = CHAPTER_DATA[chapter];
-    const value = chapter === 'json' ? draft : section ? draft[section.key] : null;
+    const section = CHAPTER_JSON[chapter];
+    const value = chapter === 'json' ? draft : section ? draft[section] : null;
     setJsonText(JSON.stringify(value ?? (chapter === 'damage' ? [] : {}), null, 2));
     setJsonError('');
   }, [chapter, draft]);
@@ -325,10 +383,10 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
         if (problem) throw new Error(problem);
         updateDraft(parsed as ProjectDocument);
       } else {
-        const section = CHAPTER_DATA[chapter];
+        const section = CHAPTER_JSON[chapter];
         if (!section) return;
         const next = structuredClone(draft);
-        next[section.key] = parsed;
+        next[section] = parsed;
         updateDraft(next);
       }
       setJsonError('');
@@ -338,6 +396,7 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
   if (!draft || !view) return <div className="page-pad"><p className="section-kicker">WORKSPACE / LOADING</p>{error ? <div className="notice notice--error" role="alert">{error}</div> : <div className="loading-skeleton" aria-label="正在读取舰船" />}</div>;
 
   const hull = draft.hull ?? {};
+  const hullSources = (hull.sources && typeof hull.sources === 'object' ? hull.sources : {}) as Record<string, unknown>;
   // Validate identity here, in render, rather than relying on the effect having
   // run: a stale or in-flight result must never be displayed for the current
   // revision/condition.
@@ -346,51 +405,111 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
   const visibleRuns = selectedRun ? [selectedRun] : [];
   // Display units follow the edited draft. They change presentation only: the
   // saved revision, the request and every export stay canonical.
-  const page = <div className="workbench-layout">
+  const page = <div className="workbench-layout" data-trace={traceOpen ? 'open' : 'closed'}>
     <ProjectNav name={draft.name} active={chapter} onSelect={setChapter} onBack={onBack} />
     <main className="workbench-main">
-      <div className="workbench-toolbar"><div className="breadcrumbs"><button onClick={onBack}>项目库</button><span>/</span><strong>{draft.name}</strong></div>
-        <div className="toolbar-actions"><span className={`save-state ${dirty ? 'save-state--dirty' : ''}`}><i aria-hidden="true" />{dirty ? '未保存修改' : `已保存 · 修订 ${view.revision}`}</span>
-          <button className="button button--secondary" onClick={downloadProject}
-            title={dirty ? '下载当前草稿文档（含未保存修改）' : `下载已保存的修订 ${view.revision} 项目文档`}>
-            下载项目 JSON
-          </button>
-          <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>保存修订</button>
-          <button className="button button--primary" onClick={run} disabled={dirty || !conditionId || busy || !!runError} title={dirty ? '先保存当前修改再运行计算' : runError || undefined}>{busy ? '请稍候…' : '运行计算 ↗'}</button></div>
+      <div className="workbench-toolbar">
+        <div className="operation-bar">
+          <div className="operation-identity">
+            <label htmlFor="condition">当前工况</label>
+            <select id="condition" value={conditionId} onChange={event => setConditionId(event.target.value)}>
+              {draft.loading_conditions.length === 0 ? <option value="">尚无工况</option>
+                : draft.loading_conditions.map(item => <option key={item.id} value={item.id}>{item.label || item.id}</option>)}
+            </select>
+            {/* The saved revision stays visible while the draft is edited: an
+                unsaved edits do not change the saved revision number. */}
+            <span className="save-state">
+              <span className={`save-dot ${dirty ? 'save-dot--dirty' : ''}`} aria-hidden="true" />
+              <span>{dirty ? '未保存修改' : '已保存'}</span>
+              <span className="save-revision">修订 {view.revision}</span>
+            </span>
+          </div>
+          <div className="toolbar-actions">
+            <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>保存修订</button>
+            <button className="button button--primary" onClick={run} disabled={dirty || !conditionId || busy || !!runError}
+              title={dirty ? '先保存当前修改再运行计算' : runError || undefined}>{busy ? '请稍候…' : '运行计算 ↗'}</button>
+            <details className="secondary-actions">
+              <summary aria-label="更多操作">更多</summary>
+              <div className="secondary-actions-panel">
+                <button className="button button--secondary" onClick={downloadProject}
+                  title={dirty ? '下载当前草稿文档（含未保存修改）' : `下载已保存的修订 ${view.revision} 项目文档`}>
+                  下载项目 JSON
+                </button>
+                <p>项目文档是草稿备份，不是计算报告。</p>
+              </div>
+            </details>
+          </div>
+        </div>
+        {/* Every blocking failure sits here, directly under the operation bar and
+            above the chapter heading: request errors included, never folded away. */}
+        <div className="workbench-alerts">
+          {runError && <div className="notice notice--error" role="alert">{runError}</div>}
+          {error && <div className="notice notice--error" role="alert">{error}</div>}
+          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void navigator.clipboard?.writeText(JSON.stringify(draft, null, 2)); }}>复制我的修改</button><button className="button button--primary" onClick={() => { void reload(); }}>重新载入</button></div></div>}
+        </div>
       </div>
       <div className="workbench-content">
-        {runError && chapter !== 'damage' && <div className="notice notice--error" role="alert">{runError}</div>}
-        <header className="vessel-header"><span className="section-kicker">VESSEL / {draft.id.slice(0, 8).toUpperCase()}</span><div className="vessel-title-row"><h1>{draft.name}</h1><span className="proxy-label">{draft.name.toLowerCase().includes('queen mary') ? '工程代理 · 非史实认证' : '项目输入'}</span></div><p>选择工况并保存输入后运行。计算状态与历史适用性分别呈现。</p></header>
-        <div className="condition-strip"><label htmlFor="condition">当前工况</label><select id="condition" value={conditionId} onChange={event => setConditionId(event.target.value)}>{draft.loading_conditions.length === 0 ? <option value="">尚无工况</option> : draft.loading_conditions.map(item => <option key={item.id} value={item.id}>{item.label || item.id}</option>)}</select><span>已选修订 {view.revision} · 计算不会读取未保存的修改</span></div>
-        {error && <div className="notice notice--error" role="alert">{error}</div>}
-        {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void navigator.clipboard?.writeText(JSON.stringify(draft, null, 2)); }}>复制我的修改</button><button className="button button--primary" onClick={() => { void reload(); }}>重新载入</button></div></div>}
-        {chapter === 'overview' && <section className="overview-grid"><div className="metric-grid">
-          <FactField label="船长" value={numeric(hull.loa_m ?? hull.length_m)} dimension="length" status="known" source="项目输入" />
-          <FactField label="型宽" value={numeric(hull.beam_m)} dimension="length" status="known" source="项目输入" />
-          <FactField label="设计吃水" value={numeric(hull.draught_normal_m ?? hull.draft_m)} dimension="length" status="known" source="项目输入" />
-          <FactField label="重量条目" value={draft.weight_groups.reduce((sum, group) => sum + group.items.length, 0)} unit="项" status="known" source="当前修订" />
-        </div><div className="overview-panel"><div className="section-heading"><h2>纵向概览</h2><span>结构示意 · 不按比例</span></div><svg viewBox="0 0 780 180" role="img" aria-label="舰船轮廓示意，不按比例"><path className="ship-outline" d="M40 96 L72 74 L166 67 L255 64 L365 67 L470 65 L592 70 L705 78 L741 96 L726 118 Q450 143 101 118 Z"/><path className="ship-waterline" d="M28 105 H752"/><path className="ship-mast" d="M290 67 L314 13 L339 67 M311 65 L313 14 M510 67 L525 32 L541 68"/><rect className="ship-detail" x="353" y="35" width="22" height="31"/><rect className="ship-detail" x="402" y="25" width="24" height="40"/><rect className="ship-detail" x="466" y="34" width="22" height="31"/></svg><p className="diagram-caption">仅表达船体与水线阅读关系；真实型线以项目数据和计算结果为准。</p></div><div className="overview-callout"><span className="section-kicker">NEXT STEP / 下一步</span><h2>先确认输入，再看结果</h2><p>从左侧章节检查主尺度、载荷与来源。运行后可查看各阶段的结果、限制与报告。</p><button className="text-button" onClick={() => setChapter('hull')}>编辑船型数据 ↗</button></div>{runs.length > 0 && <div className="overview-panel"><div className="section-heading"><h2>最近运行</h2><span>保存的输入快照</span></div><div className="run-history">{runs.slice(0, 6).map(item => <button key={item.id} onClick={() => onRun(item.id)}><span>{item.condition_id} · 修订 {item.revision}</span><strong><StatusBadge status={item.status} /></strong><small>{new Date(item.created_at).toLocaleString('zh-CN')}</small><span aria-hidden="true">↗</span></button>)}</div></div>}</section>}
-        {chapter === 'hull' && <section className="editor-section"><div className="section-heading"><h2>船型与几何</h2><span>显示单位可读，保存与计算仍为规范单位</span></div><p className="section-intro">主尺度只记录已知输入。留空表示未知，不自动补零。复杂型线可在“项目数据”中编辑。</p><div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`)); return <div className="field-label" key={field.key} onFocus={() => setInspected({ label: field.label, source: '当前项目输入；具体史料来源请在项目数据中声明', estimate: false })}>
+        <ChapterHead chapter={chapter} name={draft.name} projectId={draft.id} revision={view.revision} proxy={draft.name.toLowerCase().includes('queen mary')} />
+        {chapter === 'overview' && <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
+          runs={runs} current={selectedRun} dirty={dirty} onChapter={setChapter} onRun={onRun} />}
+        {chapter === 'hull' && <section className="editor-section"><InputGroup index="01" title="主尺度" note="显示单位可读，保存与计算仍为规范单位" />
+          <p className="section-intro">主尺度只记录已知输入。留空表示未知，不自动补零。复杂型线可在“项目数据”中编辑。</p>
+          <div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`));
+            // A main dimension carries no per-field source of its own; only an
+            // explicitly declared `hull.sources` entry is ever read as one.
+            const declared = hullSources[key];
+            const fact: TraceFact = { key: `hull.${key}`, label: field.label, value: numeric(hull[key]),
+              dimension: field.dimension ?? undefined, storedUnit: field.dimension ? 'm' : undefined,
+              // No per-dimension estimate flag is stored alongside hull.sources.
+              source: declaredSource(declared),
+              estimate: null, path: `hull.${key}` };
+            return <TracedField fact={fact} className="hull-field" key={field.key}>
           {field.dimension
             ? <QuantityField label={field.label} ariaLabel={field.label} value={numeric(hull[key])} dimension={field.dimension} kind="positive" invalid={Boolean(issue)} hint={field.hint} onChange={next => updateHull(key, next === null ? null : String(next))} />
             : <label className="field-label">{field.label}<input type="number" step="any" aria-label={field.label} aria-invalid={Boolean(issue)} value={typeof hull[key] === 'number' ? hull[key] : ''} onChange={event => updateHull(key, event.target.value)} placeholder="未知" /><small>{field.hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>}
-        </div>; })}</div></section>}
-        {chapter === 'hull' && <section className="editor-section"><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><div className="section-heading"><h2>性能与工况研究</h2></div><PerformanceEditor project={draft} run={selectedRun} request={performanceRequest} onChange={updateDraft} onRequestChange={setPerformanceRequest} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><div className="section-heading"><h2>阻力研究场景</h2><span>两种既有方法 · 输入来源与敏感性</span></div><ResistanceEditor project={draft} onChange={updateDraft} /></section>}
-        {chapter === 'weights' && <section className="editor-section"><div className="section-heading"><h2>重量与载荷</h2><span>{draft.weight_groups.length} 个分组</span></div><p className="section-intro">这里只修改已有条目。质量、重心和来源随项目修订保存；新增分组可通过“项目数据”编辑。</p>{draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>还没有重量分组</h3><p>空白项目可先从项目数据中添加账本结构。</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{group.items.length} 项</span></div><div className="weight-list">{group.items.map((item, itemIndex) => <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{String(item.id ?? `条目 ${itemIndex + 1}`)}</strong><QuantityField small label="质量" ariaLabel={`${group.id} ${String(item.id ?? itemIndex)} 质量`} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /><QuantityField small label="纵向位置" ariaLabel={`${group.id} ${String(item.id ?? itemIndex)} 纵向位置`} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /><label>来源<input value={typeof item.source === 'string' ? item.source : ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label></div>)}</div></div>)}</section>}
-        {chapter === 'weights' && <section className="editor-section"><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'stability' && <section className="editor-section"><div className="section-heading"><h2>{CHAPTER_DATA[chapter]?.title}</h2><span>端点、干舷与参考长度</span></div><p className="section-intro">{CHAPTER_DATA[chapter]?.intro}</p><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">用于编辑表单未覆盖的字段（如 y_m / z_m）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'guns' && <section className="editor-section"><div className="section-heading"><h2>{CHAPTER_DATA[chapter]?.title}</h2><span>每个炮组声明输入 · 未知留空</span></div><p className="section-intro">{CHAPTER_DATA[chapter]?.intro}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 mounts / armour 边界）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'weapons' && <section className="editor-section"><div className="section-heading"><h2>{CHAPTER_DATA[chapter]?.title}</h2><span>鱼雷 / 水雷 / 深弹 / 杂项分区 · 未知留空</span></div><p className="section-intro">{CHAPTER_DATA[chapter]?.intro}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 torpedo 的 weight_item_ids 绑定）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'armour' && <section className="editor-section"><div className="section-heading"><h2>装甲输入与研究</h2></div><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'propulsion' && <section className="editor-section"><div className="section-heading"><h2>动力输入与研究</h2></div><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'damage' && <section className="editor-section"><div className="section-heading"><h2>{CHAPTER_DATA[chapter]?.title}</h2><span>场景草稿 · 请求与结果</span></div><p className="section-intro">{CHAPTER_DATA[chapter]?.intro}</p><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
-        {chapter === 'damage' && <section className="editor-section"><details className="advanced-json"><summary>高级：破损场景 JSON</summary><p className="section-intro">这里编辑表单未覆盖的场景字段（项目舱室几何已在下方表单编辑）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">场景数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'json' && <section className="editor-section"><div className="section-heading"><h2>完整项目数据</h2><span>结构化 JSON</span></div><p className="section-intro">这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。</p><label className="field-label" htmlFor="chapter-json">项目 JSON</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
+          {field.dimension && issue && <span className="field-error" role="alert">{issue.message}</span>}
+        </TracedField>; })}</div></section>}
+        {chapter === 'hull' && <section className="editor-section"><InputGroup index="02" title="补充船型与显示" /><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {/* Reading order: every input first, then the optional request, then the
+            results that request produces. Nothing is recomputed to reorder this. */}
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="01" title="载荷工况与横摇输入" note="工况定义与派生扣除规则" />
+          <PerformanceInputs project={draft} onChange={updateDraft} /></section>}
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="02" title="阻力研究场景" note="两种既有方法 · 输入来源与敏感性" />
+          <ResistanceEditor project={draft} onChange={updateDraft} /></section>}
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="03" title="本次计算请求" note="可选 · 只决定这次运行计算什么" />
+          <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={setPerformanceRequest} /></section>}
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="04" title="结果" note="当前修订 · 所选工况" />
+          <PerformanceResults run={selectedRun} /></section>}
+        {chapter === 'weights' && <section className="editor-section"><InputGroup index="01" title="载荷账本" note={`${draft.weight_groups.length} 个分组`} />
+          {draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>还没有重量分组</h3><p>空白项目可先从项目数据中添加账本结构。</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{group.items.length} 项</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
+            const itemId = String(item.id ?? `条目 ${itemIndex + 1}`);
+            const source = declaredSource(item.source);
+            const estimate = item.estimate === true ? true : item.estimate === false ? false : null;
+            // Mass and longitudinal position are two facts of one ledger item, and
+            // each shows the item's own declared source rather than a shared note.
+            const massFact: TraceFact = { key: `ledger.${group.id}.${itemId}.mass_t`, label: `${itemId} 质量`, value: numeric(item.mass_t), dimension: 'mass', storedUnit: 't', source, estimate, path: `weight_groups[${groupIndex}].items[${itemId}].mass_t` };
+            const positionFact: TraceFact = { ...massFact, key: `ledger.${group.id}.${itemId}.x_m`, label: `${itemId} 纵向位置`, value: numeric(item.x_m), dimension: 'length', storedUnit: 'm', path: `weight_groups[${groupIndex}].items[${itemId}].x_m` };
+            return <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{itemId}</strong>
+              <TracedField fact={massFact}><QuantityField small label="质量" ariaLabel={`${group.id} ${itemId} 质量`} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /></TracedField>
+              <TracedField fact={positionFact}><QuantityField small label="纵向位置" ariaLabel={`${group.id} ${itemId} 纵向位置`} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
+              <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: `${itemId} 来源`, value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }}>
+                <label>来源<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
+              </TracedField></div>;
+          })}</div></div>)}</section>}
+        {chapter === 'weights' && <section className="editor-section"><InputGroup index="02" title="系统质量模型" note="按已声明输入核算质量，不改写账本" /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title="端点与干舷" note="端点、干舷与参考长度" /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">用于编辑表单未覆盖的字段（如 y_m / z_m）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title="炮组声明" note="每个炮组声明输入 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 mounts / armour 边界）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title="鱼雷与水雷分区" note="鱼雷 / 水雷 / 深弹 / 杂项分区 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 torpedo 的 weight_item_ids 绑定）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title="装甲输入与研究" /><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title="动力输入与研究" /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'damage' && <section className="editor-section"><InputGroup index="01" title="场景草稿" note="场景草稿 · 请求与结果" /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
+        {chapter === 'damage' && <section className="editor-section"><InputGroup index="02" title="高级场景数据" /><details className="advanced-json"><summary>高级：破损场景 JSON</summary><p className="section-intro">这里编辑表单未覆盖的场景字段（项目舱室几何已在下方表单编辑）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">场景数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'json' && <section className="editor-section"><InputGroup index="01" title="完整项目数据" note="结构化 JSON" /><p className="section-intro">这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。</p><label className="field-label" htmlFor="chapter-json">项目 JSON</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
       </div>
     </main>
-    <aside className="inspector" aria-label="来源与诊断"><span className="section-kicker">TRACE / 来源与诊断</span><h2>{inspected?.label || '当前输入'}</h2><p>点击字段查看输入语义。计算完成后，结果来源与方法边界会在报告中逐项展开。</p><div className="inspector-rule" /><dl><dt>数据状态</dt><dd>{inspected?.estimate ? '工程估算' : '项目输入'}</dd><dt>来源</dt><dd>{inspected?.source || '请在项目中保留原始来源；未提供的事实保持未知'}</dd><dt>请求身份</dt><dd>运行后生成并固定指纹</dd></dl><div className="inspector-bottom">水线 / 来源 / 适用范围</div></aside>
+    <TracePanel open={traceOpen} onToggle={() => setTraceOpen(open => !open)} />
   </div>;
-  return <UnitProvider preferences={draft.display_preferences}>{page}</UnitProvider>;
+  return <UnitProvider preferences={draft.display_preferences}>
+    <InputTraceProvider onReveal={() => setTraceOpen(true)}><TraceScope scopeKey={`${projectId}/${chapter}`}>{page}</TraceScope></InputTraceProvider>
+  </UnitProvider>;
 }

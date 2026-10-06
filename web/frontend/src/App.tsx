@@ -22,7 +22,12 @@ function currentRoute(): Route {
 
 function navigate(path: string) { window.location.hash = path; }
 
-export default function App() {
+/**
+ * `returnHref` is the public page the visitor actually came from. Portfolio owns
+ * that origin and passes it in; the application never guesses a destination, and
+ * the return anchor renders in the application header instead of a second bar.
+ */
+export default function App({ returnHref }: { returnHref?: string }) {
   const [user, setUser] = useState<UserSession | null>(null);
   const [mode, setMode] = useState<AuthMode | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,19 +101,28 @@ export default function App() {
   const anonymous = mode === 'anonymous';
   const identity = user?.label ?? user?.email ?? '';
 
-  if (loading) return <div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在连接工作空间</small></div>;
-  if (!user && mode !== 'email') return <div className="app-loading"><span className="brand-mark" />Plimsoll <small>{message || '正在建立本浏览器工作区'}</small></div>;
-  if (!user) return <><Login onAuthenticated={() => {
+  // The public return belongs to the application head and stays available in every
+  // state below, including a workspace that never reaches its API. Someone who
+  // cannot sign in must still be able to go back to the public pages.
+  const head = <header className="site-header">
+    {returnHref && <a className="ff-tool-return" href={returnHref}>↖ Y’s Formfield</a>}
+    <button className="brand brand-button" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ WORKSPACE</span></button>
+    <div className="header-actions"><span className="header-edition">DESIGN DESK · 1.0</span>
+      {user && <><button className="icon-button" aria-label={user.theme === 'light' ? '切换到深色主题' : '切换到浅色主题'} onClick={changeTheme}>{user.theme === 'light' ? '◐' : '◑'}</button><span className="user-email" title={identity}>{identity}</span>{!anonymous && <button className="text-button" onClick={signOut}>退出</button>}</>}
+    </div>
+  </header>;
+
+  if (loading) return <div className="app-shell">{head}<div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在连接工作空间</small></div></div>;
+  if (!user && mode !== 'email') return <div className="app-shell">{head}<div className="app-loading"><span className="brand-mark" />Plimsoll <small>{message || '正在建立本浏览器工作区'}</small></div></div>;
+  if (!user) return <div className="app-shell">{head}<Login onAuthenticated={() => {
     // Gated before the request, not only after it: a stale callback from a form
     // that was already replaced must not start another identity lookup.
     if (!mounted.current) return;
     void api.me().then(session => { if (!mounted.current) return; setUser(session); document.documentElement.dataset.theme = session.theme; });
-  }} />{message && <div className="connection-note" role="alert">{message}</div>}</>;
+  }} />{message && <div className="connection-note" role="alert">{message}</div>}</div>;
 
   return <div className="app-shell">
-    <header className="site-header"><button className="brand brand-button" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ WORKSPACE</span></button>
-      <div className="header-actions"><span className="header-edition">DESIGN DESK · 1.0</span><button className="icon-button" aria-label={user.theme === 'light' ? '切换到深色主题' : '切换到浅色主题'} onClick={changeTheme}>{user.theme === 'light' ? '◐' : '◑'}</button><span className="user-email" title={identity}>{identity}</span>{!anonymous && <button className="text-button" onClick={signOut}>退出</button>}</div>
-    </header>
+    {head}
     {message && <div className="connection-note" role="alert">{message}<button onClick={() => setMessage('')} aria-label="关闭提示">×</button></div>}
     {route.kind === 'library' && <Library onOpen={id => navigate(`/projects/${id}`)} anonymous={anonymous} />}
     {route.kind === 'project' && <Workbench key={route.id} projectId={route.id} onBack={() => navigate('/projects')} onRun={id => navigate(`/runs/${id}`)} />}
