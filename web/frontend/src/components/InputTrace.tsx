@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { useUnits } from './UnitProvider';
+import { useMotionToken } from './useLocalMotion';
 import type { Dimension } from './units';
 
 /**
@@ -164,6 +165,10 @@ export function TracePanel({ open, onToggle }: { open: boolean; onToggle: () => 
   useEffect(() => {
     if (open && revealVersion > 0) panel.current?.scrollIntoView?.({ block: 'nearest', behavior: 'instant' });
   }, [open, revealVersion]);
+  // The reveal follows the *field*, not its value: typing a new number into the
+  // field that is already selected republishes the same fact and must not replay
+  // anything. The panel itself is never re-keyed and never takes focus.
+  const motion = useMotionToken(open ? fact?.key ?? 'guide' : null);
   const units = useUnits();
   return <aside ref={panel} className={`trace-panel ${open ? 'trace-panel--open' : ''}`} aria-label="输入来源">
     <div className="trace-head">
@@ -173,7 +178,7 @@ export function TracePanel({ open, onToggle }: { open: boolean; onToggle: () => 
       </button>
     </div>
     {open && (fact
-      ? <div className="trace-body">
+      ? <div className="trace-body" data-motion={motion}>
         <h2>{fact.label}</h2>
         <dl>
           <dt>当前值</dt>
@@ -189,7 +194,7 @@ export function TracePanel({ open, onToggle }: { open: boolean; onToggle: () => 
         <p className="trace-note">来源声明说明数字从哪里来，不代表史实验证。</p>
         <button type="button" className="text-button" onClick={clear}>清除选择</button>
       </div>
-      : <div className="trace-body trace-body--guide">
+      : <div className="trace-body trace-body--guide" data-motion={motion}>
         <h2>输入来源</h2>
         <p>选择任一输入字段，这里显示它实际声明的来源与估算状态。未声明的来源保持未知，不用通用说明代替。</p>
       </div>)}

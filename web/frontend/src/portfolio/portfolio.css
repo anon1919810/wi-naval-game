@@ -9,6 +9,10 @@
 .ff-shell {
   --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #70736e; --ff-line: #d6d9d2; --ff-accent: #3857e7;
   --ff-pad: clamp(18px, 2.6vw, 48px);
+  /* The navigation preview's one exchange: the current word hands its underline
+     to the destination in a single damped move, with no bounce and no restart.
+     NAV_PREVIEW_MS and NAV_PREVIEW_EASE in navPreview.ts are the numbers. */
+  --ff-nav-preview: 300ms; --ff-nav-ease: cubic-bezier(.2,.8,.2,1);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   min-height: 100svh; background: var(--ff-bg); color: var(--ff-ink); padding: 0 var(--ff-pad);
@@ -36,20 +40,45 @@
    It is inert while the splash owns the screen and sits outside `.ff-main`, so
    the 260 ms page cut cannot move it and it keeps keyboard focus across routes. */
 .ff-rail { grid-area: 2 / 2 / 3 / 3; align-self: start; justify-self: end; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
-.ff-rail a { display: flex; align-items: flex-start; gap: .06em; position: relative; white-space: nowrap; font-family: var(--font-display); font-size: clamp(74px, 7.6vw, 110px); font-weight: 700; line-height: .86; letter-spacing: -.025em; text-transform: lowercase; color: var(--ff-muted); transition: color .2s; padding: 0 0 clamp(2px, .3vw, 6px); }
-.ff-rail a[aria-current] { color: var(--ff-ink); }
-/* The accent stripe sits under the word and never across it, so legibility is
-   untouched. It is decoration only: the focus outline is still the focus cue. */
-.ff-rail a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--ff-accent); transform: scaleX(0); transform-origin: left center; transition: transform .3s cubic-bezier(.2,.7,.2,1); }
-.ff-rail a[aria-current]::after { transform: scaleX(.22); background: var(--ff-ink); }
-.ff-rail a:hover { color: var(--ff-ink); }
-.ff-rail a:hover::after, .ff-rail a:focus-visible::after { transform: scaleX(1); }
-/* Truthful 01 badge, kept from the header navigation: one work exists. It is a
-   flex item beside the word — never a line of its own — and sits in the x-height
-   band at the word's shoulder. */
-.ff-rail a span { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-top: .16em; border-radius: 50%; background: var(--ff-accent); color: var(--ff-bg); font-size: 10px; font-weight: 600; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+/* One entry: the word, and the truthful 01 badge beside it — never a line of its
+   own. The badge is outside the word box, so no underline ever crosses the count
+   and the count never moves when an underline grows. */
+.ff-rail-link { display: flex; align-items: flex-start; gap: .06em; position: relative; white-space: nowrap; font-family: var(--font-display); font-size: clamp(74px, 7.6vw, 110px); font-weight: 700; line-height: .86; letter-spacing: -.025em; text-transform: lowercase; color: var(--ff-muted); padding: 0 0 clamp(2px, .3vw, 6px); }
+/* The word box is the frame for the preview's origin and the only thing the
+   rule spans. */
+.ff-rail-word { position: relative; display: block; }
+.ff-rail-ink { display: block; }
+/* One rule, one move. Its scale is the word's whole width when the word is
+   selected and the measured width of its first glyph when it is not, and its
+   colour goes from ink to the accent in the same 300 ms — so the rule shortens
+   onto the first glyph instead of one rule leaving as another arrives. The
+   first glyph's width is measured on the text itself by a DOM range; see
+   firstGlyphWidth in RailNav.tsx. */
+.ff-rail-word::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background-color: var(--ff-ink); transform: scaleX(var(--ff-nav-rule, 1)); transform-origin: left center; transition: transform var(--ff-nav-preview) var(--ff-nav-ease), background-color var(--ff-nav-preview) linear; }
+.ff-rail-link[data-ff-nav='selected'] .ff-rail-word::after { background-color: var(--ff-accent); transform: scaleX(1); }
+/* The preview: a duplicate of the word in the accent, opened up by a circle that
+   starts where the pointer crossed into the word — at its centre under the
+   keyboard — and grows to the far corner, so it ends exactly when the word is
+   blue. There is no disc behind it, only the word showing through the circle,
+   and the whole thing is decoration: hidden from assistive technology, never a
+   pointer target, and never a second name for the link.
+   An origin installed while the circle is closed is armed: its transition is off
+   for that one step, so the radius grows from the new origin instead of the
+   circle sliding over from the last one. */
+.ff-rail-dup { position: absolute; inset: 0; color: var(--ff-accent); opacity: 0; pointer-events: none; clip-path: circle(var(--ff-nav-radius, 0px) at var(--ff-nav-x, 50%) var(--ff-nav-y, 50%)); transition: clip-path var(--ff-nav-preview) var(--ff-nav-ease), opacity var(--ff-nav-preview) linear; }
+.ff-rail-dup[data-ff-nav-armed] { transition: none; }
+.ff-rail-link[data-ff-nav='selected'] .ff-rail-dup { opacity: 1; }
+/* Truthful 01 badge, kept from the header navigation: one work exists. */
+.ff-rail-badge { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-top: .16em; border-radius: 50%; background: var(--ff-accent); color: var(--ff-bg); font-size: 10px; font-weight: 600; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; }
 .ff-shell .ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; min-height: 44px; padding: 4px 10px; transition: color .16s; }
 .ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 6px; }
+/* The preview's tap, muted or not. One word of type beside the theme controls:
+   the label says what it is, the pressed state says whether it is on. */
+.ff-shell .ff-preview-sound { min-height: 30px; padding: 6px 8px; border: 1px solid var(--ff-line); transition: color .16s, border-color .16s; }
+.ff-shell .ff-preview-sound:hover { color: var(--ff-ink); border-color: var(--ff-muted); }
+.ff-shell .ff-preview-sound[aria-pressed='true'] { color: var(--ff-ink); border-color: var(--ff-accent); }
+.ff-preview-sound-mode { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); }
+.ff-shell .ff-preview-sound[aria-pressed='true'] .ff-preview-sound-mode { color: var(--ff-ink); }
 .ff-shell .ff-theme-system { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); border: 1px solid var(--ff-line); padding: 6px 8px; min-height: 30px; transition: color .16s, border-color .16s; }
 .ff-shell .ff-theme-system:hover { color: var(--ff-ink); border-color: var(--ff-muted); }
 .ff-shell .ff-theme-system[aria-pressed='true'] { color: var(--ff-ink); border-color: var(--ff-accent); }
@@ -75,19 +104,30 @@
 .ff-exhibit-note { position: absolute; left: 25px; right: 25px; bottom: 23px; display: flex; justify-content: space-between; font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; pointer-events: none; }
 /* Bounded inspection lens: a 2x window onto the same rendered artwork, never a
    second render, so it adds no resolution and measures nothing. Position and
-   viewBox are written by the coalesced frame loop, so nothing transitions here. */
+   viewBox are written by the coalesced frame loop, so nothing transitions here.
+   The circle is centred on the sampled point everywhere, so at the rim it hangs
+   over the board and the board's own clipping cuts it — the pointer never loses
+   the thing it is pointing at. */
 .ff-lens { position: absolute; left: 0; top: 0; width: 200px; height: 200px; pointer-events: none; }
-.ff-lens-port { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: var(--ff-panel); box-shadow: 0 0 0 1px var(--ff-accent), 0 0 0 2px var(--ff-panel), 0 0 0 3px color-mix(in srgb, var(--ff-accent) 40%, transparent); }
+/* A neutral, theme-contrast ring: two thin rings with a hairline of the page
+   between them, so the lens reads as an instrument and not as a blue button. No
+   accent anywhere on it — the accent is the navigation's. */
+.ff-lens-port { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; background: var(--ff-panel); box-shadow: 0 0 0 1px var(--ff-line), 0 0 0 2px var(--ff-bg), 0 0 0 3px var(--ff-ink); }
 .ff-lens-view { display: block; width: 100%; height: 100%; }
 /* Inside the lens the composition frame keeps 1px = 1 composition unit, so the
    outer viewBox window alone decides the 2x. That is ARTWORK_FRAME in CSS. */
 .ff-lens-view .ff-artwork { position: absolute; left: 0; top: 0; width: 1600px; height: 700px; }
+/* Four long primary ticks on the cardinal points and eight short ones between
+   them: a dial face, drawn in the same two inks as the rings. */
+.ff-lens-dial { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--ff-muted); stroke-width: .7; opacity: .7; pointer-events: none; }
+.ff-lens-tick-major { stroke: var(--ff-ink); stroke-width: 1; }
+/* The reticle: the sampled point, which is the centre of the lens everywhere. */
 .ff-lens-mark { position: absolute; left: 50%; top: 50%; width: 1px; height: 1px; }
-.ff-lens-mark::before, .ff-lens-mark::after { content: ''; position: absolute; background: var(--ff-accent); }
+.ff-lens-mark::before, .ff-lens-mark::after { content: ''; position: absolute; background: var(--ff-ink); }
 .ff-lens-mark::before { width: 13px; height: 1px; left: -6px; top: 0; }
 .ff-lens-mark::after { height: 13px; width: 1px; top: -6px; left: 0; }
-.ff-lens-label { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); display: flex; align-items: baseline; gap: 5px; padding: 1px 5px; font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-accent); background: color-mix(in srgb, var(--ff-panel) 82%, transparent); white-space: nowrap; }
-.ff-lens-label i { font-style: normal; font-size: 9px; opacity: .85; }
+.ff-lens-label { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); display: flex; align-items: baseline; gap: 5px; padding: 1px 5px; font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-ink); background: color-mix(in srgb, var(--ff-panel) 82%, transparent); white-space: nowrap; }
+.ff-lens-label i { font-style: normal; font-size: 8px; color: var(--ff-muted); }
 /* Switching references is the one moment the lens and the blueprint cursor are
    withdrawn: both sample the artwork that is being cut away. */
 .ff-shell[data-switching='true'] :is(.ff-lens, .ff-cursor) { visibility: hidden; }
@@ -153,8 +193,8 @@
   .ff-shell { grid-template-columns: minmax(0, 1fr); row-gap: 26px; }
   .ff-header, .ff-main, .ff-rail, .ff-footer { grid-area: auto; }
   .ff-rail { flex-direction: row; align-items: center; gap: 22px; padding: 16px 0 0; border-top: 1px solid var(--ff-line); }
-  .ff-rail a { font-size: clamp(40px, 10vw, 60px); line-height: .9; }
-  .ff-rail a span { width: 20px; height: 20px; font-size: 9px; margin-top: 0; }
+  .ff-rail-link { font-size: clamp(40px, 10vw, 60px); line-height: .9; }
+  .ff-rail-badge { width: 20px; height: 20px; font-size: 9px; margin-top: 0; }
 }
 @media (max-width: 650px) {
   .ff-shell { padding: 0 6vw; }

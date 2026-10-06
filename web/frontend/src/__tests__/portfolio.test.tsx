@@ -669,20 +669,79 @@ describe('inspection lens', () => {
     expect(samplePoint({ left: 0, top: 0, width: 1600, height: 900 }, .5, .25)).toMatchObject({ x: 800, y: 125 });
   });
 
-  it('magnifies exactly twice and clamps the circle while pointing at the sample', () => {
+  it('magnifies exactly twice and centres the circle on the sample at every edge and corner', () => {
     expect(LENS_MAGNIFICATION).toBe(2);
-    const centred = lensFrame({ left: 0, top: 0, width: 800, height: 350 }, .5, .5);
+    const frame = { left: 0, top: 0, width: 800, height: 350 };
+    const centred = lensFrame(frame, .5, .5);
     // 200px of lens at 2x over a 0.5 scale shows 200/2/0.5 = 200 composition units.
-    expect(centred).toMatchObject({ viewBox: '700 250 200 200', span: 200, size: 200, cx: 400, cy: 175, ox: 0, oy: 0 });
+    expect(centred).toMatchObject({ viewBox: '700 250 200 200', span: 200, size: 200, cx: 400, cy: 175 });
     // Letterboxed exhibit: scale 1, so 200px of lens at 2x shows 100 units.
-    expect(lensFrame({ left: 0, top: 0, width: 1600, height: 900 }, .5, .25)).toMatchObject({ viewBox: '750 75 100 100', size: 200 });
-    // At the top-left corner the circle is pushed inside, and the sample rides
-    // its rim: y=0 of the rectangle is above the letterboxed artwork.
-    expect(lensFrame({ left: 0, top: 0, width: 1600, height: 900 }, 0, 0)).toMatchObject({ viewBox: '-50 -150 100 100', cx: 100, cy: 100, ox: -100, oy: -100 });
-    // An exhibit smaller than the lens shrinks it rather than overflowing.
-    expect(lensFrame({ left: 0, top: 0, width: 160, height: 90 }, .5, .5)).toMatchObject({ size: 90, cx: 80, cy: 45 });
+    expect(lensFrame({ left: 0, top: 0, width: 1600, height: 900 }, .5, .25)).toMatchObject({ viewBox: '750 75 100 100', size: 200, cx: 800, cy: 225 });
+    // The circle is never pushed back inside the board: at every edge and corner
+    // its centre is the sampled point itself, and the board clips what hangs out.
+    const square: [number, number][] = [[0, 0], [1, 0], [0, 1], [1, 1], [0, .5], [.5, 0], [1, .5], [.5, 1], [.25, .75]];
+    for (const [fx, fy] of square) {
+      const lens = lensFrame(frame, fx, fy);
+      expect(lens.cx).toBe(fx * 800);
+      expect(lens.cy).toBe(fy * 350);
+      expect(lens.size).toBe(200);
+    }
+    // Corner viewBoxes still centre on the sample: 800 ± 100, 350 ± 100.
+    expect(lensFrame(frame, 0, 0)).toMatchObject({ viewBox: '-100 -100 200 200', cx: 0, cy: 0 });
+    expect(lensFrame(frame, 1, 1)).toMatchObject({ viewBox: '1500 600 200 200', cx: 800, cy: 350 });
+    expect(lensFrame(frame, 0, .5)).toMatchObject({ viewBox: '-100 250 200 200', cx: 0, cy: 175 });
+    expect(lensFrame(frame, 1, .5)).toMatchObject({ viewBox: '1500 250 200 200', cx: 800, cy: 175 });
+    // A letterboxed board samples above and below the artwork itself, and the
+    // circle still sits exactly on the pointer rather than on the artwork's edge.
+    const letterboxed: [number, number, string][] = [
+      [0, 0, '-50 -150 100 100'],
+      [1, 1, '1550 750 100 100'],
+      [.5, 1, '750 750 100 100'],
+      [0, .5, '-50 300 100 100'],
+    ];
+    for (const [fx, fy, viewBox] of letterboxed) {
+      const lens = lensFrame({ left: 0, top: 0, width: 1600, height: 900 }, fx, fy);
+      expect(lens.viewBox).toBe(viewBox);
+      expect(lens.cx).toBe(fx * 1600);
+      expect(lens.cy).toBe(fy * 900);
+    }
+    // An exhibit smaller than the lens shrinks it rather than overflowing, and
+    // it is still centred on the sample.
+    expect(lensFrame({ left: 0, top: 0, width: 160, height: 90 }, .5, .5)).toMatchObject({ size: 90, cx: 80, cy: 45, viewBox: '575 125 450 450' });
     // Unmeasured (zero) rectangles fall back to the resting view instead of NaN.
     expect(lensFrame({ left: 0, top: 0, width: 0, height: 0 }, .5, .5).viewBox).toBe('400 -50 800 800');
+  });
+
+  it('paints the lens over the sample rather than pulled back inside the board', () => {
+    fakeFrames();
+    const { container } = render(<Portfolio introEnabled={false} />);
+    const exhibit = screen.getByRole('group', { name: /Interactive top-view/ });
+    const rect = vi.spyOn(exhibit, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 800, 350));
+    fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
+    const lens = container.querySelector<HTMLElement>('.ff-lens')!;
+    const view = () => container.querySelector('.ff-lens-view')!.getAttribute('viewBox');
+    const move = (clientX: number, clientY: number) => {
+      const event = new Event('pointermove', { bubbles: true });
+      Object.assign(event, { pointerType: 'mouse', clientX, clientY });
+      fireEvent(exhibit, event);
+      act(() => { vi.advanceTimersByTime(16); });
+    };
+    // The middle: the circle is centred on the sample, so the transform puts the
+    // lens half its size above and to the left of it.
+    move(400, 175);
+    expect(lens.style.width).toBe('200px');
+    expect(lens.style.transform).toBe('translate(300px, 75px)');
+    // The top-left corner: the circle stays on the sample and a quarter of it
+    // hangs over the board, which is what the exhibit's own clipping cuts.
+    move(0, 0);
+    expect(lens.style.transform).toBe('translate(-100px, -100px)');
+    expect(view()).toBe('-100 -100 200 200');
+    // The bottom-right corner, in a board that letterboxes: the sample is off the
+    // artwork, and the lens is still exactly where the pointer is.
+    rect.mockReturnValue(new DOMRect(0, 0, 1600, 900));
+    move(1600, 900);
+    expect(lens.style.transform).toBe('translate(1500px, 800px)');
+    expect(view()).toBe('1550 750 100 100');
   });
 
   it('magnifies the registered scan, moves by keyboard and leaves on Escape', () => {

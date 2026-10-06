@@ -20,6 +20,8 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 观察与资源规划基准为 50–200 m、15 艘同屏；这不是硬性锁定游戏相机。
 
+**前端待发布**：[第三组工作空间转场与加载交接](docs/formfield/transition-loading-2026-10-06.md) · [首页蓝色预览、提示音与放大镜交接](docs/formfield/homepage-motion-2026-10-06.md)；本地验收完成，展板覆片候选已撤回，尚未部署。
+
 ## 当前状态 · 2026-09-20
 
 - **main**：最近一次玩法代码提交 `2794c80`（当前 HEAD 用 `git log -1` 查，文档提交会让 SHA 前进）→ https://github.com/anon1919810/wi-naval-game

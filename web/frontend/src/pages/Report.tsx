@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
 import * as api from '../api';
+import { ReadFailure, ReadPending } from '../components/ReadPending';
 import { ReportReadings } from '../components/ReportReadings';
 import { requestedStages } from '../components/resultReading';
 import { SourceInspector } from '../components/SourceInspector';
@@ -281,6 +282,7 @@ export function ReportPage({ runId, onBack }: { runId: string; onBack: () => voi
   const [compareError, setCompareError] = useState('');
   const [compareBusy, setCompareBusy] = useState(false);
   const [error, setError] = useState('');
+  const [attempt, setAttempt] = useState(0);
   // Late answers are rejected by ticket: a comparison that arrives after the
   // reader changed or cleared the selection is not the one they asked for.
   const comparison = useRef(0);
@@ -308,7 +310,7 @@ export function ReportPage({ runId, onBack }: { runId: string; onBack: () => voi
       }).catch(() => { /* Comparison list is optional; the stored report remains available. */ });
     }).catch(cause => { if (active && loading.current === ticket) setError(cause instanceof Error ? cause.message : '无法读取报告'); });
     return () => { active = false; loading.current += 1; comparison.current += 1; };
-  }, [runId]);
+  }, [runId, attempt]);
 
   async function selectComparison(id: string) {
     const ticket = ++comparison.current;
@@ -330,8 +332,10 @@ export function ReportPage({ runId, onBack }: { runId: string; onBack: () => voi
     }
   }
 
-  if (error) return <div className="page-pad"><div className="notice notice--error" role="alert">{error}</div><button className="text-button" onClick={onBack}>← 返回运行</button></div>;
-  if (!run) return <div className="page-pad"><div className="loading-skeleton" aria-label="正在读取报告" /></div>;
+  if (error) return <div className="page-pad">
+    <ReadFailure title={`无法读取报告 ${runId}`} detail={error} retryLabel="重新读取报告"
+      onRetry={() => { setError(''); setAttempt(current => current + 1); }} onBack={onBack} backLabel="← 返回运行" /></div>;
+  if (!run) return <div className="page-pad"><ReadPending scope="report" object="计算报告" /></div>;
   if (!run.result) return <div className="page-pad"><h1>暂无计算报告</h1><p>此运行尚未保存结果，状态：{run.status}。</p><button className="text-button" onClick={onBack}>← 返回运行</button></div>;
   // A stored report is immutable: display units come from its own input snapshot.
   const preferences = run.result.input_snapshot?.display_preferences;

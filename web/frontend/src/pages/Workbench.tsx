@@ -17,7 +17,9 @@ import { getDeck, type DeckInput } from '../components/deckModel';
 import { declaredSource, InputTraceProvider, TracePanel, useInputTrace, TracedField, type TraceFact } from '../components/InputTrace';
 import { CHAPTERS, chapterNumber, chapterOf, ProjectNav, type Chapter } from '../components/ProjectNav';
 import { QuantityField } from '../components/QuantityField';
+import { ReadFailure, ReadPending } from '../components/ReadPending';
 import { UnitProvider } from '../components/UnitProvider';
+import { useMotionToken } from '../components/useLocalMotion';
 import { WorkbenchOverview } from '../components/WorkbenchOverview';
 import type { ProjectDocument, ProjectView, RunView } from '../types';
 
@@ -144,15 +146,32 @@ function TraceScope({ scopeKey, children }: { scopeKey: string; children: ReactN
 
 
 
-export function Workbench({ projectId, onBack, onRun }: { projectId: string; onBack: () => void; onRun: (runId: string) => void }) {
+/**
+ * One of three named operations, or none. They are named apart on purpose: a
+ * save is not a run, and neither is a reload. A reader who is told only that
+ * "something is happening" cannot tell whether their revision reached the
+ * server, and a save in progress must never be reported as a busy calculation.
+ */
+type Operation = 'saving' | 'starting' | 'reloading';
+
+const OPERATION_TEXT: Record<Operation, string> = {
+  saving: '正在保存修订…', starting: '正在提交计算请求…', reloading: '正在重新载入项目…',
+};
+
+export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
+  projectId: string; onBack: () => void; onRun: (runId: string) => void; onDirtyChange?: (dirty: boolean) => void;
+}) {
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
   const [chapter, setChapter] = useState<Chapter>('overview');
   const [traceOpen, setTraceOpen] = useState(traceDefaultsOpen);
   const [conditionId, setConditionId] = useState('');
   const [dirty, setDirty] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [operation, setOperation] = useState<Operation | null>(null);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
+  const [load, setLoad] = useState<'loading' | 'failed'>('loading');
+  const [attempt, setAttempt] = useState(0);
   const [conflict, setConflict] = useState<number | null>(null);
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState('');
@@ -181,11 +200,34 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
     : performanceOptions.options;
   const runError = performanceOptions.error || floodingChoice.error;
   const draftGeneration = useRef(0);
+  const loadTicket = useRef(0);
+  /**
+   * The page's lifetime, and one ticket per write. A save, a reload or a queued
+   * run that resolves after the reader has left belongs to a page that no longer
+   * exists: it must not paint into an unmounted tree, must not navigate, and
+   * must not leave the toolbar claiming an operation is still running.
+   */
+  const alive = useRef(true);
+  const writeTicket = useRef(0);
+  useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; writeTicket.current += 1; loadTicket.current += 1; };
+  }, []);
+  const current = () => alive.current;
+  const busy = operation !== null;
+  // The chapter reveal is a local one-shot keyed on the chapter itself. The
+  // container is never re-keyed, so a hand-edited JSON document, the focused
+  // control and the reader's selection all survive the switch untouched.
+  const chapterMotion = useMotionToken(chapter);
 
   useEffect(() => {
     let active = true;
+    const mine = ++loadTicket.current;
+    setLoad('loading');
+    setLoadError('');
+    setError('');
     api.getProject(projectId).then(saved => {
-      if (!active) return;
+      if (!active || loadTicket.current !== mine) return;
       setView(saved);
       setDraft(structuredClone(saved.project));
       setPerformanceRequest(EMPTY_REQUEST);
@@ -195,9 +237,19 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
       setConditionId(saved.project.loading_conditions[0]?.id ?? '');
       setDirty(false);
       setError('');
-    }).catch(cause => { if (active) setError(errorMessage(cause)); });
+    }).catch(cause => {
+      // An older answer that arrives after a retry has started is not the one
+      // this page is now waiting for.
+      if (!active || loadTicket.current !== mine) return;
+      setLoadError(errorMessage(cause));
+      setLoad('failed');
+    });
     return () => { active = false; };
-  }, [projectId]);
+  }, [projectId, attempt]);
+
+  // The leave guard is told about edits, not about renders: one call when the
+  // draft stops matching the saved revision, one when it matches again.
+  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
 
   useEffect(() => {
     let active = true;
@@ -323,13 +375,20 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
   }
 
   async function save() {
-    if (!view || !draft || !dirty) return;
+    if (!view || !draft || !dirty || operation) return;
     const submittedGeneration = draftGeneration.current;
-    setBusy(true);
+    const ticket = ++writeTicket.current;
+    const mine = () => current() && writeTicket.current === ticket;
+    setOperation('saving');
     setError('');
     try {
       const saved = await api.saveProject(projectId, { base_revision: view.revision, project: draft });
+      // A newer write, or an unmounted page, has taken this answer away.
+      if (!mine()) return;
       setView(saved);
+      // Edits made while the save was in flight are still the reader's: the
+      // draft is only replaced when nothing was touched, and otherwise stays
+      // dirty against the revision that was just written.
       if (draftGeneration.current === submittedGeneration) {
         setDraft(structuredClone(saved.project));
         setDirty(false);
@@ -339,6 +398,7 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
       setConflict(null);
       setFieldErrors([]);
     } catch (cause) {
+      if (!mine()) return;
       if (cause instanceof api.ApiError && cause.status === 409) {
         const detail = cause.detail as { current_revision?: number };
         setConflict(detail.current_revision ?? -1);
@@ -346,13 +406,17 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
         setError(errorMessage(cause));
         setFieldErrors(validationDetails(cause));
       }
-    } finally { setBusy(false); }
+    } finally { if (mine()) setOperation(null); }
   }
 
   async function reload() {
-    setBusy(true);
+    const ticket = ++writeTicket.current;
+    const mine = () => current() && writeTicket.current === ticket;
+    setOperation('reloading');
+    setError('');
     try {
       const saved = await api.getProject(projectId);
+      if (!mine()) return;
       setView(saved);
       setDraft(structuredClone(saved.project));
       setPerformanceRequest(EMPTY_REQUEST);
@@ -360,18 +424,25 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
       setDirty(false);
       setConflict(null);
       setError('');
-    } catch (cause) { setError(errorMessage(cause)); }
-    finally { setBusy(false); }
+    } catch (cause) { if (mine()) setError(errorMessage(cause)); }
+    finally { if (mine()) setOperation(null); }
   }
 
   async function run() {
-    if (!view || !conditionId || dirty || runError) return;
-    setBusy(true);
+    if (!view || !conditionId || dirty || runError || operation) return;
+    const ticket = ++writeTicket.current;
+    const mine = () => current() && writeTicket.current === ticket;
+    setOperation('starting');
+    setError('');
     try {
       const queued = await api.enqueueRun(projectId, { revision: view.revision, condition_id: conditionId, options: runOptions });
+      // The queueing succeeded and this page is still the one that asked, so the
+      // run it created is the destination. A page that has since been left does
+      // not navigate anywhere.
+      if (!mine()) return;
       onRun(queued.id);
-    } catch (cause) { setError(errorMessage(cause)); }
-    finally { setBusy(false); }
+    } catch (cause) { if (mine()) setError(errorMessage(cause)); }
+    finally { if (mine()) setOperation(null); }
   }
 
   function applyJson() {
@@ -393,7 +464,12 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
     } catch (cause) { setJsonError(cause instanceof Error ? cause.message : 'JSON 格式无效'); }
   }
 
-  if (!draft || !view) return <div className="page-pad"><p className="section-kicker">WORKSPACE / LOADING</p>{error ? <div className="notice notice--error" role="alert">{error}</div> : <div className="loading-skeleton" aria-label="正在读取舰船" />}</div>;
+  // A project that never loaded is its own content: the reason, one explicit
+// retry, and the real way back to the library. There is no skeleton behind it.
+if (!draft || !view) return <div className="page-pad"><p className="section-kicker">WORKSPACE / {load === 'failed' ? 'LOAD FAILED' : 'LOADING'}</p>
+  {load === 'failed'
+    ? <ReadFailure title={`无法读取舰船 ${projectId}`} detail={loadError} onRetry={() => setAttempt(current => current + 1)} onBack={onBack} backLabel="← 返回项目库" />
+    : <ReadPending scope="workbench" object="舰船项目" />}</div>;
 
   const hull = draft.hull ?? {};
   const hullSources = (hull.sources && typeof hull.sources === 'object' ? hull.sources : {}) as Record<string, unknown>;
@@ -423,11 +499,17 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
               <span>{dirty ? '未保存修改' : '已保存'}</span>
               <span className="save-revision">修订 {view.revision}</span>
             </span>
+            {/* One live line for the operation actually in flight, so the bar
+                answers "what is it doing" without being read off the buttons. */}
+            {operation && <span className="operation-live" role="status">{OPERATION_TEXT[operation]}</span>}
           </div>
           <div className="toolbar-actions">
-            <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>保存修订</button>
+            {/* Each control names the operation it is actually waiting on. A save
+                in progress keeps the run control reading as a run, because it is
+                not one. */}
+            <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>{operation === 'saving' ? '保存中…' : '保存修订'}</button>
             <button className="button button--primary" onClick={run} disabled={dirty || !conditionId || busy || !!runError}
-              title={dirty ? '先保存当前修改再运行计算' : runError || undefined}>{busy ? '请稍候…' : '运行计算 ↗'}</button>
+              title={dirty ? '先保存当前修改再运行计算' : runError || undefined}>{operation === 'starting' ? '正在启动计算…' : '运行计算 ↗'}</button>
             <details className="secondary-actions">
               <summary aria-label="更多操作">更多</summary>
               <div className="secondary-actions-panel">
@@ -445,10 +527,14 @@ export function Workbench({ projectId, onBack, onRun }: { projectId: string; onB
         <div className="workbench-alerts">
           {runError && <div className="notice notice--error" role="alert">{runError}</div>}
           {error && <div className="notice notice--error" role="alert">{error}</div>}
-          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void navigator.clipboard?.writeText(JSON.stringify(draft, null, 2)); }}>复制我的修改</button><button className="button button--primary" onClick={() => { void reload(); }}>重新载入</button></div></div>}
+          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void navigator.clipboard?.writeText(JSON.stringify(draft, null, 2)); }}>复制我的修改</button><button className="button button--primary" disabled={operation !== null} onClick={() => { void reload(); }}>{operation === 'reloading' ? '正在重新载入…' : '重新载入'}</button></div></div>}
         </div>
       </div>
-      <div className="workbench-content">
+      {/* The chapter reveal is keyed on the chapter alone, and this container is
+          never re-keyed: the operation bar and the chapter index stay put, and a
+          hand-edited JSON document survives the switch with its value, its focus
+          and its selection. */}
+      <div className="workbench-content" data-motion={chapterMotion}>
         <ChapterHead chapter={chapter} name={draft.name} projectId={draft.id} revision={view.revision} proxy={draft.name.toLowerCase().includes('queen mary')} />
         {chapter === 'overview' && <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
           runs={runs} current={selectedRun} dirty={dirty} onChapter={setChapter} onRun={onRun} />}

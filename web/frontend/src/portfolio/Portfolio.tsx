@@ -4,19 +4,38 @@ import { AboutContent } from './AboutContent';
 import { CONTACT_EMAIL } from './Contact';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
+import { introPlayed, markIntroPlayed } from './intro';
 import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
+import { createPreviewSound, storedMuted } from './previewAudio';
 import { ProjectDetail } from './ProjectDetail';
+import { RailNav } from './RailNav';
 import { Splash } from './Splash';
 import { SiteGeometry } from './SiteGeometry';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
 import { APP_ENTRY_LINK, classifyHash, publicHref, WORK_DETAIL_LINK, type PortfolioRoute, type PublicView } from './routes';
 import { resolveTheme, storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
+import { ToolModuleBoundary } from './ToolModule';
 import { animateTheme, cancelTransitions, runTransition, TRANSITION_MS, transitionsActive, type TransitionKind, type TransitionOptions } from './transitions';
+import { ReadPending } from '../components/ReadPending';
+// The leave guard attaches at import time: before this component mounts, and
+// before the lazily fetched application chunk could have added any listener of
+// its own. It therefore always hears a navigation first.
+import '../leaveGuard';
 import './portfolio.css';
 import './content.css';
 import './exhibit.css';
 
-const Plimsoll = lazy(() => import('../App'));
+/**
+ * The workspace chunk, fetched once and mounted only on the committed app route.
+ *
+ * A failed import is remembered by the browser's module map for the lifetime of
+ * the document, so this factory is deliberately created once and never replaced:
+ * re-running it would look like a retry while resolving the same rejection. The
+ * boundary's own recovery is a page reload, which is the only thing that gets a
+ * fresh module map. `toolFailed` records the failure so a later entry into the
+ * workspace does not wait on the same dead promise before it can show that.
+ */
+const Tool = lazy(() => import('../App'));
 const zero = { x: 0, y: 0 };
 const limit = (value: number) => Math.max(-70, Math.min(70, value));
 const inside = (value: number) => Math.max(0, Math.min(100, value));
@@ -32,9 +51,15 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const [systemDark, setSystemDark] = useState(() => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false);
   const resolved = resolveTheme(theme, systemDark);
   const dark = resolved === 'dark';
+  /**
+   * The opening plays once per browser session, and only on request after that:
+   * a reload or a Back does not replay it, and a new tab may. A refused
+   * `sessionStorage` simply falls back to the previous behaviour.
+   */
   const [opening, setOpening] = useState(() => {
     const initial = classifyHash(window.location.hash);
-    return introEnabled && initial.kind === 'public' && initial.view === 'home' && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    return introEnabled && initial.kind === 'public' && initial.view === 'home'
+      && !introPlayed() && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   });
   const [settling, setSettling] = useState(false);
   const [sheetIndex, setSheetIndex] = useState(0);
@@ -90,7 +115,27 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const homeScroll = useRef(0);
   /** The route React has actually committed, which the async listener compares against. */
   const committed = useRef(route);
+  /** Whether the chunk has failed, so a later entry can say so immediately. */
+  const toolFailed = useRef(false);
+  /**
+   * The navigation preview's tap. Created once per shell, and only ever given a
+   * context by a real gesture, so the first hover is silent. Disposing it is not
+   * a one-way door: a later gesture can unlock a fresh context, which is what
+   * keeps it correct under StrictMode's mount/unmount/mount rehearsal.
+   */
+  const [muted, setMuted] = useState(storedMuted);
+  const soundRef = useRef<ReturnType<typeof createPreviewSound> | null>(null);
+  if (soundRef.current === null) soundRef.current = createPreviewSound({ muted: storedMuted() });
+  const sound = soundRef.current;
   const finish = useCallback(() => { setOpening(false); setSettling(false); }, []);
+
+  useEffect(() => () => sound.dispose(), [sound]);
+
+  // Marked as soon as the opening starts, not when it ends: an interrupted intro
+  // has still been shown once in this session. Deliberately an effect rather than
+  // part of the initial state, because a state initialiser runs during render and
+  // this is a write to another context.
+  useEffect(() => { if (opening) markIntroPlayed(); }, [opening]);
 
   /**
    * Every page-level state change goes through here. A native cut also owns the
@@ -127,6 +172,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const detail = publicActive && route.view === 'project';
   /** Work owns the exhibit and its detail; both of them need the reference bitmap. */
   const onWork = publicActive && !about;
+  /** The rail only exists on a public route, so anything else reads as Work. */
+  const railCurrent = route.kind === 'app' ? 'home' : route.view;
 
   useEffect(() => {
     if (!onWork) return;
@@ -199,8 +246,10 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     lensNode.style.width = lensNode.style.height = `${frame.size}px`;
     lensNode.style.transform = `translate(${frame.cx - frame.size / 2}px, ${frame.cy - frame.size / 2}px)`;
     lensView.current?.setAttribute('viewBox', frame.viewBox);
-    // The viewBox centres the sampled detail even when the lens itself is
-    // clamped, so its reticle must stay at the centre of the magnified image.
+    // The circle's centre is the sampled point itself, at the rim as much as in
+    // the middle, so the reticle at the centre of the magnified image and the
+    // crosshair under the pointer are the same place. Near an edge the lens
+    // hangs over the board and the board clips it — the sample is never moved.
   }, []);
   const schedule = useCallback(() => {
     if (!panFrame.current) panFrame.current = requestAnimationFrame(() => { panFrame.current = 0; paint(); });
@@ -261,8 +310,11 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       && (current.kind === 'app' || next.kind === 'app' || current.view === next.view);
     if (same) {
       // Already there, but a transition may still be in flight toward here. It
-      // is now redundant, so it is retired rather than left to finish.
-      if (transitionsActive()) retire();
+      // is now redundant, so it is retired rather than left to finish. Only the
+      // public shell's own moves are retired this way: an address change between
+      // two application pages is the application's own business, and it manages
+      // its transition with the same controller.
+      if (transitionsActive() && next.kind === 'public') retire();
       return;
     }
     // Retire the previous route's work *before* starting this one: the pending
@@ -481,6 +533,14 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     void change('theme', () => { flushSync(() => setTheme(next)); }, { animate: () => animateTheme({ x, y }, radius) });
   }, [change, dark, settleRequestedRoute]);
 
+  /** The preview's tap, and nothing else on the page, answers to this switch. */
+  const toggleSound = useCallback(() => {
+    const next = !muted;
+    sound.setMuted(next);
+    if (!next) sound.unlock();
+    setMuted(next);
+  }, [muted, sound]);
+
   /**
    * The workspace module is fetched, never mounted: the lazy factory is the
    * same one React.lazy will call on the app route, so the chunk is already
@@ -506,10 +566,16 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const withdrawDrawingCursor = () => { hovered.current = false; keysOn.current = false; paint(); };
 
   return <>
-    <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
+    <div className="ff-shell" data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive} onPointerDownCapture={() => sound.unlock()} onKeyDownCapture={() => sound.unlock()}>
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
         <div className="ff-theme-group">
+          {/* One small switch for the navigation preview's tap, beside the theme
+              controls it shares a row with. The label is the thing, the pressed
+              state is the truth, and the choice is remembered where the theme
+              preference is — or forgotten, without complaint, if storage is
+              refused. */}
+          <button className="ff-preview-sound" onClick={toggleSound} aria-label="Preview sound" aria-pressed={!muted} title={muted ? 'Turn preview sound on' : 'Mute preview sound'}><span className="ff-preview-sound-mode">{muted ? 'MUTED' : 'SOUND'}</span></button>
           <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}><span className="ff-theme-symbol" aria-hidden="true">◐</span><span className="ff-theme-mode">{dark ? 'DARK' : 'LIGHT'}</span></button>
           <button className="ff-theme-system" onClick={followSystem} aria-pressed={theme === 'system'} title="Follow system theme">SYSTEM</button>
         </div>
@@ -529,6 +595,16 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
                 <svg ref={lensView} className="ff-lens-view" viewBox={RESTING_VIEW_BOX} preserveAspectRatio="xMidYMid meet"><Artwork pixelFrame compositionRef={lensComposition} geometryRef={lensGeometry} maskRef={lensMask} sheet={sheet} dark={dark} details={details} /></svg>
                 <span className="ff-lens-mark" />
               </span>
+              <svg className="ff-lens-dial" viewBox="0 0 200 200" focusable="false">
+                {Array.from({ length: 12 }, (_, index) => {
+                  const angle = index * Math.PI / 6;
+                  const major = index % 3 === 0;
+                  const start = major ? 84 : 90;
+                  return <line key={index} className={major ? 'ff-lens-tick-major' : undefined}
+                    x1={100 + Math.cos(angle) * start} y1={100 + Math.sin(angle) * start}
+                    x2={100 + Math.cos(angle) * 96} y2={100 + Math.sin(angle) * 96} />;
+                })}
+              </svg>
               <span className="ff-lens-label">2×<i>REF {sheet.id}</i></span>
             </div>}
             {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><span className="ff-cursor-cross" /><i /></div>}
@@ -573,12 +649,12 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
         </section>}
       </main>
 
-      <nav className="ff-rail" aria-label="Main navigation" inert={opening}>
-        {/* Work owns the exhibit and the work detail, so it stays the current page
-            on both; the detail is reached from the exhibit, not from the rail. */}
-        <a href={publicHref('home')} aria-current={!about ? 'page' : undefined}>Work <span>01</span></a>
-        <a href={publicHref('about')} aria-current={about ? 'page' : undefined}>About</a>
-      </nav>
+      {/* Work owns the exhibit and the work detail, so it stays the current page
+          on both; the detail is reached from the exhibit, not from the rail. A
+          press on the page already on screen raises no address and therefore no
+          route, so it is answered here instead: it drops whatever is still
+          travelling away from it. */}
+      <RailNav current={railCurrent} sound={sound} onCurrentPagePress={retire} inert={opening} />
 
       <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button><SiteGeometry variant="rule" /></footer>
       {opening && publicActive && (readyHref === sheet.href
@@ -592,12 +668,17 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
         way out is the real public view the visitor left, and it is rendered by
         the application header itself — there is no second return bar here. */}
     {route.kind === 'app' && <div className="ff-tool-shell"><div className="ff-workspace">
-      {/* The application chunk is still loading: its header cannot be on screen
-          yet, so the same real return href is rendered here. When the app mounts,
-          it owns the anchor and this fallback leaves with it. */}
-      <Suspense fallback={<><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>↖ Y’s Formfield</a><div className="app-loading"><span className="brand-mark" />Plimsoll <small>正在加载工作空间</small></div></>}>
-        <Plimsoll returnHref={publicHref(publicOrigin.current)} />
-      </Suspense>
+      {/* The chunk is still arriving: the application's own header cannot be on
+          screen yet, so the same real return href is rendered here, and the
+          shared read placeholder says what is being read. When the app mounts it
+          owns the anchor and this fallback leaves with it. */}
+      <ToolModuleBoundary returnHref={publicHref(publicOrigin.current)}
+        onFailure={() => { toolFailed.current = true; }}>
+        <Suspense fallback={<><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>↖ Y’s Formfield</a>
+          <div className="workspace-connect"><ReadPending scope="workspace" object="工作空间" /></div></>}>
+          <Tool returnHref={publicHref(publicOrigin.current)} />
+        </Suspense>
+      </ToolModuleBoundary>
     </div></div>}
   </>;
 }

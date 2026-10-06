@@ -14,8 +14,9 @@
  *    shared drawing, so one named group morphs between them (400 ms) while the
  *    persistent chrome stays still.
  * 5. **tool** — the exhibit frame morphs into the workspace (450 ms).
+ * 6. **app-route** — the workspace moves between its own pages (220 ms).
  *
- * What the controller guarantees for all five:
+ * What the controller guarantees for all six:
  *
  * - **Feature detection, never assumptions.** `document.startViewTransition` is
  *   checked at call time; reduced motion and an unsupported browser both fall
@@ -32,7 +33,7 @@
  * - **No waiting.** Nothing here waits for a module, an image or a response.
  */
 
-export type TransitionKind = 'theme' | 'sheet' | 'sheet-back' | 'page' | 'page-back' | 'detail' | 'tool' | 'tool-back';
+export type TransitionKind = 'theme' | 'sheet' | 'sheet-back' | 'page' | 'page-back' | 'detail' | 'tool' | 'tool-back' | 'app-route';
 
 /** Choreography, in milliseconds. These are the only moving durations in the shell. */
 export const TRANSITION_MS = {
@@ -46,6 +47,8 @@ export const TRANSITION_MS = {
   detail: 400,
   /** Exhibit frame expanding into the workspace. */
   tool: 450,
+  /** One workspace page to the next: identity holds, content arrives. */
+  appRoute: 220,
 } as const;
 
 /** The vessel only leaves while the frame expands; it never stretches. */
@@ -55,8 +58,32 @@ export const TOOL_CHROME_MS = 150;
 /** The workspace surface fades in behind the expanded frame. */
 export const TOOL_SURFACE_MS = 240;
 
-/** Kinds that animate the section itself instead of snapshotting the page. */
-const ATTRIBUTE_KINDS: ReadonlySet<TransitionKind> = new Set<TransitionKind>(['page', 'page-back']);
+/**
+ * Kinds that set one attribute on the root and let plain CSS move a section.
+ *
+ * `page`, `page-back` and `app-route` are here for the same reason: these pages
+ * can each be thousands of lines — a full report, a tall About — and a named-group
+ * morph would have to snapshot the whole of them, which is expensive and would
+ * distort the text as it moved. So nothing is captured, and the content changes
+ * as the attribute is set. Identity is carried by the header and the rail, which
+ * are outside `.ff-main` and hold still, and the arrival is a plain CSS animation
+ * with the shared chrome sitting still beside it.
+ */
+interface AttributeKind {
+  readonly attribute: 'ffPage' | 'ffAppRoute';
+  /** The value the attribute takes while the move runs. */
+  readonly value: string;
+  /** How long the attribute is held before it is released. */
+  readonly duration: number;
+}
+
+const ATTRIBUTE_KINDS: ReadonlyMap<TransitionKind, AttributeKind> = new Map([
+  // Work→About: the section that appeared rises into place.
+  ['page', { attribute: 'ffPage', value: 'in', duration: TRANSITION_MS.page }],
+  // About→Work: the same cut, entering from the other side.
+  ['page-back', { attribute: 'ffPage', value: 'out', duration: TRANSITION_MS.page }],
+  ['app-route', { attribute: 'ffAppRoute', value: 'in', duration: TRANSITION_MS.appRoute }],
+]);
 /** Kinds that move the exhibit frame and the workspace surface. */
 const TOOL_KINDS: ReadonlySet<TransitionKind> = new Set<TransitionKind>(['tool', 'tool-back']);
 
@@ -129,6 +156,39 @@ interface ActiveTransition { clean: () => void; cancel: () => void }
 let generation = 0;
 let active: ActiveTransition | null = null;
 
+/** A transition has ended: finished, interrupted, cancelled or committed at once. */
+export interface TransitionEnd {
+  /** The generation that owned the move, so a late end can be told from a late start. */
+  readonly generation: number;
+  readonly kind: TransitionKind;
+}
+
+const endings = new Set<(event: TransitionEnd) => void>();
+
+/**
+ * Watch for the controller's current move ending.
+ *
+ * Every move here is announced, including the ones that reach their destination
+ * at once: reduced motion, an unsupported browser and the content-only cut all
+ * still have a beginning and an end, and a listener that guessed at a duration
+ * would be wrong for whichever one it did not expect. Anything that has to hold a
+ * state across a whole move — the navigation preview holding the word it was
+ * asked for — needs this rather than a guess at a duration.
+ */
+export function onTransitionEnd(listener: (event: TransitionEnd) => void): () => void {
+  endings.add(listener);
+  return () => { endings.delete(listener); };
+}
+
+/** The generation that owns the next move. Read before a move starts, to tell later ends apart. */
+export function transitionGeneration(): number {
+  return generation;
+}
+
+function announce(mine: number, kind: TransitionKind): void {
+  for (const listener of [...endings]) listener({ generation: mine, kind });
+}
+
 export interface TransitionOptions {
   /** Milliseconds the controller keeps its own attributes. Defaults per kind. */
   duration?: number;
@@ -165,14 +225,22 @@ export async function runTransition(kind: TransitionKind, update: () => void, op
   const root = document.documentElement;
 
   const start = startViewTransition();
-  if (!start || prefersReducedMotion()) { commit(); return; }
+  if (!start || prefersReducedMotion()) {
+    commit();
+    // Reduced motion and an unsupported browser both reach the page at once, and
+    // that is still a move with an end: anything waiting on this one is released.
+    announce(mine, kind);
+    return;
+  }
 
-  if (ATTRIBUTE_KINDS.has(kind)) {
+  const attribute = ATTRIBUTE_KINDS.get(kind);
+  if (attribute) {
     // The live page is always interactive here: there is no snapshot layer at
-    // all, only a CSS animation on the section that just appeared.
-    root.dataset.ffPage = kind === 'page-back' ? 'out' : 'in';
-    const timer = window.setTimeout(() => { if (mine === generation) clean(); }, options.duration ?? TRANSITION_MS.page);
-    const clean = () => { window.clearTimeout(timer); delete root.dataset.ffPage; if (mine === generation) active = null; };
+    // all, only a CSS animation on the section that just appeared, and the
+    // content changes in the same synchronous step that sets the attribute.
+    root.dataset[attribute.attribute] = attribute.value;
+    const timer = window.setTimeout(() => { if (mine === generation) clean(); }, options.duration ?? attribute.duration);
+    const clean = () => { window.clearTimeout(timer); delete root.dataset[attribute.attribute]; if (mine === generation) active = null; announce(mine, kind); };
     active = { clean, cancel: () => {} };
     commit();
     return;
@@ -185,6 +253,7 @@ export async function runTransition(kind: TransitionKind, update: () => void, op
   } catch {
     delete root.dataset.ffTransition;
     commit();
+    announce(mine, kind);
     return;
   }
   // A snapshot layer sits above the live page, and a snapshot of a clickable
@@ -196,7 +265,7 @@ export async function runTransition(kind: TransitionKind, update: () => void, op
   // owner releases the attribute on cancel, while the late cleanup below stays
   // generation-guarded so a finished callback can never clear a newer
   // transition's attribute.
-  const clean = () => { delete root.dataset.ffTransition; if (mine === generation) active = null; };
+  const clean = () => { delete root.dataset.ffTransition; if (mine === generation) active = null; announce(mine, kind); };
   active = { clean, cancel: () => { transition.skipTransition?.(); } };
   const drive = options.animate ?? (TOOL_KINDS.has(kind) ? () => animateTool(kind === 'tool-back') : undefined);
   await transition.ready.then(

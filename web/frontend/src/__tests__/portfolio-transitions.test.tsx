@@ -166,12 +166,17 @@ describe('desktop transitions', () => {
     const nav = screen.getByRole('navigation', { name: 'Main navigation' });
     const about = screen.getByRole('link', { name: 'About' }); about.focus();
     follow('About'); expect(document.documentElement.dataset.ffPage).toBe('in');
+    // The content changes in the same synchronous step that sets the attribute:
+    // there is no deferred commit and nothing covers the column while it settles.
     expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible(); expect(document.activeElement).toBe(about);
     act(() => vi.advanceTimersByTime(TRANSITION_MS.page - 1)); expect(document.documentElement.dataset.ffPage).toBe('in');
     act(() => vi.advanceTimersByTime(1)); expect(document.documentElement.dataset.ffPage).toBeUndefined();
     follow('Work 01'); expect(document.documentElement.dataset.ffPage).toBe('out');
     expect(screen.getByRole('heading', { name: 'Plimsoll' })).toBeVisible(); expect(nav).toBeInTheDocument();
+    // No sheet, no paper and no overlay exist anywhere on the public shell.
     expect(vt.captures).toHaveLength(0);
+    expect(document.querySelector('.ff-cover')).toBeNull();
+    expect(document.documentElement.dataset.ffCover).toBeUndefined();
   });
 
   it('protects a newer theme from a skipped callback and late cleanup', async () => {

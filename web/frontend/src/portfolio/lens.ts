@@ -18,7 +18,7 @@ import { ARTWORK_FRAME } from './Artwork';
  *   composition units, letterbox offsets included. That is what the lens
  *   viewBox must centre on.
  * - `cssSample` answers "where in the exhibit rectangle is that pointer", in CSS
- *   pixels. That is what the lens circle is clamped with, and it is also what
+ *   pixels. That is what the lens circle is centred on, and it is also what
  *   the pan cursor and the keyboard focus read.
  */
 
@@ -40,14 +40,14 @@ export interface LensFrame {
   readonly viewBox: string;
   /** Composition units visible across the lens. */
   readonly span: number;
-  /** Lens circle centre inside the exhibit, in CSS pixels. */
+  /**
+   * Lens circle centre inside the exhibit, in CSS pixels: the sampled point
+   * itself, at every edge and corner.
+   */
   readonly cx: number;
   readonly cy: number;
   /** Lens edge in CSS pixels; shrinks only when the exhibit is smaller than the lens. */
   readonly size: number;
-  /** Sampled point relative to the lens centre, in CSS pixels. */
-  readonly ox: number;
-  readonly oy: number;
 }
 
 /** Resting viewBox before the exhibit has been measured: the middle of the frame. */
@@ -79,28 +79,29 @@ export function cssSample(fx: number, fy: number, rect: ExhibitRect) {
 }
 
 /**
- * Lens placement for one sample. The lens stays fully inside the exhibit by
- * shifting the *circle*, while the viewBox — and therefore the sampled detail —
- * stays locked to the sampled point, reported back as the in-lens offset.
+ * Lens placement for one sample.
+ *
+ * The circle is centred on the sampled point, everywhere: in the middle, at each
+ * edge and at each corner. It is deliberately not pushed back inside the exhibit,
+ * because a lens that slides away from the pointer is no longer showing the thing
+ * under the pointer. Near the rim it hangs over the board and the board's own
+ * clipping cuts it — the part of the circle that is still on the board keeps
+ * showing the same sampled detail, magnified by exactly the same ratio.
  */
 export function lensFrame(rect: ExhibitRect, fx: number, fy: number, diameter = LENS_DIAMETER): LensFrame {
   const size = Math.max(0, Math.min(diameter, rect.width, rect.height));
   const sample = cssSample(fx, fy, rect);
   if (!rect.width || !rect.height || !size) {
-    return { viewBox: RESTING_VIEW_BOX, span: 800, cx: sample.x, cy: sample.y, size: 0, ox: 0, oy: 0 };
+    return { viewBox: RESTING_VIEW_BOX, span: 800, cx: sample.x, cy: sample.y, size: 0 };
   }
   const { x, y, scale } = samplePoint(rect, fx, fy);
   const span = size / (LENS_MAGNIFICATION * scale);
   const half = span / 2;
-  const cx = clamp(sample.x, size / 2, Math.max(size / 2, rect.width - size / 2));
-  const cy = clamp(sample.y, size / 2, Math.max(size / 2, rect.height - size / 2));
   return {
     viewBox: `${round(x - half)} ${round(y - half)} ${round(span)} ${round(span)}`,
     span,
-    cx,
-    cy,
+    cx: sample.x,
+    cy: sample.y,
     size,
-    ox: sample.x - cx,
-    oy: sample.y - cy,
   };
 }

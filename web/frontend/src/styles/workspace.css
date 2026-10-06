@@ -46,6 +46,20 @@
 .ff-tool-shell { min-height: 100svh; }
 .ff-tool-shell .ff-workspace { min-height: 100svh; }
 .app-shell { min-height: 100svh; }
+/* A failed workspace chunk is recoverable, and the public pages never needed it:
+   the panel says so, offers one real second fetch, and keeps the real way out. */
+.ff-tool-shell .ff-tool-error, .app-shell .ff-tool-error { display: grid; gap: 10px; justify-items: start; max-width: 640px; padding: 40px clamp(24px, 3vw, 52px); }
+.ff-tool-error strong { font-family: var(--workspace-display); font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+.ff-tool-error-detail { margin: 0; color: var(--error); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.ff-tool-error-note { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.75; }
+.ff-tool-error-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 6px; }
+.ff-tool-error-actions .ff-tool-return { display: inline-block; padding: 0; border: 0; background: none; color: var(--muted); font-size: 12px; font-weight: 500; }
+.ff-tool-error-actions .ff-tool-return:hover { color: var(--ink); }
+/* The header states where the reader is, from the route alone, so the identity
+   holds still while the arriving page fades in under it. */
+.app-shell .header-context { margin-left: 14px; color: var(--muted); font-family: var(--workspace-display); font-size: 10px; font-weight: 500; letter-spacing: .06em; }
+.app-shell .header-context[data-ff-context='library'] { color: var(--faint); }
+.app-shell .operation-live { color: var(--accent); font-size: 11px; }
 /* The public return is rendered inside the application header: the real origin
    href, the same semantics as the previous standalone bar, no second row. */
 .app-shell .site-header .ff-tool-return { display: inline-flex; align-items: center; align-self: stretch; margin-right: 18px; padding: 0; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font-family: var(--workspace-body); font-size: 11px; font-weight: 500; letter-spacing: 0; }
@@ -115,6 +129,69 @@
 .app-shell .blank-project { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(140px, 240px) auto; gap: 20px; margin-top: 22px; padding: 18px 0; border: 0; border-radius: 0; background: transparent; }
 .app-shell .blank-project input { width: 100%; min-width: 0; height: 36px; }
 .app-shell .library-body .loading-skeleton { height: 115px; border-radius: 0; }
+.library-create-error { margin: 0 0 18px; }
+.app-shell .library-section-heading [data-read-state] { min-width: 5.5em; text-align: right; }
+.app-shell .library-section-heading [data-read-state='failed'] { color: var(--error); }
+/* Reading feedback, shared by every surface that waits for an answer.
+   The frame appears late enough that a fast read never flashes it, and the text
+   always names what is being read — again once the wait passes two seconds.
+   The frame is the page's own geometry: a ruled list, a chapter rail beside
+   input rows, a report cover over its readings, an index beside a body. It is
+   static, never swept, and never carries a number or a label the real answer
+   does not have. */
+.workspace-connect { min-height: calc(100svh - 69px); padding-top: 48px; }
+.read-pending { display: grid; gap: 10px; align-content: start; width: 100%; }
+.read-pending-lines { display: block; }
+.read-shape { display: grid; gap: 8px; }
+.read-line, .read-row, .read-field, .read-metric, .read-stage, .read-index, .read-shape--rows > .read-row { background: var(--surface-tint); border-radius: 2px; }
+.read-line { display: block; height: 8px; }
+.read-line--head { width: 46%; height: 15px; }
+.read-line--title { width: 68%; height: 11px; }
+.read-line--meta { width: 40%; height: 7px; }
+.read-line--wide { width: 100%; }
+.read-line--mid { width: 76%; }
+.read-line--nav { width: 78%; height: 7px; }
+.read-line--bar { width: 62%; height: 10px; }
+.read-line--pill { width: 74px; height: 22px; justify-self: end; }
+.read-line--fact { width: 100%; height: 9px; }
+.read-line--section { width: 32%; height: 10px; }
+.read-line--kicker { width: 18%; height: 7px; }
+.read-line--cover { width: 52%; height: 20px; }
+.read-line--wordmark { width: 30%; height: 13px; }
+.read-line--bar { width: 62%; height: 10px; }
+/* Library: the saved list, each row a mark beside a name and its meta line. */
+.read-shape--rows { gap: 0; border-top: 1px solid var(--line); }
+.read-row { display: flex; align-items: center; gap: 14px; padding: 14px 8px; border-bottom: 1px solid var(--line); background: transparent; }
+.read-row-mark { width: 14px; height: 14px; background: var(--surface-tint); border-left: 2px solid var(--line-strong); flex: 0 0 auto; }
+.read-row-body { display: grid; gap: 7px; flex: 1 1 auto; }
+/* Workbench: the chapter rail, then the operation bar, then input rows. */
+.read-shape--editor { grid-template-columns: 190px minmax(0, 1fr); gap: 26px; align-items: start; }
+.read-rail { display: grid; gap: 11px; padding: 18px 12px; border-right: 1px solid var(--line); }
+.read-editor { display: grid; gap: 16px; }
+.read-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.read-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.read-field { height: 54px; }
+/* Run: identity and its facts, then the stage cards. */
+.read-shape--run { gap: 14px; }
+.read-ident { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.read-facts { display: grid; gap: 9px; }
+.read-stages { display: grid; gap: 12px; }
+.read-stage { height: 46px; }
+/* Report: the cover, the six readings, then an index beside the body. */
+.read-shape--report { gap: 16px; }
+.read-cover { display: grid; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.read-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; border: 1px solid var(--line); }
+.read-metric { height: 62px; }
+.read-body { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 26px; align-items: start; }
+.read-index { display: grid; gap: 9px; padding-right: 18px; border-right: 1px solid var(--line); background: transparent; }
+.read-prose { display: grid; gap: 10px; }
+.read-shape--workspace { gap: 14px; padding: 24px 0; border-top: 1px solid var(--line); }
+.read-pending-object, .read-pending-wait { margin: 0; color: var(--muted); font-size: 11px; }
+.read-pending-wait { color: var(--faint); }
+/* A read that failed is the content: a reason, one explicit retry, one way out. */
+.read-failed { display: grid; gap: 10px; justify-items: start; max-width: 640px; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.read-failed-detail { margin: 0; color: var(--error); font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.read-failed-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 /* Editing surfaces use the same material, while protecting the input width.
    The Trace rail is a real third column on wide desktops; at 1280 and below the
    same panel leaves the grid and sits above the inputs in normal flow, so it
@@ -243,8 +320,6 @@
 .app-shell .report-compare-control { max-width: 1600px; margin: 24px auto 0; padding: 0 clamp(24px, 3vw, 52px); flex-wrap: wrap; }
 .app-shell .stage-value strong { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 :root[data-theme='dark'] .app-shell .stage-pill--completed { color: #a5d5b7; border-color: #3d6650; background: #20362b; }
-.ff-tool-shell .app-loading { min-height: calc(100svh - 40px); font-family: var(--workspace-display); background: var(--canvas); color: var(--ink); }
-.ff-tool-shell .app-loading small { font-family: var(--workspace-body); }
 /* Below 1281 the Trace panel returns to normal flow and spans the centre column,
    above the inputs: no overlay, no third column, no squeezed form. */
 @media (max-width: 1280px) {
@@ -280,7 +355,41 @@
   .app-shell .blank-project { grid-template-columns: 1fr; }
   .app-shell .brand-suffix, .app-shell .header-edition, .app-shell .user-email { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .app-shell :is(.button, .loading-skeleton) { animation: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  /* Everything the workspace moves on purpose stops here: the spinner that
+     stands for a real background state becomes a still ring with two solid
+     quadrants, and the local reveals and the route entry show their end state
+     immediately. The controller's own reduced-motion branch handles page moves,
+     so this only has to cover what CSS owns. */
+  .app-shell :is(.button, .loading-skeleton), .ff-tool-shell :is(.button, .loading-skeleton) { animation: none; transition: none; }
+  .app-shell .run-progress { animation: none; border-top-color: var(--accent); border-right-color: var(--accent); }
+  .app-shell :is(.workbench-content[data-motion], .trace-body[data-motion], .app-route[data-motion]) { animation: none; }
+  .ff-tool-error { animation: none; transition: none; }
+}
+/* Local reveals. Two names on purpose: one fixed name would only ever run on
+   mount, and the token flips between them whenever the revealed thing changes.
+   Nothing here remounts a container, so a draft, a focus and a selection all
+   survive the move. */
+.app-shell .workbench-content[data-motion='a'] { animation: chapter-in 150ms cubic-bezier(.22, 1, .36, 1) both; }
+.app-shell .workbench-content[data-motion='b'] { animation: chapter-in-alt 150ms cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes chapter-in { from { opacity: 0; transform: translate3d(0, 4px, 0); } to { opacity: 1; transform: none; } }
+@keyframes chapter-in-alt { from { opacity: 0; transform: translate3d(0, -4px, 0); } to { opacity: 1; transform: none; } }
+.app-shell .trace-body[data-motion='a'] { animation: trace-in 180ms cubic-bezier(.22, 1, .36, 1) both; }
+.app-shell .trace-body[data-motion='b'] { animation: trace-in-alt 180ms cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes trace-in { from { opacity: 0; transform: translate3d(0, 3px, 0); } to { opacity: 1; transform: none; } }
+@keyframes trace-in-alt { from { opacity: 0; transform: translate3d(-3px, 0, 0); } to { opacity: 1; transform: none; } }
+/* One workspace page to the next. Only the arriving page is marked: the header,
+   which carries the vessel or run identity, holds still beside it, and no part
+   of a long report is ever captured, scaled or distorted. The token alternates,
+   because a CSS animation restarts only when its name changes — a second switch
+   inside the first 220 ms must still be seen. */
+:root[data-ff-app-route='in'] .app-shell .app-route[data-motion='a'] { animation: app-route-in 220ms cubic-bezier(.22, 1, .36, 1) both; }
+:root[data-ff-app-route='in'] .app-shell .app-route[data-motion='b'] { animation: app-route-in-alt 220ms cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes app-route-in { from { opacity: 0; transform: translate3d(0, 4px, 0); } to { opacity: 1; transform: none; } }
+@keyframes app-route-in-alt { from { opacity: 0; transform: translate3d(0, 4px, 0); } to { opacity: 1; transform: none; } }
+@media print {
+  .app-shell :is(.app-route, .workbench-content, .trace-body) { animation: none !important; }
+}
 /* Run page: identity, real status and the stage index. A number and a thin rule
    do the dividing, so the run reads as one column of stages and not as a stack
    of framed panels. */
@@ -304,10 +413,6 @@
 .app-shell .run-meta dt { color: var(--faint); font-size: 10px; }
 .app-shell .run-meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .app-shell .run-stage-list { display: grid; gap: 18px; margin-top: 18px; }
-/* A run that never loaded has nothing to show, so the failure itself is the
-   content: the reason, and one explicit way to try again. */
-.app-shell .run-read-failed { display: grid; gap: 10px; justify-items: start; padding: 20px 0; border-bottom: 1px solid var(--line); }
-.app-shell .run-read-failed p { margin: 0; color: var(--error); font-size: 11px; }
 .app-shell .stage-card h3:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .app-shell .stage-diagnostics-repeat { margin: 8px 0 0; color: var(--faint); font-size: 10px; }
 /* The stage index locates; it never becomes a tab bar or a second column of
@@ -438,4 +543,21 @@
   .app-shell .stage-diagnostics-open { border-left: 1px solid var(--line-strong); background: transparent; color: var(--ink); }
   .app-shell .stability-plot, .app-shell .comparison-table, .app-shell .stage-table { break-inside: auto; }
   .app-shell .report-audit-fold > summary, .app-shell .stage-assumptions > summary { list-style: none; }
+}
+/* Reduced motion, stated last so it wins.
+   Everything above this point may name an animation; this block is what actually
+   enforces the preference. It covers each rule in the application by name rather
+   than by inheritance, because a selector that merely matched an ancestor would
+   not stop an animation declared on a descendant. The spinner keeps its meaning
+   as a still ring: two solid quadrants say "in flight" without anything turning,
+   and the text beside it always states the real status anyway. */
+@media (prefers-reduced-motion: reduce) {
+  .app-shell :is(.workbench-content[data-motion], .trace-body[data-motion], .app-route[data-motion]),
+  .ff-tool-shell :is(.app-route[data-motion], .ff-tool-error),
+  .app-shell :is(.run-progress, .loading-skeleton, .button, .read-line, .read-metric, .read-stage, .read-field) {
+    animation: none !important;
+    transition: none !important;
+  }
+  .app-shell .run-progress { border-top-color: var(--accent); border-right-color: var(--accent); }
+  .app-shell .read-line, .app-shell .read-metric, .app-shell .read-stage, .app-shell .read-field { background: var(--surface-tint); }
 }

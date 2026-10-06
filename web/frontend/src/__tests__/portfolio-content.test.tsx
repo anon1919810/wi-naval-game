@@ -417,11 +417,13 @@ describe('home and detail navigation', () => {
     expect(document.documentElement.dataset.ffPage).toBe('in');
     expect(vt.captures).toHaveLength(0);
     // The rail is a sibling of main, so it keeps its own focus across the change.
+    expect(screen.getByRole('heading', { name: /A field for/ })).toBeVisible();
     expect(document.activeElement).toBe(about);
     // Coming back through the exhibit, nothing visible took the rail away, so
     // focus is still there and the exhibit does not steal it.
     follow('Work 01');
     expect(document.documentElement.dataset.ffPage).toBe('out');
+    expect(screen.getByRole('heading', { name: 'Plimsoll' })).toBeVisible();
     expect(document.activeElement).toBe(about);
     // Entering the detail from the exhibit does strand the VIEW PROJECT link — it
     // is inside the section that gets hidden — so the new page's heading takes it.

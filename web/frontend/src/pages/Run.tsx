@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
+import { ReadFailure, ReadPending } from '../components/ReadPending';
 import { requestedStages } from '../components/resultReading';
 import { StageIndex } from '../components/StageIndex';
 import { StageStatus } from '../components/StageStatus';
@@ -125,12 +126,8 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
     {/* A read that never succeeded has no run to show, so it says so and offers
         exactly one explicit retry instead of a skeleton that never resolves. */}
     {error && !run
-      ? <div className="run-read-failed" role="alert">
-        <strong>无法读取运行 {runId}</strong>
-        <p>{error}</p>
-        <button className="button button--secondary" onClick={() => { setError(''); poll.current(); }}>重新读取</button>
-      </div>
-      : !run ? <div className="loading-skeleton" aria-label="正在读取运行" /> : <>
+      ? <ReadFailure title={`无法读取运行 ${runId}`} detail={error} onRetry={() => { setError(''); poll.current(); }} />
+      : !run ? <ReadPending scope="run" object="运行" /> : <>
       <div className="run-identity">
         <div className="run-identity-lead">
           <span className="section-kicker">RUN / {run.id.slice(0, 8).toUpperCase()}</span>
@@ -149,7 +146,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
         <h2>{statusText}</h2>
         {cancelPending && <p className="run-status-note">已请求取消，等待服务端实际结束；当前服务端状态为 {LABELS[run.status]}。</p>}
         {waiting && <div className="run-pending">
-          <span className="run-progress" aria-hidden="true" />
+          <span className="run-progress" data-status={run.status} aria-hidden="true" />
           <p>{run.status === 'queued' ? '已排队，等待计算工作进程。' : '计算正在后台执行，离开页面后可再打开此运行。'}</p>
           <button className="button button--secondary" disabled={canceling || (run.cancel_requested && !cancelError)} onClick={cancel}>
             {canceling ? '正在取消' : cancelError ? '重试取消' : run.cancel_requested ? '已请求取消' : '取消计算'}
