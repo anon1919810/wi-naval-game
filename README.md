@@ -12,7 +12,9 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 总站 **Y’s Formfield**：[更新日志](docs/formfield/CHANGELOG.md) · [2026-10-06 生产发布交接](docs/formfield/release-2026-10-06.md) · [第一组：编辑页工作头与输入层级](docs/formfield/workbench-group-one-2026-10-06.md) · [第二组：运行与报告阅读](docs/formfield/run-report-2026-10-06.md) · [Inter + Space Grotesk 字体包](docs/formfield/fonts-inter-space-grotesk-2026-10-05.md) · [下一轮桌面设计提案](docs/formfield/next-workspace-design-2026-10-05.md) · [2026-10-05 工作台设计语言统一](docs/formfield/workspace-language-2026-10-05.md) · [2026-10-05 展板控件与全站辅助线](docs/formfield/exhibit-controls-2026-10-05.md) · [2026-10-05 项目详情、作者与联系](docs/formfield/project-detail-and-contact-2026-10-05.md) · [2026-10-05 桌面转场与字体](docs/formfield/transitions-typography-2026-10-05.md) · [2026-10-05 桌面局部放大与色调](docs/formfield/inspect-lens-2026-10-05.md) · [2026-10-05 加载与渲染修正](docs/formfield/review-hardening-2026-10-05.md) · [首页与资产交接](docs/formfield/交接_Formfield首页与资产_2026-10-04.md) · [本地使用说明](docs/formfield-homepage.md)。原图解码完成后起播，保留详细原稿与温和净底处理。
 
-**已上线 · 2026-10-06**：总站视觉、第一组（编辑页工作头与输入层级）、第二组（运行与报告阅读）与 Space Grotesk 标题 / Inter 正文字体已发布到 **[https://119.91.211.156](https://119.91.211.156)**，公网验收通过。源码提交 `7131a78`（分支 `feature/plimsoll-1.0`），发布名 `plimsoll-web-20261006T032422Z-7131a78`，128 个文件哈希全部核对一致；Python 运行时、计算核心、后端与部署文件字节未变（前端产物已变更），服务器上只原子切换了静态站点链接，无容器重启、未执行迁移、无配置变更。本轮未新建或修改项目、修订与运行，主题偏好切换后已还原。**第三组功能转场仍未上线，移动端与生产原生打印对话框尚未验收。** 详见 [2026-10-06 生产发布交接](docs/formfield/release-2026-10-06.md)。
+**已上线 · 2026-10-07**：第三组工作空间转场与加载、首页蓝色预览、提示音与边缘放大镜已发布到 **[https://119.91.211.156](https://119.91.211.156)**。源码 `0add0b4`（分支 `feature/plimsoll-1.0`），发布名 `plimsoll-web-20261006T161702Z-0add0b4`；131 个文件哈希及 22 个公网静态资源核对通过，全量前端测试 393/393。被否决的展板覆片已撤回，Work/About 保留 260ms 即时内容切换。仅切换静态站点链接，无容器重启、迁移或配置变更。现有项目、运行与报告读取验收通过；未创建或修改工程数据。详见 [2026-10-07 生产发布交接](docs/formfield/release-feedback-2026-10-07.md)。移动端与生产原生打印对话框尚未验收。
+
+**上一生产版本 · 2026-10-06**：总站视觉、第一组（编辑页工作头与输入层级）、第二组（运行与报告阅读）与 Space Grotesk 标题 / Inter 正文字体发布于 `7131a78`。该发布目录保留作回滚，详见 [2026-10-06 生产发布交接](docs/formfield/release-2026-10-06.md)。
 
 当前**玩法运行时**模型为 v4：`Assets/Prefabs/Ships/HMS_Queen_Mary_1913.prefab` 由 `queen_mary_v4/QueenMary_v4_Gameplay.fbx` 构建（`unity/Editor/ShipRuntimeBuilder.cs:190-203`，找不到 v4 时才回退到契约里的 v3 FBX）。v3 灰盒（`queen_mary_v3/queen_mary.py`，101 对象、85 网格、31,164 三角形）保留为历史资产与**契约数据来源**——碰撞代理、14 个舱室、LOD 剖面等仍从 `queen_mary_v3/` 读取。
 
@@ -20,7 +22,7 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 观察与资源规划基准为 50–200 m、15 艘同屏；这不是硬性锁定游戏相机。
 
-**前端待发布**：[第三组工作空间转场与加载交接](docs/formfield/transition-loading-2026-10-06.md) · [首页蓝色预览、提示音与放大镜交接](docs/formfield/homepage-motion-2026-10-06.md)；本地验收完成，展板覆片候选已撤回，尚未部署。
+**本轮前端功能交接**：[第三组工作空间转场与加载](docs/formfield/transition-loading-2026-10-06.md) · [首页蓝色预览、提示音与放大镜](docs/formfield/homepage-motion-2026-10-06.md)；均已随 `0add0b4` 上线。新的遮罩方案仍在讨论，尚未实现。
 
 ## 当前状态 · 2026-09-20
 
