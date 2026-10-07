@@ -11,12 +11,15 @@
 /* ---- Work detail --------------------------------------------------------- */
 
 :root[data-formfield-surface='public'] { scrollbar-gutter: stable; }
+/* The dock, not the rail, is what stays with a long page: the two entries and the
+   reading ruler below them move together, so the ruler never scrolls away from
+   the navigation it belongs to. Below the desktop floor the rail falls back to a
+   row under the drawing and the ruler withdraws with it. */
 @media (min-width: 651px) {
-  .ff-rail { position: sticky; top: 32px; align-self: start; }
+  .ff-rail-dock { position: sticky; top: 32px; }
 }
 .ff-footer a { color: inherit; }
 .ff-footer a:hover { color: var(--ff-accent); }
-
 /* The detail is the About page's grid, declared from the same two custom
    properties: twelve tracks, one gutter, one left edge. Nothing here measures a
    label track in fixed pixels, so the two pages cannot drift apart. */
@@ -25,12 +28,12 @@
 /* The shell's own faint field stays behind this page and each block clears the
    paper under itself, the way the About sections do, so no hairline of that field
    ever crosses a word or the hero drawing. */
-.ff-detail-back, .ff-detail > .ff-eyebrow, .ff-detail h1, .ff-detail-lede, .ff-detail-entries, .ff-detail-section { position: relative; z-index: 1; background: var(--ff-bg); box-shadow: 0 0 0 14px var(--ff-bg); }
+.ff-detail-back, .ff-detail > .ff-eyebrow, .ff-detail h1, .ff-detail-lede, .ff-detail-section { position: relative; z-index: 1; background: var(--ff-bg); box-shadow: 0 0 0 14px var(--ff-bg); }
 .ff-detail-back { display: inline-flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; letter-spacing: .05em; color: var(--ff-muted); padding: 6px 0; transition: color .16s, gap .2s; }
 .ff-detail-back span { font-size: 15px; }
 .ff-detail-back:hover { color: var(--ff-ink); gap: 15px; }
 .ff-detail > .ff-eyebrow { display: block; margin-top: clamp(26px, 3vw, 46px); }
-.ff-detail h1 { margin: 14px 0 0; font-family: var(--font-display); font-size: clamp(54px, 7.6vw, 108px); font-weight: 700; line-height: 1; letter-spacing: -.025em; }
+.ff-detail h1 { font-size: clamp(54px, 7.6vw, 108px); }
 .ff-detail-lede { margin: 22px 0 0; font-size: clamp(16px, 1.35vw, 19px); line-height: 1.65; color: var(--ff-muted); }
 
 /* The hero is the exhibit's own composition at the page's own width, and it
@@ -41,7 +44,6 @@
 .ff-detail-hero { position: relative; z-index: 1; margin-top: clamp(30px, 3.4vw, 52px); aspect-ratio: 16 / 7; overflow: hidden; background: var(--ff-panel); }
 .ff-detail-hero .ff-art-scene { background: var(--ff-panel); }
 .ff-detail-hero-note { position: absolute; left: 20px; right: 20px; bottom: 17px; display: block; font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-muted); pointer-events: none; }
-.ff-detail-entries { display: flex; align-items: center; gap: 26px; padding: 24px 0 8px; }
 
 /* Numbered editorial sections: flat rows and hairline rules, no card wall. Above
    the shell's own 900 px floor the section repeats the page grid — heading on the
@@ -64,7 +66,12 @@
   .ff-detail h1 { grid-column: 1 / span 8; }
   .ff-detail-lede { grid-column: 1 / span 6; }
   .ff-detail-section { display: grid; grid-template-columns: repeat(var(--ff-cols, 12), minmax(0, 1fr)); column-gap: var(--ff-col-gap, 24px); align-items: start; }
-  .ff-detail-section h2 { grid-column: 1 / span 4; margin: 0; }
+  /* The section title stays at the top of its own section while the reader works
+     through the rows below it, and leaves with the section rather than floating
+     over the next one. It is sticky inside the section's own grid area, so the
+     heading can never outlive the text it names. Same-paper clearance keeps the
+     rule and the number clear of the rows passing under them. */
+  .ff-detail-section h2 { grid-column: 1 / span 4; margin: 0; position: sticky; top: 32px; background: var(--ff-bg); box-shadow: 0 0 0 14px var(--ff-bg); padding-bottom: 6px; }
   .ff-detail-rows { grid-column: 5 / span 8; }
   /* A row is one column of type: the label sits above its body and both run the
      full measure of the eight columns the list was given. A label track beside
@@ -152,21 +159,11 @@
   .ff-detail { padding-bottom: 60px; }
   .ff-detail-hero { aspect-ratio: 16 / 9; }
   .ff-detail-hero-note { left: 13px; right: 13px; bottom: 12px; font-size: 8px; }
-  .ff-work-entries { flex-wrap: wrap; gap: 8px 16px; }
   .ff-contact-actions { gap: 12px 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ff-detail *, .ff-about *, .ff-contact * { transition: none !important; }
 }
-
-/* ---- The two ways out of the exhibit ------------------------------------- */
-/* The framed block stays the direct entry to the tool. The project read is a
-   ruled text link, so it can never be mistaken for it or for the quiet
-   reference squares, and it keeps the same accent on hover. */
-.ff-work-entries { display: flex; align-items: center; gap: 24px; }
-.ff-project-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; padding-bottom: 2px; border-bottom: 1px solid var(--ff-line); font-size: 11px; font-weight: 600; letter-spacing: .02em; color: var(--ff-muted); transition: color .16s, gap .2s, border-color .16s; }
-.ff-project-link span { font-size: 16px; }
-.ff-project-link:hover { color: var(--ff-accent); gap: 18px; border-color: var(--ff-accent); }
 
 /* ---- Home -> detail artwork morph ---------------------------------------- */
 /* Exactly one named group, and only while the controller owns the transition.

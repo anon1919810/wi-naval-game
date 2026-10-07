@@ -14,6 +14,24 @@ beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
 
 describe('preview tap lifecycle', () => {
+  it('keeps the section tick quieter and inside the shared mute and throttle', () => {
+    const graph = audio(); let time = 0;
+    const sound = createPreviewSound({ create: graph.create, now: () => time });
+    expect(sound.tap('section')).toBe(false);
+    expect(graph.create).not.toHaveBeenCalled();
+    sound.unlock();
+    expect(sound.tap('section')).toBe(true);
+    expect(graph.source.stop).toHaveBeenLastCalledWith(12 + PREVIEW_TAP.section.ms / 1000);
+    expect(PREVIEW_TAP.section.peak).toBeLessThan(PREVIEW_TAP.about.peak);
+    expect(PREVIEW_TAP.section.ms).toBeLessThan(PREVIEW_TAP.work.ms);
+    expect(sound.tap('work')).toBe(false);
+    time += PREVIEW_SOUND_THROTTLE_MS;
+    sound.setMuted(true);
+    expect(sound.tap('section')).toBe(false);
+    expect(graph.source.start).toHaveBeenCalledTimes(1);
+    sound.dispose();
+  });
+
   it('distinguishes silent attempts and uses a lower, shorter Work voice', () => {
     const graph = audio(); let time = 0;
     const sound = createPreviewSound({ create: graph.create, now: () => time });

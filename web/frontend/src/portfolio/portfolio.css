@@ -7,7 +7,7 @@
    *inside* the public shell only, so the Splash text and the SVG metadata follow
    them while the Plimsoll app keeps its own tokens. */
 .ff-shell {
-  --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #70736e; --ff-line: #d6d9d2; --ff-accent: #3857e7;
+  --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #70736e; --ff-line: #d6d9d2; --ff-accent: #3857e7; --ff-red: #E2231A;
   --ff-pad: clamp(18px, 2.6vw, 48px);
   /* The rail's width and the gap beside it, named once. The grid spends these,
      and so does every content region that has to stay clear of the rail — which
@@ -17,8 +17,10 @@
   --ff-gap: clamp(40px, 4vw, 88px);
   /* The navigation preview's one exchange: the current word hands its underline
      to the destination in a single damped move, with no bounce and no restart.
-     NAV_PREVIEW_MS and NAV_PREVIEW_EASE in navPreview.ts are the numbers. */
+     NAV_PREVIEW_MS and NAV_PREVIEW_EASE in navPreview.ts are the numbers. The
+     title entry answers with the same two, in the same 300 ms. */
   --ff-nav-preview: 300ms; --ff-nav-ease: cubic-bezier(.2,.8,.2,1);
+  --ff-title-preview: var(--ff-nav-preview); --ff-title-ease: var(--ff-nav-ease);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   min-height: 100svh; background: var(--ff-bg); color: var(--ff-ink); padding: 0 var(--ff-pad);
@@ -50,8 +52,10 @@
 /* The rail: Work/About stacked at display size on the right, quiet until asked.
    It is inert while the splash owns the screen and sits outside `.ff-main`, so
    the circular reveal cannot move it, copy it or clip it, and it keeps keyboard
-   focus across routes. */
-.ff-rail { grid-area: 2 / 2 / 3 / 3; align-self: start; justify-self: end; width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
+   focus across routes. The dock is the rail's grid cell: it holds the rail and,
+   below it, the reading ruler, and it is what goes sticky on a long page. */
+.ff-rail-dock { grid-area: 2 / 2 / 3 / 3; justify-self: end; align-self: start; width: 100%; }
+.ff-rail { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
 /* One entry: the word, and the truthful 01 badge beside it — never a line of its
    own. The badge is outside the word box, so no underline ever crosses the count
    and the count never moves when an underline grows. */
@@ -88,22 +92,26 @@
    preview says nothing about Work's count, and nothing resizes or bounces. */
 .ff-rail-badge { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-top: .16em; border-radius: 50%; background: var(--ff-accent); color: var(--ff-bg); font-size: 10px; font-weight: 600; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; transition: background-color .2s linear, color .2s linear; }
 .ff-shell .ff-rail-link[data-ff-badge='preview'] .ff-rail-badge { background: #E2231A; color: #fff; }
-.ff-shell .ff-theme { justify-self: end; display: flex; align-items: center; gap: 7px; font-size: 12px; min-height: 44px; padding: 4px 10px; transition: color .16s; }
-.ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 6px; }
-/* The preview's tap, muted or not. One word of type beside the theme controls:
-   the label says what it is, the pressed state says whether it is on. */
-.ff-shell .ff-preview-sound { min-height: 30px; padding: 6px 8px; border: 1px solid var(--ff-line); transition: color .16s, border-color .16s; }
-.ff-shell .ff-preview-sound:hover { color: var(--ff-ink); border-color: var(--ff-muted); }
-.ff-shell .ff-preview-sound[aria-pressed='true'] { color: var(--ff-ink); border-color: var(--ff-accent); }
-.ff-preview-sound-mode { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); }
-.ff-shell .ff-preview-sound[aria-pressed='true'] .ff-preview-sound-mode { color: var(--ff-ink); }
-.ff-shell .ff-theme-system { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); border: 1px solid var(--ff-line); padding: 6px 8px; min-height: 30px; transition: color .16s, border-color .16s; }
-.ff-shell .ff-theme-system:hover { color: var(--ff-ink); border-color: var(--ff-muted); }
-.ff-shell .ff-theme-system[aria-pressed='true'] { color: var(--ff-ink); border-color: var(--ff-accent); }
-.ff-theme-symbol { font-size: 18px; line-height: 1; display: inline-block; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
-.ff-shell[data-ff-theme='dark'] .ff-theme-symbol { transform: rotate(180deg); }
-.ff-theme-mode { font-size: 10px; font-weight: 500; letter-spacing: .05em; font-variant-numeric: tabular-nums; color: var(--ff-muted); transition: color .16s; }
-.ff-shell .ff-theme:hover .ff-theme-mode { color: var(--ff-ink); }
+.ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 4px; }
+/* Three geometric marks and nothing else: no text box, no word, no label in the
+   layout. Each is a real 44px target with its own accessible name, pressed state
+   where it has one, and English title. The speaker is a body, one wave and a
+   diagonal slash through both when muted; the theme is a ring half filled; the
+   replay is an incomplete circle that turns under the pointer or the key and
+   stands perfectly still otherwise. */
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay) { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ff-muted); transition: color .16s; }
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay) svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):hover { color: var(--ff-ink); }
+.ff-shell :is(.ff-preview-sound, .ff-theme)[aria-pressed='true'] { color: var(--ff-accent); }
+/* The mute slash exists only when muted: an unmuted speaker has no strike. */
+.ff-preview-sound-slash { opacity: 0; stroke: var(--ff-red); stroke-width: 1.6; }
+.ff-shell .ff-preview-sound[aria-pressed='false'] .ff-preview-sound-slash { opacity: 1; }
+.ff-shell .ff-preview-sound[aria-pressed='false'] .ff-preview-sound-wave { opacity: 0; }
+.ff-theme-fill { fill: currentColor; stroke: none; }
+/* One turn of a 270 degree ring: enough to read as a replay, short enough that a
+   pointer resting on it is not watching a spinner. */
+.ff-replay svg { transition: transform .6s cubic-bezier(.3,.8,.2,1); }
+.ff-shell .ff-replay:hover svg, .ff-shell .ff-replay:focus-visible svg { transform: rotate(-90deg); }
 /* `main` spans both columns. The page's own art is drawn behind the whole width
    it is given — the Work compass runs out under the rail — while the rail stays a
    grid child on top of it. Everything the visitor reads or presses is then taken
@@ -166,13 +174,7 @@
 .ff-work-info { display: flex; justify-content: space-between; gap: 30px; align-items: center; padding: 26px 0 24px; }
 .ff-work-heading { display: flex; align-items: baseline; gap: 20px; }
 .ff-work-index { font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
-.ff-work-heading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(35px, 4vw, 54px); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; }
 .ff-work-heading p { margin: 8px 0 0; color: var(--ff-muted); font-size: 14px; font-weight: 400; letter-spacing: normal; }
-/* The way out of the exhibit is a framed, weighted block, so it can never be
-   mistaken for the quiet reference squares beside it. */
-.ff-explore-link { font-size: 12px; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 22px; min-height: 50px; border: 1px solid var(--ff-ink); padding: 0 18px; transition: color .15s, gap .2s, border-color .15s; }
-.ff-explore-link span { font-size: 24px; font-weight: 500; }
-.ff-explore-link:hover { gap: 32px; color: var(--ff-accent); border-color: var(--ff-accent); }
 .ff-work-controls { padding: 16px 0; border-top: 1px solid var(--ff-line); display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 .ff-sheet-picker, .ff-exhibit-tools { display: flex; gap: 8px; align-items: center; }
 .ff-sheet-picker > span { font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; margin-right: 12px; }
@@ -183,8 +185,6 @@
 .ff-exhibit-tools button:hover, .ff-exhibit-tools button[aria-pressed='true'] { color: var(--ff-ink); }
 .ff-exhibit-tools button:last-child { margin-left: 10px; }
 .ff-footer { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 20px; margin-top: 35px; padding: 24px 0; border-top: 1px solid var(--ff-line); font-size: 9px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ff-muted); letter-spacing: .05em; }
-.ff-footer button { min-height: 30px; font: inherit; font-weight: 600; letter-spacing: inherit; }
-.ff-footer button:hover { color: var(--ff-ink); }
 /* The About page is a twelve-column editorial field, not a measure-limited
    column: the whole desktop width is available, and the type is placed on it. */
 .ff-about { padding: 70px 0 90px; max-width: none; }
@@ -215,8 +215,8 @@
 .ff-scan-light { background: #fff; }
 .ff-skip { position: absolute; bottom: 30px; right: var(--ff-pad); min-height: 44px; color: #c5c5c5 !important; font-family: var(--font-sans) !important; font-size: 10px !important; font-weight: 500 !important; letter-spacing: .05em; font-variant-numeric: tabular-nums; mix-blend-mode: difference; }
 .ff-skip span { margin-left: 20px; }
-.ff-header, .ff-rail, .ff-exhibit-label, .ff-work-info, .ff-work-controls, .ff-footer { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1); }
-.ff-shell[data-opening='true'][data-settling='false'] :is(.ff-header,.ff-rail,.ff-exhibit-label,.ff-work-info,.ff-work-controls,.ff-footer) { opacity: 0; transform: translateY(10px); }
+.ff-header, .ff-rail-dock, .ff-exhibit-label, .ff-work-info, .ff-work-controls, .ff-footer { transition: opacity .65s ease, transform .65s cubic-bezier(.2,.7,.2,1); }
+.ff-shell[data-opening='true'][data-settling='false'] :is(.ff-header,.ff-rail-dock,.ff-exhibit-label,.ff-work-info,.ff-work-controls,.ff-footer) { opacity: 0; transform: translateY(10px); }
 .ff-workspace { min-height: 100vh; background: var(--canvas, #f5f7f8); }
 .ff-tool-return { display: block; background: #f6f6f3; color: #191b19; text-decoration: none; padding: 15px 4vw; font-family: var(--font-sans); font-size: 12px; font-weight: 620; letter-spacing: .02em; border-bottom: 1px solid #d6d9d2; }
 .ff-tool-return:focus-visible { outline: 2px solid #3857e7; outline-offset: -5px; }
@@ -229,7 +229,7 @@
    the drawing as one row: a fallback, not a separate mobile design campaign. */
 @media (max-width: 650px) {
   .ff-shell { grid-template-columns: minmax(0, 1fr); row-gap: 26px; }
-  .ff-header, .ff-main, .ff-rail, .ff-footer { grid-area: auto; }
+  .ff-header, .ff-main, .ff-rail-dock, .ff-footer { grid-area: auto; }
   .ff-rail { flex-direction: row; align-items: center; gap: 22px; padding: 16px 0 0; border-top: 1px solid var(--ff-line); }
   .ff-rail-link { font-size: clamp(40px, 10vw, 60px); line-height: .9; }
   .ff-rail-badge { width: 20px; height: 20px; font-size: 9px; margin-top: 0; }
@@ -247,11 +247,8 @@
   .ff-work-info { align-items: end; gap: 15px; padding: 24px 0; }
   .ff-work-heading { gap: 9px; }
   .ff-work-index { font-size: 9px; }
-  .ff-work-heading h1 { font-size: 37px; }
+  .ff-title { font-size: 37px; }
   .ff-work-heading p { font-size: 12px; max-width: 150px; line-height: 1.5; }
-  .ff-explore-link { font-size: 10px; letter-spacing: .02em; gap: 9px; min-height: 44px; white-space: nowrap; }
-  .ff-explore-link:hover { gap: 12px; }
-  .ff-explore-link span { font-size: 22px; }
   .ff-work-controls { flex-wrap: wrap; gap: 4px; }
   .ff-exhibit-tools { width: 100%; justify-content: space-between; }
   .ff-exhibit-tools button { padding: 0; }
@@ -262,7 +259,6 @@
 }
 @media (max-width: 360px) {
   .ff-work-info { flex-wrap: wrap; gap: 12px; }
-  .ff-explore-link { margin-left: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ff-shell *, .ff-shell *::before, .ff-shell *::after { transition: none !important; animation: none !important; }
@@ -300,7 +296,7 @@
 .ff-shell .ff-reveal-edge { z-index: 3; }
 /* The chrome is never a layer, so this only has to lift it above the reveal's own
    visual layers. It is a static grid child otherwise and moves not at all. */
-.ff-shell > .ff-header, .ff-shell > .ff-rail, .ff-shell > .ff-footer { z-index: 4; }
+.ff-shell > .ff-header, .ff-shell > .ff-rail-dock, .ff-shell > .ff-footer { z-index: 4; }
 /* One hairline exactly on the clip edge, drawn in the page's own ink so it stays
    visible where the outgoing and incoming colours are identical. It animates
    nothing of its own: the radius written here is the same number the clip uses. */

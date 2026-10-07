@@ -112,7 +112,7 @@ const transform = () => document.querySelector('.ff-layer-vessel')!.getAttribute
 describe('desktop transitions', async () => {
   it('prefetches on hover/focus without mounting the app or calling its API', async () => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
-    const entry = screen.getByRole('link', { name: 'OPEN PLIMSOLL' });
+    const entry = screen.getByRole('link', { name: 'Open Plimsoll' });
     fireEvent.pointerEnter(entry); fireEvent.focus(entry); await flush();
     expect(vt.captures).toHaveLength(0);
     expect(document.querySelector('.ff-tool-shell')).toBeNull();
@@ -122,7 +122,7 @@ describe('desktop transitions', async () => {
 
   it('uses the anchor navigation and retains the tool transition until it finishes', async () => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
-    follow('OPEN PLIMSOLL'); const entry = vt.last();
+    follow('Open Plimsoll'); const entry = vt.last();
     expect(entry.kind).toBe('tool'); expect(api.authConfig).not.toHaveBeenCalled();
     await entry.capture();
     expect(document.documentElement.dataset.ffTransition).toBe('tool');
@@ -149,7 +149,7 @@ describe('desktop transitions', async () => {
     fireEvent.click(screen.getByRole('button', { name: 'Inspect Off' }));
     fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
     const sample = document.querySelector('.ff-lens-view')!.getAttribute('viewBox');
-    follow('OPEN PLIMSOLL'); await vt.last().capture(); await vt.last().finish();
+    follow('Open Plimsoll'); await vt.last().capture(); await vt.last().finish();
     await screen.findByTitle('本浏览器工作区');
     follow('↖ Y’s Formfield'); const back = vt.last();
     expect(back.kind).toBe('tool-back'); await back.capture(); await back.finish();
@@ -160,7 +160,7 @@ describe('desktop transitions', async () => {
     expect(screen.getByRole('button', { name: 'Inspect On' })).toHaveAttribute('aria-pressed', 'true');
     expect(transform()).toBe(pan); expect(document.querySelector('.ff-lens-view')!.getAttribute('viewBox')).toBe(sample);
     expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
-    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'OPEN PLIMSOLL' }));
+    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Open Plimsoll' }));
   });
 
   it('animates Work/About content for 500 ms while keeping persistent navigation focus', async () => {
@@ -194,12 +194,11 @@ describe('desktop transitions', async () => {
     await current.finish(); expect(document.documentElement.dataset.ffTransition).toBeUndefined();
   });
 
-  it.each(['theme', 'system', 'reduced'] as const)('clears a requested sheet interrupted before capture by %s', async interruption => {
+  it.each(['theme', 'reduced'] as const)('clears a requested sheet interrupted before capture by %s', async interruption => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
     fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[2].label })); await flush();
     const sheet = vt.last(); expect(study()).toBe(PLAN_SHEETS[0].id);
     if (interruption === 'theme') fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
-    else if (interruption === 'system') fireEvent.click(screen.getByRole('button', { name: 'SYSTEM' }));
     else media(reducedQuery, true);
     expect(sheet.skipped).toBe(true); await sheet.capture(); await sheet.finish();
     expect(study()).toBe(PLAN_SHEETS[0].id);
@@ -209,18 +208,18 @@ describe('desktop transitions', async () => {
     expect(document.querySelector('.ff-shell')).toHaveAttribute('data-switching', 'false');
   });
 
-  it('allows system theme changes to retire a running sheet before capture', async () => {
+  it('ignores OS theme changes during a running sheet capture', async () => {
     localStorage.setItem('formfield-theme', 'system');
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
     fireEvent.click(screen.getByRole('button', { name: PLAN_SHEETS[1].label })); await flush();
     const sheet = vt.last(); media(darkQuery, true); await sheet.capture(); await sheet.finish();
-    expect(sheet.skipped).toBe(true); expect(study()).toBe(PLAN_SHEETS[0].id);
-    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(sheet.skipped).toBe(false); expect(study()).toBe(PLAN_SHEETS[1].id);
+    expect(document.documentElement.dataset.theme).toBe('light');
   });
 
   it('cancels a pending tool entry when history returns to the already committed public route', async () => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
-    follow('OPEN PLIMSOLL'); const entry = vt.last(); hash('#/work');
+    follow('Open Plimsoll'); const entry = vt.last(); hash('#/work');
     expect(entry.skipped).toBe(true); await entry.capture(); await entry.finish();
     expect(api.authConfig).not.toHaveBeenCalled(); expect(document.querySelector('.ff-tool-shell')).toBeNull();
     expect(document.documentElement.dataset.ffTransition).toBeUndefined();
@@ -230,7 +229,7 @@ describe('desktop transitions', async () => {
     if (reduced) { preferences.set(reducedQuery, true); native(); }
     render(<Portfolio introEnabled={reduced} />); await flush();
     if (reduced) expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
-    follow('About'); follow('Work 01'); follow('OPEN PLIMSOLL');
+    follow('About'); follow('Work 01'); follow('Open Plimsoll');
     await screen.findByTitle('本浏览器工作区'); follow('↖ Y’s Formfield'); await flush();
     expect(document.documentElement.dataset.formfieldSurface).toBe('public');
     expect(revealing()).toBeUndefined(); expect(document.documentElement.dataset.ffTransition).toBeUndefined();
@@ -239,7 +238,7 @@ describe('desktop transitions', async () => {
 
   it('keeps modified and middle clicks available to the browser', async () => {
     const vt = native(); render(<Portfolio introEnabled={false} />); await flush();
-    const link = screen.getByRole('link', { name: 'OPEN PLIMSOLL' });
+    const link = screen.getByRole('link', { name: 'Open Plimsoll' });
     for (const detail of [{ metaKey: true, button: 0 }, { ctrlKey: true, button: 0 }, { button: 1 }]) {
       const click = new MouseEvent('click', { bubbles: true, cancelable: true, ...detail });
       fireEvent(link, click); expect(click.defaultPrevented).toBe(false);

@@ -86,7 +86,7 @@ describe('public portfolio boundary', () => {
     render(<Portfolio introEnabled={false} />);
     fireEvent.click(screen.getByRole('button', { name: 'Reference sheet 02' }));
     await act(async () => {});
-    follow('OPEN PLIMSOLL');
+    follow('Open Plimsoll');
     await waitFor(() => expect(api.authConfig).toHaveBeenCalledTimes(1));
     expect(await screen.findByTitle('本浏览器工作区')).toBeVisible();
     expect(document.documentElement.dataset.formfieldSurface).toBe('app');
@@ -189,48 +189,27 @@ describe('public portfolio boundary', () => {
     expect(cursor().hidden).toBe(true);
   });
 
-  it('resolves the system preference locally and restores a saved theme', () => {
+  it('migrates legacy system to light and ignores later OS changes', () => {
     media(false, true);
     localStorage.setItem(THEME_KEY, 'system');
     render(<Portfolio introEnabled={false} />);
-    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
-    expect(document.documentElement.dataset.theme).toBe('dark');
+    expect(document.documentElement.dataset.theme).toBe('light');
+    expect(screen.queryByRole('button', { name: 'SYSTEM' })).toBeNull();
+    changeMedia('(prefers-color-scheme: dark)', false);
+    changeMedia('(prefers-color-scheme: dark)', true);
+    expect(document.documentElement.dataset.theme).toBe('light');
     expect(api.authConfig).not.toHaveBeenCalled();
   });
 
-  it('offers a compact System entry that follows the OS and yields to the primary toggle', () => {
+  it('persists the manual theme independently of OS changes', () => {
     render(<Portfolio introEnabled={false} />);
-    const system = screen.getByRole('button', { name: 'SYSTEM' });
-    fireEvent.click(system);
-    expect(system).toHaveAttribute('title', 'Follow system theme');
-    expect(system).toHaveAttribute('aria-pressed', 'true');
-    expect(localStorage.getItem(THEME_KEY)).toBe('system');
-    // Following the OS means following it live, with no reload and no workspace.
-    changeMedia('(prefers-color-scheme: dark)', true);
-    expect(document.documentElement.dataset.theme).toBe('dark');
-    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument();
-    changeMedia('(prefers-color-scheme: dark)', false);
-    expect(document.documentElement.dataset.theme).toBe('light');
-    // The explicit toggle leaves system mode behind and persists the choice.
     fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
-    expect(system).toHaveAttribute('aria-pressed', 'false');
     expect(localStorage.getItem(THEME_KEY)).toBe('dark');
-    expect(document.documentElement.dataset.theme).toBe('dark');
-    // System re-enters on demand; pressing it while following pins what the
-    // system resolves to right now, not the opposite of it.
-    fireEvent.click(system);
-    expect(system).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(system);
-    expect(system).toHaveAttribute('aria-pressed', 'false');
-    expect(localStorage.getItem(THEME_KEY)).toBe('light');
     changeMedia('(prefers-color-scheme: dark)', true);
-    fireEvent.click(system);
-    expect(system).toHaveAttribute('aria-pressed', 'true');
+    changeMedia('(prefers-color-scheme: dark)', false);
     expect(document.documentElement.dataset.theme).toBe('dark');
-    fireEvent.click(system);
-    expect(system).toHaveAttribute('aria-pressed', 'false');
-    expect(localStorage.getItem(THEME_KEY)).toBe('dark');
-    expect(document.documentElement.dataset.theme).toBe('dark');
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
+    expect(localStorage.getItem(THEME_KEY)).toBe('light');
     expect(api.authConfig).not.toHaveBeenCalled();
     expect(api.listProjects).not.toHaveBeenCalled();
   });
@@ -282,7 +261,7 @@ describe('opening lifecycle', () => {
     media(true); controlledImage();
     const { unmount } = render(<StrictMode><Portfolio /></StrictMode>);
     expect(screen.queryByRole('status')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'REPLAY INTRO' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Replay intro' }));
     expect(screen.queryByRole('status')).toBeNull();
     expect(document.body.style.overflow).not.toBe('hidden');
     unmount();
@@ -330,7 +309,7 @@ describe('opening lifecycle', () => {
     await act(async () => { image.resolve(); });
     expect(screen.queryByRole('status')).toBeNull();
     expect(document.body.style.overflow).not.toBe('hidden');
-    fireEvent.click(screen.getByRole('button', { name: 'REPLAY INTRO' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Replay intro' }));
     unmount();
     expect(document.body.style.overflow).not.toBe('hidden');
   });
@@ -376,7 +355,7 @@ describe('opening lifecycle', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(meta.content).toBe('#101110');
     expect(document.documentElement.style.colorScheme).toBe('dark');
-    follow('OPEN PLIMSOLL');
+    follow('Open Plimsoll');
     expect(meta.content).toBe('#abcdef');
     expect(document.documentElement.style.colorScheme).toBe('normal');
     // Clicking an anchor queues a navigation in jsdom. Let it land inside this

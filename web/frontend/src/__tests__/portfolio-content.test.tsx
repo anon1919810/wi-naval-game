@@ -61,6 +61,7 @@ function hash(value: string) {
   act(() => { window.history.replaceState(null, '', `/${value}`); window.dispatchEvent(new HashChangeEvent('hashchange')); });
 }
 function follow(name: string) {
+  if (name === 'VIEW PROJECT') fireEvent.focus(screen.getByRole('link', { name: 'Open Plimsoll' }));
   const link = screen.getByRole('link', { name });
   const click = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
   let allowed = false;
@@ -99,16 +100,17 @@ describe('work detail routing', () => {
   it('offers the detail as a secondary entry and keeps the direct tool entry', async () => {
     render(<Portfolio introEnabled={false} />);
     await flush();
+    fireEvent.focus(screen.getByRole('link', { name: 'Open Plimsoll' }));
     const view = screen.getByRole('link', { name: /VIEW PROJECT/ });
     expect(view).toHaveAttribute('href', '#/work/plimsoll');
     // The two ways out stay visibly different classes, and only the framed block
     // carries the tool behaviour.
-    expect(view).toHaveClass('ff-project-link');
-    expect(view).not.toHaveClass('ff-explore-link');
-    const open = screen.getByRole('link', { name: 'OPEN PLIMSOLL' });
-    expect(open).toHaveClass('ff-explore-link');
+    expect(view).toHaveClass('ff-title-action');
+    expect(view).not.toHaveClass('ff-title-link');
+    const open = screen.getByRole('link', { name: 'Open Plimsoll' });
+    expect(open).toHaveClass('ff-title-link');
     expect(open).toHaveAttribute('href', '#/plimsoll');
-    expect(view.closest('.ff-work-entries')).toContainElement(open);
+    expect(view.closest('.ff-title-region')).toContainElement(open);
   });
 
   it('opens the detail from a deep link without the intro, the tool or any API call', async () => {
@@ -197,9 +199,9 @@ describe('work detail content', () => {
   it('keeps a working way into the tool and a way back to the exhibit', async () => {
     const back = screen.getByRole('link', { name: /BACK TO WORK/ });
     expect(back).toHaveAttribute('href', '#/work');
-    const cta = screen.getByRole('link', { name: 'OPEN PLIMSOLL' });
+    const cta = screen.getByRole('link', { name: 'Open Plimsoll' });
     expect(cta).toHaveAttribute('href', '#/plimsoll');
-    expect(cta).toHaveClass('ff-explore-link');
+    expect(cta).toHaveClass('ff-title-link');
     // The detail's own CTA warms the chunk on hover without mounting anything.
     fireEvent.pointerEnter(cta); fireEvent.focus(cta); await flush();
     expect(document.querySelector('.ff-tool-shell')).toBeNull();
@@ -242,11 +244,11 @@ describe('home and detail navigation', () => {
     const vt = native();
     render(<Portfolio introEnabled={false} />);
     await flush();
-    follow('OPEN PLIMSOLL');
+    follow('Open Plimsoll');
     const entry = vt.last();
     // A second anchor activation at the same hash raises no hashchange.
     window.addEventListener('click', event => event.preventDefault(), { once: true });
-    fireEvent.click(screen.getByRole('link', { name: 'OPEN PLIMSOLL' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Open Plimsoll' }));
     expect(entry.skipped).toBe(false);
     await entry.capture(); await entry.finish();
     await screen.findByTitle('本浏览器工作区');
@@ -254,8 +256,7 @@ describe('home and detail navigation', () => {
     expect(document.querySelector('.ff-tool-shell')).toBeVisible();
   });
 
-  it.each(['theme', 'system', 'reduced motion', 'OS theme'])('settles requested navigation when %s interrupts its capture', async mode => {
-    if (mode === 'OS theme') localStorage.setItem('formfield-theme', 'system');
+  it.each(['theme', 'reduced motion'])('settles requested navigation when %s interrupts its capture', async mode => {
     const vt = native();
     render(<Portfolio introEnabled={false} />);
     await flush();
@@ -263,9 +264,8 @@ describe('home and detail navigation', () => {
     const enter = vt.last();
     expect(homeVisible()).toBe(true);
     if (mode === 'theme') fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
-    else if (mode === 'system') fireEvent.click(screen.getByRole('button', { name: /system/i }));
     else {
-      const query = mode === 'reduced motion' ? reducedQuery : '(prefers-color-scheme: dark)';
+      const query = reducedQuery;
       preferences.set(query, true);
       act(() => mediaListeners.get(query)?.forEach(listener => listener({ matches: true } as MediaQueryListEvent)));
     }
@@ -424,6 +424,7 @@ describe('home and detail navigation', () => {
     expect(document.activeElement).toBe(about);
     // Entering the detail from the exhibit does strand the VIEW PROJECT link — it
     // is inside the section that gets hidden — so the new page's heading takes it.
+    fireEvent.focus(screen.getByRole('link', { name: 'Open Plimsoll' }));
     screen.getByRole('link', { name: /VIEW PROJECT/ }).focus();
     expect(document.activeElement).not.toBe(document.body);
     follow('VIEW PROJECT');
@@ -437,7 +438,7 @@ describe('home and detail navigation', () => {
     await flush();
     follow('VIEW PROJECT');
     await vt.last().capture(); await vt.last().finish();
-    follow('OPEN PLIMSOLL');
+    follow('Open Plimsoll');
     await vt.last().capture(); await vt.last().finish();
     await screen.findByTitle('本浏览器工作区');
     // The way out points at the detail, not at a hardcoded exhibit.
@@ -461,7 +462,7 @@ describe('home and detail navigation', () => {
     const vt = native();
     render(<Portfolio introEnabled={false} />);
     await flush();
-    follow('OPEN PLIMSOLL');
+    follow('Open Plimsoll');
     await vt.last().capture(); await vt.last().finish();
     await screen.findByTitle('本浏览器工作区');
     // A return that leaves the page without a visible focus holder is the case the
@@ -471,7 +472,7 @@ describe('home and detail navigation', () => {
     expect(document.activeElement).toBe(document.body);
     follow('↖ Y’s Formfield');
     await vt.last().capture(); await vt.last().finish();
-    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'OPEN PLIMSOLL' }));
+    expect(document.activeElement).toBe(screen.getByRole('link', { name: 'Open Plimsoll' }));
   });
 
   it('navigates immediately under reduced motion and leaves nothing named behind', async () => {

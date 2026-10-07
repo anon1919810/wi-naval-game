@@ -16,11 +16,8 @@
 @media (min-width: 651px) {
   .ff-home .ff-work-info { padding: 24px 0 12px; gap: 20px; flex-wrap: wrap; }
   .ff-home .ff-work-heading { gap: 14px; }
-  .ff-home .ff-work-heading h1 { font-size: clamp(36px, 3.6vw, 52px); }
+  .ff-home .ff-title { font-size: clamp(36px, 3.6vw, 52px); }
   .ff-home .ff-work-heading p { font-size: 13px; margin-top: 6px; }
-  .ff-home .ff-work-entries { gap: 20px; }
-  .ff-home .ff-explore-link { min-height: 46px; padding: 0 14px; font-size: 11px; gap: 16px; }
-  .ff-home .ff-project-link { font-size: 10px; min-height: 42px; }
 }
 /* The page order lives in pageGeometry.tsx / pageGeometry.css: a pale field per
    page and one focal drawing per page, placed behind the reading. The exhibit's own

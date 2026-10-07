@@ -1,0 +1,89 @@
+/* The page title, and the one secondary action that may sit beside it.
+   Scoped to the public shell's own tokens; nothing here introduces a colour,
+   family or size the shell does not already own. */
+
+/* The title is ink at rest and accent while it is previewed. The word's own
+   metrics are untouched: the reveal is a duplicate behind a circle, not a
+   recolour of the word that is already on screen. */
+.ff-title { margin: 0; font-family: var(--font-display); font-weight: 700; line-height: 1.1; letter-spacing: -.02em; display: inline-block; }
+.ff-title-link { display: inline-flex; align-items: baseline; gap: .16em; color: var(--ff-ink); }
+
+/* The region is the whole hover/focus territory: the title, the gap, and the
+   action. It is not focusable and never takes a pointer of its own. */
+.ff-title-region { display: inline-flex; align-items: baseline; gap: clamp(14px, 1.6vw, 26px); }
+
+/* One word: the ink, the duplicate the circle opens onto, and the single rule
+   under both. The duplicate is never a pointer target and never a second name. */
+.ff-title-word { position: relative; display: inline-block; }
+.ff-title-ink { display: block; }
+.ff-title-dup {
+  position: absolute; inset: 0; color: var(--ff-accent); pointer-events: none;
+  clip-path: circle(var(--ff-title-radius, 0px) at var(--ff-title-x, 50%) var(--ff-title-y, 50%));
+  transition: clip-path var(--ff-title-preview) var(--ff-title-ease);
+}
+/* An origin installed while the circle is closed: transition off for that one
+   step, so the radius grows from the new origin instead of the circle sliding
+   over from the last one. */
+.ff-title-dup[data-ff-title-armed] { transition: none; }
+.ff-title-link[data-ff-title-held='true'] .ff-title-dup,
+.ff-title-action[data-ff-title-action='preview'] .ff-title-dup { opacity: 1; }
+
+/* One rule, one move: the word's first glyph at rest, the whole word while it is
+   previewed, ink to accent in the same 300 ms as the circle. */
+.ff-title-rule {
+  position: absolute; left: 0; right: 0; bottom: -.12em; height: 2px; background-color: var(--ff-ink);
+  transform: scaleX(var(--ff-title-rule, 1)); transform-origin: left center;
+  transition: transform var(--ff-title-preview) var(--ff-title-ease), background-color var(--ff-title-preview) linear;
+}
+.ff-title-link[data-ff-title-active='true'] .ff-title-rule,
+.ff-title-action[data-ff-title-action='preview'] .ff-title-rule { background-color: var(--ff-accent); transform: scaleX(1); }
+
+.ff-title-arrow { font-size: .38em; font-weight: 500; color: var(--ff-muted); transform: translateY(-.25em); transition: color var(--ff-title-preview) linear; }
+.ff-title-link:hover .ff-title-arrow { color: var(--ff-accent); }
+
+/* The isolated `i`. Nothing about the letter changes: it is a plain inline
+   element around the glyph, so shaping, weight and spacing are the font's own.
+   What changes is that only the band above the x-height is painted, and only in
+   the duplicate, so the dot reads red where the circle has reached it and the
+   stem stays the colour behind it.
+
+   `--ff-title-line` is the i's own line box, and `--ff-title-dot` the bottom of
+   the band measured from the top of that box in `em`. For Space Grotesk as
+   shipped (upm 1000, ascender 984, descender 292, x-height 486, cap 700) a
+   browser using the hhea metrics puts the stem's top at 0.5 * line - 0.140 em
+   and one using the OS/2 win metrics at 0.5 * line - 0.057 em; the dot sits above
+   both. 0.39 em is inside the first gap and within a pixel of the second, which is
+   why the band fades rather than stopping dead. */
+.ff-title { --ff-title-line: 1.1; --ff-title-dot: 0.39em; }
+.ff-title-dup .ff-title-i {
+  color: transparent;
+  background-image: linear-gradient(to bottom, var(--ff-red) 0, var(--ff-red) var(--ff-title-dot), var(--ff-accent) calc(var(--ff-title-dot) + .014em));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.ff-title-i { line-height: var(--ff-title-line); }
+
+/* The secondary action: smaller, muted blue at rest, on its own preview at the
+   brand blue. It is hidden by an inline `visibility`, which is what keeps it out
+   of the tab order and off the pointer while it is closed; the size of the gap
+   is always reserved, so opening it never moves the title. */
+.ff-shell .ff-title-action {
+  display: inline-flex; align-items: baseline; gap: .5em;
+  font-size: clamp(12px, 1vw, 14px); font-weight: 600; letter-spacing: .04em; line-height: 1;
+  color: var(--ff-accent); opacity: .62;
+  transform: translateX(8px);
+  transition: opacity var(--ff-title-preview) linear, color var(--ff-title-preview) linear, transform var(--ff-title-preview) var(--ff-title-ease);
+}
+.ff-title-region[data-ff-title-region='open'] .ff-title-action { transform: translateX(0); }
+.ff-title-action:hover, .ff-title-action[data-ff-title-action='preview'] { opacity: 1; }
+.ff-title-action .ff-title-arrow { font-size: .7em; }
+.ff-title-action[data-ff-title-action='preview'] .ff-title-arrow { color: var(--ff-accent); }
+
+/* A pointer that cannot hover has no region to open, so the action is simply
+   there: reachable by touch, and still only one small link on the baseline. */
+@media (hover: none) {
+  .ff-title-action { visibility: visible !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-title-region *, .ff-title-region { transition: none !important; }
+}

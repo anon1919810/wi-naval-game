@@ -1,7 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type KeyboardEvent } from 'react';
 import { flushSync } from 'react-dom';
 import { AboutContent } from './AboutContent';
-import { CONTACT_EMAIL } from './Contact';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
 import { introPlayed, markIntroPlayed } from './intro';
@@ -9,12 +8,16 @@ import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
 import { createPreviewSound, storedMuted } from './previewAudio';
 import { ProjectDetail } from './ProjectDetail';
 import { RailNav, type DestinationOrigin } from './RailNav';
+import { ReadingRuler } from './ReadingRuler';
+import { measureSections, READ_LINE_PX, sectionNodes, startReading, type Reading } from './readingScroll';
 import { Splash } from './Splash';
 import { PageField, ShellField } from './pageGeometry';
 import { PLAN_SHEETS, sheetByIndex } from './plans';
 import { APP_ENTRY_LINK, classifyHash, publicHref, WORK_DETAIL_LINK, type PortfolioRoute, type PublicView } from './routes';
 import { railView } from './navPreview';
-import { resolveTheme, storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
+import { startScrollStudies } from './scrollStudies';
+import { storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
+import { TitleEntry } from './TitleEntry';
 import { ToolModuleBoundary } from './ToolModule';
 import { animateTheme, cancelTransitions, runTransition, TRANSITION_MS, transitionsActive, type TransitionKind, type TransitionOptions } from './transitions';
 import { ReadPending } from '../components/ReadPending';
@@ -50,9 +53,7 @@ const SAMPLE_MOVES: Record<string, [number, number]> = { ArrowLeft: [-4, 0], Arr
 export default function Portfolio({ introEnabled = true }: { introEnabled?: boolean }) {
   const [route, setRoute] = useState(() => classifyHash(window.location.hash));
   const [theme, setTheme] = useState<PortfolioTheme>(storedTheme);
-  const [systemDark, setSystemDark] = useState(() => window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false);
-  const resolved = resolveTheme(theme, systemDark);
-  const dark = resolved === 'dark';
+  const dark = theme === 'dark';
   /**
    * The opening plays once per browser session, and only on request after that:
    * a reload or a Back does not replay it, and a new tab may. A refused
@@ -106,6 +107,13 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const aboutHeading = useRef<HTMLHeadingElement>(null);
   const detailHeading = useRef<HTMLHeadingElement>(null);
   const detailCta = useRef<HTMLAnchorElement>(null);
+  /** The page the ruler measures: the visible document, never the shell around it. */
+  const page = useRef<HTMLElement>(null);
+  /** The reading controller for that page, and the studies painter beside it. */
+  const reading = useRef<Reading | null>(null);
+  const studies = useRef<{ dispose(): void } | null>(null);
+  /** Only section identity crosses into React; drawing progress stays in the DOM. */
+  const [readingCurrent, setReadingCurrent] = useState(-1);
   const cut = useRef(0);
   /** The shell, which owns the theme tokens the reveal's layers are drawn in. */
   const shellRef = useRef<HTMLDivElement>(null);
@@ -171,6 +179,9 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     cancelTransitions();
     busy.current = false;
     setSwitching(false);
+    // Cancel the pending tick even when this press keeps the current route.
+    // Effect cleanup owns controller disposal when the route actually changes.
+    reading.current?.refresh();
   }, []);
   const beginSettle = useCallback(() => setSettling(true), []);
   const sheet = sheetByIndex(sheetIndex);
@@ -182,6 +193,37 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const onWork = publicActive && !about;
   /** The rail only exists on a public route, so anything else reads as Work. */
   const railCurrent = route.kind === 'app' ? 'home' : route.view;
+  /** Only the two long views carry a ruler; the exhibit is one screenful. */
+  const ruler = publicActive && (about || detail);
+
+  /** A reading controller for long pages; a separate painter also serves Work. */
+  useEffect(() => {
+    if (!ruler) return;
+    const root = page.current;
+    if (!root) return;
+    const measure = () => measureSections(sectionNodes(root), window.scrollY);
+    reading.current = startReading({
+      measure,
+      line: () => window.scrollY + READ_LINE_PX,
+      atEnd: () => window.scrollY + window.innerHeight >= (document.documentElement.scrollHeight || 0) - 1,
+      sound,
+      onCurrent: setReadingCurrent,
+      reducedMotion: () => still.current,
+    });
+    return () => { reading.current?.dispose(); reading.current = null; };
+  }, [ruler, route, sound]);
+
+  useEffect(() => {
+    if (!publicActive || opening) return;
+    studies.current = startScrollStudies({
+      find: () => Array.from(mainRef.current?.querySelectorAll<HTMLElement>('[data-ff-study]') ?? []).filter(node => !node.closest('[hidden]')),
+      viewport: () => window.innerHeight,
+      reducedMotion: () => still.current,
+    });
+    return () => {
+      studies.current?.dispose(); studies.current = null;
+    };
+  }, [publicActive, route, opening, sheet.href]);
 
   useEffect(() => {
     if (!onWork) return;
@@ -452,14 +494,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       applyRoute(next);
     };
     window.addEventListener('hashchange', update);
-    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
-    const change = (e: MediaQueryListEvent) => {
-      if (theme === 'system') settleRequestedRoute();
-      setSystemDark(e.matches);
-    };
-    media?.addEventListener?.('change', change);
-    return () => { window.removeEventListener('hashchange', update); media?.removeEventListener?.('change', change); };
-  }, [applyRoute, settleRequestedRoute, theme]);
+    return () => { window.removeEventListener('hashchange', update); };
+  }, [applyRoute]);
   useEffect(() => {
     document.title = route.kind === 'app' ? 'Plimsoll · 舰船计算工作台'
       : route.view === 'project' ? 'Plimsoll — Y’s Formfield'
@@ -534,14 +570,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     setOpening(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
   };
 
-  /** Compact companion to the primary toggle: follow the OS, or pin what it resolves to now. */
-  const followSystem = useCallback(() => {
-    // Following the OS re-resolves the theme from scratch, so any cut in flight
-    // is retired rather than left to overwrite the value it just changed.
-    settleRequestedRoute();
-    setTheme(previous => (previous === 'system' ? resolved : 'system'));
-  }, [resolved, settleRequestedRoute]);
-
+  /** Compact companion to the primary toggle: nothing. The theme is chosen here
+   *  and kept, so there is no mode that follows the OS behind the visitor's back. */
   const toggleTheme = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     settleRequestedRoute();
     const next = dark ? 'light' : 'dark';
@@ -591,14 +621,25 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
         <div className="ff-theme-group">
-          {/* One small switch for the navigation preview's tap, beside the theme
-              controls it shares a row with. The label is the thing, the pressed
-              state is the truth, and the choice is remembered where the theme
-              preference is — or forgotten, without complaint, if storage is
-              refused. */}
-          <button className="ff-preview-sound" onClick={toggleSound} aria-label="Preview sound" aria-pressed={!muted} title={muted ? 'Turn preview sound on' : 'Mute preview sound'}><span className="ff-preview-sound-mode">{muted ? 'MUTED' : 'SOUND'}</span></button>
-          <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}><span className="ff-theme-symbol" aria-hidden="true">◐</span><span className="ff-theme-mode">{dark ? 'DARK' : 'LIGHT'}</span></button>
-          <button className="ff-theme-system" onClick={followSystem} aria-pressed={theme === 'system'} title="Follow system theme">SYSTEM</button>
+          {/* Three geometric marks, no words. The sound is a speaker with one
+              wave and a diagonal slash through it when muted; the theme is a ring
+              half filled; the replay is an incomplete circle that turns under the
+              pointer or the key and stands still otherwise. Each keeps its
+              accessible name, its pressed state where it has one, and its English
+              title, so nothing here is only a picture. */}
+          <button className="ff-preview-sound" onClick={toggleSound} aria-label="Preview sound" aria-pressed={!muted} title={muted ? 'Turn preview sound on' : 'Mute preview sound'}>
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M3 8h3l4-3.4v10.8L6 12H3z" />
+              <path className="ff-preview-sound-wave" d="M13 7.4a3.4 3.4 0 0 1 0 5.2" />
+              <path className="ff-preview-sound-slash" d="M3.5 16.5 16.5 3.5" />
+            </svg>
+          </button>
+          <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}>
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.4" /><path className="ff-theme-fill" d="M10 3.6a6.4 6.4 0 0 1 0 12.8z" /></svg>
+          </button>
+          <button className="ff-replay" onClick={replay} aria-label="Replay intro" title="Replay intro">
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M15.2 12.6A6.4 6.4 0 1 1 10 3.6a6.4 6.4 0 0 1 5.2 9" /><path className="ff-replay-head" d="M15.6 6.2v3.6h-3.6" /></svg>
+          </button>
         </div>
       </header>
 
@@ -656,12 +697,16 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           </div>
 
           <div className="ff-work-info">
-            <div className="ff-work-heading"><span className="ff-work-index">01 /</span><div><h1 ref={homeHeading} tabIndex={-1}>Plimsoll</h1><p>Naval design, made explorable.</p></div></div>
-            {/* Two ways out, and they stay visibly different: the framed block opens
-                the tool, the ruled text reads the project first. */}
-            <div className="ff-work-entries">
-              <a className="ff-explore-link" ref={cta} href={APP_ENTRY_LINK} onClick={enterTool} onPointerEnter={prefetchApp} onFocus={prefetchApp}>OPEN PLIMSOLL <span aria-hidden="true">↗</span></a>
-              <a className="ff-project-link" href={WORK_DETAIL_LINK}>VIEW PROJECT <span aria-hidden="true">↗</span></a>
+            {/* The title is the way into the tool, and the detail sits on its
+                baseline rather than under it, so there is one entry line here
+                instead of two competing ones. */}
+            <div className="ff-work-heading">
+              <span className="ff-work-index">01 /</span>
+              <div>
+                <TitleEntry headingRef={homeHeading} linkRef={cta} parts={['Pl', 'i', 'msoll']} dot={1} name="Open Plimsoll" href={APP_ENTRY_LINK}
+                  secondary={{ href: WORK_DETAIL_LINK, label: 'VIEW PROJECT' }} prefetch={prefetchApp} onEnter={enterTool} />
+                <p>Naval design, made explorable.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -673,22 +718,32 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             All the exhibit's own state lives in refs and state above, so it is
             already intact when this view comes back. */}
         {detail && <section className="ff-detail-slot">
-          <ProjectDetail sheet={sheet} dark={dark} details={details} headingRef={detailHeading} ctaRef={detailCta} prefetchApp={prefetchApp} onEnterTool={enterTool} />
+          <ProjectDetail sheet={sheet} dark={dark} details={details} pageRef={page} headingRef={detailHeading} ctaRef={detailCta} prefetchApp={prefetchApp} onEnterTool={enterTool} />
         </section>}
 
         {about && <section className="ff-about-slot">
-          <AboutContent headingRef={aboutHeading} />
+          <AboutContent headingRef={aboutHeading} pageRef={page} />
         </section>}
       </main>
 
-      {/* Work owns the exhibit and the work detail, so it stays the current page
+      {/* The rail dock owns the whole navigation column: the two entries, and
+          below them the reading ruler for the views long enough to need one. The
+          ruler is its own labelled landmark, a sibling of the main navigation
+          rather than a child of it, so a landmark list never reads them as one.
+          Work owns the exhibit and the work detail, so it stays the current page
           on both; the detail is reached from the exhibit, not from the rail. A
           press on the page already on screen raises no address and therefore no
           route, so it is answered here instead: it drops whatever is still
           travelling away from it. */}
-      <RailNav current={railCurrent} sound={sound} onCurrentPagePress={retire} revealOrigins={railOrigins} inert={opening} />
+      <div className="ff-rail-dock">
+        <RailNav current={railCurrent} sound={sound} onCurrentPagePress={retire} revealOrigins={railOrigins} inert={opening} />
+        {ruler && <ReadingRuler key={railCurrent} pageRef={page} reading={reading} current={readingCurrent} />}
+      </div>
 
-      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span><a href={`mailto:${CONTACT_EMAIL}`}>CONTACT ↗</a><button onClick={replay}>REPLAY INTRO <span aria-hidden="true">↗</span></button></footer>
+      {/* Footer contact is gone: About ends with the real contact section, and a
+          second address at the bottom of every page said the same thing twice.
+          Replay is in the header for the same reason — one control, not two. */}
+      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span></footer>
       {opening && publicActive && (readyHref === sheet.href
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
         : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}

@@ -270,7 +270,7 @@ describe('the opening, once per browser session', () => {
     render(<Portfolio />);
     await screen.findByRole('heading', { level: 1, name: 'Plimsoll' });
     expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /REPLAY INTRO/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Replay intro/ }));
     expect(screen.getByRole('status', { name: /Opening Y’s Formfield|Loading reference/ })).toBeInTheDocument();
   });
 
@@ -311,7 +311,7 @@ describe('the opening, once per browser session', () => {
     expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
     // The reference controls are still there, and replay can try again.
     for (const sheet of PLAN_SHEETS) expect(screen.getByRole('button', { name: sheet.label })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /REPLAY INTRO/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Replay intro/ }));
     expect(screen.getByRole('status', { name: /Opening Y’s Formfield|Loading reference/ })).toBeInTheDocument();
   });
 });

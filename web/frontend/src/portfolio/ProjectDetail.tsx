@@ -1,6 +1,7 @@
 import type { MouseEventHandler, RefObject } from 'react';
 import { Artwork } from './Artwork';
 import { APP_ENTRY_LINK, publicHref } from './routes';
+import { TitleEntry } from './TitleEntry';
 import type { PlanSheet } from './plans';
 
 interface Row {
@@ -70,11 +71,15 @@ interface Props {
   sheet: PlanSheet;
   dark: boolean;
   details: boolean;
+  /** The page's own node, so the reading ruler measures this document and not the shell. */
+  pageRef: RefObject<HTMLElement | null>;
+  /** The H1, still claimed when a route strands the focus on the page it replaced. */
   headingRef: RefObject<HTMLHeadingElement | null>;
+  /** The tool link inside that heading. Coming back from the workspace focuses it. */
   ctaRef: RefObject<HTMLAnchorElement | null>;
-  /** Same warm-the-chunk entry the exhibit's CTA uses; the click itself is left to the anchor. */
+  /** Same warm-the-chunk entry the exhibit's title uses; the click itself is left to the anchor. */
   prefetchApp: () => void;
-  /** Retires the exhibit and the opening before the browser follows the CTA. */
+  /** Retires the exhibit and the opening before the browser follows the link. */
   onEnterTool: MouseEventHandler<HTMLAnchorElement>;
 }
 
@@ -84,12 +89,24 @@ interface Props {
  * accent, with the selected reference sheet as the only picture. Every claim here
  * is either what the repository actually does or an explicitly stated limit, with
  * no invented statistics, credentials or project repositories.
+ *
+ * The title is the way into the tool, not a heading with a button under it, and
+ * there is no second entry here: this page is already the detail, so it has no
+ * project link to offer and one less thing to say the same thing twice.
  */
-export function ProjectDetail({ sheet, dark, details, headingRef, ctaRef, prefetchApp, onEnterTool }: Props) {
-  return <article className="ff-detail" aria-label="Plimsoll, project detail">
+export function ProjectDetail({ sheet, dark, details, pageRef, headingRef, ctaRef, prefetchApp, onEnterTool }: Props) {
+  return <article className="ff-detail" aria-label="Plimsoll, project detail" ref={pageRef}>
     <a className="ff-detail-back" href={publicHref('home')}>BACK TO WORK <span aria-hidden="true">↖</span></a>
     <span className="ff-eyebrow">WORK / 01 · NAVAL DESIGN WORKBENCH</span>
-    <h1 ref={headingRef} tabIndex={-1}>Plimsoll</h1>
+    <TitleEntry
+      headingRef={headingRef}
+      linkRef={ctaRef}
+      parts={['Pl', 'i', 'msoll']}
+      dot={1}
+      name="Open Plimsoll"
+      href={APP_ENTRY_LINK}
+      prefetch={prefetchApp}
+      onEnter={onEnterTool} />
     <p className="ff-detail-lede">A workbench for studying ship projects — loading, stability, resistance and simplified damage — built on one Python calculation core with a browser interface in front of it.</p>
 
     <div className="ff-detail-hero">
@@ -98,13 +115,9 @@ export function ProjectDetail({ sheet, dark, details, headingRef, ctaRef, prefet
       <span className="ff-detail-hero-note">REFERENCE {sheet.id} / SAME DRAWING AS THE EXHIBIT</span>
     </div>
 
-    <div className="ff-detail-entries">
-      <a className="ff-explore-link" ref={ctaRef} href={APP_ENTRY_LINK} onClick={onEnterTool} onPointerEnter={prefetchApp} onFocus={prefetchApp}>OPEN PLIMSOLL <span aria-hidden="true">↗</span></a>
-    </div>
-
     <div className="ff-detail-body">
-      {SECTIONS.map(section => <section key={section.index} className="ff-detail-section" aria-labelledby={`ff-detail-${section.index}`}>
-        <h2 id={`ff-detail-${section.index}`}><span>{section.index}</span>{section.title}</h2>
+      {SECTIONS.map(section => <section key={section.index} className="ff-detail-section" aria-labelledby={`ff-detail-${section.index}`} data-ff-section={section.title}>
+        <h2 id={`ff-detail-${section.index}`} tabIndex={-1}><span>{section.index}</span>{section.title}</h2>
         <dl className="ff-detail-rows">
           {section.body.map(row => <div className="ff-detail-row" key={row.label}>
             <dt>{row.label}</dt><dd>{row.text}</dd>

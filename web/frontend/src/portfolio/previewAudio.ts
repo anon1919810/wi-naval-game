@@ -26,15 +26,17 @@
 export const PREVIEW_SOUND_KEY = 'formfield-preview-sound';
 
 /**
- * One voice per destination, so the tap says which way the visitor is going.
+ * One voice per destination, plus the one a settled section uses.
  *
- * Work is the shorter, lower, more exact of the two — a small closed tap, a
- * steeper fall, a shorter attack. About is the same quiet register for a little
- * longer, a touch softer and rounder. Both peaks stay inside one narrow range
- * below a fifth of full scale, so neither can be louder than the other and
- * neither can become a chime.
+ * Work is the shorter, lower, more exact of the two destinations — a small
+ * closed tap, a steeper fall, a shorter attack. About is the same quiet register
+ * for a little longer, a touch softer and rounder. `section` is neither of those:
+ * it is a reading tick rather than an answer, so it is the quietest and shortest
+ * voice in the set and it sits below Work. All three peaks stay inside
+ * one narrow range well below a fifth of full scale, so nothing can be louder
+ * than anything else and none of them can become a chime.
  */
-export type PreviewVoice = 'work' | 'about';
+export type PreviewVoice = 'work' | 'about' | 'section';
 
 interface TapProfile {
   /** Peak gain: a tap under a conversation, never a chime. */
@@ -53,6 +55,7 @@ interface TapProfile {
 export const PREVIEW_TAP: Readonly<Record<PreviewVoice, TapProfile>> = {
   work: { peak: 0.05, ms: 84, attack: 0.004, fromHz: 540, toHz: 440, cutoffHz: 2600 },
   about: { peak: 0.046, ms: 124, attack: 0.009, fromHz: 620, toHz: 500, cutoffHz: 2000 },
+  section: { peak: 0.028, ms: 58, attack: 0.005, fromHz: 420, toHz: 350, cutoffHz: 1400 },
 };
 
 /** The envelope, in the units the Web Audio API actually takes. */

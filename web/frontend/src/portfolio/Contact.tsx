@@ -28,8 +28,8 @@ export function Contact() {
     }
   };
 
-  return <section className="ff-contact" aria-labelledby="ff-contact-title">
-    <h2 id="ff-contact-title">Get in touch</h2>
+  return <section className="ff-contact" aria-labelledby="ff-contact-title" data-ff-section="Contact">
+    <h2 id="ff-contact-title" tabIndex={-1}>Get in touch</h2>
     <p className="ff-contact-note">About the work, a bug in one of the tools, or something worth building together — email is the surest way.</p>
     <div className="ff-contact-actions">
       <a className="ff-contact-mail" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>

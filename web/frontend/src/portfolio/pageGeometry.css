@@ -51,6 +51,10 @@
 .ff-curve-tick { stroke: var(--ff-muted); stroke-width: .7; opacity: .4; }
 .ff-curve-main { stroke: var(--ff-ink); stroke-width: 1.05; opacity: .75; }
 .ff-curve-soft { stroke: var(--ff-muted); stroke-width: .6; opacity: .25; }
+/* The added reading of the curve: a short dark segment and the cursor on it,
+   both written from the equation. The faint graph behind them never moves. */
+.ff-curve-trace { stroke: var(--ff-ink); stroke-width: 1.8; opacity: .9; }
+.ff-curve-cursor { fill: var(--ff-bg); stroke: var(--ff-accent); stroke-width: 1.6; }
 
 /* ---- Typeset mathematics ----------------------------------------------------- */
 /* Serif maths with real fractions and radicals. No renderer, no installed font:
@@ -105,8 +109,26 @@
 .ff-study-vector--back { stroke: var(--ff-muted); }
 .ff-study-dimension { stroke: var(--ff-muted); stroke-width: .8; }
 .ff-study-curve { stroke: var(--ff-ink); stroke-width: 1.6; }
+/* The friction marker and its two projections, drawn onto the axes the curve is
+   read against: the coefficient on the left, Re along the bottom. */
+.ff-study-marker { fill: var(--ff-bg); stroke: var(--ff-accent); stroke-width: 1.8; }
+.ff-study-projection { stroke: var(--ff-accent); stroke-width: .9; stroke-dasharray: 3 3; opacity: .8; }
 .ff-study-tag { fill: var(--ff-muted); stroke: none; font-family: var(--font-sans); font-size: 11px; font-weight: 500; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
 .ff-study-tag--name { fill: var(--ff-ink); }
+
+/* ---- Study emphasis ------------------------------------------------------ */
+/* Guides and vectors are emphasised as a study crosses the viewport, driven by
+   the one `--ff-study-progress` the painter writes on the figure. The drawing
+   itself is never hidden and no term of a formula is ever taken apart: only the
+   weight of an already-drawn line changes, and it is always legible at rest. */
+.ff-about-study-figure { --ff-study-progress: 0; }
+.ff-study-emphasis { transition: opacity .35s linear, stroke .35s linear; }
+/* Scale: the velocity vector leads and the length dimension answers. */
+.ff-about-study-figure[data-ff-study='scale'] [data-ff-emphasis='velocity'] { opacity: calc(.45 + .55 * var(--ff-study-progress)); }
+.ff-about-study-figure[data-ff-study='scale'] [data-ff-emphasis='length'] { opacity: calc(.4 + .6 * clamp(0, calc(var(--ff-study-progress) * 1.6 - .6), 1)); }
+/* Power: velocity first, then the resistance opposing it. */
+.ff-about-study-figure[data-ff-study='power'] [data-ff-emphasis='velocity'] { opacity: calc(.45 + .55 * clamp(0, calc(var(--ff-study-progress) * 2 - .5), 1)); }
+.ff-about-study-figure[data-ff-study='power'] [data-ff-emphasis='resistance'] { opacity: calc(.4 + .6 * clamp(0, calc(var(--ff-study-progress) * 2 - 1.1), 1)); }
 .ff-about-study-figure figcaption { max-width: 46ch; margin: 16px 0 0; font-size: 12px; line-height: 1.62; color: var(--ff-muted); }
 
 @media (min-width: 901px) {

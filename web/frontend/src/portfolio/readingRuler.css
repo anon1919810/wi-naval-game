@@ -1,0 +1,43 @@
+/* The reading ruler: a track beside the persistent rail that says where a long
+   page is and gets to any part of it. Scoped to the shell's own tokens. */
+
+/* It lives in the rail's column, under the navigation, and it is its own labelled
+   landmark — a sibling of the main navigation, never a child of it. */
+.ff-ruler { display: flex; flex-direction: column; gap: 10px; padding: clamp(10px, 1.4vw, 20px) 0 0; margin-top: clamp(10px, 1.4vw, 22px); border-top: 1px solid var(--ff-line); }
+.ff-ruler-label { margin: 0; font-size: 9px; font-weight: 600; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: var(--ff-accent); white-space: nowrap; }
+
+/* The track never grows past the height the viewport can spare, and the marks are
+   positioned as fractions of it, so the ruler reads the same on a short window as
+   on a tall one. */
+.ff-ruler-track { position: relative; height: clamp(160px, calc(100svh - 420px), 440px); margin: 8px 0 12px 2px; }
+.ff-ruler-line { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ff-line); }
+.ff-ruler-tick { display: block; width: 7px; height: 1px; background: var(--ff-muted); }
+.ff-ruler-tick--minor { position: absolute; left: 0; width: 4px; opacity: .5; transform: translateY(-.5px); }
+
+/* One mark per section. The hit area is generous and invisible: the tick and the
+   name are the only things painted, and the button itself is what the pointer and
+   the keyboard actually find. */
+.ff-shell .ff-ruler-mark {
+  position: absolute; left: 0; right: 0; margin-top: -12px; padding: 4px 0;
+  display: flex; align-items: center; gap: 8px; min-height: 24px;
+  color: var(--ff-muted); text-align: left;
+}
+.ff-ruler-name { font-size: 9px; font-weight: 600; letter-spacing: .1em; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0; transition: opacity .18s linear; }
+.ff-ruler-mark:hover .ff-ruler-name, .ff-ruler-mark:focus-visible .ff-ruler-name { opacity: 1; }
+
+/* Where the reader is, and where they are about to go, are two answers. The
+   current square is blue and never turns; a hovered or focused mark turns red. */
+.ff-ruler-mark[data-ff-ruler-mark='current'] .ff-ruler-tick { width: 9px; height: 9px; background: var(--ff-accent); }
+.ff-ruler-mark[data-ff-ruler-mark='current'] .ff-ruler-name { opacity: 1; }
+.ff-ruler-mark[data-ff-ruler-mark='preview'] .ff-ruler-tick { background: var(--ff-red); }
+.ff-ruler-mark[data-ff-ruler-mark='preview'] .ff-ruler-name { opacity: 1; color: var(--ff-red); }
+
+/* The ruler exists because the page is long. Where the rail drops under the
+   drawing, there is no column to hang it in and it is withdrawn with the ruler's
+   own fallback rather than becoming a second navigation in the flow. */
+@media (max-width: 650px) {
+  .ff-ruler { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ff-ruler * { transition: none !important; }
+}
