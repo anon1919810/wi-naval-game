@@ -12,7 +12,9 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 总站 **Y’s Formfield**：[更新日志](docs/formfield/CHANGELOG.md) · [2026-10-06 生产发布交接](docs/formfield/release-2026-10-06.md) · [第一组：编辑页工作头与输入层级](docs/formfield/workbench-group-one-2026-10-06.md) · [第二组：运行与报告阅读](docs/formfield/run-report-2026-10-06.md) · [Inter + Space Grotesk 字体包](docs/formfield/fonts-inter-space-grotesk-2026-10-05.md) · [下一轮桌面设计提案](docs/formfield/next-workspace-design-2026-10-05.md) · [2026-10-05 工作台设计语言统一](docs/formfield/workspace-language-2026-10-05.md) · [2026-10-05 展板控件与全站辅助线](docs/formfield/exhibit-controls-2026-10-05.md) · [2026-10-05 项目详情、作者与联系](docs/formfield/project-detail-and-contact-2026-10-05.md) · [2026-10-05 桌面转场与字体](docs/formfield/transitions-typography-2026-10-05.md) · [2026-10-05 桌面局部放大与色调](docs/formfield/inspect-lens-2026-10-05.md) · [2026-10-05 加载与渲染修正](docs/formfield/review-hardening-2026-10-05.md) · [首页与资产交接](docs/formfield/交接_Formfield首页与资产_2026-10-04.md) · [本地使用说明](docs/formfield-homepage.md)。原图解码完成后起播，保留详细原稿与温和净底处理。
 
-**已上线 · 2026-10-07**：圆形揭页与波纹、Work/About 制图背景和公式研究、详情说明上下排列及 18–20px 正文已随 `cec19c9` 发布。前端 427/427；136 个发布文件及 27 个公网静态资源核对通过，工作空间与既有报告读取正常。详见 [本轮发布与回滚](docs/formfield/release-layout-2026-10-07.md)。
+**已上线 · 2026-10-07**：标题工具入口、展开式 View Project、图标化页眉、阅读刻度、章节停驻和随滚动变化的制图研究已随 `c20e22c` 发布。前端 496/496；139 个发布文件及 30 个公网静态资源核对通过，生产项目库读取与工具往返正常。详见 [本轮发布与回滚](docs/formfield/release-scroll-2026-10-07.md)。
+
+**上一生产版本 · 2026-10-07**：圆形揭页与波纹、Work/About 制图背景和公式研究、详情说明上下排列及 18–20px 正文已随 `cec19c9` 发布。前端 427/427；136 个发布文件及 27 个公网静态资源核对通过，工作空间与既有报告读取正常。该版本保留作本轮回滚，详见 [发布记录](docs/formfield/release-layout-2026-10-07.md)。
 
 **上一生产版本 · 2026-10-07**：第三组工作空间转场与加载、首页蓝色预览、提示音与边缘放大镜已发布到 **[https://119.91.211.156](https://119.91.211.156)**。源码 `0add0b4`（分支 `feature/plimsoll-1.0`），发布名 `plimsoll-web-20261006T161702Z-0add0b4`；131 个文件哈希及 22 个公网静态资源核对通过，全量前端测试 393/393。被否决的展板覆片已撤回，Work/About 保留 260ms 即时内容切换。仅切换静态站点链接，无容器重启、迁移或配置变更。现有项目、运行与报告读取验收通过；未创建或修改工程数据。详见 [2026-10-07 生产发布交接](docs/formfield/release-feedback-2026-10-07.md)。移动端与生产原生打印对话框尚未验收。
 
@@ -24,7 +26,7 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 观察与资源规划基准为 50–200 m、15 艘同屏；这不是硬性锁定游戏相机。
 
-**本轮前端功能交接**：[第三组工作空间转场与加载](docs/formfield/transition-loading-2026-10-06.md) · [首页蓝色预览、提示音与放大镜](docs/formfield/homepage-motion-2026-10-06.md)；均已随 `0add0b4` 上线。新的遮罩方案仍在讨论，尚未实现。
+**前端功能交接**：[阅读刻度、滚动图案与标题入口](docs/formfield/scroll-acceptance-2026-10-07.md) · [圆形揭页与制图背景](docs/formfield/circular-reveal-2026-10-07.md) · [第三组工作空间转场与加载](docs/formfield/transition-loading-2026-10-06.md) · [首页蓝色预览、提示音与放大镜](docs/formfield/homepage-motion-2026-10-06.md)；以上均已包含在当前生产版本。致谢页仍在文案讨论阶段。
 
 ## 当前状态 · 2026-09-20
 

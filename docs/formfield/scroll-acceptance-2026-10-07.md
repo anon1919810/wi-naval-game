@@ -1,6 +1,6 @@
 # Portfolio scroll · 本地验收交接
 
-日期：2026-10-07，Asia/Shanghai。基线 `44dec6c`；本轮未提交、未推送、未部署，线上仍为此前发布。
+日期：2026-10-07，Asia/Shanghai。基线 `44dec6c`；本地验收后已提交为 `c20e22c` 并推送部署，详见 [发布与回滚记录](release-scroll-2026-10-07.md)。下文保留本地验收时的技术证据。
 
 设计见 [执行计划](../superpowers/plans/2026-10-07-portfolio-scroll.md)。OpenCode 实现主体，Codex 审查、修正控制器和 React/CSS 整合后独立验收。另一次只读审查发现的指针/键盘混用导致链接消失问题已修复并补回归测试。
 
@@ -46,4 +46,4 @@ TypeScript passed · Vite 95 modules
 - `scrollStudies.ts` / `pageGeometry.tsx` / `pageGeometry.css`：图案方程与滚动绘制。
 - `Portfolio.tsx`：生命周期与路由组合；`ProjectDetail.tsx`、`AboutContent.tsx`、`Contact.tsx`：章节元数据及标题。
 
-预览：`http://127.0.0.1:5173/#/work`。本地 API/worker 继续运行以支持真实工具往返；发布工作未在本轮执行。
+预览：`http://127.0.0.1:5173/#/work`。本地 API/worker 继续运行以支持真实工具往返。发布阶段追加了独立全量测试、构建、139 个文件校验、30 个公网静态资源校验与真实生产工具往返，结果见发布记录。
