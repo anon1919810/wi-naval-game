@@ -1,5 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
 import { classifyHash, PUBLIC_WORK_DETAIL_HASH, publicHref } from '../portfolio/routes';
 import { CONTACT_EMAIL, CONTACT_PROFILE } from '../portfolio/Contact';
@@ -11,6 +11,10 @@ vi.mock('../api', async importOriginal => ({
   ...await importOriginal<typeof import('../api')>(),
   authConfig: vi.fn(), me: vi.fn(), bootstrapAnonymous: vi.fn(), listProjects: vi.fn(),
 }));
+
+// Keep cold module transformation outside the navigation assertion's timeout.
+// Importing the tool does not mount it or call its API.
+beforeAll(async () => { await import('../App'); });
 
 const mediaListeners = new Map<string, Set<(event: MediaQueryListEvent) => void>>();
 const preferences = new Map<string, boolean>();
