@@ -23,6 +23,10 @@ Plimsoll 的做法（诚实记录）
 from __future__ import annotations
 
 import math
+try:
+    from ._provenance import combine_estimates
+except ImportError:
+    from _provenance import combine_estimates
 
 if __package__:
     from . import units
@@ -67,6 +71,26 @@ def _D(diagnostics, code, severity, path, message, blocking=False):
                         "message": message, "blocking": blocking})
 
 
+def _admiralty_coefficient(displacement, speed, power):
+    """Preserve representable C when intermediate powers exceed float range."""
+    try:
+        ordinary = displacement ** (2.0 / 3.0) * speed ** 3 / power
+        if 0 < ordinary < math.inf:
+            return ordinary
+    except OverflowError:
+        pass
+    d_fraction, d_exponent = math.frexp(displacement)
+    v_fraction, v_exponent = math.frexp(speed)
+    p_fraction, p_exponent = math.frexp(power)
+    d_power, remainder = divmod(2 * d_exponent, 3)
+    fraction = (d_fraction ** (2.0 / 3.0) * v_fraction ** 3 / p_fraction
+                * 2.0 ** (remainder / 3.0))
+    try:
+        return math.ldexp(fraction, d_power + 3 * v_exponent - p_exponent)
+    except OverflowError as error:
+        raise ValueError('admiralty_coeff is outside the numeric range') from error
+
+
 def _steady_endurance(case, coal, oil, diagnostics, trace):
     scenario = case.get("endurance_scenario")
     if scenario is None:
@@ -91,6 +115,8 @@ def _steady_endurance(case, coal, oil, diagnostics, trace):
 
     rows = {}
     durations = []
+    contributing_estimates = [estimate]
+    fuel_sources = {}
     incomplete = False
     for fuel_name, mass in (("coal", coal), ("oil", oil)):
         config = fuels.get(fuel_name)
@@ -131,7 +157,7 @@ def _steady_endurance(case, coal, oil, diagnostics, trace):
         if reserve > mass:
             raise ValueError("%s reserve_t 不能超过已知燃料质量" % fuel_name)
         usable = mass - reserve
-        days = usable / rate
+        days = _finite(usable / rate, 'derived %s endurance days' % fuel_name)
         rows[fuel_name] = {
             "status": "consumed",
             "mass_t": mass,
@@ -141,6 +167,8 @@ def _steady_endurance(case, coal, oil, diagnostics, trace):
             "days": days,
         }
         durations.append((days, fuel_name))
+        contributing_estimates.append(case.get(fuel_name+'_estimate', case.get('fuel_estimate', False)))
+        fuel_sources[fuel_name] = case.get(fuel_name+'_source', case.get('fuel_source'))
     if incomplete or not durations:
         if not durations and not incomplete:
             _D(diagnostics, "engines.endurance_no_consumed_stream", "warning",
@@ -148,24 +176,28 @@ def _steady_endurance(case, coal, oil, diagnostics, trace):
                "All declared burn rates are zero; no finite endurance is calculated.")
         return None
     days, limiting_fuel = min(durations)
-    hours = days * 24.0
+    hours = _finite(days * 24.0, 'derived endurance hours')
+    range_nm = _finite(hours * speed, 'derived endurance range_nm')
+    estimate = combine_estimates(contributing_estimates)
+    dependency_sources = {'scenario': source, 'fuel_masses': fuel_sources}
     result = {
         "method": "steady_simultaneous_fuel_consumption",
         "hours": hours,
-        "range_nm": hours * speed,
+        "range_nm": range_nm,
         "speed_kn": speed,
         "power_kw": power,
         "limiting_fuel": limiting_fuel,
         "fuels": rows,
         "source": source,
         "estimate": estimate,
+        "input_sources": dependency_sources,
         "assumption": "Fixed operating point; simultaneous declared per-fuel burn rates; first required fuel exhausted limits endurance.",
     }
     _T(trace, "steady_endurance_hours", hours,
        "min((fuel mass - reserve) / per-fuel burn rate) × 24",
-       source, estimate)
+       dependency_sources, estimate)
     _T(trace, "steady_endurance_range_nm", result["range_nm"],
-       "range_nm = hours × speed_kn", source, estimate)
+       "range_nm = hours × speed_kn", dependency_sources, estimate)
     return result
 
 
@@ -179,7 +211,11 @@ def compute(case: dict) -> dict:
         raise ValueError("schema 必须是 %s，收到 %r" % (SCHEMA, case.get("schema")))
 
     shafts = _int_positive(case.get("shafts"), "shafts")
-    _T(trace, "shafts", shafts, "输入", case.get("shafts_source", "无来源"))
+    disp = case.get('displacement_normal_t')
+    lwl = case.get('lwl_m')
+    disp = _finite(disp, 'displacement_normal_t', positive=True) if disp is not None else None
+    lwl = _finite(lwl, 'lwl_m', positive=True) if lwl is not None else None
+    _T(trace, "shafts", shafts, "输入", case.get("shafts_source", "无来源"), case.get('shafts_estimate', False))
 
     # ---------------- 功率（每个导出量只算一次：trace 与 values 共用同一变量）
     conversion_method = case.get("power_conversion_method", "legacy_rounded_0.7457_kw_per_shp")
@@ -208,14 +244,15 @@ def compute(case: dict) -> dict:
             p_design, p_design_kw = v, kw
         else:
             p_trial, p_trial_kw = v, kw
-        _T(trace, key, v, "输入", case.get(src_key, "无来源"))
+        estimate = case.get(key.replace('_shp', '')+'_estimate', False)
+        _T(trace, key, v, "输入", case.get(src_key, "无来源"), estimate)
         if conversion_method == "legacy_rounded_0.7457_kw_per_shp":
             _T(trace, key.replace("_shp", "_kw"), kw, "kW = shp × 0.7457",
-               "legacy rounded compatibility constant")
+               {'input': case.get(src_key), 'conversion': 'legacy rounded compatibility constant'}, estimate)
         else:
             _T(trace, key.replace("_shp", "_kw"), kw,
                "units.convert(shp, 'shp', 'kW')",
-               "international mechanical horsepower = 0.7456998715822702 kW")
+               {'input': case.get(src_key), 'conversion': 'international mechanical horsepower = 0.7456998715822702 kW'}, estimate)
 
     # ---------------- 航速
     v_max = case.get("max_speed_kn")
@@ -231,7 +268,7 @@ def compute(case: dict) -> dict:
         else:
             v_cruise = vv
         _T(trace, key, vv, "输入",
-           case.get(key.replace("_kn", "_source"), "无来源"))
+           case.get(key.replace("_kn", "_source"), "无来源"), case.get(key.replace('_kn', '_estimate'), False))
 
     # ---------------- 燃料
     coal = case.get("coal_t")
@@ -241,7 +278,11 @@ def compute(case: dict) -> dict:
     fuel_total = None
     fuel_known_subtotal = (None if coal is None and oil is None
                            else sum(value for value in (coal, oil) if value is not None))
+    if fuel_known_subtotal is not None:
+        fuel_known_subtotal = _finite(fuel_known_subtotal, 'derived bunker subtotal')
     pct_coal = None
+    fuel_estimate = combine_estimates(case.get(name+'_estimate', case.get('fuel_estimate', False))
+                                      for name in ('coal', 'oil'))
     if coal is None and oil is None:
         warnings.append("燃料（coal_t / oil_t）均未给：Bunker 置空。")
         _D(diagnostics, "engines.bunker_unknown", "warning", "$",
@@ -254,19 +295,19 @@ def compute(case: dict) -> dict:
         _T(trace, "bunker_known_subtotal_t", fuel_known_subtotal,
            "sum of known fuel masses only", case.get("fuel_source", "无来源"), True)
     else:
-        fuel_total = coal + oil
+        fuel_total = fuel_known_subtotal
         _T(trace, "bunker_total_t", fuel_total, "Bunker = 煤 + 油",
-           case.get("fuel_source", "无来源"))
+           case.get("fuel_source", "无来源"), fuel_estimate)
         if coal is not None and fuel_total > 0:
-            pct_coal = 100.0 * coal / fuel_total
+            pct_coal = 100.0 * (coal / fuel_total)
             _T(trace, "pct_coal", pct_coal, "%Coal = 煤 / (煤 + 油) ×100",
-               case.get("fuel_source", "无来源"))
+               case.get("fuel_source", "无来源"), fuel_estimate)
         else:
             pct_coal = None
-        if coal is not None:
-            _T(trace, "coal_t", coal, "输入", case.get("fuel_source", "无来源"))
-        if oil is not None:
-            _T(trace, "oil_t", oil, "输入", case.get("fuel_source", "无来源"))
+    for name, mass in (('coal', coal), ('oil', oil)):
+        if mass is not None:
+            _T(trace, name+'_t', mass, '输入', case.get(name+'_source', case.get('fuel_source', '无来源')),
+               case.get(name+'_estimate', case.get('fuel_estimate', False)))
 
     # ---------------- 续航
     rng = case.get("range_nm")
@@ -285,20 +326,20 @@ def compute(case: dict) -> dict:
     steady_endurance = _steady_endurance(case, coal, oil, diagnostics, trace)
 
     # ---------------- 量级校核（estimate）
-    disp = case.get("displacement_normal_t")
     adm = None
     if disp and v_max and (p_design or p_trial):
         p = p_design or p_trial
-        adm = (float(disp) ** (2.0 / 3.0)) * float(v_max) ** 3 / float(p)
+        adm = _admiralty_coefficient(disp, v_max, p)
+        adm = _finite(adm, 'derived admiralty_coeff', positive=True)
         _T(trace, "admiralty_coeff", adm, "C = Δ^(2/3)·V³ / P（Δ 吨、V 节、P shp）",
            "海军部系数经验式，仅作功率–航速量级校核", True)
         warnings.append("海军部系数 %.0f 只是量级校核（经验式，随船型差异极大），"
                         "不能当设计依据。" % adm)
-    if v_max and disp and case.get("lwl_m"):
+    if v_max and disp and lwl:
         v_mps = (float(v_max) * KNOT_MPS
                  if speed_conversion_method == "legacy_rounded_0.514444_m_s_per_kn"
                  else units.convert(float(v_max), "kn", "m_s"))
-        fn = v_mps / math.sqrt(G * float(case["lwl_m"]))
+        fn = _finite(v_mps / (math.sqrt(G)*math.sqrt(lwl)), 'derived froude_at_max', positive=True)
         _T(trace, "froude_at_max", fn, "Fn = V(m/s) / √(g·Lwl)", "最大航速对应的 Froude 数", True)
 
     # ---------------- 明确不做
@@ -309,7 +350,7 @@ def compute(case: dict) -> dict:
     else:
         _T(trace, "engine_weight_t", _finite(case["engine_weight_t"], "engine_weight_t",
                                              positive=True), "输入",
-           case.get("engine_weight_source", "无来源"))
+           case.get("engine_weight_source", "无来源"), case.get('engine_weight_estimate', False))
 
     values = {
         "shafts": shafts,

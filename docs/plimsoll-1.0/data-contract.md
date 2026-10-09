@@ -48,6 +48,9 @@ The supported explicit conversions are:
 These precise definitions supersede rounded constants used by some legacy
 calculators. Legacy results may differ only by the rounding implied by those
 older constants. Cross-dimension conversions are errors.
+Conversion combines unit factors before multiplying, so representable identity
+and scaled values survive intermediate overflow. An unrepresentable result
+raises `ValueError`; it never returns infinity.
 
 ## Top-level project
 
@@ -311,6 +314,9 @@ versions are errors. Normalization never mutates the caller's object.
 
 Migration is deterministic for the same legacy inputs when the ship lacks an
 explicit ID.
+An explicitly declared legacy weight datum other than `keel` is rejected.
+The caller must supply an explicit coordinate conversion before migration;
+waterline/model-origin heights are never copied silently into `kg_m`.
 
 ## Input fingerprint
 

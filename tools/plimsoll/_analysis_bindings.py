@@ -4,9 +4,11 @@ import copy
 try:
     from . import engines, geometry_analysis, page_rows, units
     from ._analysis_request import diagnostic
+    from ._provenance import combine_estimates, field_metadata, unique_sources
 except ImportError:
     import engines, geometry_analysis, page_rows, units
     from _analysis_request import diagnostic
+    from _provenance import combine_estimates, field_metadata, unique_sources
 
 
 def page_rows_for(project, state, summary):
@@ -135,6 +137,11 @@ def _fuel(propulsion, state):
             for i in binding["weight_item_ids"]] if binding else [], value_t=values[name + "_t"],
             input_path=f"$.systems.propulsion.fuel_bindings.{name}",
             output_path=f"$.stages.propulsion.data.values.{name}_t")
+        metadata = [field_metadata(ledger[i], 'mass_t') for i in binding['weight_item_ids']] if binding else []
+        trace[name]['estimate'] = combine_estimates([row.get('estimate') for row in metadata]
+            + [binding.get('estimate')]) if binding else None
+        trace[name]['source'] = unique_sources([row.get('source') for row in metadata]
+            + [binding.get('source')]) if binding else None
     return values, trace
 
 
@@ -145,14 +152,19 @@ def _propulsion(project, state, stages):
     case = dict(schema=engines.SCHEMA, **values, displacement_normal_t=state["values"]["total_mass_t"],
         power_conversion_method="international_mechanical_hp_precise", speed_conversion_method="international_knot_exact",
         fuel_source=fuels)
+    for name in ('coal', 'oil'):
+        case[name+'_source'] = copy.deepcopy(fuels[name]['source'])
+        case[name+'_estimate'] = fuels[name]['estimate']
     for field in ("shafts", "max_speed_kn", "cruise_speed_kn"):
         fact = facts.get(field, {})
         case[field] = fact.get("value")
         case[field.replace("_kn", "") + "_source"] = fact.get("source")
+        case[field.replace('_kn', '')+'_estimate'] = fact.get('estimate')
     for canonical, legacy in (("design_power_kw", "power_design"), ("trial_power_kw", "power_trial")):
         fact = facts.get(canonical, {})
         case[legacy + "_shp"] = units.convert(fact["value"], "kW", "shp") if fact.get("value") is not None else None
         case[legacy + "_source"] = fact.get("source")
+        case[legacy + '_estimate'] = fact.get('estimate')
     system = (stages["systems"]["data"] or {}).get("systems", {}).get("propulsion", {})
     mass = system.get("ledger_mass_t")
     variable_binding = prop.get("variable_load_groups")
@@ -179,6 +191,9 @@ def _propulsion(project, state, stages):
     if mass is not None and mass > 0:
         case["engine_weight_t"] = mass
         case["engine_weight_source"] = "selected linked propulsion ledger; not an independent mass estimate"
+        metadata = [field_metadata(row, 'mass_t') for row in system.get('linked_items', [])]
+        case['engine_weight_source'] = unique_sources(row.get('source') for row in metadata)
+        case['engine_weight_estimate'] = combine_estimates(row.get('estimate') for row in metadata)
     # No design L is substituted for an unavailable selected waterline.
     hydro = stages["hydrostatics"]["data"]
     if hydro is not None:

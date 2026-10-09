@@ -3,6 +3,7 @@
 import copy
 import json
 
+import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -59,6 +60,22 @@ def test_invalid_project_or_external_geometry_does_not_change_revision(alice, pr
     external["geometry"] = {"kind": "offsets_reference", "reference": {"path": "../../secrets.txt"}}
     assert alice.put(f"/api/projects/{project_id}", json={"base_revision": 1, "project": external}).status_code == 422
     assert alice.get(f"/api/projects/{project_id}").json()["revision"] == 1
+
+
+@pytest.mark.parametrize('path', ('systems', 'systems.armour', 'systems.armour.fixed'))
+@pytest.mark.parametrize('invalid', ([], [{}]))
+def test_invalid_extension_shape_cannot_create_a_revision(alice, project_id, saved_document, path, invalid):
+    document = copy.deepcopy(saved_document)
+    cursor = document
+    parts = path.split('.')
+    for part in parts[:-1]:
+        cursor = cursor.setdefault(part, {})
+    cursor[parts[-1]] = invalid
+    response = alice.put(f'/api/projects/{project_id}',
+                         json={'base_revision': 1, 'project': document})
+    assert response.status_code == 422
+    assert any(diagnostic['path'] == '$.' + path for diagnostic in response.json()['detail'])
+    assert alice.get(f'/api/projects/{project_id}').json()['revision'] == 1
 
 
 def test_project_request_over_eight_mib_is_rejected(alice, project_id, saved_document):

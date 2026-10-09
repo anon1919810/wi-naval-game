@@ -247,7 +247,8 @@ def form_coefficients(hull, z: float = 0.0) -> dict:
 def half_angle_of_entrance(hull, z: float = 0.0, at_frac: float = 0.20) -> dict:
     """半进流角 iE（度）—— 只给一个**显式约定**，不假装只有一个口径。
 
-    约定：在艏部水线上取「半宽 = at_frac × 最大半宽」的那一点，用相邻站中心差分求
+    约定：在艏部水线上取「半宽 = at_frac × 最大半宽」的那一点。各站用相邻站
+    中心差分求斜率，再在该点插值斜率（端站用单边差分），求
     dhb/dx，iE = atan(|dhb/dx|)。默认 at_frac = 0.20（≈ NavCad 等采用的
     「离中线 Bwl/10」口径）。
 
@@ -261,6 +262,9 @@ def half_angle_of_entrance(hull, z: float = 0.0, at_frac: float = 0.20) -> dict:
     else:
         import geometric as GM
 
+    if (isinstance(at_frac, bool) or not isinstance(at_frac, (int, float))
+            or not math.isfinite(at_frac) or not 0 < at_frac < 1):
+        raise ValueError("at_frac must be a finite fraction strictly between 0 and 1")
     xs = [float(x) for x, _ in hull.stations]
     hb = [GM._waterline_halfbeam(poly, z) for _, poly in hull.stations]
     hb_max = max(hb) if hb else 0.0
@@ -273,11 +277,12 @@ def half_angle_of_entrance(hull, z: float = 0.0, at_frac: float = 0.20) -> dict:
         return {"values": {"iE_deg": None, "at_frac": at_frac}, "trace": trace,
                 "warnings": ["水线 z=%.3f 处无半宽：无法定半进流角。" % z]}
 
-    # 从艏端（x 最大）向内找第一个低于 target 的站，与相邻站线性定位
+    # Find the target crossing, scanning from the bow toward the interior.
     n = len(xs)
     idx = None
-    for i in range(n - 1, -1, -1):
-        if hb[i] < target:
+    max_at = max(i for i, width in enumerate(hb) if width == hb_max)
+    for i in range(n - 2, max_at - 1, -1) if hb[-1] < target else ():
+        if hb[i] >= target and hb[i+1] < target:
             idx = i
             break
     if idx is None:
@@ -288,16 +293,21 @@ def half_angle_of_entrance(hull, z: float = 0.0, at_frac: float = 0.20) -> dict:
         return {"values": {"iE_deg": None, "at_frac": at_frac, "hb_max_m": hb_max},
                 "trace": trace, "warnings": warnings}
 
-    i = min(max(idx, 1), n - 2)
-    slope = (hb[i + 1] - hb[i - 1]) / (xs[i + 1] - xs[i - 1])
+    i = idx
+    fraction = (target-hb[i])/(hb[i+1]-hb[i])
+    x_at = xs[i]+fraction*(xs[i+1]-xs[i])
+    def slope_at(j):
+        a, b = max(j-1, 0), min(j+1, n-1)
+        return (hb[b]-hb[a])/(xs[b]-xs[a])
+    slope = slope_at(i)*(1-fraction)+slope_at(i+1)*fraction
     ie = math.degrees(math.atan(abs(slope)))
     _T(trace, "iE_deg", ie,
-       "iE = atan(|dhb/dx|) @ 半宽=%.0f%%·半宽max (x≈%.1f)" % (100 * at_frac, xs[i]),
+       "iE = atan(|dhb/dx|) @ 半宽=%.0f%%·半宽max (x≈%.1f)" % (100 * at_frac, x_at),
        "型线差分（约定：离中线 Bwl/10 量法；**口径不唯一**）", True)
     warnings.append("半进流角口径不唯一（艏端切线 / B/10 / B/4 各派不同），"
                     "本值按 at_frac=%.2f 约定，跨来源比较前先对齐口径。" % at_frac)
     return {"values": {"iE_deg": ie, "at_frac": at_frac, "hb_max_m": hb_max,
-                       "x_at_m": xs[i]}, "trace": trace, "warnings": warnings}
+                       "x_at_m": x_at}, "trace": trace, "warnings": warnings}
 
 
 def _submerged_girth(poly, tan_phi: float, d: float, eps: float = 1e-9) -> float:

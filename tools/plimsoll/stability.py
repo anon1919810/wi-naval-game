@@ -15,8 +15,11 @@ except ImportError:
     import offsets
     import tank_geometry
 
-METHOD_VERSION = 'loaded-projected-equilibrium-1'
+METHOD_VERSION = 'loaded-projected-equilibrium-2'
 RESIDUAL_TOLERANCE = 1e-6
+# A converged sample whose |GZ| is within this band carries no resolved sign; the
+# last resolved sign survives such a run instead of deleting an observed crossing.
+NEAR_ZERO_GZ_M = 1e-8
 
 
 def _number(value, name):
@@ -538,6 +541,7 @@ def stability_curve(hull, state, angles_deg, openings=None, options=None):
                 a,ra=mid,rm
         return (a+b)/2,rm
     previous = None
+    resolved = None
     for angle in angles:
         result = solve(angle)
         clear = clearance(result) if result['converged'] else None
@@ -546,12 +550,19 @@ def stability_curve(hull, state, angles_deg, openings=None, options=None):
             event_clearance = clearance(crossing[1]) if crossing else clear
             downflooding = dict(angle_deg=crossing[0] if crossing else angle,
                 kind='bracketed_immersion' if crossing else 'already_immersed_sample',opening_id=event_clearance[1])
-        if previous and result['converged'] and previous[1]['converged']:
-            if previous[1]['gz_m']*result['gz_m']<0 and abs(previous[1]['gz_m'])>1e-8 and abs(result['gz_m'])>1e-8:
-                root = bracket(previous[0],angle,'zero')
-                if root:
-                    zeros.append(dict(kind='bracketed_zero',angle_deg=root[0],gz_m=root[1]['gz_m'],
-                        bracket_deg=[previous[0],angle],direction='positive_to_negative' if previous[1]['gz_m']>0 else 'negative_to_positive'))
+        if result['converged'] and result.get('gz_m') is not None:
+            gz = result['gz_m']
+            if abs(gz)>NEAR_ZERO_GZ_M:
+                if resolved is not None and (resolved[1]>0)!=(gz>0):
+                    root = bracket(resolved[0],angle,'zero')
+                    if root:
+                        zeros.append(dict(kind='bracketed_zero',angle_deg=root[0],gz_m=root[1]['gz_m'],
+                            bracket_deg=[resolved[0],angle],direction='positive_to_negative' if resolved[1]>0 else 'negative_to_positive'))
+                resolved = (angle,gz)
+            # A near-zero converged sample keeps `resolved` unchanged, so a run of
+            # sampled zeros still resolves the transition around it.
+        else:
+            resolved = None  # A failed sample breaks the bracket: never span it.
         rows.append(dict(angle_deg=angle,gz_m=result.get('gz_m'),equilibrium=result,
             opening_normal_clearance_m=clear[0] if clear else None,
             validity=dict(model_applicable=result['converged'],

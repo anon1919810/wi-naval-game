@@ -19,7 +19,7 @@ except ImportError:  # Preserve direct-module imports used by repository tests.
 
 SCHEMA = 'plimsoll-flooding-result-1'
 SCENARIO_SCHEMA = 'plimsoll-flooding-scenario-1'
-METHOD_VERSION = 'connected-quasi-static-flooding-2'
+METHOD_VERSION = 'connected-quasi-static-flooding-3'
 DEFAULT_MAX_STEPS = 100000
 DEFAULT_MAX_STEP_HALVINGS = 40
 HYDRAULIC_HEAD_TOLERANCE_M = 1e-8
@@ -86,6 +86,22 @@ def _estimate(value, path):
         raise FloodingInputError('flooding.estimate_invalid', f'{path}.estimate',
                                  'estimate metadata must be boolean')
     return estimate
+
+
+UNSUPPORTED_PRESSURE_FIELDS = kernel.UNSUPPORTED_PRESSURE_FIELDS
+
+
+def _reject_pressure_state(node, path):
+    """Reject recognized trapped-air or pressure state on any scenario node.
+
+    The declared model is vented liquid only; such a field would otherwise be
+    ignored while the run still claimed applicability.
+    """
+    for unsupported in UNSUPPORTED_PRESSURE_FIELDS:
+        if unsupported in node:
+            raise FloodingInputError('flooding.pressure_unsupported',
+                                     f'{path}.{unsupported}',
+                                     'pressure networks are outside this model')
 
 
 def _validate_options(options):
@@ -217,6 +233,7 @@ def _validate_scenario(raw_scenario, raw_project):
     sea_id = _string(sea.get('id'), '$.scenario.sea.id')
     sea_density = _positive(sea.get('fluid_density_t_m3'),
                             '$.scenario.sea.fluid_density_t_m3')
+    _reject_pressure_state(sea, '$.scenario.sea')
     normalized_sea = {
         'id': sea_id, 'fluid_density_t_m3': sea_density,
         'source': _source(sea, '$.scenario.sea'),
@@ -228,6 +245,9 @@ def _validate_scenario(raw_scenario, raw_project):
         raise FloodingInputError('flooding.tanks_invalid', '$.scenario.tanks',
                                  'tanks must be an array')
     normalized_tanks, volumes, tank_ids = [], {}, set()
+    # Tank IDs whose locked-centroid proxy resolves no liquid plane at its
+    # initial volume; an open connection to those cannot compute a vented head.
+    locked_planes = {}
     for index, tank in enumerate(tanks):
         path = f'$.scenario.tanks[{index}]'
         if not isinstance(tank, dict):
@@ -246,12 +266,17 @@ def _validate_scenario(raw_scenario, raw_project):
                                      'all water nodes must use the same explicit density')
         initial = _number(tank.get('initial_volume_m3'),
                           f'{path}.initial_volume_m3', minimum=0.0)
+        _reject_pressure_state(tank, path)
         _source(tank, path)
         _estimate(tank, path)
         try:
-            tank_geometry.liquid_state(tank, initial)
+            state = tank_geometry.liquid_state(tank, initial)
         except (ValueError, TypeError, KeyError) as error:
             raise FloodingInputError('flooding.tank_state_invalid', path, str(error)) from error
+        if not tank.get('free_surface', True) and state['plane_offset_m'] is None:
+            # A locked liquid-centroid proxy has no free surface, so only its
+            # empty and exactly full states carry a plane this model can use.
+            locked_planes[tank.get('id')] = initial in (0.0, state['capacity_m3'])
         normalized_tanks.append(copy.deepcopy(tank))
         volumes[identity] = initial
 
@@ -289,6 +314,14 @@ def _validate_scenario(raw_scenario, raw_project):
         if not isinstance(is_open, bool):
             raise FloodingInputError('flooding.connection_state_invalid',
                                      f'{path}.open', 'open must be boolean')
+        if is_open:
+            for endpoint in (source, target):
+                if endpoint in locked_planes and not locked_planes[endpoint]:
+                    raise FloodingInputError(
+                        'flooding.locked_centroid_open_connection', path,
+                        f'connection to tank {endpoint!r} is unsupported: '
+                        'free_surface=false locks the liquid centroid and leaves '
+                        'no liquid plane for an open vented head')
         row = {
             'id': identity, 'from_node_id': source, 'to_node_id': target,
             'centre_m': [_number(edge.get(field), f'{path}.{field}')
@@ -304,12 +337,7 @@ def _validate_scenario(raw_scenario, raw_project):
         if 'aperture_height_m' in edge:
             row['aperture_height_m'] = _positive(
                 edge['aperture_height_m'], f'{path}.aperture_height_m')
-        for unsupported in ('pressure_pa', 'from_pressure_pa', 'to_pressure_pa',
-                            'air_pressure_pa'):
-            if unsupported in edge:
-                raise FloodingInputError('flooding.pressure_unsupported',
-                                         f'{path}.{unsupported}',
-                                         'pressure networks are outside this model')
+        _reject_pressure_state(edge, path)
         normalized_connections.append(row)
 
     if 'openings' in scenario:
@@ -468,6 +496,14 @@ def _state_row(time_s, actual_dt_s, volumes, equilibrium, evaluation, transfers,
     }
 
 
+def _model_limit_reason(evaluation):
+    """Return the public stop reason carried by a blocking kernel diagnostic."""
+    for item in evaluation.get('diagnostics', []):
+        if item.get('blocking'):
+            return kernel.MODEL_LIMIT_REASONS.get(item.get('code'), 'model_limit')
+    return 'model_limit'
+
+
 def _invalid_result(diagnostics, *, input_fingerprint=None,
                     project_fingerprint=None, loading_state=None,
                     scenario=None, openings_origin=None,
@@ -614,7 +650,8 @@ def simulate_flooding(project, condition_id, scenario, options=None):
         downflooding['time_s'] = 0.0
         status, stop_reason = 'downflooding_event', 'downflooding_event'
     elif evaluation['status'] == 'model_limit':
-        status, stop_reason = 'model_limit', 'partial_aperture'
+        status = 'model_limit'
+        stop_reason = _model_limit_reason(evaluation)
         diagnostics.extend(copy.deepcopy(evaluation['diagnostics']))
     elif duration == 0.0:
         status, stop_reason = 'completed', 'scheduled_completion'
@@ -688,7 +725,8 @@ def simulate_flooding(project, condition_id, scenario, options=None):
                                 'requested_dt_s': attempt_dt}
                 continue
             if candidate_evaluation['status'] == 'model_limit':
-                last_failure = {'kind': 'partial_aperture',
+                limit_reason = _model_limit_reason(candidate_evaluation)
+                last_failure = {'kind': limit_reason,
                                 'volumes_m3': copy.deepcopy(candidate_volumes),
                                 'requested_dt_s': attempt_dt,
                                 'diagnostics': candidate_evaluation['diagnostics']}

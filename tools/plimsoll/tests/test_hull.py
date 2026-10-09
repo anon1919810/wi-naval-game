@@ -190,9 +190,13 @@ class TestFormCoefficients(unittest.TestCase):
 
 
 class TestHalfAngleOfEntrance(unittest.TestCase):
+    def forward_wedge(self):
+        # x is forward: the original volume fixture narrows toward its stern.
+        return GE.StationedHull([(L-x, poly) for x, poly in wedge_hull().stations])
+
     def test_wedge_exact(self):
         """线性水线：iE = atan(0.05) = 2.862°（与 at_frac 无关，因为斜率恒定）。"""
-        r = H.half_angle_of_entrance(wedge_hull())
+        r = H.half_angle_of_entrance(self.forward_wedge())
         self.assertAlmostEqual(r["values"]["iE_deg"],
                                math.degrees(math.atan(0.05)), places=6)
 
@@ -204,7 +208,7 @@ class TestHalfAngleOfEntrance(unittest.TestCase):
 
     def test_convention_is_declared(self):
         """口径不唯一必须写进警告 —— 跨来源比较前先对齐。"""
-        r = H.half_angle_of_entrance(wedge_hull())
+        r = H.half_angle_of_entrance(self.forward_wedge())
         self.assertTrue(any("口径" in w for w in r["warnings"]))
 
     def test_queen_mary_in_plausible_band(self):

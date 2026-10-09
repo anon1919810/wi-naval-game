@@ -90,7 +90,10 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
         request_api.reject("cancel_check must be callable", "$.cancel_check")
     snapshot, request, fingerprint = request_api.normalize(project, condition_id, options)
     opts = request["options"]
-    state = loading.resolve_loading(snapshot, condition_id)
+    try:
+        state = loading.resolve_loading(snapshot, condition_id)
+    except loading.LoadingRangeError as error:
+        request_api.reject(str(error), '$.weight_groups', 'loading.derived_out_of_range')
     requested = set(opts["stages"])
     active = {"loading"}
     def require(name):

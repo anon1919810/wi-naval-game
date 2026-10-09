@@ -12,7 +12,7 @@ except ImportError:
 STAGES = ("loading", "systems", "l0", "geometry", "equilibrium", "hydrostatics", "gz", "deck",
           "hydrostatic_curve", "bonjean", "resistance", "propulsion", "endurance", "historical", "flooding")
 DEFAULT_STAGES = ("loading", "systems", "l0", "geometry", "equilibrium", "hydrostatics", "deck", "propulsion")
-VERSIONS = {"coordinator": "selected-loading-analysis-1", "geometry": geometry_analysis.METHOD_VERSION,
+VERSIONS = {"coordinator": "selected-loading-analysis-2", "geometry": geometry_analysis.METHOD_VERSION,
             "stability": stability.METHOD_VERSION, "request": "plimsoll-analysis-request-1"}
 
 

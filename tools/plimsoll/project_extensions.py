@@ -687,8 +687,18 @@ def validate_extensions(project, item_ids):
                 if not isinstance(prefs[key], str) or prefs[key] not in choices[key]:
                     _diag(diagnostics, "$.display_preferences." + key, "unsupported display unit for this dimension")
     _system_fields(project.get("systems"), item_ids, diagnostics, project.get("weight_groups", []))
-    armour = (project.get("systems") or {}).get("armour") or {}
-    fixed = armour.get("fixed") or {}
+    systems = project.get('systems')
+    if systems is not None and not isinstance(systems, dict):
+        _diag(diagnostics, '$.systems', 'must be an object or null')
+    systems = systems if isinstance(systems, dict) else {}
+    armour = systems.get('armour')
+    if armour is not None and not isinstance(armour, dict):
+        _diag(diagnostics, '$.systems.armour', 'must be an object or null')
+    armour = armour if isinstance(armour, dict) else {}
+    fixed = armour.get('fixed')
+    if fixed is not None and not isinstance(fixed, dict):
+        _diag(diagnostics, '$.systems.armour.fixed', 'must be an object or null')
+    fixed = fixed if isinstance(fixed, dict) else {}
     coverage = fixed.get("deck_coverage")
     if coverage is not None:
         path = "$.systems.armour.fixed.deck_coverage"

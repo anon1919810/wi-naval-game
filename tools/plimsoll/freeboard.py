@@ -7,9 +7,8 @@ Ram Length、Stern overhang、Depth Unlocked、Sheer 示意图、**Average freeb
 Plimsoll 的做法（诚实记录）
 ---------------------------
 - **Average freeboard**：按各甲板分段的长度加权（段内艏→艉线性，取段均值）——定义式。
-- **干舷 ↔ 稳性的桥**：每段给出 `deck_immersion_deg = atan(fb / (B/2))`。
-  这是本页与 L1 GZ 的接口：**超过该角后主甲板入水、GZ 曲线不再可信**，
-  cli.py 用的是同一判据（半宽取 B/2，是本模块的近似，见 warnings）。
+- **甲板接水代理**：每段给出 `atan(min(fb_fore,fb_aft) / (B/2))`。
+  常半宽 B/2 是近似；甲板接水不等同于开口下进水，不能据此终止 GZ 曲线。
 - **本舰数据缺口**：QM 的型深/干舷**没有外部文献源**（Navypedia/维基均不列），
   型深只能由模型型线推得（水线上 5.10 m + 满载吃水 9.9 m = 15.0 m，**estimate**）；
   甲板分段的 %Lwl 与艏艉舷弧（sheer）**未考证** —— 案例里逐项标 estimate。
@@ -94,7 +93,8 @@ def compute(case: dict) -> dict:
         src = s.get("source", "无来源")
         length = pct / 100.0 * lwl
         mean_fb = 0.5 * (fb_f + fb_a)
-        imm = math.degrees(math.atan(mean_fb / (0.5 * beam)))
+        lowest_fb = min(fb_f, fb_a)
+        imm = math.degrees(math.atan(lowest_fb / (0.5 * beam)))
 
         rows.append({"id": sid, "kind": kind, "length_pct_lwl": pct, "length_m": length,
                      "fb_fore_m": fb_f, "fb_aft_m": fb_a, "fb_mean_m": mean_fb,
@@ -102,20 +102,20 @@ def compute(case: dict) -> dict:
         total_len += length
         total_mom += length * mean_fb
         pct_sum += pct
-        min_fb = mean_fb if min_fb is None else min(min_fb, mean_fb)
+        min_fb = lowest_fb if min_fb is None else min(min_fb, lowest_fb)
 
         _T(trace, "segment.%s.length_m" % sid, length, "L段 = %.2f%% × Lwl" % pct, src, est)
         _T(trace, "segment.%s.fb_mean_m" % sid, mean_fb, "f段 = (f艏 + f艉) / 2", src, est)
         _T(trace, "segment.%s.deck_immersion_deg" % sid, imm,
-           "α = atan(f段 / (B/2))", "干舷与半宽之比（半宽取 B/2，近似）", True)
-        if mean_fb <= 0:
-            warnings.append("分段 %s 的干舷 %.2f m ≤ 0：甲板已在水线，干舷无效。" % (sid, mean_fb))
+           "α = atan(min(f艏, f艉) / (B/2))", "最低端点的甲板接水代理（常半宽 B/2 近似）", True)
+        if lowest_fb <= 0:
+            warnings.append("分段 %s 的最低端点干舷 %.2f m ≤ 0：甲板已接水。" % (sid, lowest_fb))
 
     avg = total_mom / total_len if total_len > 0 else None
     _T(trace, "average_freeboard_m", avg, "f̄ = Σ(L段·f段) / Σ L段", "长度加权平均",
        any(r["estimate"] for r in rows))
     if avg is not None:
-        _T(trace, "min_freeboard_m", min_fb, "min(各段均值)", "分段干舷")
+        _T(trace, "min_freeboard_m", min_fb, "min(各段艏艉端点)", "分段线性干舷")
         _T(trace, "deck_immersion_min_deg", math.degrees(math.atan(min_fb / (0.5 * beam))),
            "α = atan(f_min / (B/2))", "最薄弱段的甲板浸没角", True)
 
@@ -125,7 +125,8 @@ def compute(case: dict) -> dict:
         warnings.append("平均干舷 %.2f m ≤ 0。" % avg)
     imm_min = math.degrees(math.atan(min_fb / (0.5 * beam))) if min_fb is not None else None
     if imm_min is not None and imm_min < 15.0:
-        warnings.append("最薄弱段甲板浸没角仅 %.1f°：GZ 曲线在该角以上已不可信（甲板入水）。" % imm_min)
+        warnings.append("最低端点甲板接水代理角仅 %.1f°（常半宽 B/2 近似）。" % imm_min)
+    warnings.append("甲板接水不等同于开口下进水（downflooding），不能据此推定 GZ 失效或安全角。")
 
     return {
         "values": {"average_freeboard_m": avg, "min_freeboard_m": min_fb,

@@ -167,11 +167,24 @@ def compute(hull: dict) -> dict:
     # --- 纵稳心半径与每厘米纵倾力矩
     i_l = coeffs["i_l_per_B_L3"] * B * L ** 3
     bm_l = i_l / vol
-    mct = mass * bm_l / (100.0 * L)
     T("il_m4", i_l, "I_L = √π·B·L³·Γ(p+1)/(16·Γ(p+5/2))",
       "同一水线面形状模型的解析积分（方箱 = B·L³/12）", cwp_est)
     T("bm_l_m", bm_l, "BM_L = I_L / ∇", "纵稳心半径定义", cwp_est or cb_est)
-    T("mct1cm_t_m_per_cm", mct, "MCT1cm = Δ · BM_L / (100 · L)", "每厘米纵倾力矩", cwp_est)
+    kg_for_trim = hull.get("kg_m")
+    if kg_for_trim is None:
+        mct = mass*bm_l/(100.0*L)
+        T("mct1cm_t_m_per_cm", mct, "MCT1cm ≈ Δ · BM_L / (100 · L)",
+          "BM_L proxy approximation: KG unknown; omit KB−KG", True)
+        warnings.append("KG 未知：MCT1cm 使用 BM_L 近似（忽略 KB−KG）；不能作为已知 KG 的精确纵倾刚度。")
+    else:
+        if (isinstance(kg_for_trim, bool) or not isinstance(kg_for_trim, (int, float))
+                or not math.isfinite(kg_for_trim)):
+            raise ValueError("kg_m must be a finite real number")
+        gm_l = kb+bm_l-kg_for_trim
+        mct = mass*gm_l/(100.0*L)
+        T("gm_l_m", gm_l, "GM_L = KB + BM_L − KG", "KB 使用 Morrish 近似", True)
+        T("mct1cm_t_m_per_cm", mct, "MCT1cm = Δ · GM_L / (100 · L)",
+          "初始纵倾刚度；继承 KB 与形状模型的近似，保留有符号结果", True)
 
     # --- 稳心高（需要 KG；KG 属 L2 重量分组）
     km = kb + bm_t

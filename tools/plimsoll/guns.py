@@ -97,10 +97,16 @@ def compute(case: dict) -> dict:
 
         rounds = b.get("rounds_per_gun")
         charge_lb = b.get("charge_lb")
+        if charge_lb is not None:
+            if (isinstance(charge_lb, bool) or not isinstance(charge_lb, (int, float))
+                    or not math.isfinite(charge_lb) or charge_lb < 0):
+                raise ValueError(f'battery {bid} charge_lb must be finite and nonnegative')
         if rounds is not None:
             _int_positive(rounds, "battery %s 的 rounds_per_gun" % bid)
             per_round_kg = shell_kg + (float(charge_lb) * LB_TO_KG if charge_lb is not None else 0.0)
             magazine_t = guns * rounds * per_round_kg / 1000.0
+            if not math.isfinite(magazine_t):
+                raise ValueError(f'battery {bid} magazine_t is outside the numeric range')
             if charge_lb is None:
                 warnings.append("battery %s 未提供装药重：Magazine 只算了弹重（偏低）。" % bid)
         else:

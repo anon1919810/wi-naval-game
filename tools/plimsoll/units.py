@@ -34,8 +34,14 @@ def convert(value: float, from_unit: str, to_unit: str) -> float:
     Raises:
         ValueError: If the value or either unit is invalid, or dimensions differ.
     """
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"value must be a finite real number, received {value!r}")
+    try:
+        value = float(value)
+    except OverflowError as exc:
+        raise ValueError("value is outside the supported numeric range") from exc
+    if not math.isfinite(value):
+        raise ValueError("value must be a finite real number")
     if from_unit not in _UNITS:
         raise ValueError(f"unsupported source unit: {from_unit!r}")
     if to_unit not in _UNITS:
@@ -46,4 +52,7 @@ def convert(value: float, from_unit: str, to_unit: str) -> float:
         raise ValueError(
             f"cannot convert {from_unit!r} ({from_dimension}) to {to_unit!r} ({to_dimension})"
         )
-    return value * from_factor / to_factor
+    result = value * (from_factor / to_factor)
+    if not math.isfinite(result):
+        raise ValueError("converted value is outside the supported numeric range")
+    return result

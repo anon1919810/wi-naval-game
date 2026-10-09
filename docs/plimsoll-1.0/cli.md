@@ -6,9 +6,11 @@ the `import-geometry` semantics. It describes observed, acceptance-tested
 behaviour of the calculation-only CLI.
 
 All commands are invoked as a module: `python -m plimsoll <command> ...`.
-On any error the CLI writes a single structured JSON object to **stderr** whose
-`schema` is `plimsoll-cli-error-1`; **stdout is reserved for the successful
-report** and is empty whenever a command exits non-zero. Exit codes are:
+On a usage, input, serialization or output-write error, the CLI writes a single
+structured JSON object to **stderr** whose `schema` is `plimsoll-cli-error-1`,
+with empty stdout. A completed or partial calculation report may be written to
+stdout; normal partial completion exits `1` with its report and empty stderr.
+Exit codes are:
 
 - `0` — every requested stage / case / grid point completed and was persisted.
   The payload `status` is `"completed"`.
@@ -17,9 +19,10 @@ report** and is empty whenever a command exits non-zero. Exit codes are:
   `"partial"` (or the batch/sweep summary reports `"partial"`). Read the
   payload: stage `status` and `reason` are authoritative, the exit code only
   says "not all done".
-- `2` — input or usage error: unreadable file, invalid strict JSON, schema
+- `2` — input, usage or output error: unreadable file, invalid strict JSON, schema
   mismatch, alias/path protection, unsupported arguments, or a condition /
-  request that the core rejects as invalid input. Always paired with a
+  request that the core rejects as invalid input, serialization failure, or an
+  `analyze` report destination that cannot be written. Always paired with a
   `plimsoll-cli-error-1` object on stderr.
 
 `analyze`, `batch` and `sweep` compute; `import-geometry` only materializes
@@ -58,6 +61,19 @@ Verified examples (run against the bundled cases):
 `--options` pointing at invalid strict JSON (e.g. duplicate object keys) is a
 usage error → exit `2` with `cli.json_invalid`. The report output path may not
 alias an explicitly read input → exit `2` with `cli.output_alias`.
+
+Argparse failures (including absent commands, unknown options and missing
+required arguments) use `cli.usage` and the same JSON error contract. `--help`
+still prints ordinary help and exits `0`. Malformed sweep field types use
+`cli.schema_invalid` with their exact input path.
+
+`analyze` validates JSON and CSV serialization before any output is written.
+`cli.output_serialization_failed` or `cli.output_write_failed` exits `2`, even
+when the calculation itself completed. Its error context includes
+`calculation_status` and `persisted_outputs`, the absolute paths actually
+written before the failure. Each file is replaced atomically; multiple output
+files are not a single transaction, so a later CSV write failure does not
+claim that an already written JSON report was rolled back.
 
 ## batch
 

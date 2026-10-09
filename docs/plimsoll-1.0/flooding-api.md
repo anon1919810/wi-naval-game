@@ -1,7 +1,8 @@
 # Connected quasi-static flooding API
 
 `tools.plimsoll.flooding` implements method
-`connected-quasi-static-flooding-1`:
+`connected-quasi-static-flooding-3`, with hydraulic kernel
+`vented-orifice-network-2`:
 
 ```python
 simulate_flooding(project, condition_id, scenario, options=None) -> dict
@@ -102,6 +103,10 @@ so an aperture touching both equal surfaces does not create a false partial-
 aperture limit.
 Pressure fields are rejected because compressed-air and pressure-network flow
 are outside this version.
+This applies to the scenario, sea, tanks and connections, including closed
+edges. A closed valve needs no hydraulic head and may remain connected to a
+partially filled locked-centroid tank. An open edge to that tank instead returns
+`flooding.liquid_plane_unsupported`: the solid proxy supplies no liquid plane.
 
 ## Options
 
@@ -148,6 +153,13 @@ clamp. The coupled driver then resolves full equilibrium and reevaluates all
 heads. It halves and retries before accepting a head reversal, unsupported
 aperture state, unresolved liquid geometry, or failed equilibrium. Exhausting
 the explicit retry bound stops visibly and retains the last accepted state.
+Gross-flow budgets only bound an explicit step. A full/dry event requires the
+accepted net transfer to reach the physical boundary; simultaneous inflow and
+outflow cannot convert a shortened step into a false capacity/dry-out stop.
+Representable discharge uses binary scaling when its intermediate velocity
+would overflow. Unrepresentable volume or mass flow returns a model limit with
+null flow, including a zero-duration request; unrepresentable heads and transfer
+ledgers are explicitly rejected, never emitted as infinity or NaN.
 For the coupled model, open-edge head differences at or below 1×10⁻⁸ m are
 treated as numerical hydraulic equilibrium. This prevents repeated halving
 around a physically negligible reversal. The result records the threshold and

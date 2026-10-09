@@ -101,6 +101,24 @@ New calculations select `international_mechanical_hp_precise` and
 select methods explicitly, so an existing result is never silently redefined.
 
 `bunker_total_t` is available only when both `coal_t` and `oil_t` are known.
+Fuel input traces preserve both the selected mass-field and binding sources.
+Explicit fuel absence supplies known zero with the absence declaration's
+estimate flag; an omitted binding supplies unknown. Fuel totals use tri-state
+aggregation, while steady endurance uses the scenario and consumed fuel masses
+only. Unused fuel and unrelated position/power metadata do not change it.
+Optional displacement and LWL validate finite positive numbers whenever
+provided. Fuel totals, endurance and calibration outputs must remain finite;
+binary-scaled Admiralty evaluation preserves representable results whose
+intermediate product would overflow.
+
+Taylor table completeness is separate from turbulent-friction eligibility.
+`speed_power_curve` applies the named project policy `Re >= 1e5`, consistent
+with the existing Holtrop project policy. This is not a universal transition
+threshold or empirical validation. Below it, a populated table may still return
+a complete algebraic estimate, but `primary_result` and `model_applicable` are
+false with `resistance.reynolds_policy`. The selected-plane adapter preserves
+the per-speed diagnostic and eligibility through QPC rows, fixed-power inverse
+studies and aggregate validity; one eligible speed never promotes another.
 An explicit zero is a known zero. If one mass is unknown,
 `bunker_known_subtotal_t` reports the known partial mass while total and fuel
 percentage remain null with `engines.bunker_partial`. Historical `range_nm` and

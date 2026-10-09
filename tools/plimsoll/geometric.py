@@ -27,8 +27,10 @@ import math
 
 if __package__:
     from . import freesurface as FS
+    from .geometry import waterline_intervals
 else:
     import freesurface as FS
+    from geometry import waterline_intervals
 
 RHO_SEA = 1.025
 G = 9.80665
@@ -106,8 +108,8 @@ def hydrostatics_upright(hull, waterline_z, rho=RHO_SEA):
     xs = [x for x, _ in hull.stations]
     it_terms = []
     for x, poly in hull.stations:
-        half = _waterline_halfbeam(poly, waterline_z)
-        it_terms.append((2.0 / 3.0) * half ** 3)
+        it_terms.append(sum((b**3-a**3)/3 for a, b in
+                            waterline_intervals(poly, 0.0, waterline_z)))
     it = _trapz(it_terms, xs)
     if it <= 1e-9:
         raise ValueError(

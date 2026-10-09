@@ -65,6 +65,11 @@ method_versions, sources, diagnostics, validity, stages
 
 `input_fingerprint` is exactly the selected loading fingerprint. Request identity
 binds the normalized snapshot, condition, effective options and method versions.
+The 2026-10-09 audit repairs use coordinator `selected-loading-analysis-2`.
+This changes request identities so cached pre-repair results cannot be reused
+as repaired results; stored input snapshots and historical results are not
+rewritten. Numerical method names, Taylor source bytes and the ITTC equation
+remain unchanged.
 Every stage is located **only under `result.stages`**, with these stable keys:
 
 ```text

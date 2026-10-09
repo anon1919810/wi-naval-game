@@ -184,21 +184,45 @@ class StationedHull:
         `trim_rad` 传入时按给定纵倾求解。**解 θ 本身用
         `solve_trim_equilibrium`（阶段 2.2）**，那是二维求根，不要混进本函数。
         """
-        if lo is None or hi is None:
-            zmin = min(z for _, poly in self.stations for _, z in poly)
-            zmax = max(z for _, poly in self.stations for _, z in poly)
-            span = max(1.0, zmax - zmin)
-            lo, hi = zmin - span, zmax + span
+        for name, value in (("phi_rad", phi_rad), ("trim_rad", trim_rad),
+                            ("target_volume", target_volume), ("tol", tol)):
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError(f"{name} must be a finite real number")
+        if target_volume <= 0 or tol <= 0:
+            raise ValueError("target_volume and tol must be positive")
+        q, p = math.tan(phi_rad), math.tan(trim_rad)
+        support = [z-q*y-p*x for x, poly in self.stations for y, z in poly]
+        lo = min(support) if lo is None else lo
+        hi = max(support) if hi is None else hi
+        if (isinstance(lo, bool) or isinstance(hi, bool)
+                or not isinstance(lo, (int, float)) or not isinstance(hi, (int, float))
+                or not math.isfinite(lo) or not math.isfinite(hi) or lo >= hi):
+            raise ValueError("waterline bracket must be finite with lo < hi")
+        v_lo = self.integrate(phi_rad, lo, trim_rad)["volume"]
+        v_hi = self.integrate(phi_rad, hi, trim_rad)["volume"]
+        if not v_lo <= target_volume <= v_hi:
+            raise ValueError("target_volume 超出当前限界内的可浸没体积范围 (outside attainable volume bracket)")
+        if target_volume == v_lo:
+            return lo
+        if target_volume == v_hi:
+            return hi
+        volume_tol = max(target_volume*1e-11, math.ulp(target_volume)*64)
         for _ in range(200):
             mid = 0.5 * (lo + hi)
             v = self.integrate(phi_rad, mid, trim_rad)["volume"]
+            if hi-lo <= tol and abs(v-target_volume) <= volume_tol:
+                return mid
             if v < target_volume:
                 lo = mid
             else:
                 hi = mid
-            if hi - lo < tol:
+            if mid == lo == hi or math.nextafter(lo, hi) >= hi:
                 break
-        return 0.5 * (lo + hi)
+        mid = 0.5*(lo+hi)
+        residual = self.integrate(phi_rad, mid, trim_rad)["volume"]-target_volume
+        if not math.isfinite(residual) or abs(residual) > volume_tol:
+            raise ValueError("equal-volume waterline did not converge within the volume tolerance")
+        return mid
 
     def solve_trim_equilibrium(self, target_volume, target_lcb, *,
                                phi_rad=0.0,

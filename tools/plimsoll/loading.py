@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 
 try:
     from . import project_io
@@ -64,6 +65,16 @@ def _result_fingerprint(project_fingerprint: str, condition_id: str) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+class LoadingRangeError(ValueError):
+    """Finite input fields produced an unrepresentable ledger quantity."""
+
+
+def _finite_derived(value, path):
+    if not math.isfinite(value):
+        raise LoadingRangeError(f"loading arithmetic is outside the numeric range at {path}")
+    return value
+
+
 def _summarize(items: list[dict]) -> dict:
     known_mass = 0.0
     mass_complete = True
@@ -75,7 +86,7 @@ def _summarize(items: list[dict]) -> dict:
             mass_complete = False
             axis_complete = {axis: False for axis in _AXIS_FIELDS}
             continue
-        known_mass += mass
+        known_mass = _finite_derived(known_mass+mass, 'total_mass_t')
         if mass == 0:
             continue
         for axis, field in _AXIS_FIELDS.items():
@@ -83,7 +94,8 @@ def _summarize(items: list[dict]) -> dict:
             if position is None:
                 axis_complete[axis] = False
             else:
-                known_moments[axis] += mass * position
+                contribution = _finite_derived(mass*position, f"item.{item['id']}.{field}.moment")
+                known_moments[axis] = _finite_derived(known_moments[axis]+contribution, axis+'.moment_sum')
 
     total_mass = known_mass if mass_complete else None
     moments = {
@@ -92,7 +104,7 @@ def _summarize(items: list[dict]) -> dict:
     }
     cgs = {
         _CG_FIELDS[axis]: (
-            moments[axis] / total_mass
+            _finite_derived(moments[axis] / total_mass, axis+'.cg')
             if moments[axis] is not None and total_mass is not None and total_mass > 0
             else None
         )
@@ -153,8 +165,8 @@ def _coverage(reference: float | None, total_mass: float | None) -> tuple[dict, 
                 )
             )
         return result, diagnostics
-    result["ratio"] = total_mass / reference
-    result["percent"] = 100.0 * result["ratio"]
+    result["ratio"] = _finite_derived(total_mass / reference, 'coverage.ratio')
+    result["percent"] = _finite_derived(100.0 * result["ratio"], 'coverage.percent')
     if result["ratio"] < 0.95:
         diagnostics.append(
             _diagnostic(
@@ -183,6 +195,8 @@ def _multiply_intervals(first: list[float], second: list[float]) -> list[float]:
         first[1] * second[0],
         first[1] * second[1],
     ]
+    for value in products:
+        _finite_derived(value, 'uncertainty.moment_product')
     return [min(products), max(products)]
 
 
@@ -193,11 +207,14 @@ def _divide_intervals(numerator: list[float], denominator: list[float]) -> list[
         numerator[1] / denominator[0],
         numerator[1] / denominator[1],
     ]
+    for value in quotients:
+        _finite_derived(value, 'uncertainty.cg_quotient')
     return [min(quotients), max(quotients)]
 
 
 def _source_unknown(source):
-    return source in (None, "", {}) or isinstance(source, str) and not source.strip()
+    return not ((isinstance(source, str) and source.strip())
+                or (isinstance(source, dict) and source))
 
 
 def _provenance_summary(items: list[dict]) -> dict:
@@ -259,8 +276,8 @@ def _uncertainty_summary(
         else:
             item_mass_interval = [mass, mass]
             conditional_fields.append(f"{item_path}.mass_t")
-        mass_interval[0] += item_mass_interval[0]
-        mass_interval[1] += item_mass_interval[1]
+        mass_interval[0] = _finite_derived(mass_interval[0]+item_mass_interval[0], 'uncertainty.mass_lower')
+        mass_interval[1] = _finite_derived(mass_interval[1]+item_mass_interval[1], 'uncertainty.mass_upper')
 
         missing_fields = []
         if item["provenance"]["fields"]["mass_t"]["estimate"] is True and "mass_t" not in uncertainty:
@@ -280,8 +297,8 @@ def _uncertainty_summary(
                 if item["provenance"]["fields"][field]["estimate"] is True:
                     missing_fields.append(field)
             contribution = _multiply_intervals(item_mass_interval, position_interval)
-            moment_intervals[axis][0] += contribution[0]
-            moment_intervals[axis][1] += contribution[1]
+            moment_intervals[axis][0] = _finite_derived(moment_intervals[axis][0]+contribution[0], 'uncertainty.'+axis+'.lower')
+            moment_intervals[axis][1] = _finite_derived(moment_intervals[axis][1]+contribution[1], 'uncertainty.'+axis+'.upper')
         if missing_fields:
             missing_fields.sort()
             missing_estimate_bounds.append(
@@ -533,6 +550,8 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
         semantic_block=required_group_empty or ownership_overlap,
     )
     diagnostics.extend(uncertainty_diagnostics)
+    provenance = _provenance_summary(effective_items)
+    uncertainty['certified'] = uncertainty['certified'] and provenance['provenance_complete']
     project_fingerprint = project_io.input_fingerprint(normalized)
     result = {
         "schema": SCHEMA,
@@ -546,7 +565,7 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
         "groups": group_rows,
         "values": values,
         "coverage": coverage,
-        "provenance": _provenance_summary(effective_items),
+        "provenance": provenance,
         "uncertainty": uncertainty,
         "axis_complete": axis_complete,
         "complete_mass": complete_mass,

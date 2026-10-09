@@ -6,7 +6,7 @@ from datetime import datetime
 import uuid
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from plimsoll import _analysis_request, exports
@@ -18,21 +18,28 @@ from .projects import RevisionConflict, owned_project
 ACTIVE = ("queued", "running")
 
 
+def expire_lost_runs(db: Session, owner_id: uuid.UUID | None = None) -> int:
+    """Atomically recover only rows that are still running with an expired lease.
+
+    The status predicate is rechecked by the database at the write, including
+    SQLite where a preceding SELECT FOR UPDATE would not lock the row.
+    """
+    now = utc_now()
+    statement = update(CalculationRun).where(
+        CalculationRun.status == "running",
+        CalculationRun.lease_expires_at < now)
+    if owner_id is not None:
+        statement = statement.where(CalculationRun.owner_id == owner_id)
+    result = db.execute(statement.values(status='failed', finished_at=now,
+        lease_expires_at=None, result=None,
+        error={"code": "run.worker_lost", "message": "calculation worker stopped before reporting a result"}),
+        execution_options={'synchronize_session': 'fetch'})
+    return result.rowcount
+
+
 def _expire_lost_runs(db: Session, owner_id: uuid.UUID) -> bool:
     """Recover this owner's expired worker leases during ordinary API traffic."""
-    rows = db.scalars(select(CalculationRun).where(
-        CalculationRun.owner_id == owner_id,
-        CalculationRun.status == "running",
-        CalculationRun.lease_expires_at < utc_now(),
-    ).with_for_update(skip_locked=True)).all()
-    for row in rows:
-        row.status = "failed"
-        row.finished_at = utc_now()
-        row.lease_expires_at = None
-        row.error = {"code": "run.worker_lost", "message": "calculation worker stopped before reporting a result"}
-    if rows:
-        db.flush()
-    return bool(rows)
+    return expire_lost_runs(db, owner_id) > 0
 
 
 def _run_view(row: CalculationRun, *, include_result: bool = True) -> dict:

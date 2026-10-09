@@ -7,7 +7,7 @@ import multiprocessing
 import time
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session, sessionmaker
 
 from plimsoll import analysis, exports
@@ -15,6 +15,7 @@ from plimsoll import analysis, exports
 from .config import Settings
 from .db import make_session_factory
 from .models import CalculationRun, utc_now
+from .runs import expire_lost_runs
 
 
 MAX_SECONDS = 120
@@ -26,17 +27,7 @@ CANCEL_GRACE_SECONDS = 2
 def recover_expired_runs(factory: sessionmaker[Session]) -> int:
     """Keep a lost process visible as failed rather than running forever."""
     with factory.begin() as db:
-        rows = db.scalars(
-            select(CalculationRun).where(
-                CalculationRun.status == "running",
-                CalculationRun.lease_expires_at < utc_now(),
-            ).with_for_update(skip_locked=True)
-        ).all()
-        for row in rows:
-            row.status = "failed"
-            row.finished_at = utc_now()
-            row.error = {"code": "run.worker_lost", "message": "calculation worker stopped before reporting a result"}
-        return len(rows)
+        return expire_lost_runs(db)
 
 
 def claim_next_run(db: Session) -> CalculationRun | None:
@@ -114,6 +105,7 @@ def execute_run(run_id: uuid.UUID, factory: sessionmaker[Session], cancel_check=
         if row is None or row.status != "running":
             return
         snapshot, request, fingerprint = row.input_snapshot, row.request, row.request_fingerprint
+        lease = row.lease_expires_at
 
     def canceled() -> bool:
         if cancel_check is not None and cancel_check():
@@ -134,21 +126,19 @@ def execute_run(run_id: uuid.UUID, factory: sessionmaker[Session], cancel_check=
         kind, payload = "error", {"code": "run.worker_failed", "message": str(error)[:500]}
 
     with factory.begin() as db:
-        row = db.get(CalculationRun, run_id)
-        if row is None or row.status != "running":
-            return
-        row.finished_at = utc_now()
-        row.lease_expires_at = None
+        terminal = dict(finished_at=utc_now(), lease_expires_at=None, result=None, error=None)
         if kind == "result":
-            row.result = payload
-            row.status = payload["status"]
-            row.error = None
+            terminal.update(result=payload, status=payload['status'])
         elif kind == "canceled":
-            row.status = "canceled"
-            row.error = payload
+            terminal.update(status='canceled', error=payload)
         else:
-            row.status = "failed"
-            row.error = payload
+            terminal.update(status='failed', error=payload)
+        # A terminal row or a replaced lease belongs to another winner. All
+        # terminal fields travel together in one conditional database write.
+        db.execute(update(CalculationRun).where(CalculationRun.id == run_id,
+            CalculationRun.status == 'running', CalculationRun.lease_expires_at == lease,
+            CalculationRun.request_fingerprint == fingerprint).values(**terminal),
+            execution_options={'synchronize_session': False})
 
 
 def work_one(factory: sessionmaker[Session]) -> bool:

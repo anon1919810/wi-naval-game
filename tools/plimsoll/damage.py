@@ -148,11 +148,10 @@ def flood_combination(ship: dict, tanks=None) -> dict:
     gm = None if km is None else (km - kg_eff)
 
     lcg_solid = None
-    lcb_out = None
-    if lcg0 is not None and lcb0 is not None:
+    lcb_out = lcb0  # No new equilibrium is solved here.
+    if lcg0 is not None:
         # 实心合成纵向重心；进水形心 x 作为额外力矩
         lcg_solid = (delta0 * lcg0 + sum_delta_x) / delta1
-        lcb_out = lcb0  # 4.1 不求新浮态，LCB 不自动变
 
     return {
         "displacement_before_t": delta0,

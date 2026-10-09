@@ -30,6 +30,10 @@ torpedo_bulkhead / barbette / conning_tower），而账本有 13 个装甲条目
 from __future__ import annotations
 
 import math
+try:
+    from ._provenance import combine_estimates, field_metadata, unique_sources
+except ImportError:
+    from _provenance import combine_estimates, field_metadata, unique_sources
 
 SCHEMA = "plimsoll-page-rows-1"
 SCHEMA_FREEBOARD = "plimsoll-page-rows-freeboard-1"
@@ -132,6 +136,8 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             used[item_id] = row_name
             item = ledger.get(item_id)
             if item is None:
+                mass_complete = False
+                estimates.append(None)
                 diagnostics.append(_diagnostic(
                     "page_rows.item_unknown",
                     "item %r is not present in the selected loading ledger" % item_id,
@@ -146,7 +152,8 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
                     "page_rows.item_mass_unknown",
                     "item %r has no known mass; row total is incomplete" % item_id,
                     path + ".weight_item_ids"))
-            estimates.append(bool(item.get("estimate", False)))
+            mass_provenance = field_metadata(item, "mass_t")
+            estimates.append(mass_provenance.get("estimate"))
             model = models.get(item_id)
             if model:
                 if isinstance(model["area_m2"], (int, float)):
@@ -154,7 +161,7 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
                 if isinstance(model["thickness_mm"], (int, float)):
                     thicknesses.append(float(model["thickness_mm"]))
             provenance = item.get("provenance") or {}
-            source = provenance.get("source", item.get("source"))
+            source = mass_provenance.get("source", item.get("source"))
             if source is not None:
                 sources.append(source)
             for model in leaf_payload.get("mass_models", []):
@@ -209,7 +216,7 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             "typed": typed,
             "typed_unknown_fields": typed_unknown,
             "typed_status": typed_status,
-            "estimate": all(estimates) if estimates else None,
+            "estimate": combine_estimates(estimates),
             "sources": sources,
             "declaration_source": entry.get("source"),
             "declaration_estimate": entry.get("estimate"),
@@ -222,7 +229,7 @@ def project_declared_rows(state, systems_result, system, leaf, declaration):
             "formula": ("Σ 声明条目的账本 mass_t（不重算）" if ids
                         else "no ledger binding → mass unknown"),
             "source": "selected loading weight ledger; declared binding by weight_item_ids",
-            "estimate": all(estimates) if estimates else None,
+            "estimate": combine_estimates(estimates),
         })
 
     uncovered = sorted(set(bound_ids) - set(used))
@@ -368,7 +375,7 @@ def deck_coverage(declaration):
     result.update(covered_plan_area_m2=covered, reference_plan_area_m2=reference,
                   source={"covered_plan_area_m2": covered_fact.get("source"),
                           "reference_plan_area_m2": reference_fact.get("source")},
-                  estimate=(covered_fact.get("estimate") or reference_fact.get("estimate"))
+                  estimate=combine_estimates((covered_fact.get("estimate"), reference_fact.get("estimate")))
                       if covered is not None and reference is not None else None)
     missing = [key for key, value in (("covered_plan_area_m2", covered),
                                       ("reference_plan_area_m2", reference)) if value is None]
@@ -402,7 +409,7 @@ def minimum_main_belt(project, declaration):
     fore = max(row["fore_m"] for row in extents)
     result.update(declared_span_m=fore - aft, protected_compartments=extents,
                   source=declaration["source"],
-                  estimate=declaration["estimate"] or any(row.get("estimate") for row in listed),
+                  estimate=combine_estimates([declaration["estimate"]]+[row.get("estimate") for row in listed]),
                   aft_margin_m=declaration["aft_margin_m"], fore_margin_m=declaration["fore_margin_m"])
     if not declaration["inventory_complete"]:
         result["reason"] = "declared protected compartments are not a complete inventory"
@@ -567,9 +574,8 @@ def freeboard_rows(deck):
             continue
 
         seg_mean = 0.5 * (aft_val + fore_val)
-        seg_estimate = (bool(aft_est and fore_est)
-                        if aft_est is not None and fore_est is not None else None)
-        seg_sources = [s for s in (aft_src, fore_src) if s is not None] or None
+        seg_estimate = combine_estimates((aft_est, fore_est))
+        seg_sources = unique_sources((aft_src, fore_src))
         segments_out.append({
             "id": seg_id, "aft_point_id": aft_id, "fore_point_id": fore_id,
             "length_m": length, "length_percent": length_percent,
@@ -582,8 +588,9 @@ def freeboard_rows(deck):
             weighted_num += length * seg_mean
             weighted_den += length
             declared_length += length
-        wm_estimates.append(seg_estimate)
-        wm_sources.append(seg_sources)
+        if length is not None and length > 0:
+            wm_estimates.append(seg_estimate)
+            wm_sources.extend(seg_sources or [])
 
     if unknown_segments:
         diagnostics.append(_diagnostic("page_rows.freeboard_unknown",
@@ -592,13 +599,8 @@ def freeboard_rows(deck):
 
     if weighted_den > 0:
         weighted_mean = weighted_num / weighted_den
-        wm_estimate = (all(e for e in wm_estimates if e is not None)
-                       if all(e is not None for e in wm_estimates) else None)
-        wm_source_set = set()
-        for grp in wm_sources:
-            if isinstance(grp, list):
-                wm_source_set.update(s for s in grp if isinstance(s, str))
-        wm_source = sorted(wm_source_set) or None
+        wm_estimate = combine_estimates(wm_estimates)
+        wm_source = unique_sources(wm_sources)
     else:
         weighted_mean = None
         wm_estimate = None
@@ -723,12 +725,17 @@ def guns_rows(state, systems_result, system, leaf, payload):
     ammo_row = next((r for r in (payload.get("page_rows") or [])
                      if isinstance(r, dict) and r.get("row") == "ammunition"), None)
     ammo_ids = (ammo_row.get("weight_item_ids") or []) if isinstance(ammo_row, dict) else []
-    for item in (leaf_payload.get("linked_items") or []):
-        if isinstance(item, dict) and item.get("id") in ammo_ids:
-            ship_wide_t = item.get("mass_t") if item.get("mass_t") is not None else None
-            prov = item.get("provenance") or {}
-            ship_wide_source = prov.get("source") if isinstance(prov, dict) else None
-            break
+    linked_ids = {entry.get('id') if isinstance(entry, dict) else entry
+                  for entry in (leaf_payload.get('linked_items') or [])}
+    ledger = _item_index(state)
+    selected = [ledger.get(identity) if identity in linked_ids else None
+                for identity in dict.fromkeys(ammo_ids)]
+    if selected and all(item is not None and isinstance(item.get('mass_t'), (int, float))
+                        and not isinstance(item['mass_t'], bool) and math.isfinite(item['mass_t'])
+                        for item in selected):
+        ship_wide_t = math.fsum(item['mass_t'] for item in selected)
+    ship_wide_source = unique_sources(field_metadata(item, 'mass_t').get('source')
+                                      for item in selected if item is not None)
 
     ledger_mass_t = leaf_payload.get("ledger_mass_t")
     ledger_source = leaf_payload.get("source")

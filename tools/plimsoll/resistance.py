@@ -27,6 +27,9 @@ HP_TO_KW = 0.7457
 DELTA_CF_TAYLOR = 0.0004   # Taylor 法的粗糙度附加（0.4×10⁻³）
 TAYLOR_AXIS_TOLERANCE = 1e-10
 TAYLOR_ROUNDED_AXIS_FLOAT_TOLERANCE = 1e-15
+# Project eligibility policy shared with the Holtrop adapter. This is neither
+# a universal transition Reynolds number nor empirical validation of a hull.
+MIN_TURBULENT_REYNOLDS = 1e5
 
 
 def _finite(v, what, positive=False):
@@ -537,6 +540,13 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
                                     method=interpolation_method)
         row_warnings = list(friction["warnings"]) + list(resid["warnings"])
         row_diagnostics = []
+        rn = v*L/nu
+        friction_applicable = rn >= MIN_TURBULENT_REYNOLDS
+        if not friction_applicable:
+            row_diagnostics.append(dict(code='resistance.reynolds_policy', severity='warning',
+                path=f'$.speeds_kn[{speed_index}]', speed_kn=v_kn, blocking=False,
+                message='Below the project Re >= 100000 turbulent-friction eligibility policy; a complete table remains a non-primary algebraic estimate.',
+                reynolds_number=rn, minimum_reynolds=MIN_TURBULENT_REYNOLDS))
         for diagnostic in resid.get("diagnostics", []):
             contextual = dict(diagnostic)
             contextual["source_path"] = diagnostic.get("path")
@@ -558,12 +568,14 @@ def speed_power_curve(hull_params: dict, speeds_kn, cr_table: dict | None,
         warnings.extend("[%g kn] %s" % (v_kn, w) for w in row_warnings)
         rows.append({
             "speed_kn": v_kn, "fr": fr, "fr_used": fr_use,
-            "rn": v * L / nu, "rf_kN": rf / 1000.0,
+            "rn": rn, "rf_kN": rf / 1000.0,
             "cr": cr, "rr_kN": (rr / 1000.0) if rr is not None else None,
             "rt_kN": rt / 1000.0 if rt is not None else None, "pe_kw": pe_kw,
             "pe_shp": pe_kw / HP_TO_KW if pe_kw is not None else None,
             "shp_required": pe_kw / HP_TO_KW / qpc if pe_kw is not None else None,
             "complete": cr is not None, "estimate": True,
+            "model_applicable": cr is not None and friction_applicable,
+            "primary_result": cr is not None and friction_applicable,
             "methods": {"friction": friction_method, "interpolation": interpolation_method},
             "source_axis_mapping": copy.deepcopy(resid.get("source_axis_mapping")),
             "warnings": row_warnings,

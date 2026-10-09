@@ -1,6 +1,6 @@
 # Loaded equilibrium and sampled stability curves
 
-`tools.plimsoll.stability` implements method `loaded-projected-equilibrium-1`.
+`tools.plimsoll.stability` implements method `loaded-projected-equilibrium-2`.
 It uses the coordinate/force contract in `coupled-stability-contract.md`.
 
 ```python
@@ -135,6 +135,10 @@ that is intact-valid relative to the supplied opening definitions; missing
 opening information leaves it null. Sparse sampling can miss intermediate
 crossings/immersion and does not establish a global first event. Users must
 refine the angle sampling for their geometry and intended range.
+Samples within the numerical zero tolerance retain the preceding resolved sign
+anchor, so sampling the root itself does not erase a positive-to-negative
+bracket. A failed sample breaks that anchor; the solver does not bridge an
+unresolved interval. Upright zero is not itself an AVS event.
 
 The maximum is labelled `sampled_maximum`, not an optimized peak. Endpoints
 distinguish positive/nonpositive samples, failed samples and requested angles

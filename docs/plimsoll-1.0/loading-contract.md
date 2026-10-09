@@ -53,6 +53,10 @@ unknown values or ownership overlap.
 `provenance` counts `estimate: true`, `false`, and `null` separately. Missing
 source metadata or unknown estimate status places the item in
 `unverified_item_ids`; unknown is never treated as confirmed non-estimated.
+An item source must be a string, object or null; other types are schema errors.
+Null, blank strings and empty objects are accepted draft placeholders but leave
+provenance incomplete. Incomplete source or estimate provenance also prevents
+`uncertainty.certified=true`, even when its numerical interval exists.
 
 `uncertainty` is a conservative engineering interval, not a confidence
 interval. It multiplies every nonnegative mass range by each signed position
@@ -64,6 +68,11 @@ Known values without bounds are held at their nominal values and listed in
 `missing_estimate_bounds` and receive a diagnostic. Unknown mass, an unsupported
 axis, a nonpositive lower mass bound, a missing required group, or ownership
 overlap prevents the affected full CG interval from being certified.
+Nominal mass/moment/CG, coverage and interval arithmetic must remain finite.
+An unrepresentable derived value raises `LoadingRangeError(ValueError)` before
+any complete or certified state is returned. The analysis coordinator exposes
+this as `AnalysisInputError` with `loading.derived_out_of_range`; no arbitrary
+ship-size cap is imposed.
 
 An override clears any inherited interval for the overridden field and emits
 `loading.uncertainty_override_cleared`; the base interval describes the base

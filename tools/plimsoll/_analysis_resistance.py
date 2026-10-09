@@ -79,7 +79,7 @@ def _fixed_power_study(data, project, state, options, stages):
     study.update(status="completed" if applicable else "estimated_nonprimary",
                  speed_kn=(low+high)/2, bracket_speeds_kn=[pair[0]["speed_kn"], pair[1]["speed_kn"]],
                  model_applicable=bool(applicable), primary_result=bool(applicable),
-                 estimate=True, reason=None if applicable else "selected-plane proxy is non-primary")
+                 estimate=True, reason=None if applicable else "resistance rows do not satisfy the project applicability policy")
     return study
 
 
@@ -88,7 +88,7 @@ def compute(project, state, options, stages):
     scenario = copy.deepcopy(request.get("scenario") or next(s for s in project["resistance_scenarios"] if s["id"] == request["scenario_id"]))
     equilibrium, measured = stages["equilibrium"]["data"], stages["hydrostatics"]["data"]
     plane = {key: equilibrium[key] for key in ("p", "q", "waterline_d_m")}
-    data = dict(method=scenario["method"], method_version="selected-plane-resistance-adapter-1",
+    data = dict(method=scenario["method"], method_version="selected-plane-resistance-adapter-2",
         scenario=scenario, selected_plane=plane, selected_volume_m3=measured["values"]["volume_m3"],
         input_fingerprint=state["input_fingerprint"], geometry_source=copy.deepcopy(project["geometry"].get("source")),
         estimate=True, primary_result=False, rows=[], power_rows=[], effective_inputs={}, diagnostics=[], assumptions=[],
@@ -153,10 +153,15 @@ def compute(project, state, options, stages):
         data["kernel"] = native
         data["assumptions"].append("kernel legacy horsepower and unsourced-QPC warning retained verbatim; canonical shaft kW uses PE/QPC and precise units.convert separately")
         for row in native["rows"]:
+            row_diagnostics = copy.deepcopy(row.get("diagnostics", []))
+            for entry in row_diagnostics:
+                entry['kernel_path'] = entry['path']
+                entry['path'] = '$.options.resistance' + entry['path'][1:]
+            data['diagnostics'].extend(row_diagnostics)
             data["rows"].append(dict(speed_kn=row["speed_kn"], total_resistance_kn=row["rt_kN"],
                 effective_power_kw=row["pe_kw"], complete=row["complete"],
-                primary_result=row["complete"] and not proxy, model_applicable=row["complete"] and not proxy,
-                estimate=True, kernel_row=row,
+                primary_result=row["primary_result"] and not proxy, model_applicable=row["model_applicable"] and not proxy,
+                estimate=True, kernel_row=row, diagnostics=row_diagnostics,
                 components=dict(friction_kn=row.get("rf_kN"), wave_kn=row.get("rr_kN"),
                     wave_fraction_pct=100*row["rr_kN"]/row["rt_kN"]
                         if row.get("rr_kN") is not None and row.get("rt_kN") else None,

@@ -125,15 +125,29 @@ def _analyze(args):
             diagnostics=getattr(error, "diagnostics", None),
         ) from error
 
-    json_text = exports.serialize_report(result, format="json")
+    try:
+        json_text = exports.serialize_report(result, format='json')
+        if args.csv:
+            exports.serialize_report(result, format='csv')
+    except (ValueError, TypeError, OverflowError) as error:
+        raise _CLIError('cli.output_serialization_failed', f'cannot serialize analysis result: {error}',
+            calculation_status=result.get('status'), persisted_outputs=[]) from error
+    persisted = []
+    outputs = [] if args.output == '-' else [(args.output, 'json')]
     if args.csv:
-        exports.serialize_report(result, format="csv")
-    if args.output == "-":
+        outputs.append((args.csv, 'csv'))
+    for destination, format_name in outputs:
+        try:
+            exports.write_report(result, destination, format=format_name)
+        except (OSError, ValueError, TypeError, OverflowError) as error:
+            raise _CLIError('cli.output_write_failed', f'cannot write {format_name} result: {error}',
+                input_path=str(destination), calculation_status=result.get('status'),
+                persisted_outputs=persisted) from error
+        persisted.append(str(Path(destination).resolve()))
+    # Stdout is emitted only after every requested file has been written. It is
+    # never counted as a persisted filesystem output.
+    if args.output == '-':
         sys.stdout.write(json_text)
-    else:
-        exports.write_report(result, args.output, format="json")
-    if args.csv:
-        exports.write_report(result, args.csv, format="csv")
     return 0 if result.get("status") == "completed" else 1
 
 
@@ -357,7 +371,7 @@ def _sweep_axes(document):
             _schema_error("axis must be an object", path)
         _exact_keys(axis, {"field", "values", "source", "estimate"}, path)
         field = axis.get("field")
-        if field not in _SWEEP_FIELDS:
+        if not isinstance(field, str) or field not in _SWEEP_FIELDS:
             _schema_error("unsupported sweep field", path + ".field")
         if field in seen:
             _schema_error("sweep fields must be unique", path + ".field")
@@ -523,8 +537,14 @@ def _emit_error(command, error):
     sys.stderr.write(exports.serialize_document(payload, format="json"))
 
 
+class _ArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        raise _CLIError('cli.usage', message,
+            diagnostics=[_diagnostic('cli.usage', message, '$.argv')])
+
+
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="plimsoll")
+    parser = _ArgumentParser(prog="plimsoll")
     commands = parser.add_subparsers(dest="command", required=True)
 
     analyze = commands.add_parser("analyze", help="calculate one selected loading")

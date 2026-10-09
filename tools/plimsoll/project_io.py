@@ -572,7 +572,10 @@ def _validate_weight_groups(project: dict, diagnostics: list[dict]) -> set[str]:
                     unknown_warning=True,
                 )
             source = item.get("source")
-            if source is None or source == "" or source == {}:
+            if source is not None and not isinstance(source, (str, dict)):
+                diagnostics.append(_diagnostic("source.invalid", "error", f"{item_path}.source",
+                                               "source must be string, object or null"))
+            elif source is None or source == {} or isinstance(source, str) and not source.strip():
                 diagnostics.append(
                     _diagnostic(
                         "source.missing",
@@ -925,6 +928,8 @@ def migrate_legacy(ship: dict, weights: dict | None = None) -> dict:
     ):
         raise ValueError("weights must use schema 'plimsoll-weights-1' when supplied")
     name = ship.get("name")
+    if weights is not None and "datum" in weights and weights["datum"] != "keel":
+        raise ValueError("legacy weights.datum must be converted explicitly to keel before migration; the offset is not inferred")
     if not isinstance(name, str) or not name.strip():
         raise ValueError("legacy ship name must be a non-empty string")
     project = new_project(name, _legacy_project_id(ship, weights))

@@ -54,12 +54,12 @@ class TestCompute(unittest.TestCase):
         self.assertAlmostEqual(r["segments"][1]["length_m"], 60.0, places=9)
 
     def test_deck_immersion_angle_exact(self):
-        """α = atan(f段 / (B/2))；第一段 5.5 / 10 → 28.81°。"""
+        """Earliest endpoint contact: first segment min(6,5)/10."""
         r = FB.compute(analytic_case())
-        expect = math.degrees(math.atan(5.5 / 10.0))
+        expect = math.degrees(math.atan(5.0 / 10.0))
         self.assertAlmostEqual(r["segments"][0]["deck_immersion_deg"], expect, places=9)
         self.assertAlmostEqual(r["values"]["deck_immersion_min_deg"],
-                               math.degrees(math.atan(4.5 / 10.0)), places=9)
+                               math.degrees(math.atan(4.0 / 10.0)), places=9)
 
     def test_pct_not_full_warns(self):
         c = analytic_case()
@@ -75,12 +75,12 @@ class TestCompute(unittest.TestCase):
             FB.compute(c)
 
     def test_low_immersion_angle_warns(self):
-        """浸没角 < 15° → GZ 上限告警（这是本页与 L1 GZ 的接口）。"""
+        """Low deck contact is disclosed without implying a GZ cutoff."""
         c = analytic_case()
         c["segments"] = [{"id": "low", "kind": "fore", "length_pct_lwl": 100.0,
                           "fb_fore_m": 1.0, "fb_aft_m": 1.0, "source": "解析"}]
         r = FB.compute(c)
-        self.assertTrue(any("GZ" in w for w in r["warnings"]))
+        self.assertTrue(any("接水代理角" in w for w in r["warnings"]))
 
     def test_bad_kind_and_duplicate_raise(self):
         c = analytic_case()
@@ -127,20 +127,18 @@ class TestQueenMaryModelDerived(unittest.TestCase):
         self.assertAlmostEqual(FB.from_depth(15.0, 8.5)["values"]["freeboard_m"], 6.5, places=9)
 
     def test_immersion_angles_exact(self):
-        """α = atan(f段 / (B/2))，B/2 = 13.55：33.30° / 27.71°（守住半宽不写错的坑）。"""
+        """Use each input segment's lowest endpoint and the B/2 proxy."""
         seg = {s["id"]: s for s in self.r["segments"]}
         half = self.case["beam_m"] / 2.0
         self.assertAlmostEqual(seg["forecastle"]["deck_immersion_deg"],
-                               math.degrees(math.atan(seg["forecastle"]["fb_mean_m"] / half)),
+                               math.degrees(math.atan(min(self.case["segments"][0]["fb_fore_m"], self.case["segments"][0]["fb_aft_m"]) / half)),
                                places=9)
         self.assertAlmostEqual(seg["quarterdeck"]["deck_immersion_deg"],
-                               math.degrees(math.atan(seg["quarterdeck"]["fb_mean_m"] / half)),
+                               math.degrees(math.atan(min(self.case["segments"][1]["fb_fore_m"], self.case["segments"][1]["fb_aft_m"]) / half)),
                                places=9)
-        self.assertAlmostEqual(seg["forecastle"]["deck_immersion_deg"], 33.30, places=2)
-        self.assertAlmostEqual(seg["quarterdeck"]["deck_immersion_deg"], 27.72, places=2)
 
     def test_immersion_angle_below_gz_peak(self):
-        """干舷给出的甲板浸没角应低于 GZ 峰值角（40°）—— 否则 GZ 整条曲线都要打折引用。"""
+        """Model-derived deck contact remains distinct from downflooding."""
         self.assertLess(self.r["values"]["deck_immersion_min_deg"], 40.0)
         self.assertGreater(self.r["values"]["deck_immersion_min_deg"], 10.0)
 

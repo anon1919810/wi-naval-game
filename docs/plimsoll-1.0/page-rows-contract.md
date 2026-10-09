@@ -114,6 +114,18 @@ even without page rows. An unknown count is omitted, not written as zero;
 known zero retains its ordinary meaning. Derived shell figures inherit the
 projectile fact's estimate status.
 
+Whole-ship ammunition mass sums every unique ammunition item explicitly bound
+to the selected battery page rows, using the effective loading ledger. A
+missing/null contributing mass makes the total unknown; explicit zero remains
+known. It never substitutes the first linked item or scales the inventory by
+broadside count.
+
+Derived metadata follows the fields actually consumed: `estimate=true` if any
+contributor is estimated, `false` only when every contributor is explicitly
+false, otherwise null. Position-only overrides do not taint a mass-only row.
+Distinct string and structured-object sources survive in declaration order;
+zero-valued and explicitly absent contributors retain their declared metadata.
+
 The independent minimum-belt result is always available at
 `stages.systems.data.minimum_main_belt`, including projects without Armour
 page rows; when that page view exists the same result is mirrored under
