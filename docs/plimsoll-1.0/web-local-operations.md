@@ -1,5 +1,21 @@
 # Plimsoll 网站本地运行与交接 · 2026-09-23
 
+## 2026-10-08 · 本机匿名 UI 预览
+
+前端单独运行时，工作空间仍需要 8000 端口的 API。已有前后端依赖及本地迁移数据库时，从仓库根目录执行（PowerShell 7.4+）：
+
+```powershell
+pwsh -File web/dev/start-local.ps1
+```
+
+默认复用本工作区既有隔离库 `.superpowers/sdd/advanced-workflow-plan-2026-10-04/browser-check.db`。其他工作区需显式提供已迁移的现有数据库：`pwsh -File web/dev/start-local.ps1 -DatabasePath 'C:/path/to/existing.db'`；若 API 已运行，先由操作者停止后才能指定另一数据库，脚本不会切库或终止进程。
+
+此命令启动回环 API（8000）与 Vite（5173），已有健康服务则复用，最后验证 Vite 的 API 代理。数据库仅做只读 schema 预检，不创建、迁移或重置；子进程隐藏运行，日志写入被 Git 忽略的 `.superpowers/sdd/local-preview-2026-10-08/`。匿名模式无需邮件配置，不修改当前终端或用户环境变量。
+
+**范围为 UI 浏览和编辑预览。** 计算 worker 不随此命令启动；运行计算前，按下文环境配置在另一个终端设置同一绝对数据库地址、`PYTHONPATH=tools` 等设置，再启动 worker。下文邮箱模式部分保留为历史记录；当前 UI 预览使用匿名模式。
+
+---
+
 这份文档对应 `feature/plimsoll-1.0` 的本地网站首版。它提供邮箱验证码入口、逐用户私有舰船项目、不可变修订、后台计算、JSON/CSV 导出及站内报告。计算核心仍是类 SPS 阶段成果；“完成”表示已请求阶段完成，不代表史实验证或适航认证。Queen Mary 是标明估算和缺项的工程代理。
 
 （历史记录）网站当时未在公网部署，Unity 游戏、桌面资产仓库和服务器均未修改。上线前列出的前置条件里，**有效邮件发送服务已不再是必需项** —— 生产改用匿名模式，不发邮件、不做邮箱登录；HTTPS、PostgreSQL 集成验收、备份与运维监控仍然需要。不要把 `PLIMSOLL_LOCAL_HTTP` 或 `PLIMSOLL_LOCAL_MAIL_TEST` 用于公网。
