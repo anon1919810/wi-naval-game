@@ -7,7 +7,7 @@
  * application so old links and bookmarks survive.
  */
 
-export type PublicView = 'home' | 'about' | 'project';
+export type PublicView = 'home' | 'about' | 'credits' | 'project';
 
 export type PortfolioRoute = { kind: 'public'; view: PublicView } | { kind: 'app' };
 
@@ -16,6 +16,7 @@ export const PUBLIC_WORK_HASH = '/work';
 /** The one public work detail. Matched exactly, before any first-segment rule. */
 export const PUBLIC_WORK_DETAIL_HASH = '/work/plimsoll';
 export const PUBLIC_ABOUT_HASH = '/about';
+export const PUBLIC_CREDITS_HASH = '/credits';
 export const APP_ENTRY_HASH = '/plimsoll';
 
 /** Hash sections that belong to the existing Plimsoll application. */
@@ -45,6 +46,7 @@ export function classifyHash(hash: string): PortfolioRoute {
   if (exact) return { kind: 'public', view: exact };
   const section = path.split('/')[0] ?? '';
   if (section === 'about') return { kind: 'public', view: 'about' };
+  if (section === 'credits') return { kind: 'public', view: 'credits' };
   if (section === '' || section === 'work' || section === 'home') return { kind: 'public', view: 'home' };
   if ((APP_HASH_SECTIONS as readonly string[]).includes(section)) return { kind: 'app' };
   // Unknown hashes belong to the public surface, which is now the document root.
@@ -57,6 +59,7 @@ export function isAppHash(hash: string): boolean {
 
 export function publicHref(view: PublicView): string {
   if (view === 'about') return `#${PUBLIC_ABOUT_HASH}`;
+  if (view === 'credits') return `#${PUBLIC_CREDITS_HASH}`;
   if (view === 'project') return `#${PUBLIC_WORK_DETAIL_HASH}`;
   return `#${PUBLIC_WORK_HASH}`;
 }

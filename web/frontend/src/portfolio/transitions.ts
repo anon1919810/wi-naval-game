@@ -35,6 +35,8 @@
  */
 
 import { startCircularReveal, REVEAL_MS, type RevealRequest } from './circularReveal';
+import { transitionCue } from '../audio/feedback';
+import { interactionAudio } from '../audio/interactionAudio';
 
 export type TransitionKind = 'theme' | 'sheet' | 'sheet-back' | 'page' | 'page-back' | 'detail' | 'tool' | 'tool-back' | 'app-route';
 
@@ -217,6 +219,7 @@ export interface TransitionOptions {
  * so nothing late may be able to reintroduce state that is already gone.
  */
 export function cancelTransitions(): void {
+  interactionAudio.stop('transition');
   const current = active;
   active = null;
   generation++;
@@ -231,7 +234,13 @@ export function cancelTransitions(): void {
 export async function runTransition(kind: TransitionKind, update: () => void, options: TransitionOptions = {}): Promise<void> {
   cancelTransitions();
   const mine = generation;
-  const commit = () => { if (mine === generation) update(); };
+  let committed = false;
+  const commit = () => {
+    if (mine !== generation || committed) return;
+    committed = true;
+    update();
+    transitionCue(kind);
+  };
   const root = document.documentElement;
 
   const start = startViewTransition();

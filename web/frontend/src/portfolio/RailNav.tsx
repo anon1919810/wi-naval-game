@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import { classifyHash, publicHref, type PublicView } from './routes';
 import { destinationOrigin, entryPoint, previewTarget, railView, revealRadius, wordCentre, type NavPoint, type RailView } from './navPreview';
 import { onTransitionEnd, transitionGeneration } from './transitions';
 import type { PreviewSound, PreviewVoice } from './previewAudio';
 
 /**
- * The rail: Work and About, and nothing else.
+ * The rail: Work, About and Credits, and nothing else.
  *
- * Both entries are ordinary anchors with real hashes, in the tab order, doing the
+ * Every entry is an ordinary anchor with a real hash, in the tab order, doing the
  * browser's own navigation — nothing here intercepts a press. What this component
  * adds is the answer *before* the press: pointing at a destination, or tabbing to
  * it, paints that word blue behind a circle that opens from where the pointer
@@ -46,6 +46,13 @@ interface Entry {
   readonly label: string;
   /** One work exists, so Work carries the truthful count. */
   readonly badge?: string;
+  /**
+   * The word split around an isolated `i`, which carries the red preview dot. The
+   * glyphs stay plain text on both sides of it, so the first glyph of the word is
+   * still a text node and the resting underline has something to measure — see
+   * firstGlyphWidth below.
+   */
+  readonly parts?: readonly string[];
   /** Which voice this destination's preview answers with. */
   readonly voice: PreviewVoice;
 }
@@ -53,7 +60,25 @@ interface Entry {
 const ENTRIES: readonly Entry[] = [
   { view: 'home', label: 'Work', badge: '01', voice: 'work' },
   { view: 'about', label: 'About', voice: 'about' },
+  // A third destination, and no new voice: Credits answers with About's, because
+  // both are the pages that are read rather than the exhibit that is explored, and
+  // one quiet register for the reading destinations is the point.
+  { view: 'credits', label: 'Credits', parts: ['Cred', 'i', 'ts'], voice: 'about' },
 ];
+
+/**
+ * A word's own glyphs, with the middle part isolated when the entry has one.
+ *
+ * The split is a plain inline element around a single letter, so the font shapes,
+ * weights and spaces the word exactly as it would unstyled — and both copies of the
+ * word are built from the same call, so the duplicate the circle opens onto is the
+ * same word at the same width.
+ */
+function glyphs(entry: Entry): ReactNode {
+  if (!entry.parts) return entry.label;
+  return entry.parts.map((part, index) =>
+    <span key={index} className={index === 1 ? 'ff-rail-i' : undefined}>{part}</span>);
+}
 
 /** The page reveal asks the rail where a destination's circle should open. */
 export type DestinationOrigin = (view: RailView, centreOnly?: boolean) => NavPoint | null;
@@ -87,10 +112,16 @@ interface Props {
  * breaks the word apart for anything reading the link. A range over the first
  * character of the text node measures the glyph exactly as it is painted, with
  * its real kerning and side bearings.
+ *
+ * The first text node is walked to rather than assumed to be `word.firstChild`:
+ * `credits` isolates its `i` in a span, so the leading `Cred` sits behind a
+ * wrapper on its way in, and a range taken against an element measures the box
+ * rather than the glyph.
  */
 function firstGlyphWidth(word: HTMLElement): number {
-  const text = word.firstChild;
-  if (!text || text.nodeType !== Node.TEXT_NODE) return 0;
+  const ink = word.querySelector('.ff-rail-ink') ?? word;
+  const text = document.createTreeWalker(ink, NodeFilter.SHOW_TEXT).nextNode();
+  if (!text?.nodeValue?.length) return 0;
   const range = document.createRange();
   range.setStart(text, 0);
   range.setEnd(text, 1);
@@ -253,21 +284,14 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
     return () => window.removeEventListener('hashchange', check);
   }, [held]);
 
-  // One tap per real change of destination. Looking at the page already on screen,
-  // or leaving, is not a change of destination. A press is not a second tap: the
-  // preview that led to it already sounded, and asking again would answer the same
-  // intention twice. A press that arrived with no preview at all — a finger, or a
-  // click with the pointer never over the word — does get its one tap, once the
-  // gesture that carries it has unlocked the context.
-  /** Each destination's own voice; Work's is the shorter, lower one. */
+  // One touch per audible preview. Selected words and pointer leave stay quiet;
+  // an accepted click receives Passage from the shared transition controller.
   const voiceOf = (view: RailView) => ENTRIES.find(entry => entry.view === view)!.voice;
   useEffect(() => {
     if (held !== null) return;
     if (preview === null || preview === here) { tapped.current = null; return; }
     if (tapped.current === preview) return;
-    // Only a tap that actually sounded counts as having happened, so the first
-    // silent preview — before any gesture has unlocked the context — does not
-    // stand in for the tap a later real press still owes.
+    // A cold hover creates no context and queues no delayed preview.
     if (sound.tap(voiceOf(preview))) tapped.current = preview;
   }, [preview, here, held, sound]);
 
@@ -304,12 +328,8 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
       onCurrentPagePress();
       return;
     }
-    // A press that has not *already sounded* gets exactly one tap now, which is
-    // the case for a finger, for a click with the pointer never over the word, and
-    // — importantly — for a preview that was still silent because the context was
-    // not unlocked yet. A preview that did sound does not get a second one: that
-    // would answer the same intention twice.
-    if (tapped.current !== view && sound.tap(voiceOf(view))) tapped.current = view;
+    // The route controller supplies Passage for the accepted navigation. A
+    // direct click does not add a touch ahead of it; hover remains a preview.
     // Pressing the same destination again asks for nothing new: the hold already
     // belongs to the move that is running, so its generation must stand.
     if (held !== view) {
@@ -368,12 +388,16 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
         // keyboard focus, or a Work press that is still travelling. About's
         // preview is about About and says nothing about Work's count, and the
         // page on screen never changes what is current.
-        const previewing = entry.badge ? entry.view === (held ?? hover ?? focus) : false;
+        const previewing = entry.view === (held ?? hover ?? focus);
         return <a
           key={entry.view}
           className="ff-rail-link"
           data-ff-nav={selected ? 'selected' : 'rest'}
           data-ff-nav-held={held === entry.view ? 'true' : undefined}
+          // Credits' own red dot, on the same terms as Work's badge: a preview of
+          // this destination, or a press of it still travelling. The page on screen
+          // is a different question — a selected Credits is blue, dot included.
+          data-ff-dot={entry.parts ? (previewing ? 'preview' : 'idle') : undefined}
           data-ff-badge={entry.badge ? (previewing ? 'preview' : 'idle') : undefined}
           href={publicHref(entry.view)}
           aria-label={name}
@@ -386,10 +410,12 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
           {/* The word box is the frame for the reveal and for the rule. The badge
               is deliberately outside it, so the rule never crosses the count. The
               space is a real text node, and a flex container drops a
-              whitespace-only child, so it costs no layout. */}
+              whitespace-only child, so it costs no layout. Both copies carry the
+              same glyph markup, so the duplicate is the same word painted twice and
+              the isolated `i` lines up exactly across the clip edge. */}
           <span className="ff-rail-word" ref={bind(entry.view)}>
-            <span className="ff-rail-ink">{entry.label}</span>
-            <span className="ff-rail-dup" aria-hidden="true">{entry.label}</span>
+            <span className="ff-rail-ink">{glyphs(entry)}</span>
+            <span className="ff-rail-dup" aria-hidden="true">{glyphs(entry)}</span>
           </span>
           {entry.badge && <>{' '}<span className="ff-rail-badge">{entry.badge}</span></>}
         </a>;

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { outcome } from '../audio/feedback';
 
 /** The real, public contact address and profile. Nothing here is a placeholder. */
 export const CONTACT_EMAIL = 'youxiang051110@163.com';
@@ -15,16 +16,24 @@ type CopyState = 'idle' | 'copied' | 'unavailable';
  */
 export function Contact() {
   const [state, setState] = useState<CopyState>('idle');
+  const alive = useRef(true);
+  const ticket = useRef(0);
+  useEffect(() => { alive.current = true; return () => { alive.current = false; ticket.current++; }; }, []);
 
   const copy = async () => {
+    const mine = ++ticket.current;
     const clipboard = typeof navigator === 'undefined' ? undefined : navigator.clipboard;
-    if (typeof clipboard?.writeText !== 'function') { setState('unavailable'); return; }
+    if (typeof clipboard?.writeText !== 'function') { setState('unavailable'); outcome('hold'); return; }
     try {
       await clipboard.writeText(CONTACT_EMAIL);
+      if (!alive.current || ticket.current !== mine) return;
       setState('copied');
+      outcome('resolve');
     } catch {
+      if (!alive.current || ticket.current !== mine) return;
       // A rejected write means nothing reached the clipboard. Say so.
       setState('unavailable');
+      outcome('hold');
     }
   };
 

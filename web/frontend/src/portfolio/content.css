@@ -147,22 +147,67 @@
 .ff-contact-status { margin: 18px 0 0; font-size: 12px; line-height: 1.6; color: var(--ff-muted); }
 .ff-contact-status--failed { color: var(--ff-ink); }
 
+/* ---- Credits ---------------------------------------------------------------- */
+/* The About page's own grid, declared from the same two custom properties, so a
+   block here starts on the same left edge a block on About does and the two pages
+   cannot drift apart. Nothing is measured in fixed pixels, and nothing new is
+   introduced: the same paper, the same rule, the same fonts, the same accent. */
+.ff-credits { --ff-cols: 12; --ff-col-gap: clamp(18px, 1.9vw, 34px); display: grid; grid-template-columns: repeat(var(--ff-cols), minmax(0, 1fr)); column-gap: var(--ff-col-gap); padding: 70px 0 90px; max-width: none; }
+.ff-credits > * { grid-column: 1 / -1; }
+/* Same-paper clearance, the way the About sections and the detail use it: the
+   shell's faint field is stopped by a margin rather than crossing a word. */
+.ff-credits-masthead, .ff-credits-section { background: var(--ff-bg); box-shadow: 0 0 0 14px var(--ff-bg); }
+.ff-credits-masthead h1 { font-family: var(--font-display); font-size: clamp(54px, 7vw, 96px); letter-spacing: -.03em; line-height: .96; font-weight: 700; margin: 32px 0; }
+/* Numbered sections with the detail's own hairline and measure: heading on the low
+   four columns, the list on the high eight, one flat row per entry. No table, no
+   cards, no logo wall, and no decoration that is not the shell's own. The section
+   label stays modest: it names the list beside it, and at this size the longest of
+   them still fits its four-column track rather than reaching into the content. */
+.ff-credits-section { border-top: 1px solid var(--ff-line); margin-top: clamp(46px, 5vw, 92px); padding-top: 26px; scroll-margin-top: 24px; }
+.ff-credits-section h2 { margin: 0 0 22px; font-family: var(--font-display); font-size: clamp(18px, 1.9vw, 22px); font-weight: 700; line-height: 1.12; letter-spacing: -.015em; }
+.ff-credits-section h2 span { display: block; margin-bottom: 10px; font-family: var(--font-sans); font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .12em; color: var(--ff-accent); }
+.ff-credits-rows { margin: 0; }
+.ff-credits-row { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding: 24px 0; border-top: 1px solid var(--ff-line); }
+.ff-credits-rows > .ff-credits-row:first-child { border-top: 0; padding-top: 0; }
+.ff-credits-row dt { font-size: 15px; font-weight: 600; letter-spacing: .02em; color: var(--ff-ink); }
+/* A name or a label sits above its own description, and both run the full measure
+   of the eight columns the list was given. */
+.ff-credits-row dd { margin: 0; font-size: clamp(18px, 1.3vw, 20px); line-height: 1.65; color: var(--ff-muted); }
+/* The two people this page exists for are carried as display type rather than as
+   row labels: these are the names, and nothing else on the page is sized like them. */
+.ff-credits-section--thanks .ff-credits-row dt { font-family: var(--font-display); font-size: clamp(28px, 2.6vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.025em; }
+/* An official page, or the licence file as shipped, read as what it is. */
+.ff-credits-link, .ff-credits-licence-file { color: var(--ff-ink); border-bottom: 1px solid var(--ff-line); padding-bottom: 3px; transition: color .16s, border-color .16s; }
+.ff-credits-link:hover, .ff-credits-licence-file:hover { color: var(--ff-accent); border-color: var(--ff-accent); }
+.ff-credits-licence { display: block; margin-bottom: 10px; }
+.ff-credits-licence-file { display: inline-block; margin-right: 20px; font-size: clamp(14px, 1.05vw, 16px); }
+
+@media (min-width: 901px) {
+  .ff-credits-section { display: grid; grid-template-columns: repeat(var(--ff-cols, 12), minmax(0, 1fr)); column-gap: var(--ff-col-gap, 24px); align-items: start; }
+  /* Sticky inside the section's own grid area, as the detail's heading is: it can
+     never outlive the list it names, and it leaves with the section. */
+  .ff-credits-section h2 { grid-column: 1 / span 4; margin: 0; position: sticky; top: 32px; padding-bottom: 6px; }
+  .ff-credits-rows { grid-column: 5 / span 8; }
+  .ff-credits h1, .ff-credits h2, .ff-credits dt, .ff-credits dd { text-align: left; }
+}
+
 /* ---- Narrow-width fallback ----------------------------------------------- */
 /* Same rule as the shell: desktop composition holds above 650px, and below it
    the existing single-column fallback applies. This is a floor, not a redesign. */
 @media (max-width: 900px) {
   .ff-detail-row, .ff-about-row { grid-template-columns: minmax(0, 1fr); }
-  .ff-detail-row dt, .ff-about-row dt { color: var(--ff-muted); }
+  .ff-detail-row dt, .ff-about-row dt, .ff-credits-row dt { color: var(--ff-muted); }
 }
 @media (max-width: 650px) {
-  .ff-about, .ff-detail { grid-template-columns: minmax(0, 1fr); }
+  .ff-about, .ff-detail, .ff-credits { grid-template-columns: minmax(0, 1fr); }
   .ff-detail { padding-bottom: 60px; }
+  .ff-credits { padding: 45px 0 60px; }
   .ff-detail-hero { aspect-ratio: 16 / 9; }
   .ff-detail-hero-note { left: 13px; right: 13px; bottom: 12px; font-size: 8px; }
   .ff-contact-actions { gap: 12px 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ff-detail *, .ff-about *, .ff-contact * { transition: none !important; }
+  .ff-detail *, .ff-about *, .ff-contact *, .ff-credits * { transition: none !important; }
 }
 
 /* ---- Home -> detail artwork morph ---------------------------------------- */

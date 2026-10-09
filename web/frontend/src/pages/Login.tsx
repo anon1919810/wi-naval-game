@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
+import { outcome } from '../audio/feedback';
 
 export function Login({ onAuthenticated }: { onAuthenticated: () => void }) {
   const [email, setEmail] = useState('');
@@ -8,6 +9,8 @@ export function Login({ onAuthenticated }: { onAuthenticated: () => void }) {
   const [phase, setPhase] = useState<'email' | 'code'>('email');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const audioAlive = useRef(true);
+  useEffect(() => { audioAlive.current = true; return () => { audioAlive.current = false; }; }, []);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -16,12 +19,15 @@ export function Login({ onAuthenticated }: { onAuthenticated: () => void }) {
     try {
       if (phase === 'email') {
         await api.requestCode(email.trim());
+        if (audioAlive.current) outcome('resolve');
         setPhase('code');
       } else {
         await api.verifyCode(email.trim(), code);
+        if (audioAlive.current) outcome('resolve');
         onAuthenticated();
       }
     } catch (cause) {
+      if (audioAlive.current) outcome('hold');
       setError(cause instanceof Error ? cause.message : '暂时无法完成操作，请稍后重试');
     } finally {
       setBusy(false);

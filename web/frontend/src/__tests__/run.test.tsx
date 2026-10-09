@@ -2,6 +2,8 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '../api';
+import * as feedback from '../audio/feedback';
+import { expectRunResult } from '../audio/interactionAudio';
 import { Run } from '../pages/Run';
 import type { AnalysisResult, RunView, StageEnvelope } from '../types';
 
@@ -76,6 +78,61 @@ beforeEach(() => {
 });
 
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+
+describe('confirmed run sound', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it.each(['completed', 'partial', 'failed', 'canceled'] as const)('reads an existing %s result silently', async status => {
+    const announce = vi.spyOn(feedback, 'outcome').mockImplementation(() => {});
+    vi.mocked(api.getRun).mockResolvedValue(runOf({ status, result: savedResult({}) }));
+    render(<Run runId="run-1" onBack={vi.fn()} onReport={vi.fn()} />);
+    await screen.findByRole('heading', { name: { completed: '计算完成', partial: '部分完成', failed: '计算失败', canceled: '已取消' }[status] });
+    expect(announce).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['completed', 'completed', 'resolve'], ['completed', 'partial', 'detent'],
+    ['partial', 'partial', 'detent'], ['canceled', 'canceled', 'detent'], ['failed', 'partial', 'hold'],
+  ] as const)('announces observed %s / %s once as %s', async (status, resultStatus, cue) => {
+    const announce = vi.spyOn(feedback, 'outcome').mockImplementation(() => {});
+    vi.mocked(api.getRun).mockResolvedValueOnce(runOf({ status: 'running' }))
+      .mockResolvedValue(runOf({ status, result: savedResult({}, resultStatus) }));
+    render(<Run runId="run-1" onBack={vi.fn()} onReport={vi.fn()} />);
+    await screen.findByRole('heading', { name: '计算中' });
+    expect(announce).not.toHaveBeenCalled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(1600); });
+    expect(announce.mock.calls).toEqual([[cue]]);
+    await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
+    expect(announce).toHaveBeenCalledOnce();
+  });
+
+  it('announces a newly requested run even when the first response is already complete', async () => {
+    const announce = vi.spyOn(feedback, 'outcome').mockImplementation(() => {});
+    expectRunResult('run-1');
+    vi.mocked(api.getRun).mockResolvedValue(runOf({ status: 'completed', result: savedResult({}) }));
+    const view = render(<Run runId="run-1" onBack={vi.fn()} onReport={vi.fn()} />);
+    await screen.findByRole('heading', { name: '计算完成' });
+    expect(announce.mock.calls).toEqual([['resolve']]);
+    view.unmount();
+    render(<Run runId="run-1" onBack={vi.fn()} onReport={vi.fn()} />);
+    await screen.findByRole('heading', { name: '计算完成' });
+    expect(announce).toHaveBeenCalledOnce();
+  });
+
+  it('does not announce background read failure or a retired run response', async () => {
+    const announce = vi.spyOn(feedback, 'outcome').mockImplementation(() => {});
+    vi.mocked(api.getRun).mockRejectedValueOnce(new Error('offline'));
+    const view = render(<Run runId="run-1" onBack={vi.fn()} onReport={vi.fn()} />);
+    await screen.findByText('offline'); expect(announce).not.toHaveBeenCalled(); view.unmount();
+    const late = deferred<RunView>();
+    vi.mocked(api.getRun).mockImplementation(() => late.promise);
+    expectRunResult('late-run');
+    const gone = render(<Run runId="late-run" onBack={vi.fn()} onReport={vi.fn()} />);
+    gone.unmount();
+    await act(async () => { late.resolve(runOf({ status: 'completed', result: savedResult({}) })); });
+    expect(announce).not.toHaveBeenCalled();
+  });
+});
 
 describe('run states', () => {
   it('names each of the six real states, without percentages or a guessed stage', async () => {

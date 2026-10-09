@@ -1,5 +1,5 @@
 /**
- * Geometry and arbitration for the Work/About navigation preview.
+ * Geometry and arbitration for the Work/About/Credits navigation preview.
  *
  * The rail is the only navigation on the site, so it answers a pointer or the
  * keyboard before it answers a press: pointing at a destination paints that word
@@ -8,7 +8,7 @@
  * these are the numbers the component writes as custom properties, kept apart so
  * they can be reasoned about and tested on their own.
  *
- * Two rules the shape of the answer depends on:
+ * Three rules the shape of the answer depend on:
  *
  * - **The circle opens from where the pointer entered the word.** Moving inside
  *   the same word must not move the origin, or the reveal would slide around
@@ -28,8 +28,8 @@ export const NAV_PREVIEW_MS = 300;
 /** Damped and monotonic: the two words hand over without a bounce or a jump. */
 export const NAV_PREVIEW_EASE = 'cubic-bezier(.2,.8,.2,1)';
 
-/** The two entries the rail owns. Work also stands in for the work detail. */
-export type RailView = 'home' | 'about';
+/** The three entries the rail owns. Work also stands in for the work detail. */
+export type RailView = 'home' | 'about' | 'credits';
 
 export interface NavPoint { readonly x: number; readonly y: number }
 
@@ -45,10 +45,12 @@ const round = (value: number) => Math.round(value * 100) / 100;
 
 /**
  * Which rail entry is the truthful current page. Work owns the exhibit *and* its
- * detail, so a public view that is not About is Work.
+ * detail, so a public view that is neither About nor Credits is Work.
  */
 export function railView(view: string): RailView {
-  return view === 'about' ? 'about' : 'home';
+  if (view === 'about') return 'about';
+  if (view === 'credits') return 'credits';
+  return 'home';
 }
 
 /**

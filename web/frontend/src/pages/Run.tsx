@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
+import { outcome } from '../audio/feedback';
+import { consumeRunRequest } from '../audio/interactionAudio';
 import { ReadFailure, ReadPending } from '../components/ReadPending';
 import { requestedStages } from '../components/resultReading';
 import { StageIndex } from '../components/StageIndex';
@@ -48,9 +50,20 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
   const ticket = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const poll = useRef<() => void>(() => {});
+  const reportOutcome = useRef<(next: RunView) => void>(() => {});
 
   useEffect(() => {
     let active = true;
+    let observed = false;
+    let announced = false;
+    const resultCue = (next: RunView) => {
+      observed = consumeRunRequest(runId) || observed || !TERMINAL.has(next.status);
+      if (!observed || announced || !TERMINAL.has(next.status)) return;
+      announced = true;
+      outcome(next.status === 'completed' && next.result?.status === 'completed' ? 'resolve'
+        : next.status === 'failed' ? 'hold' : 'detent');
+    };
+    reportOutcome.current = resultCue;
     const current = ++ticket.current;
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     setRun(null);
@@ -65,6 +78,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
       try {
         const next = await api.getRun(runId);
         if (!active || ticket.current !== issued) return;
+        resultCue(next);
         setRun(next);
         setError('');
         if (!TERMINAL.has(next.status)) timer.current = setTimeout(refresh, POLL_MS);
@@ -83,6 +97,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
       if (timer.current) clearTimeout(timer.current);
       timer.current = null;
       poll.current = () => {};
+      reportOutcome.current = () => {};
     };
   }, [runId]);
 
@@ -96,12 +111,14 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
     try {
       const next = await api.cancelRun(runId);
       if (ticket.current !== current) return;
+      reportOutcome.current(next);
       setRun(next);
       setCancelError('');
       // A terminal answer ends the run; anything else keeps being watched.
       if (!TERMINAL.has(next.status)) poll.current();
     } catch (cause) {
       if (ticket.current !== current) return;
+      outcome('hold');
       setCancelError(cause instanceof Error ? cause.message : '取消失败');
       // The cancel took the read loop down with it; a refused cancel must not
       // leave the run unwatched, so the loop goes back to work.
@@ -122,7 +139,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
   const statusText = cancelPending ? '已请求取消' : run ? LABELS[run.status] : '';
 
   const page = <main className="run-page page-pad">
-    <button className="text-button" onClick={() => run && onBack(run.project_id)}>← 返回舰船</button>
+    <button className="text-button" data-audio="manual" onClick={() => run && onBack(run.project_id)}>← 返回舰船</button>
     {/* A read that never succeeded has no run to show, so it says so and offers
         exactly one explicit retry instead of a skeleton that never resolves. */}
     {error && !run
@@ -179,7 +196,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
           <div><span className="section-kicker">RESULT / 已存结果</span>
             <h2>{run.result.status === 'partial' ? '部分结果可供复核' : run.result.status === 'canceled' ? '已保存取消前的结果' : '计算结果已保存'}</h2>
             <p>计算完成不等于史实验证。逐阶段检查有效性、缺项与诊断。</p></div>
-          <button className="button button--primary" onClick={onReport}>查看完整报告 ↗</button>
+          <button className="button button--primary" data-audio="manual" onClick={onReport}>查看完整报告 ↗</button>
         </div>
         {/* Every requested stage is reachable: nothing is truncated, and the
             damage evidence lives inside the flooding stage rather than in a

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import * as api from '../api';
+import { outcome } from '../audio/feedback';
+import { expectRunResult } from '../audio/interactionAudio';
 import { DeckFreeboardEditor } from '../components/DeckFreeboardEditor';
 import { DamageEditor } from '../components/DamageEditor';
 import { GunsEditor } from '../components/GunsEditor';
@@ -374,6 +376,18 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
     URL.revokeObjectURL(url);
   }
 
+  async function copyDraft() {
+    if (!draft) return;
+    const ticket = writeTicket.current;
+    try {
+      if (!navigator.clipboard) throw new Error('浏览器暂不支持复制，请使用“下载项目 JSON”备份修改。');
+      await navigator.clipboard.writeText(JSON.stringify(draft, null, 2));
+      if (current() && writeTicket.current === ticket) outcome('resolve');
+    } catch (cause) {
+      if (current() && writeTicket.current === ticket) { setError(errorMessage(cause)); outcome('hold'); }
+    }
+  }
+
   async function save() {
     if (!view || !draft || !dirty || operation) return;
     const submittedGeneration = draftGeneration.current;
@@ -397,8 +411,10 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
       }
       setConflict(null);
       setFieldErrors([]);
+      outcome('resolve');
     } catch (cause) {
       if (!mine()) return;
+      outcome('hold');
       if (cause instanceof api.ApiError && cause.status === 409) {
         const detail = cause.detail as { current_revision?: number };
         setConflict(detail.current_revision ?? -1);
@@ -424,7 +440,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
       setDirty(false);
       setConflict(null);
       setError('');
-    } catch (cause) { if (mine()) setError(errorMessage(cause)); }
+      outcome('detent');
+    } catch (cause) { if (mine()) { setError(errorMessage(cause)); outcome('hold'); } }
     finally { if (mine()) setOperation(null); }
   }
 
@@ -440,8 +457,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
       // run it created is the destination. A page that has since been left does
       // not navigate anywhere.
       if (!mine()) return;
+      expectRunResult(queued.id);
       onRun(queued.id);
-    } catch (cause) { if (mine()) setError(errorMessage(cause)); }
+    } catch (cause) { if (mine()) { setError(errorMessage(cause)); outcome('hold'); } }
     finally { if (mine()) setOperation(null); }
   }
 
@@ -461,7 +479,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
         updateDraft(next);
       }
       setJsonError('');
-    } catch (cause) { setJsonError(cause instanceof Error ? cause.message : 'JSON 格式无效'); }
+    } catch (cause) { setJsonError(cause instanceof Error ? cause.message : 'JSON 格式无效'); outcome('hold'); }
   }
 
   // A project that never loaded is its own content: the reason, one explicit
@@ -527,7 +545,7 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
         <div className="workbench-alerts">
           {runError && <div className="notice notice--error" role="alert">{runError}</div>}
           {error && <div className="notice notice--error" role="alert">{error}</div>}
-          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void navigator.clipboard?.writeText(JSON.stringify(draft, null, 2)); }}>复制我的修改</button><button className="button button--primary" disabled={operation !== null} onClick={() => { void reload(); }}>{operation === 'reloading' ? '正在重新载入…' : '重新载入'}</button></div></div>}
+          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void copyDraft(); }}>复制我的修改</button><button className="button button--primary" disabled={operation !== null} onClick={() => { void reload(); }}>{operation === 'reloading' ? '正在重新载入…' : '重新载入'}</button></div></div>}
         </div>
       </div>
       {/* The chapter reveal is keyed on the chapter alone, and this container is

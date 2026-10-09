@@ -4,6 +4,7 @@ import * as api from '../api';
 import { ReadFailure, ReadPending } from '../components/ReadPending';
 import type { ProjectSummary } from '../types';
 import { SiteGeometry } from '../portfolio/SiteGeometry';
+import { outcome } from '../audio/feedback';
 
 const templates = [
   { key: 'analytic_box', name: '解析方箱', tag: '解析基准', text: '有明确几何与解析解，适合熟悉项目和验证流程。' },
@@ -73,9 +74,11 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
       const saved = await api.createProject(template, initialName.trim());
       // The answer belongs to the page that asked, and only while it exists.
       if (!alive.current || createTicket.current !== ticket) return;
+      outcome('resolve');
       onOpen(saved.project_id);
     } catch (cause) {
       if (!alive.current || createTicket.current !== ticket) return;
+      outcome('hold');
       setCreateError(creationReason(cause));
     } finally {
       if (alive.current && createTicket.current === ticket) setCreating(null);
@@ -106,7 +109,7 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
             onRetry={() => setAttempt(current => current + 1)} onBack={undefined} />
           : read.projects.length === 0
         ? <div className="empty-state"><span className="empty-glyph" aria-hidden="true">⌁</span><h3>还没有舰船项目</h3><p>选择下方的案例开始。每次计算都会固定输入修订，方便复核。</p></div>
-        : <div className="project-list">{read.projects.map(project => <button key={project.project_id} className="project-row" onClick={() => onOpen(project.project_id)}>
+        : <div className="project-list">{read.projects.map(project => <button key={project.project_id} className="project-row" data-audio="manual" onClick={() => onOpen(project.project_id)}>
             <span className="project-row-mark" aria-hidden="true" /><span className="project-row-main"><strong>{project.name}</strong><small>修订 {project.revision} · {new Date(project.updated_at).toLocaleDateString('zh-CN')}</small></span><span aria-hidden="true">↗</span>
           </button>)}</div>}
     </section>

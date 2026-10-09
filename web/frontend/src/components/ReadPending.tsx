@@ -118,7 +118,7 @@ export function ReadFailure({ title, detail, onRetry, retryLabel = '重新读取
     <p className="read-failed-detail">{detail}</p>
     <div className="read-failed-actions">
       <button type="button" className="button button--primary" onClick={onRetry}>{retryLabel}</button>
-      {onBack && <button type="button" className="button button--secondary" onClick={onBack}>{backLabel}</button>}
+      {onBack && <button type="button" className="button button--secondary" data-audio="manual" onClick={onBack}>{backLabel}</button>}
       {!onBack && backHref && <a className="button button--secondary" href={backHref}>{backLabel}</a>}
     </div>
   </div>;

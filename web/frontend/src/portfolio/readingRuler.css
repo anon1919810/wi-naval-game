@@ -2,14 +2,22 @@
    page is and gets to any part of it. Scoped to the shell's own tokens. */
 
 /* It lives in the rail's column, under the navigation, and it is its own labelled
-   landmark — a sibling of the main navigation, never a child of it. */
-.ff-ruler { display: flex; flex-direction: column; gap: 10px; padding: clamp(10px, 1.4vw, 20px) 0 0; margin-top: clamp(10px, 1.4vw, 22px); border-top: 1px solid var(--ff-line); }
-.ff-ruler-label { margin: 0; font-size: 9px; font-weight: 600; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: var(--ff-accent); white-space: nowrap; }
+   landmark — a sibling of the main navigation, never a child of it.
 
-/* The track never grows past the height the viewport can spare, and the marks are
-   positioned as fractions of it, so the ruler reads the same on a short window as
-   on a tall one. */
-.ff-ruler-track { position: relative; height: clamp(160px, calc(100svh - 420px), 440px); margin: 8px 0 12px 2px; }
+   The ruler takes the height the dock has left rather than asking for one of its
+   own: the dock is a bounded column, the navigation above it is fixed, and this is
+   the only part that can be shorter. So the track is offered its own preferred
+   height first — 440px on a window that can spare it — and gives it back when the
+   dock is smaller, instead of pushing its last marks below the screen. */
+.ff-ruler { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: clamp(10px, 1.4vw, 20px) 0 0; margin-top: clamp(10px, 1.4vw, 22px); border-top: 1px solid var(--ff-line); }
+.ff-ruler-label { margin: 0; flex: none; font-size: 9px; font-weight: 600; letter-spacing: .12em; font-variant-numeric: tabular-nums; color: var(--ff-accent); white-space: nowrap; }
+
+/* The track carries its preferred height as its flex basis, so the bounds on the
+   dock decide how much of it there is rather than the track collapsing on its own.
+   The floor is the narrowest track the busiest page can use without its marks
+   landing on top of one another — About declares eight sections and the detail
+   five — and below that floor the dock overflows rather than drop a mark. */
+.ff-ruler-track { position: relative; flex: 1 1 clamp(160px, calc(100svh - 420px), 440px); min-height: 160px; max-height: clamp(160px, calc(100svh - 420px), 440px); margin: 8px 0 12px 2px; }
 .ff-ruler-line { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ff-line); }
 .ff-ruler-tick { display: block; width: 7px; height: 1px; background: var(--ff-muted); }
 .ff-ruler-tick--minor { position: absolute; left: 0; width: 4px; opacity: .5; transform: translateY(-.5px); }

@@ -46,7 +46,7 @@ export function ProjectNav({ name, active, onSelect, onBack }: {
   name: string; active: Chapter; onSelect: (chapter: Chapter) => void; onBack: () => void;
 }) {
   return <aside className="project-nav" aria-label="项目章节">
-    <button className="nav-return" onClick={onBack}>← 项目库</button>
+    <button className="nav-return" data-audio="manual" onClick={onBack}>← 项目库</button>
     <div className="nav-section-label">当前舰船</div>
     <div className="nav-project-name" title={name}>{name}</div>
     <div className="nav-section-label nav-section-label--chapters">研究章节</div>

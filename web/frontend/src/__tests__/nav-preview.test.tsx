@@ -340,7 +340,7 @@ describe('work and about navigation', async () => {
   it('accepts keyboard focus arriving from outside after pointer input', async () => {
     render(<Portfolio introEnabled={false} />);
     layout();
-    fireEvent.pointerDown(screen.getByRole('button', { name: 'Preview sound' }));
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Sound' }));
     fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
     fireEvent.focus(screen.getByRole('link', { name: 'About' }));
     expect(state('About')).toBe('selected');
@@ -362,7 +362,7 @@ describe('work and about navigation', async () => {
     expect(sound.tap).toHaveBeenCalledTimes(1);
   });
 
-  it('answers a real click after a cold silent hover', async () => {
+  it('leaves an accepted cold click to the transition voice', async () => {
     const sound: PreviewSound = { muted: false, unlocked: false, unlock: vi.fn(), tap: vi.fn().mockReturnValueOnce(false).mockReturnValue(true), setMuted: vi.fn(), dispose: vi.fn() };
     render(<RailNav current="home" sound={sound} onCurrentPagePress={vi.fn()} />);
     layout();
@@ -370,7 +370,7 @@ describe('work and about navigation', async () => {
     down('About');
     press('About');
     expect(sound.unlock).toHaveBeenCalled();
-    expect(sound.tap).toHaveBeenCalledTimes(2);
+    expect(sound.tap).toHaveBeenCalledTimes(1);
     expect(sound.tap).toHaveBeenLastCalledWith('about');
   });
 
@@ -395,9 +395,9 @@ describe('work and about navigation', async () => {
     });
     render(<Portfolio introEnabled={false} />);
     expect(opened).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Preview sound' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sound' }));
     expect(opened).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('button', { name: 'Preview sound' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('restores the truthful route when the pointer leaves, including from About', async () => {

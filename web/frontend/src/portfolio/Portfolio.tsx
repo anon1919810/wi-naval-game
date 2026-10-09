@@ -1,11 +1,15 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type KeyboardEvent } from 'react';
 import { flushSync } from 'react-dom';
 import { AboutContent } from './AboutContent';
+import { CreditsContent } from './CreditsContent';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
 import { introPlayed, markIntroPlayed } from './intro';
 import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
-import { createPreviewSound, storedMuted } from './previewAudio';
+import { createPreviewSound } from './previewAudio';
+import { installInteractionFeedback, outcome } from '../audio/feedback';
+import { interactionAudio } from '../audio/interactionAudio';
+import { SoundToggle } from '../audio/SoundToggle';
 import { ProjectDetail } from './ProjectDetail';
 import { RailNav, type DestinationOrigin } from './RailNav';
 import { ReadingRuler } from './ReadingRuler';
@@ -105,6 +109,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const cta = useRef<HTMLAnchorElement>(null);
   const homeHeading = useRef<HTMLHeadingElement>(null);
   const aboutHeading = useRef<HTMLHeadingElement>(null);
+  const creditsHeading = useRef<HTMLHeadingElement>(null);
   const detailHeading = useRef<HTMLHeadingElement>(null);
   const detailCta = useRef<HTMLAnchorElement>(null);
   /** The page the ruler measures: the visible document, never the shell around it. */
@@ -139,13 +144,12 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
    * a one-way door: a later gesture can unlock a fresh context, which is what
    * keeps it correct under StrictMode's mount/unmount/mount rehearsal.
    */
-  const [muted, setMuted] = useState(storedMuted);
   const soundRef = useRef<ReturnType<typeof createPreviewSound> | null>(null);
-  if (soundRef.current === null) soundRef.current = createPreviewSound({ muted: storedMuted() });
+  if (soundRef.current === null) soundRef.current = createPreviewSound();
   const sound = soundRef.current;
   const finish = useCallback(() => { setOpening(false); setSettling(false); }, []);
 
-  useEffect(() => () => sound.dispose(), [sound]);
+  useEffect(installInteractionFeedback, []);
 
   // Marked as soon as the opening starts, not when it ends: an interrupted intro
   // has still been shown once in this session. Deliberately an effect rather than
@@ -188,13 +192,21 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const marked = requested ?? sheetIndex;
   const publicActive = route.kind === 'public';
   const about = publicActive && route.view === 'about';
+  const credits = publicActive && route.view === 'credits';
   const detail = publicActive && route.view === 'project';
-  /** Work owns the exhibit and its detail; both of them need the reference bitmap. */
-  const onWork = publicActive && !about;
+  /**
+   * Work owns the exhibit and its detail, and nothing else.
+   *
+   * Stated as the two views that really are Work rather than as "anything that is
+   * not About": a fourth public view added later would otherwise inherit the
+   * exhibit, and with it the reference decode, the sheet prefetch and the compass
+   * field, none of which that page needs or asked for.
+   */
+  const onWork = publicActive && (route.view === 'home' || route.view === 'project');
   /** The rail only exists on a public route, so anything else reads as Work. */
   const railCurrent = route.kind === 'app' ? 'home' : route.view;
-  /** Only the two long views carry a ruler; the exhibit is one screenful. */
-  const ruler = publicActive && (about || detail);
+  /** Every view long enough to measure: three ruler sections on Credits. */
+  const ruler = publicActive && (about || detail || credits);
 
   /** A reading controller for long pages; a separate painter also serves Work. */
   useEffect(() => {
@@ -332,7 +344,9 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     const fromDetail = next.view === 'project';
     const target = returningFromTool
       ? (fromDetail ? detailCta.current : cta.current)
-      : (next.view === 'about' ? aboutHeading.current : fromDetail ? detailHeading.current : homeHeading.current);
+      : (next.view === 'about' ? aboutHeading.current
+        : next.view === 'credits' ? creditsHeading.current
+        : fromDetail ? detailHeading.current : homeHeading.current);
     target?.focus({ preventScroll: true });
   }, []);
 
@@ -380,13 +394,20 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     if (current.kind === 'public' && current.view === 'home') homeScroll.current = window.scrollY;
     if (next.kind === 'app' && current.kind === 'public') publicOrigin.current = current.view;
     if (next.kind === 'app' || next.view !== 'home') finish();
-    // The artwork morph is the move between the exhibit and its own detail, in
-    // either direction. Work/About uses the bounded circular reveal.
+    // The artwork morph is the existing move between the exhibit and its own
+    // detail. Work/About uses the bounded circular reveal. Credits uses that same
+    // reveal from and to every public page — the detail included — because the
+    // drawing lives on Work and there is nothing on Credits for it to morph with.
+    // The morph rule is otherwise untouched: a move Credits is not part of behaves
+    // exactly as it did before this page existed.
     const fromView = current.kind === 'public' ? current.view : null;
+    const toView = next.kind === 'public' ? next.view : null;
+    const creditsMove = toView === 'credits' || fromView === 'credits';
     const kind: TransitionKind = next.kind === 'app' ? 'tool'
       : returningFromTool ? 'tool-back'
-      : (next.view === 'project' || fromView === 'project') ? 'detail'
-      : (next.view === 'about' ? 'page' : 'page-back');
+      : creditsMove ? (toView === 'credits' ? 'page' : 'page-back')
+      : (toView === 'project' || fromView === 'project') ? 'detail'
+      : (toView === 'about' ? 'page' : 'page-back');
     const commit = () => {
       committed.current = next;
       flushSync(() => setRoute(next));
@@ -449,6 +470,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       if (token !== sheetRequest.current) return;
       setRequested(null);
       setSwitchError(index);
+      outcome('hold');
     });
   }, [change, settleRequestedRoute]);
   // Re-register the lens and cursor nodes and restate their visibility whenever
@@ -499,6 +521,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   useEffect(() => {
     document.title = route.kind === 'app' ? 'Plimsoll · 舰船计算工作台'
       : route.view === 'project' ? 'Plimsoll — Y’s Formfield'
+      : route.view === 'credits' ? 'Credits — Y’s Formfield'
       : 'Y’s Formfield — Tools & Experiments';
     document.documentElement.lang = route.kind === 'app' ? 'zh-CN' : 'en';
     document.documentElement.dataset.formfieldSurface = route.kind;
@@ -550,10 +573,11 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     }
     if (e.key === 'Home') {
       e.preventDefault();
+      interactionAudio.play('detent');
       if (inspectOn.current) { focus.current = { x: 50, y: 50 }; paint(); } else reset();
     }
     // Escape leaves inspection, or resets the view when nothing is inspected.
-    if (e.key === 'Escape') { e.preventDefault(); if (inspectOn.current) setInspect(false); else reset(); }
+    if (e.key === 'Escape') { e.preventDefault(); interactionAudio.play('detent'); if (inspectOn.current) setInspect(false); else reset(); }
   };
   const replay = () => {
     // Replay is an explicit restart: it retires every in-flight transition and
@@ -583,14 +607,6 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     void change('theme', () => { flushSync(() => setTheme(next)); }, { animate: () => animateTheme({ x, y }, radius) });
   }, [change, dark, settleRequestedRoute]);
 
-  /** The preview's tap, and nothing else on the page, answers to this switch. */
-  const toggleSound = useCallback(() => {
-    const next = !muted;
-    sound.setMuted(next);
-    if (!next) sound.unlock();
-    setMuted(next);
-  }, [muted, sound]);
-
   /**
    * The workspace module is fetched, never mounted: the lazy factory is the
    * same one React.lazy will call on the app route, so the chunk is already
@@ -616,7 +632,7 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
   const withdrawDrawingCursor = () => { hovered.current = false; keysOn.current = false; paint(); };
 
   return <>
-    <div className="ff-shell" ref={shellRef} data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive} onPointerDownCapture={() => sound.unlock()} onKeyDownCapture={() => sound.unlock()}>
+    <div className="ff-shell" ref={shellRef} data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
       <ShellField />
       <header className="ff-header" inert={opening}>
         <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
@@ -627,14 +643,8 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
               pointer or the key and stands still otherwise. Each keeps its
               accessible name, its pressed state where it has one, and its English
               title, so nothing here is only a picture. */}
-          <button className="ff-preview-sound" onClick={toggleSound} aria-label="Preview sound" aria-pressed={!muted} title={muted ? 'Turn preview sound on' : 'Mute preview sound'}>
-            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-              <path d="M3 8h3l4-3.4v10.8L6 12H3z" />
-              <path className="ff-preview-sound-wave" d="M13 7.4a3.4 3.4 0 0 1 0 5.2" />
-              <path className="ff-preview-sound-slash" d="M3.5 16.5 16.5 3.5" />
-            </svg>
-          </button>
-          <button className="ff-theme" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}>
+          <SoundToggle />
+          <button className="ff-theme" data-audio="manual" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}>
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.4" /><path className="ff-theme-fill" d="M10 3.6a6.4 6.4 0 0 1 0 12.8z" /></svg>
           </button>
           <button className="ff-replay" onClick={replay} aria-label="Replay intro" title="Replay intro">
@@ -687,9 +697,9 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             </button>
             <span className="ff-board-caption">DRAWING {sheet.id} / 03</span>
             <div className="ff-board-picker" data-exhibit-ui role="group" aria-label="Reference drawing" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>
-              {PLAN_SHEETS.map((s, i) => <button key={s.id} onClick={() => chooseReference(i)} aria-label={s.label} aria-pressed={i === marked} title={`View drawing ${s.shortLabel}`}>{s.shortLabel}</button>)}
+              {PLAN_SHEETS.map((s, i) => <button key={s.id} data-audio="manual" onClick={() => chooseReference(i)} aria-label={s.label} aria-pressed={i === marked} title={`View drawing ${s.shortLabel}`}>{s.shortLabel}</button>)}
             </div>
-            <button className="ff-board-icon ff-board-reset" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={reset} aria-label="Reset view" title="Reset view">
+            <button className="ff-board-icon ff-board-reset" data-audio="detent" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={reset} aria-label="Reset view" title="Reset view">
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9a8 8 0 1 1-.5 6 M5 3v6h6" /></svg>
             </button>
             {switchError !== null && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>Reference {PLAN_SHEETS[switchError].shortLabel} could not be loaded, so {sheet.shortLabel} stays on the exhibit. <button onClick={() => chooseReference(switchError)}>RETRY {PLAN_SHEETS[switchError].shortLabel}</button> or choose another reference.</p>}
@@ -723,6 +733,13 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
 
         {about && <section className="ff-about-slot">
           <AboutContent headingRef={aboutHeading} pageRef={page} />
+        </section>}
+
+        {/* Credits mounts only on its own route, for the same reason the detail
+            does: a hidden second long page in the document is a second thing the
+            ruler could measure and a second one a reader would have to skip past. */}
+        {credits && <section className="ff-credits-slot">
+          <CreditsContent headingRef={creditsHeading} pageRef={page} />
         </section>}
       </main>
 

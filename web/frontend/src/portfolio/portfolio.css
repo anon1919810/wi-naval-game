@@ -12,8 +12,12 @@
   /* The rail's width and the gap beside it, named once. The grid spends these,
      and so does every content region that has to stay clear of the rail — which
      is what lets the drawing behind a page use the rail's own width without
-     either of them being a second, drifting measurement of the same thing. */
-  --ff-rail: clamp(230px, 20vw, 320px);
+     either of them being a second, drifting measurement of the same thing.
+     The column is sized for the longest word in it: `credits` is seven glyphs
+     where `work` is four, and the rail is given the room for it at the same
+     display size as the others rather than by shrinking one word. The value is
+     still one token, so main's width and the diagrams behind it stay aligned. */
+  --ff-rail: clamp(260px, 25.5vw, 380px);
   --ff-gap: clamp(40px, 4vw, 88px);
   /* The navigation preview's one exchange: the current word hands its underline
      to the destination in a single damped move, with no bounce and no restart.
@@ -54,8 +58,16 @@
    the circular reveal cannot move it, copy it or clip it, and it keeps keyboard
    focus across routes. The dock is the rail's grid cell: it holds the rail and,
    below it, the reading ruler, and it is what goes sticky on a long page. */
-.ff-rail-dock { grid-area: 2 / 2 / 3 / 3; justify-self: end; align-self: start; width: 100%; }
-.ff-rail { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
+.ff-rail-dock { grid-area: 2 / 2 / 3 / 3; justify-self: end; align-self: start; width: 100%;
+  /* A bounded column, and the ruler below it gives up the room. The dock holds the
+     navigation *and* the reading ruler, so the two cannot each claim a height of
+     their own. The cap is the viewport less the header, which is where the dock
+     starts before it sticks: that is the tighter of its two positions, so the last
+     ruler marks stay on screen both at the top of a long page and halfway down
+     one. The track is the only part allowed to shrink, because it is the only part
+     that can be shorter without losing a mark. */
+  max-height: calc(100svh - 100px); display: flex; flex-direction: column; }
+.ff-rail { width: 100%; flex: none; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(2px, .6vw, 10px); padding-top: clamp(16px, 1.8vw, 30px); }
 /* One entry: the word, and the truthful 01 badge beside it — never a line of its
    own. The badge is outside the word box, so no underline ever crosses the count
    and the count never moves when an underline grows. */
@@ -64,6 +76,36 @@
    rule spans. */
 .ff-rail-word { position: relative; display: block; }
 .ff-rail-ink { display: block; }
+/* The isolated `i` of `credits`, in the same treatment the title's `i` has: a plain
+   inline element around the glyph, so shaping, weight and width are the font's own,
+   and only the band above the x-height is painted — and only inside the duplicate,
+   so the dot reads red where the circle has reached it while the stem keeps the
+   accent behind it.
+
+   `--ff-nav-line` is the i's own line box and `--ff-nav-dot` the bottom of the
+   painted band from the top of that box, in `em`. The origin is the inline element's
+   own box, which is taller than the word's line box and sits above it — measured at
+   1440, that box runs from y315.05 to y453.05 while the word's line box runs from
+   y337.55 to y430.68 — so the band has to be cut against the inline box, not the
+   word's. Space Grotesk as shipped (upm 1000, ascender 984, x-height 486) puts the
+   dot between the ascent and the x-height, around 0.30–0.52em inside that box, with
+   the stem's top near 0.57em; 0.45em falls in the gap above the stem and fades into
+   the accent rather than cutting it. The title's own value is smaller only because
+   its line box is set to 1.1, which moves the same metrics closer to the top. */
+.ff-rail-link { --ff-nav-line: .86; --ff-nav-dot: .45em; }
+/* Red only while this destination is being previewed or is held; see
+   `[data-ff-dot='preview']` below. At rest the dot is the same accent as its stem,
+   so the word is one colour and the red is a signal about a move. */
+.ff-rail-dup .ff-rail-i {
+  color: transparent;
+  background-image: linear-gradient(to bottom, var(--ff-red) 0, var(--ff-red) var(--ff-nav-dot), var(--ff-accent) calc(var(--ff-nav-dot) + .014em));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.ff-rail-link[data-ff-dot='idle'] .ff-rail-dup .ff-rail-i {
+  background-image: linear-gradient(to bottom, var(--ff-accent) 0, var(--ff-accent) calc(var(--ff-nav-dot) + .014em));
+}
+.ff-rail-i { line-height: var(--ff-nav-line); }
 /* One rule, one move. Its scale is the word's whole width when the word is
    selected and the measured width of its first glyph when it is not, and its
    colour goes from ink to the accent in the same 300 ms — so the rule shortens
@@ -92,6 +134,13 @@
    preview says nothing about Work's count, and nothing resizes or bounces. */
 .ff-rail-badge { flex: none; display: inline-grid; place-items: center; width: 26px; height: 26px; margin-top: .16em; border-radius: 50%; background: var(--ff-accent); color: var(--ff-bg); font-size: 10px; font-weight: 600; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; transition: background-color .2s linear, color .2s linear; }
 .ff-shell .ff-rail-link[data-ff-badge='preview'] .ff-rail-badge { background: #E2231A; color: #fff; }
+/* Credits' red dot, on exactly Work badge's terms: its own pointer, its own
+   keyboard focus, or its own press still travelling. The selected page is a
+   different answer — where the visitor is, not where they are going — so a Credits
+   that is merely current keeps its dot in the accent with the rest of the word. */
+.ff-shell .ff-rail-link[data-ff-dot='preview'] .ff-rail-dup .ff-rail-i {
+  background-image: linear-gradient(to bottom, var(--ff-red) 0, var(--ff-red) var(--ff-nav-dot), var(--ff-accent) calc(var(--ff-nav-dot) + .014em));
+}
 .ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 4px; }
 /* Three geometric marks and nothing else: no text box, no word, no label in the
    layout. Each is a real 44px target with its own accessible name, pressed state
@@ -120,7 +169,7 @@
    Width and no auto margins: the exhibit never collapses inside its track. */
 .ff-main { grid-area: 2 / 1 / 3 / -1; width: 100%; min-width: 0; position: relative; }
 @media (min-width: 651px) {
-  .ff-main > :is(.ff-home, .ff-detail-slot, .ff-about-slot) { width: calc(100% - var(--ff-rail) - var(--ff-gap)); }
+  .ff-main > :is(.ff-home, .ff-detail-slot, .ff-about-slot, .ff-credits-slot) { width: calc(100% - var(--ff-rail) - var(--ff-gap)); }
 }
 .ff-exhibit-label { display: flex; justify-content: space-between; align-items: center; padding: 27px 0 19px; font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-muted); }
 .ff-exhibit-label span:first-child { display: flex; align-items: center; gap: 8px; color: var(--ff-ink); }
@@ -230,6 +279,9 @@
 @media (max-width: 650px) {
   .ff-shell { grid-template-columns: minmax(0, 1fr); row-gap: 26px; }
   .ff-header, .ff-main, .ff-rail-dock, .ff-footer { grid-area: auto; }
+  /* In the fallback the rail is one row in the flow and the ruler withdraws, so
+     there is nothing to bound and nothing that would fit inside a cap. */
+  .ff-rail-dock { max-height: none; }
   .ff-rail { flex-direction: row; align-items: center; gap: 22px; padding: 16px 0 0; border-top: 1px solid var(--ff-line); }
   .ff-rail-link { font-size: clamp(40px, 10vw, 60px); line-height: .9; }
   .ff-rail-badge { width: 20px; height: 20px; font-size: 9px; margin-top: 0; }

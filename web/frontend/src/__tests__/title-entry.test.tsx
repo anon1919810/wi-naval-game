@@ -340,15 +340,15 @@ describe('the header', () => {
   it('draws the sound as a speaker and states its pressed truth', async () => {
     render(<Portfolio introEnabled={false} />);
     await flush();
-    const sound = screen.getByRole('button', { name: 'Preview sound' });
+    const sound = screen.getByRole('button', { name: 'Sound' });
     expect(sound).toHaveAttribute('aria-pressed', 'true');
     // A geometric speaker with one wave and a slash for mute: no text box.
     expect(sound.querySelector('svg')).not.toBeNull();
     expect(sound.textContent).toBe('');
     expect(sound.querySelector('.ff-preview-sound-slash')).not.toBeNull();
     fireEvent.click(sound);
-    expect(screen.getByRole('button', { name: 'Preview sound' })).toHaveAttribute('aria-pressed', 'false');
-    expect(screen.getByRole('button', { name: 'Preview sound' })).toHaveAttribute('title', 'Turn preview sound on');
+    expect(screen.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Sound' })).toHaveAttribute('title', 'Turn sound on');
   });
 
   it('offers one replay control in the header and none in the footer', async () => {

@@ -10,6 +10,8 @@ import { Run } from './pages/Run';
 import { Workbench } from './pages/Workbench';
 import { isAppHash } from './portfolio/routes';
 import { runTransition } from './portfolio/transitions';
+import { SoundToggle } from './audio/SoundToggle';
+import { outcome } from './audio/feedback';
 import type { AuthMode, Theme, UserSession } from './types';
 // The workspace material is loaded by the eager shell entry, so a chunk that
 // fails to arrive still finds these styles present.
@@ -103,7 +105,7 @@ export default function App({ returnHref }: { returnHref?: string }) {
    * replaced — and only a genuine 401 goes on to create one, and `bootstrap` stays
    * single-flight, so a second press cannot start a second creation.
    */
-  const enter = useCallback(async () => {
+  const enter = useCallback(async (explicit = false) => {
     const mine = ++attempt.current;
     setConnecting(true);
     setFailed(false);
@@ -135,7 +137,7 @@ export default function App({ returnHref }: { returnHref?: string }) {
         apply(created);
       }
     } catch {
-      if (live()) { setFailed(true); setMessage('暂时无法连接工作空间，请稍后刷新页面重试。'); }
+      if (live()) { setFailed(true); setMessage('暂时无法连接工作空间，请稍后刷新页面重试。'); if (explicit) outcome('hold'); }
     } finally { if (live()) setConnecting(false); }
   }, [apply]);
 
@@ -203,7 +205,7 @@ export default function App({ returnHref }: { returnHref?: string }) {
       if (!mounted.current) return;
       setUser({ ...user, theme });
       document.documentElement.dataset.theme = theme;
-    } catch { if (mounted.current) setMessage('主题设置未保存。'); }
+    } catch { if (mounted.current) { setMessage('主题设置未保存。'); outcome('hold'); } }
   }
 
   async function signOut() {
@@ -212,7 +214,7 @@ export default function App({ returnHref }: { returnHref?: string }) {
       if (!mounted.current) return;
       setUser(null);
       navigate('/projects');
-    } catch { if (mounted.current) setMessage('退出登录失败，请重试。'); }
+    } catch { if (mounted.current) { setMessage('退出登录失败，请重试。'); outcome('hold'); } }
   }
 
   const anonymous = mode === 'anonymous';
@@ -226,10 +228,11 @@ export default function App({ returnHref }: { returnHref?: string }) {
   // cannot sign in must still be able to go back to the public pages.
   const head = <header className="site-header">
     {returnHref && <a className="ff-tool-return" href={returnHref}>↖ Y’s Formfield</a>}
-    <button className="brand brand-button" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ WORKSPACE</span></button>
+    <button className="brand brand-button" data-audio="manual" onClick={() => navigate('/projects')}><span className="brand-mark" aria-hidden="true" />Plimsoll<span className="brand-suffix">/ WORKSPACE</span></button>
     <span className="header-context" data-ff-context={route.kind} title="当前位置">{place}</span>
     <div className="header-actions"><span className="header-edition">DESIGN DESK · 1.0</span>
-      {user && <><button className="icon-button" aria-label={user.theme === 'light' ? '切换到深色主题' : '切换到浅色主题'} onClick={changeTheme}>{user.theme === 'light' ? '◐' : '◑'}</button><span className="user-email" title={identity}>{identity}</span>{!anonymous && <button className="text-button" onClick={signOut}>退出</button>}</>}
+      <SoundToggle workspace />
+      {user && <><button className="icon-button" data-audio="detent" aria-label={user.theme === 'light' ? '切换到深色主题' : '切换到浅色主题'} onClick={changeTheme}>{user.theme === 'light' ? '◐' : '◑'}</button><span className="user-email" title={identity}>{identity}</span>{!anonymous && <button className="text-button" onClick={signOut}>退出</button>}</>}
     </div>
   </header>;
 
@@ -241,7 +244,7 @@ export default function App({ returnHref }: { returnHref?: string }) {
     <div className="page-pad workspace-connect">
       {failed
         ? <ReadFailure title="工作空间尚未连接" detail={message} retryLabel="重新连接"
-            onRetry={() => { void enter(); }}
+            onRetry={() => { void enter(true); }}
             onBack={returnHref ? () => { window.location.hash = returnHref.replace(/^#/, ''); } : undefined}
             backLabel="返回总站" />
         : <ReadPending scope="workspace" object="工作空间" />}

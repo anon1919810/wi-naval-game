@@ -198,14 +198,14 @@ export function WorkbenchOverview({ draft, revision, conditionId, runs, current,
         <h2>运行记录</h2><span>历史可查，身份必须明确</span></div>
       {runs.length === 0
         ? <p className="group-note">还没有任何运行记录。保存输入后即可运行计算。</p>
-        : <div className="run-history">{runs.slice(0, 6).map(item => <button key={item.id} onClick={() => onRun(item.id)}>
+        : <div className="run-history">{runs.slice(0, 6).map(item => <button key={item.id} data-audio="manual" onClick={() => onRun(item.id)}>
           <span><span>修订 {item.revision}</span><span>工况 {item.condition_id}</span></span>
           <strong><StatusBadge status={item.status} /></strong>
           <small>{new Date(item.created_at).toLocaleString('zh-CN')}</small>
           <span aria-hidden="true">↗</span>
         </button>)}</div>}
       {current && <p className="group-note">上方“当前结果”只对应运行 {current.id}；其余记录保留其各自的修订与工况身份。</p>}
-      <button className="text-button" onClick={() => onChapter('hull')}>编辑船型数据 ↗</button>
+      <button className="text-button" data-audio="detent" onClick={() => onChapter('hull')}>编辑船型数据 ↗</button>
     </section>
   </div>;
 }
