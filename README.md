@@ -8,6 +8,8 @@ Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md
 
 工作空间支持从项目 JSON 校验预览并恢复为新项目，以及从已保存报告的诊断定位到输入，保留历史运行和未保存草稿。用户自己的 AI 可用 `python -m plimsoll readme` 读取随包分发的命令行指南。详见[工作空间流程说明](docs/formfield/workspace-workflow-2026-10-10.md)。
 
+**最新发布 · 2026-10-10**：`a863b0e` 已推送并部署，包含上述流程及窄屏导航、资源压缩/缓存/404、延后加载和元数据修复；前端 638/638，后端 103 项及另外 2 项 PostgreSQL 专项通过，原有项目、修订和运行数据保留。[发布身份与回滚](docs/formfield/release-workflow-2026-10-10.md)。后续[独立数值收敛研究](docs/plimsoll-1.0/numerical-convergence-study-2026-10-10.md)完成核心 pytest 全量 895 项、594 子测试、研究 98/98 和独立反例 21/21；研究工具及证据纳入源码，计算核方法版本保持原有身份。
+
 网站：[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md) · [生产部署与运维](docs/plimsoll-1.0/web-production-operations.md) · [2026-10-04 生产部署交接](docs/plimsoll-1.0/web-production-handoff-2026-10-04.md) · [六页输入表单交接](docs/plimsoll-1.0/forms-handoff-2026-10-03.md) · [产品与视觉规格](docs/superpowers/specs/2026-09-23-plimsoll-web-design.md) · [浅色工作台概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench.png) · [深色概念图](docs/superpowers/specs/assets/plimsoll-datum-workbench-dark.png)。
 
 高级输入：[2026-10-04 最新交接与验收](docs/plimsoll-1.0/advanced-workflow-handoff-2026-10-04.md) · [阻力与质量模型、舱室、破损和显示单位操作](docs/plimsoll-1.0/advanced-input-workflow.md) · [实施计划](docs/plimsoll-1.0/advanced-workflow-plan-2026-10-04.md)。
