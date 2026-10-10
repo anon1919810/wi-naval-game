@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+from importlib import resources
 import itertools
 import json
 import math
@@ -11,6 +12,11 @@ from pathlib import Path
 import sys
 
 from . import analysis, exports, geometry_import, project_store
+
+# The bundled usage guide is a fixed package resource, addressed by one
+# constant so the read is discoverable and is never assembled from the working
+# directory, the project, a calculation or the network.
+README_RESOURCE = "CLI_README.md"
 
 
 class _StrictJSONError(ValueError):
@@ -515,6 +521,33 @@ def _sweep(args):
     return 0 if completed else 1
 
 
+def _readme(args):
+    """Print the bundled usage guide; read one fixed package resource, write nothing."""
+    try:
+        raw = (resources.files(__package__).joinpath(README_RESOURCE).read_bytes()
+               if __package__ else Path(__file__).with_name(README_RESOURCE).read_bytes())
+    except (OSError, ModuleNotFoundError, ValueError) as error:
+        raise _CLIError(
+            "cli.readme_unavailable", f"cannot read bundled README: {error}",
+        ) from error
+    try:
+        raw.decode("utf-8")
+    except UnicodeError as error:
+        raise _CLIError(
+            "cli.readme_unavailable", f"bundled README is not valid UTF-8: {error}",
+        ) from error
+    # The verified bytes go out unchanged. Writing through the text layer would
+    # rewrite every newline for the platform, so the resource is emitted exactly
+    # as it is bundled and a caller can compare it against the file itself.
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is None:
+        sys.stdout.write(raw.decode("utf-8"))
+    else:
+        buffer.write(raw)
+        buffer.flush()
+    return 0
+
+
 def _configure_utf8():
     for stream in (sys.stdout, sys.stderr):
         reconfigure = getattr(stream, "reconfigure", None)
@@ -576,6 +609,8 @@ def _parser() -> argparse.ArgumentParser:
     )
     geometry.add_argument("--estimate", required=True, choices=("true", "false"))
     geometry.add_argument("--output", required=True)
+
+    commands.add_parser("readme", help="print the bundled command-line guide")
     return parser
 
 
@@ -654,6 +689,8 @@ def main(argv=None) -> int:
             return _sweep(args)
         if args.command == "import-geometry":
             return _import_geometry(args)
+        if args.command == "readme":
+            return _readme(args)
         raise NotImplementedError(f"command {args.command!r} is not implemented")
     except _CLIError as error:
         _emit_error(command, error)

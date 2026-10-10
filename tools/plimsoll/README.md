@@ -15,6 +15,18 @@
 配对游戏：**《敌前转向》（Gefahrwend）**。
 命名约定：**平台用历史意象，模块用方法命名** —— `plimsoll.hydrostatics` / `.bonjean` / `.stability` / `.damage`。
 
+## 命令行使用指南
+
+`python -m plimsoll readme` 在标准输出打印随包分发的完整指南
+（`CLI_README.md`，UTF-8，逐字节与文件一致）：实际可用的 `analyze` /
+`batch` / `sweep` / `import-geometry` 命令与所需输入、选项和工况；退出码与
+`plimsoll-cli-error-1` 错误契约；15 个阶段及其状态与四轴 validity；规范单位、
+坐标与龙骨基准；三个指纹的含义；`null` 与 `0` 的区别、`source`/`estimate`
+三态；以及给 AI 读者的解读规则（读结果、追问缺失输入、保留不确定性）。
+本仓库内的详细契约见 [`docs/plimsoll-1.0/cli.md`](../../docs/plimsoll-1.0/cli.md)、
+[`data-contract.md`](../../docs/plimsoll-1.0/data-contract.md) 与
+[`analysis-api.md`](../../docs/plimsoll-1.0/analysis-api.md)。
+
 ## 通用求解器（不是 Queen Mary 专用机）
 
 **核心面向满足模型输入与适用条件的通用船型**；Queen Mary 只是随包案例，不代表支持任意几何、任意倾角或任意物理工况。SPEC §2.7 通用性契约：

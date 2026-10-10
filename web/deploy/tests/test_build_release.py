@@ -27,6 +27,7 @@ ReleaseError = build_release.ReleaseError
 
 TRACKED = (
     "tools/plimsoll/hydrostatics.py",
+    "tools/plimsoll/CLI_README.md",
     "tools/plimsoll/cases/templates/generic_cargo.json",
     "tools/plimsoll/tests/test_stability.py",
     "web/backend/alembic.ini",
@@ -93,6 +94,7 @@ class IncludeCasesTest(unittest.TestCase):
         paths = {entry["path"] for entry in manifest["files"]}
         for expected in (
             "tools/plimsoll/hydrostatics.py",
+            "tools/plimsoll/CLI_README.md",
             "tools/plimsoll/cases/templates/generic_cargo.json",
             "web/backend/alembic/versions/6226f03d283f_initial_web_workspace_schema.py",
             "web/backend/alembic.ini",
@@ -115,6 +117,30 @@ class IncludeCasesTest(unittest.TestCase):
             sorted(f"{prefix}/{member}" for member in paths),
         )
         self.assertFalse(any(name.startswith("/") or ".." in name for name in names))
+
+    def test_the_bundled_readme_ships_as_the_exact_resource_bytes(self) -> None:
+        """`python -m plimsoll readme` reads this one file out of the package.
+
+        If the release archive dropped it, renamed it or re-encoded it, the
+        command would report `cli.readme_unavailable` on a deployed image that
+        otherwise looks healthy. The archive member is therefore compared to the
+        file on disk byte for byte, not merely checked for presence.
+        """
+        source = self.repo / "tools/plimsoll/CLI_README.md"
+        manifest = build(self.repo, self.output)
+        entry = next(item for item in manifest["files"]
+                     if item["path"] == "tools/plimsoll/CLI_README.md")
+        self.assertEqual(entry["sha256"], build_release.sha256_file(source))
+        self.assertEqual(entry["bytes"], source.stat().st_size)
+
+        prefix = manifest["archive"]["prefix"]
+        member = f"{prefix}/tools/plimsoll/CLI_README.md"
+        with tarfile.open(manifest["archive_path"], "r:gz") as archive:
+            archived = archive.extractfile(member)
+            self.assertIsNotNone(archived, f"{member} is not in the archive")
+            self.assertEqual(archived.read(), source.read_bytes())
+        # It decodes as UTF-8, because that is what the command guarantees.
+        source.read_bytes().decode("utf-8")
 
     def test_manifest_hashes_match_bytes_on_disk(self) -> None:
         manifest = build(self.repo, self.output)
