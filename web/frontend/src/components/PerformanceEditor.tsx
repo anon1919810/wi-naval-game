@@ -6,6 +6,15 @@ import { Diagnostics, Metric, ResultSection, StudyResult } from './FormResults';
 import { fact, inputNumber, number, object, rows, sourceText, stageData, type Raw } from './formModel';
 
 const BASE_STAGES = ['loading', 'systems', 'l0', 'geometry', 'equilibrium', 'hydrostatics', 'deck', 'propulsion'];
+/** Exported because the readiness panel names the same base stages a request always selects. */
+export { BASE_STAGES };
+/** The stages a request builder adds on top of the base, by explicit choice. */
+export function requestedExtraStages(request: RequestDraft): string[] {
+  const extra: string[] = [];
+  if (request.scenario) extra.push('resistance');
+  if (request.endurance) extra.push('endurance');
+  return extra;
+}
 export interface RequestDraft { scenario: string; mode: string; speeds: number[]; power: string; qpc: Raw; trim: string; endurance: string }
 export const EMPTY_REQUEST: RequestDraft = { scenario: '', mode: 'predict_power', speeds: [], power: '', qpc: fact(null), trim: '', endurance: '' };
 

@@ -120,21 +120,24 @@ export function SourceMark({ fact }: { fact: Pick<TraceFact, 'source' | 'estimat
 /**
  * Wraps one real input control. Focusing it selects its provenance without
  * moving focus, and the marker sits next to the control rather than replacing
- * any label or accessible name.
+ * any label or accessible name. An `id` lets a followed diagnostic address this
+ * exact control without any selector built from project data.
  */
-export function TracedField({ fact, children, className }: { fact: TraceFact; children: ReactNode; className?: string }) {
-  const id = useId();
+export function TracedField({ fact, children, className, id }: {
+  fact: TraceFact; children: ReactNode; className?: string; id?: string;
+}) {
+  const key = useId();
   const { selectedId, select, publish, forget } = useInputTrace();
-  const active = selectedId === id;
-  useEffect(() => { if (active) publish(id, fact); }, [active, id, publish, fact.value, fact.source, fact.estimate, fact.label, fact.key, fact.path, fact.dimension, fact.storedUnit]);
-  useEffect(() => () => forget(id), [forget, id]);
-  return <div className={`traced-field ${active ? 'traced-field--active' : ''} ${className ?? ''}`}
+  const active = selectedId === key;
+  useEffect(() => { if (active) publish(key, fact); }, [active, key, publish, fact.value, fact.source, fact.estimate, fact.label, fact.key, fact.path, fact.dimension, fact.storedUnit]);
+  useEffect(() => () => forget(key), [forget, key]);
+  return <div id={id} className={`traced-field ${active ? 'traced-field--active' : ''} ${className ?? ''}`}
     data-trace-key={fact.key}
-    onFocusCapture={() => { if (!active) select(id, fact); }}>
+    onFocusCapture={() => { if (!active) select(key, fact); }}>
     {children}
     <span className="field-provenance">
       <SourceMark fact={fact} />
-      <TraceSelectButton id={id} fact={fact} />
+      <TraceSelectButton id={key} fact={fact} />
     </span>
   </div>;
 }

@@ -146,7 +146,7 @@ describe('the report first screen', () => {
     expect(readings.getAllByText(/模型越界：超出方法适用范围/)).toHaveLength(2);
     // The residual GM of an unavailable stage is not a result either.
     expect(readings.queryByText('9.99')).toBeNull();
-    expect(readings.getByText(/资料不足：型线资料不足/)).toBeVisible();
+    expect(readings.getByText(/暂不可计算：型线资料不足/)).toBeVisible();
     // Power comes from the single complete work point, with its speed.
     expect(readings.getByText('12,894.8 kW')).toBeVisible();
     expect(readings.getByText('阶段 阻力与功率 · 工作点 18 kn')).toBeVisible();

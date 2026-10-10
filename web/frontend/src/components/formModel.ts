@@ -40,6 +40,29 @@ export function eligibleResultRun(runs: RunView[], revision: number, conditionId
   return best;
 }
 
+/**
+ * The newest run this project owns for the selected condition, whatever revision
+ * it was computed from.
+ *
+ * This is *history*, not a result: it is what the reader needs after they save a
+ * corrected revision and before they run again — the previous check that said
+ * which input was missing. Ownership is project plus condition plus a stored
+ * payload status; the revision is deliberately not matched, and this run may
+ * never be presented as the current result of the saved revision.
+ */
+export function latestOwnedRun(runs: RunView[], projectId: string, conditionId: string,
+  maxRevision: number = Infinity): RunView | null {
+  if (!projectId || !conditionId) return null;
+  let best: RunView | null = null;
+  for (const run of runs) {
+    if (!RESULT_STATUSES.includes(run.status)) continue;
+    if (run.project_id !== projectId || run.condition_id !== conditionId) continue;
+    if (run.revision > maxRevision) continue;
+    if (!best || String(run.created_at ?? '') > String(best.created_at ?? '')) best = run;
+  }
+  return best;
+}
+
 // A run may be presented as the current result only when it describes exactly
 // this project, this saved revision and this condition, carries a payload, and
 // the draft is clean (an unsaved draft is not the analysed input).

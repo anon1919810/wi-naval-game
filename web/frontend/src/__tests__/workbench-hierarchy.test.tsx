@@ -262,14 +262,14 @@ describe('overview reads inputs and the identity-guarded result', () => {
     vi.mocked(api.listRuns).mockResolvedValue([runWith(result)]);
     await open();
     const panel = group('当前结果 · Result');
-    expect(within(panel).getByText('资料不足')).toBeVisible();
+    expect(within(panel).getByText('暂不可计算')).toBeVisible();
     expect(within(panel).getByText('模型越界')).toBeVisible();
     expect(within(panel).getByText(/质量账本缺少关键条目/)).toBeVisible();
     expect(panel.textContent).not.toContain('仅供比较的提示');
     // An unavailable stage shows no number, not even one left in the envelope.
     const gm = within(panel).getByText('初稳性高 GM').closest('.fact-field')!;
     expect(gm.querySelector('.fact-value')!.textContent).toBe('未知');
-    expect(gm.textContent).toContain('资料不足');
+    expect(gm.textContent).toContain('暂不可计算');
     expect(gm.textContent).not.toContain('9.99');
     expect(severeDiagnostics(runWith(result)).map(entry => entry.message)).toEqual(['质量账本缺少关键条目']);
   });

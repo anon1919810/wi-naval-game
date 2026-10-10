@@ -54,7 +54,7 @@ const STATUS_STATE: Record<string, ReadingState> = {
 };
 
 const STATUS_REASON: Record<string, string> = {
-  not_requested: '本次请求未运行该阶段', unavailable: '资料不足', model_limit: '模型越界',
+  not_requested: '本次请求未运行该阶段', unavailable: '暂不可计算', model_limit: '模型越界',
   failed: '计算失败', canceled: '该阶段已取消',
 };
 

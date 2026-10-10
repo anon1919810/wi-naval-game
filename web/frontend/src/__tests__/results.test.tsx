@@ -12,7 +12,7 @@ describe('stage status', () => {
     render(<><StageStatus name="flooding" stage={completedFixture.stages.flooding} />
       <StageStatus name="deck" stage={partialFixture.stages.deck} /></>);
     expect(screen.getByText('未请求')).toBeVisible();
-    expect(screen.getByText('资料不足')).toBeVisible();
+    expect(screen.getByText('暂不可计算')).toBeVisible();
     expect(screen.getByText('甲板端点资料不足')).toBeVisible();
   });
 

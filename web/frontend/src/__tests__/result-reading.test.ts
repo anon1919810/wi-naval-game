@@ -109,7 +109,7 @@ describe('saved-result readings', () => {
     expect(blocked.every(item => item.value === null)).toBe(true);
     expect(blocked[0].reason).toBe('计算失败：权重账本自检未通过');
     expect(blocked[1].reason).toBe('模型越界：超出方法适用范围');
-    expect(blocked[2].reason).toBe('资料不足：型线资料不足');
+    expect(blocked[2].reason).toBe('暂不可计算：型线资料不足');
     expect(blocked[3].reason).toBe('该阶段已取消');
     expect(blocked[3].context).toBe('阶段 阻力与功率');
   });

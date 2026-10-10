@@ -252,6 +252,34 @@
 .app-shell .result-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; color: var(--muted); font-size: 10px; }
 .app-shell .result-identity code { font-family: 'Cascadia Code', Consolas, monospace; }
 .app-shell .result-absent p { margin: 0 0 6px; color: var(--muted); font-size: 12px; }
+/* Calculation readiness and followed diagnostics. A number and a thin rule do
+   the dividing here too, so the panel never becomes a stack of framed cards. */
+.app-shell .readiness-attribution { margin: 0; color: var(--muted); font-size: 11px; }
+.app-shell .readiness-attribution code { font-family: 'Cascadia Code', Consolas, monospace; overflow-wrap: anywhere; }
+.app-shell .readiness-history { margin: 0; padding-left: 10px; border-left: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.75; }
+.app-shell .readiness-stages { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.app-shell .readiness-stages li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.app-shell .readiness-stages li:last-child { border-bottom: 0; }
+.app-shell .readiness-stages small { color: var(--faint); font-size: 10px; }
+.app-shell .readiness-stages .readiness-selection { color: var(--muted); }
+.app-shell .stage-pill--unassessed { color: var(--faint); border-color: var(--line); background: transparent; }
+.app-shell .readiness-findings { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.app-shell .readiness-findings li { display: grid; gap: 6px; justify-items: start; min-width: 0; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.app-shell .readiness-findings li:last-child { border-bottom: 0; }
+.app-shell .readiness-findings strong { font-size: 12px; font-weight: 500; line-height: 1.65; overflow-wrap: anywhere; }
+.app-shell .readiness-findings small { color: var(--faint); font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+.app-shell .readiness-findings code { display: block; max-width: 100%; font-family: 'Cascadia Code', Consolas, monospace; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+/* The followed-diagnostic control is one quiet line under the finding. It never
+   carries the finding itself, and it is the only part that leaves the screen.
+   It is read, not whispered: body-size text on a full control height. */
+.app-shell .diagnostic-action { display: inline-flex; align-items: center; min-height: 32px; margin-top: 2px; padding: 4px 12px; border: 1px solid var(--line-strong); border-radius: 2px; background: transparent; color: var(--accent); font-family: inherit; font-size: 12px; font-weight: 500; line-height: 1.5; text-decoration: none; cursor: pointer; }
+.app-shell a.diagnostic-action:hover, .app-shell .diagnostic-action:hover { border-color: var(--accent); background: var(--accent-soft); }
+/* Message, code and path each on their own line: they must not run together. */
+.app-shell .stage-diagnostics-open p, .app-shell .stage-diagnostics > div > p, .app-shell .report-root-diagnostics p { display: grid; gap: 4px; justify-items: start; max-width: 100%; }
+.app-shell .stage-diagnostics-open strong, .app-shell .report-root-diagnostics p > strong { font-size: 12px; font-weight: 500; line-height: 1.65; overflow-wrap: anywhere; }
+.app-shell .stage-diagnostics-open code, .app-shell .stage-diagnostics code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 11px; line-height: 1.6; overflow-wrap: anywhere; }
+/* A control followed from a diagnostic must not end up under the sticky bar. */
+.app-shell [id^='guidance-'], .app-shell #chapter-json { scroll-margin-top: 96px; }
 .app-shell .stage-status-list { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; list-style: none; }
 .app-shell .stage-status-list li { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
 .app-shell .stage-status-list small { color: var(--faint); }
@@ -485,6 +513,7 @@
 .app-shell .report-compare-busy { color: var(--faint); font-size: 10px; }
 @media (max-width: 1100px) {
   .app-shell .report-readings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .app-shell .readiness-findings li, .app-shell .stage-diagnostics-open p { max-width: 100%; }
 }
 @media (max-width: 940px) {
   .app-shell .report-columns > .stage-index { position: static; }
@@ -512,7 +541,7 @@
   /* Screen furniture: navigation, the stage index, every control and the raw
      stage payload. The raw payload is megabytes of saved arrays; it belongs in
      the JSON or CSV export, not on paper. */
-  .app-shell :is(.site-header, .stage-index, .report-actions, .report-units, .report-compare-control, .stage-raw-data) { display: none !important; }
+  .app-shell :is(.site-header, .stage-index, .report-actions, .report-units, .report-compare-control, .stage-raw-data, .diagnostic-action) { display: none !important; }
   /* One continuous column. The index is gone, so nothing is beside the body. */
   .app-shell .report-columns { grid-template-columns: minmax(0, 1fr); }
   .app-shell .report-main { display: block; }

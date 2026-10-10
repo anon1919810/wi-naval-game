@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { StageEnvelope, StageStatus as StageStatusCode } from '../types';
+import { DiagnosticAction, type GuidanceContext } from './DiagnosticAction';
 import { FloodingResults } from './FloodingResults';
 import { StabilityPlot } from './StabilityPlot';
 import { useUnits } from './UnitProvider';
@@ -18,7 +19,7 @@ export const STAGE_ORDER = [
 ];
 
 export const STATUS_LABELS: Record<StageStatusCode, string> = {
-  completed: '计算完成', not_requested: '未请求', unavailable: '资料不足', failed: '计算失败',
+  completed: '计算完成', not_requested: '未请求', unavailable: '暂不可计算', failed: '计算失败',
   canceled: '已取消', model_limit: '模型越界',
 };
 
@@ -156,7 +157,29 @@ function ResistanceTables({ data }: { data: Record<string, unknown> }) {
   </div>;
 }
 
-export function StageStatus({ name, stage }: { name: string; stage: StageEnvelope }) {
+/**
+ * One finding line. The message reads once and every piece of evidence the saved
+ * result attached to it stays on the line: the code, the path, the source path
+ * and, when the page knows which project and run it is showing, a way to follow
+ * the path into that project. The action is additive — it never replaces or
+ * summarises the finding, and it is absent when the path leads nowhere
+ * editable, so a fabricated link can never appear.
+ */
+function DiagnosticLine({ item, guidance, repeat }: {
+  item: StageEnvelope['diagnostics'][number]; guidance: GuidanceContext | null; repeat?: boolean;
+}) {
+  return <p className={repeat ? 'stage-diagnostics-repeat' : undefined}>
+    <strong>{repeat ? `${item.code ?? '诊断'} · 与上面的阶段原因相同` : (item.message ?? item.code)}</strong>
+    {!repeat && item.code && item.message && <small>{item.code}</small>}
+    {item.path && <code>{item.path}</code>}
+    {item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}
+    <DiagnosticAction diagnostic={item} context={guidance} project={guidance?.snapshot ?? null} />
+  </p>;
+}
+
+export function StageStatus({ name, stage, guidance }: {
+  name: string; stage: StageEnvelope; guidance?: GuidanceContext | null;
+}) {
   const [rawOpen, setRawOpen] = useState(false);
   const units = useUnits();
   // Only a requested stage that actually finished may show plain numbers. A
@@ -181,7 +204,7 @@ export function StageStatus({ name, stage }: { name: string; stage: StageEnvelop
     {stage.status === 'not_requested' && <p className="stage-reason">这次请求没有运行该阶段。</p>}
     {severe.length > 0 && <div className="stage-diagnostics-open" role="alert">
       <strong>严重诊断 · {severe.length} 条</strong>
-      {severe.map((item, index) => <p key={`${item.code ?? ''}-${index}`}><strong>{item.message ?? item.code}</strong>{item.code && item.message && <small>{item.code}</small>}{item.path && <code>{item.path}</code>}{item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}</p>)}
+      {severe.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}
     </div>}
     {values.length > 0 && <div className="stage-values">{values.map(item => {
       const shown = item.dimension ? units.text(item.value, item.dimension, item.storedUnit) : display(item.value);
@@ -197,8 +220,8 @@ export function StageStatus({ name, stage }: { name: string; stage: StageEnvelop
         curve worth drawing. */}
     {name === 'gz' && delivered && <StabilityPlot stage={stage} />}
     {name === 'flooding' && stage.requested && stage.data && typeof record(stage.data).status === 'string' && <FloodingResults data={record(stage.data)} />}
-    {detailCount > 0 && <details className="stage-diagnostics"><summary>诊断与缺项 · {detailCount} 条</summary><div>{ordinary.map((item, index) => <p key={`${item.code ?? ''}-${index}`}><strong>{item.message ?? item.code}</strong>{item.code && item.message && <small>{item.code}</small>}{item.path && <code>{item.path}</code>}{item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}</p>)}</div>
-      {repeats.map((item, index) => <p className="stage-diagnostics-repeat" key={`repeat-${item.code ?? ''}-${index}`}><strong>{item.code ?? '诊断'} · 与上面的阶段原因相同</strong>{item.path && <code>{item.path}</code>}{item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}</p>)}</details>}
+    {detailCount > 0 && <details className="stage-diagnostics"><summary>诊断与缺项 · {detailCount} 条</summary><div>{ordinary.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}</div>
+      {repeats.map((item, index) => <DiagnosticLine key={`repeat-${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} repeat />)}</details>}
     {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">方法版本 · {Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(value)}`).join(' / ')}</p>}
     {stage.assumptions.length > 0 && <details className="stage-assumptions"><summary>假设与适用性</summary><pre>{JSON.stringify(stage.assumptions, null, 2)}</pre></details>}
     {/* The raw payload stays reachable on screen and stays off paper: a saved

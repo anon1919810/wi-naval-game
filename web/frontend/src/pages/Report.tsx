@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom';
 
 import * as api from '../api';
 import { outcome } from '../audio/feedback';
+import { DiagnosticAction, type GuidanceContext } from '../components/DiagnosticAction';
 import { ReadFailure, ReadPending } from '../components/ReadPending';
 import { ReportReadings } from '../components/ReportReadings';
 import { requestedStages } from '../components/resultReading';
@@ -80,7 +81,7 @@ function rootFindings(result: AnalysisResult, stages: Array<{ name: string; stag
 }
 
 /** A diagnostic line: the message reads once, and its evidence stays beside it. */
-function Finding({ item, fallback }: { item: Diagnostic; fallback: string }) {
+function Finding({ item, fallback, guidance }: { item: Diagnostic; fallback: string; guidance: GuidanceContext | null }) {
   const message = item.message ?? item.code ?? fallback;
   // A code is evidence too, so it is kept rather than dropped whenever a message
   // happens to exist. Identical text is printed once, not twice.
@@ -90,6 +91,7 @@ function Finding({ item, fallback }: { item: Diagnostic; fallback: string }) {
     {item.stage && <span className="report-diagnostic-stage">阶段 {STAGE_LABELS[item.stage] ?? item.stage}</span>}
     {item.path && <code>{item.path}</code>}
     {item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}
+    <DiagnosticAction diagnostic={item} context={guidance} project={guidance?.snapshot ?? null} />
   </p>;
 }
 
@@ -170,6 +172,12 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
   const root = rootFindings(result, stages);
   const rootSevere = root.filter(isSerious);
   const rootOrdinary = root.filter(item => !isSerious(item));
+  // A diagnostic only becomes a link where this page can name the project it
+  // belongs to and the run that produced it. A standalone preview has neither,
+  // and renders every finding exactly as it always has.
+  const guidance: GuidanceContext | null = runId && result.project_id
+    ? { projectId: result.project_id, runId, conditionId: result.condition_id, snapshot }
+    : null;
 
   return <div className="report-page page-pad" ref={host}>
     <div className="report-actions no-print">
@@ -202,10 +210,10 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
     {(rootSevere.length > 0 || rootOrdinary.length > 0) && <section className="report-root-diagnostics" aria-label="整体诊断">
       {rootSevere.length > 0 && <div className="stage-diagnostics-open" role="alert">
         <strong>整体严重诊断 · {rootSevere.length} 条</strong>
-        {rootSevere.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="严重诊断" />)}
+        {rootSevere.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="严重诊断" guidance={guidance} />)}
       </div>}
       {rootOrdinary.length > 0 && <details className="report-root-diagnostics-fold"><summary>整体诊断与缺项 · {rootOrdinary.length} 条</summary>
-        {rootOrdinary.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="诊断" />)}
+        {rootOrdinary.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="诊断" guidance={guidance} />)}
       </details>}
     </section>}
 
@@ -217,7 +225,7 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
           <div className="section-heading"><h2>本次计算</h2><span>{stages.length} 个已请求阶段</span></div>
           <p className="report-intro">报告直接读取保存的不可变运行结果。灰色或警示状态不是零值，也不是“安全”结论。显示单位只影响本页呈现，导出与指纹仍为规范单位。</p>
           <div className="report-stage-list">{stages.map(({ name, stage }) =>
-            <StageStatus key={name} name={name} stage={stage} />)}</div>
+            <StageStatus key={name} name={name} stage={stage} guidance={guidance} />)}</div>
           {stages.length === 0 && <p>本次结果没有请求阶段。</p>}
         </section>
 

@@ -1,6 +1,8 @@
 import { FactField } from './FactField';
+import { CalculationReadiness } from './CalculationReadiness';
 import { declaredSource } from './InputTrace';
 import { number, object, type Raw } from './formModel';
+import type { DiagnosticLocation } from './diagnosticGuidance';
 import { STAGE_LABELS, STAGE_ORDER, STATUS_LABELS } from './StageStatus';
 import { StatusBadge } from './StatusBadge';
 import type { Dimension } from './units';
@@ -53,7 +55,7 @@ function stageOf(run: RunView | null, name: string): StageEnvelope | null {
 function stageReason(stage: StageEnvelope | null): string {
   if (!stage) return '该运行没有保存此阶段';
   if (!stage.requested && stage.status === 'not_requested') return '本次请求未运行该阶段';
-  if (stage.status === 'unavailable') return stage.reason ? `资料不足：${stage.reason}` : '资料不足';
+  if (stage.status === 'unavailable') return stage.reason ? `暂不可计算：${stage.reason}` : '暂不可计算';
   if (stage.status === 'model_limit') return stage.reason ? `模型越界：${stage.reason}` : '模型越界';
   if (stage.status === 'failed') return stage.reason ? `计算失败：${stage.reason}` : '计算失败';
   if (stage.status === 'canceled') return '该阶段已取消';
@@ -117,9 +119,16 @@ export function severeDiagnostics(run: RunView | null): Array<{ stage: string | 
   return found;
 }
 
-export function WorkbenchOverview({ draft, revision, conditionId, runs, current, dirty, onChapter, onRun }: {
+export function WorkbenchOverview({ draft, revision, conditionId, runs, current, previous, requestStages, requestError, dirty, onChapter, onRun, onNavigate }: {
   draft: ProjectDocument; revision: number; conditionId: string; runs: RunView[]; current: RunView | null;
+  /** The owned previous check of this condition, kept across a save. */
+  previous: RunView | null;
+  /** The stages the request assembled on screen selects, base stages plus extras. */
+  requestStages: string[];
+  /** The request builder's own refusal, when the request cannot be submitted. */
+  requestError: string;
   dirty: boolean; onChapter: (chapter: 'hull') => void; onRun: (runId: string) => void;
+  onNavigate: (location: DiagnosticLocation) => void;
 }) {
   const hull = object(draft.hull);
   const condition = draft.loading_conditions.find(item => item.id === conditionId) ?? null;
@@ -160,8 +169,11 @@ export function WorkbenchOverview({ draft, revision, conditionId, runs, current,
       </dl>
     </section>
 
+    <CalculationReadiness stages={requestStages} previous={previous} live={draft} dirty={dirty}
+      revision={revision} conditionId={conditionId} invalidRequest={requestError} onNavigate={onNavigate} />
+
     <section className="chapter-group">
-      <div className="group-head"><span className="group-index" aria-hidden="true">03</span>
+      <div className="group-head"><span className="group-index" aria-hidden="true">04</span>
         <h2>当前结果 · Result</h2><span>只取匹配本项目、修订与工况的已保存运行</span></div>
       {current
         ? <>
@@ -194,7 +206,7 @@ export function WorkbenchOverview({ draft, revision, conditionId, runs, current,
     </section>
 
     <section className="chapter-group">
-      <div className="group-head"><span className="group-index" aria-hidden="true">04</span>
+      <div className="group-head"><span className="group-index" aria-hidden="true">05</span>
         <h2>运行记录</h2><span>历史可查，身份必须明确</span></div>
       {runs.length === 0
         ? <p className="group-note">还没有任何运行记录。保存输入后即可运行计算。</p>

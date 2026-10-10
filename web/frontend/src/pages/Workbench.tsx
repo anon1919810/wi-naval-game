@@ -12,10 +12,16 @@ import { WeaponsEditor } from '../components/WeaponsEditor';
 import { ArmourEditor } from '../components/ArmourEditor';
 import { EnginesEditor } from '../components/EnginesEditor';
 import { HullSupplementEditor } from '../components/HullSupplementEditor';
-import { EMPTY_REQUEST, PerformanceInputs, PerformanceRequest, PerformanceResults, buildOptions, type RequestDraft } from '../components/PerformanceEditor';
+import { BASE_STAGES, EMPTY_REQUEST, PerformanceInputs, PerformanceRequest, PerformanceResults, requestedExtraStages, buildOptions, type RequestDraft } from '../components/PerformanceEditor';
 import { buildFloodingRequest, EMPTY_FLOODING_REQUEST, type FloodingRequest } from '../components/floodingModel';
-import { currentRun, eligibleResultRun, ledgerItems, RESULT_STATUSES } from '../components/formModel';
+import { CalculationReadiness } from '../components/CalculationReadiness';
+import { currentRun, eligibleResultRun, latestOwnedRun, ledgerItems, RESULT_STATUSES } from '../components/formModel';
 import { getDeck, type DeckInput } from '../components/deckModel';
+import {
+  CHAPTER_HEAD, hullGuidanceId, LEDGER_SECTION, ledgerGuidanceId, PROJECT_JSON,
+  readDiagnosticTail, REQUEST_DAMAGE, REQUEST_PERFORMANCE, resolveDiagnosticPath,
+  type DiagnosticLocation,
+} from '../components/diagnosticGuidance';
 import { declaredSource, InputTraceProvider, TracePanel, useInputTrace, TracedField, type TraceFact } from '../components/InputTrace';
 import { CHAPTERS, chapterNumber, chapterOf, ProjectNav, type Chapter } from '../components/ProjectNav';
 import { QuantityField } from '../components/QuantityField';
@@ -69,6 +75,16 @@ function matchesRun(run: RunView | null | undefined, projectId: string, revision
     && run.condition_id === conditionId && RESULT_STATUSES.includes(run.status) && !!run.result;
 }
 
+// History is checked at render time too: an effect cannot clear a previous
+// condition's payload before the first render of the newly selected condition.
+function matchesSavedCheck(run: RunView | null, candidate: RunView | null,
+  projectId: string, revision: number, conditionId: string): boolean {
+  if (!run || !candidate || run.id !== candidate.id || run.revision !== candidate.revision
+    || run.revision > revision || !matchesRun(run, projectId, run.revision, conditionId)) return false;
+  return run.result!.project_id === projectId && run.result!.condition_id === conditionId
+    && run.result!.request_fingerprint === run.request_fingerprint;
+}
+
 /**
  * A numbered first-level group. The number and the thin rule do the dividing, so
  * nested cards inside a group do not need to repeat their own heavy frames.
@@ -91,14 +107,14 @@ function ChapterHead({ chapter, name, projectId, revision, proxy }: {
 }) {
   const definition = chapterOf(chapter);
   if (chapter === 'overview') {
-    return <header className="chapter-head chapter-head--vessel">
+    return <header className="chapter-head chapter-head--vessel" id={CHAPTER_HEAD}>
       <span className="section-kicker">{definition.title.toUpperCase()} / {projectId.slice(0, 8).toUpperCase()}</span>
       <div className="vessel-title-row"><h1>{name}</h1>
         <span className="proxy-label">{proxy ? '工程代理 · 非史实认证' : '项目输入'}</span></div>
       <p>{definition.purpose}</p>
     </header>;
   }
-  return <header className="chapter-head">
+  return <header className="chapter-head" id={CHAPTER_HEAD}>
     <span className="section-kicker">{chapterNumber(chapter)} / {definition.title.toUpperCase()}</span>
     <h1>{definition.title}</h1>
     <p className="chapter-context"><span className="chapter-vessel">{name}</span>
@@ -133,6 +149,26 @@ function projectRenderError(value: unknown, projectId: string): string | null {
 function traceDefaultsOpen(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true;
   return !window.matchMedia('(max-width: 1280px)').matches;
+}
+
+const FOCUSABLE = 'input, select, textarea, button, a[href], [tabindex]';
+
+/**
+ * Opens whatever disclosure folds the control away, moves the keyboard focus
+ * onto the control itself, and centres it without an animation. Nothing here is
+ * interpolated from a diagnostic path: the element was addressed by an id the
+ * workspace mounted itself.
+ */
+function revealAndFocus(host: HTMLElement) {
+  for (let node = host.parentElement; node; node = node.parentElement) {
+    if (node.tagName === 'DETAILS' && !(node as HTMLDetailsElement).open) (node as HTMLDetailsElement).open = true;
+  }
+  const control = host.matches(FOCUSABLE) ? host : host.querySelector<HTMLElement>(FOCUSABLE) ?? host;
+  if (!control.hasAttribute('tabindex') && !control.matches('input, select, textarea, button, a[href]')) {
+    control.setAttribute('tabindex', '-1');
+  }
+  control.focus?.({ preventScroll: true });
+  host.scrollIntoView?.({ block: 'center', behavior: 'instant' });
 }
 
 /**
@@ -177,6 +213,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
   const [conflict, setConflict] = useState<number | null>(null);
   const [jsonText, setJsonText] = useState('');
   const [jsonError, setJsonError] = useState('');
+  // A hand-edited document that has not been applied yet. A jump that would
+  // leave this chapter discards it, so the jump is refused instead.
+  const [jsonEdited, setJsonEdited] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Array<{ path: string; message: string }>>([]);
   const [inspected, setInspected] = useState<{ label: string; source: string; estimate: boolean } | null>(null);
   const [runs, setRuns] = useState<RunView[]>([]);
@@ -192,15 +231,41 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
   // An explicit environment density belongs to the whole request: the flooding
   // stage is required to use the same equilibrium options as every other stage.
   const equilibrium = { ...(performanceOptions.options.equilibrium as Record<string, unknown> | undefined) };
+  const runError = performanceOptions.error || floodingChoice.error;
+  // An invalid request carries no assembled stage list at all, and the flooding
+  // choice must never spread one. The panel therefore names the stages this
+  // request *explicitly* selects — the existing shared base stages plus the
+  // studies the reader picked — rather than reporting none.
+  const assembledStages = Array.isArray(performanceOptions.options.stages) ? (performanceOptions.options.stages as string[]) : [];
   const runOptions = floodingChoice.flooding
     ? {
       ...performanceOptions.options,
       ...(floodingChoice.rho === null ? {} : { equilibrium: { ...equilibrium, rho_t_m3: floodingChoice.rho } }),
-      stages: [...(performanceOptions.options.stages as string[]), 'flooding'],
+      stages: [...assembledStages, 'flooding'],
       flooding: floodingChoice.flooding,
     }
     : performanceOptions.options;
-  const runError = performanceOptions.error || floodingChoice.error;
+  /** The stages this request will actually submit, read from the request itself. */
+  const requestStages = runError
+    ? [...BASE_STAGES, ...requestedExtraStages(performanceRequest), ...(floodingRequest.scenario.trim() ? ['flooding'] : [])]
+    : Array.isArray(runOptions.stages) ? (runOptions.stages as string[]) : [];
+  /** The field a followed diagnostic is waiting to focus, and its own ticket. */
+  const [focusRequest, setFocusRequest] = useState<{ target: string; seq: number } | null>(null);
+  const [guidanceNotice, setGuidanceNotice] = useState('');
+  const focusTicket = useRef(0);
+  /** Every destination change retires the answer that was asked for the last one. */
+  const arrivalTicket = useRef(0);
+  /** The address this page has already acted on, so a re-render never replays it. */
+  const handledArrival = useRef<string | null>(null);
+  /** Always the newest draft: a jump resolves against what is on screen now. */
+  const draftRef = useRef<ProjectDocument | null>(null);
+  draftRef.current = draft;
+  const chapterRef = useRef(chapter);
+  chapterRef.current = chapter;
+  const jsonEditedRef = useRef(jsonEdited);
+  jsonEditedRef.current = jsonEdited;
+  const conditionRef = useRef(conditionId);
+  conditionRef.current = conditionId;
   const draftGeneration = useRef(0);
   const loadTicket = useRef(0);
   /**
@@ -250,8 +315,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
   }, [projectId, attempt]);
 
   // The leave guard is told about edits, not about renders: one call when the
-  // draft stops matching the saved revision, one when it matches again.
-  useEffect(() => { onDirtyChange?.(dirty); }, [dirty, onDirtyChange]);
+  // workspace stops matching what the reader can recover — an edited draft, or
+  // hand-written JSON that has not been applied yet and would be lost by leaving.
+  useEffect(() => { onDirtyChange?.(dirty || jsonEdited); }, [dirty, jsonEdited, onDirtyChange]);
 
   useEffect(() => {
     let active = true;
@@ -267,29 +333,250 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
   // condition switch or an unsaved draft hides the previous result immediately
   // rather than after the in-flight request resolves. The response is accepted
   // only when it still matches the candidate that requested it.
+  //
+  // An edited draft does not stop the read: the saved run stays available as
+  // *history* — it is the previous check, and it is usually the most useful
+  // thing on the page while an input is being corrected. What it may not do is
+  // become the current result, and `currentRun` already refuses that outright.
   useEffect(() => {
     const revision = view?.revision ?? -1;
     const candidate = eligibleResultRun(runs, revision, conditionId);
     // A run list entry may already carry its payload; use it directly and make
     // no request. Only a payload-less entry needs the single bounded retrieval.
     setPendingRunId(candidate && !candidate.result ? candidate.id : null);
-    if (!candidate || dirty) { setRunResult(null); return; }
+    if (!candidate) { setRunResult(null); return; }
     if (candidate.result) { setRunResult(matchesRun(candidate, projectId, revision, conditionId) ? candidate : null); return; }
     let active = true;
     api.getRun(candidate.id).then(full => {
       if (!active) return;
-      setRunResult(matchesRun(full, projectId, revision, conditionId) ? full : null);
+      setRunResult(full.id === candidate.id && matchesRun(full, projectId, revision, conditionId) ? full : null);
     }).catch(() => { if (active) setRunResult(null); });
     return () => { active = false; };
-  }, [runs, view?.revision, conditionId, dirty, projectId]);
+  }, [runs, view?.revision, conditionId, projectId]);
 
+  /**
+   * The last check that actually ran, kept across a save.
+   *
+   * The moment a corrected revision is saved, the new revision has no result at
+   * all and the strict candidate above finds nothing — which would throw away
+   * the very diagnostic the reader is following. This one is matched on project
+   * and condition only, so the previous check survives the save and a fresh
+   * load. It is never a current result: `currentRun` is untouched, and the panel
+   * attributes it to its own run, revision and condition.
+   */
+  const historyCandidate = latestOwnedRun(runs, projectId, conditionId, view?.revision ?? -1);
+  const historyKey = historyCandidate ? `${historyCandidate.id}|${historyCandidate.result ? 'full' : 'summary'}` : '';
+  const currentResultId = eligibleResultRun(runs, view?.revision ?? -1, conditionId)?.id;
+  const [historyRun, setHistoryRun] = useState<RunView | null>(null);
+  useEffect(() => {
+    if (!historyCandidate) { setHistoryRun(null); return; }
+    const mine = historyCandidate;
+    // The current-result read already retrieves this payload. Share it rather
+    // than issue a second request for the same saved run.
+    if (mine.id === currentResultId) { setHistoryRun(null); return; }
+    if (mine.result) {
+      setHistoryRun(matchesSavedCheck(mine, mine, projectId, view?.revision ?? -1, conditionId) ? mine : null);
+      return;
+    }
+    let active = true;
+    api.getRun(mine.id).then(full => {
+      if (!active) return;
+      setHistoryRun(matchesSavedCheck(full, mine, projectId, view?.revision ?? -1, conditionId) ? full : null);
+    }).catch(() => { if (active) setHistoryRun(null); });
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyKey, projectId, conditionId, view?.revision, currentResultId]);
+
+  /**
+   * A jump to a real field: select the chapter, then focus and scroll once the
+   * control is actually mounted. It is a view change and nothing else — no
+   * input is written, nothing is saved, no run is queued, and the Workbench is
+   * never remounted, so the draft and the leave guard survive it untouched.
+   *
+   * The path is re-resolved against the draft as it stands right now, so a
+   * ledger item removed since the saved run is refused here instead of focusing
+   * whatever now sits at that index. It says nothing about the notice: whatever
+   * the caller wants the reader to keep reading stays on screen.
+   */
+  function jumpTo(location: DiagnosticLocation, snapshot: ProjectDocument | null = null): boolean {
+    const target = resolveDiagnosticPath(location.path, { snapshot, live: draftRef.current }) ?? location;
+    if (!target.chapter || !target.target) {
+      setGuidanceNotice(`路径 ${target.path} 没有可定位的项目输入：${target.note}`);
+      return false;
+    }
+    if (target.chapter !== chapterRef.current && jsonEditedRef.current) {
+      // Refused, not consumed: the same jump is retried once the reader has
+      // applied or discarded that edit.
+      handledArrival.current = null;
+      setGuidanceNotice('当前章节的项目 JSON 还没有“应用到草稿”。跳转会丢弃这段未应用的编辑，已拒绝：文本保持原样。');
+      return false;
+    }
+    setChapter(target.chapter);
+    setFocusRequest({ target: target.target, seq: ++focusTicket.current });
+    setGuidanceNotice(target.note);
+    return true;
+  }
+
+  /**
+   * Following a diagnostic from a report. The address is read on mount and on
+   * `hashchange`, so refreshing, copying and Back/Forward all arrive the same
+   * way; the run behind it is fetched and checked against the address, against
+   * itself and against the project before anything moves.
+   *
+   * Every destination change retires the previous answer, including a plain
+   * return to the project's base address, and the address is re-read when the
+   * answer arrives. A foreign run, a run that disagrees with its own result, a
+   * condition that has since been removed, a malformed tail and a late answer
+   * each end in a sentence that says so, never in a wrong focus.
+   */
   useEffect(() => {
     if (!draft) return;
+    const arrive = () => {
+      const tail = readDiagnosticTail(window.location.hash, projectId);
+      const key = tail.kind === 'target' ? `${tail.runId}|${tail.path}`
+        : tail.kind === 'malformed' ? `malformed|${window.location.hash}` : null;
+      // Whatever the destination, the previous answer is now retired.
+      const mine = ++arrivalTicket.current;
+      focusTicket.current += 1;
+      setFocusRequest(null);
+      handledArrival.current = key;
+      if (tail.kind === 'none') return;
+      if (tail.kind === 'malformed') { setGuidanceNotice(tail.reason); return; }
+      const { runId, path } = tail;
+      setGuidanceNotice('');
+      api.getRun(runId).then(source => {
+        if (!alive.current || arrivalTicket.current !== mine) return;
+        // The answer must still belong to the address the reader is standing on.
+        const still = readDiagnosticTail(window.location.hash, projectId);
+        if (still.kind !== 'target' || still.runId !== runId || still.path !== path) return;
+        if (source.id !== runId) {
+          setGuidanceNotice(`读取到的运行 ${source.id} 与地址要求的 ${runId} 不一致，已拒绝跳转。`);
+          return;
+        }
+        if (source.project_id !== projectId) {
+          setGuidanceNotice(`运行 ${runId} 属于其他项目，已拒绝跳转。`);
+          return;
+        }
+        if (!source.result) {
+          setGuidanceNotice(`运行 ${runId} 尚无已保存结果，无法定位输入。`);
+          return;
+        }
+        // The stored result has to be the same run's own result, or the
+        // identity behind the link is not one we can trust.
+        const result = source.result;
+        const consistent = result.project_id === source.project_id
+          && result.condition_id === source.condition_id
+          && result.request_fingerprint === source.request_fingerprint;
+        if (!consistent) {
+          setGuidanceNotice(`运行 ${runId} 的项目、工况或请求指纹与其保存结果不一致，已拒绝跳转。`);
+          return;
+        }
+        // An existing condition may be selected so the reader lands on the
+        // inputs the run actually used. A condition that has since been removed
+        // is never resurrected, and nothing is followed on its behalf.
+        const conditions = draftRef.current?.loading_conditions ?? [];
+        if (!conditions.some(item => item.id === source.condition_id)) {
+          setGuidanceNotice(`运行 ${runId} 的工况 ${source.condition_id} 已不在当前项目，已拒绝跳转。`);
+          return;
+        }
+        const snapshot = result.input_snapshot ?? null;
+        const location = resolveDiagnosticPath(path, { snapshot, live: draftRef.current });
+        if (!location || location.kind === 'evidence') {
+          setGuidanceNotice(`路径 ${path} 没有可定位的项目输入：${location?.note ?? '这条诊断路径无法解析。'}`);
+          return;
+        }
+        const notice = source.revision !== view?.revision
+          ? `该诊断来自修订 ${source.revision}；当前项目已保存修订 ${view?.revision}，需要保存并重新运行后才会更新。`
+          : '';
+        if (source.condition_id !== conditionRef.current) setConditionId(source.condition_id);
+        if (!jumpTo(location, snapshot)) return;
+        // Stated after the jump, so the reader sees it next to where they landed.
+        if (notice) setGuidanceNotice(`${notice} ${location.note}`);
+      }).catch(() => {
+        if (alive.current && arrivalTicket.current === mine) setGuidanceNotice(`无法读取诊断来源运行 ${runId}。`);
+      });
+    };
+    // A re-render only acts when the address is one this page has not used.
+    const reconcile = () => {
+      const tail = readDiagnosticTail(window.location.hash, projectId);
+      const key = tail.kind === 'target' ? `${tail.runId}|${tail.path}`
+        : tail.kind === 'malformed' ? `malformed|${window.location.hash}` : null;
+      if (key !== handledArrival.current) arrive();
+    };
+    reconcile();
+    window.addEventListener('hashchange', arrive);
+    return () => { window.removeEventListener('hashchange', arrive); arrivalTicket.current += 1; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId, view?.revision, !!draft]);
+
+  /**
+   * Focus the addressed control as soon as it exists, opening whatever details
+   * fold contains it, and scroll it to the middle of the view without an
+   * animation. The retry is bounded: the chapter may still be mounting, but it
+   * is never waited for forever.
+   */
+  useEffect(() => {
+    if (!focusRequest) return;
+    const seq = focusRequest.seq;
+    const frame = typeof requestAnimationFrame === 'function'
+      ? (task: () => void) => requestAnimationFrame(() => { task(); })
+      : (task: () => void) => setTimeout(task, 16) as unknown as number;
+    const cancel = typeof cancelAnimationFrame === 'function' ? cancelAnimationFrame : clearTimeout;
+    let cancelled = false;
+    let pending = 0;
+    let attempts = 0;
+    const attempt = () => {
+      if (cancelled || focusTicket.current !== seq) return;
+      const host = document.getElementById(focusRequest.target);
+      if (host) { revealAndFocus(host); return; }
+      if (attempts++ >= 30) return;
+      pending = frame(attempt);
+    };
+    pending = frame(attempt);
+    return () => { cancelled = true; cancel(pending); };
+  }, [focusRequest]);
+
+  useEffect(() => {
+    // Hand-written text the reader has not applied is theirs: a save or a reload
+    // replaces the draft, and that must never silently overwrite what is on
+    // screen. Applying the text clears the flag first, so this refresh still
+    // runs for the reader's own edit.
+    if (!draft || jsonEditedRef.current) return;
     const section = CHAPTER_JSON[chapter];
     const value = chapter === 'json' ? draft : section ? draft[section] : null;
     setJsonText(JSON.stringify(value ?? (chapter === 'damage' ? [] : {}), null, 2));
     setJsonError('');
+    setJsonEdited(false);
   }, [chapter, draft]);
+
+  /** The chapter's own serialization of the draft, which is where a discard returns to. */
+  function jsonSource(): string {
+    if (!draft) return '';
+    const section = CHAPTER_JSON[chapter];
+    const value = chapter === 'json' ? draft : section ? draft[section] : null;
+    return JSON.stringify(value ?? (chapter === 'damage' ? [] : {}), null, 2);
+  }
+
+  /** Throws away unapplied JSON explicitly. Invalid text can never trap a reader here. */
+  function discardJson() {
+    setJsonText(jsonSource());
+    setJsonError('');
+    setJsonEdited(false);
+  }
+
+  /**
+   * A chapter change never discards unapplied JSON silently. The reader is told
+   * what the chapter offers to keep it, and nothing is applied on their behalf.
+   */
+  function goChapter(next: Chapter) {
+    if (next === chapterRef.current) return;
+    if (jsonEditedRef.current) {
+      handledArrival.current = null;
+      setGuidanceNotice('当前章节有未应用的项目 JSON 文本，离开会丢弃它，已保留本章：可“放弃未应用的文本”后切换，或先“应用到草稿”。');
+      return;
+    }
+    setChapter(next);
+  }
 
   function updateDraft(next: ProjectDocument) {
     draftGeneration.current += 1;
@@ -479,6 +766,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
         updateDraft(next);
       }
       setJsonError('');
+      setJsonEdited(false);
     } catch (cause) { setJsonError(cause instanceof Error ? cause.message : 'JSON 格式无效'); outcome('hold'); }
   }
 
@@ -495,12 +783,18 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
   // run: a stale or in-flight result must never be displayed for the current
   // revision/condition.
   const selectedRun = currentRun(runResult, projectId, view.revision, conditionId, dirty);
+  // History and result are two different things from two different runs: the
+  // guarded result above is what the saved revision may present, and the owned
+  // previous check below is what the reader still needs after a save.
+  const latestCheck = runResult?.id === historyCandidate?.id ? runResult : historyRun;
+  const historyOfSelected = matchesSavedCheck(latestCheck, historyCandidate, projectId, view.revision, conditionId)
+    ? latestCheck : null;
   const ledger = ledgerItems(draft);
   const visibleRuns = selectedRun ? [selectedRun] : [];
   // Display units follow the edited draft. They change presentation only: the
   // saved revision, the request and every export stay canonical.
   const page = <div className="workbench-layout" data-trace={traceOpen ? 'open' : 'closed'}>
-    <ProjectNav name={draft.name} active={chapter} onSelect={setChapter} onBack={onBack} />
+    <ProjectNav name={draft.name} active={chapter} onSelect={goChapter} onBack={onBack} />
     <main className="workbench-main">
       <div className="workbench-toolbar">
         <div className="operation-bar">
@@ -545,6 +839,9 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
         <div className="workbench-alerts">
           {runError && <div className="notice notice--error" role="alert">{runError}</div>}
           {error && <div className="notice notice--error" role="alert">{error}</div>}
+          {/* A refused jump is stated here, in the one place that is always on
+              screen, and it changes neither the chapter nor the draft. */}
+          {guidanceNotice && <div className="notice" role="status">{guidanceNotice}</div>}
           {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void copyDraft(); }}>复制我的修改</button><button className="button button--primary" disabled={operation !== null} onClick={() => { void reload(); }}>{operation === 'reloading' ? '正在重新载入…' : '重新载入'}</button></div></div>}
         </div>
       </div>
@@ -555,7 +852,8 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
       <div className="workbench-content" data-motion={chapterMotion}>
         <ChapterHead chapter={chapter} name={draft.name} projectId={draft.id} revision={view.revision} proxy={draft.name.toLowerCase().includes('queen mary')} />
         {chapter === 'overview' && <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
-          runs={runs} current={selectedRun} dirty={dirty} onChapter={setChapter} onRun={onRun} />}
+          runs={runs} current={selectedRun} previous={historyOfSelected} requestStages={requestStages}
+          requestError={runError} dirty={dirty} onChapter={goChapter} onRun={onRun} onNavigate={jumpTo} />}
         {chapter === 'hull' && <section className="editor-section"><InputGroup index="01" title="主尺度" note="显示单位可读，保存与计算仍为规范单位" />
           <p className="section-intro">主尺度只记录已知输入。留空表示未知，不自动补零。复杂型线可在“项目数据”中编辑。</p>
           <div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`));
@@ -567,7 +865,7 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
               // No per-dimension estimate flag is stored alongside hull.sources.
               source: declaredSource(declared),
               estimate: null, path: `hull.${key}` };
-            return <TracedField fact={fact} className="hull-field" key={field.key}>
+            return <TracedField fact={fact} className="hull-field" key={field.key} id={hullGuidanceId(field.key)}>
           {field.dimension
             ? <QuantityField label={field.label} ariaLabel={field.label} value={numeric(hull[key])} dimension={field.dimension} kind="positive" invalid={Boolean(issue)} hint={field.hint} onChange={next => updateHull(key, next === null ? null : String(next))} />
             : <label className="field-label">{field.label}<input type="number" step="any" aria-label={field.label} aria-invalid={Boolean(issue)} value={typeof hull[key] === 'number' ? hull[key] : ''} onChange={event => updateHull(key, event.target.value)} placeholder="未知" /><small>{field.hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>}
@@ -580,11 +878,11 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
           <PerformanceInputs project={draft} onChange={updateDraft} /></section>}
         {chapter === 'performance' && <section className="editor-section"><InputGroup index="02" title="阻力研究场景" note="两种既有方法 · 输入来源与敏感性" />
           <ResistanceEditor project={draft} onChange={updateDraft} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="03" title="本次计算请求" note="可选 · 只决定这次运行计算什么" />
+        {chapter === 'performance' && <section className="editor-section" id={REQUEST_PERFORMANCE} tabIndex={-1}><InputGroup index="03" title="本次计算请求" note="可选 · 只决定这次运行计算什么" />
           <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={setPerformanceRequest} /></section>}
         {chapter === 'performance' && <section className="editor-section"><InputGroup index="04" title="结果" note="当前修订 · 所选工况" />
           <PerformanceResults run={selectedRun} /></section>}
-        {chapter === 'weights' && <section className="editor-section"><InputGroup index="01" title="载荷账本" note={`${draft.weight_groups.length} 个分组`} />
+        {chapter === 'weights' && <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}><InputGroup index="01" title="载荷账本" note={`${draft.weight_groups.length} 个分组`} />
           {draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>还没有重量分组</h3><p>空白项目可先从项目数据中添加账本结构。</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{group.items.length} 项</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
             const itemId = String(item.id ?? `条目 ${itemIndex + 1}`);
             const source = declaredSource(item.source);
@@ -593,22 +891,26 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
             // each shows the item's own declared source rather than a shared note.
             const massFact: TraceFact = { key: `ledger.${group.id}.${itemId}.mass_t`, label: `${itemId} 质量`, value: numeric(item.mass_t), dimension: 'mass', storedUnit: 't', source, estimate, path: `weight_groups[${groupIndex}].items[${itemId}].mass_t` };
             const positionFact: TraceFact = { ...massFact, key: `ledger.${group.id}.${itemId}.x_m`, label: `${itemId} 纵向位置`, value: numeric(item.x_m), dimension: 'length', storedUnit: 'm', path: `weight_groups[${groupIndex}].items[${itemId}].x_m` };
+            // A followed diagnostic addresses one ledger row by the ids the
+            // source run saw, so only a row with a real id can be reached.
+            const keyed = typeof item.id === 'string' && item.id !== '';
+            const rowId = (field: string) => keyed ? ledgerGuidanceId(String(group.id), itemId, field) : undefined;
             return <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{itemId}</strong>
-              <TracedField fact={massFact}><QuantityField small label="质量" ariaLabel={`${group.id} ${itemId} 质量`} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /></TracedField>
-              <TracedField fact={positionFact}><QuantityField small label="纵向位置" ariaLabel={`${group.id} ${itemId} 纵向位置`} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
-              <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: `${itemId} 来源`, value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }}>
+              <TracedField fact={massFact} id={rowId('mass_t')}><QuantityField small label="质量" ariaLabel={`${group.id} ${itemId} 质量`} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /></TracedField>
+              <TracedField fact={positionFact} id={rowId('x_m')}><QuantityField small label="纵向位置" ariaLabel={`${group.id} ${itemId} 纵向位置`} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
+              <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: `${itemId} 来源`, value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }} id={rowId('source')}>
                 <label>来源<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
               </TracedField></div>;
           })}</div></div>)}</section>}
         {chapter === 'weights' && <section className="editor-section"><InputGroup index="02" title="系统质量模型" note="按已声明输入核算质量，不改写账本" /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title="端点与干舷" note="端点、干舷与参考长度" /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">用于编辑表单未覆盖的字段（如 y_m / z_m）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title="炮组声明" note="每个炮组声明输入 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 mounts / armour 边界）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title="鱼雷与水雷分区" note="鱼雷 / 水雷 / 深弹 / 杂项分区 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 torpedo 的 weight_item_ids 绑定）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title="端点与干舷" note="端点、干舷与参考长度" /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">用于编辑表单未覆盖的字段（如 y_m / z_m）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title="炮组声明" note="每个炮组声明输入 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 mounts / armour 边界）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title="鱼雷与水雷分区" note="鱼雷 / 水雷 / 深弹 / 杂项分区 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 torpedo 的 weight_item_ids 绑定）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
         {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title="装甲输入与研究" /><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
         {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title="动力输入与研究" /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'damage' && <section className="editor-section"><InputGroup index="01" title="场景草稿" note="场景草稿 · 请求与结果" /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
-        {chapter === 'damage' && <section className="editor-section"><InputGroup index="02" title="高级场景数据" /><details className="advanced-json"><summary>高级：破损场景 JSON</summary><p className="section-intro">这里编辑表单未覆盖的场景字段（项目舱室几何已在下方表单编辑）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">场景数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'json' && <section className="editor-section"><InputGroup index="01" title="完整项目数据" note="结构化 JSON" /><p className="section-intro">这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。</p><label className="field-label" htmlFor="chapter-json">项目 JSON</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => setJsonText(event.target.value)} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button><span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
+        {chapter === 'damage' && <section className="editor-section" id={REQUEST_DAMAGE} tabIndex={-1}><InputGroup index="01" title="场景草稿" note="场景草稿 · 请求与结果" /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
+        {chapter === 'damage' && <section className="editor-section"><InputGroup index="02" title="高级场景数据" /><details className="advanced-json"><summary>高级：破损场景 JSON</summary><p className="section-intro">这里编辑表单未覆盖的场景字段（项目舱室几何已在下方表单编辑）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">场景数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
+        {chapter === 'json' && <section className="editor-section"><InputGroup index="01" title="完整项目数据" note="结构化 JSON" /><p className="section-intro">这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。</p><label className="field-label" htmlFor="chapter-json">项目 JSON</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
       </div>
     </main>
     <TracePanel open={traceOpen} onToggle={() => setTraceOpen(open => !open)} />
