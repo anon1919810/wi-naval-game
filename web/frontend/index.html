@@ -5,12 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f6f6f3" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="preload" as="image" href="/portfolio/ship-plan-01.png" />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/archivo-latin-var.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-var-latin.woff2" crossorigin />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/space-grotesk-var-latin.woff2" crossorigin />
+    <!-- There is deliberately no image preload here. The one bitmap this site
+         loads is whichever reference sheet is on screen, and a root preload
+         fetched it on every route — including About and Credits, which show no
+         drawing at all. Each sheet is requested when it is selected instead. -->
     <meta name="description" content="Y’s Formfield — Yang Duanming’s collection of tools and experiments. Explore Plimsoll, a naval design and analysis tool." />
     <title>Y’s Formfield — Tools &amp; Experiments</title>
+    <!-- Absolute URLs: this site is one origin at one address, and every public
+         page is a hash route under it. Saying so plainly is what lets a link
+         preview, a share and a search result agree about what this is. -->
+    <link rel="canonical" href="https://119.91.211.156/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Y’s Formfield" />
+    <meta property="og:title" content="Y’s Formfield — Tools &amp; Experiments" />
+    <meta property="og:description" content="Yang Duanming’s collection of tools and experiments. Explore Plimsoll, a naval design and analysis tool." />
+    <meta property="og:url" content="https://119.91.211.156/" />
+    <!-- The preview image is the archival original PNG, not the WebP derivative
+         the page itself draws: a preview URL is a stable, conventional public
+         address, and the PNG is the file of record. The WebP exists only for
+         drawing delivery and is never preloaded here. -->
+    <meta property="og:image" content="https://119.91.211.156/portfolio/ship-plan-01.png" />
+    <meta property="og:image:alt" content="Reference line sheet 01 for the Plimsoll naval design work." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Y’s Formfield — Tools &amp; Experiments" />
+    <meta name="twitter:description" content="Yang Duanming’s collection of tools and experiments. Explore Plimsoll, a naval design and analysis tool." />
+    <meta name="twitter:image" content="https://119.91.211.156/portfolio/ship-plan-01.png" />
+    <meta name="twitter:image:alt" content="Reference line sheet 01 for the Plimsoll naval design work." />
+    <!-- The favicon reuses the brand mark the workspace header already ships
+         (.brand-mark in src/styles/layout.css): a ring with the load line
+         through it, redrawn as SVG so it costs a few hundred bytes. Before this
+         the browser asked for /favicon.ico on every visit and the server
+         answered with the SPA shell, so the tab carried the site as a broken
+         image. No new brand image was created. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
     <div id="root"></div>

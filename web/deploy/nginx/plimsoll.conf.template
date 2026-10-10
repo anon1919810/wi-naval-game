@@ -51,6 +51,32 @@ server {
     index index.html;
     client_max_body_size 8m;
 
+    # Static compression, using the gzip module this image already ships.
+    # No brotli is configured: that module is not built in here, and claiming it
+    # would mean shipping something that may not exist. `gzip_vary on` makes every
+    # negotiated response carry `Vary: Accept-Encoding`, so a shared cache cannot
+    # hand a compressed body to a client that did not ask for one.
+    # text/html is always compressed by nginx and must not be repeated here.
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 256;
+    gzip_types
+        application/javascript
+        application/json
+        application/manifest+json
+        application/wasm
+        application/xml
+        image/svg+xml
+        text/css
+        text/javascript
+        text/plain
+        text/xml;
+
+    # Keep WAV transport unchanged; audio is fetched only after interaction.
+    # WOFF2 is already compressed. Text assets use gzip above.
+
     add_header X-Content-Type-Options nosniff always;
     add_header X-Frame-Options SAMEORIGIN always;
     add_header Referrer-Policy same-origin always;
@@ -79,19 +105,70 @@ server {
         return 308 /api/;
     }
 
-    # Hashed build assets are immutable.
+    # Hashed build assets are immutable — but only when they exist.
+    # `add_header ... always` attaches the header to *every* response from this
+    # location, including the 404 that `try_files $uri =404` raises. That is
+    # exactly what production was doing: /assets/no-such-bundle.js answered 404
+    # and still advertised `max-age=31536000, immutable`, so a stale document
+    # asking for an old bundle name cached the miss for a year and the file
+    # stayed broken. Without `always` nginx adds the header only to 2xx/3xx
+    # responses, so a hit is immutable and a miss carries no lifetime at all.
+    # The security headers keep `always` and are repeated here because a
+    # location that declares any `add_header` stops inheriting the server's.
     location /assets/ {
-        add_header Cache-Control "public, max-age=31536000, immutable" always;
         try_files $uri =404;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy same-origin always;
+    }
+
+    # Unhashed static: the fonts, the audition WAVs and the reference sheets.
+    # These filenames do not change when their bytes do, so they must not be
+    # cached for a year. One hour with revalidation keeps a normal visit off the
+    # network entirely while a redeploy is picked up on the next reload. As
+    # above, the header carries no `always`, so a miss is not given a lifetime.
+    location ~* ^/(fonts|audio|portfolio)/ {
+        # A local types table replaces inherited mappings. List all formats in
+        # these static directories; leave the shell and hashed assets inherited.
+        types {
+            audio/wav wav;
+            font/woff2 woff2;
+            font/woff woff;
+            image/png png;
+            image/jpeg jpg jpeg;
+            image/webp webp;
+            image/svg+xml svg;
+            image/gif gif;
+            image/avif avif;
+            application/json json;
+            text/plain txt md;
+        }
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=3600, must-revalidate";
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy same-origin always;
     }
 
     # The shell must always be revalidated so a new release is picked up.
+    # The security headers are repeated for the same reason as above: declaring
+    # any add_header here stops this location inheriting the server's.
     location = /index.html {
         add_header Cache-Control "no-cache" always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-Frame-Options SAMEORIGIN always;
+        add_header Referrer-Policy same-origin always;
     }
 
-    # SPA fallback for client-side routes only.
+    # This is a single-page app, but its routes are hash routes: the browser
+    # asks for `/` and then navigates inside the document, so the server only
+    # ever sees real paths. There is therefore no client-side route to fall back
+    # to, and the previous `try_files ... /index.html` answered every unknown
+    # pathname with the shell — including `/admin/`, `/audio/touch.mp3` and
+    # `/portfolio/no-such-plan.png`, each of which returned 200 and a full HTML
+    # document. A missing file is a missing file: 404, and nothing else.
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ =404;
     }
 }

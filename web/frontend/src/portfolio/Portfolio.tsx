@@ -247,18 +247,13 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     return () => { active = false; };
   }, [sheet.href, onWork, loadAttempt, finish]);
 
-  useEffect(() => {
-    if (!onWork || readyHref !== sheet.href) return;
-    const prefetch = () => {
-      for (const other of PLAN_SHEETS) if (other.href !== sheet.href) void readyImage(other.href, imageCache.current).catch(() => {});
-    };
-    if (window.requestIdleCallback) {
-      const id = window.requestIdleCallback(prefetch);
-      return () => window.cancelIdleCallback(id);
-    }
-    const timer = window.setTimeout(prefetch, 1500);
-    return () => window.clearTimeout(timer);
-  }, [readyHref, sheet.href, onWork]);
+  // There is deliberately no idle prefetch of the other reference sheets.
+  // Each sheet is a ~200 KB archival scan and a visitor normally looks at one,
+  // so loading all three while the page is idle spends their data and
+  // connection on drawings they may never open. A sheet is requested when it is
+  // selected (chooseReference), which is the intent that justifies the fetch;
+  // the decode gate below still keeps the drawing on screen until the target
+  // bitmap has actually decoded.
 
   useLayoutEffect(() => {
     if (!opening || !publicActive) return;
@@ -671,8 +666,10 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           {/* The shared pale field surrounds the exhibit. */}
           <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
           <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (isExhibitControl(e.target)) withdrawDrawingCursor(); else if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (isExhibitControl(e.target)) return; if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
-            <div className="ff-art-scene"><Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} /></div>
-            {inspect && <div ref={lens} className="ff-lens" aria-hidden="true">
+            {/* Hidden SVG images still fetch. Keep the exhibit frame and state,
+                but mount its bitmap only while this drawing is displayed. */}
+            <div className="ff-art-scene">{onWork && !detail && <Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} />}</div>
+            {onWork && !detail && inspect && <div ref={lens} className="ff-lens" aria-hidden="true">
               <span className="ff-lens-port">
                 {/* The same Artwork composition, narrowed by viewBox: no second renderer, no second tone. */}
                 <svg ref={lensView} className="ff-lens-view" viewBox={RESTING_VIEW_BOX} preserveAspectRatio="xMidYMid meet"><Artwork pixelFrame compositionRef={lensComposition} geometryRef={lensGeometry} maskRef={lensMask} sheet={sheet} dark={dark} details={details} /></svg>

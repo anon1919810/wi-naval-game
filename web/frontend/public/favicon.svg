@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The existing brand mark (.brand-mark in src/styles/layout.css): a blue
+       circle with a single horizontal rule through it, in the workspace accent. -->
+  <circle cx="16" cy="16" r="11" fill="none" stroke="#3857e7" stroke-width="3"/>
+  <path d="M5 16h22" stroke="#3857e7" stroke-width="3"/>
+</svg>

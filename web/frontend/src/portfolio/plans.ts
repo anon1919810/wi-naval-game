@@ -1,11 +1,19 @@
 /**
  * Reference line sheets behind the public Plimsoll exhibit.
  *
- * The public artwork *is* the original PNG: VesselDrawing.tsx crops each sheet
+ * The public artwork *is* the original scan: VesselDrawing.tsx crops each sheet
  * in place with an <image> at its intrinsic size, so the crop metadata below is
  * load-bearing source geometry rather than reference notes. Nothing is redrawn,
  * traced or simplified, and the scan is shown at its own resolution. The bow
  * points right in all three studies.
+ *
+ * `href` names a **lossless WebP derivative** of each PNG, not the PNG itself.
+ * Lossless here means exactly that: the decoded pixels are byte-for-byte
+ * identical to the PNG's, which was verified for all three sheets when they were
+ * generated. The PNGs remain in `public/portfolio/` as the archival originals
+ * and are unchanged; the derivatives are ~58% smaller, which matters because
+ * each sheet is a ~200 KB scan the browser has to fetch. Nothing about the
+ * geometry, the crop or the tonal treatment changes — only the container.
  *
  * Provenance and usage limits: see `public/portfolio/PROVENANCE.md`. The three
  * sheets are reference alternatives inside the single
@@ -67,7 +75,7 @@ export const PLAN_SHEETS: readonly PlanSheet[] = [
     id: '01',
     label: 'Reference sheet 01',
     shortLabel: '01',
-    href: '/portfolio/ship-plan-01.png',
+    href: '/portfolio/ship-plan-01.webp',
     sourceWidth: 1000,
     sourceHeight: 451,
     crop: { x: 0, y: 290, width: 1000, height: 161 },
@@ -80,7 +88,7 @@ export const PLAN_SHEETS: readonly PlanSheet[] = [
     id: '02',
     label: 'Reference sheet 02',
     shortLabel: '02',
-    href: '/portfolio/ship-plan-02.png',
+    href: '/portfolio/ship-plan-02.webp',
     sourceWidth: 1018,
     sourceHeight: 451,
     crop: { x: 0, y: 290, width: 1018, height: 161 },
@@ -93,7 +101,7 @@ export const PLAN_SHEETS: readonly PlanSheet[] = [
     id: '03',
     label: 'Reference sheet 03',
     shortLabel: '03',
-    href: '/portfolio/ship-plan-03.png',
+    href: '/portfolio/ship-plan-03.webp',
     sourceWidth: 1063,
     sourceHeight: 542,
     crop: { x: 0, y: 360, width: 1063, height: 182 },

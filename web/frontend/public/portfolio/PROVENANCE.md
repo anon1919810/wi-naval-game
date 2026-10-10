@@ -1,5 +1,29 @@
 # Reference artwork
 
+## Lossless WebP derivatives
+
+On 2026-10-10 each of the three line sheets gained a **lossless WebP** derivative
+alongside its PNG. The PNGs are the archival originals and are **unchanged**;
+current checksums are in `docs/formfield/assets/source-sha256.csv` and the
+original supplied files are named below.
+
+| Sheet | PNG | WebP | WebP / PNG | Decoded pixels |
+|---|---:|---:|---:|---|
+| ship-plan-01 | 235,564 B | 96,662 B | 0.410 | identical |
+| ship-plan-02 | 344,997 B | 145,820 B | 0.423 | identical |
+| ship-plan-03 | 314,169 B | 133,054 B | 0.424 | identical |
+
+Generated with Pillow's bundled WebP encoder as `lossless=True, quality=100,
+method=6, exact=True`. **Nothing is redrawn, resampled, re-toned or cropped**:
+the decoded RGB pixel buffer of each WebP was compared against the PNG's and is
+byte-for-byte identical, at the same intrinsic dimensions. These are the same
+scans in a smaller container, not new artwork — roughly 58% less to fetch for the
+same image.
+
+`src/portfolio/plans.ts` points its `href` at the WebP; the crop metadata, the
+source coordinates and the tonal profiles are unchanged, because none of them
+depend on the file format.
+
 ## Report screenshot
 
 Retired from the project detail on 2026-10-07. The screenshot and its caption are no longer rendered, and the `REPORT_IMAGE` constant has been removed. The original asset remains unchanged as historical evidence; the paragraph below records its original use.

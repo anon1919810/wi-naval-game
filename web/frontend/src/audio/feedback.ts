@@ -12,7 +12,11 @@ export function controlCue(control: Element): SoundCue | null {
 }
 export function installInteractionFeedback(): () => void {
   interactionAudio.setMuted(storedMuted());
-  interactionAudio.warm();
+  // Deliberately no warm() here. Mounting is not consent: the audition files are
+  // read on the first real, unmuted gesture or when the visitor explicitly turns
+  // sound on, both of which go through unlock(). Fetching five WAVs on mount
+  // would spend the visitor's bandwidth and data before they had asked for a
+  // single sound, and would do it even to someone who has muted it.
   let active = true;
   let keyboard = false;
   const gesture = (event: Event) => {

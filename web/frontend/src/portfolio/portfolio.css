@@ -7,7 +7,13 @@
    *inside* the public shell only, so the Splash text and the SVG metadata follow
    them while the Plimsoll app keeps its own tokens. */
 .ff-shell {
-  --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #70736e; --ff-line: #d6d9d2; --ff-accent: #3857e7; --ff-red: #E2231A;
+  /* `--ff-muted` is the shell's secondary type colour, and it sits on `--ff-bg`
+     for the rail words, the exhibit label, the ruler and the footers — all body
+     text, none of it a hairline. #70736e measured 4.44189:1 against #f6f6f3,
+     under the 4.5:1 WCAG AA threshold for normal-size text. #6c6f6a measures
+     4.70809:1 on the same background and is visually the same grey. Only the
+     light value changes; the dark theme is 7.40173:1 and is left alone. */
+  --ff-bg: #f6f6f3; --ff-panel: #fff; --ff-ink: #191b19; --ff-muted: #6c6f6a; --ff-line: #d6d9d2; --ff-accent: #3857e7; --ff-red: #E2231A;
   --ff-pad: clamp(18px, 2.6vw, 48px);
   /* The rail's width and the gap beside it, named once. The grid spends these,
      and so does every content region that has to stay clear of the rail — which
@@ -282,14 +288,35 @@
   /* In the fallback the rail is one row in the flow and the ruler withdraws, so
      there is nothing to bound and nothing that would fit inside a cap. */
   .ff-rail-dock { max-height: none; }
-  .ff-rail { flex-direction: row; align-items: center; gap: 22px; padding: 16px 0 0; border-top: 1px solid var(--ff-line); }
-  .ff-rail-link { font-size: clamp(40px, 10vw, 60px); line-height: .9; }
+  /* Three words at the fallback's own display size do not fit on one row below
+     about 430px: measured at 40px type the three links were 112.6 + 111 + 130
+     = 353.6px wide plus two 22px gaps, against a 343px content box at a 390px
+     viewport, so the row ran ~30px past the right edge and Credits was clipped.
+     Nothing here hides that overflow — the row is sized to fit, and it is
+     allowed to wrap if it ever cannot.
+     The three words scale together: the sum of their widths plus the two gaps
+     is 8.34em + 20px (the badge is a fixed 20px circle) + 2×gap, and the
+     content box is 88vw. Solving 8.34·F + 20 + 2G ≤ 0.88·V at each breakpoint
+     gives this type scale and this column gap, which leave a real margin at
+     320 / 360 / 390 / 430 and a wide one at 650:
+       320 → 252 of 282 · 360 → 278 of 317 · 390 → 300 of 343
+       430 → 328 of 378 · 650 → 431 of 572
+     One font-size for all three entries, because a per-entry size would break
+     the equal typography the rail is built on, and Credits' isolated `i` is cut
+     in em from that same value so it would move with it.
+     `flex-wrap: wrap` is the real safety net for a font substitution wider than
+     the one measured: a second row of whole navigation words is a correct
+     fallback, where a horizontal scrollbar or a clipped word is not. */
+  .ff-rail { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start;
+             column-gap: clamp(12px, 5vw, 22px); row-gap: 4px; padding: 16px 0 0; border-top: 1px solid var(--ff-line); }
+  .ff-rail-link { font-size: clamp(24px, 7.4vw, 44px); line-height: .9; }
   .ff-rail-badge { width: 20px; height: 20px; font-size: 9px; margin-top: 0; }
 }
 @media (max-width: 650px) {
   .ff-shell { padding: 0 6vw; }
-  .ff-header { height: 82px; gap: 12px; grid-template-columns: 1fr auto; }
-  .ff-wordmark { font-size: 21px; }
+  .ff-header { height: 82px; gap: 12px; grid-template-columns: minmax(0, 1fr) auto; }
+  /* Leave room for three 44px controls, including a desktop scrollbar. */
+  .ff-wordmark { font-size: clamp(14px, calc(10vw - 18px), 21px); }
   .ff-theme-group { grid-column: 2; grid-row: 1; }
   .ff-exhibit-label { font-size: 8px; padding: 22px 0 15px; gap: 12px; }
   .ff-exhibit-label span:last-child { display: none; }

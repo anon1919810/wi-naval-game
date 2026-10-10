@@ -66,14 +66,34 @@
 /* The secondary action: smaller, muted blue at rest, on its own preview at the
    brand blue. It is hidden by an inline `visibility`, which is what keeps it out
    of the tab order and off the pointer while it is closed; the size of the gap
-   is always reserved, so opening it never moves the title. */
+   is always reserved, so opening it never moves the title.
+
+   Its own type is a 12–14px cap height on a line box of 1, so the box a pointer
+   actually lands on measured 12px high — well under the 44px a touch target
+   needs, and too small to hit reliably even with a mouse. The type, the baseline,
+   the word box and the preview circle are all left exactly as they were; only
+   the box the pointer can reach grows, and it grows through a pseudo-element
+   overlay rather than through padding or a min-height. That matters: this link
+   sits on the title's baseline inside a flex region whose alignment is
+   `baseline`, so changing the element's own box would move it relative to the
+   title. A positioned child cannot, because the element's layout box is
+   untouched — the word, its underline and the circle all measure the same as
+   before, and the region reserves the same 14–26px gap.
+   The overlay belongs to the link, so a press anywhere inside it activates the
+   link itself: no dead zone, no separate target to miss, and keyboard focus and
+   the coarse-pointer rule below are unchanged. */
 .ff-shell .ff-title-action {
+  position: relative;
   display: inline-flex; align-items: baseline; gap: .5em;
   font-size: clamp(12px, 1vw, 14px); font-weight: 600; letter-spacing: .04em; line-height: 1;
   color: var(--ff-accent); opacity: .62;
   transform: translateX(8px);
   transition: opacity var(--ff-title-preview) linear, color var(--ff-title-preview) linear, transform var(--ff-title-preview) var(--ff-title-ease);
 }
+/* 44px tall, centred on the word, and 8px wider on each side. The 14px gap the
+   region reserves is wider than the 8px each side reaches, so the two hit areas
+   stay disjoint and neither can swallow a press meant for the other. */
+.ff-shell .ff-title-action::after { content: ''; position: absolute; left: -8px; right: -8px; top: 50%; height: 44px; transform: translateY(-50%); }
 .ff-title-region[data-ff-title-region='open'] .ff-title-action { transform: translateX(0); }
 .ff-title-action:hover, .ff-title-action[data-ff-title-action='preview'] { opacity: 1; }
 .ff-title-action .ff-title-arrow { font-size: .7em; }
