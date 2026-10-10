@@ -196,8 +196,8 @@ const OPERATION_TEXT: Record<Operation, string> = {
   saving: '正在保存修订…', starting: '正在提交计算请求…', reloading: '正在重新载入项目…',
 };
 
-export function Workbench({ projectId, onBack, onRun, onDirtyChange }: {
-  projectId: string; onBack: () => void; onRun: (runId: string) => void; onDirtyChange?: (dirty: boolean) => void;
+export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
+  projectId: string; onBack: () => void; onRun: (runId: string) => void; onDirtyChange?: (dirty: boolean) => void; onLab?: () => void;
 }) {
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
@@ -825,6 +825,8 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
             <details className="secondary-actions">
               <summary aria-label="更多操作">更多</summary>
               <div className="secondary-actions-panel">
+                {onLab && <button className="button button--secondary" onClick={onLab} disabled={dirty || busy}
+                  title={dirty ? '先保存当前修订再进入实验室' : '以已保存的舰船修订做命中后果试验'}>损伤实验室 ↗</button>}
                 <button className="button button--secondary" onClick={downloadProject}
                   title={dirty ? '下载当前草稿文档（含未保存修改）' : `下载已保存的修订 ${view.revision} 项目文档`}>
                   下载项目 JSON

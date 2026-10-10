@@ -1,0 +1,181 @@
+{
+  "schema": "plimsoll-damage-lab-experiment-1",
+  "duration_s": 0,
+  "time_step_s": 1,
+  "modules": [
+    {
+      "id": "equipment:starboard-machinery",
+      "label": "Starboard engine",
+      "role": "propulsion",
+      "compartment_id": "starboard-machinery",
+      "box": {
+        "center_m": [
+          -3,
+          2.5,
+          2.0
+        ],
+        "size_m": [
+          2.0999999999999996,
+          1.75,
+          1.4
+        ]
+      },
+      "weight_item_ids": [
+        "machinery:starboard-machinery"
+      ],
+      "required_staff": 6,
+      "initial_integrity": 1,
+      "nominal_shaft_power_kw": 500,
+      "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+      "estimate": true
+    },
+    {
+      "id": "equipment:port-machinery",
+      "label": "Port engine",
+      "role": "propulsion",
+      "compartment_id": "port-machinery",
+      "box": {
+        "center_m": [
+          -3,
+          -2.5,
+          2.0
+        ],
+        "size_m": [
+          2.0999999999999996,
+          1.75,
+          1.4
+        ]
+      },
+      "weight_item_ids": [
+        "machinery:port-machinery"
+      ],
+      "required_staff": 6,
+      "initial_integrity": 1,
+      "nominal_shaft_power_kw": 500,
+      "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+      "estimate": true
+    },
+    {
+      "id": "equipment:forward-control",
+      "label": "Control equipment",
+      "role": "control",
+      "compartment_id": "forward-control",
+      "box": {
+        "center_m": [
+          4,
+          0,
+          2.0
+        ],
+        "size_m": [
+          2.8,
+          3.5,
+          1.4
+        ]
+      },
+      "weight_item_ids": [],
+      "required_staff": 2,
+      "initial_integrity": 1,
+      "nominal_shaft_power_kw": 0,
+      "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+      "estimate": true
+    }
+  ],
+  "crew_groups": [
+    {
+      "id": "watch:starboard-machinery",
+      "label": "Starboard watch",
+      "compartment_id": "starboard-machinery",
+      "module_id": "equipment:starboard-machinery",
+      "station_box": {
+        "center_m": [
+          -3,
+          2.5,
+          2.0
+        ],
+        "size_m": [
+          2.0999999999999996,
+          1.75,
+          1.4
+        ]
+      },
+      "personnel": 10,
+      "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+      "estimate": true
+    },
+    {
+      "id": "watch:port-machinery",
+      "label": "Port watch",
+      "compartment_id": "port-machinery",
+      "module_id": "equipment:port-machinery",
+      "station_box": {
+        "center_m": [
+          -3,
+          -2.5,
+          2.0
+        ],
+        "size_m": [
+          2.0999999999999996,
+          1.75,
+          1.4
+        ]
+      },
+      "personnel": 10,
+      "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+      "estimate": true
+    },
+    {
+      "id": "watch:forward-control",
+      "label": "Control watch",
+      "compartment_id": "forward-control",
+      "module_id": "equipment:forward-control",
+      "station_box": {
+        "center_m": [
+          4,
+          0,
+          2.0
+        ],
+        "size_m": [
+          2.8,
+          3.5,
+          1.4
+        ]
+      },
+      "personnel": 4,
+      "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+      "estimate": true
+    }
+  ],
+  "initial_water_m3": {
+    "starboard-machinery": 0,
+    "port-machinery": 0,
+    "forward-control": 0
+  },
+  "impact": {
+    "position_m": [
+      -3,
+      2.5,
+      2.0
+    ],
+    "severity": 0.6,
+    "radius_m": 2,
+    "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+    "estimate": true
+  },
+  "breaches": [],
+  "remaining_gz_angles_deg": [
+    0,
+    10,
+    20,
+    30
+  ],
+  "rules": {
+    "casualty_fraction": 0.4,
+    "fatal_fraction": 0.25,
+    "module_flood_threshold": 0.5,
+    "evacuate_fill_fraction": 0.3,
+    "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+    "estimate": true
+  },
+  "source": "Explicit synthetic gameplay rig; not a historical ship or calibrated casualty model",
+  "estimate": true
+}

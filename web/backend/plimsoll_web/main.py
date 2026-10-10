@@ -9,7 +9,7 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from . import auth, projects, runs
+from . import auth, damage_lab_runs, projects, runs
 from .config import Settings
 from .db import get_db, make_session_factory
 from .mailer import mailer_from_settings
@@ -72,6 +72,13 @@ class AnonymousRequest(BaseModel):
     """No fields: the workspace identity is minted by the server, never supplied."""
 
     model_config = ConfigDict(extra="forbid")
+
+
+class DamageLabCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    revision: int = Field(ge=1)
+    condition_id: str
+    experiment: dict
 
 
 MAX_REQUEST_BYTES = 8 * 1024 * 1024
@@ -245,6 +252,53 @@ def create_app(settings: Settings) -> FastAPI:
     def export_run(run_id: uuid.UUID, format: str, request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
         data = runs.export_run(user.id, run_id, format, db)
+        return PlainTextResponse(data, media_type="application/json" if format == "json" else "text/csv; charset=utf-8")
+
+    @app.get("/api/projects/{project_id}/damage-lab-setup")
+    def lab_setup(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return damage_lab_runs.setup(user.id, project_id, db)
+
+    @app.get("/api/damage-lab-demo")
+    def lab_demo(request: Request, db: Session = Depends(get_db)):
+        auth.get_current_user(request, db)
+        return damage_lab_runs.demo()
+
+    @app.get("/api/projects/{project_id}/damage-lab-runs")
+    def lab_list(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return damage_lab_runs.list_runs(user.id, project_id, db)
+
+    @app.post("/api/projects/{project_id}/damage-lab-runs", status_code=202)
+    def lab_enqueue(project_id: uuid.UUID, body: DamageLabCreate, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        try:
+            return damage_lab_runs.enqueue(user.id, project_id, body.revision, body.condition_id, body.experiment, db)
+        except projects.RevisionConflict as error:
+            return JSONResponse(status_code=409, content={"current_revision": error.current_revision})
+
+    @app.post("/api/projects/{project_id}/damage-lab-preview")
+    def lab_preview(project_id: uuid.UUID, body: DamageLabCreate, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        try:
+            return damage_lab_runs.preview(user.id, project_id, body.revision, body.condition_id, body.experiment, db)
+        except projects.RevisionConflict as error:
+            return JSONResponse(status_code=409, content={"current_revision": error.current_revision})
+
+    @app.get("/api/damage-lab-runs/{run_id}")
+    def lab_read(run_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return damage_lab_runs.get(user.id, run_id, db)
+
+    @app.post("/api/damage-lab-runs/{run_id}/cancel")
+    def lab_cancel(run_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        return damage_lab_runs.cancel(user.id, run_id, db)
+
+    @app.get("/api/damage-lab-runs/{run_id}/export")
+    def lab_export(run_id: uuid.UUID, format: str, request: Request, db: Session = Depends(get_db)):
+        user = auth.get_current_user(request, db)
+        data = damage_lab_runs.export(user.id, run_id, format, db)
         return PlainTextResponse(data, media_type="application/json" if format == "json" else "text/csv; charset=utf-8")
 
     return app

@@ -8,7 +8,7 @@ export class ApiError extends Error {
 
 let csrfToken: string | null = null;
 
-async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function call<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = init.method ?? 'GET';
   const headers = new Headers(init.headers);
   if (method !== 'GET' && method !== 'HEAD') {

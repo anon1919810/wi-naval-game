@@ -32,7 +32,7 @@ function creationReason(cause: unknown): string {
   return cause instanceof Error && cause.message ? cause.message : '请检查名称与模板后重试';
 }
 
-export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) => void; anonymous?: boolean }) {
+export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: string) => void; onLab?: (id: string) => void; anonymous?: boolean }) {
   const [read, setRead] = useState<Read>({ status: 'loading', projects: [] });
   const [readError, setReadError] = useState('');
   const [createError, setCreateError] = useState('');
@@ -122,6 +122,7 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
       </details>
       </div>}
       <p className="library-context-foot">INPUT / REVISION / RESULT<br /><span>输入、修订与结果分别保存</span></p>
+      {onLab && <button className="button button--secondary" onClick={() => onLab('demo')}>损伤实验室 ↗</button>}
     </aside>
     <div className="library-body">
     {createError && <div className="notice notice--error library-create-error" role="alert">创建失败：{createError}</div>}

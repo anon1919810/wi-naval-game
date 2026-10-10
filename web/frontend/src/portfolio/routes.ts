@@ -20,7 +20,7 @@ export const PUBLIC_CREDITS_HASH = '/credits';
 export const APP_ENTRY_HASH = '/plimsoll';
 
 /** Hash sections that belong to the existing Plimsoll application. */
-export const APP_HASH_SECTIONS = ['plimsoll', 'projects', 'runs', 'reports'] as const;
+export const APP_HASH_SECTIONS = ['plimsoll', 'projects', 'runs', 'reports', 'damage-lab'] as const;
 
 /**
  * Public routes that name a specific view. `#/work` itself is a first segment, so

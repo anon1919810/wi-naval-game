@@ -11,6 +11,9 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session, sessionmaker
 
 from plimsoll import analysis, exports
+from plimsoll.damage_lab import run_experiment
+from plimsoll.damage_lab import exports as lab_exports
+from plimsoll.damage_lab.request import SCHEMA as LAB_SCHEMA
 
 from .config import Settings
 from .db import make_session_factory
@@ -47,10 +50,10 @@ def claim_next_run(db: Session) -> CalculationRun | None:
 
 def _compute_child(snapshot: dict, request: dict, stop, writer) -> None:
     try:
-        result = analysis.compute_project(
-            snapshot, request["condition_id"], request["options"],
-            cancel_check=stop.is_set,
-        )
+        if request.get("schema") == LAB_SCHEMA:
+            result = run_experiment(snapshot, request["condition_id"], request["experiment"], cancel_check=stop.is_set)
+        else:
+            result = analysis.compute_project(snapshot, request["condition_id"], request["options"], cancel_check=stop.is_set)
         writer.send(("result", result))
     except Exception as error:
         writer.send(("error", {"code": "run.calculation_failed", "message": str(error)[:500],
@@ -117,7 +120,8 @@ def execute_run(run_id: uuid.UUID, factory: sessionmaker[Session], cancel_check=
     try:
         kind, payload = _run_bounded(snapshot, request, canceled)
         if kind == "result":
-            serialized = exports.serialize_report(payload, format="json")
+            serializer = lab_exports if request.get("schema") == LAB_SCHEMA else exports
+            serialized = serializer.serialize_report(payload, format="json")
             if len(serialized.encode("utf-8")) > MAX_RESULT_BYTES:
                 kind, payload = "error", {"code": "run.result_too_large", "message": "analysis result exceeds storage limit"}
             elif payload.get("request_fingerprint") != fingerprint:

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 
 import * as api from './api';
 import { ReadFailure, ReadPending } from './components/ReadPending';
@@ -16,19 +16,21 @@ import type { AuthMode, Theme, UserSession } from './types';
 // The workspace material is loaded by the eager shell entry, so a chunk that
 // fails to arrive still finds these styles present.
 
-type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string } | { kind: 'report'; id: string };
+const DamageLabPage = lazy(() => import('./damageLab/Page'));
+type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string } | { kind: 'report'; id: string } | { kind: 'lab'; id: string };
 
 /** What the reader gives up by leaving an edited project. */
 const UNSAVED = '当前舰船有未保存的修改，离开会丢失这些修改。是否离开？';
 
 /** Where the reader is, in the shell's own words. Read from the route alone. */
-const PLACES = { project: '项目', run: '运行', report: '报告' } as const;
+const PLACES = { project: '项目', run: '运行', report: '报告', lab: '损伤实验室' } as const;
 
 function routeFrom(hash: string): Route {
   const path = hash.replace(/^#\/?/, '').split('/');
   if (path[0] === 'projects' && path[1]) return { kind: 'project', id: path[1] };
   if (path[0] === 'runs' && path[1]) return { kind: 'run', id: path[1] };
   if (path[0] === 'reports' && path[1]) return { kind: 'report', id: path[1] };
+  if (path[0] === 'damage-lab' && path[1]) return { kind: 'lab', id: path[1] };
   return { kind: 'library' };
 }
 
@@ -56,7 +58,7 @@ function sameRoute(left: Route, right: Route): boolean {
  * here would hand the guard an address that names no page, and a refused leave
  * would restore the reader to nothing.
  */
-const SEGMENTS = { library: 'projects', project: 'projects', run: 'runs', report: 'reports' } as const;
+const SEGMENTS = { library: 'projects', project: 'projects', run: 'runs', report: 'reports', lab: 'damage-lab' } as const;
 
 function addressOf(route: Route): string {
   return route.kind === 'library' ? '#/projects' : `#/${SEGMENTS[route.kind]}/${route.id}`;
@@ -262,11 +264,12 @@ export default function App({ returnHref }: { returnHref?: string }) {
     {head}
     {message && <div className="connection-note" role="alert">{message}<button onClick={() => setMessage('')} aria-label="关闭提示">×</button></div>}
     <div className="app-route" data-motion={routeMotion ?? undefined}>
-      {route.kind === 'library' && <Library onOpen={id => navigate(`/projects/${id}`)} anonymous={anonymous} />}
+      {route.kind === 'library' && <Library onOpen={id => navigate(`/projects/${id}`)} onLab={id => navigate(`/damage-lab/${id}`)} anonymous={anonymous} />}
       {route.kind === 'project' && <Workbench key={route.id} projectId={route.id} onDirtyChange={reportDirty}
-        onBack={() => navigate('/projects')} onRun={id => navigate(`/runs/${id}`)} />}
+        onBack={() => navigate('/projects')} onRun={id => navigate(`/runs/${id}`)} onLab={() => navigate(`/damage-lab/${route.id}`)} />}
       {route.kind === 'run' && <Run key={route.id} runId={route.id} onBack={id => navigate(`/projects/${id}`)} onReport={() => navigate(`/reports/${route.id}`)} />}
       {route.kind === 'report' && <ReportPage key={route.id} runId={route.id} onBack={() => navigate(`/runs/${route.id}`)} />}
+      {route.kind === 'lab' && <Suspense fallback={<div className="page-pad"><ReadPending scope="workspace" object="损伤实验室" /></div>}><DamageLabPage key={route.id} projectId={route.id} onBack={() => navigate('/projects')} onProject={id => navigate(`/damage-lab/${id}`)} /></Suspense>}
     </div>
   </div>;
 }

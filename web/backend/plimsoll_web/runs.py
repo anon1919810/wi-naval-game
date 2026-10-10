@@ -16,6 +16,7 @@ from .projects import RevisionConflict, owned_project
 
 
 ACTIVE = ("queued", "running")
+ANALYSIS_SCHEMA = "plimsoll-analysis-request-1"
 
 
 def expire_lost_runs(db: Session, owner_id: uuid.UUID | None = None) -> int:
@@ -56,10 +57,11 @@ def _run_view(row: CalculationRun, *, include_result: bool = True) -> dict:
     }
 
 
-def owned_run(db: Session, owner_id: uuid.UUID, run_id: uuid.UUID, *, lock: bool = False) -> CalculationRun:
+def owned_run(db: Session, owner_id: uuid.UUID, run_id: uuid.UUID, *, lock: bool = False,
+              request_schema: str = ANALYSIS_SCHEMA) -> CalculationRun:
     query = select(CalculationRun).where(CalculationRun.id == run_id, CalculationRun.owner_id == owner_id)
     row = db.scalar(query.with_for_update() if lock else query)
-    if row is None:
+    if row is None or row.request.get("schema") != request_schema:
         raise HTTPException(status_code=404, detail="run not found")
     return row
 
@@ -78,6 +80,11 @@ def enqueue_run(
         snapshot, request, fingerprint = _analysis_request.normalize(saved.document, condition_id, options)
     except _analysis_request.AnalysisInputError as error:
         raise HTTPException(status_code=422, detail=error.diagnostics) from error
+    return enqueue_snapshot(owner_id, project_id, revision, condition_id, snapshot, request, fingerprint, db)
+
+
+def enqueue_snapshot(owner_id, project_id, revision, condition_id, snapshot, request, fingerprint, db):
+    """One admission limit across every validated calculation request kind."""
     db.scalar(select(User).where(User.id == owner_id).with_for_update())
     _expire_lost_runs(db, owner_id)
     active = db.scalar(select(func.count()).select_from(CalculationRun).where(
@@ -101,6 +108,7 @@ def list_runs(owner_id: uuid.UUID, project_id: uuid.UUID, db: Session) -> list[d
         db.commit()
     rows = db.scalars(select(CalculationRun).where(
         CalculationRun.owner_id == owner_id, CalculationRun.project_id == project_id,
+        CalculationRun.request["schema"].as_string() == ANALYSIS_SCHEMA,
     ).order_by(CalculationRun.created_at.desc(), CalculationRun.id.desc())).all()
     return [_run_view(row, include_result=False) for row in rows]
 
