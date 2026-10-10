@@ -1,4 +1,4 @@
-import type { AuthConfig, ProjectDocument, ProjectSummary, ProjectView, RunView, Theme, UserSession } from './types';
+import type { AuthConfig, ProjectDocument, ProjectImportPreview, ProjectSummary, ProjectView, RunView, Theme, UserSession } from './types';
 
 export class ApiError extends Error {
   constructor(public status: number, public detail: unknown) {
@@ -72,6 +72,14 @@ export const listProjects = () => call<ProjectSummary[]>('/projects');
 export const createProject = (template: string | null, name: string) =>
   call<ProjectView>('/projects', { method: 'POST', body: JSON.stringify({ template, name }) });
 export const getProject = (id: string) => call<ProjectView>(`/projects/${encodeURIComponent(id)}`);
+/** Validate a backup on the server without saving anything. */
+export const previewProjectImport = (project: ProjectDocument) =>
+  call<ProjectImportPreview>('/projects/import-preview', { method: 'POST', body: JSON.stringify({ project }) });
+/** Save a backup as a new project. The name is the reader's, and optional. */
+export const importProject = (project: ProjectDocument, name?: string) =>
+  call<ProjectView>('/projects/import', {
+    method: 'POST', body: JSON.stringify(name === undefined ? { project } : { project, name }),
+  });
 export const saveProject = (id: string, body: { base_revision: number; project: ProjectDocument }) =>
   call<ProjectView>(`/projects/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
 export const deleteProject = (id: string) =>

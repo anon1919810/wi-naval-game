@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
+import { ProjectImport } from '../components/ProjectImport';
 import { ReadFailure, ReadPending } from '../components/ReadPending';
 import type { ProjectSummary } from '../types';
 import { SiteGeometry } from '../portfolio/SiteGeometry';
@@ -36,8 +37,18 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
   const [readError, setReadError] = useState('');
   const [createError, setCreateError] = useState('');
   const [creating, setCreating] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
   const [name, setName] = useState('');
   const [attempt, setAttempt] = useState(0);
+  /**
+   * One creation at a time across the whole page. Restoring a backup saves a
+   * project exactly as a template does, so the two must never overlap: without
+   * this a reader could start a template and a restore together and be taken to
+   * whichever answered first. Each side reports only its own work to the other —
+   * the restore reports its reading and saving, the page reports `creating` —
+   * so neither can latch itself busy through the other's state.
+   */
+  const busy = creating !== null || importing;
   /**
    * The page's own lifetime, and one ticket per request. A creation that is still
    * in flight when the reader leaves must not navigate a page that no longer
@@ -46,6 +57,13 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
   const alive = useRef(true);
   const readTicket = useRef(0);
   const createTicket = useRef(0);
+  const creatingNow = useRef(false);
+  const importingNow = useRef(false);
+  const noteImport = useCallback((value: boolean) => {
+    importingNow.current = value;
+    if (alive.current) setImporting(value);
+  }, []);
+  const importBlocked = useCallback(() => creatingNow.current, []);
 
   useEffect(() => {
     alive.current = true;
@@ -67,6 +85,8 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
   }, [attempt]);
 
   async function create(template: string | null, initialName: string) {
+    if (creatingNow.current || importingNow.current) return;
+    creatingNow.current = true;
     const ticket = ++createTicket.current;
     setCreateError('');
     setCreating(template ?? 'blank');
@@ -81,7 +101,10 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
       outcome('hold');
       setCreateError(creationReason(cause));
     } finally {
-      if (alive.current && createTicket.current === ticket) setCreating(null);
+      if (alive.current && createTicket.current === ticket) {
+        creatingNow.current = false;
+        setCreating(null);
+      }
     }
   }
 
@@ -95,7 +118,7 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
       <strong>本浏览器工作区</strong>
       <p className="workspace-summary">仅当前浏览器可见。请下载项目 JSON 备份；清除身份 Cookie 后无法自动找回。</p>
       <details><summary>保存与恢复说明</summary>
-      <p>项目保存在这台设备的浏览器 Cookie 身份下，只有这个浏览器能看到它们。清除 Cookie、使用无痕窗口或换一台设备，都无法自动找回原来的工作区。需要留存时，请在项目页用「下载项目 JSON」保存完整文档。手工恢复时，先创建新项目，将备份的顶层 id 改为新项目的 id，再粘入「完整项目数据」并保存。运行页导出的 JSON/CSV 是计算报告，不是项目备份。</p>
+      <p>项目保存在这台设备的浏览器 Cookie 身份下，只有这个浏览器能看到它们。清除 Cookie、使用无痕窗口或换一台设备，都无法自动找回原来的工作区。需要留存时，请在项目页用「下载项目 JSON」保存完整文档；恢复时回到本页面「从备份恢复」，选择该文件，确认新项目名称后保存为新项目。运行页导出的 JSON/CSV 是计算报告，不是项目备份。</p>
       </details>
       </div>}
       <p className="library-context-foot">INPUT / REVISION / RESULT<br /><span>输入、修订与结果分别保存</span></p>
@@ -115,14 +138,18 @@ export function Library({ onOpen, anonymous = false }: { onOpen: (id: string) =>
     </section>
     <section className="library-section" aria-labelledby="template-title">
       <div className="section-heading library-section-heading"><div><span className="section-kicker">02 / NEW PROJECT</span><h2 id="template-title">从基线开始</h2></div><span>模板只作为起点</span><SiteGeometry /></div>
-      <div className="template-grid">{templates.map((template, index) => <button className="template-card" key={template.key} onClick={() => create(template.key, template.name)} disabled={creating !== null}>
+      <div className="template-grid">{templates.map((template, index) => <button className="template-card" key={template.key} onClick={() => create(template.key, template.name)} disabled={busy}>
         <span className="template-number">0{index + 1}</span><span className="template-identity"><strong>{template.name}</strong><span className="template-tag">{template.tag}</span></span><p>{template.text}</p><span className="template-action">{creating === template.key ? '建立中…' : '建立项目 ↗'}</span>
       </button>)}</div>
       <form className="blank-project" onSubmit={event => { event.preventDefault(); if (name.trim()) void create(null, name); }}>
         <div><strong>空白项目</strong><p>从自己的数据开始，未知输入会继续保持未知。</p></div>
         <label className="visually-hidden" htmlFor="blank-name">新项目名称</label><input id="blank-name" required value={name} onChange={event => setName(event.target.value)} placeholder="新项目名称" />
-        <button className="button button--secondary" disabled={creating !== null || !name.trim()} type="submit">{creating === 'blank' ? '建立中…' : '创建空白项目'}</button>
+        <button className="button button--secondary" disabled={busy || !name.trim()} type="submit">{creating === 'blank' ? '建立中…' : '创建空白项目'}</button>
       </form>
+    </section>
+    <section className="library-section" aria-labelledby="restore-title">
+      <div className="section-heading library-section-heading"><div><span className="section-kicker">03 / RESTORE FROM BACKUP</span><h2 id="restore-title">从备份恢复</h2></div><span>先校验，再另存为新项目</span><SiteGeometry /></div>
+      <ProjectImport onOpen={onOpen} busy={creating !== null} isBlocked={importBlocked} onBusyChange={noteImport} />
     </section>
     </div>
   </main>;

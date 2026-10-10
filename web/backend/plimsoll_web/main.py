@@ -42,6 +42,25 @@ class ProjectSave(BaseModel):
     project: dict
 
 
+class ProjectImportPreview(BaseModel):
+    """A backup as it was downloaded: nothing about the destination yet."""
+
+    model_config = ConfigDict(extra="forbid")
+    project: dict
+
+
+class ProjectImport(BaseModel):
+    """A backup plus the name the reader confirmed for the new project.
+
+    ``name`` is optional so the server never invents one: omitted, the backup's
+    own name is kept. Supplied, it is the reader's decision and is bounded here.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    project: dict
+    name: str | None = Field(default=None, max_length=200)
+
+
 class RunCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     revision: int = Field(ge=1)
@@ -164,6 +183,22 @@ def create_app(settings: Settings) -> FastAPI:
     def create_project(body: ProjectCreate, request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
         return projects.create_project(user.id, body.template, body.name, db)
+
+    @app.post("/api/projects/import-preview")
+    def preview_project_import(
+        body: ProjectImportPreview, request: Request, db: Session = Depends(get_db),
+    ):
+        # A preview only reads the submitted document; it never touches a project,
+        # so it is declared before the {project_id} routes it must not shadow.
+        auth.get_current_user(request, db)
+        return projects.preview_project_import(body.project)
+
+    @app.post("/api/projects/import", status_code=201)
+    def import_project(
+        body: ProjectImport, request: Request, db: Session = Depends(get_db),
+    ):
+        user = auth.get_current_user(request, db)
+        return projects.import_project(user.id, body.project, body.name, db)
 
     @app.get("/api/projects/{project_id}")
     def get_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):

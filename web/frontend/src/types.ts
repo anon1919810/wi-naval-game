@@ -39,6 +39,38 @@ export interface ProjectSummary {
   updated_at: string;
 }
 
+/** One canonical validator finding, in the server's own words. */
+export interface ProjectDiagnostic {
+  code: string;
+  severity: 'error' | 'warning' | string;
+  path: string;
+  message: string;
+  blocking?: boolean;
+}
+
+/** What a backup holds, counted rather than reproduced. */
+export interface ProjectImportCounts {
+  loading_conditions: number;
+  weight_groups: number;
+  weight_items: number;
+  damage_scenarios: number;
+  compartments: number;
+  openings: number;
+}
+
+/**
+ * The server's reading of one backup. It carries the source's own identity so
+ * a reader can see which file they chose, and never carries the document.
+ */
+export interface ProjectImportPreview {
+  source_id: string;
+  name: string;
+  source_revision: number;
+  geometry_kind: string | null;
+  counts: ProjectImportCounts;
+  diagnostics: ProjectDiagnostic[];
+}
+
 export type StageStatus = 'completed' | 'not_requested' | 'unavailable' | 'failed' | 'canceled' | 'model_limit';
 export type RunStatus = 'queued' | 'running' | 'completed' | 'partial' | 'canceled' | 'failed';
 

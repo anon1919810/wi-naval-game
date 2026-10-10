@@ -1,0 +1,85 @@
+/* Restoring a project backup.
+   The section is a ruled extension of the library's own list: the same line
+   weight, the same two type sizes, the same accent, and the same light/dark
+   variables as every other workspace surface. It introduces no new colour, no
+   new radius and no shadow — a form inside an existing grid, not a panel on it.
+   Every rule is scoped to `.app-shell` so the public pages are untouched, and
+   the layout narrows to one column rather than reflowing into anything new. */
+
+.app-shell .project-import { display: grid; gap: 22px; padding-top: 20px; font-size: 13px; line-height: 1.7; min-width: 0; }
+
+.app-shell .project-import-pick { display: grid; gap: 10px; justify-items: start; }
+.app-shell .project-import-label { color: var(--muted); font-size: 12px; font-weight: 500; letter-spacing: .02em; }
+.app-shell .project-import-help { margin: 0; max-width: 62ch; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.app-shell .project-import-file { max-width: 100%; font-family: var(--workspace-body); font-size: 13px; }
+.app-shell .project-import-file:disabled { color: var(--faint); }
+.app-shell .project-import-file::file-selector-button { min-height: 36px; margin-right: 12px; padding: 7px 14px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.app-shell .project-import-file::file-selector-button:hover { border-color: var(--accent); }
+.app-shell .project-import-file:disabled::file-selector-button { cursor: wait; opacity: .6; }
+.app-shell .project-import .button { min-height: 36px; font-size: 13px; }
+.app-shell .project-import-progress { margin: 0; color: var(--accent); overflow-wrap: anywhere; }
+
+/* The chosen file is stated as a fact — its name and its size — never as a
+   claim about whether it is any good. That verdict belongs to the preview. */
+.app-shell .project-import-file-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin: 0; padding: 8px 0 0; border-top: 1px solid var(--line); width: 100%; }
+.app-shell .project-import-file-name-text { font-family: var(--workspace-display); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.app-shell .project-import-file-size { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.app-shell .project-import-failure { margin: 0; }
+.app-shell .project-import-failure-title { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
+.app-shell .project-import-failure-list { display: grid; gap: 10px; margin: 0; padding-left: 18px; font-size: 13px; overflow-wrap: anywhere; }
+.app-shell .project-import-failure-list code { display: block; font: 12px/1.7 'Cascadia Code', Consolas, monospace; }
+.app-shell .project-import-failure-list .project-import-finding-severity { display: block; }
+
+/* The preview: identity first, then what it contains, then what the validator
+   still warns about. All three are read from the same ruled column, so the
+   reader sees a description of a file rather than a second copy of it. */
+.app-shell .project-import-preview { display: grid; gap: 18px; padding-top: 4px; }
+.app-shell .project-import-identity,
+.app-shell .project-import-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1px; margin: 0; background: var(--line); border: 1px solid var(--line); }
+.app-shell .project-import-counts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.app-shell .project-import-identity > div,
+.app-shell .project-import-counts > div { display: grid; gap: 5px; padding: 12px 13px; background: var(--surface); min-width: 0; }
+.app-shell .project-import-identity dt,
+.app-shell .project-import-counts dt { color: var(--muted); font-size: 12px; letter-spacing: .02em; }
+.app-shell .project-import-identity dd { margin: 0; font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+.app-shell .project-import-identity code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; font-weight: 400; }
+.app-shell .project-import-counts dd { margin: 0; font-family: var(--workspace-display); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* What a validated file structure is, stated as exactly that. */
+.app-shell .project-import-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+
+.app-shell .project-import-findings { display: grid; gap: 12px; padding: 14px; border-left: 2px solid var(--warning); background: var(--warning-soft); }
+.app-shell .project-import-findings-title { margin: 0; font-family: var(--workspace-display); font-size: 14px; font-weight: 600; }
+.app-shell .project-import-finding-list { display: grid; gap: 14px; margin: 0; padding-left: 18px; font-size: 13px; }
+.app-shell .project-import-finding { overflow-wrap: anywhere; }
+.app-shell .project-import-finding > :is(code, .project-import-finding-message) { display: block; }
+.app-shell .project-import-finding code { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; }
+.app-shell .project-import-finding-severity { color: var(--warning); font-size: 12px; }
+.app-shell .project-import-finding-severity[data-severity='error'] { color: var(--error); }
+.app-shell .project-import-finding-code { color: var(--muted); }
+.app-shell .project-import-findings-more { margin-top: 4px; }
+.app-shell .project-import-findings-more summary { min-height: 36px; padding: 7px 0; font-size: 13px; cursor: pointer; }
+.app-shell .project-import-findings-more[open] > ul { margin-top: 12px; }
+
+/* Confirmation is its own block: the name the reader chose, one sentence about
+   what importing does and does not do, and one button. */
+.app-shell .project-import-confirm { display: grid; gap: 12px; justify-items: start; padding-top: 18px; border-top: 1px solid var(--line-strong); }
+.app-shell .project-import-name-field { display: grid; gap: 7px; width: 100%; max-width: 420px; }
+.app-shell .project-import-name-field input { width: 100%; height: 36px; padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: 0; background: var(--surface); color: var(--ink); font-family: var(--workspace-body); font-size: 13px; }
+.app-shell .project-import :is(.project-import-file, .project-import-name-field input):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app-shell .project-import-explain { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.app-shell .project-import-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* The restrained responsive rule: the description stays in one column and the
+   fact tables wrap on their own, so a narrow window loses no field. */
+@media (min-width: 1280px) {
+  .app-shell .project-import-counts { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .app-shell .project-import-identity,
+  .app-shell .project-import-counts { grid-template-columns: minmax(0, 1fr); }
+  .app-shell .project-import-name-field { max-width: none; }
+  .app-shell .project-import-actions .button { flex: 1 1 auto; }
+}

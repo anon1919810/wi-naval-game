@@ -23,11 +23,38 @@ TEMPLATES = {
     "queen_mary_1913": "queen_mary_1913.project.json",
 }
 
+MAX_PROJECT_NAME = 200
+
 
 class ProjectView(TypedDict):
     project_id: str
     revision: int
     project: dict
+
+
+class ImportCounts(TypedDict):
+    loading_conditions: int
+    weight_groups: int
+    weight_items: int
+    damage_scenarios: int
+    compartments: int
+    openings: int
+
+
+class ImportPreview(TypedDict):
+    """What a backup actually contains, without the document itself.
+
+    A preview is a summary a reader confirms before anything is saved, so it
+    carries identity, shape and counts rather than a second copy of a document
+    that can be a megabyte long.
+    """
+
+    source_id: str
+    name: str
+    source_revision: int
+    geometry_kind: str | None
+    counts: ImportCounts
+    diagnostics: list[dict]
 
 
 class RevisionConflict(Exception):
@@ -122,3 +149,98 @@ def delete_project(owner_id: uuid.UUID, project_id: uuid.UUID, db: Session) -> N
     row = owned_project(db, owner_id, project_id, lock=True)
     db.delete(row)
     db.commit()
+
+
+# --- restoring a backup ------------------------------------------------------
+#
+# A downloaded project JSON is input only. Restoring it therefore never looks
+# the source identity up: it is not an update, it is a new project that happens
+# to hold the same input. The source document is validated exactly as it was
+# written before any of its identity is replaced, so a backup with a malformed
+# `id` or `revision` fails on its own terms rather than being quietly repaired.
+
+def _lengths(value: object) -> int:
+    return len(value) if isinstance(value, list) else 0
+
+
+def _import_counts(project: dict) -> ImportCounts:
+    groups = project.get("weight_groups")
+    groups = groups if isinstance(groups, list) else []
+    return {
+        "loading_conditions": _lengths(project.get("loading_conditions")),
+        "weight_groups": len(groups),
+        "weight_items": sum(
+            _lengths(group.get("items")) for group in groups if isinstance(group, dict)
+        ),
+        "damage_scenarios": _lengths(project.get("flooding_scenarios")),
+        "compartments": _lengths(project.get("compartments")),
+        "openings": _lengths(project.get("openings")),
+    }
+
+
+def _import_preview(normalized: dict) -> ImportPreview:
+    geometry = normalized.get("geometry")
+    return {
+        "source_id": normalized["id"],
+        "name": normalized["name"],
+        "source_revision": normalized["revision"],
+        "geometry_kind": geometry["kind"] if isinstance(geometry, dict) else None,
+        "counts": _import_counts(normalized),
+        # The source passed normalization, so everything left here is a warning
+        # the reader should see rather than a defect that stopped the import.
+        "diagnostics": project_io.validate_project(normalized),
+    }
+
+
+def preview_project_import(document: dict) -> ImportPreview:
+    """Validate a backup and describe it. Reads nothing and writes nothing.
+
+    Args:
+        document (dict): The backup exactly as it was downloaded.
+
+    Returns:
+        (ImportPreview): Identity, geometry, counts and canonical diagnostics.
+    """
+    return _import_preview(_normalize(document))
+
+
+def _confirmed_name(name: str | None, fallback: str) -> str:
+    """The reader's own name for the restored project, or the backup's.
+
+    The stored column is 200 characters, so the bound is checked on whichever
+    name is actually going to be written — including a backup's own over-length
+    name, which is refused before a row exists rather than at the database.
+    """
+    trimmed = fallback if name is None else name.strip()
+    if not trimmed:
+        raise HTTPException(status_code=422, detail="project name cannot be blank")
+    if len(trimmed) > MAX_PROJECT_NAME:
+        raise HTTPException(
+            status_code=422,
+            detail=f"project name cannot exceed {MAX_PROJECT_NAME} characters",
+        )
+    return trimmed
+
+
+def import_project(
+    owner_id: uuid.UUID, document: dict, name: str | None, db: Session,
+) -> ProjectView:
+    """Save a backup as a new project owned by the current reader.
+
+    The source is revalidated before anything is copied, then a fresh server
+    identity replaces only `id`, `revision` and `name`. No run, fingerprint or
+    cached result travels with a backup, and no failure part-way through can
+    leave a project behind: validation happens before the first write.
+    """
+    source = _normalize(document)
+    project_id = uuid.uuid4()
+    restored = copy.deepcopy(source)
+    restored["id"] = str(project_id)
+    restored["revision"] = 1
+    restored["name"] = _confirmed_name(name, source["name"])
+    normalized = _normalize(restored)
+    row = Project(id=project_id, owner_id=owner_id, name=normalized["name"], current_revision=1)
+    saved = ProjectRevision(project_id=project_id, revision=1, document=normalized)
+    db.add_all((row, saved))
+    db.commit()
+    return _view(row, saved)
