@@ -11,7 +11,7 @@ service or the React app, and no file in `web/backend` or `web/frontend` is modi
 | `requirements-build.txt` | Pinned `setuptools` satisfying the `setuptools>=75` build requirement of `web/backend/pyproject.toml`. |
 | `compose.yaml` | Compose v2 project `plimsoll`: `db` (postgres:16-alpine, persistent volume, no published port), one-shot `migrate`, `api` on `127.0.0.1:18000`, `worker`. One shared image. |
 | `production.env.example` | Template for `/etc/plimsoll/production.env` (the only source of secrets). |
-| `nginx/plimsoll.conf.template` | HTTPS vhost template; replaces one named old site, ACME on port 80, `/api/` → `127.0.0.1:18000`, SPA fallback for non-API paths. |
+| `nginx/plimsoll.conf.template` | HTTPS vhost template; replaces one named old site, ACME on port 80, `/api/` → `127.0.0.1:18000`, gzip/MIME/cache rules for static files and 404 for missing real paths. Hash routes remain within `/`. |
 | `nginx/rate-limit-zones.conf` | Optional `limit_req_zone` definitions (general 10r/s burst 20, bootstrap 1r/s burst 5). |
 | `build_release.py` | Stdlib packager: allowlist archive + JSON manifest with git head, dirty flag and SHA-256 sums. |
 | `tests/test_build_release.py` | Stdlib unit tests for the packager. |
