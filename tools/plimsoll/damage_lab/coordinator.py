@@ -6,9 +6,10 @@ import time
 from .. import analysis
 from .effects import exposure, initial_state, refresh
 from .request import METHOD, normalize_request
+from .fragmentation import trace_fragments
 
 
-def flooding_scenario(project, experiment):
+def flooding_scenario(project, experiment, breaches=None):
     tank_ids = {r["id"]: "lab-water:" + r["id"] for r in project["compartments"]}
     tanks = []
     for room in project["compartments"]:
@@ -16,7 +17,7 @@ def flooding_scenario(project, experiment):
         tanks[-1].update(id=tank_ids[room["id"]], free_surface=True, fluid_density_t_m3=1.025,
                          initial_volume_m3=experiment["initial_water_m3"][room["id"]])
     connections = []
-    for row in experiment["breaches"]:
+    for row in experiment["breaches"] if breaches is None else breaches:
         x, y, z = row["position_m"]
         connections.append(dict(id=row["id"], **{"from": tank_ids.get(row["from_id"], "sea"), "to": tank_ids.get(row["to_id"], "sea")},
             x_m=x, y_m=y, z_m=z, area_m2=row["area_m2"], discharge_coefficient=row["discharge_coefficient"],
@@ -35,22 +36,39 @@ def run_experiment(project, condition_id, experiment, *, cancel_check=None):
     state = initial_state(experiment)
     events, snapshots = [], [copy.deepcopy(state)]
 
-    def event(kind, target_id, message, time_s=0.0):
+    def event(kind, target_id, message, time_s=0.0, data=None):
         index = len(events)
         events.append(dict(index=index, time_s=time_s, kind=kind, target_id=target_id, message=message))
+        if data is not None:
+            events[-1]["data"] = data
         state.update(time_s=time_s, event_index=index)
         refresh(state, experiment)
         snapshots.append(copy.deepcopy(state))
 
+    fragments = trace_fragments(snapshot, experiment, cancel_check=cancel_check) if "detonation" in experiment else None
+    canceled = fragments is not None and fragments["canceled"]
+    generated = fragments["generated_breaches"] if fragments else []
+    applied_breaches = copy.deepcopy(experiment["breaches"] + generated)
+    if fragments and not canceled:
+        state["detonation_occurred"] = True
+        event("detonation", fragments["compartment_id"], "Declared game detonation and frozen representative rays",
+              data={**{k: fragments[k] for k in ("position_m", "seed", "compartment_id")}, "fragment_count": len(fragments["traces"])})
+        if generated:
+            state["generated_breaches"] = copy.deepcopy(generated)
+            event("generated_breaches", fragments["compartment_id"], "Estimated boundary holes passed to native hydraulics", data={"breaches": generated})
     for row, definition in zip(state["modules"], experiment["modules"]):
-        loss = exposure(experiment["impact"], definition["box"])
+        if canceled:
+            break
+        loss = fragments["module_exposure"][row["id"]] if fragments else exposure(experiment["impact"], definition["box"])
         row["mechanical_integrity"] = max(0, definition["initial_integrity"]-loss)
         if loss:
-            row["causes"].append("localized_game_impact")
+            row["causes"].append("estimated_fragment_exposure" if fragments else "localized_game_impact")
         event("module_impact", row["id"], f"Gameplay exposure {loss:.3f}; equipment mass remains in the loading ledger")
     for row, definition in zip(state["crew_groups"], experiment["crew_groups"]):
+        if canceled:
+            break
         n = definition["personnel"]
-        influence = exposure(experiment["impact"], definition["station_box"])
+        influence = fragments["crew_exposure"][row["id"]] if fragments else exposure(experiment["impact"], definition["station_box"])
         if n is not None:
             affected = math.floor(n*influence*experiment["rules"]["casualty_fraction"])
             dead = math.floor(affected*experiment["rules"]["fatal_fraction"])
@@ -58,10 +76,10 @@ def run_experiment(project, condition_id, experiment, *, cancel_check=None):
         if influence:
             row["causes"].append("estimated_game_casualties")
         event("crew_impact", row["id"], "Declared gameplay casualty estimate" if n is not None else "Personnel unknown; casualty counts remain unknown")
-    scenario = flooding_scenario(snapshot, experiment)
+    scenario = flooding_scenario(snapshot, experiment, applied_breaches)
     core = analysis.compute_project(snapshot, condition_id, dict(stages=["flooding"],
         flooding=dict(scenario=scenario, options=dict(max_steps=240, remaining_gz_angles_deg=experiment["remaining_gz_angles_deg"],
-                                                    remaining_gz_snapshot="final"))), cancel_check=cancel_check)
+                                                    remaining_gz_snapshot="final"))), cancel_check=(lambda: True) if canceled else cancel_check)
     native = core["stages"]["flooding"].get("data") or {}
     rooms = {r["id"]: r for r in snapshot["compartments"]}
     for row in native.get("timeline", []):
@@ -89,11 +107,15 @@ def run_experiment(project, condition_id, experiment, *, cancel_check=None):
     return dict(schema="plimsoll-damage-lab-result-1", status=core["status"], project_id=snapshot["id"], condition_id=condition_id,
         method_version=METHOD, method_versions=request["method_versions"], request=request, request_fingerprint=fingerprint,
         project_fingerprint=core["project_fingerprint"], input_fingerprint=core["input_fingerprint"], input_snapshot=snapshot,
-        core_analysis=core, events=events, snapshots=snapshots, final_state=copy.deepcopy(state),
+        core_analysis=core, fragmentation=fragments, applied_breaches=applied_breaches,
+        events=events, snapshots=snapshots, final_state=copy.deepcopy(state),
         validity={**core["validity"], "gameplay_estimate": True, "historical_validated": None}, diagnostics=core["diagnostics"],
         elapsed_wall_seconds=time.perf_counter()-started, simulated_duration_s=state["time_s"],
         assumptions=["Localized normalized gameplay damage; no penetration, blast-pressure or medical injury calculation",
                      "Base loading excludes the added water owned by lab tanks; users must declare water ownership correctly",
                      "Single hit; fixed declared compartment-to-sea/shared-face hydraulic proxies",
+                     "Fragment mode uses normalized representative rays and declared boundary transmission, not explosive or armor physics",
+                     "Modules and crew stations sample exposure, not additional physical occluders; only compartment boundaries shield",
+                     "Generated holes use declared interface proxy positions; no hull-skin fracture or within-burst wall evolution",
                      "Scripted crew evacuation to an abstract assembly location; no pathfinding",
                      "No structural failure, fire, speed prediction or real-time performance claim"])

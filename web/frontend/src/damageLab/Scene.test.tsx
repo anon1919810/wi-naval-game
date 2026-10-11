@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { ProjectDocument } from '../types';
-import type { Experiment, LabState } from './types';
+import type { Experiment, Fragmentation, LabState } from './types';
 import Scene from './Scene';
 import * as THREE from 'three';
 
@@ -53,6 +53,19 @@ function rendered(){
   scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
   return {renderer,scene,camera};
 }
+
+it('keeps fragment endpoint heights in the declared keel datum and hides pre-burst paths',()=>{
+  const fragments={traces:[{index:0,termination:'sealed_boundary',segments:[{from_m:[0,0,2],to_m:[2,1,2]}]}]} as unknown as Fragmentation;
+  const state={ship:null,modules:[],detonation_occurred:true} as unknown as LabState;
+  const {rerender}=render(<Scene {...props} fragments={fragments} state={state} />);
+  const {scene}=rendered();
+  let path:THREE.LineSegments|undefined;
+  scene.traverse(object=>{if(object instanceof THREE.LineSegments && object.material instanceof THREE.LineBasicMaterial && object.material.color.getHex()===0x977d48)path=object;});
+  expect(Array.from(path!.geometry.getAttribute('position').array)).toEqual([0,2,-0,2,2,-1]);
+  expect(path!.parent!.visible).toBe(true);
+  rerender(<Scene {...props} fragments={fragments} state={null} />);
+  expect(path!.parent!.visible).toBe(false);
+});
 function clickModule(scene:THREE.Scene,camera:THREE.PerspectiveCamera,canvas:HTMLCanvasElement,drag=false){
   let module:THREE.Object3D|undefined;
   scene.traverse(object=>{if(object.userData.id==='engine')module=object;});
@@ -139,4 +152,19 @@ it('batches hull triangles by material rather than submitting one draw per face'
     expect(hull.geometry.groups).toHaveLength(2);
     expect(hull.geometry.groups.reduce((sum,group)=>sum+group.count,0)).toBe(hull.geometry.getAttribute('position').count);
   }
+});
+
+it('keeps the camera through event highlights and moves only on explicit locate',()=>{
+  const clock=vi.spyOn(performance,'now').mockReturnValue(0);
+  const mounted=render(<Scene {...props} />);
+  const {camera}=rendered(),original=camera.position.clone();
+  mounted.rerender(<Scene {...props} eventTargets={[{kind:'module',id:'engine'}]} />);
+  rendered();expect(camera.position.equals(original)).toBe(true);
+  fireEvent.click(screen.getByRole('button',{name:'定位'}));
+  clock.mockReturnValue(500);rendered();
+  expect(camera.position.equals(original)).toBe(false);
+  const focused=camera.position.clone();
+  mounted.rerender(<Scene {...props} state={{modules:[],ship:null} as unknown as LabState} />);
+  rendered();expect(camera.position.equals(focused)).toBe(true);
+  clock.mockRestore();
 });

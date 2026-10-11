@@ -17,12 +17,28 @@ export interface CrewGroup extends Metadata {
 export interface Breach extends Metadata {
   id: string; from_id: string; to_id: string; position_m: Vec3; area_m2: number; discharge_coefficient: number;
 }
+export interface Boundary extends Metadata {
+  id: string; from_id: string; to_id: string; position_m: Vec3;
+  transmission: number; breach_threshold: number; max_breach_area_m2: number; discharge_coefficient: number;
+}
+export interface Detonation extends Metadata { position_m: Vec3; fragment_count: number; seed: number; boundaries: Boundary[] }
+export interface FragmentTrace {
+  index: number; direction: Vec3; termination: string; blocked_by: string | null;
+  segments: Array<{ from_m: Vec3; to_m: Vec3; compartment_id: string; transmission: number; boundary_id?: string | null; boundary_transmission?: number }>;
+  hits: Array<{ kind: 'module' | 'crew'; id: string; position_m: Vec3; exposure: number }>;
+}
+export interface Fragmentation extends Metadata {
+  method_version: string; position_m: Vec3; compartment_id: string; fragment_count: number; seed: number; canceled: boolean;
+  traces: FragmentTrace[]; module_exposure: Record<string, number>; crew_exposure: Record<string, number>;
+  boundaries: Array<Boundary & { absorbed_exposure: number; generated_area_m2: number }>; generated_breaches: Breach[];
+}
 export interface Experiment extends Metadata {
   schema: 'plimsoll-damage-lab-experiment-1'; duration_s: number; time_step_s: number;
   initial_water_m3: Record<string, number>; modules: Module[]; crew_groups: CrewGroup[]; breaches: Breach[];
   impact: Metadata & { position_m: Vec3; severity: number; radius_m: number };
   rules: Metadata & { casualty_fraction: number; fatal_fraction: number; module_flood_threshold: number; evacuate_fill_fraction: number };
   remaining_gz_angles_deg: number[];
+  detonation?: Detonation;
 }
 export interface LabRequest {
   schema: 'plimsoll-damage-lab-request-1'; condition_id: string; experiment: Experiment; method_versions: Record<string, string>;
@@ -48,14 +64,17 @@ export interface LabState {
   compartments: Array<{ id: string; volume_m3: number; capacity_m3: number; fill_fraction: number }>;
   modules: ModuleState[]; crew_groups: CrewState[];
   capabilities: { shaft_power_kw: number | null; known_shaft_power_subtotal_kw: number };
+  detonation_occurred?: boolean; generated_breaches?: Breach[];
 }
-export interface LabEvent { index: number; time_s: number; kind: string; target_id: string | null; message: string }
+export interface LabEvent { index: number; time_s: number; kind: string; target_id: string | null; message: string;
+  data?: { position_m?: Vec3; fragment_count?: number; seed?: number; compartment_id?: string; breaches?: Breach[] } }
 export interface LabResult {
   schema: 'plimsoll-damage-lab-result-1'; status: RunStatus; condition_id: string; request: LabRequest;
   request_fingerprint: string; input_snapshot: ProjectDocument; core_analysis: AnalysisResult;
   method_versions: Record<string, string>; validity: Record<string, unknown>; diagnostics: ProjectDiagnostic[];
   events: LabEvent[]; snapshots: LabState[]; final_state: LabState; simulated_duration_s: number;
   elapsed_wall_seconds: number; assumptions: string[];
+  fragmentation?: Fragmentation | null; applied_breaches?: Breach[];
 }
 export interface LabRun {
   id: string; project_id: string; revision: number; condition_id: string; status: RunStatus;

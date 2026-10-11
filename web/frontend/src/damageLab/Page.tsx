@@ -1,10 +1,13 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import * as accountApi from '../api';
 import type { ProjectView } from '../types';
 import * as api from './api';
 import { active, draftIdentity, frameAt, numeric, STATUS, visibleResult } from './model';
 import type { Experiment, LabRun, Room, Setup, Vec3 } from './types';
-import Inspector, { CoreEvidence } from './Inspector';
+import Inspector, { CoreEvidence, ShipMetrics } from './Inspector';
+import Replay from './Replay';
+import { DetonationControls, FragmentEvidence } from './Detonation';
+import { comparisonBaseline, replayEntries, type InspectionTarget } from './narrative';
 import './lab.css';
 
 const Scene = lazy(()=>import('./Scene'));
@@ -26,13 +29,26 @@ export default function DamageLabPage({ projectId, onBack, onProject }: {
   const [run,setRun]=useState<LabRun|null>(null), [history,setHistory]=useState<LabRun[]>([]);
   const [loading,setLoading]=useState(projectId!=='demo'), [busy,setBusy]=useState(false), [error,setError]=useState('');
   const [attempt,setAttempt]=useState(0), [selected,setSelected]=useState(''), [target,setTarget]=useState('');
+  const [inspection,setInspection]=useState<InspectionTarget|null>(null);
   const [frame,setFrame]=useState(0), [playing,setPlaying]=useState(false), [speed,setSpeed]=useState(1);
+  const [trace,setTrace]=useState<number|null>(null);
   const [json,setJson]=useState(''), [pollAttempt,setPollAttempt]=useState(0);
   const alive=useRef(true), busyNow=useRef(false), operation=useRef(0), draftTicket=useRef(0);
   const result=view ? visibleResult(run,view.project_id,view.revision,condition,draft) : null;
   const state=frameAt(result,frame);
   const snapshotProject=result?.input_snapshot ?? view?.project;
   const rooms=(snapshotProject?.compartments ?? []) as Room[];
+  const entries=useMemo(()=>replayEntries(result),[result]);
+  const baseline=useMemo(()=>comparisonBaseline(result),[result]);
+  const currentEntry=entries[frame];
+  function inspect(next:InspectionTarget){
+    setInspection(next);
+    const module=next.kind==='module' ? next.id : next.kind==='crew'
+      ? draft?.crew_groups.find(c=>c.id===next.id)?.module_id
+      : draft?.modules.find(m=>m.compartment_id===next.id)?.id;
+    setSelected(module ?? '');
+  }
+  useEffect(()=>{if(currentEntry?.targets[0])inspect(currentEntry.targets[0]);},[frame,result?.request_fingerprint]);
 
   useEffect(()=>{ alive.current=true; return ()=>{alive.current=false;operation.current++;}; },[]);
   useEffect(()=>{
@@ -61,7 +77,7 @@ export default function DamageLabPage({ projectId, onBack, onProject }: {
     return ()=>controller.abort();
   },[projectId,attempt]);
 
-  useEffect(()=>{setPlaying(false);setFrame(0);setJson(draft ? JSON.stringify(draft,null,2) : '');},[draft,condition,run?.id]);
+  useEffect(()=>{setPlaying(false);setFrame(0);setTrace(null);setInspection(null);setJson(draft ? JSON.stringify(draft,null,2) : '');},[draft,condition,run?.id]);
   useEffect(()=>{
     if(!run || !active(run))return;
     const controller=new AbortController();let timer: ReturnType<typeof setTimeout>;
@@ -97,6 +113,7 @@ export default function DamageLabPage({ projectId, onBack, onProject }: {
     try {const next=await api.enqueue(view.project_id,view.revision,condition,clone(draft));
       if(!alive.current || token!==operation.current)return;
       setRun(next);setHistory(previous=>[next,...previous]);
+      try{sessionStorage.setItem('plimsoll:lab-draft:'+view.project_id,JSON.stringify({revision:view.revision,experiment:next.request.experiment}));}catch{/* Draft storage is optional. */}
     }catch(cause){if(alive.current && token===operation.current)setError(message(cause));}
     finally{if(alive.current && token===operation.current){busyNow.current=false;setBusy(false);}}
   }
@@ -162,15 +179,16 @@ export default function DamageLabPage({ projectId, onBack, onProject }: {
         <form className="lab-setup" onSubmit={e=>{e.preventDefault();void start();}}>
           <span className="lab-kicker">01 / EXPERIMENT</span><h2>命中条件</h2>
           <label>载荷工况<select value={condition} onChange={e=>{draftTicket.current++;setCondition(e.target.value);}}>{view.project.loading_conditions.map(c=><option key={c.id} value={c.id}>{c.label || c.id}</option>)}</select></label>
-          <label>命中目标<select value={target} onChange={e=>{setTarget(e.target.value);edit(next=>{const m=next.modules.find(v=>v.id===e.target.value);if(m)next.impact.position_m=clone(m.box.center_m);});}}>{draft.modules.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
-          <div className="lab-coordinates">{(['X','Y','Z'] as const).map((axis,i)=><label key={axis}>{axis} / m<input aria-label={`命中 ${axis}`} type="number" step=".1" value={draft.impact.position_m[i]} onChange={e=>{if(e.target.value!=='')edit(next=>{next.impact.position_m[i]=Number(e.target.value);});}} /></label>)}</div>
+          <DetonationControls draft={draft} rooms={rooms} edit={edit} />
+          <label>{draft.detonation ? '将起爆点移到模块中心' : '命中目标'}<select value={target} onChange={e=>{setTarget(e.target.value);edit(next=>{const m=next.modules.find(v=>v.id===e.target.value);if(m){next.impact.position_m=clone(m.box.center_m);if(next.detonation)next.detonation.position_m=clone(m.box.center_m);}});}}>{draft.modules.map(m=><option key={m.id} value={m.id}>{m.label}</option>)}</select></label>
+          <div className="lab-coordinates">{(['X','Y','Z'] as const).map((axis,i)=><label key={axis}>{axis} / m<input aria-label={`${draft.detonation ? '起爆' : '命中'} ${axis}`} type="number" step=".1" value={(draft.detonation?.position_m ?? draft.impact.position_m)[i]} onChange={e=>{if(e.target.value!=='')edit(next=>{(next.detonation?.position_m ?? next.impact.position_m)[i]=Number(e.target.value);});}} /></label>)}</div>
           <label>命中强度 <span>{numeric(draft.impact.severity,2)}</span><input aria-label="命中强度" type="range" min="0" max="1" step=".05" value={draft.impact.severity} onChange={e=>edit(next=>{next.impact.severity=Number(e.target.value);})} /></label>
-          <label>影响半径 / m<input type="number" min="0" max="1000" step=".1" value={draft.impact.radius_m} onChange={e=>edit(next=>{next.impact.radius_m=Number(e.target.value);})} /></label>
+          <label>{draft.detonation ? '最大路径范围 / m' : '影响半径 / m'}<input type="number" min="0" max="1000" step=".1" value={draft.impact.radius_m} onChange={e=>edit(next=>{next.impact.radius_m=Number(e.target.value);})} /></label>
           <div className="lab-pair"><label>时长 / s<input type="number" min="0" max="60" step="any" value={draft.duration_s} onChange={e=>edit(next=>{next.duration_s=Number(e.target.value);})} /></label><label>步长 / s<input type="number" min=".000001" max="60" step="any" value={draft.time_step_s} onChange={e=>edit(next=>{next.time_step_s=Number(e.target.value);})} /></label></div>
           <label className="lab-check"><input type="checkbox" checked={draft.breaches.length>0} onChange={e=>breach(e.target.checked)} />目标舱海水破口（替换）</label>
           {draft.breaches[0] && <label>首个破口面积 / m²<input type="number" min="0" step=".1" value={draft.breaches[0].area_m2} onChange={e=>edit(next=>{next.breaches[0].area_m2=Number(e.target.value);})} /></label>}
           {draft.breaches.map(b=><p className="lab-note" key={b.id}>{b.from_id} → {b.to_id} / {b.area_m2} m² / Cd {b.discharge_coefficient}</p>)}
-          <p className="lab-note">无破口就不新增进水路径。强度与影响范围由你指定。</p>
+          <p className="lab-note">{draft.detonation ? '手动破口与自动开孔不能重复声明同一界面。生成孔的位置与面积可在结果中检查。' : '无破口就不新增进水路径。强度与影响范围由你指定。'}</p>
           <button className="lab-primary" disabled={busy || active(run) || !condition}>{busy ? '提交中…' : '运行命中试验'}</button>
           {active(run) && <button type="button" onClick={()=>void cancel()} disabled={busy || run?.cancel_requested}>{run?.cancel_requested ? '正在取消…' : '取消试验'}</button>}
           <details><summary>乘员与规则</summary>
@@ -180,18 +198,14 @@ export default function DamageLabPage({ projectId, onBack, onProject }: {
         </form>
         <div className="lab-middle">
           <div className="lab-scene-head"><span className="lab-kicker">SPATIAL INSPECTOR / METRES</span><span>{run ? STATUS[run.status] : '待试验'}</span></div>
-          <Suspense fallback={<div className="lab-scene-loading" role="status">正在加载三维检查视图…</div>}><Scene project={snapshotProject!} experiment={draft} state={state} selected={selected} onSelect={setSelected} /></Suspense>
+          <Suspense fallback={<div className="lab-scene-loading" role="status">正在加载三维检查视图…</div>}><Scene project={snapshotProject!} experiment={draft} state={state} selected={selected} inspection={inspection} eventTargets={currentEntry?.targets} fragments={result?.fragmentation ?? null} selectedTrace={trace} onSelect={id=>inspect({kind:'module',id})} /></Suspense>
           {run?.error && <p role="alert" className="lab-error">{run.error.message}</p>}
           {mismatch && <p className="lab-note lab-mismatch">配置已改变，原结果不显示在当前配置下。{run?.revision!==view.revision ? '原结果属于另一修订，可导出留存或重新运行。' : '可恢复保存的配置，或运行新试验。'}</p>}
-          {result && <section aria-label="回放结果" className="lab-replay">
-            <div className="lab-replay-head"><span className="lab-kicker">03 / ACCEPTED EVENTS</span><strong>{numeric(state?.time_s,2)} s</strong><span>{state?.event_index===-1 ? '命中前 / 尚无平衡解' : `事件 ${(state?.event_index ?? 0)+1}`}</span></div>
-            <input aria-label="回放事件" type="range" min="0" max={Math.max(0,result.snapshots.length-1)} step="1" value={frame} onChange={e=>{setPlaying(false);setFrame(Number(e.target.value));}} />
-            <div className="lab-replay-actions"><button onClick={()=>{setPlaying(false);setFrame(0);}}>回到命中前</button><button onClick={()=>{if(frame>=result.snapshots.length-1)setFrame(0);setPlaying(v=>!v);}}>{playing ? '暂停' : '播放'}</button><button onClick={()=>{setPlaying(false);setFrame(v=>Math.min(result.snapshots.length-1,v+1));}}>下一事件 →</button><button onClick={()=>{setPlaying(false);setFrame(result.snapshots.length-1);}}>最终接受状态</button><label>回放速度<select aria-label="回放速度" value={speed} onChange={e=>setSpeed(Number(e.target.value))}><option value=".5">0.5×</option><option value="1">1×</option><option value="2">2×</option></select></label></div>
-            <p className="lab-note">{state?.event_index===-1 ? '保留已声明的初始状态；物理量待核心求解。' : result.events[state?.event_index ?? 0]?.message}</p>
-          </section>}
-          <div className="lab-ship-metrics"><div><span>新增水量</span><strong>{numeric(state?.ship?.total_onboard_water_mass_t)} <small>t</small></strong></div><div><span>横倾</span><strong>{numeric(state?.ship?.equilibrium.heel_deg,2)} <small>°</small></strong></div><div><span>纵倾</span><strong>{numeric(state?.ship?.equilibrium.trim_deg,2)} <small>°</small></strong></div><div><span>质量残差</span><strong>{state?.ship ? state.ship.mass_conservation_error_t.toExponential(1) : '未知'} <small>t</small></strong></div></div>
+          <ShipMetrics state={state} baseline={baseline.ship} />
+          {result?.fragmentation && <FragmentEvidence report={result.fragmentation} state={state} experiment={draft} selected={trace} onTrace={setTrace} onInspect={inspect} />}
+          {result && <Replay entries={entries} frame={frame} playing={playing} speed={speed} onFrame={setFrame} onPlaying={setPlaying} onSpeed={setSpeed} onInspect={inspect} />}
         </div>
-        <Inspector experiment={draft} state={state} selected={selected} onSelect={setSelected} />
+        <Inspector experiment={draft} state={state} baseline={baseline.initial} rooms={rooms} selected={selected} inspection={inspection} onSelect={id=>inspect({kind:'module',id})} onInspect={inspect} />
       </div>
       {result && <CoreEvidence result={result} />}
       <section className="lab-records"><div><span className="lab-kicker">CONFIGURATION / REPRODUCE</span><h2>配置与复核</h2><p className="lab-note">配置可下载；结果包含冻结的舰船、工况、规则、事件和核心计算。CLI 能从这些输入复跑。</p>

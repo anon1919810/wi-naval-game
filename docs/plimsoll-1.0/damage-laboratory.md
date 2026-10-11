@@ -101,9 +101,56 @@ single report cell. Prefer JSON for structured automated interpretation.
   work limit), with the existing worker's timeout/cancellation/result-size bounds.
   Solver/model stops retain the last accepted state. Completed does not mean
   historically validated, safe, survived or sank.
-- No new penetration, fuse, fragmentation, blast, fire, structural breakup,
+- No new penetration, fuse, blast-pressure, fire, structural breakup,
   medical, damage-control pathfinding or repeated-hit solver is supplied. No
   real-time combat performance claim is made.
+
+## Declared detonation and representative fragments
+
+An optional `detonation` block selects `compartment-fragment-rays-1`. Omitting it
+keeps the localized impact rules above unchanged. The block declares `position_m`,
+integer `fragment_count` (32..512), integer `seed` (0..4294967295), `boundaries`,
+and source/estimate metadata. The origin must be strictly inside exactly one
+declared room, and room interiors must not overlap. Total ray/layout checks are
+limited to 65536. `impact.severity` is the normalized game exposure budget;
+`impact.radius_m` is the maximum ray range. Neither is explosive mass or pressure.
+The declared origin is not a fuse or projectile calculation.
+
+Seeded rotations of equal-area spherical samples trace room faces in distance
+order. Every face defaults to fully blocking fragments. A boundary response
+declares an `id`, `from_id` room, `to_id` adjacent room or explicit `sea`,
+`position_m`, `transmission` in [0,1], `breach_threshold` in [0,1],
+`max_breach_area_m2`, `discharge_coefficient` in [0,1], and metadata. Shared-room
+responses require real opposing faces with positive overlap. Sea responses use
+an explicitly declared exterior rectangular face proxy; mixed or adjoining room
+faces cannot be marked as sea. Points on face edges are rejected. Duplicate
+responses and manual links on interfaces configured to generate holes are rejected.
+
+Each representative ray contributes `severity/count * accumulated_transmission *
+max(0,1-distance/range)` when it first intersects each module or duty-station box.
+Modules and stations sample exposure; they do not add further physical shielding.
+Only compartment boundaries occlude in this version. Existing integrity and
+aggregate casualty rules consume the resulting bounded exposure. Unknown personnel
+remain unknown, and equipment mass remains in the loading ledger.
+
+A declared boundary accumulates the arriving ray exposure it absorbs. If its
+threshold is below 1, generated area is `maximum_area * clamp((absorbed-threshold)
+/(1-threshold),0,1)`; threshold 1 disables generation. Maximum area cannot exceed
+the interface area or 1000 m². One link per boundary is generated at its declared
+proxy point, not at a surveyed fracture or a fitted hull-skin intersection. These
+new openings affect subsequent hydraulics; they do not change shielding during
+this instantaneous burst. Manual and generated links are merged once and passed
+to the original flooding core; the frozen request remains unchanged.
+
+The report contains `fragmentation` (origin, seed, indexed traces and segments,
+target contributions, stop reasons, boundary loads and generated links) and
+`applied_breaches`. JSON and CSV retain all these records. Canceled tracing does
+not apply partial damage or generate openings. Replay adds distinct indexed
+detonation and opening events at t=0. Paths and generated-opening markers stay
+hidden in the pre-detonation state. Red endpoints indicate blocked paths, a red
+line indicates the selected path, and blue points locate generated hydraulic
+proxies. Through-hull path overlays are explanatory inspection aids, not moving
+physical particles. Camera movement remains explicit through **locate**.
 
 Replay uses event indices, including distinct t=0 events. It steps accepted
 states without inventing intermediate physics. The final GZ panel is explicitly
@@ -112,6 +159,15 @@ result; the stored run remains available for restoration or export. Owner checks
 CSRF, origin policy, immutable revisions, per-account active limits, lease/CAS
 identity and bounded-process cleanup are shared with the existing queue. Analysis
 URLs cannot read a lab run as an analysis report.
+
+The replay highlights meaningful module/crew changes and folds intermediate
+hydraulic records under **all records**, retaining every original frame and index.
+Explanations compare adjacent frozen snapshots; they do not parse event messages.
+Threshold effects mean first recorded at that accepted state, not an inferred exact
+crossing time. Event targets and manual inspection share spatial outlines; camera
+movement happens only on **locate**. Dashed outlines are through-hull location aids.
+Module/crew comparisons use the declared pre-hit state; ship comparisons use the
+first available accepted equilibrium, never an invented zero-angle pre-hit solve.
 
 The scene uses `(x,y,z) → (x,z,-y)` and subtracts the raw hull geometry's keel
 datum only for raw offsets. The neutral opaque hull preserves every canonical

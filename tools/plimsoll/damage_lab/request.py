@@ -180,7 +180,7 @@ def normalize_request(project, condition_id, experiment):
         reject("requires finite serializable JSON: " + str(error))
     p = "$.experiment"
     obj(document, {"schema", "source", "estimate", "duration_s", "time_step_s", "initial_water_m3",
-        "modules", "crew_groups", "impact", "breaches", "rules", "remaining_gz_angles_deg"}, p)
+        "modules", "crew_groups", "impact", "breaches", "rules", "remaining_gz_angles_deg", "detonation"}, p)
     if document.get("schema") != "plimsoll-damage-lab-experiment-1":
         reject("unsupported experiment schema", p + ".schema")
     metadata(document, p)
@@ -277,6 +277,10 @@ def normalize_request(project, condition_id, experiment):
         reject("GZ angles must be strictly increasing", p + ".remaining_gz_angles_deg")
     versions = {"damage_lab": METHOD, **_analysis_request.VERSIONS, "flooding": flooding.METHOD_VERSION,
                 "hydraulics": flooding_kernel.METHOD_VERSION, "liquid_geometry": tank_geometry.METHOD_VERSION}
+    if "detonation" in document:
+        from .fragmentation import METHOD as FRAGMENT_METHOD, normalize_detonation
+        normalize_detonation(document, rooms)
+        versions["fragmentation"] = FRAGMENT_METHOD
     request = dict(schema=SCHEMA, condition_id=condition_id, experiment=document, method_versions=versions)
     encoded = json.dumps(dict(project=snapshot, request=request), sort_keys=True, ensure_ascii=False,
                          allow_nan=False, separators=(",", ":")).encode("utf-8")
