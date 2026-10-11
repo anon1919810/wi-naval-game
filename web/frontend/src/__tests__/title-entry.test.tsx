@@ -358,9 +358,13 @@ describe('the header', () => {
     expect(replay).toHaveAttribute('title', 'Replay intro');
     expect(replay.querySelector('svg')).not.toBeNull();
     expect(screen.getAllByRole('button', { name: 'Replay intro' })).toHaveLength(1);
-    // The footer keeps only its two lines: the address lives in About, once.
-    expect(document.querySelector('.ff-footer')!.textContent).toBe('BUILT BY YANG DUANMINGPRECISE. MODERN. INTERACTIVE.');
-    expect(document.querySelector('.ff-footer a')).toBeNull();
+    // Contact lives in About; the footer's one external link is the ICP record.
+    const filing = screen.getByRole('link', { name: '蜀ICP备2026059657号-1' });
+    expect(filing.closest('.ff-footer')).not.toBeNull();
+    expect(filing).toHaveAttribute('href', 'https://beian.miit.gov.cn/');
+    expect(filing).toHaveAttribute('target', '_blank');
+    expect(filing).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(document.querySelector('.ff-footer')).not.toHaveTextContent('公网安备');
     expect(document.querySelector('.ff-footer button')).toBeNull();
   });
 

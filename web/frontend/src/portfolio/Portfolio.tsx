@@ -757,7 +757,11 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
       {/* Footer contact is gone: About ends with the real contact section, and a
           second address at the bottom of every page said the same thing twice.
           Replay is in the header for the same reason — one control, not two. */}
-      <footer className="ff-footer" inert={opening}><span>BUILT BY YANG DUANMING</span><span>PRECISE. MODERN. INTERACTIVE.</span></footer>
+      <footer className="ff-footer" inert={opening}>
+        <span>BUILT BY YANG DUANMING</span>
+        <a className="ff-filing" lang="zh-CN" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">蜀ICP备2026059657号-1</a>
+        <span>PRECISE. MODERN. INTERACTIVE.</span>
+      </footer>
       {opening && publicActive && (readyHref === sheet.href
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
         : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}
