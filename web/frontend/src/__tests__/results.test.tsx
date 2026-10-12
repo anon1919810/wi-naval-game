@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { StageStatus } from '../components/StageStatus';
@@ -23,6 +24,15 @@ describe('stage status', () => {
     expect(screen.getByText('0 t')).toBeVisible();
     expect(screen.getByText('量测记录')).toBeVisible();
     expect(screen.getByText('工程估算')).toBeVisible();
+  });
+
+  it('shows every metric a stage reported, not the first eight', () => {
+    // The card used to stop at eight, so a stage with twelve metrics looked
+    // exactly like one with eight and the rest were silently missing.
+    const stage = structuredClone(completedFixture.stages.loading);
+    stage.data = { values: Object.fromEntries(Array.from({ length: 12 }, (_, index) => [`k${index + 1}`, index + 1])) };
+    render(<StageStatus name="loading" stage={stage} />);
+    for (let index = 1; index <= 12; index += 1) expect(screen.getByText(`k${index}`)).toBeVisible();
   });
 
   it('is the stage\'s own positioning and focus target', () => {

@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '../api';
@@ -325,7 +326,7 @@ describe('two creations never overlap', () => {
     fireEvent.click(screen.getByRole('button', { name: '保存为新项目' }));
     await screen.findByRole('button', { name: '保存中…' });
     for (const label of ['解析方箱', '通用试验船', 'HMS Queen Mary']) {
-      expect(screen.getByRole('button', { name: new RegExp(label) })).toBeDisabled();
+      for (const entry of screen.getAllByRole('button', { name: new RegExp(label) })) expect(entry).toBeDisabled();
     }
     expect(screen.getByRole('button', { name: '创建空白项目' })).toBeDisabled();
     expect(api.createProject).not.toHaveBeenCalled();
@@ -479,7 +480,7 @@ describe('the library keeps its own behaviour', () => {
   it('points an anonymous reader at this section instead of a manual procedure', async () => {
     render(<Library onOpen={vi.fn()} anonymous />);
     fireEvent.click(await screen.findByText('保存与恢复说明'));
-    const note = within(screen.getByRole('note')).getByText(/「下载项目 JSON」/);
+    const note = within(screen.getByRole('note')).getByText(/在项目页下载项目 JSON/);
     expect(note).toHaveTextContent('从备份恢复');
     // The distinction that matters is kept exactly as it was.
     expect(screen.getByText(/运行页导出的 JSON\/CSV 是计算报告，不是项目备份/)).toBeVisible();

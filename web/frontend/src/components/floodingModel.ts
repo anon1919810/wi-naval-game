@@ -1,5 +1,7 @@
-import { number, numericProblem, numericValue, object, rows, stringList, type NumericDomain, type Raw } from './formModel';
+import { englishCopy, number, numericProblem, numericValue, object, rows, stringList, type NumericDomain, type Raw } from './formModel';
+import type { Copy } from './diagnosticGuidance';
 import type { Dimension } from './units';
+import type { WorkspaceKey } from '../i18n/workspace';
 
 // Saved flooding scenario drafts and the flooding run request.
 //
@@ -8,6 +10,10 @@ import type { Dimension } from './units';
 // case. Nothing here solves anything. The run request only assembles
 // `options.flooding = {scenario, options}`; the kernel and the coordinator remain
 // the authority for whether a scenario is calculable.
+//
+// The refusal messages and the field labels are dictionary keys read through the
+// `Copy` the caller passes, so this module stays pure; without one it answers in
+// English, the workspace's own default.
 
 export const SCENARIO_SCHEMA = 'plimsoll-flooding-scenario-1';
 
@@ -16,27 +22,27 @@ export const SCENARIO_SCHEMA = 'plimsoll-flooding-scenario-1';
 // density must match it exactly, otherwise the run is refused.
 export const EQUILIBRIUM_RHO_T_M3 = 1.025;
 
-export interface FieldSpec { key: string; label: string; kind: NumericDomain; dimension?: Dimension; storedUnit?: string }
+export interface FieldSpec { key: string; label: WorkspaceKey; kind: NumericDomain; dimension?: Dimension; storedUnit?: string }
 
 // Liquid density stays canonical: no dimension is declared for it, so it is
 // typed and shown unchanged under every reader preference.
 export const TANK_FIELDS: FieldSpec[] = [
-  { key: 'length_m', label: '长度', kind: 'positive', dimension: 'length' },
-  { key: 'beam_m', label: '型宽', kind: 'positive', dimension: 'length' },
-  { key: 'height_m', label: '高度', kind: 'positive', dimension: 'length' },
-  { key: 'x_m', label: '纵向位置', kind: 'signed', dimension: 'length' },
-  { key: 'y_m', label: '横向位置', kind: 'signed', dimension: 'length' },
-  { key: 'keel_to_bottom_m', label: '舱底距基线', kind: 'nonnegative', dimension: 'length' },
-  { key: 'permeability', label: '渗透率 [0,1]', kind: 'nonnegative' },
-  { key: 'initial_volume_m3', label: '初始水量', kind: 'nonnegative', dimension: 'volume' },
+  { key: 'length_m', label: 'floodingField.length', kind: 'positive', dimension: 'length' },
+  { key: 'beam_m', label: 'floodingField.beam', kind: 'positive', dimension: 'length' },
+  { key: 'height_m', label: 'floodingField.height', kind: 'positive', dimension: 'length' },
+  { key: 'x_m', label: 'floodingField.x', kind: 'signed', dimension: 'length' },
+  { key: 'y_m', label: 'floodingField.y', kind: 'signed', dimension: 'length' },
+  { key: 'keel_to_bottom_m', label: 'floodingField.keelToBottom', kind: 'nonnegative', dimension: 'length' },
+  { key: 'permeability', label: 'floodingField.permeability', kind: 'nonnegative' },
+  { key: 'initial_volume_m3', label: 'floodingField.initialVolume', kind: 'nonnegative', dimension: 'volume' },
 ];
 export const CONNECTION_FIELDS: FieldSpec[] = [
-  { key: 'x_m', label: '纵向位置', kind: 'signed', dimension: 'length' },
-  { key: 'y_m', label: '横向位置', kind: 'signed', dimension: 'length' },
-  { key: 'z_m', label: '高度（基线以上）', kind: 'signed', dimension: 'length' },
-  { key: 'area_m2', label: '面积', kind: 'nonnegative', dimension: 'area' },
-  { key: 'discharge_coefficient', label: '流量系数 Cd [0,1]', kind: 'nonnegative' },
-  { key: 'aperture_height_m', label: '有限开口高度', kind: 'positive', dimension: 'length' },
+  { key: 'x_m', label: 'floodingField.x', kind: 'signed', dimension: 'length' },
+  { key: 'y_m', label: 'floodingField.y', kind: 'signed', dimension: 'length' },
+  { key: 'z_m', label: 'floodingField.z', kind: 'signed', dimension: 'length' },
+  { key: 'area_m2', label: 'floodingField.area', kind: 'nonnegative', dimension: 'area' },
+  { key: 'discharge_coefficient', label: 'floodingField.dischargeCoefficient', kind: 'nonnegative' },
+  { key: 'aperture_height_m', label: 'floodingField.apertureHeight', kind: 'positive', dimension: 'length' },
 ];
 export const APERTURE_HEIGHT = CONNECTION_FIELDS.find(field => field.key === 'aperture_height_m') as FieldSpec;
 
@@ -127,22 +133,22 @@ function knownSource(value: unknown): boolean {
 }
 function triState(value: unknown): boolean | null { return typeof value === 'boolean' ? value : null; }
 
-export function requestOptionProblem(request: FloodingRequest): string | null {
-  if (request.rho.trim() !== '' && numericProblem('positive', request.rho)) return '环境与海水密度必须是正数';
+export function requestOptionProblem(request: FloodingRequest, w: Copy = englishCopy): string | null {
+  if (request.rho.trim() !== '' && numericProblem('positive', request.rho, w)) return w('flooding.request.rho');
   if (request.steps.trim() !== '') {
     const value = Number(request.steps);
-    if (!Number.isInteger(value) || value < 1 || value > 100000) return '最大接受步数必须是 1–100000 的整数';
+    if (!Number.isInteger(value) || value < 1 || value > 100000) return w('flooding.request.steps');
   }
   if (request.halvings.trim() !== '') {
     const value = Number(request.halvings);
-    if (!Number.isInteger(value) || value < 0 || value > 60) return '每步减半重试次数必须是 0–60 的整数';
+    if (!Number.isInteger(value) || value < 0 || value > 60) return w('flooding.request.halvings');
   }
-  if (request.gravity.trim() !== '' && numericProblem('positive', request.gravity)) return '重力加速度必须是正数';
+  if (request.gravity.trim() !== '' && numericProblem('positive', request.gravity, w)) return w('flooding.request.gravity');
   if (request.gzAngles.length > 0) {
     const angles = request.gzAngles;
     if (!angles.length || angles.length > 201 || angles.some(value => !Number.isFinite(value))
       || angles.some((value, index) => index > 0 && value <= angles[index - 1])) {
-      return '剩余稳性采样须为 1–201 个严格递增角度';
+      return w('flooding.request.gzAngles');
     }
   }
   return null;
@@ -150,88 +156,88 @@ export function requestOptionProblem(request: FloodingRequest): string | null {
 
 // Everything a run needs, checked without touching a solver. The messages name
 // the offending field so the run is refused for a reason the user can fix.
-export function scenarioProblems(scenario: Raw, ledgerIds: string[], environmentRho = EQUILIBRIUM_RHO_T_M3): string[] {
+export function scenarioProblems(scenario: Raw, ledgerIds: string[], environmentRho = EQUILIBRIUM_RHO_T_M3, w: Copy = englishCopy): string[] {
   const problems: string[] = [];
-  if (scenario.schema !== SCENARIO_SCHEMA) problems.push('场景 schema 必须是 plimsoll-flooding-scenario-1');
+  if (scenario.schema !== SCENARIO_SCHEMA) problems.push(w('flooding.problem.schema'));
   const duration = scenario.duration_s;
-  if (number(duration) === null || (number(duration) as number) < 0) problems.push('进水时长未知或超出非负域');
+  if (number(duration) === null || (number(duration) as number) < 0) problems.push(w('flooding.problem.duration'));
   const step = scenario.time_step_s;
-  if (number(step) === null || (number(step) as number) <= 0) problems.push('时间步长必须是已知正数');
-  if (!knownSource(scenario.source)) problems.push('场景缺少来源');
-  if (triState(scenario.estimate) === null) problems.push('场景缺少估算状态声明');
+  if (number(step) === null || (number(step) as number) <= 0) problems.push(w('flooding.problem.timeStep'));
+  if (!knownSource(scenario.source)) problems.push(w('flooding.problem.scenarioSource'));
+  if (triState(scenario.estimate) === null) problems.push(w('flooding.problem.scenarioEstimate'));
   const water = sea(scenario);
   const seaId = typeof water.id === 'string' && water.id.trim() ? water.id : null;
-  if (!seaId) problems.push('海水节点缺少 id');
+  if (!seaId) problems.push(w('flooding.problem.seaId'));
   const seaDensity = number(water.fluid_density_t_m3);
-  if (seaDensity === null || seaDensity <= 0) problems.push('海水密度必须是已知正数');
-  else if (seaDensity !== environmentRho) problems.push(`海水密度必须等于本次请求的环境密度 ${environmentRho} t/m³`);
-  if (!knownSource(water.source) || triState(water.estimate) === null) problems.push('海水节点缺少来源或估算状态');
+  if (seaDensity === null || seaDensity <= 0) problems.push(w('flooding.problem.seaDensity'));
+  else if (seaDensity !== environmentRho) problems.push(w('flooding.problem.seaMatchesRho', { rho: environmentRho }));
+  if (!knownSource(water.source) || triState(water.estimate) === null) problems.push(w('flooding.problem.seaProvenance'));
 
   const declared = tanks(scenario);
   const ids = new Set<string>();
-  if (declared.length === 0) problems.push('场景至少需要一个舱室');
+  if (declared.length === 0) problems.push(w('flooding.problem.needsTank'));
   for (const tank of declared) {
-    const label = `舱室 ${String(tank.id ?? '?')}`;
-    if (typeof tank.id !== 'string' || !tank.id.trim()) { problems.push('舱室缺少 id'); continue; }
-    if (ids.has(tank.id)) problems.push(`舱室 ${tank.id} 重复`);
+    const label = w('flooding.problem.tankLabel', { id: String(tank.id ?? '?') });
+    if (typeof tank.id !== 'string' || !tank.id.trim()) { problems.push(w('flooding.problem.tankId')); continue; }
+    if (ids.has(tank.id)) problems.push(w('flooding.problem.tankDuplicate', { id: tank.id }));
     ids.add(tank.id);
-    if (seaId && tank.id === seaId) problems.push(`舱室 ${tank.id} 不能与海水节点同名`);
-    if (ledgerIds.includes(tank.id)) problems.push(`舱室 ${tank.id} 与账本条目同名，会重复计重`);
+    if (seaId && tank.id === seaId) problems.push(w('flooding.problem.tankSeaName', { id: tank.id }));
+    if (ledgerIds.includes(tank.id)) problems.push(w('flooding.problem.tankLedgerName', { id: tank.id }));
     for (const field of TANK_FIELDS) {
       if (field.key === 'permeability') continue;
-      if (number(tank[field.key]) === null) problems.push(`${label} 的 ${field.label} 未知`);
+      if (number(tank[field.key]) === null) problems.push(w('flooding.problem.unknown', { label, field: w(field.label) }));
     }
     const permeability = number(tank.permeability);
-    if (permeability === null || permeability < 0 || permeability > 1) problems.push(`${label} 的渗透率必须在 [0,1] 内`);
-    if (triState(tank.free_surface) === null) problems.push(`${label} 的自由液面状态必须明确声明`);
+    if (permeability === null || permeability < 0 || permeability > 1) problems.push(w('flooding.problem.tankPermeability', { label }));
+    if (triState(tank.free_surface) === null) problems.push(w('flooding.problem.tankFreeSurface', { label }));
     const density = number(tank.fluid_density_t_m3);
-    if (seaDensity !== null && density !== seaDensity) problems.push(`${label} 的液体密度必须与海水一致`);
-    if (!knownSource(tank.source) || triState(tank.estimate) === null) problems.push(`${label} 缺少来源或估算状态`);
+    if (seaDensity !== null && density !== seaDensity) problems.push(w('flooding.problem.tankDensity', { label }));
+    if (!knownSource(tank.source) || triState(tank.estimate) === null) problems.push(w('flooding.problem.provenance', { label }));
   }
 
   const edges = connections(scenario);
   for (const tank of declared) {
     if (tank.free_surface === false && edges.some(edge => edge.open === true &&
       (edge.from === tank.id || edge.to === tank.id))) {
-      problems.push(`舱室 ${String(tank.id)} 参与开启连接：连通进水须声明存在自由液面；无自由液面是锁定重心代理`);
+      problems.push(w('flooding.problem.tankOpen', { id: String(tank.id) }));
     }
   }
-  if (edges.length === 0) problems.push('场景至少需要一条连接');
+  if (edges.length === 0) problems.push(w('flooding.problem.needsConnection'));
   const nodes = new Set<string>([...(seaId ? [seaId] : []), ...ids]);
   for (const edge of edges) {
-    const label = `连接 ${String(edge.id ?? '?')}`;
-    if (typeof edge.id !== 'string' || !edge.id.trim()) { problems.push('连接缺少 id'); continue; }
+    const label = w('flooding.problem.connectionLabel', { id: String(edge.id ?? '?') });
+    if (typeof edge.id !== 'string' || !edge.id.trim()) { problems.push(w('flooding.problem.connectionId')); continue; }
     for (const side of ['from', 'to'] as const) {
       const reference = edge[side];
-      if (typeof reference !== 'string' || !nodes.has(reference)) problems.push(`${label} 的 ${side} 端点未指向海水或已声明舱室`);
+      if (typeof reference !== 'string' || !nodes.has(reference)) problems.push(w('flooding.problem.connectionSide', { label, side }));
     }
-    if (edge.from === edge.to) problems.push(`${label} 必须连接两个不同节点`);
+    if (edge.from === edge.to) problems.push(w('flooding.problem.connectionSelfLoop', { label }));
     for (const field of CONNECTION_FIELDS) {
       if (field.key === 'aperture_height_m') continue;
-      if (number(edge[field.key]) === null) problems.push(`${label} 的 ${field.label} 未知`);
+      if (number(edge[field.key]) === null) problems.push(w('flooding.problem.unknown', { label, field: w(field.label) }));
     }
     // An absent or null aperture height simply requests no finite-height check,
     // exactly as the kernel treats a missing key.
     // Requesting the finite-aperture check requires a known positive height; leaving
     // the key out entirely means no applicability check was requested at all.
     const aperture = number(edge.aperture_height_m);
-    if ('aperture_height_m' in edge && aperture === null) problems.push(`${label} 请求了有限开口高度检查但高度未知`);
-    else if (aperture !== null && aperture <= 0) problems.push(`${label} 的有限开口高度必须是正数`);
+    if ('aperture_height_m' in edge && aperture === null) problems.push(w('flooding.problem.apertureUnknown', { label }));
+    else if (aperture !== null && aperture <= 0) problems.push(w('flooding.problem.aperturePositive', { label }));
     const coefficient = number(edge.discharge_coefficient);
-    if (coefficient !== null && coefficient > 1) problems.push(`${label} 的流量系数必须在 [0,1] 内`);
+    if (coefficient !== null && coefficient > 1) problems.push(w('flooding.problem.coefficientRange', { label }));
     const density = number(edge.fluid_density_t_m3);
-    if (seaDensity !== null && density !== seaDensity) problems.push(`${label} 的液体密度必须与海水一致`);
-    if (triState(edge.open) === null) problems.push(`${label} 必须明确声明开启或关闭`);
-    if (!knownSource(edge.source) || triState(edge.estimate) === null) problems.push(`${label} 缺少来源或估算状态`);
+    if (seaDensity !== null && density !== seaDensity) problems.push(w('flooding.problem.tankDensity', { label }));
+    if (triState(edge.open) === null) problems.push(w('flooding.problem.connectionOpen', { label }));
+    if (!knownSource(edge.source) || triState(edge.estimate) === null) problems.push(w('flooding.problem.provenance', { label }));
   }
 
   if ('openings' in scenario && scenario.openings !== null) {
-    if (!Array.isArray(scenario.openings)) problems.push('场景开口必须是数组或显式 null');
+    if (!Array.isArray(scenario.openings)) problems.push(w('flooding.problem.openingsArray'));
     else for (const opening of scenario.openings) {
       const row = object(opening);
-      if (!row.id || triState(row.open) === null) problems.push('场景开口必须声明唯一 id 与开启状态');
-      if (['x_m', 'y_m', 'z_m'].some(field => number(row[field]) === null)) problems.push('场景开口坐标未知');
-      if (!knownSource(row.source) || triState(row.estimate) === null) problems.push('场景开口缺少来源或估算状态');
+      if (!row.id || triState(row.open) === null) problems.push(w('flooding.problem.openingId'));
+      if (['x_m', 'y_m', 'z_m'].some(field => number(row[field]) === null)) problems.push(w('flooding.problem.openingCoords'));
+      if (!knownSource(row.source) || triState(row.estimate) === null) problems.push(w('flooding.problem.openingProvenance'));
     }
   }
   return problems;
@@ -241,17 +247,17 @@ export function scenarioProblems(scenario: Raw, ledgerIds: string[], environment
 // Nothing is requested when no scenario is selected, so the flooding stage stays
 // unrequested exactly like before. An explicit environment density is returned
 // separately because the coordinator applies it to the whole request.
-export function buildFloodingRequest(project: Raw, request: FloodingRequest): { flooding: Raw | null; rho: number | null; error: string } {
+export function buildFloodingRequest(project: Raw, request: FloodingRequest, w: Copy = englishCopy): { flooding: Raw | null; rho: number | null; error: string } {
   const rho = environmentDensity(request);
   if (!request.scenario) {
-    return { flooding: null, rho: null, error: request.rho.trim() === '' ? '' : '环境密度只在选择破损场景时生效' };
+    return { flooding: null, rho: null, error: request.rho.trim() === '' ? '' : w('flooding.request.rhoInactive') };
   }
-  const optionProblem = requestOptionProblem(request);
+  const optionProblem = requestOptionProblem(request, w);
   if (optionProblem) return { flooding: null, rho: null, error: optionProblem };
   const scenario = rows(project.flooding_scenarios).find(row => String(row.id) === request.scenario);
-  if (!scenario) return { flooding: null, rho: null, error: '所选破损场景已不存在；请重新选择或保存场景' };
-  const problems = scenarioProblems(scenario, ledgerItemIds(project), rho ?? EQUILIBRIUM_RHO_T_M3);
-  if (problems.length > 0) return { flooding: null, rho: null, error: `破损场景不可运行：${problems.slice(0, 3).join('；')}${problems.length > 3 ? `；另有 ${problems.length - 3} 项待补` : ''}` };
+  if (!scenario) return { flooding: null, rho: null, error: w('flooding.request.scenarioGone') };
+  const problems = scenarioProblems(scenario, ledgerItemIds(project), rho ?? EQUILIBRIUM_RHO_T_M3, w);
+  if (problems.length > 0) return { flooding: null, rho: null, error: w('flooding.request.notRunnable', { problems: problems.slice(0, 3).join(w('form.listSeparator')), more: problems.length > 3 ? w('flooding.request.more', { count: problems.length - 3 }) : '' }) };
   const options: Raw = {};
   if (request.steps.trim() !== '') options.max_steps = Number(request.steps);
   if (request.halvings.trim() !== '') options.max_step_halvings = Number(request.halvings);

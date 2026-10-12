@@ -1,6 +1,6 @@
 import { Profiler, StrictMode } from 'react';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import Portfolio from '../portfolio/Portfolio';
 import { diagonalClip, introFrame, INTRO_DURATION } from '../portfolio/motion';
 import { classifyHash } from '../portfolio/routes';
@@ -36,6 +36,11 @@ function media(reduced = false, dark = false) {
 function changeMedia(query: string, matches: boolean) {
   act(() => { for (const handler of mediaListeners.get(query) ?? []) handler({ matches } as MediaQueryListEvent); });
 }
+
+// Keep cold module transformation outside the assertions' timeouts. Importing the
+// tool does not mount it and does not call its API; it only transforms the chunk
+// before a navigation assertion has to wait for it.
+beforeAll(async () => { await import('../App'); });
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/');
@@ -88,7 +93,7 @@ describe('public portfolio boundary', () => {
     await act(async () => {});
     follow('Open Plimsoll');
     await waitFor(() => expect(api.authConfig).toHaveBeenCalledTimes(1));
-    expect(await screen.findByTitle('本浏览器工作区')).toBeVisible();
+    expect(await screen.findByTitle('This browser’s workspace')).toBeVisible();
     expect(document.documentElement.dataset.formfieldSurface).toBe('app');
     follow('↖ Y’s Formfield');
     expect(await screen.findByRole('heading', { name: 'Plimsoll' })).toBeVisible();

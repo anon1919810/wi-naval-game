@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
-import { numericProblem, type NumericDomain } from './formModel';
+import { numericProblemCode, type NumericDomain, type NumericProblemCode } from './formModel';
 import { useUnits } from './UnitProvider';
+import { useWorkspaceCopy } from '../i18n/workspace';
 import type { Dimension } from './units';
 
 // A controlled numeric input for one declared quantity.
@@ -38,6 +39,7 @@ export interface QuantityFieldProps {
 
 export function QuantityField(props: QuantityFieldProps) {
   const { label, value, dimension, storedUnit, kind = 'signed', onChange, hint, placeholder, invalid, readOnly, small } = props;
+  const w = useWorkspaceCopy();
   const ariaLabel = props.ariaLabel ?? props['aria-label'];
   const unitId = useId();
   const visibleLabel = label.replace(/\s*·\s*(mm|cm|m|kg|t|kW|shp|kn|deg|rad)$/, '');
@@ -45,7 +47,9 @@ export function QuantityField(props: QuantityFieldProps) {
   const stored = typeof value === 'number' && Number.isFinite(value) ? value : null;
   const [text, setText] = useState(() => units.typed(stored, dimension, storedUnit));
   const [editing, setEditing] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
+  // The refusal is stored as its key, so a language switch while the message is
+  // on screen re-renders it in the new language instead of leaving the old one.
+  const [problem, setProblem] = useState<NumericProblemCode | null>(null);
   // The display unit the current text was produced in. While it is unchanged the
   // text is kept exactly as typed; if the reader's preference switches mid-edit
   // the text is rebased so it can never be read as the previous unit.
@@ -71,13 +75,13 @@ export function QuantityField(props: QuantityFieldProps) {
     }
     const typedValue = Number(raw);
     if (!Number.isFinite(typedValue)) {
-      setProblem('必须是有限数值');
+      setProblem('units.finiteRequired');
       return;
     }
     const converted = units.stored(typedValue, dimension, storedUnit) as number;
     // The numeric domain is checked on the stored value, so a field in another
     // unit still refuses out-of-domain input.
-    const domain = numericProblem(kind, String(converted));
+    const domain = numericProblemCode(kind, String(converted));
     if (domain) {
       setProblem(domain);
       return;
@@ -86,12 +90,12 @@ export function QuantityField(props: QuantityFieldProps) {
     onChange(converted);
   }
 
-  const control = <input type="number" step="any" placeholder={placeholder ?? '未知'}
+  const control = <input type="number" step="any" placeholder={placeholder ?? w('units.unknown')}
     aria-label={ariaLabel ?? label} aria-describedby={unitId} aria-invalid={Boolean(invalid || problem)} readOnly={readOnly}
     value={text} onChange={event => commit(event.target.value)} onFocus={() => { setEditing(true); textUnit.current = units.unit(dimension); }}
     onBlur={() => { setEditing(false); textUnit.current = units.unit(dimension); setText(units.typed(stored, dimension, storedUnit)); }} />;
   const suffix = <span id={unitId} className="field-unit">{units.unit(dimension)}{props.unitSuffix}</span>;
-  const message = problem ? <span className="field-error" role="alert">{problem}</span> : null;
+  const message = problem ? <span className="field-error" role="alert">{w(problem)}</span> : null;
   if (small) return <label className="field-label field-label--inline">{visibleLabel}{control}{suffix}{message}</label>;
   return <label className="field-label">{visibleLabel}{control}{suffix}{hint && <small>{hint}</small>}{message}</label>;
 }
@@ -114,12 +118,15 @@ export interface QuantityListProps {
  * stale samples. The marker is rejected by request builders, never persisted.
  */
 export function QuantityListField({ label, value, dimension, storedUnit, onChange, hint, placeholder }: QuantityListProps) {
+  const w = useWorkspaceCopy();
   const units = useUnits();
   const unitId = useId();
   const shown = value.map(sample => units.value(sample, dimension, storedUnit));
   const [text, setText] = useState(() => shown.filter(item => item !== null).join(', '));
   const [editing, setEditing] = useState(false);
-  const [problem, setProblem] = useState<string | null>(null);
+  // Stored as its key for the same reason as the single field's: a visible
+  // refusal has to follow a language switch, and the typed text must not.
+  const [problem, setProblem] = useState<'units.sampleFiniteRequired' | null>(null);
   const textUnit = useRef(units.unit(dimension));
   const signature = `${shown.join(',')}|${units.unit(dimension)}`;
 
@@ -136,7 +143,7 @@ export function QuantityListField({ label, value, dimension, storedUnit, onChang
     const converted: number[] = [];
     for (const token of tokens) {
       const typed = Number(token);
-      if (!Number.isFinite(typed)) { setProblem('采样必须是有限数值'); onChange([Number.NaN]); return; }
+      if (!Number.isFinite(typed)) { setProblem('units.sampleFiniteRequired'); onChange([Number.NaN]); return; }
       converted.push(units.stored(typed, dimension, storedUnit) as number);
     }
     setProblem(null);
@@ -149,7 +156,7 @@ export function QuantityListField({ label, value, dimension, storedUnit, onChang
       onBlur={() => { setEditing(false); textUnit.current = units.unit(dimension); setText(shown.filter(item => item !== null).join(', ')); }} />
     <span id={unitId} className="field-unit">{units.unit(dimension)}</span>
     {hint && <small>{hint}</small>}
-    {problem && <span className="field-error" role="alert">{problem}</span>}
+    {problem && <span className="field-error" role="alert">{w(problem)}</span>}
   </label>;
 }
 

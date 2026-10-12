@@ -108,6 +108,12 @@
 .app-shell .library-section-heading h2 { font-size: 20px; font-weight: 600; }
 .library-section-heading > svg { top: auto; bottom: -4px; right: 0; }
 .app-shell .project-list { background: transparent; border: 0; border-radius: 0; }
+/* The library filter. It narrows the list already read, so it is drawn on the
+   list's own rules rather than in a panel of its own. */
+.app-shell .library-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 8px; border-bottom: 1px solid var(--line); }
+.app-shell .library-filter input { flex: 1 1 200px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 13px; }
+.app-shell .library-filter input::placeholder { color: var(--faint); }
+.app-shell .library-filter-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .app-shell .project-row { min-height: 78px; padding: 15px 8px; gap: 8px; border-bottom: 1px solid var(--line); }
 .app-shell .project-row:last-child { border-bottom: 1px solid var(--line); }
 .app-shell .project-row:hover { background: var(--surface-tint); }
@@ -208,6 +214,12 @@
 .app-shell .nav-item--active { border-left: 2px solid var(--accent); padding-left: 10px; background: var(--surface-tint); }
 .app-shell .nav-project-name { font-family: var(--workspace-display); font-weight: 600; }
 .app-shell .nav-section-label { letter-spacing: .04em; font-weight: 500; }
+/* The chapter filter: the index's own list, narrowed in place. */
+.app-shell .nav-filter { display: grid; gap: 6px; margin: 0 0 10px; }
+.app-shell .nav-filter input { width: 100%; min-width: 0; padding: 7px 9px; border: 1px solid var(--line-strong); border-radius: 6px; background: var(--surface); color: var(--ink); font-size: 12px; }
+.app-shell .nav-filter input::placeholder { color: var(--faint); }
+.app-shell .nav-filter-count { color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+.app-shell .nav-filter-none { margin: 0; color: var(--muted); font-size: 11px; }
 /* One compact operation bar carries condition, saved revision, draft state and
    the two primary actions. Errors sit directly under it, never inside help. */
 .app-shell .workbench-toolbar { position: sticky; top: 0; z-index: 2; flex-wrap: wrap; gap: 0; padding: 0; background: var(--canvas); }
@@ -240,6 +252,25 @@
 .app-shell .vessel-header h1 { font-size: clamp(28px, 2.5vw, 38px); font-weight: 600; letter-spacing: -.025em; }
 /* Overview groups: numbered first-level input groups separated by a thin rule. */
 .app-shell .overview-page { display: grid; gap: 26px; margin-top: 26px; }
+/* First-use guidance: a native disclosure, not a modal, a tour or a checklist.
+   It reuses the same hairline, the same faint ink and the same body measure as
+   the notes around it, so it reads as part of the page rather than as an overlay
+   on top of it. Scoped to the workspace so no public surface inherits it. */
+.app-shell .first-use { padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.app-shell .overview-page > .first-use { margin-top: -6px; }
+/* Both the summary and the steps are read, not scanned, so they are set at
+   reading size rather than at caption size. */
+.app-shell .first-use > summary { cursor: pointer; color: var(--muted); font-size: 14px; font-weight: 600; letter-spacing: .01em; line-height: 1.75; }
+.app-shell .first-use > summary::marker { color: var(--faint); }
+/* Steps stay aligned in one column and read as a sequence: the number is set in
+   the workspace's own tabular face, the text at reading size. The measure is
+   bounded so a long step wraps rather than running the full width of a wide
+   window, and nothing is clipped at a narrow one. */
+.app-shell .first-use-steps { display: grid; gap: 10px; margin: 14px 0 0; padding-left: 1.5em; max-width: 62ch; color: var(--muted); font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }
+.app-shell .first-use-steps li { padding-left: .35em; }
+.app-shell .first-use-steps li::marker { color: var(--faint); font-variant-numeric: tabular-nums; }
+.app-shell .first-use-steps strong { color: var(--ink); font-weight: 600; }
+.app-shell .first-use-cta { margin-top: 14px; }
 .app-shell .chapter-group { display: grid; gap: 14px; padding-top: 20px; border-top: 1px solid var(--line); }
 .app-shell .group-head { display: flex; align-items: baseline; gap: 12px; }
 .app-shell .group-index { color: var(--faint); font-family: var(--workspace-display); font-size: 10px; font-variant-numeric: tabular-nums; }
@@ -381,7 +412,23 @@
   .app-shell .template-card { grid-template-columns: 24px minmax(0, 1fr); }
   .app-shell .template-action { grid-column: 2; grid-row: auto; justify-self: start; }
   .app-shell .blank-project { grid-template-columns: 1fr; }
-  .app-shell .brand-suffix, .app-shell .header-edition, .app-shell .user-email { display: none; }
+  /* The header is one shared component, so its narrow-width behaviour must not
+     depend on which shell happens to wrap it. Scoped to `.app-shell` these rules
+     missed the laboratory page, which renders the same header outside that shell,
+     and its edition label and account line pushed the action group 8 px past a
+     390 px viewport. */
+  .site-header { padding: 0 16px; }
+  .site-header .header-actions { gap: 10px; }
+  .site-header .brand-suffix, .site-header .header-edition, .site-header .user-email { display: none; }
+  /* The report's 200 px stage index was only collapsed for print, so on a narrow
+     screen it still held its column: the main area was left 116 px and its content
+     pushed the document 131 px wide at 390 px. Below 650 it stacks, exactly as the
+     print rule already does. Scoped through the page as well, because this block is
+     written before the report rules and an equally specific selector would lose to
+     them on source order. */
+  .app-shell .report-page .report-columns { grid-template-columns: minmax(0, 1fr); }
+  .app-shell .report-page .report-columns > .stage-index { position: static; }
+  .app-shell .report-page .report-main { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   /* Everything the workspace moves on purpose stops here: the spinner that
@@ -572,6 +619,12 @@
   .app-shell .stage-diagnostics-open { border-left: 1px solid var(--line-strong); background: transparent; color: var(--ink); }
   .app-shell .stability-plot, .app-shell .comparison-table, .app-shell .stage-table { break-inside: auto; }
   .app-shell .report-audit-fold > summary, .app-shell .stage-assumptions > summary { list-style: none; }
+}
+/* Keep wide comparison rows inside their own scroll area. */
+@media(max-width:650px) {
+  .app-shell .site-header { padding:0 16px; }
+  .app-shell .site-header .header-actions { gap:10px; }
+  .app-shell .comparison-table { display:block; max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; }
 }
 /* Reduced motion, stated last so it wins.
    Everything above this point may name an animation; this block is what actually

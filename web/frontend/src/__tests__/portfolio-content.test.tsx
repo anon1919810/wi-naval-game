@@ -153,7 +153,7 @@ describe('work detail content', () => {
 
   it('reads as numbered editorial sections, with the exhibit drawing as the only picture', () => {
     const heads = screen.getAllByRole('heading', { level: 2 }).map(node => node.textContent);
-    expect(heads.filter(text => /^\d\d/.test(text ?? ''))).toEqual(['01Overview', '02Capabilities', '03Workflow', '04Technology', '05Methods & Limits']);
+    expect(heads.filter(text => /^\d\d/.test(text ?? ''))).toEqual(['01Overview', '02Capabilities', '03Quick start', '04Technology', '05Methods & Limits']);
     // No report bitmap on the page at all: the reference sheet is the one picture.
     expect(document.querySelector('img')).toBeNull();
     expect(detail().querySelectorAll('.ff-report')).toHaveLength(0);
@@ -170,12 +170,20 @@ describe('work detail content', () => {
     }
     // Capabilities, in the approved wording.
     expect(text).toContain('Draft, trim and heel calculations with liquid-load effects, GM and sampled GZ curves, including opening-immersion checks.');
-    expect(text).toContain('Edit the ship’s inputs while retaining source and estimate information. Missing data stays explicit.');
+    // The first run uses the sample untouched, and the copy is honest about both
+// what the default request covers and what it does not.
+    expect(text).toContain('Leave the sample condition and the calculation request exactly as they are, then use 运行计算 (Run calculation)');
+    expect(text).toContain('The eight default stages cover loading, systems, design baseline, geometry, equilibrium, hydrostatics, deck and propulsion.');
+    expect(text).toContain('GZ, resistance, endurance and flooding need separate requests.');
+    // The sample is demonstration data, never presented as measured values.
+    expect(text).toContain('as demonstration data, not measured values from a real vessel');
     expect(text).toMatch(/Taylor-Gertler, Schoenherr, Holtrop-Mennen/);
     // Limits are stated, not implied.
     expect(text).toContain('Not a full SPS reproduction');
-    expect(text).toMatch(/no armour penetration, no explosion and no CFD/);
-    expect(text).toContain('Full seakeeping, structural strength, historical cost and combat damage simulation are not modelled.');
+    // The damage boundary is precise rather than a flat denial: the laboratory
+    // approximations exist, and each says what it is not.
+    expect(text).toMatch(/None of this is physical armour penetration, a fuse solver, blast pressure/);
+    expect(text).toContain('Full seakeeping, structural strength, historical cost and a complete combat-damage simulation are not modelled.');
     expect(text).toContain('Not a certified design tool');
     // The Overview no longer repeats a negative SPS claim, and nothing on the
     // page claims equivalence, certification or a repository.
@@ -255,7 +263,7 @@ describe('home and detail navigation', () => {
     fireEvent.click(screen.getByRole('link', { name: 'Open Plimsoll' }));
     expect(entry.skipped).toBe(false);
     await entry.capture(); await entry.finish();
-    await screen.findByTitle('本浏览器工作区');
+    await screen.findByTitle('This browser’s workspace');
     expect(window.location.hash).toBe('#/plimsoll');
     expect(document.querySelector('.ff-tool-shell')).toBeVisible();
   });
@@ -444,7 +452,7 @@ describe('home and detail navigation', () => {
     await vt.last().capture(); await vt.last().finish();
     follow('Open Plimsoll');
     await vt.last().capture(); await vt.last().finish();
-    await screen.findByTitle('本浏览器工作区');
+    await screen.findByTitle('This browser’s workspace');
     // The way out points at the detail, not at a hardcoded exhibit.
     const back = screen.getByRole('link', { name: '↖ Y’s Formfield' });
     expect(back).toHaveAttribute('href', '#/work/plimsoll');
@@ -468,7 +476,7 @@ describe('home and detail navigation', () => {
     await flush();
     follow('Open Plimsoll');
     await vt.last().capture(); await vt.last().finish();
-    await screen.findByTitle('本浏览器工作区');
+    await screen.findByTitle('This browser’s workspace');
     // A return that leaves the page without a visible focus holder is the case the
     // controller has to repair: the CTA becomes the focus so the visitor can go
     // straight back in.
@@ -540,11 +548,14 @@ describe('about and contact', () => {
     const text = (document.querySelector('.ff-about-slot') as HTMLElement).textContent!;
     expect(text).toContain('Yang Duanming');
     expect(text).toContain('tools and experiments');
-    expect(text).toMatch(/Built with/i);
+    expect(text).toMatch(/Technology stack/i);
     expect(text).toContain('Space Grotesk');
     expect(text).toContain('Inter');
+    // The stack section names what the tool is actually built from.
+    expect(text).toContain('Three.js');
+    expect(text).toContain('Python · FastAPI · PostgreSQL');
     // The honest boundary about what this site does: it never reaches the tool.
-    expect(text).toMatch(/No API on this site/i);
+    expect(text).toContain('Public pages and workspace');
     expect(text).toMatch(/never call the Plimsoll service and never create a workspace/);
     // The work entry now reads the project first.
     const project = screen.getByRole('link', { name: /VIEW THE PROJECT/ });

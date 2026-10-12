@@ -127,7 +127,7 @@ describe('desktop transitions', async () => {
     await entry.capture();
     expect(document.documentElement.dataset.ffTransition).toBe('tool');
     expect(document.querySelector('.ff-workspace')).toBeInTheDocument();
-    await screen.findByTitle('本浏览器工作区');
+    await screen.findByTitle('This browser’s workspace');
     const fades = animations.filter(call => call.options.pseudoElement !== '::view-transition-new(root)');
     expect(fades).toHaveLength(3);
     expect(fades.every(call => call.options.fill === 'both')).toBe(true);
@@ -150,7 +150,7 @@ describe('desktop transitions', async () => {
     fireEvent.keyDown(exhibit, { key: 'ArrowRight' });
     const sample = document.querySelector('.ff-lens-view')!.getAttribute('viewBox');
     follow('Open Plimsoll'); await vt.last().capture(); await vt.last().finish();
-    await screen.findByTitle('本浏览器工作区');
+    await screen.findByTitle('This browser’s workspace');
     follow('↖ Y’s Formfield'); const back = vt.last();
     expect(back.kind).toBe('tool-back'); await back.capture(); await back.finish();
     const arrival = animations.find(call => call.options.pseudoElement === '::view-transition-new(ff-scan)')!;
@@ -230,7 +230,7 @@ describe('desktop transitions', async () => {
     render(<Portfolio introEnabled={reduced} />); await flush();
     if (reduced) expect(screen.queryByRole('status', { name: 'Opening Y’s Formfield' })).toBeNull();
     follow('About'); follow('Work 01'); follow('Open Plimsoll');
-    await screen.findByTitle('本浏览器工作区'); follow('↖ Y’s Formfield'); await flush();
+    await screen.findByTitle('This browser’s workspace'); follow('↖ Y’s Formfield'); await flush();
     expect(document.documentElement.dataset.formfieldSurface).toBe('public');
     expect(revealing()).toBeUndefined(); expect(document.documentElement.dataset.ffTransition).toBeUndefined();
     expect(animations).toHaveLength(0);
@@ -281,8 +281,8 @@ describe('application isolation', async () => {
     const vt = native(); window.history.replaceState(null, '', '/#/plimsoll');
     let release!: () => void;
     vi.mocked(api.setTheme).mockReturnValue(new Promise(resolve => { release = () => resolve({ theme: 'dark' }); }));
-    render(<Portfolio />); await screen.findByTitle('本浏览器工作区');
-    fireEvent.click(screen.getByRole('button', { name: '切换到深色主题' }));
+    render(<Portfolio />); await screen.findByTitle('This browser’s workspace');
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     follow('↖ Y’s Formfield'); await vt.last().capture(); await vt.last().finish();
     // Public preference remains light; a late save may not repaint it dark.
     await act(async () => release()); expect(document.documentElement.dataset.theme).toBe('light');

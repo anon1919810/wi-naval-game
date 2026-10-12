@@ -15,7 +15,15 @@
  * - Both the raw file and the actual UTF-8 bytes of each request envelope are
  *   held under the server's 8 MiB limit, because a request that exceeds it is
  *   refused by middleware the reader can never see.
+ *
+ * Every sentence this module writes is application copy, so the words come from
+ * the dictionary through the `Copy` the caller passes. This module stays pure:
+ * without one it answers in English, the workspace's own default.
  */
+
+import type { WorkspaceKey } from '../i18n/workspace';
+import { englishCopy } from './formModel';
+import type { Copy } from './diagnosticGuidance';
 
 /** The bounded request middleware's limit; a larger backup cannot be sent. */
 export const MAX_BACKUP_BYTES = 8 * 1024 * 1024;
@@ -38,8 +46,8 @@ export interface BackupDocument {
 
 /** A refusal with a sentence a reader can act on. */
 export class BackupFileError extends Error {
-  constructor(message: string) {
-    super(message);
+  constructor(readonly key: WorkspaceKey, readonly params: Record<string, string | number> = {}, copy: Copy = englishCopy) {
+    super(copy(key, params));
     this.name = 'BackupFileError';
   }
 }
@@ -79,21 +87,19 @@ export function envelopeSize(payload: unknown): number {
 }
 
 /** Refuse an envelope the server's middleware would refuse anyway. */
-export function assertEnvelopeFits(payload: unknown, label: string): void {
+export function assertEnvelopeFits(payload: unknown, label: string, w: Copy = englishCopy): void {
   const size = envelopeSize(payload);
   if (size > MAX_BACKUP_BYTES) {
-    throw new BackupFileError(
-      `${label}按 JSON 编码后约 ${(size / 1024 / 1024).toFixed(1)} MiB，超过 8 MiB 的请求上限。请改用体积更小的备份。`,
-    );
+    throw new BackupFileError('backup.tooLarge', { label, size: (size / 1024 / 1024).toFixed(1) }, w);
   }
 }
 
-function decodeUtf8(bytes: Uint8Array): string {
+function decodeUtf8(bytes: Uint8Array, w: Copy): string {
   let text: string;
   try {
     text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(bytes);
   } catch {
-    throw new BackupFileError('文件不是有效的 UTF-8 文本，无法作为项目备份读取。');
+    throw new BackupFileError('backup.encoding', {}, w);
   }
   return text.startsWith(BOM) ? text.slice(BOM.length) : text;
 }
@@ -104,36 +110,36 @@ function decodeUtf8(bytes: Uint8Array): string {
  * Split from the file read so the rules above can be exercised directly, and so
  * a component can reuse them for a file it has already loaded.
  */
-export function parseBackup(text: string, filename: string, size: number): BackupDocument {
+export function parseBackup(text: string, filename: string, size: number, w: Copy = englishCopy): BackupDocument {
   const trimmed = text.trim();
-  if (trimmed === '') throw new BackupFileError('文件是空的，没有可读取的项目备份。');
+  if (trimmed === '') throw new BackupFileError('backup.empty', {}, w);
   let parsed: unknown;
   try {
     parsed = JSON.parse(trimmed);
   } catch {
-    throw new BackupFileError('文件不是有效的 JSON。请选择「下载项目 JSON」保存的备份文件。');
+    throw new BackupFileError('backup.notJson', {}, w);
   }
   if (!isPlainObject(parsed)) {
-    throw new BackupFileError('备份文件的顶层必须是一个 JSON 对象，而不是数组或其他值。');
+    throw new BackupFileError('backup.notObject', {}, w);
   }
   if (parsed.schema === 'plimsoll-analysis-1') {
-    throw new BackupFileError('这是计算报告，不是项目备份。请在项目页用「下载项目 JSON」保存备份。');
+    throw new BackupFileError('backup.isReport', {}, w);
   }
   const broken = findNonFiniteNumber(parsed);
   if (broken) {
-    throw new BackupFileError(`备份中的 ${broken} 不是有限数值，无法原样保存。`);
+    throw new BackupFileError('backup.nonFinite', { path: broken }, w);
   }
-  assertEnvelopeFits({ project: parsed }, '该备份');
+  assertEnvelopeFits({ project: parsed }, w('backup.label'), w);
   return { project: parsed, filename, size };
 }
 
-function readBytes(file: Blob): Promise<Uint8Array> {
+function readBytes(file: Blob, w: Copy): Promise<Uint8Array> {
   if (typeof file.arrayBuffer === 'function') return file.arrayBuffer().then(buffer => new Uint8Array(buffer));
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer));
-    reader.onerror = () => reject(new BackupFileError('文件无法读取，请重新选择一次。'));
-    reader.onabort = () => reject(new BackupFileError('文件读取已中止，请重新选择一次。'));
+    reader.onerror = () => reject(new BackupFileError('backup.readFailed', {}, w));
+    reader.onabort = () => reject(new BackupFileError('backup.readAborted', {}, w));
     reader.readAsArrayBuffer(file);
   });
 }
@@ -144,13 +150,11 @@ function readBytes(file: Blob): Promise<Uint8Array> {
  * The size is checked before any read so an oversized file costs nothing, and
  * the decode is strict so a mis-encoded file is reported rather than repaired.
  */
-export async function readBackupFile(file: File): Promise<BackupDocument> {
-  const name = file.name || '未命名备份';
+export async function readBackupFile(file: File, w: Copy = englishCopy): Promise<BackupDocument> {
+  const name = file.name || w('backup.unnamed');
   if (file.size > MAX_BACKUP_BYTES) {
-    throw new BackupFileError(
-      `文件 ${name} 约 ${(file.size / 1024 / 1024).toFixed(1)} MiB，超过 8 MiB 的请求上限。`,
-    );
+    throw new BackupFileError('backup.fileTooLarge', { name, size: (file.size / 1024 / 1024).toFixed(1) }, w);
   }
-  if (file.size === 0) throw new BackupFileError('文件是空的，没有可读取的项目备份。');
-  return parseBackup(decodeUtf8(await readBytes(file)), name, file.size);
+  if (file.size === 0) throw new BackupFileError('backup.empty', {}, w);
+  return parseBackup(decodeUtf8(await readBytes(file, w), w), name, file.size, w);
 }

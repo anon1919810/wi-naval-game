@@ -2,6 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useId, useMemo, useR
 
 import { useUnits } from './UnitProvider';
 import { useMotionToken } from './useLocalMotion';
+import { englishCopy } from './formModel';
+import { useWorkspaceCopy } from '../i18n/workspace';
+import type { Copy } from './diagnosticGuidance';
 import type { Dimension } from './units';
 
 /**
@@ -86,17 +89,17 @@ export function InputTraceProvider({ children, onReveal }: { children: ReactNode
 
 export function useInputTrace(): InputTraceApi { return useContext(InputTraceContext); }
 
-const ESTIMATE_LABELS: Record<'estimate' | 'declared' | 'unknown', string> = {
-  estimate: '工程估算', declared: '非估算（已声明）', unknown: '估算状态未声明',
-};
+const ESTIMATE_LABELS = {
+  estimate: 'trace.estimate.estimate', declared: 'trace.estimate.declared', unknown: 'trace.estimate.unknown',
+} as const satisfies Record<'estimate' | 'declared' | 'unknown', Parameters<Copy>[0]>;
 
 /**
  * The tri-state marker for one field. An estimate that was never declared is
  * `unknown`, which is deliberately different from `false`: "not declared" is
  * never read as "confirmed".
  */
-export function estimateLabel(estimate: boolean | null): string {
-  return ESTIMATE_LABELS[estimate === true ? 'estimate' : estimate === false ? 'declared' : 'unknown'];
+export function estimateLabel(estimate: boolean | null, w: Copy = englishCopy): string {
+  return w(ESTIMATE_LABELS[estimate === true ? 'estimate' : estimate === false ? 'declared' : 'unknown']);
 }
 
 export function estimateState(estimate: boolean | null): 'estimate' | 'declared' | 'unknown' {
@@ -108,10 +111,11 @@ export function estimateState(estimate: boolean | null): 'estimate' | 'declared'
  * project declares: a source, an engineering estimate, or an explicit unknown.
  */
 export function SourceMark({ fact }: { fact: Pick<TraceFact, 'source' | 'estimate'> }) {
+  const w = useWorkspaceCopy();
   const state = estimateState(fact.estimate);
   const text = fact.source
-    ? state === 'estimate' ? '工程估算' : state === 'declared' ? '已声明来源' : '已声明来源 · 估算未声明'
-    : state === 'estimate' ? '工程估算 · 未声明来源' : '未知来源';
+    ? state === 'estimate' ? w('trace.mark.estimate') : state === 'declared' ? w('trace.mark.declared') : w('trace.mark.declaredUnknownEstimate')
+    : state === 'estimate' ? w('trace.mark.estimateUndeclaredSource') : w('trace.mark.unknownSource');
   return <span className={`source-mark source-mark--${fact.source ? state : 'none'}`} title={fact.source ?? undefined}>
     {text}
   </span>;
@@ -144,17 +148,18 @@ export function TracedField({ fact, children, className, id }: {
 
 /** The button that publishes one field's provenance to the Trace panel. */
 function TraceSelectButton({ id, fact }: { id: string; fact: TraceFact }) {
+  const w = useWorkspaceCopy();
   const { selectedId, select, reveal } = useInputTrace();
   const active = selectedId === id;
   return <button type="button" className={`trace-pick ${active ? 'trace-pick--active' : ''}`}
     aria-pressed={active} onClick={() => { select(id, fact); reveal(); }}>
-    <span aria-hidden="true">来源</span>
-    <span className="visually-hidden">{`查看 ${fact.label} 的来源与估算状态`}</span>
+    <span aria-hidden="true">{w('trace.pick')}</span>
+    <span className="visually-hidden">{w('trace.pickLabel', { label: fact.label })}</span>
   </button>;
 }
 
-function readValue(value: TraceFact['value']): string {
-  if (value === null) return '未知';
+function readValue(value: TraceFact['value'], w: Copy): string {
+  if (value === null) return w('units.unknown');
   return String(value);
 }
 
@@ -163,6 +168,7 @@ function readValue(value: TraceFact['value']): string {
  * shows only that field's stored value, declared source and estimate state.
  */
 export function TracePanel({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  const w = useWorkspaceCopy();
   const { fact, clear, revealVersion } = useInputTrace();
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -173,33 +179,33 @@ export function TracePanel({ open, onToggle }: { open: boolean; onToggle: () => 
   // anything. The panel itself is never re-keyed and never takes focus.
   const motion = useMotionToken(open ? fact?.key ?? 'guide' : null);
   const units = useUnits();
-  return <aside ref={panel} className={`trace-panel ${open ? 'trace-panel--open' : ''}`} aria-label="输入来源">
+  return <aside ref={panel} className={`trace-panel ${open ? 'trace-panel--open' : ''}`} aria-label={w('trace.panel.label')}>
     <div className="trace-head">
-      <span className="section-kicker">TRACE / 来源</span>
+      <span className="section-kicker">{w('trace.panel.kicker')}</span>
       <button type="button" className="trace-toggle" aria-expanded={open} onClick={onToggle}>
-        {open ? '收起来源' : '来源'}
+        {open ? w('trace.panel.hide') : w('trace.panel.show')}
       </button>
     </div>
     {open && (fact
       ? <div className="trace-body" data-motion={motion}>
         <h2>{fact.label}</h2>
         <dl>
-          <dt>当前值</dt>
+          <dt>{w('trace.panel.value')}</dt>
           <dd>{fact.dimension && typeof fact.value === 'number'
             ? units.text(fact.value, fact.dimension, fact.storedUnit)
-            : readValue(fact.value)}</dd>
-          <dt>来源</dt>
-          <dd>{fact.source?.trim() ? fact.source : '未声明来源'}</dd>
-          <dt>估算状态</dt>
-          <dd>{estimateLabel(fact.estimate)}</dd>
-          {fact.path && <><dt>位置</dt><dd><code>{fact.path}</code></dd></>}
+            : readValue(fact.value, w)}</dd>
+          <dt>{w('trace.panel.source')}</dt>
+          <dd>{fact.source?.trim() ? fact.source : w('trace.panel.sourceMissing')}</dd>
+          <dt>{w('trace.panel.estimate')}</dt>
+          <dd>{estimateLabel(fact.estimate, w)}</dd>
+          {fact.path && <><dt>{w('trace.panel.location')}</dt><dd><code>{fact.path}</code></dd></>}
         </dl>
-        <p className="trace-note">来源声明说明数字从哪里来，不代表史实验证。</p>
-        <button type="button" className="text-button" onClick={clear}>清除选择</button>
+        <p className="trace-note">{w('trace.panel.note')}</p>
+        <button type="button" className="text-button" onClick={clear}>{w('trace.panel.clear')}</button>
       </div>
       : <div className="trace-body trace-body--guide" data-motion={motion}>
-        <h2>输入来源</h2>
-        <p>选择任一输入字段，这里显示它实际声明的来源与估算状态。未声明的来源保持未知，不用通用说明代替。</p>
+        <h2>{w('trace.panel.guideTitle')}</h2>
+        <p>{w('trace.panel.guide')}</p>
       </div>)}
   </aside>;
 }

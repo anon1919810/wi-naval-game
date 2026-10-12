@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '../api';
@@ -263,13 +264,13 @@ describe('the guard in the assembled application', () => {
 
     expect(window.location.hash).toBe('#/projects/p1');
     expect(screen.getByLabelText('船长')).toHaveValue(91);
-    expect(screen.getByRole('heading', { level: 1, name: 'Hull & Geometry' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: '船型与几何' })).toBeVisible();
     expect(screen.getByText('未保存修改')).toBeVisible();
 
     // The refusal is not sticky: the very next attempt still asks, and works.
     ask.mockReturnValue(true);
     fireEvent.click(screen.getByRole('button', { name: '← 项目库' }));
-    await screen.findByRole('heading', { level: 1, name: /^Projects/ });
+    await screen.findByRole('heading', { level: 1, name: /^项目库/ });
     expect(window.location.hash).toBe('#/projects');
     expect(length).not.toBeNull();
   });
@@ -301,7 +302,7 @@ describe('the guard in the assembled application', () => {
     window.history.back();
     await settle();
     expect(ask).toHaveBeenCalledTimes(2);
-    expect(await screen.findByRole('heading', { level: 1, name: /^Projects/ })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: /^项目库/ })).toBeVisible();
     expect(window.location.hash).toBe('#/projects');
     expect(window.history.length).toBe(size);
   });
@@ -315,7 +316,7 @@ describe('the guard in the assembled application', () => {
     fireEvent.click(screen.getByRole('button', { name: '查看 船长 的来源与估算状态' }));
     expect(await screen.findByRole('heading', { level: 2, name: '船长' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: '重量与载荷' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: '概览' }));
     expect(await screen.findByRole('heading', { level: 1, name: '解析方箱' })).toBeVisible();
     expect(ask).not.toHaveBeenCalled();
@@ -331,7 +332,7 @@ describe('the guard in the assembled application', () => {
 
     ask.mockReturnValue(true);
     fireEvent.click(screen.getByRole('button', { name: '← 项目库' }));
-    await screen.findByRole('heading', { level: 1, name: /^Projects/ });
+    await screen.findByRole('heading', { level: 1, name: /^项目库/ });
 
     // A new project has no unsaved draft, so leaving it must ask nothing.
     ask.mockClear();
@@ -340,7 +341,7 @@ describe('the guard in the assembled application', () => {
     await screen.findByRole('heading', { level: 1, name: '解析方箱' });
     expect(screen.getByText('与已保存修订一致')).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: '← 项目库' }));
-    expect(await screen.findByRole('heading', { level: 1, name: /^Projects/ })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: /^项目库/ })).toBeVisible();
     expect(ask).not.toHaveBeenCalled();
   });
 });

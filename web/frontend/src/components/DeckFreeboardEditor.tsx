@@ -3,6 +3,7 @@ import { FactField } from './FactField';
 import { QuantityField } from './QuantityField';
 import { useUnits } from './UnitProvider';
 import { declaredSource, TracedField, type TraceFact } from './InputTrace';
+import { useWorkspaceCopy } from '../i18n/workspace';
 import type { Dimension } from './units';
 import type { DeckInput, DeckPoint, DeckSegment, MeasureField } from './deckModel';
 
@@ -46,15 +47,16 @@ function segmentResult(fb: DeclaredFreeboard | null, id: string): Record<string,
 
 // Tri-state estimate: unchecked = false, checked = true, indeterminate = undeclared.
 function EstimateCheckbox({ value, onChange }: { value: boolean | null; onChange: (next: boolean | null) => void }) {
+  const w = useWorkspaceCopy();
   return <>
     <input
       type="checkbox"
-      aria-label="估算"
+      aria-label={w('deck.estimateAria')}
       ref={el => { if (el) el.indeterminate = value === null; }}
       checked={value === true}
       onChange={() => onChange(value === null ? true : value === true ? false : null)}
     />
-    {value === null && <small>未声明</small>}
+    {value === null && <small>{w('deck.undeclared')}</small>}
   </>;
 }
 
@@ -63,6 +65,7 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
   runs: RunView[];
   onPatchDeck: (next: DeckInput) => void;
 }) {
+  const w = useWorkspaceCopy();
   const fb = pickDeclaredFreeboard(runs);
   const units = useUnits();
   const pointOptions = deck.points.map(p => p.id).filter(id => id.length > 0);
@@ -106,100 +109,100 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
 
   return <div className="deck-editor">
     <div className="deck-group">
-      <div className="deck-group-title"><h3>甲板点</h3><button type="button" className="text-button" onClick={addPoint}>添加点</button></div>
+      <div className="deck-group-title"><h3>{w('deck.points.title')}</h3><button type="button" className="text-button" onClick={addPoint}>{w('deck.points.add')}</button></div>
       {deck.points.length === 0
-        ? <div className="deck-empty"><p>还没有甲板点。可从“高级：原始契约字段”粘贴，或点击“添加点”。</p></div>
+        ? <div className="deck-empty"><p>{w('deck.points.empty')}</p></div>
         : deck.points.map((point, index) => (
           <div className="deck-row" key={index}>
-            <label>点 id<input type="text" value={point.id} onChange={e => updatePoint(index, { id: e.target.value })} placeholder="如 aft-centre" /></label>
-            <QuantityField small label="x" aria-label={`点 ${point.id} x`} value={point.x_m} dimension="length"
+            <label>{w('deck.pointId')}<input type="text" value={point.id} onChange={e => updatePoint(index, { id: e.target.value })} placeholder={w('deck.pointIdPlaceholder')} /></label>
+            <QuantityField small label="x" aria-label={w('deck.pointAxisAria', { id: point.id, axis: 'x' })} value={point.x_m} dimension="length"
               onChange={value => updatePoint(index, { x_m: value })} />
-            <QuantityField small label="y" aria-label={`点 ${point.id} y`} value={point.y_m} dimension="length"
+            <QuantityField small label="y" aria-label={w('deck.pointAxisAria', { id: point.id, axis: 'y' })} value={point.y_m} dimension="length"
               onChange={value => updatePoint(index, { y_m: value })} />
-            <QuantityField small label="z" aria-label={`点 ${point.id} z`} value={point.z_m} dimension="length" kind="nonnegative"
+            <QuantityField small label="z" aria-label={w('deck.pointAxisAria', { id: point.id, axis: 'z' })} value={point.z_m} dimension="length" kind="nonnegative"
               onChange={value => updatePoint(index, { z_m: value })} />
             {/* Each endpoint measures its own provenance: this point's freeboard
                 never borrows the deck-level or segment-level source. */}
-            <TracedField fact={measureFact(`deck.points[${point.id}].freeboard_m`, `点 ${point.id} 干舷`, point.freeboard_m, 'length', 'm')}>
-            <QuantityField small label="干舷值" aria-label={`点 ${point.id} 干舷值`} value={point.freeboard_m.value} dimension="length" kind="nonnegative"
+            <TracedField fact={measureFact(`deck.points[${point.id}].freeboard_m`, w('deck.pointFreeboard', { id: point.id }), point.freeboard_m, 'length', 'm')}>
+            <QuantityField small label={w('deck.freeboardValue')} aria-label={w('deck.freeboardValueAria', { id: point.id })} value={point.freeboard_m.value} dimension="length" kind="nonnegative"
               onChange={value => updatePointFreeboard(index, { value })} />
             </TracedField>
-            <TracedField fact={measureFact(`deck.points[${point.id}].freeboard_m.source`, `点 ${point.id} 干舷来源`, point.freeboard_m, undefined, undefined, point.freeboard_m.source ?? null)}>
-            <label>干舷来源<input type="text" aria-label={`点 ${point.id} 干舷来源`} value={declaredSource(point.freeboard_m.source) ?? ''} onChange={e => updatePointFreeboard(index, { source: e.target.value })} placeholder="来源" /></label>
+            <TracedField fact={measureFact(`deck.points[${point.id}].freeboard_m.source`, w('deck.pointFreeboardSource', { id: point.id }), point.freeboard_m, undefined, undefined, point.freeboard_m.source ?? null)}>
+            <label>{w('deck.freeboardSource')}<input type="text" aria-label={w('deck.pointFreeboardSource', { id: point.id })} value={declaredSource(point.freeboard_m.source) ?? ''} onChange={e => updatePointFreeboard(index, { source: e.target.value })} placeholder={w('fact.source')} /></label>
             </TracedField>
-            <label>估算<EstimateCheckbox value={point.freeboard_m.estimate} onChange={next => updatePointFreeboard(index, { estimate: next })} /></label>
-            <button type="button" className="text-button deck-remove" onClick={() => removePoint(index)} aria-label={`删除点 ${point.id || index}`}>删除</button>
+            <label>{w('deck.estimate')}<EstimateCheckbox value={point.freeboard_m.estimate} onChange={next => updatePointFreeboard(index, { estimate: next })} /></label>
+            <button type="button" className="text-button deck-remove" onClick={() => removePoint(index)} aria-label={w('deck.removePointAria', { id: point.id || String(index) })}>{w('deck.remove')}</button>
           </div>
         ))}
     </div>
 
     <div className="deck-group">
-      <div className="deck-group-title"><h3>分段</h3><button type="button" className="text-button" onClick={addSegment}>添加段</button></div>
+      <div className="deck-group-title"><h3>{w('deck.segments.title')}</h3><button type="button" className="text-button" onClick={addSegment}>{w('deck.segments.add')}</button></div>
       {deck.segments.length === 0
-        ? <div className="deck-empty"><p>还没有分段。可从“高级：原始契约字段”粘贴，或点击“添加段”。</p></div>
+        ? <div className="deck-empty"><p>{w('deck.segments.empty')}</p></div>
         : deck.segments.map((segment, index) => {
           const sr = segmentResult(fb, segment.id);
           const lengthM = numeric(sr?.length_m);
           const lengthPct = numeric(sr?.length_percent);
           return (
             <div className="deck-row deck-row--segment" key={index}>
-              <label>段 id<input type="text" value={segment.id} onChange={e => updateSegment(index, { id: e.target.value })} placeholder="如 centreline-profile" /></label>
-              <label>艉端点<select aria-label={`段 ${segment.id} 艉端点`} value={segment.aft_point_id ?? ''} onChange={e => updateSegment(index, { aft_point_id: e.target.value || null })}>
-                <option value="">未选择</option>
+              <label>{w('deck.segmentId')}<input type="text" value={segment.id} onChange={e => updateSegment(index, { id: e.target.value })} placeholder={w('deck.segmentIdPlaceholder')} /></label>
+              <label>{w('deck.aftPoint')}<select aria-label={w('deck.pointAria', { id: segment.id, end: w('deck.aftPoint') })} value={segment.aft_point_id ?? ''} onChange={e => updateSegment(index, { aft_point_id: e.target.value || null })}>
+                <option value="">{w('deck.unselected')}</option>
                 {pointOptions.map(id => <option key={id} value={id}>{id}</option>)}
               </select></label>
-              <label>艏端点<select aria-label={`段 ${segment.id} 艏端点`} value={segment.fore_point_id ?? ''} onChange={e => updateSegment(index, { fore_point_id: e.target.value || null })}>
-                <option value="">未选择</option>
+              <label>{w('deck.forePoint')}<select aria-label={w('deck.pointAria', { id: segment.id, end: w('deck.forePoint') })} value={segment.fore_point_id ?? ''} onChange={e => updateSegment(index, { fore_point_id: e.target.value || null })}>
+                <option value="">{w('deck.unselected')}</option>
                 {pointOptions.map(id => <option key={id} value={id}>{id}</option>)}
               </select></label>
-              <span className="deck-readonly">长度：<strong>{units.text(lengthM, 'length')}</strong> · 占比：<strong>{lengthPct === null ? '—' : `${lengthPct} %`}</strong></span>
+              <span className="deck-readonly">{w('deck.length')}<strong>{units.text(lengthM, 'length')}</strong>{w('deck.share')}<strong>{lengthPct === null ? '—' : `${lengthPct} %`}</strong></span>
               {/* A segment declares its own source; it is not the point's. */}
-              <TracedField fact={{ key: `deck.segments[${segment.id}].source`, label: `段 ${segment.id} 来源`,
+              <TracedField fact={{ key: `deck.segments[${segment.id}].source`, label: w('deck.segmentSource', { id: segment.id }),
                 value: declaredSource(segment.source), source: declaredSource(segment.source), estimate: segment.estimate, path: `deck.segments[${segment.id}].source` }}>
                 <span className="deck-segment-source">
-                  <span>来源</span>
-                  <span className="deck-segment-source-value">{declaredSource(segment.source) ?? '未声明'}</span>
+                  <span>{w('fact.source')}</span>
+                  <span className="deck-segment-source-value">{declaredSource(segment.source) ?? w('deck.undeclared')}</span>
                 </span>
               </TracedField>
-              <button type="button" className="text-button deck-remove" onClick={() => removeSegment(index)} aria-label={`删除段 ${segment.id || index}`}>删除</button>
+              <button type="button" className="text-button deck-remove" onClick={() => removeSegment(index)} aria-label={w('deck.removeSegmentAria', { id: segment.id || String(index) })}>{w('deck.remove')}</button>
             </div>
           );
         })}
     </div>
 
     <div className="deck-group">
-      <div className="deck-group-title"><h3>参考长度</h3></div>
+      <div className="deck-group-title"><h3>{w('deck.reference.title')}</h3></div>
       <div className="deck-row">
-        <TracedField fact={measureFact('deck.reference_length_m', '参考长度', deck.reference_length_m, 'length', 'm')}>
-        <QuantityField small label="参考长度" aria-label="参考长度值" value={deck.reference_length_m.value} dimension="length" kind="positive"
+        <TracedField fact={measureFact('deck.reference_length_m', w('deck.reference.length'), deck.reference_length_m, 'length', 'm')}>
+        <QuantityField small label={w('deck.reference.length')} aria-label={w('deck.reference.lengthAria')} value={deck.reference_length_m.value} dimension="length" kind="positive"
           onChange={value => updateReference({ value })} />
         </TracedField>
-        <TracedField fact={measureFact('deck.reference_length_m.source', '参考长度来源', deck.reference_length_m, undefined, undefined, deck.reference_length_m.source ?? null)}>
-        <label>来源<input type="text" aria-label="参考长度来源" value={declaredSource(deck.reference_length_m.source) ?? ''} onChange={e => updateReference({ source: e.target.value })} placeholder="来源" /></label>
+        <TracedField fact={measureFact('deck.reference_length_m.source', w('deck.reference.source'), deck.reference_length_m, undefined, undefined, deck.reference_length_m.source ?? null)}>
+        <label>{w('fact.source')}<input type="text" aria-label={w('deck.reference.source')} value={declaredSource(deck.reference_length_m.source) ?? ''} onChange={e => updateReference({ source: e.target.value })} placeholder={w('fact.source')} /></label>
         </TracedField>
-        <label>估算<EstimateCheckbox value={deck.reference_length_m.estimate} onChange={next => updateReference({ estimate: next })} /></label>
+        <label>{w('deck.estimate')}<EstimateCheckbox value={deck.reference_length_m.estimate} onChange={next => updateReference({ estimate: next })} /></label>
       </div>
     </div>
 
-    <div className="section-heading"><h2>聚合结果</h2><span>取自最近一次运行（不在此处复算）</span></div>
+    <div className="section-heading"><h2>{w('deck.aggregate.title')}</h2><span>{w('deck.aggregate.note')}</span></div>
     {fb
       ? <>
         <div className="metric-grid">
           <FactField
-            label="加权平均干舷"
+            label={w('deck.aggregate.weightedMean')}
             value={numeric(fb.values.weighted_mean_freeboard_m)}
             dimension="length"
             status={fb.values.weighted_mean_freeboard_m == null ? 'unknown' : fb.values.weighted_mean_estimate ? 'estimate' : 'known'}
             source={typeof fb.values.weighted_mean_source === 'string' ? fb.values.weighted_mean_source : null}
           />
           <FactField
-            label="覆盖度"
+            label={w('deck.aggregate.coverage')}
             value={fb.values.coverage_fraction == null ? null : Math.round((fb.values.coverage_fraction as number) * 1000) / 10}
             unit="%"
             status={fb.values.coverage_fraction == null ? 'unknown' : 'known'}
           />
           <FactField
-            label="参考长度"
+            label={w('deck.reference.length')}
             value={numeric(fb.values.reference_length_m)}
             dimension="length"
             status={fb.values.reference_length_m == null ? 'unknown' : 'known'}
@@ -207,9 +210,9 @@ export function DeckFreeboardEditor({ deck, runs, onPatchDeck }: {
           />
         </div>
         {Array.isArray(fb.values.unknown_segment_ids) && (fb.values.unknown_segment_ids as string[]).length > 0 && (
-          <p className="section-intro">未知段：{(fb.values.unknown_segment_ids as string[]).join('、')}</p>
+          <p className="section-intro">{w('deck.aggregate.unknownSegments', { ids: (fb.values.unknown_segment_ids as string[]).join(w('form.listSeparator')) })}</p>
         )}
       </>
-      : <p className="section-intro">保存并运行后显示聚合值</p>}
+      : <p className="section-intro">{w('deck.aggregate.empty')}</p>}
   </div>;
 }

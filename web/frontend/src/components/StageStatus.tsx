@@ -5,37 +5,42 @@ import { FloodingResults } from './FloodingResults';
 import { StabilityPlot } from './StabilityPlot';
 import { useUnits } from './UnitProvider';
 import { classifyKey, type Dimension, type QuantityKey } from './units';
+import { DATA_LABEL_ORDER, useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
+import { numberLocale as numberLocaleFor, useNumberLocale } from '../i18n/format';
+import { useLanguage } from '../portfolio/LanguageProvider';
 
-export const STAGE_LABELS: Record<string, string> = {
-  loading: '载荷与重心', systems: '系统与分项', l0: '设计基线', geometry: '型线几何',
-  equilibrium: '浮态平衡', hydrostatics: '静水力', gz: '稳性曲线', deck: '甲板与干舷',
-  hydrostatic_curve: '静水力曲线', bonjean: '邦戎曲线', resistance: '阻力与功率',
-  propulsion: '动力装置', endurance: '续航', historical: '历史参照', flooding: '破损进水',
-};
-
+/**
+ * The canonical stage order, and the only stage names that may be sorted by it.
+ *
+ * These are API keys, not words: a stage name is whatever the coordinator wrote
+ * into the result, so the order and the key set are data and never change with
+ * the language. The display name is looked up separately, below.
+ */
 export const STAGE_ORDER = [
   'loading', 'systems', 'l0', 'geometry', 'equilibrium', 'hydrostatics', 'gz', 'deck',
   'hydrostatic_curve', 'bonjean', 'resistance', 'propulsion', 'endurance', 'historical', 'flooding',
 ];
 
-export const STATUS_LABELS: Record<StageStatusCode, string> = {
-  completed: '计算完成', not_requested: '未请求', unavailable: '暂不可计算', failed: '计算失败',
-  canceled: '已取消', model_limit: '模型越界',
-};
+/** A stage name in one language. An unknown key keeps its own name. */
+export function stageLabel(w: (key: WorkspaceKey) => string, name: string): string {
+  return w(`stage.${name}` as WorkspaceKey);
+}
 
-const DATA_LABELS: Record<string, string> = {
-  total_mass_t: '总质量', known_mass_t: '已知质量', linked_total_mass_t: '绑定质量',
-  lcg_m: '纵向重心', tcg_m: '横向重心', kg_m: '垂向重心', gm_m: '初稳性高',
-  kb_m: '浮心高度', km_m: '横稳心高度', draught_m: '吃水', displacement_t: '排水量',
-  heel_deg: '横倾角', trim_deg: '纵倾角', minimum_clearance_m: '最小净空',
-  awp_m2: '水线面积', roll_period_s: '横摇周期',
-  // The waterline and GM are the saved balance readings, in their own names.
-  waterline_above_keel_m: '龙骨基准水线高度', waterline_d_m: '水线高度', gm_t_m: '初稳性高 GM',
-  // Declared powers belong to the machinery declaration, not to the resistance
-  // work point shown on the report's first screen.
-  power_design_kw: '设计轴功率（设计声明）', power_trial_kw: '试航轴功率（试航声明）',
-  power_design_shp: '设计轴功率（设计声明）', power_trial_shp: '试航轴功率（试航声明）',
-};
+/** A stage status in one language. */
+export function stageStatusLabel(w: (key: WorkspaceKey) => string, status: StageStatusCode): string {
+  return w(`status.${status}` as WorkspaceKey);
+}
+
+/**
+ * A result datum's display name, when this interface knows the key.
+ *
+ * An unrecognised key falls through to the key itself, exactly as it always did:
+ * the raw payload stays readable rather than being hidden behind a guess.
+ */
+export function dataLabel(w: (key: WorkspaceKey) => string, key: string): string {
+  const label = w(`data.${key}` as WorkspaceKey);
+  return label === `data.${key}` ? key : label;
+}
 
 // A severe diagnostic is a finding, not a footnote: it is shown in place. A
 // warning that blocks the stage counts as severe even though its severity says
@@ -69,13 +74,13 @@ function inferredUnit(key: string): { label: string; dimension?: Dimension; stor
   return null;
 }
 
-function display(value: unknown): string {
-  if (value === null || value === undefined) return '未知';
+function display(w: (key: WorkspaceKey) => string, value: unknown, locale: string): string {
+  if (value === null || value === undefined) return w('units.unknown');
   if (typeof value === 'number') {
-    if (value !== 0 && Math.abs(value) < 0.0000005) return '≈0';
-    return new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 6 }).format(Object.is(value, -0) ? 0 : value);
+    if (value !== 0 && Math.abs(value) < 0.0000005) return w('units.approxZero');
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 6 }).format(Object.is(value, -0) ? 0 : value);
   }
-  if (typeof value === 'boolean') return value ? '是' : '否';
+  if (typeof value === 'boolean') return value ? w('units.yes') : w('units.no');
   if (typeof value === 'object') return JSON.stringify(value);
   return String(value);
 }
@@ -87,6 +92,16 @@ function datumFor(key: string, value: unknown): Datum {
   return { key, value, unit: unit?.dimension ? undefined : unit?.label, dimension: unit?.dimension, storedUnit: unit?.storedUnit };
 }
 
+/**
+ * Every numeric datum a stage reported, in the order the payload declares.
+ *
+ * This used to stop at eight, which silently hid whichever metrics happened to
+ * come after the eighth in payload order — the reader could not tell a stage
+ * with eight metrics from one with twenty. The card is a per-stage group
+ * already, and `dataLabel` names what the registry knows while anything else
+ * keeps its raw key, so showing them all is both honest and bounded by the
+ * payload itself.
+ */
 function extract(data: Record<string, unknown> | null): Datum[] {
   if (!data) return [];
   const found: Datum[] = [];
@@ -104,13 +119,20 @@ function extract(data: Record<string, unknown> | null): Datum[] {
       } else if (key === 'values') {
         for (const [subkey, subvalue] of Object.entries(row)) {
           if (typeof subvalue === 'number' || subvalue === null) found.push(datumFor(subkey, subvalue));
-          if (found.length >= 8) break;
         }
       }
     }
-    if (found.length >= 8) break;
   }
-  return found;
+  // Known metrics in the registry's fixed order, so the same stage of two runs
+  // lines up; anything the registry does not know keeps payload order behind it.
+  const rank = (key: string) => {
+    const index = DATA_LABEL_ORDER.indexOf(key);
+    return index === -1 ? DATA_LABEL_ORDER.length : index;
+  };
+  return found
+    .map((datum, index) => ({ datum, index }))
+    .sort((left, right) => rank(left.datum.key) - rank(right.datum.key) || left.index - right.index)
+    .map(entry => entry.datum);
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -119,14 +141,17 @@ function record(value: unknown): Record<string, unknown> {
 
 // A table cell that follows the reader's units when the key is a reliable
 // quantity name, and keeps the canonical unit otherwise (for example kN).
-function tableValue(units: ReturnType<typeof useUnits>, key: string, value: unknown, canonicalUnit?: string): string {
-  if (value === null || value === undefined) return '未知';
+function tableValue(w: (key: WorkspaceKey) => string, locale: string, units: ReturnType<typeof useUnits>, key: string, value: unknown, canonicalUnit?: string): string {
+  if (value === null || value === undefined) return w('units.unknown');
   const kind = classifyKey(key);
   if (kind) return units.keyed(key, value);
-  return `${display(value)}${canonicalUnit ? ` ${canonicalUnit}` : ''}`;
+  return `${display(w, value, locale)}${canonicalUnit ? ` ${canonicalUnit}` : ''}`;
 }
 
 function ResistanceTables({ data }: { data: Record<string, unknown> }) {
+  const w = useWorkspaceCopy();
+  const { language } = useLanguage();
+  const locale = numberLocaleFor(language);
   const units = useUnits();
   const rows = Array.isArray(data.rows) ? data.rows.map(record) : [];
   const powerRows = Array.isArray(data.power_rows) ? data.power_rows.map(record) : [];
@@ -134,24 +159,29 @@ function ResistanceTables({ data }: { data: Record<string, unknown> }) {
   const scenario = record(data.scenario);
   if (rows.length === 0 && powerRows.length === 0) return null;
   const powerUnit = units.unit('power');
+  const meaning = (row: Record<string, unknown>, withRange: boolean): string =>
+    (row.complete === false ? w('resistance.cell.incomplete')
+      : withRange && row.model_applicable === false ? w('resistance.cell.outOfRange')
+      : row.primary_result === false ? w('resistance.cell.nonPrimary')
+      : w('resistance.cell.value')) + (row.estimate === true ? ` · ${w('resistance.estimated')}` : '');
   return <div className="resistance-results">
-    <p className="result-context">方法 {display(data.method)} · {data.estimate === true ? '工程估算' : '来源见输入'}
-      {validity.model_applicable === false && ' · 不在经验适用范围，仅供方法试算'}
-      {data.primary_result === false && ' · 非主结果'}</p>
-    {typeof scenario.source === 'string' && <p className="result-source">来源：{scenario.source}</p>}
-    {rows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>速度与阻力</caption><thead><tr><th>速度</th><th>总阻力</th><th>有效功率</th><th>解释</th></tr></thead><tbody>{rows.map((row, index) => <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
-      <td>{tableValue(units, 'speed_kn', row.speed_kn)}</td><td>{tableValue(units, 'total_resistance_kn', row.total_resistance_kn, 'kN')}</td>
-      <td>{tableValue(units, 'effective_power_kw', row.effective_power_kw)}</td>
-      <td>{row.complete === false ? '未完整求得' : row.model_applicable === false ? '不在经验适用范围' : row.primary_result === false ? '非主结果' : '计算值'}{row.estimate === true && ' · 工程估算'}</td>
+    <p className="result-context">{w('resistance.method', { method: display(w, data.method, locale) })} · {data.estimate === true ? w('resistance.estimated') : w('resistance.sourceInInputs')}
+      {validity.model_applicable === false && ` · ${w('resistance.outOfRange')}`}
+      {data.primary_result === false && ` · ${w('resistance.nonPrimary')}`}</p>
+    {typeof scenario.source === 'string' && <p className="result-source">{w('resistance.source', { source: scenario.source })}</p>}
+    {rows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>{w('resistance.caption.main')}</caption><thead><tr><th>{w('resistance.th.speed')}</th><th>{w('resistance.th.total')}</th><th>{w('resistance.th.effective')}</th><th>{w('resistance.th.meaning')}</th></tr></thead><tbody>{rows.map((row, index) => <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
+      <td>{tableValue(w, locale, units, 'speed_kn', row.speed_kn)}</td><td>{tableValue(w, locale, units, 'total_resistance_kn', row.total_resistance_kn, 'kN')}</td>
+      <td>{tableValue(w, locale, units, 'effective_power_kw', row.effective_power_kw)}</td>
+      <td>{meaning(row, true)}</td>
     </tr>)}</tbody></table></div>}
-    {powerRows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>轴功率与推进系数</caption><thead><tr><th>速度</th><th>QPC</th><th>轴功率</th><th>解释</th></tr></thead><tbody>{powerRows.map((row, index) => {
+    {powerRows.length > 0 && <div className="stage-table-scroll"><table className="stage-table"><caption>{w('resistance.caption.power')}</caption><thead><tr><th>{w('resistance.th.speed')}</th><th>{w('resistance.th.qpc')}</th><th>{w('resistance.th.shaft')}</th><th>{w('resistance.th.meaning')}</th></tr></thead><tbody>{powerRows.map((row, index) => {
       const qpc = record(row.qpc);
       return <tr key={`${row.speed_kn ?? 'unknown'}-${index}`}>
-        <td>{tableValue(units, 'speed_kn', row.speed_kn)}</td><td>{tableValue(units, 'qpc', qpc.value)}{typeof qpc.source === 'string' && <small>{qpc.source}</small>}</td>
+        <td>{tableValue(w, locale, units, 'speed_kn', row.speed_kn)}</td><td>{tableValue(w, locale, units, 'qpc', qpc.value)}{typeof qpc.source === 'string' && <small>{qpc.source}</small>}</td>
         {/* One shaft-power column in the reader's unit; the stored kW and shp
             values are the same quantity and must not be shown side by side. */}
-        <td>{tableValue(units, 'shaft_power_kw', row.shaft_power_kw)}<small>{powerUnit}</small></td>
-        <td>{row.complete === false ? '未完整求得' : row.primary_result === false ? '非主结果' : '计算值'}{row.estimate === true && ' · 工程估算'}</td>
+        <td>{tableValue(w, locale, units, 'shaft_power_kw', row.shaft_power_kw)}<small>{powerUnit}</small></td>
+        <td>{meaning(row, false)}</td>
       </tr>;
     })}</tbody></table></div>}
   </div>;
@@ -168,11 +198,16 @@ function ResistanceTables({ data }: { data: Record<string, unknown> }) {
 function DiagnosticLine({ item, guidance, repeat }: {
   item: StageEnvelope['diagnostics'][number]; guidance: GuidanceContext | null; repeat?: boolean;
 }) {
+  const w = useWorkspaceCopy();
   return <p className={repeat ? 'stage-diagnostics-repeat' : undefined}>
-    <strong>{repeat ? `${item.code ?? '诊断'} · 与上面的阶段原因相同` : (item.message ?? item.code)}</strong>
+    <strong>{repeat
+      ? (item.code
+        ? w('stage.diagnostics.repeat', { code: item.code })
+        : w('stage.diagnostics.repeatFallback'))
+      : (item.message ?? item.code)}</strong>
     {!repeat && item.code && item.message && <small>{item.code}</small>}
     {item.path && <code>{item.path}</code>}
-    {item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}
+    {item.source_path && item.source_path !== item.path && <small>{w('stage.diagnostics.source', { path: item.source_path })}</small>}
     <DiagnosticAction diagnostic={item} context={guidance} project={guidance?.snapshot ?? null} />
   </p>;
 }
@@ -180,6 +215,8 @@ function DiagnosticLine({ item, guidance, repeat }: {
 export function StageStatus({ name, stage, guidance }: {
   name: string; stage: StageEnvelope; guidance?: GuidanceContext | null;
 }) {
+  const w = useWorkspaceCopy();
+  const locale = useNumberLocale();
   const [rawOpen, setRawOpen] = useState(false);
   const units = useUnits();
   // Only a requested stage that actually finished may show plain numbers. A
@@ -199,33 +236,36 @@ export function StageStatus({ name, stage, guidance }: {
   const detailCount = ordinary.length + repeats.length;
   const reasonAlreadyVisible = severe.some(item => item.message === stage.reason);
   return <article id={`stage-${name}`} className={`stage-card stage-card--${stage.status}`}>
-    <div className="stage-card-header"><div><span className="section-kicker">{name.toUpperCase()}</span><h3 tabIndex={-1}>{STAGE_LABELS[name] ?? name}</h3></div><span className={`stage-pill stage-pill--${stage.status}`}>{STATUS_LABELS[stage.status] ?? stage.status}</span></div>
+    <div className="stage-card-header"><div><span className="section-kicker">{name.toUpperCase()}</span><h3 tabIndex={-1}>{stageLabel(w, name)}</h3></div><span className={`stage-pill stage-pill--${stage.status}`}>{stageStatusLabel(w, stage.status)}</span></div>
+    {/* The stage's own reason is the core's saved text and stays verbatim: a
+        localized summary of the message a reader is here to check would be a
+        claim about the message rather than the message. */}
     {stage.reason && stage.status !== 'not_requested' && !reasonAlreadyVisible && <p className="stage-reason">{stage.reason}</p>}
-    {stage.status === 'not_requested' && <p className="stage-reason">这次请求没有运行该阶段。</p>}
+    {stage.status === 'not_requested' && <p className="stage-reason">{w('stage.card.reasonNotRequested')}</p>}
     {severe.length > 0 && <div className="stage-diagnostics-open" role="alert">
-      <strong>严重诊断 · {severe.length} 条</strong>
+      <strong>{w('stage.card.severe', { count: severe.length })}</strong>
       {severe.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}
     </div>}
     {values.length > 0 && <div className="stage-values">{values.map(item => {
-      const shown = item.dimension ? units.text(item.value, item.dimension, item.storedUnit) : display(item.value);
-      return <div className="stage-value" key={item.key}><span title={item.key}>{DATA_LABELS[item.key] ?? item.key}</span>
+      const shown = item.dimension ? units.text(item.value, item.dimension, item.storedUnit) : display(w, item.value, locale);
+      return <div className="stage-value" key={item.key}><span title={item.key}>{dataLabel(w, item.key)}</span>
         <strong>{shown}{!item.dimension && item.value !== null && item.unit ? ` ${item.unit}` : ''}</strong>
-        {item.source && <small>{item.source}</small>}{item.estimate && <em>工程估算</em>}</div>;
+        {item.source && <small>{item.source}</small>}{item.estimate && <em>{w('stage.card.estimate')}</em>}</div>;
     })}</div>}
     {name === 'resistance' && stage.requested && stage.data && (delivered || stage.status === 'model_limit') && <>
-      {stage.status === 'model_limit' && <p className="stage-reason">以下为模型越界试算，不作为有效工作点。</p>}
+      {stage.status === 'model_limit' && <p className="stage-reason">{w('stage.card.modelLimitNote')}</p>}
       <ResistanceTables data={stage.data} />
     </>}
     {/* The GZ curve belongs to its own stage, and only a finished one carries a
         curve worth drawing. */}
     {name === 'gz' && delivered && <StabilityPlot stage={stage} />}
     {name === 'flooding' && stage.requested && stage.data && typeof record(stage.data).status === 'string' && <FloodingResults data={record(stage.data)} />}
-    {detailCount > 0 && <details className="stage-diagnostics"><summary>诊断与缺项 · {detailCount} 条</summary><div>{ordinary.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}</div>
+    {detailCount > 0 && <details className="stage-diagnostics"><summary>{w('stage.diagnostics.summary', { count: detailCount })}</summary><div>{ordinary.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}</div>
       {repeats.map((item, index) => <DiagnosticLine key={`repeat-${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} repeat />)}</details>}
-    {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">方法版本 · {Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(value)}`).join(' / ')}</p>}
-    {stage.assumptions.length > 0 && <details className="stage-assumptions"><summary>假设与适用性</summary><pre>{JSON.stringify(stage.assumptions, null, 2)}</pre></details>}
+    {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">{w('stage.card.method', { value: Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(w, value, locale)}`).join(' / ') })}</p>}
+    {stage.assumptions.length > 0 && <details className="stage-assumptions"><summary>{w('stage.card.assumptions')}</summary><pre>{JSON.stringify(stage.assumptions, null, 2)}</pre></details>}
     {/* The raw payload stays reachable on screen and stays off paper: a saved
         stage can carry megabytes of iteration and geometry arrays. */}
-    {stage.data && <details className="stage-assumptions stage-raw-data no-print" onToggle={event => setRawOpen(event.currentTarget.open)}><summary>完整阶段数据与来源</summary>{rawOpen && <pre>{JSON.stringify(stage.data, null, 2)}</pre>}</details>}
+    {stage.data && <details className="stage-assumptions stage-raw-data no-print" onToggle={event => setRawOpen(event.currentTarget.open)}><summary>{w('stage.card.raw')}</summary>{rawOpen && <pre>{JSON.stringify(stage.data, null, 2)}</pre>}</details>}
   </article>;
 }

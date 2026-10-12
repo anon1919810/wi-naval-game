@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { useLanguage, type TranslationKey } from './LanguageProvider';
 import { classifyHash, publicHref, type PublicView } from './routes';
 import { destinationOrigin, entryPoint, previewTarget, railView, revealRadius, wordCentre, type NavPoint, type RailView } from './navPreview';
 import { onTransitionEnd, transitionGeneration } from './transitions';
@@ -43,14 +44,21 @@ import type { PreviewSound, PreviewVoice } from './previewAudio';
 
 interface Entry {
   readonly view: RailView;
-  readonly label: string;
+  /**
+   * The dictionary key for the word. The route identity is the constant and the
+   * word follows the language, so a switch changes three words and nothing else
+   * about the rail: same three anchors, same three hashes, same order, same
+   * current page, same preview arithmetic.
+   */
+  readonly label: TranslationKey;
   /** One work exists, so Work carries the truthful count. */
   readonly badge?: string;
   /**
    * The word split around an isolated `i`, which carries the red preview dot. The
    * glyphs stay plain text on both sides of it, so the first glyph of the word is
    * still a text node and the resting underline has something to measure — see
-   * firstGlyphWidth below.
+   * firstGlyphWidth below. English only: a Chinese word has no isolated `i` to
+   * paint, so the split — and the dot it exists for — is simply absent.
    */
   readonly parts?: readonly string[];
   /** Which voice this destination's preview answers with. */
@@ -58,12 +66,12 @@ interface Entry {
 }
 
 const ENTRIES: readonly Entry[] = [
-  { view: 'home', label: 'Work', badge: '01', voice: 'work' },
-  { view: 'about', label: 'About', voice: 'about' },
+  { view: 'home', label: 'nav.work', badge: '01', voice: 'work' },
+  { view: 'about', label: 'nav.about', voice: 'about' },
   // A third destination, and no new voice: Credits answers with About's, because
   // both are the pages that are read rather than the exhibit that is explored, and
   // one quiet register for the reading destinations is the point.
-  { view: 'credits', label: 'Credits', parts: ['Cred', 'i', 'ts'], voice: 'about' },
+  { view: 'credits', label: 'nav.credits', parts: ['Cred', 'i', 'ts'], voice: 'about' },
 ];
 
 /**
@@ -73,10 +81,13 @@ const ENTRIES: readonly Entry[] = [
  * weights and spaces the word exactly as it would unstyled — and both copies of the
  * word are built from the same call, so the duplicate the circle opens onto is the
  * same word at the same width.
+ *
+ * A word that is not being split arrives as text, which is what the first-glyph
+ * measurement walks to for the resting underline.
  */
-function glyphs(entry: Entry): ReactNode {
-  if (!entry.parts) return entry.label;
-  return entry.parts.map((part, index) =>
+function glyphs(parts: readonly string[] | undefined, word: string): ReactNode {
+  if (!parts) return word;
+  return parts.map((part, index) =>
     <span key={index} className={index === 1 ? 'ff-rail-i' : undefined}>{part}</span>);
 }
 
@@ -129,6 +140,7 @@ function firstGlyphWidth(word: HTMLElement): number {
 }
 
 export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, inert }: Props) {
+  const { language, t } = useLanguage();
   const [hover, setHover] = useState<RailView | null>(null);
   const [focus, setFocus] = useState<RailView | null>(null);
   /** A destination that has been pressed and whose move is still running. */
@@ -256,6 +268,29 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
     return () => { active = false; window.removeEventListener('resize', update); };
   }, [reveal]);
 
+  /**
+   * A language switch repaints the words in place, so the boxes the reveal was
+   * measured against are the boxes of the *other* language: a different width,
+   * a different first glyph, a different far corner. The layout effect above has
+   * already run against the new text, but its first paint of each word is armed —
+   * installed with the transition switched off — and an armed circle that is
+   * already at its old radius would not animate from the new origin.
+   *
+   * So each word's reveal is disarmed and re-measured once per language, on the
+   * frame after the switch: the origin is re-read from the box the new glyphs
+   * really occupy, the radius is recomputed from it, and the resting rule is
+   * re-measured on the new first glyph. The word itself is never re-keyed and no
+   * node is detached, so the preview, the current page and the focus are exactly
+   * as they were.
+   */
+  const measuredFor = useRef(language);
+  useLayoutEffect(() => {
+    if (measuredFor.current === language) return;
+    measuredFor.current = language;
+    for (const view of words.current.keys()) initialized.current.delete(view);
+    reveal();
+  }, [language, reveal]);
+
   // A requested destination is held for the whole move, not just to the arrival:
 // the destination page is already on screen while its 500 ms reveal is still
 // running, and a pointer that drifted back onto the outgoing word must not take
@@ -374,15 +409,23 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
   return (
     <nav
       className="ff-rail"
-      aria-label="Main navigation"
+      aria-label={t('nav.label')}
       inert={inert}
       onPointerDown={() => { keyed.current = false; sound.unlock(); }}
       onKeyDown={() => { keyed.current = true; sound.unlock(); }}>
       {ENTRIES.map(entry => {
         const selected = entry.view === target;
+        // The word is resolved once, here, and the same string feeds the painted
+        // glyphs, the duplicate and the accessible name — so the rail can never
+        // name a word it is not showing, in either language. The `i` split exists
+        // to isolate one Latin letter's dot; a word the dictionary replaced is
+        // painted as text and keeps no split, so no stray `Cred`/`i`/`ts` spans
+        // and no red dot are left behind in the Chinese interface.
+        const split = language === 'en' ? entry.parts : undefined;
+        const word = split ? split.join('') : t(entry.label);
         // Named outright, because the word is split across elements for the reveal
         // and a reader must never see "w ork" or a name that counts twice.
-        const name = entry.badge ? `${entry.label} ${entry.badge}` : entry.label;
+        const name = entry.badge ? `${word} ${entry.badge}` : word;
         // The badge answers for its own destination only. Work's count turns red
         // while Work itself is being previewed — Work's own pointer, Work's own
         // keyboard focus, or a Work press that is still travelling. About's
@@ -397,7 +440,9 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
           // Credits' own red dot, on the same terms as Work's badge: a preview of
           // this destination, or a press of it still travelling. The page on screen
           // is a different question — a selected Credits is blue, dot included.
-          data-ff-dot={entry.parts ? (previewing ? 'preview' : 'idle') : undefined}
+          // Only a word that is actually split has a dot to paint, so this
+          // follows the split rather than the entry.
+          data-ff-dot={split ? (previewing ? 'preview' : 'idle') : undefined}
           data-ff-badge={entry.badge ? (previewing ? 'preview' : 'idle') : undefined}
           href={publicHref(entry.view)}
           aria-label={name}
@@ -414,8 +459,8 @@ export function RailNav({ current, sound, onCurrentPagePress, revealOrigins, ine
               same glyph markup, so the duplicate is the same word painted twice and
               the isolated `i` lines up exactly across the clip edge. */}
           <span className="ff-rail-word" ref={bind(entry.view)}>
-            <span className="ff-rail-ink">{glyphs(entry)}</span>
-            <span className="ff-rail-dup" aria-hidden="true">{glyphs(entry)}</span>
+            <span className="ff-rail-ink">{glyphs(split, word)}</span>
+            <span className="ff-rail-dup" aria-hidden="true">{glyphs(split, word)}</span>
           </span>
           {entry.badge && <>{' '}<span className="ff-rail-badge">{entry.badge}</span></>}
         </a>;

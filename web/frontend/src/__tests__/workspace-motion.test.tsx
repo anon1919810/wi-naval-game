@@ -8,6 +8,11 @@ import { PLAN_SHEETS } from '../portfolio/plans';
 import { runTransition, TRANSITION_MS } from '../portfolio/transitions';
 import { Workbench } from '../pages/Workbench';
 import { ToolModuleBoundary } from '../portfolio/ToolModule';
+import { shellCopy } from '../i18n/shell';
+// The workbench half of this suite asserts Chinese labels while the portfolio
+// half asserts English copy, so the language is chosen per render rather than
+// for the whole file.
+import { zh } from './locale';
 import type { ProjectDocument, ProjectView, RunView, UserSession } from '../types';
 
 /**
@@ -105,7 +110,7 @@ const token = (selector: string): string | null | undefined => document.querySel
 
 describe('local reveals keep the draft', () => {
   it('reveals a chapter change without ever remounting the editor', async () => {
-    render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
+    render(zh(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />));
     fireEvent.click(await screen.findByRole('button', { name: '船型与几何' }));
     const length = await screen.findByLabelText('船长');
     fireEvent.change(length, { target: { value: '91' } });
@@ -124,7 +129,7 @@ describe('local reveals keep the draft', () => {
   });
 
   it('keeps a hand-edited JSON document across the reveal that shows it', async () => {
-    render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
+    render(zh(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />));
     fireEvent.click(await screen.findByRole('button', { name: '项目数据' }));
     const editor = await screen.findByLabelText('项目 JSON');
     // Applied to the draft, so it is the draft being preserved rather than a
@@ -140,7 +145,7 @@ describe('local reveals keep the draft', () => {
   });
 
   it('does not replay a reveal when the same chapter is chosen again', async () => {
-    render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
+    render(zh(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />));
     fireEvent.click(await screen.findByRole('button', { name: '重量与载荷' }));
     const after = token('.workbench-content');
     fireEvent.click(screen.getByRole('button', { name: '重量与载荷' }));
@@ -149,7 +154,7 @@ describe('local reveals keep the draft', () => {
   });
 
   it('reveals a traced field when it changes, and not when only its value does', async () => {
-    render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
+    render(zh(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />));
     fireEvent.click(await screen.findByRole('button', { name: '船型与几何' }));
     await screen.findByLabelText('型宽');
     const panel = () => document.querySelector<HTMLElement>('.trace-body')!;
@@ -239,7 +244,9 @@ describe('the route entry', () => {
   it('shows which project or run the reader is in, from the route alone', async () => {
     window.history.replaceState(null, '', '/#/projects/p1');
     const { default: App } = await import('../App');
-    render(<App returnHref="#/work" />);
+    // The header states the place in the reader's language, so this half renders
+    // under the same Chinese provider the workbench half of this suite uses.
+    render(zh(<App returnHref="#/work" />));
     await screen.findByRole('heading', { level: 1, name: '解析方箱' });
     // The identity is stated before the page's own data arrives, so the arriving
     // page is never a blank screen.
@@ -321,19 +328,28 @@ describe('a workspace chunk that failed to load', () => {
     function Explode(): never { throw new Error('Failed to fetch dynamically imported module'); }
     const reload = vi.fn();
     const location = vi.spyOn(window, 'location', 'get').mockReturnValue({ ...window.location, reload } as Location);
-    render(<ToolModuleBoundary returnHref="#/work" onFailure={vi.fn()}>
+    // The boundary is a class component and takes its four sentences as a prop,
+    // so the test passes them the way the eager shell does. Rendered on its own
+    // with no provider, that is the English lookup the shell resolves by default.
+    const copy = {
+      title: shellCopy('en', 'shell.module.title'),
+      note: shellCopy('en', 'shell.module.note'),
+      reload: shellCopy('en', 'shell.module.reload'),
+      returnLabel: shellCopy('en', 'shell.toolReturn'),
+    };
+    render(<ToolModuleBoundary returnHref="#/work" copy={copy} onFailure={vi.fn()}>
       <Explode />
     </ToolModuleBoundary>);
     const alert = screen.getByRole('alert');
-    expect(alert).toHaveTextContent('工作空间未能加载');
+    expect(alert).toHaveTextContent(copy.title);
     expect(screen.getByText('Failed to fetch dynamically imported module')).toBeVisible();
     // What the reader is told, in terms of what they keep and can still do.
-    expect(screen.getByText(/请重新载入页面以恢复工作空间/)).toBeVisible();
-    expect(screen.getByText(/现有浏览器工作区会保留/)).toBeVisible();
+    expect(screen.getByText(/Reload the page to restore the workspace/)).toBeVisible();
+    expect(screen.getByText(/existing browser workspace is kept/)).toBeVisible();
     expect(screen.getByRole('link', { name: '↖ Y’s Formfield' })).toHaveAttribute('href', '#/work');
 
     // And the action is the real thing, not a second attempt at the same import.
-    fireEvent.click(screen.getByRole('button', { name: '重新载入页面' }));
+    fireEvent.click(screen.getByRole('button', { name: copy.reload }));
     expect(reload).toHaveBeenCalledTimes(1);
     location.mockRestore();
   });

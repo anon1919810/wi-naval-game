@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { renderZh as render } from '../__tests__/locale';
 import { afterEach, expect, it, vi } from 'vitest';
 import { boundaryCandidates, FragmentEvidence } from './Detonation';
 import type { Experiment, Fragmentation, LabState, Room } from './types';

@@ -1,11 +1,48 @@
 import { useSyncExternalStore } from 'react';
 import { interactionAudio } from './interactionAudio';
+import { useShellCopy } from '../i18n/shell';
 import './sound.css';
-export function SoundToggle({ workspace = false }: { workspace?: boolean }) {
+
+/**
+ * The one sound control, shared by the public shell and the workspace.
+ *
+ * This component is mounted by the eager public shell as well as by the
+ * workspace, so its workspace wording is read from the shared chrome dictionary
+ * rather than from the workspace one: reading the bigger dictionary here would
+ * pull every editor, report and laboratory string into the chunk the home page
+ * loads. The public labels are passed in rather than looked up, because the
+ * public dictionary is the shell's own and the public shell is the only surface
+ * that renders them.
+ *
+ * Both are optional: with no props at all and no provider this is the English
+ * control it has always been, which is what keeps a standalone render and the
+ * workspace's own tests unchanged. The mute itself is shared state
+ * (`interactionAudio`), not local state: the public toggle and the workspace
+ * toggle always say the same thing about the same speaker.
+ */
+export function SoundToggle({
+  workspace = false,
+  label,
+  onLabel,
+  offLabel,
+}: {
+  /** The workspace control names itself from the shared chrome dictionary. */
+  workspace?: boolean;
+  /** Public accessible name. Defaults to the English "Sound". */
+  label?: string;
+  /** Public title while muted. Defaults to "Turn sound on". */
+  onLabel?: string;
+  /** Public title while unmuted. Defaults to "Mute sound". */
+  offLabel?: string;
+}) {
+  const w = useShellCopy();
   const muted = useSyncExternalStore(interactionAudio.subscribe, () => interactionAudio.muted);
+  const name = workspace ? w('sound.label') : label ?? 'Sound';
+  const toOn = workspace ? w('sound.on') : onLabel ?? 'Turn sound on';
+  const toOff = workspace ? w('sound.off') : offLabel ?? 'Mute sound';
   return <button className={workspace ? 'workspace-sound icon-button' : 'ff-preview-sound'} data-audio="manual"
-    type="button" aria-label={workspace ? '交互音效' : 'Sound'} aria-pressed={!muted}
-    title={muted ? (workspace ? '开启交互音效' : 'Turn sound on') : (workspace ? '关闭交互音效' : 'Mute sound')}
+    type="button" aria-label={name} aria-pressed={!muted}
+    title={muted ? toOn : toOff}
     onClick={() => {
       interactionAudio.setMuted(!muted);
       if (muted) { interactionAudio.unlock(); interactionAudio.play('touch'); }

@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '../api';
@@ -191,7 +192,7 @@ function savedResult(stages: Record<string, StageEnvelope>, status: AnalysisResu
 
 function runOf(id: string, result: AnalysisResult | null): RunView {
   return {
-    id, project_id: 'p1', revision: 2, condition_id: 'normal', status: result ? 'completed' : 'running',
+    id, project_id: 'p1', revision: 2, condition_id: 'normal', status: result ? result.status : 'running',
     request_fingerprint: 'rf', created_at: '2026-10-06T00:00:00Z', started_at: null, finished_at: null,
     cancel_requested: false, result, error: null,
   };
@@ -209,6 +210,18 @@ function deferred<T>() {
 }
 
 describe('the report page', () => {
+  it('rejects a comparison wrapper whose revision disagrees with its frozen snapshot',async()=>{
+    const data=savedResult({loading:{...stage(),data:{values:{total_mass_t:900}}}});
+    const a=runOf('a',data),b={...runOf('b',structuredClone(data)),revision:3};
+    vi.mocked(api.getRun).mockImplementation(async id=>id==='a'?a:b);
+    vi.mocked(api.listRuns).mockResolvedValue([b]);
+    render(<ReportPage runId="a" onBack={vi.fn()}/>);
+    await screen.findByRole('heading',{level:1,name:'HMS Fixture'});
+    await waitFor(()=>expect(screen.getByLabelText('对照另一运行').querySelector('option[value="b"]')).not.toBeNull());
+    fireEvent.change(screen.getByLabelText('对照另一运行'),{target:{value:'b'}});
+    await screen.findByText('运行记录与结果的身份不一致。');
+    expect(document.querySelector('.comparison-table')).toBeNull();
+  });
   beforeEach(() => {
     vi.mocked(api.getRun).mockReset();
     vi.mocked(api.listRuns).mockReset();
@@ -231,7 +244,7 @@ describe('the report page', () => {
     expect(document.activeElement).toBe(document.body);
     expect(api.getRun).toHaveBeenCalledTimes(reads);
 
-    fireEvent.change(screen.getByLabelText('报告mass显示单位'), { target: { value: 'kg' } });
+    fireEvent.change(screen.getByLabelText('报告质量显示单位'), { target: { value: 'kg' } });
     const readings = within(document.querySelector('.report-readings') as HTMLElement);
     expect(readings.getByText('27,200,000 kg')).toBeVisible();
 
@@ -362,7 +375,7 @@ describe('the report page', () => {
 
     const { rerender } = render(<ReportPage runId="run-1" onBack={vi.fn()} />);
     expect(await screen.findByRole('heading', { level: 1, name: 'HMS First' })).toBeVisible();
-    fireEvent.change(screen.getByLabelText('报告mass显示单位'), { target: { value: 'kg' } });
+    fireEvent.change(screen.getByLabelText('报告质量显示单位'), { target: { value: 'kg' } });
     expect(readings().getByText('27,200,000 kg')).toBeVisible();
 
     // The same run, a different stage address: the reader's choice is theirs.
@@ -377,6 +390,6 @@ describe('the report page', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'HMS Second' })).toBeVisible();
     expect(readings().getByText('27,200 t')).toBeVisible();
     expect(readings().queryByText('27,200,000 kg')).toBeNull();
-    expect(screen.getByLabelText('报告mass显示单位')).toHaveValue('t');
+    expect(screen.getByLabelText('报告质量显示单位')).toHaveValue('t');
   });
 });

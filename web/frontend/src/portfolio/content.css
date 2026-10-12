@@ -210,6 +210,31 @@
   .ff-detail *, .ff-about *, .ff-contact *, .ff-credits * { transition: none !important; }
 }
 
+/* ---- Chinese type on the content pages -------------------------------------
+   The same rule the shell applies, to the same elements: no negative tracking,
+   and line boxes opened to what a full-em glyph needs. Display headings gain the
+   most — `.96` and `1.02` line boxes are cut from Latin metrics and squeeze the
+   ascenders and descenders of a Han character together — and running prose gains
+   a little, because CJK reads by the square of the glyph rather than by the
+   word's outline.
+
+   Everything else is the same page: same columns, same left edge, same sizes,
+   same rules, same accent, same English equations and citations. */
+/* Credits' masthead only. The detail's H1 is the Latin word `Plimsoll` in both
+   languages and keeps its own display tracking and line box. */
+.ff-shell[data-ff-lang='zh-CN'] .ff-credits-masthead h1 { letter-spacing: 0; line-height: 1.16; }
+.ff-shell[data-ff-lang='zh-CN'] .ff-detail-section h2,
+.ff-shell[data-ff-lang='zh-CN'] .ff-credits-section h2,
+.ff-shell[data-ff-lang='zh-CN'] .ff-about-work h2 { letter-spacing: 0; line-height: 1.3; }
+.ff-shell[data-ff-lang='zh-CN'] .ff-about-author h2,
+.ff-shell[data-ff-lang='zh-CN'] .ff-about-built h2,
+.ff-shell[data-ff-lang='zh-CN'] .ff-contact h2 { letter-spacing: .04em; line-height: 1.5; }
+.ff-shell[data-ff-lang='zh-CN'] :is(.ff-detail-row dd, .ff-about-author p, .ff-about-work p, .ff-about-row dd, .ff-about-intro > p, .ff-credits-row dd, .ff-contact-note, .ff-detail-lede, .ff-study-note, figcaption) { line-height: 1.85; }
+/* A Latin span *inside* a Chinese sentence is untouched by all of the above: every
+   rule names the element it sets, never a descendant, so a book title or a
+   person's name inside a translated paragraph keeps the metrics the Latin rules
+   gave it. */
+
 /* ---- Home -> detail artwork morph ---------------------------------------- */
 /* Exactly one named group, and only while the controller owns the transition.
    The home stays mounted, so the rules are scoped by the section that is

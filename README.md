@@ -1,12 +1,14 @@
 # 《敌前转向》（Gefahrwend）· 一战舰船游戏资产
 
 > 项目名取自 1916 年日德兰海战中舍尔的敌前转向（*Gefechtskehrtwendung*）——三次 180° 转向让公海舰队从英军战列线前脱险。
-> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；网站首版见[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md)。2026-10-04 生产部署与公网验收均已完成，站点地址 **[https://119.91.211.156](https://119.91.211.156)**（直接用 IP 访问，未绑定域名）。生产以匿名模式运行，无邮箱登录。
+> 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；网站首版见[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md)。2026-10-04 生产部署与公网验收均已完成，站点地址 **[https://www.ydm-xjx.com.cn](https://www.ydm-xjx.com.cn)**，原 IP 入口继续可用。生产以匿名模式运行，无邮箱登录。
 > 命名约定：**平台用历史意象命名，模块用方法命名**（`plimsoll.bonjean` / `.stability` / `.damage`）。
 
 Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md) · [2026-10-10 核心复核与生产发布](docs/plimsoll-1.0/core-release-2026-10-10.md) · [2026-09-23 类 SPS 核心交接](docs/plimsoll-1.0/交接_类SPS计算核心_2026-09-23.md) · [Queen Mary 输入资料准备度](docs/plimsoll-1.0/queen-mary-input-readiness.md) · [原 2026-09-22 报告](docs/plimsoll-1.0/项目报告_Plimsoll计算核心_2026-09-22.md)。
 
 工作空间支持从项目 JSON 校验预览并恢复为新项目，以及从已保存报告的诊断定位到输入，保留历史运行和未保存草稿。用户自己的 AI 可用 `python -m plimsoll readme` 读取随包分发的命令行指南。详见[工作空间流程说明](docs/formfield/workspace-workflow-2026-10-10.md)。
+
+**网站发布候选 · 2026-10-12**：完整中英界面、章节检索、冻结报告对照和损伤试验解释已完成本地验收；用户已授权推送上线，实际发布身份见[发布记录](docs/formfield/release-sitewide-2026-10-12.md)。计算核心与另一会话的未提交验证工作不进入本次网站发布。
 
 **最新发布 · 2026-10-10**：`a863b0e` 已推送并部署，包含上述流程及窄屏导航、资源压缩/缓存/404、延后加载和元数据修复；前端 638/638，后端 103 项及另外 2 项 PostgreSQL 专项通过，原有项目、修订和运行数据保留。[发布身份与回滚](docs/formfield/release-workflow-2026-10-10.md)。后续[独立数值收敛研究](docs/plimsoll-1.0/numerical-convergence-study-2026-10-10.md)完成核心 pytest 全量 895 项、594 子测试、研究 98/98 和独立反例 21/21；研究工具及证据纳入源码，计算核方法版本保持原有身份。
 

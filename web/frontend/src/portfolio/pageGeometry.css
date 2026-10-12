@@ -172,4 +172,8 @@
   .ff-home > .ff-exhibit-label, .ff-home > .ff-work-info, .ff-home > .ff-work-controls { box-shadow: none; }
 }
 .ff-shell .ff-reveal-wave { stroke: var(--ff-ink); stroke-width: 1.1; stroke-linejoin: round; }
+/* The studies' own display headings, on the same terms as the pages' headings:
+   no negative tracking and a line box that a full-em Han glyph fits inside.
+   `.94` was cut from Latin metrics and closes the gaps between characters. */
+.ff-shell[data-ff-lang='zh-CN'] .ff-about-study h2 { letter-spacing: .01em; line-height: 1.12; }
 @media (prefers-reduced-motion: reduce) { .ff-rail-badge { transition: none; } }

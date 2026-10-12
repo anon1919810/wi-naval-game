@@ -1,3 +1,4 @@
+import { useCopyMessage } from '../i18n/useCopyMessage';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import * as api from '../api';
@@ -23,47 +24,54 @@ import {
   type DiagnosticLocation,
 } from '../components/diagnosticGuidance';
 import { declaredSource, InputTraceProvider, TracePanel, useInputTrace, TracedField, type TraceFact } from '../components/InputTrace';
-import { CHAPTERS, chapterNumber, chapterOf, ProjectNav, type Chapter } from '../components/ProjectNav';
+import { chapterJsonKeys, chapterNumber, chapterOf, ProjectNav, type Chapter } from '../components/ProjectNav';
 import { QuantityField } from '../components/QuantityField';
 import { ReadFailure, ReadPending } from '../components/ReadPending';
 import { UnitProvider } from '../components/UnitProvider';
 import { useMotionToken } from '../components/useLocalMotion';
 import { WorkbenchOverview } from '../components/WorkbenchOverview';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import type { ProjectDocument, ProjectView, RunView } from '../types';
 
 // Dimensionless coefficients keep a plain number input; lengths speak the
-// reader's unit while the project keeps metres.
+// reader's unit while the project keeps metres. Each entry names the dictionary
+// keys for its label and its hint rather than carrying the words itself.
 const HULL_FIELDS = [
-  { key: 'loa_m', alternate: 'length_m', label: '船长', hint: '全长（LOA），保留输入口径', dimension: 'length' },
-  { key: 'lwl_m', label: '水线长', hint: '计算水线长度', dimension: 'length' },
-  { key: 'beam_m', label: '型宽', hint: '最大型宽', dimension: 'length' },
-  { key: 'draught_normal_m', alternate: 'draft_m', label: '设计吃水', hint: '正常工况参考值', dimension: 'length' },
-  { key: 'block_coeff', label: '方形系数', hint: '无量纲', dimension: null },
-  { key: 'waterplane_coeff', label: '水线面系数', hint: '无量纲', dimension: null },
+  { key: 'loa_m', alternate: 'length_m', label: 'field.loa_m', hint: 'field.loa_m.hint', dimension: 'length' },
+  { key: 'lwl_m', label: 'field.lwl_m', hint: 'field.lwl_m.hint', dimension: 'length' },
+  { key: 'beam_m', label: 'field.beam_m', hint: 'field.beam_m.hint', dimension: 'length' },
+  { key: 'draught_normal_m', alternate: 'draft_m', label: 'field.draught_normal_m', hint: 'field.draught_normal_m.hint', dimension: 'length' },
+  { key: 'block_coeff', label: 'field.block_coeff', hint: 'field.block_coeff.hint', dimension: null },
+  { key: 'waterplane_coeff', label: 'field.waterplane_coeff', hint: 'field.waterplane_coeff.hint', dimension: null },
 ] as const;
 
 // The chapter that owns a raw-JSON view, and the project section it edits.
 // A chapter without a `jsonKey` has no contract fragment of its own.
-const CHAPTER_JSON: Partial<Record<Chapter, string>> = Object.fromEntries(
-  CHAPTERS.filter(entry => entry[3]).map(entry => [entry[0], entry[3] as string]),
-);
+const CHAPTER_JSON = chapterJsonKeys();
 
 function numeric(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function errorMessage(cause: unknown): string {
+function errorMessage(w: (key: WorkspaceKey, params?: any) => string, cause: unknown): string {
   if (cause instanceof api.ApiError && Array.isArray(cause.detail)) {
-    return cause.detail.map((item: { path?: string; message?: string }) => `${item.path ?? '输入'}：${item.message ?? '无效'}`).slice(0, 4).join('；');
+    return cause.detail.map((item: { path?: string; message?: string }) =>
+      w('workbench.error.validation', {
+        path: item.path ?? w('workbench.error.validationPath'),
+        message: item.message ?? w('workbench.error.validationMessage'),
+      })).slice(0, 4).join('；');
   }
-  return cause instanceof Error ? cause.message : '操作未完成，请检查输入';
+  // An unknown failure keeps the server's own sentence inside a localized frame,
+  // so the reader is never left with an untranslated error and never with an
+  // error that has lost its original wording.
+  return cause instanceof Error ? cause.message : w('workbench.error.generic');
 }
 
-function validationDetails(cause: unknown): Array<{ path: string; message: string }> {
+function validationDetails(w: (key: WorkspaceKey, params?: any) => string, cause: unknown): Array<{ path: string; message: string }> {
   if (!(cause instanceof api.ApiError) || !Array.isArray(cause.detail)) return [];
   return cause.detail.map(item => {
-    const path = typeof item.path === 'string' ? item.path : Array.isArray(item.loc) ? item.loc.join('.') : '项目';
-    return { path, message: String(item.message ?? item.msg ?? '输入无效') };
+    const path = typeof item.path === 'string' ? item.path : Array.isArray(item.loc) ? item.loc.join('.') : w('workbench.error.validationProject');
+    return { path, message: String(item.message ?? item.msg ?? w('workbench.error.validationMessage')) };
   });
 }
 
@@ -105,42 +113,50 @@ function InputGroup({ index, title, note }: { index: string; title: string; note
 function ChapterHead({ chapter, name, projectId, revision, proxy }: {
   chapter: Chapter; name: string; projectId: string; revision: number; proxy: boolean;
 }) {
-  const definition = chapterOf(chapter);
+  const w = useWorkspaceCopy();
+  const definition = chapterOf(chapter, w);
   if (chapter === 'overview') {
     return <header className="chapter-head chapter-head--vessel" id={CHAPTER_HEAD}>
-      <span className="section-kicker">{definition.title.toUpperCase()} / {projectId.slice(0, 8).toUpperCase()}</span>
+      <span className="section-kicker">{definition.label.toUpperCase()} / {projectId.slice(0, 8).toUpperCase()}</span>
       <div className="vessel-title-row"><h1>{name}</h1>
-        <span className="proxy-label">{proxy ? '工程代理 · 非史实认证' : '项目输入'}</span></div>
+        <span className="proxy-label">{proxy ? w('workbench.chapter.proxy') : w('workbench.chapter.input')}</span></div>
       <p>{definition.purpose}</p>
     </header>;
   }
   return <header className="chapter-head" id={CHAPTER_HEAD}>
-    <span className="section-kicker">{chapterNumber(chapter)} / {definition.title.toUpperCase()}</span>
-    <h1>{definition.title}</h1>
+    <span className="section-kicker">{chapterNumber(chapter)} / {definition.label.toUpperCase()}</span>
+    <h1>{definition.label}</h1>
     <p className="chapter-context"><span className="chapter-vessel">{name}</span>
-      <span>修订 {revision}</span>
+      <span>{w('workbench.save.revision', { revision })}</span>
       <span>{projectId.slice(0, 8).toUpperCase()}</span>
     </p>
     {definition.purpose && <p className="chapter-purpose">{definition.purpose}</p>}
   </header>;
 }
 
-function projectRenderError(value: unknown, projectId: string): string | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return '项目 JSON 根节点无效';
+/**
+ * Why a hand-written project document cannot replace the visible draft.
+ *
+ * These are refusals about the document the reader typed, so they are owned by
+ * this module and read in the reader's language. The path in a message is the
+ * document's own field name and stays as written.
+ */
+function projectRenderError(w: (key: WorkspaceKey, params?: any) => string, value: unknown, projectId: string): string | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return w('editor.json.projectError.root');
   const row = value as Record<string, unknown>;
-  if (row.id !== projectId) return '项目 ID 必须与当前项目一致';
-  if (row.schema !== 'plimsoll-project-1') return '项目 schema 无效';
-  if (typeof row.name !== 'string' || !row.name.trim()) return '项目缺少有效舰名';
-  if (!row.hull || typeof row.hull !== 'object' || Array.isArray(row.hull)) return '项目缺少船型 hull';
+  if (row.id !== projectId) return w('editor.json.projectError.id');
+  if (row.schema !== 'plimsoll-project-1') return w('editor.json.projectError.schema');
+  if (typeof row.name !== 'string' || !row.name.trim()) return w('editor.json.projectError.name');
+  if (!row.hull || typeof row.hull !== 'object' || Array.isArray(row.hull)) return w('editor.json.projectError.hull');
   if (!Array.isArray(row.loading_conditions) || !row.loading_conditions.every(
     item => item && typeof item === 'object' && typeof item.id === 'string'
       && (item.label === undefined || item.label === null || typeof item.label === 'string'),
-  )) return '项目缺少有效工况 loading_conditions';
+  )) return w('editor.json.projectError.conditions');
   if (!Array.isArray(row.weight_groups) || !row.weight_groups.every(
     group => group && typeof group === 'object' && typeof group.id === 'string'
       && (group.label === undefined || group.label === null || typeof group.label === 'string')
       && Array.isArray(group.items) && group.items.every((item: unknown) => item && typeof item === 'object' && !Array.isArray(item)),
-  )) return '项目缺少有效重量分组 weight_groups';
+  )) return w('editor.json.projectError.groups');
   return null;
 }
 
@@ -192,13 +208,51 @@ function TraceScope({ scopeKey, children }: { scopeKey: string; children: ReactN
  */
 type Operation = 'saving' | 'starting' | 'reloading';
 
-const OPERATION_TEXT: Record<Operation, string> = {
-  saving: '正在保存修订…', starting: '正在提交计算请求…', reloading: '正在重新载入项目…',
+const OPERATION_TEXT: Record<Operation, WorkspaceKey> = {
+  saving: 'workbench.op.saving', starting: 'workbench.op.starting', reloading: 'workbench.op.reloading',
 };
+
+/**
+ * The raw contract fields a chapter's form does not cover.
+ *
+ * Six chapters own one of these, all of them the same panel with a different
+ * sentence: the text is the reader's own until they apply it, the apply button
+ * is the only thing that writes to the draft, and the saved revision is still
+ * required afterwards. One component rather than six copies, so the wording
+ * follows the language in all six at once and a change reaches all of them.
+ *
+ * An empty `summary` renders the panel open, which is what the project-data
+ * chapter wants: there the raw document *is* the page.
+ */
+function ChapterJson({ w, text, onEdit, edited, onApply, onDiscard, error, summary, note, label }: {
+  w: (key: WorkspaceKey, params?: any) => string;
+  text: string; onEdit: (text: string) => void; edited: boolean;
+  onApply: () => void; onDiscard: () => void; error: string;
+  summary: string; note: string; label: string;
+}) {
+  const body = <>
+    {note && <p className="section-intro">{note}</p>}
+    <label className="field-label" htmlFor="chapter-json">{label}</label>
+    <textarea id="chapter-json" className="json-editor" spellCheck={false} value={text} onChange={event => onEdit(event.target.value)} />
+    <div className="json-actions">
+      <button className="button button--secondary" type="button" onClick={onApply}>{w('editor.json.apply')}</button>
+      {edited && <button className="button button--secondary" type="button" onClick={onDiscard}>{w('editor.json.discard')}</button>}
+      <span>{w('editor.json.stillSave')}</span>
+    </div>
+    {error && <p className="form-error" role="alert">{error}</p>}
+  </>;
+  if (!summary) return <>{body}</>;
+  return <details className="advanced-json"><summary>{summary}</summary>{body}</details>;
+}
 
 export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   projectId: string; onBack: () => void; onRun: (runId: string) => void; onDirtyChange?: (dirty: boolean) => void; onLab?: () => void;
 }) {
+  // The one language state, owned by the shell above this route. Reading it here
+  // changes words and nothing else: the draft, the selected chapter, the unsaved
+  // marker, the scroll position and the trace panel all live in the state below
+  // and none of them is touched by a dictionary changing.
+  const w = useWorkspaceCopy();
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
   const [chapter, setChapter] = useState<Chapter>('overview');
@@ -206,19 +260,28 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   const [conditionId, setConditionId] = useState('');
   const [dirty, setDirty] = useState(false);
   const [operation, setOperation] = useState<Operation | null>(null);
-  const [error, setError] = useState('');
-  const [loadError, setLoadError] = useState('');
+  const [error, setError] = useCopyMessage();
+  const [loadError, setLoadError] = useCopyMessage();
   const [load, setLoad] = useState<'loading' | 'failed'>('loading');
   const [attempt, setAttempt] = useState(0);
   const [conflict, setConflict] = useState<number | null>(null);
   const [jsonText, setJsonText] = useState('');
-  const [jsonError, setJsonError] = useState('');
+  const [jsonError, setJsonError] = useCopyMessage();
   // A hand-edited document that has not been applied yet. A jump that would
   // leave this chapter discards it, so the jump is refused instead.
   const [jsonEdited, setJsonEdited] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Array<{ path: string; message: string }>>([]);
   const [inspected, setInspected] = useState<{ label: string; source: string; estimate: boolean } | null>(null);
   const [runs, setRuns] = useState<RunView[]>([]);
+  const runsScope = useRef(projectId);
+  const [runsState, setRunsState] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const [runsError, setRunsError] = useCopyMessage();
+  const [runsAttempt, setRunsAttempt] = useState(0);
+  const [resultState, setResultState] = useState<'loading' | 'ready' | 'failed'>('ready');
+  const [resultError, setResultError] = useCopyMessage();
+  const [previousState, setPreviousState] = useState<'loading' | 'ready' | 'failed'>('ready');
+  const [previousError, setPreviousError] = useCopyMessage();
+  const [resultAttempt, setResultAttempt] = useState(0);
   const [runResult, setRunResult] = useState<RunView | null>(null);
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [performanceRequest, setPerformanceRequest] = useState<RequestDraft>(EMPTY_REQUEST);
@@ -226,8 +289,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // The flooding request joins the existing performance request only when a
   // saved scenario is chosen; otherwise the stage stays unrequested exactly as
   // before. Both requests use the same project revision and condition.
-  const performanceOptions = buildOptions(performanceRequest);
-  const floodingChoice = buildFloodingRequest(draft ?? {}, floodingRequest);
+  const performanceOptions = buildOptions(performanceRequest, w);
+  const floodingChoice = buildFloodingRequest(draft ?? {}, floodingRequest, w);
   // An explicit environment density belongs to the whole request: the flooding
   // stage is required to use the same equilibrium options as every other stage.
   const equilibrium = { ...(performanceOptions.options.equilibrium as Record<string, unknown> | undefined) };
@@ -251,7 +314,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     : Array.isArray(runOptions.stages) ? (runOptions.stages as string[]) : [];
   /** The field a followed diagnostic is waiting to focus, and its own ticket. */
   const [focusRequest, setFocusRequest] = useState<{ target: string; seq: number } | null>(null);
-  const [guidanceNotice, setGuidanceNotice] = useState('');
+  const [guidanceNotice, setGuidanceNotice] = useCopyMessage();
   const focusTicket = useRef(0);
   /** Every destination change retires the answer that was asked for the last one. */
   const arrivalTicket = useRef(0);
@@ -308,7 +371,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       // An older answer that arrives after a retry has started is not the one
       // this page is now waiting for.
       if (!active || loadTicket.current !== mine) return;
-      setLoadError(errorMessage(cause));
+      setLoadError(w => errorMessage(w, cause));
       setLoad('failed');
     });
     return () => { active = false; };
@@ -321,9 +384,13 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
 
   useEffect(() => {
     let active = true;
-    api.listRuns(projectId).then(items => { if (active) setRuns(items); }).catch(() => { /* Project editing remains usable if history is unavailable. */ });
+    setRunsState('loading'); setRunsError('');
+    if (runsScope.current !== projectId) { runsScope.current = projectId; setRuns([]); }
+    api.listRuns(projectId).then(items => { if (active) { setRuns(items); setRunsState('ready'); } }).catch(cause => {
+      if (active) { setRunsState('failed'); setRunsError(w => errorMessage(w, cause)); }
+    });
     return () => { active = false; };
-  }, [projectId]);
+  }, [projectId, runsAttempt]);
 
   // The list endpoint never carries result payloads (the backend builds run
   // summaries with `include_result=False`), so retrieve exactly one run: the
@@ -341,6 +408,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   useEffect(() => {
     const revision = view?.revision ?? -1;
     const candidate = eligibleResultRun(runs, revision, conditionId);
+    setResultError(''); setResultState(candidate && !candidate.result ? 'loading' : 'ready');
     // A run list entry may already carry its payload; use it directly and make
     // no request. Only a payload-less entry needs the single bounded retrieval.
     setPendingRunId(candidate && !candidate.result ? candidate.id : null);
@@ -349,10 +417,11 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     let active = true;
     api.getRun(candidate.id).then(full => {
       if (!active) return;
+      setResultState('ready');
       setRunResult(full.id === candidate.id && matchesRun(full, projectId, revision, conditionId) ? full : null);
-    }).catch(() => { if (active) setRunResult(null); });
+    }).catch(cause => { if (active) { setResultState('failed'); setResultError(w => errorMessage(w, cause)); } });
     return () => { active = false; };
-  }, [runs, view?.revision, conditionId, projectId]);
+  }, [runs, view?.revision, conditionId, projectId, resultAttempt]);
 
   /**
    * The last check that actually ran, kept across a save.
@@ -369,6 +438,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   const currentResultId = eligibleResultRun(runs, view?.revision ?? -1, conditionId)?.id;
   const [historyRun, setHistoryRun] = useState<RunView | null>(null);
   useEffect(() => {
+    setPreviousError(''); setPreviousState('ready');
     if (!historyCandidate) { setHistoryRun(null); return; }
     const mine = historyCandidate;
     // The current-result read already retrieves this payload. Share it rather
@@ -379,13 +449,15 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       return;
     }
     let active = true;
+    setPreviousState('loading');
     api.getRun(mine.id).then(full => {
       if (!active) return;
+      setPreviousState('ready');
       setHistoryRun(matchesSavedCheck(full, mine, projectId, view?.revision ?? -1, conditionId) ? full : null);
-    }).catch(() => { if (active) setHistoryRun(null); });
+    }).catch(cause => { if (active) { setPreviousState('failed'); setPreviousError(w => errorMessage(w, cause)); } });
     return () => { active = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [historyKey, projectId, conditionId, view?.revision, currentResultId]);
+  }, [historyKey, projectId, conditionId, view?.revision, currentResultId, resultAttempt]);
 
   /**
    * A jump to a real field: select the chapter, then focus and scroll once the
@@ -399,21 +471,21 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
    * the caller wants the reader to keep reading stays on screen.
    */
   function jumpTo(location: DiagnosticLocation, snapshot: ProjectDocument | null = null): boolean {
-    const target = resolveDiagnosticPath(location.path, { snapshot, live: draftRef.current }) ?? location;
+    const target = resolveDiagnosticPath(location.path, { snapshot, live: draftRef.current }, w) ?? location;
     if (!target.chapter || !target.target) {
-      setGuidanceNotice(`路径 ${target.path} 没有可定位的项目输入：${target.note}`);
+      setGuidanceNotice(w => w('workbench.guidance.unlocatable', { path: target.path, note: target.note }));
       return false;
     }
     if (target.chapter !== chapterRef.current && jsonEditedRef.current) {
       // Refused, not consumed: the same jump is retried once the reader has
       // applied or discarded that edit.
       handledArrival.current = null;
-      setGuidanceNotice('当前章节的项目 JSON 还没有“应用到草稿”。跳转会丢弃这段未应用的编辑，已拒绝：文本保持原样。');
+      setGuidanceNotice(w => w('workbench.guidance.jsonUnapplied'));
       return false;
     }
     setChapter(target.chapter);
     setFocusRequest({ target: target.target, seq: ++focusTicket.current });
-    setGuidanceNotice(target.note);
+    setGuidanceNotice(w => resolveDiagnosticPath(location.path, { snapshot, live: draftRef.current }, w)?.note ?? location.note);
     return true;
   }
 
@@ -432,7 +504,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   useEffect(() => {
     if (!draft) return;
     const arrive = () => {
-      const tail = readDiagnosticTail(window.location.hash, projectId);
+      const tail = readDiagnosticTail(window.location.hash, projectId, w);
       const key = tail.kind === 'target' ? `${tail.runId}|${tail.path}`
         : tail.kind === 'malformed' ? `malformed|${window.location.hash}` : null;
       // Whatever the destination, the previous answer is now retired.
@@ -441,24 +513,24 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       setFocusRequest(null);
       handledArrival.current = key;
       if (tail.kind === 'none') return;
-      if (tail.kind === 'malformed') { setGuidanceNotice(tail.reason); return; }
+      if (tail.kind === 'malformed') { const hash = window.location.hash; setGuidanceNotice(w => { const value = readDiagnosticTail(hash, projectId, w); return value.kind === 'malformed' ? value.reason : ''; }); return; }
       const { runId, path } = tail;
       setGuidanceNotice('');
       api.getRun(runId).then(source => {
         if (!alive.current || arrivalTicket.current !== mine) return;
         // The answer must still belong to the address the reader is standing on.
-        const still = readDiagnosticTail(window.location.hash, projectId);
+        const still = readDiagnosticTail(window.location.hash, projectId, w);
         if (still.kind !== 'target' || still.runId !== runId || still.path !== path) return;
         if (source.id !== runId) {
-          setGuidanceNotice(`读取到的运行 ${source.id} 与地址要求的 ${runId} 不一致，已拒绝跳转。`);
+          setGuidanceNotice(w => w('workbench.guidance.runMismatch', { actual: source.id, expected: runId }));
           return;
         }
         if (source.project_id !== projectId) {
-          setGuidanceNotice(`运行 ${runId} 属于其他项目，已拒绝跳转。`);
+          setGuidanceNotice(w => w('workbench.guidance.foreignRun', { id: runId }));
           return;
         }
         if (!source.result) {
-          setGuidanceNotice(`运行 ${runId} 尚无已保存结果，无法定位输入。`);
+          setGuidanceNotice(w => w('workbench.guidance.noResult', { id: runId }));
           return;
         }
         // The stored result has to be the same run's own result, or the
@@ -468,7 +540,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           && result.condition_id === source.condition_id
           && result.request_fingerprint === source.request_fingerprint;
         if (!consistent) {
-          setGuidanceNotice(`运行 ${runId} 的项目、工况或请求指纹与其保存结果不一致，已拒绝跳转。`);
+          setGuidanceNotice(w => w('workbench.guidance.inconsistent', { id: runId }));
           return;
         }
         // An existing condition may be selected so the reader lands on the
@@ -476,29 +548,29 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
         // is never resurrected, and nothing is followed on its behalf.
         const conditions = draftRef.current?.loading_conditions ?? [];
         if (!conditions.some(item => item.id === source.condition_id)) {
-          setGuidanceNotice(`运行 ${runId} 的工况 ${source.condition_id} 已不在当前项目，已拒绝跳转。`);
+          setGuidanceNotice(w => w('workbench.guidance.conditionGone', { id: runId, condition: source.condition_id }));
           return;
         }
         const snapshot = result.input_snapshot ?? null;
-        const location = resolveDiagnosticPath(path, { snapshot, live: draftRef.current });
+        const location = resolveDiagnosticPath(path, { snapshot, live: draftRef.current }, w);
         if (!location || location.kind === 'evidence') {
-          setGuidanceNotice(`路径 ${path} 没有可定位的项目输入：${location?.note ?? '这条诊断路径无法解析。'}`);
+          setGuidanceNotice(w => w('workbench.guidance.unlocatable', { path, note: location?.note ?? w('workbench.guidance.unresolvable') }));
           return;
         }
         const notice = source.revision !== view?.revision
-          ? `该诊断来自修订 ${source.revision}；当前项目已保存修订 ${view?.revision}，需要保存并重新运行后才会更新。`
+          ? w('workbench.guidance.staleRevision', { source: source.revision, current: String(view?.revision ?? '') })
           : '';
         if (source.condition_id !== conditionRef.current) setConditionId(source.condition_id);
         if (!jumpTo(location, snapshot)) return;
         // Stated after the jump, so the reader sees it next to where they landed.
-        if (notice) setGuidanceNotice(`${notice} ${location.note}`);
+        if (notice) setGuidanceNotice(w => `${w('workbench.guidance.staleRevision', { source: source.revision, current: String(view?.revision ?? '') })} ${resolveDiagnosticPath(path, { snapshot, live: draftRef.current }, w)?.note ?? ''}`);
       }).catch(() => {
-        if (alive.current && arrivalTicket.current === mine) setGuidanceNotice(`无法读取诊断来源运行 ${runId}。`);
+        if (alive.current && arrivalTicket.current === mine) setGuidanceNotice(w => w('workbench.guidance.unreadableRun', { id: runId }));
       });
     };
     // A re-render only acts when the address is one this page has not used.
     const reconcile = () => {
-      const tail = readDiagnosticTail(window.location.hash, projectId);
+      const tail = readDiagnosticTail(window.location.hash, projectId, w);
       const key = tail.kind === 'target' ? `${tail.runId}|${tail.path}`
         : tail.kind === 'malformed' ? `malformed|${window.location.hash}` : null;
       if (key !== handledArrival.current) arrive();
@@ -559,9 +631,16 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
 
   /** Throws away unapplied JSON explicitly. Invalid text can never trap a reader here. */
   function discardJson() {
+    draftGeneration.current += 1;
     setJsonText(jsonSource());
     setJsonError('');
     setJsonEdited(false);
+  }
+
+  function editJson(text: string) {
+    draftGeneration.current += 1;
+    jsonEditedRef.current = true;
+    setJsonEdited(true); setJsonText(text);
   }
 
   /**
@@ -572,7 +651,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     if (next === chapterRef.current) return;
     if (jsonEditedRef.current) {
       handledArrival.current = null;
-      setGuidanceNotice('当前章节有未应用的项目 JSON 文本，离开会丢弃它，已保留本章：可“放弃未应用的文本”后切换，或先“应用到草稿”。');
+      setGuidanceNotice(w => w('workbench.guidance.leaveUnapplied'));
       return;
     }
     setChapter(next);
@@ -667,11 +746,11 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     if (!draft) return;
     const ticket = writeTicket.current;
     try {
-      if (!navigator.clipboard) throw new Error('浏览器暂不支持复制，请使用“下载项目 JSON”备份修改。');
+      if (!navigator.clipboard) throw new Error(w('workbench.error.copyUnsupported'));
       await navigator.clipboard.writeText(JSON.stringify(draft, null, 2));
       if (current() && writeTicket.current === ticket) outcome('resolve');
     } catch (cause) {
-      if (current() && writeTicket.current === ticket) { setError(errorMessage(cause)); outcome('hold'); }
+      if (current() && writeTicket.current === ticket) { setError(w => errorMessage(w, cause)); outcome('hold'); }
     }
   }
 
@@ -706,13 +785,16 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
         const detail = cause.detail as { current_revision?: number };
         setConflict(detail.current_revision ?? -1);
       } else {
-        setError(errorMessage(cause));
-        setFieldErrors(validationDetails(cause));
+        setError(w => errorMessage(w, cause));
+        setFieldErrors(validationDetails(w, cause));
       }
     } finally { if (mine()) setOperation(null); }
   }
 
   async function reload() {
+    if (operation) return;
+    if (jsonEditedRef.current) { setError(w => w('workbench.reload.unapplied')); return; }
+    const submittedGeneration = draftGeneration.current;
     const ticket = ++writeTicket.current;
     const mine = () => current() && writeTicket.current === ticket;
     setOperation('reloading');
@@ -720,6 +802,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     try {
       const saved = await api.getProject(projectId);
       if (!mine()) return;
+      if (draftGeneration.current !== submittedGeneration || jsonEditedRef.current) {
+        setError(w => w('workbench.reload.newEdits')); return;
+      }
       setView(saved);
       setDraft(structuredClone(saved.project));
       setPerformanceRequest(EMPTY_REQUEST);
@@ -728,12 +813,12 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       setConflict(null);
       setError('');
       outcome('detent');
-    } catch (cause) { if (mine()) { setError(errorMessage(cause)); outcome('hold'); } }
+    } catch (cause) { if (mine()) { setError(w => errorMessage(w, cause)); outcome('hold'); } }
     finally { if (mine()) setOperation(null); }
   }
 
   async function run() {
-    if (!view || !conditionId || dirty || runError || operation) return;
+    if (!view || !conditionId || dirty || jsonEditedRef.current || runError || operation) return;
     const ticket = ++writeTicket.current;
     const mine = () => current() && writeTicket.current === ticket;
     setOperation('starting');
@@ -746,7 +831,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       if (!mine()) return;
       expectRunResult(queued.id);
       onRun(queued.id);
-    } catch (cause) { if (mine()) { setError(errorMessage(cause)); outcome('hold'); } }
+    } catch (cause) { if (mine()) { setError(w => errorMessage(w, cause)); outcome('hold'); } }
     finally { if (mine()) setOperation(null); }
   }
 
@@ -755,8 +840,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     try {
       const parsed: unknown = JSON.parse(jsonText);
       if (chapter === 'json') {
-        const problem = projectRenderError(parsed, projectId);
-        if (problem) throw new Error(problem);
+        const problem = projectRenderError(w, parsed, projectId);
+        if (problem) { setJsonError(w => projectRenderError(w, parsed, projectId) ?? ''); outcome('hold'); return; }
         updateDraft(parsed as ProjectDocument);
       } else {
         const section = CHAPTER_JSON[chapter];
@@ -767,22 +852,22 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       }
       setJsonError('');
       setJsonEdited(false);
-    } catch (cause) { setJsonError(cause instanceof Error ? cause.message : 'JSON 格式无效'); outcome('hold'); }
+    } catch (cause) { setJsonError(w => cause instanceof Error ? cause.message : w('workbench.error.json')); outcome('hold'); }
   }
 
   // A project that never loaded is its own content: the reason, one explicit
-// retry, and the real way back to the library. There is no skeleton behind it.
-if (!draft || !view) return <div className="page-pad"><p className="section-kicker">WORKSPACE / {load === 'failed' ? 'LOAD FAILED' : 'LOADING'}</p>
+  // retry, and the real way back to the library. There is no skeleton behind it.
+  if (!draft || !view) return <div className="page-pad"><p className="section-kicker">WORKSPACE / {w(load === 'failed' ? 'workbench.load.kickerFailed' : 'workbench.load.kickerLoading')}</p>
   {load === 'failed'
-    ? <ReadFailure title={`无法读取舰船 ${projectId}`} detail={loadError} onRetry={() => setAttempt(current => current + 1)} onBack={onBack} backLabel="← 返回项目库" />
-    : <ReadPending scope="workbench" object="舰船项目" />}</div>;
+    ? <ReadFailure title={w('workbench.load.failed', { id: projectId })} detail={loadError} onRetry={() => setAttempt(current => current + 1)} onBack={onBack} backLabel={w('workbench.load.back')} />
+    : <ReadPending scope="workbench" object={w('workbench.load.pending')} />}</div>;
 
   const hull = draft.hull ?? {};
   const hullSources = (hull.sources && typeof hull.sources === 'object' ? hull.sources : {}) as Record<string, unknown>;
   // Validate identity here, in render, rather than relying on the effect having
   // run: a stale or in-flight result must never be displayed for the current
   // revision/condition.
-  const selectedRun = currentRun(runResult, projectId, view.revision, conditionId, dirty);
+  const selectedRun = currentRun(runResult, projectId, view.revision, conditionId, dirty || jsonEdited);
   // History and result are two different things from two different runs: the
   // guarded result above is what the saved revision may present, and the owned
   // previous check below is what the reader still needs after a save.
@@ -799,39 +884,39 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
       <div className="workbench-toolbar">
         <div className="operation-bar">
           <div className="operation-identity">
-            <label htmlFor="condition">当前工况</label>
+            <label htmlFor="condition">{w('workbench.condition.label')}</label>
             <select id="condition" value={conditionId} onChange={event => setConditionId(event.target.value)}>
-              {draft.loading_conditions.length === 0 ? <option value="">尚无工况</option>
+              {draft.loading_conditions.length === 0 ? <option value="">{w('workbench.condition.none')}</option>
                 : draft.loading_conditions.map(item => <option key={item.id} value={item.id}>{item.label || item.id}</option>)}
             </select>
             {/* The saved revision stays visible while the draft is edited: an
                 unsaved edits do not change the saved revision number. */}
             <span className="save-state">
-              <span className={`save-dot ${dirty ? 'save-dot--dirty' : ''}`} aria-hidden="true" />
-              <span>{dirty ? '未保存修改' : '已保存'}</span>
-              <span className="save-revision">修订 {view.revision}</span>
+              <span className={`save-dot ${dirty || jsonEdited ? 'save-dot--dirty' : ''}`} aria-hidden="true" />
+              <span>{jsonEdited ? w('workbench.save.unapplied') : dirty ? w('workbench.save.dirty') : w('workbench.save.saved')}</span>
+              <span className="save-revision">{w('workbench.save.revision', { revision: view.revision })}</span>
             </span>
             {/* One live line for the operation actually in flight, so the bar
                 answers "what is it doing" without being read off the buttons. */}
-            {operation && <span className="operation-live" role="status">{OPERATION_TEXT[operation]}</span>}
+            {operation && <span className="operation-live" role="status">{w(OPERATION_TEXT[operation])}</span>}
           </div>
           <div className="toolbar-actions">
             {/* Each control names the operation it is actually waiting on. A save
                 in progress keeps the run control reading as a run, because it is
                 not one. */}
-            <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>{operation === 'saving' ? '保存中…' : '保存修订'}</button>
-            <button className="button button--primary" onClick={run} disabled={dirty || !conditionId || busy || !!runError}
-              title={dirty ? '先保存当前修改再运行计算' : runError || undefined}>{operation === 'starting' ? '正在启动计算…' : '运行计算 ↗'}</button>
+            <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>{operation === 'saving' ? w('workbench.save.busy') : w('workbench.save.action')}</button>
+            <button className="button button--primary" onClick={run} disabled={dirty || jsonEdited || !conditionId || busy || !!runError}
+              title={jsonEdited ? w('workbench.reload.unapplied') : dirty ? w('workbench.run.blockedDirty') : runError || undefined}>{operation === 'starting' ? w('workbench.run.busy') : w('workbench.run.action')}</button>
             <details className="secondary-actions">
-              <summary aria-label="更多操作">更多</summary>
+              <summary aria-label={w('workbench.more.label')}>{w('workbench.more.summary')}</summary>
               <div className="secondary-actions-panel">
-                {onLab && <button className="button button--secondary" onClick={onLab} disabled={dirty || busy}
-                  title={dirty ? '先保存当前修订再进入实验室' : '以已保存的舰船修订做命中后果试验'}>损伤实验室 ↗</button>}
+                {onLab && <button className="button button--secondary" onClick={onLab} disabled={dirty || jsonEdited || busy}
+                  title={dirty ? w('workbench.more.labBlocked') : w('workbench.more.labTitle')}>{w('workbench.more.lab')}</button>}
                 <button className="button button--secondary" onClick={downloadProject}
-                  title={dirty ? '下载当前草稿文档（含未保存修改）' : `下载已保存的修订 ${view.revision} 项目文档`}>
-                  下载项目 JSON
+                  title={dirty ? w('workbench.more.downloadDraft') : w('workbench.more.downloadSaved', { revision: view.revision })}>
+                  {w('workbench.more.download')}
                 </button>
-                <p>项目文档是草稿备份，不是计算报告。</p>
+                <p>{w('workbench.more.downloadNote')}</p>
               </div>
             </details>
           </div>
@@ -839,12 +924,18 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
         {/* Every blocking failure sits here, directly under the operation bar and
             above the chapter heading: request errors included, never folded away. */}
         <div className="workbench-alerts">
+          {runsState === 'failed' && <ReadFailure title={w('workbench.read.historyFailed')} detail={runsError}
+            onRetry={() => setRunsAttempt(value => value + 1)} />}
+          {resultState === 'failed' && <ReadFailure title={w('workbench.read.resultFailed')} detail={resultError}
+            onRetry={() => setResultAttempt(value => value + 1)} />}
+          {previousState === 'failed' && <ReadFailure title={w('workbench.read.previousFailed')} detail={previousError}
+            onRetry={() => setResultAttempt(value => value + 1)} />}
           {runError && <div className="notice notice--error" role="alert">{runError}</div>}
           {error && <div className="notice notice--error" role="alert">{error}</div>}
           {/* A refused jump is stated here, in the one place that is always on
               screen, and it changes neither the chapter nor the draft. */}
           {guidanceNotice && <div className="notice" role="status">{guidanceNotice}</div>}
-          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>服务器已有修订 {conflict}</strong><p>你的修改仍留在此页。复制后再载入最新版本，避免覆盖他人的或另一标签页的工作。</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void copyDraft(); }}>复制我的修改</button><button className="button button--primary" disabled={operation !== null} onClick={() => { void reload(); }}>{operation === 'reloading' ? '正在重新载入…' : '重新载入'}</button></div></div>}
+          {conflict !== null && <div className="notice notice--conflict" role="alert"><strong>{w('workbench.conflict.title', { revision: conflict })}</strong><p>{w('workbench.conflict.body')}</p><div className="notice-actions"><button className="button button--secondary" onClick={() => { void copyDraft(); }}>{w('workbench.conflict.copy')}</button><button className="button button--primary" disabled={operation !== null} onClick={() => { void reload(); }}>{operation === 'reloading' ? w('workbench.conflict.reloadBusy') : w('workbench.conflict.reload')}</button></div></div>}
         </div>
       </div>
       {/* The chapter reveal is keyed on the chapter alone, and this container is
@@ -855,64 +946,67 @@ if (!draft || !view) return <div className="page-pad"><p className="section-kick
         <ChapterHead chapter={chapter} name={draft.name} projectId={draft.id} revision={view.revision} proxy={draft.name.toLowerCase().includes('queen mary')} />
         {chapter === 'overview' && <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
           runs={runs} current={selectedRun} previous={historyOfSelected} requestStages={requestStages}
-          requestError={runError} dirty={dirty} onChapter={goChapter} onRun={onRun} onNavigate={jumpTo} />}
-        {chapter === 'hull' && <section className="editor-section"><InputGroup index="01" title="主尺度" note="显示单位可读，保存与计算仍为规范单位" />
-          <p className="section-intro">主尺度只记录已知输入。留空表示未知，不自动补零。复杂型线可在“项目数据”中编辑。</p>
+          requestError={runError} dirty={dirty || jsonEdited} historyState={runsState} resultState={resultState} previousState={historyCandidate?.id === currentResultId ? resultState : previousState} onRefreshRuns={() => setRunsAttempt(value => value + 1)} onChapter={goChapter} onRun={onRun} onNavigate={jumpTo} />}
+        {chapter === 'hull' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.mainDimensions')} note={w('editor.group.mainDimensions.note')} />
+          <p className="section-intro">{w('editor.hull.intro')}</p>
           <div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`));
             // A main dimension carries no per-field source of its own; only an
             // explicitly declared `hull.sources` entry is ever read as one.
             const declared = hullSources[key];
-            const fact: TraceFact = { key: `hull.${key}`, label: field.label, value: numeric(hull[key]),
+            const label = w(field.label as WorkspaceKey), hint = w(field.hint as WorkspaceKey);
+            const fact: TraceFact = { key: `hull.${key}`, label, value: numeric(hull[key]),
               dimension: field.dimension ?? undefined, storedUnit: field.dimension ? 'm' : undefined,
               // No per-dimension estimate flag is stored alongside hull.sources.
               source: declaredSource(declared),
               estimate: null, path: `hull.${key}` };
             return <TracedField fact={fact} className="hull-field" key={field.key} id={hullGuidanceId(field.key)}>
           {field.dimension
-            ? <QuantityField label={field.label} ariaLabel={field.label} value={numeric(hull[key])} dimension={field.dimension} kind="positive" invalid={Boolean(issue)} hint={field.hint} onChange={next => updateHull(key, next === null ? null : String(next))} />
-            : <label className="field-label">{field.label}<input type="number" step="any" aria-label={field.label} aria-invalid={Boolean(issue)} value={typeof hull[key] === 'number' ? hull[key] : ''} onChange={event => updateHull(key, event.target.value)} placeholder="未知" /><small>{field.hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>}
+            ? <QuantityField label={label} ariaLabel={label} value={numeric(hull[key])} dimension={field.dimension} kind="positive" invalid={Boolean(issue)} hint={hint} onChange={next => updateHull(key, next === null ? null : String(next))} />
+            : <label className="field-label">{label}<input type="number" step="any" aria-label={label} aria-invalid={Boolean(issue)} value={typeof hull[key] === 'number' ? hull[key] : ''} onChange={event => updateHull(key, event.target.value)} placeholder={w('editor.unknown')} /><small>{hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>}
           {field.dimension && issue && <span className="field-error" role="alert">{issue.message}</span>}
         </TracedField>; })}</div></section>}
-        {chapter === 'hull' && <section className="editor-section"><InputGroup index="02" title="补充船型与显示" /><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'hull' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.hullSupplement')} /><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
         {/* Reading order: every input first, then the optional request, then the
             results that request produces. Nothing is recomputed to reorder this. */}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="01" title="载荷工况与横摇输入" note="工况定义与派生扣除规则" />
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.performanceInputs')} note={w('editor.group.performanceInputs.note')} />
           <PerformanceInputs project={draft} onChange={updateDraft} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="02" title="阻力研究场景" note="两种既有方法 · 输入来源与敏感性" />
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.resistance')} note={w('editor.group.resistance.note')} />
           <ResistanceEditor project={draft} onChange={updateDraft} /></section>}
-        {chapter === 'performance' && <section className="editor-section" id={REQUEST_PERFORMANCE} tabIndex={-1}><InputGroup index="03" title="本次计算请求" note="可选 · 只决定这次运行计算什么" />
+        {chapter === 'performance' && <section className="editor-section" id={REQUEST_PERFORMANCE} tabIndex={-1}><InputGroup index="03" title={w('editor.group.request')} note={w('editor.group.request.note')} />
           <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={setPerformanceRequest} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="04" title="结果" note="当前修订 · 所选工况" />
+        {chapter === 'performance' && <section className="editor-section"><InputGroup index="04" title={w('editor.group.results')} note={w('editor.group.results.note')} />
           <PerformanceResults run={selectedRun} /></section>}
-        {chapter === 'weights' && <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}><InputGroup index="01" title="载荷账本" note={`${draft.weight_groups.length} 个分组`} />
-          {draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>还没有重量分组</h3><p>空白项目可先从项目数据中添加账本结构。</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{group.items.length} 项</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
-            const itemId = String(item.id ?? `条目 ${itemIndex + 1}`);
+        {chapter === 'weights' && <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}><InputGroup index="01" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
+          {draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>{w('editor.ledger.empty.title')}</h3><p>{w('editor.ledger.empty.text')}</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{w('editor.ledger.items', { count: group.items.length })}</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
+            // An entry with no id of its own still needs a name on screen; the
+            // fallback is positional furniture, not a stored label.
+            const itemId = String(item.id ?? w('editor.ledger.itemFallback', { index: itemIndex + 1 }));
             const source = declaredSource(item.source);
             const estimate = item.estimate === true ? true : item.estimate === false ? false : null;
             // Mass and longitudinal position are two facts of one ledger item, and
             // each shows the item's own declared source rather than a shared note.
-            const massFact: TraceFact = { key: `ledger.${group.id}.${itemId}.mass_t`, label: `${itemId} 质量`, value: numeric(item.mass_t), dimension: 'mass', storedUnit: 't', source, estimate, path: `weight_groups[${groupIndex}].items[${itemId}].mass_t` };
-            const positionFact: TraceFact = { ...massFact, key: `ledger.${group.id}.${itemId}.x_m`, label: `${itemId} 纵向位置`, value: numeric(item.x_m), dimension: 'length', storedUnit: 'm', path: `weight_groups[${groupIndex}].items[${itemId}].x_m` };
+            const massFact: TraceFact = { key: `ledger.${group.id}.${itemId}.mass_t`, label: w('editor.ledger.massLabel', { item: itemId }), value: numeric(item.mass_t), dimension: 'mass', storedUnit: 't', source, estimate, path: `weight_groups[${groupIndex}].items[${itemId}].mass_t` };
+            const positionFact: TraceFact = { ...massFact, key: `ledger.${group.id}.${itemId}.x_m`, label: w('editor.ledger.positionLabel', { item: itemId }), value: numeric(item.x_m), dimension: 'length', storedUnit: 'm', path: `weight_groups[${groupIndex}].items[${itemId}].x_m` };
             // A followed diagnostic addresses one ledger row by the ids the
             // source run saw, so only a row with a real id can be reached.
             const keyed = typeof item.id === 'string' && item.id !== '';
             const rowId = (field: string) => keyed ? ledgerGuidanceId(String(group.id), itemId, field) : undefined;
             return <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{itemId}</strong>
-              <TracedField fact={massFact} id={rowId('mass_t')}><QuantityField small label="质量" ariaLabel={`${group.id} ${itemId} 质量`} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /></TracedField>
-              <TracedField fact={positionFact} id={rowId('x_m')}><QuantityField small label="纵向位置" ariaLabel={`${group.id} ${itemId} 纵向位置`} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
-              <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: `${itemId} 来源`, value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }} id={rowId('source')}>
-                <label>来源<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
+              <TracedField fact={massFact} id={rowId('mass_t')}><QuantityField small label={w('editor.ledger.mass')} ariaLabel={w('editor.ledger.massLabel', { item: `${group.id} ${itemId}` })} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /></TracedField>
+              <TracedField fact={positionFact} id={rowId('x_m')}><QuantityField small label={w('editor.ledger.position')} ariaLabel={w('editor.ledger.positionLabel', { item: `${group.id} ${itemId}` })} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
+              <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: w('editor.ledger.sourceLabel', { item: itemId }), value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }} id={rowId('source')}>
+                <label>{w('editor.ledger.source')}<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
               </TracedField></div>;
           })}</div></div>)}</section>}
-        {chapter === 'weights' && <section className="editor-section"><InputGroup index="02" title="系统质量模型" note="按已声明输入核算质量，不改写账本" /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title="端点与干舷" note="端点、干舷与参考长度" /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">用于编辑表单未覆盖的字段（如 y_m / z_m）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title="炮组声明" note="每个炮组声明输入 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 mounts / armour 边界）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title="鱼雷与水雷分区" note="鱼雷 / 水雷 / 深弹 / 杂项分区 · 未知留空" /><p className="section-intro">{chapterOf(chapter).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><details className="advanced-json"><summary>高级：原始契约字段</summary><p className="section-intro">表单未覆盖的字段（如 torpedo 的 weight_item_ids 绑定）可在此编辑 systems 原始 JSON。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">章节数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title="装甲输入与研究" /><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title="动力输入与研究" /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'damage' && <section className="editor-section" id={REQUEST_DAMAGE} tabIndex={-1}><InputGroup index="01" title="场景草稿" note="场景草稿 · 请求与结果" /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
-        {chapter === 'damage' && <section className="editor-section"><InputGroup index="02" title="高级场景数据" /><details className="advanced-json"><summary>高级：破损场景 JSON</summary><p className="section-intro">这里编辑表单未覆盖的场景字段（项目舱室几何已在下方表单编辑）。应用后仍需点击“保存修订”。</p><label className="field-label" htmlFor="chapter-json">场景数据</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</details></section>}
-        {chapter === 'json' && <section className="editor-section"><InputGroup index="01" title="完整项目数据" note="结构化 JSON" /><p className="section-intro">这里可编辑所有符合 plimsoll-project-1 契约的字段。应用后请保存修订；服务端会验证并返回具体字段路径。</p><label className="field-label" htmlFor="chapter-json">项目 JSON</label><textarea id="chapter-json" className="json-editor" spellCheck={false} value={jsonText} onChange={event => { setJsonEdited(true); setJsonText(event.target.value); }} /><div className="json-actions"><button className="button button--secondary" type="button" onClick={applyJson}>应用到草稿</button>{jsonEdited && <button className="button button--secondary" type="button" onClick={discardJson}>放弃未应用的文本</button>}<span>应用后仍须点击“保存修订”</span></div>{jsonError && <p className="form-error" role="alert">{jsonError}</p>}</section>}
+        {chapter === 'weights' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.massModel')} note={w('editor.group.massModel.note')} /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.endpoints')} note={w('editor.group.endpoints.note')} /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.advanced')} note={w('editor.json.advancedText')} label={w('editor.json.label')} /></section>}
+        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.guns')} note={w('editor.group.guns.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.systems')} note={w('editor.json.systemsText')} label={w('editor.json.label')} /></section>}
+        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.weapons')} note={w('editor.group.weapons.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.weapons')} note={w('editor.json.weaponsText')} label={w('editor.json.label')} /></section>}
+        {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.armour')} /><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.propulsion')} /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'damage' && <section className="editor-section" id={REQUEST_DAMAGE} tabIndex={-1}><InputGroup index="01" title={w('editor.group.damage')} note={w('editor.group.damage.note')} /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
+        {chapter === 'damage' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.damageAdvanced')} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.damage')} note={w('editor.json.damageText')} label={w('editor.json.damageLabel')} /></section>}
+        {chapter === 'json' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.projectJson')} note={w('editor.group.projectJson.note')} /><p className="section-intro">{w('editor.json.projectIntro')}</p><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary="" note="" label={w('editor.json.projectLabel')} /></section>}
       </div>
     </main>
     <TracePanel open={traceOpen} onToggle={() => setTraceOpen(open => !open)} />

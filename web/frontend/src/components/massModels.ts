@@ -1,5 +1,7 @@
-import { numericProblem, numericValue, object, rows, stringList, type NumericDomain, type Raw } from './formModel';
+import { englishCopy, numericProblem, numericValue, object, rows, stringList, type NumericDomain, type Raw } from './formModel';
+import type { Copy } from './diagnosticGuidance';
 import type { Dimension } from './units';
+import type { WorkspaceKey } from '../i18n/workspace';
 
 // Physical mass-model contract for system leaves.
 //
@@ -8,43 +10,47 @@ import type { Dimension } from './units';
 // `_physical_model_metadata`). Nothing is computed here: a model only proposes
 // a mass, the selected loading ledger stays the single mass authority, and a
 // proposal is never applied to `weight_groups` by this editor.
+//
+// Every label this module owns is a dictionary key rather than a string: the
+// module stays pure, so it reads the words from the `Copy` the caller passes and
+// falls back to English when it has none.
 
-export interface ModelField { key: string; label: string; kind: NumericDomain; dimension?: Dimension; storedUnit?: string }
+export interface ModelField { key: string; label: WorkspaceKey; kind: NumericDomain; dimension?: Dimension; storedUnit?: string }
 export interface MethodSpec {
-  id: string; label: string; fields: ModelField[];
+  id: string; label: WorkspaceKey; fields: ModelField[];
   counted: boolean; ammunition: boolean;
 }
 
 // Material density stays canonical under every reader preference, so it declares
 // no dimension; geometry and mass inputs are typed in the reader's unit.
 export const VOLUME_DENSITY: ModelField[] = [
-  { key: 'volume_m3', label: '体积', kind: 'nonnegative', dimension: 'volume' },
-  { key: 'density_kg_m3', label: '密度 · kg/m³', kind: 'positive' },
+  { key: 'volume_m3', label: 'massModel.field.volume', kind: 'nonnegative', dimension: 'volume' },
+  { key: 'density_kg_m3', label: 'massModel.field.density', kind: 'positive' },
 ];
 export const PLATE_FIELDS: ModelField[] = [
-  { key: 'area_m2', label: '面积', kind: 'nonnegative', dimension: 'area' },
-  { key: 'thickness_m', label: '厚度', kind: 'nonnegative', dimension: 'length' },
-  { key: 'density_kg_m3', label: '密度 · kg/m³', kind: 'positive' },
+  { key: 'area_m2', label: 'massModel.field.area', kind: 'nonnegative', dimension: 'area' },
+  { key: 'thickness_m', label: 'massModel.field.thickness', kind: 'nonnegative', dimension: 'length' },
+  { key: 'density_kg_m3', label: 'massModel.field.density', kind: 'positive' },
 ];
-export const UNIT_MASS: ModelField[] = [{ key: 'unit_mass_t', label: '单具质量', kind: 'nonnegative', dimension: 'mass' }];
+export const UNIT_MASS: ModelField[] = [{ key: 'unit_mass_t', label: 'massModel.field.unitMass', kind: 'nonnegative', dimension: 'mass' }];
 export const AMMUNITION_FIELDS: ModelField[] = [
-  { key: 'projectile_mass_kg', label: '弹丸质量', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
-  { key: 'charge_mass_kg', label: '装药质量', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
+  { key: 'projectile_mass_kg', label: 'massModel.field.projectileMass', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
+  { key: 'charge_mass_kg', label: 'massModel.field.chargeMass', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
 ];
 
 export const MASS_METHODS: MethodSpec[] = [
-  { id: 'volume_density_mass', label: '体积 × 密度', fields: VOLUME_DENSITY, counted: false, ammunition: false },
-  { id: 'plate_area_thickness_density_mass', label: '面积 × 厚度 × 密度', fields: PLATE_FIELDS, counted: false, ammunition: false },
-  { id: 'counted_unit_mass', label: '计数 × 单具质量', fields: UNIT_MASS, counted: true, ammunition: false },
-  { id: 'counted_ammunition_mass', label: '计数 × 每炮携弹 × 弹重', fields: AMMUNITION_FIELDS, counted: true, ammunition: true },
+  { id: 'volume_density_mass', label: 'massModel.method.volumeDensity', fields: VOLUME_DENSITY, counted: false, ammunition: false },
+  { id: 'plate_area_thickness_density_mass', label: 'massModel.method.plateArea', fields: PLATE_FIELDS, counted: false, ammunition: false },
+  { id: 'counted_unit_mass', label: 'massModel.method.countedUnit', fields: UNIT_MASS, counted: true, ammunition: false },
+  { id: 'counted_ammunition_mass', label: 'massModel.method.countedAmmunition', fields: AMMUNITION_FIELDS, counted: true, ammunition: true },
 ];
 
 // Installed counts only. Broadside fields are rejected as mass multipliers by
 // the core and must not be offered here either.
 export const COUNT_FIELDS = [
-  { id: 'installed_count', label: '装舰数量 installed_count' },
-  { id: 'installed_guns', label: '装舰炮数 installed_guns' },
-  { id: 'installed_tubes', label: '装舰管数 installed_tubes' },
+  { id: 'installed_count', label: 'massModel.count.installedCount' },
+  { id: 'installed_guns', label: 'massModel.count.installedGuns' },
+  { id: 'installed_tubes', label: 'massModel.count.installedTubes' },
 ] as const;
 
 export const ROUNDS_FIELD = 'rounds_per_gun';
@@ -91,9 +97,9 @@ export function defaultInputs(method: string): Raw {
 // Text-valued inputs carry provenance too: an estimated model needs a source and
 // estimate flag for *every* input key, not only its numeric ones.
 export const TEXT_INPUTS: ModelField[] = [
-  { key: 'count_field', label: '装舰数量字段', kind: 'signed' },
-  { key: 'count_basis', label: '计数依据', kind: 'signed' },
-  { key: 'rounds_field', label: '携弹数字段', kind: 'signed' },
+  { key: 'count_field', label: 'massModel.text.countField', kind: 'signed' },
+  { key: 'count_basis', label: 'massModel.text.countBasis', kind: 'signed' },
+  { key: 'rounds_field', label: 'massModel.text.roundsField', kind: 'signed' },
 ];
 
 export function textInputsFor(method: string): ModelField[] {
@@ -114,8 +120,8 @@ export function newModel(id: string, method: string, linkedWeightItemId: string 
 export function modelInputs(model: Raw): Raw { return object(model.inputs); }
 export function modelProvenance(model: Raw): Raw { return object(model.input_provenance); }
 
-export function patchModelInput(model: Raw, field: ModelField, raw: string): { model: Raw; problem: string | null } {
-  const problem = numericProblem(field.kind, raw);
+export function patchModelInput(model: Raw, field: ModelField, raw: string, w: Copy = englishCopy): { model: Raw; problem: string | null } {
+  const problem = numericProblem(field.kind, raw, w);
   if (problem) return { model, problem };
   const inputs = { ...modelInputs(model) };
   inputs[field.key] = numericValue(raw);
@@ -135,45 +141,45 @@ function knownSource(value: unknown): boolean {
 
 // Mirrors _declared_count: exactly one of count_field or count_value, a named
 // basis with count_value, and an installed count the system actually declares.
-export function countHints(model: Raw, leaf: Raw): string[] {
+export function countHints(model: Raw, leaf: Raw, w: Copy = englishCopy): string[] {
   const spec = methodSpec(model.method);
   if (!spec?.counted) return [];
   const hints: string[] = [];
   const inputs = modelInputs(model);
   const hasField = 'count_field' in inputs;
   const hasValue = 'count_value' in inputs;
-  if (hasField === hasValue) hints.push('必须且只能声明 count_field 或 count_value 之一');
+  if (hasField === hasValue) hints.push(w('massModel.hint.countExclusive'));
   if (hasValue) {
     const value = inputs.count_value;
-    if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) hints.push('count_value 必须是非负整数');
-    if (typeof inputs.count_basis !== 'string' || !inputs.count_basis.trim()) hints.push('count_value 必须声明 count_basis');
+    if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) hints.push(w('massModel.hint.countValueInteger'));
+    if (typeof inputs.count_basis !== 'string' || !inputs.count_basis.trim()) hints.push(w('massModel.hint.countValueBasis'));
   }
   if (hasField && !COUNT_FIELDS.some(field => field.id === inputs.count_field)) {
-    hints.push('count_field 必须是装舰数量字段，不能使用单舷字段');
+    hints.push(w('massModel.hint.countFieldId'));
   }
   if (hasField && !hasValue) {
     const field = inputs.count_field as string;
     const count = leaf[field];
     if (typeof count !== 'number' || !Number.isInteger(count) || count < 0) {
-      hints.push(`本系统未声明 ${field} 的装舰数量，核心不能用未知计数计算`);
+      hints.push(w('massModel.hint.countUndeclared', { field }));
     }
   }
   if (spec.ammunition) {
-    if (inputs.rounds_field !== ROUNDS_FIELD) hints.push(`rounds_field 必须是 ${ROUNDS_FIELD}`);
+    if (inputs.rounds_field !== ROUNDS_FIELD) hints.push(w('massModel.hint.roundsField', { field: ROUNDS_FIELD }));
     const rounds = leaf[ROUNDS_FIELD];
     if (typeof rounds !== 'number' || !Number.isInteger(rounds) || rounds < 0) {
-      hints.push(`弹药模型需要本系统声明 ${ROUNDS_FIELD}`);
+      hints.push(w('massModel.hint.roundsUndeclared', { field: ROUNDS_FIELD }));
     }
   }
   return hints;
 }
 
-export function toleranceHint(model: Raw): string | null {
+export function toleranceHint(model: Raw, w: Copy = englishCopy): string | null {
   const tolerance = object(model.comparison_tolerance);
   const relative = tolerance.relative;
   const absolute = tolerance.absolute_t;
   if (typeof relative !== 'number' || relative < 0 || typeof absolute !== 'number' || absolute < 0) {
-    return '比较容差必须显式声明相对值与绝对值（核心不接受缺省）';
+    return w('massModel.hint.tolerance');
   }
   return null;
 }
@@ -181,36 +187,37 @@ export function toleranceHint(model: Raw): string | null {
 // Everything the editor can check without running a kernel: the model stays
 // readable as a draft; the kernel rejects an incomplete model instead of
 // proposing a mass from incomplete inputs.
-function inputLabel(method: string, key: string): string {
-  return [...(methodSpec(method)?.fields ?? []), ...textInputsFor(method)]
-    .find(field => field.key === key)?.label ?? key;
+function inputLabel(w: Copy, method: string, key: string): string {
+  const found = [...(methodSpec(method)?.fields ?? []), ...textInputsFor(method)]
+    .find(field => field.key === key);
+  return found ? w(found.label) : key;
 }
 
-export function modelHints(model: Raw, leaf: Raw): string[] {
+export function modelHints(model: Raw, leaf: Raw, w: Copy = englishCopy): string[] {
   const spec = methodSpec(model.method);
   const hints: string[] = [];
-  if (!spec) hints.push('未选择已审查的质量模型方法');
+  if (!spec) hints.push(w('massModel.hint.method'));
   const linked = model.linked_weight_item_id;
-  if (typeof linked !== 'string' || !linked) hints.push('必须绑定本系统已链接的账本条目');
-  else if (!stringList(leaf.weight_item_ids).includes(linked)) hints.push('绑定条目不在本系统的 weight_item_ids 内');
-  if (!knownSource(model.source)) hints.push('缺少模型来源');
-  if (typeof model.estimate !== 'boolean') hints.push('缺少模型估算状态');
-  const tolerance = toleranceHint(model);
+  if (typeof linked !== 'string' || !linked) hints.push(w('massModel.hint.binding'));
+  else if (!stringList(leaf.weight_item_ids).includes(linked)) hints.push(w('massModel.hint.bindingOutside'));
+  if (!knownSource(model.source)) hints.push(w('massModel.hint.source'));
+  if (typeof model.estimate !== 'boolean') hints.push(w('massModel.hint.estimate'));
+  const tolerance = toleranceHint(model, w);
   if (tolerance) hints.push(tolerance);
   const inputs = modelInputs(model);
   for (const field of spec?.fields ?? []) {
     const value = inputs[field.key];
-    if (typeof value !== 'number' || !Number.isFinite(value) || numericProblem(field.kind, String(value))) {
-      hints.push(`${field.label} 未声明或超出数值域`);
+    if (typeof value !== 'number' || !Number.isFinite(value) || numericProblem(field.kind, String(value), w)) {
+      hints.push(w('massModel.hint.value', { label: w(field.label) }));
     }
   }
-  hints.push(...countHints(model, leaf));
+  hints.push(...countHints(model, leaf, w));
   if (model.estimate === true) {
     const provenance = modelProvenance(model);
     for (const key of Object.keys(modelInputs(model))) {
       const entry = object(provenance[key]);
       if (typeof entry.source !== 'string' || !entry.source.trim() || typeof entry.estimate !== 'boolean') {
-        hints.push(`估算模型必须为输入 ${inputLabel(String(model.method), key)} 声明来源与估算状态`);
+        hints.push(w('massModel.hint.estimateProvenance', { label: inputLabel(w, String(model.method), key) }));
       }
     }
   }

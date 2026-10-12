@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, within } from '@testing-library/react';
+import { renderZh as render, zhCopy } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Report } from '../pages/Report';
@@ -128,13 +129,13 @@ describe('preparing a report for paper', () => {
     const paths = Array.from(box.querySelectorAll('.report-audit-paths code')).map(node => node.textContent ?? '');
     // Same declaration, three statements: true, false and unsaid are not merged,
     // and the unknown one is not turned into a false.
-    expect(box.textContent).toContain(estimateLabel(true));
-    expect(box.textContent).toContain(estimateLabel(false));
-    expect(box.textContent).toContain(estimateLabel(null));
+    expect(box.textContent).toContain(estimateLabel(true, zhCopy));
+    expect(box.textContent).toContain(estimateLabel(false, zhCopy));
+    expect(box.textContent).toContain(estimateLabel(null, zhCopy));
 
     // The reordered pair is one declaration that lists both of its paths.
     const drawingGroup = Array.from(box.querySelectorAll('.report-audit-group'))
-      .find(node => node.querySelector('.report-audit-estimate')?.textContent === estimateLabel(true)
+      .find(node => node.querySelector('.report-audit-estimate')?.textContent === estimateLabel(true, zhCopy)
         && node.querySelector('.report-audit-declaration')?.textContent?.includes('第四十二页'));
     expect(drawingGroup).toBeDefined();
     expect(Array.from(drawingGroup!.querySelectorAll('.report-audit-paths code')).map(node => node.textContent))
@@ -218,14 +219,14 @@ describe('preparing a report for paper', () => {
     const before = JSON.stringify(result);
     render(<Report result={result} runId="run-9" />);
 
-    fireEvent.change(screen.getByLabelText('报告mass显示单位'), { target: { value: 'kg' } });
+    fireEvent.change(screen.getByLabelText('报告质量显示单位'), { target: { value: 'kg' } });
     expect(within(document.querySelector('.report-readings') as HTMLElement).getByText('27,200,000 kg')).toBeVisible();
     print();
     done();
 
     // The reader's page choice survives the print, and so does the saved result.
     expect(within(document.querySelector('.report-readings') as HTMLElement).getByText('27,200,000 kg')).toBeVisible();
-    expect(screen.getByLabelText('报告mass显示单位')).toHaveValue('kg');
+    expect(screen.getByLabelText('报告质量显示单位')).toHaveValue('kg');
     expect(result.input_snapshot).toBe(snapshot);
     expect(JSON.stringify(result)).toBe(before);
   });

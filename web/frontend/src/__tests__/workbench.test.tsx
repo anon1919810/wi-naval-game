@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FactField } from '../components/FactField';
@@ -11,7 +12,7 @@ import type { ProjectDocument } from '../types';
 
 vi.mock('../api', async importOriginal => {
   const actual = await importOriginal<typeof import('../api')>();
-  return { ...actual, listProjects: vi.fn(), requestCode: vi.fn(), getProject: vi.fn(), saveProject: vi.fn() };
+  return { ...actual, listProjects: vi.fn(), listRuns: vi.fn(), requestCode: vi.fn(), getProject: vi.fn(), saveProject: vi.fn() };
 });
 
 const box: ProjectDocument = {
@@ -20,7 +21,7 @@ const box: ProjectDocument = {
   geometry: null, weight_groups: [], loading_conditions: [{ id: 'loaded', label: '满载' }],
 };
 
-beforeEach(() => { cleanup(); vi.clearAllMocks(); });
+beforeEach(() => { cleanup(); vi.clearAllMocks(); vi.mocked(api.listRuns).mockResolvedValue([]); });
 afterEach(() => vi.restoreAllMocks());
 
 describe('workbench entry', () => {
@@ -92,7 +93,7 @@ describe('workbench entry', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/缺少|无效/);
     // The refused payload never reached the draft: the chapter still leads with
     // its English title and still names the vessel it is editing.
-    expect(screen.getByRole('heading', { level: 1, name: 'Project Data' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: '项目数据' })).toBeVisible();
     expect(document.querySelector('.chapter-context .chapter-vessel')).toHaveTextContent('解析方箱');
     fireEvent.change(screen.getByLabelText('项目 JSON'), { target: { value: JSON.stringify({
       ...box, loading_conditions: [{ id: 'loaded', label: { invalid: true } }],

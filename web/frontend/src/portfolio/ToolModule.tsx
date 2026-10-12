@@ -1,5 +1,7 @@
 import { Component, type ReactNode } from 'react';
 
+import type { ShellKey } from '../i18n/shell';
+
 /**
  * Recovery for the workspace chunk.
  *
@@ -27,6 +29,14 @@ interface Props {
   returnHref: string;
   /** Report that the module failed, so a later entry does not reuse it. */
   onFailure: () => void;
+  /**
+   * The four sentences this boundary prints, looked up by its caller.
+   *
+   * A class component cannot read a hook, so the copy arrives as a prop rather
+   * than being hard-coded here. That keeps this panel in the visitor's chosen
+   * language without teaching the module boundary about dictionaries.
+   */
+  copy: Readonly<Record<'title' | 'note' | 'reload' | 'returnLabel', string>>;
 }
 
 interface State { error: Error | null }
@@ -35,7 +45,7 @@ export class ToolModuleBoundary extends Component<Props, State> {
   state: State = { error: null };
 
   static getDerivedStateFromError(error: unknown): State {
-    return { error: error instanceof Error ? error : new Error('工作空间模块未能加载') };
+    return { error: error instanceof Error ? error : new Error('The workspace module could not be loaded') };
   }
 
   componentDidCatch(): void {
@@ -45,14 +55,23 @@ export class ToolModuleBoundary extends Component<Props, State> {
   render() {
     const { error } = this.state;
     if (!error) return this.props.children;
+    const { title, note, reload, returnLabel } = this.props.copy;
     return <div className="ff-tool-error" role="alert">
-      <strong>工作空间未能加载</strong>
+      <strong>{title}</strong>
       <p className="ff-tool-error-detail">{error.message}</p>
-      <p className="ff-tool-error-note">请重新载入页面以恢复工作空间。现有浏览器工作区会保留，也可以先返回公共页面。</p>
+      <p className="ff-tool-error-note">{note}</p>
       <div className="ff-tool-error-actions">
-        <button type="button" className="button button--primary" onClick={() => window.location.reload()}>重新载入页面</button>
-        <a className="ff-tool-return" href={this.props.returnHref}>↖ Y’s Formfield</a>
+        <button type="button" className="button button--primary" onClick={() => window.location.reload()}>{reload}</button>
+        <a className="ff-tool-return" href={this.props.returnHref}>{returnLabel}</a>
       </div>
     </div>;
   }
 }
+
+/** The keys a caller resolves to build {@link ToolModuleBoundary}'s `copy`. */
+export const TOOL_MODULE_KEYS = {
+  title: 'shell.module.title',
+  note: 'shell.module.note',
+  reload: 'shell.module.reload',
+  returnLabel: 'shell.toolReturn',
+} as const satisfies Record<string, ShellKey>;

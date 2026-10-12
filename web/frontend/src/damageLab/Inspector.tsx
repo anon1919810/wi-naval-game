@@ -1,118 +1,179 @@
 import { useState } from 'react';
 import type { Experiment, LabResult, LabState, Room, ShipState } from './types';
 import type { InspectionTarget } from './narrative';
-import { numeric, percent } from './model';
+import { explainTarget } from './consequences';
+import { useLabCopy } from '../i18n/lab';
+import { useLabFormat } from '../i18n/labFormat';
 
-function Comparison({ before, after, format = percent }: {
-  before: number | null | undefined; after: number | null | undefined; format?: (n: number | null | undefined) => string;
+function Comparison({ before, after, format }: {
+  before: number | null | undefined; after: number | null | undefined;
+  format: (n: number | null | undefined) => string;
 }) {
   return <><span className="lab-before">{format(before)} <span aria-hidden="true">→</span></span><strong>{format(after)}</strong></>;
 }
 
-export default function Inspector({ experiment, state, baseline = null, rooms = [], selected, inspection, onSelect, onInspect }: {
+export default function Inspector({ experiment, state, baseline = null, rooms = [], selected, inspection, result = null, frame = 0, onSelect, onInspect }: {
   experiment: Experiment; state: LabState | null; baseline?: LabState | null; rooms?: Room[];
   selected: string; inspection?: InspectionTarget | null; onSelect: (id: string) => void; onInspect?: (target: InspectionTarget) => void;
+  result?: LabResult | null; frame?: number;
 }) {
+  const l = useLabCopy();
+  const f = useLabFormat();
   const [allCrew, setAllCrew] = useState(false);
-  const format=experiment.detonation ? (value:number|null|undefined)=>value==null ? '未知' : `${numeric(value*100,2)}%` : percent;
-  const crewDefinition=inspection?.kind==='crew' ? experiment.crew_groups.find(c=>c.id===inspection.id) : null;
-  const roomId=inspection?.kind==='compartment' ? inspection.id : crewDefinition?.compartment_id;
-  const definition = crewDefinition ? experiment.modules.find(m=>m.id===crewDefinition.module_id)
-    : roomId ? experiment.modules.find(m=>m.id===selected && m.compartment_id===roomId)
-    ?? experiment.modules.find(m=>m.compartment_id===roomId) : experiment.modules.find(m=>m.id===selected) ?? experiment.modules[0];
-  const selectedRoom=roomId ?? definition?.compartment_id;
-  const room=rooms.find(r=>r.id===selectedRoom), roomState=state?.compartments.find(r=>r.id===selectedRoom);
-  const module = state?.modules.find(m=>m.id===definition?.id);
-  const initial = baseline?.modules.find(m=>m.id===definition?.id);
-  const groups=experiment.crew_groups.filter(g=>allCrew || !selectedRoom || g.compartment_id===selectedRoom);
-  return <aside className="lab-inspector" aria-label="损伤说明">
-    <span className="lab-kicker">02 / CONSEQUENCES</span><h2>影响与依据</h2>
-    <div className="lab-module-list">{experiment.modules.map(m=>{
-      const result=state?.modules.find(row=>row.id===m.id);
-      return <button key={m.id} aria-pressed={selected===m.id} onClick={()=>onSelect(m.id)}>
-        <span>{m.label}</span><strong>{result ? format(result.effective_availability) : '待试验'}</strong></button>;
+  // With a declared detonation the mechanical figures are normalised whole
+  // numbers rather than fractions; the formatter decides which, and it never
+  // turns an absent value into a zero.
+  const format = experiment.detonation ? (value: number | null | undefined) => value == null ? l('value.unknown') : `${f.numeric(value * 100, 2)}%` : f.percent;
+  const crewDefinition = inspection?.kind === 'crew' ? experiment.crew_groups.find(c => c.id === inspection.id) : null;
+  const roomId = inspection?.kind === 'compartment' ? inspection.id : crewDefinition?.compartment_id;
+  // The explanation is derived per render from the saved record: changing the frame
+  // or the selected target re-derives it, and the run itself is never modified.
+  const explanation = result && inspection ? explainTarget(result, frame, inspection, l) : null;
+  const definition = crewDefinition ? experiment.modules.find(m => m.id === crewDefinition.module_id)
+    : roomId ? experiment.modules.find(m => m.id === selected && m.compartment_id === roomId)
+    ?? experiment.modules.find(m => m.compartment_id === roomId) : experiment.modules.find(m => m.id === selected) ?? experiment.modules[0];
+  const selectedRoom = roomId ?? definition?.compartment_id;
+  const room = rooms.find(r => r.id === selectedRoom), roomState = state?.compartments.find(r => r.id === selectedRoom);
+  const module = state?.modules.find(m => m.id === definition?.id);
+  const initial = baseline?.modules.find(m => m.id === definition?.id);
+  const groups = experiment.crew_groups.filter(g => allCrew || !selectedRoom || g.compartment_id === selectedRoom);
+  return <aside className="lab-inspector" aria-label={l('panel.label')}>
+    <span className="lab-kicker">{l('panel.kicker')}</span><h2>{l('panel.title')}</h2>
+    <div className="lab-module-list">{experiment.modules.map(m => {
+      const result = state?.modules.find(row => row.id === m.id);
+      return <button key={m.id} aria-pressed={selected === m.id} onClick={() => onSelect(m.id)}>
+        <span>{m.label}</span><strong>{result ? format(result.effective_availability) : l('panel.modulePending')}</strong></button>;
     })}</div>
-    {selectedRoom && <section className="lab-room-summary"><span className="lab-kicker">SELECTED COMPARTMENT / CORE STATE</span>
-      <h3>{room?.label ?? selectedRoom}</h3><p className="lab-note">舱内水量 {numeric(roomState?.volume_m3,2)} m³ · 有效容量占比 {percent(roomState?.fill_fraction)}</p>
+    {selectedRoom && <section className="lab-room-summary"><span className="lab-kicker">{l('panel.roomKicker')}</span>
+      <h3>{room?.label ?? selectedRoom}</h3><p className="lab-note">{l('panel.roomNote', { volume: f.numeric(roomState?.volume_m3, 2), fill: f.percent(roomState?.fill_fraction) })}</p>
     </section>}
     {definition && <section><span className="lab-kicker">{definition.role.toUpperCase()} / GAME ESTIMATE</span><h3>{definition.label}</h3>
-      <p className="lab-note">初始 → 当前接受状态</p>
-      <dl><div><dt>机械完整度</dt><dd><Comparison before={initial?.mechanical_integrity} after={module?.mechanical_integrity} format={format} /></dd></div>
-        <div><dt>进水可用度</dt><dd><Comparison before={initial?.flooding_availability} after={module?.flooding_availability} format={format} /></dd></div>
-        <div><dt>值勤可用度</dt><dd><Comparison before={initial?.staffing_availability} after={module?.staffing_availability} format={format} /></dd></div>
-        <div className="lab-total"><dt>综合可用度</dt><dd><Comparison before={initial?.effective_availability} after={module?.effective_availability} format={format} /></dd></div></dl>
+      <p className="lab-note">{l('panel.moduleNote')}</p>
+      <dl><div><dt>{l('panel.mechanical')}</dt><dd><Comparison before={initial?.mechanical_integrity} after={module?.mechanical_integrity} format={format} /></dd></div>
+        <div><dt>{l('panel.flooding')}</dt><dd><Comparison before={initial?.flooding_availability} after={module?.flooding_availability} format={format} /></dd></div>
+        <div><dt>{l('panel.staffing')}</dt><dd><Comparison before={initial?.staffing_availability} after={module?.staffing_availability} format={format} /></dd></div>
+        <div className="lab-total"><dt>{l('panel.effective')}</dt><dd><Comparison before={initial?.effective_availability} after={module?.effective_availability} format={format} /></dd></div></dl>
       {module && <p className="lab-factor-equation">{format(module.mechanical_integrity)} × {format(module.flooding_availability)} × {format(module.staffing_availability)} = {format(module.effective_availability)}</p>}
-      <p className="lab-note">{module?.causes.length ? module.causes.map(c=>({ localized_game_impact: '局部命中', estimated_fragment_exposure:'破片暴露估算', flood_disable: '进水停机' }[c] ?? c)).join(' / ') : state ? '未记录直接损伤原因' : '运行试验后显示事件依据'}{module?.staffing_availability===0 ? ' · 当前无可值勤人员' : ''}</p>
+      {/* An unrecognised cause code is left exactly as the core wrote it; only
+          the three this interface knows are given a localized name. */}
+      <p className="lab-note">{module?.causes.length
+        ? module.causes.map(c => l(`panel.cause.${c}` as 'panel.cause.localized_game_impact')).join(' / ')
+        : state ? l('panel.cause.none') : l('panel.cause.pending')}{module?.staffing_availability === 0 ? l('panel.cause.noDuty') : ''}</p>
     </section>}
-    <section><span className="lab-kicker">DUTY GROUPS / GAME ESTIMATE</span><h3>舱室乘员</h3>
-      <label className="lab-check"><input type="checkbox" checked={allCrew} onChange={e=>setAllCrew(e.target.checked)} />全部乘员组</label>
-      {!groups.length && <p className="lab-note">此舱室没有已声明的乘员组。</p>}
-      {groups.map(group=>{
-        const crew = state?.crew_groups.find(c=>c.id===group.id);
-        const before = baseline?.crew_groups.find(c=>c.id===group.id);
-        return <div className="lab-crew" key={group.id} data-selected={inspection?.kind==='crew' && inspection.id===group.id ? 'true' : undefined}>
-          <button className="lab-crew-select" aria-pressed={inspection?.kind==='crew' && inspection.id===group.id} onClick={()=>onInspect?.({kind:'crew',id:group.id})}>{group.label} <span aria-hidden="true">↗</span></button>
-          <dl>{([['available','可值勤'],['incapacitated','失能'],['dead','死亡'],['evacuated','撤离']] as const).map(([key,label])=>
-            <div key={key}><dt>{label}</dt><dd><Comparison before={before?.[key]} after={crew?.[key]} format={n=>numeric(n,0)} /></dd></div>)}</dl>
-          <p className="lab-note">{crew?.evacuation_triggered ? '值勤人员撤至抽象集合点；伤亡留在原舱。' : `${group.compartment_id} · 输入 ${numeric(group.personnel,0)} 人`}</p></div>;
+    <section><span className="lab-kicker">{l('panel.crewKicker')}</span><h3>{l('panel.crewTitle')}</h3>
+      <label className="lab-check"><input type="checkbox" checked={allCrew} onChange={e => setAllCrew(e.target.checked)} />{l('panel.allCrew')}</label>
+      {!groups.length && <p className="lab-note">{l('panel.crewEmpty')}</p>}
+      {groups.map(group => {
+        const crew = state?.crew_groups.find(c => c.id === group.id);
+        const before = baseline?.crew_groups.find(c => c.id === group.id);
+        const count = (n: number | null | undefined) => f.numeric(n, 0);
+        return <div className="lab-crew" key={group.id} data-selected={inspection?.kind === 'crew' && inspection.id === group.id ? 'true' : undefined}>
+          <button className="lab-crew-select" aria-pressed={inspection?.kind === 'crew' && inspection.id === group.id} onClick={() => onInspect?.({ kind: 'crew', id: group.id })}>{group.label} <span aria-hidden="true">→</span></button>
+          <dl>{([['available', 'panel.crew.available'], ['incapacitated', 'panel.crew.incapacitated'], ['dead', 'panel.crew.dead'], ['evacuated', 'panel.crew.evacuated']] as const).map(([key, label]) =>
+            <div key={key}><dt>{l(label)}</dt><dd><Comparison before={before?.[key]} after={crew?.[key]} format={count} /></dd></div>)}</dl>
+          <p className="lab-note">{crew?.evacuation_triggered ? l('panel.crew.evacuatedNote') : l('panel.crew.input', { compartment: group.compartment_id, count: f.numeric(group.personnel, 0) })}</p></div>;
       })}
     </section>
-    <section><span className="lab-kicker">PROPULSION / ESTIMATE</span><h3>可用轴功率</h3>
-      <p className="lab-power">{numeric(state?.capabilities.shaft_power_kw,0)} <small>kW</small></p>
-      {baseline && <p className="lab-note">初始 {numeric(baseline.capabilities.shaft_power_kw,0)} kW → 当前 {numeric(state?.capabilities.shaft_power_kw,0)} kW</p>}
-      {state?.capabilities.shaft_power_kw == null && <p className="lab-note">总量含未知输入；已知小计 {numeric(state?.capabilities.known_shaft_power_subtotal_kw,0)} kW。</p>}
+    <section><span className="lab-kicker">{l('panel.powerKicker')}</span><h3>{l('panel.powerTitle')}</h3>
+      <p className="lab-power">{f.numeric(state?.capabilities.shaft_power_kw, 0)} <small>kW</small></p>
+      {baseline && <p className="lab-note">{l('panel.powerChange', { before: f.numeric(baseline.capabilities.shaft_power_kw, 0), after: f.numeric(state?.capabilities.shaft_power_kw, 0) })}</p>}
+      {state?.capabilities.shaft_power_kw == null && <p className="lab-note">{l('panel.powerUnknown', { subtotal: f.numeric(state?.capabilities.known_shaft_power_subtotal_kw, 0) })}</p>}
     </section>
+    {explanation && <section><span className="lab-kicker">{l('explain.kicker')}</span><h3>{l('explain.title')}</h3>
+      <p className="lab-note">{l('explain.note')}</p>
+      {/* Every note is a refusal or a limit of the record, so it sits with the
+          findings rather than being folded away. */}
+      {explanation.notes.map(note => <p className="lab-note" key={note}>{note}</p>)}
+      {explanation.paths.length > 0 && <>
+        <h4>{l('explain.pathsTitle')}</h4>
+        <ol>{explanation.paths.map(path => <li key={path.index}>
+          <strong>{l('explain.pathLabel', { index: path.index })}</strong>
+          <span className="lab-note"> {l('explain.exposure', { value: f.numeric(path.exposure, 3) })}</span>
+          <p className="lab-note">{path.sequence}{path.blockedBy ? ` · ${l('explain.blockedBy', { boundary: path.blockedBy })}` : ''}</p>
+        </li>)}</ol></>}
+      {explanation.boundaries.length > 0 && <>
+        <h4>{l('explain.boundariesTitle')}</h4>
+        <ul>{explanation.boundaries.map(boundary => <li key={boundary.id}>
+          <strong>{boundary.id}</strong>
+          <span className="lab-note"> {l(boundary.state === 'generated' ? 'explain.state.generated'
+            : boundary.state === 'deferred' ? 'explain.state.deferred'
+              : boundary.state === 'sealed' ? 'explain.state.sealed' : 'explain.state.unknown')}</span>
+          <p className="lab-note">{l('explain.load', { absorbed: f.numeric(boundary.absorbedExposure, 3),
+            threshold: f.numeric(boundary.threshold, 3), area: f.numeric(boundary.generatedAreaM2, 4) })}</p>
+        </li>)}</ul></>}
+      {explanation.factors.length > 0 && <>
+        <h4>{l('explain.factorsTitle')}</h4>
+        <dl>{explanation.factors.map(factor => <div key={factor.kind}>
+          <dt>{l(factor.kind === 'mechanical' ? 'compare.mechanical' : factor.kind === 'flooding' ? 'compare.flooding' : 'compare.staffing')}</dt>
+          <dd>{f.numeric(factor.value, 3)}
+            {factor.firstEventIndex !== null && <span className="lab-note"> {l('explain.firstEvent', {
+              event: factor.firstEventIndex, time: f.numeric(factor.firstEventTimeS, 2) })}</span>}
+          </dd></div>)}</dl></>}
+      {explanation.flows.length > 0 && <>
+        <h4>{l('explain.flowsTitle')}</h4>
+        <ul>{explanation.flows.map((flow, index) => <li className="lab-note" key={`${flow.id ?? flow.from}-${flow.to}-${index}`}>{l('explain.flowRow', {
+          from: flow.from, to: flow.to, transfer: f.numeric(flow.transferM3, 4), mass: f.numeric(flow.massFlowTS, 4), volume: f.numeric(flow.flowM3S, 4) })}</li>)}</ul></>}
+      {explanation.hydraulic.heelDeg !== null && <>
+        <h4>{l('explain.endpointTitle')}</h4>
+        <p className="lab-note">{l('compare.heel')} {f.numeric(explanation.hydraulic.heelDeg, 2)} · {l('compare.trim')} {f.numeric(explanation.hydraulic.trimDeg, 2)}</p></>}
+    </section>}
   </aside>;
 }
 
 export function ShipMetrics({ state, baseline }: { state: LabState | null; baseline: ShipState | null }) {
-  const ship=state?.ship;
-  const reference=ship ? baseline : null;
-  return <div className="lab-ship-metrics" aria-label="船体状态对照">
-    <div><span>新增水量</span><strong>{numeric(ship?.total_onboard_water_mass_t)} <small>t</small></strong>
-      <p className="lab-note">首解 {numeric(reference?.total_onboard_water_mass_t)} t</p></div>
-    <div><span>横倾</span><strong>{numeric(ship?.equilibrium.heel_deg,2)} <small>°</small></strong>
-      <p className="lab-note">首解 {numeric(reference?.equilibrium.heel_deg,2)}°</p></div>
-    <div><span>纵倾</span><strong>{numeric(ship?.equilibrium.trim_deg,2)} <small>°</small></strong>
-      <p className="lab-note">首解 {numeric(reference?.equilibrium.trim_deg,2)}°</p></div>
-    <div><span>质量残差</span><strong>{ship ? ship.mass_conservation_error_t.toExponential(1) : '未知'} <small>t</small></strong>
-      <p className="lab-note">核心接受状态</p></div>
+  const l = useLabCopy();
+  const f = useLabFormat();
+  const ship = state?.ship;
+  const reference = ship ? baseline : null;
+  return <div className="lab-ship-metrics" aria-label={l('ship.label')}>
+    <div><span>{l('ship.water')}</span><strong>{f.numeric(ship?.total_onboard_water_mass_t)} <small>t</small></strong>
+      <p className="lab-note">{l('ship.firstSolution')} {f.numeric(reference?.total_onboard_water_mass_t)} t</p></div>
+    <div><span>{l('ship.heel')}</span><strong>{f.numeric(ship?.equilibrium.heel_deg, 2)} <small>°</small></strong>
+      <p className="lab-note">{l('ship.firstSolution')} {f.numeric(reference?.equilibrium.heel_deg, 2)}°</p></div>
+    <div><span>{l('ship.trim')}</span><strong>{f.numeric(ship?.equilibrium.trim_deg, 2)} <small>°</small></strong>
+      <p className="lab-note">{l('ship.firstSolution')} {f.numeric(reference?.equilibrium.trim_deg, 2)}°</p></div>
+    <div><span>{l('ship.residual')}</span><strong>{ship ? ship.mass_conservation_error_t.toExponential(1) : l('value.unknown')} <small>t</small></strong>
+      <p className="lab-note">{l('ship.coreState')}</p></div>
   </div>;
 }
 
 export function CoreEvidence({ result }: { result: LabResult }) {
-  const stage=result.core_analysis.stages.flooding;
-  const native=stage.data;
-  const remaining=native?.remaining_gz as { rows?: Array<{ angle_deg: number; gz_m: number | null }>; converged?: boolean } | null;
-  const rows=remaining?.rows ?? [], segments:Array<Array<{angle_deg:number;gz_m:number}>>=[];
-  let segment:Array<{angle_deg:number;gz_m:number}>=[];
-  for(const row of rows){
-    if(Number.isFinite(row.angle_deg) && row.gz_m!=null && Number.isFinite(row.gz_m)){
-      if(!segment.length)segments.push(segment);segment.push({angle_deg:row.angle_deg,gz_m:row.gz_m});
-    }else segment=[];
+  const l = useLabCopy();
+  const f = useLabFormat();
+  const stage = result.core_analysis.stages.flooding;
+  const native = stage.data;
+  const remaining = native?.remaining_gz as { rows?: Array<{ angle_deg: number; gz_m: number | null }>; converged?: boolean } | null;
+  const rows = remaining?.rows ?? [], segments: Array<Array<{ angle_deg: number; gz_m: number }>> = [];
+  let segment: Array<{ angle_deg: number; gz_m: number }> = [];
+  for (const row of rows) {
+    if (Number.isFinite(row.angle_deg) && row.gz_m != null && Number.isFinite(row.gz_m)) {
+      if (!segment.length) segments.push(segment); segment.push({ angle_deg: row.angle_deg, gz_m: row.gz_m });
+    } else segment = [];
   }
-  const points=segments.flat(), angles=rows.map(p=>p.angle_deg).filter(Number.isFinite);
-  const xMin=angles.length ? Math.min(...angles) : 0, xMax=angles.length ? Math.max(...angles) : 0;
-  const yMin=Math.min(0,...points.map(p=>p.gz_m)), yMax=Math.max(.1,...points.map(p=>p.gz_m));
-  const x=(angle:number)=>xMax===xMin ? 180 : 20+(angle-xMin)/(xMax-xMin)*320;
-  const y=(gz:number)=>100-(gz-yMin)/(yMax-yMin)*80;
-  const xy=(p:{angle_deg:number;gz_m:number})=>`${x(p.angle_deg)},${y(p.gz_m)}`;
-  return <section className="lab-evidence" aria-label="计算依据">
-    <div><span className="lab-kicker">PLIMSOLL CORE / ACCEPTED STATE</span><h2>原始计算依据</h2>
-      <p>停止：<strong>{String(native?.stop_reason ?? stage.reason ?? stage.status)}</strong> · 接受终点 {numeric(result.simulated_duration_s,2)} s</p>
-      <p className="lab-note">数值完成与适用性分别保留。游戏损伤估算没有史实或医学认证。</p>
-      <details><summary>方法、来源与诊断</summary>
+  const points = segments.flat(), angles = rows.map(p => p.angle_deg).filter(Number.isFinite);
+  const xMin = angles.length ? Math.min(...angles) : 0, xMax = angles.length ? Math.max(...angles) : 0;
+  const yMin = Math.min(0, ...points.map(p => p.gz_m)), yMax = Math.max(.1, ...points.map(p => p.gz_m));
+  const x = (angle: number) => xMax === xMin ? 180 : 20 + (angle - xMin) / (xMax - xMin) * 320;
+  const y = (gz: number) => 100 - (gz - yMin) / (yMax - yMin) * 80;
+  const xy = (p: { angle_deg: number; gz_m: number }) => `${x(p.angle_deg)},${y(p.gz_m)}`;
+  return <section className="lab-evidence" aria-label={l('evidence.label')}>
+    <div><span className="lab-kicker">{l('evidence.kicker')}</span><h2>{l('evidence.title')}</h2>
+      {/* The stop reason is the core's own saved token, printed verbatim; the
+          sentence around it is what this interface owns. */}
+      <p>{l('evidence.stop', { reason: String(native?.stop_reason ?? stage.reason ?? stage.status), duration: f.numeric(result.simulated_duration_s, 2) })}</p>
+      <p className="lab-note">{l('evidence.note')}</p>
+      <details><summary>{l('evidence.details')}</summary>
         <p>{result.assumptions.join(' · ')}</p>
         <pre>{JSON.stringify({ method_versions: result.method_versions, validity: result.validity, diagnostics: result.diagnostics }, null, 2)}</pre>
       </details></div>
-    <div><span className="lab-kicker">FINAL ACCEPTED STATE / REMAINING GZ</span>
-      {points.length ? <><svg viewBox="0 0 360 125" role="img" aria-label="最终接受状态的剩余稳性曲线">
+    <div><span className="lab-kicker">{l('evidence.remainingKicker')}</span>
+      {points.length ? <><svg viewBox="0 0 360 125" role="img" aria-label={l('evidence.remainingLabel')}>
         <path d={`M20 15V100H340 M20 ${y(0)}H340`} fill="none" stroke="currentColor" opacity=".3" />
-        {xMin<=0 && xMax>=0 && <path d={`M${x(0)} 15V100`} fill="none" stroke="currentColor" opacity=".3" />}
-        {segments.map((part,i)=><polyline key={i} points={part.map(xy).join(' ')} fill="none" stroke="var(--accent)" strokeWidth="2" />)}
-        {points.map(p=><circle key={p.angle_deg} cx={x(p.angle_deg)} cy={y(p.gz_m)} r="3" fill="var(--accent)" />)}
+        {xMin <= 0 && xMax >= 0 && <path d={`M${x(0)} 15V100`} fill="none" stroke="currentColor" opacity=".3" />}
+        {segments.map((part, i) => <polyline key={i} points={part.map(xy).join(' ')} fill="none" stroke="var(--accent)" strokeWidth="2" />)}
+        {points.map(p => <circle key={p.angle_deg} cx={x(p.angle_deg)} cy={y(p.gz_m)} r="3" fill="var(--accent)" />)}
         <text x="20" y="120">{xMin}°</text><text x="340" y="120" textAnchor="end">{xMax}°</text><text x="25" y="15">GZ / m</text></svg>
-        <p className="lab-note">仅最终接受状态的原始采样；不推断沉没或安全。</p></> : <p>剩余 GZ 暂不可用</p>}
+        <p className="lab-note">{l('evidence.remainingNote')}</p></> : <p>{l('evidence.remainingUnavailable')}</p>}
     </div>
   </section>;
 }

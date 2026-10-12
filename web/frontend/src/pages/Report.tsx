@@ -1,3 +1,4 @@
+import { useCopyMessage } from '../i18n/useCopyMessage';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
@@ -9,13 +10,20 @@ import { ReportReadings } from '../components/ReportReadings';
 import { requestedStages } from '../components/resultReading';
 import { SourceInspector } from '../components/SourceInspector';
 import { StageIndex } from '../components/StageIndex';
-import { StageStatus, STAGE_LABELS } from '../components/StageStatus';
+import { StageStatus, stageLabel, dataLabel } from '../components/StageStatus';
+import { compareReports, validReportIdentity } from '../components/reportComparison';
 import { UnitProvider, useUnits } from '../components/UnitProvider';
 import { useReportPrint } from '../components/useReportPrint';
 import { CHOICES, classifyKey, DIMENSION_KEYS, type DisplayPreferences } from '../components/units';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import type { AnalysisResult, RunView, StageEnvelope } from '../types';
 
-const RESULT_LABELS = { completed: '计算完成', partial: '部分完成', canceled: '已取消' } as const;
+/** The whole workspace lookup, for the plain functions this page also calls. */
+type Copy = (key: WorkspaceKey, params?: any) => string;
+
+const RESULT_KEY: Record<AnalysisResult['status'], WorkspaceKey> = {
+  completed: 'report.status.completed', partial: 'report.status.partial', canceled: 'report.status.canceled',
+};
 
 type Diagnostic = StageEnvelope['diagnostics'][number];
 
@@ -80,79 +88,52 @@ function rootFindings(result: AnalysisResult, stages: Array<{ name: string; stag
   return [...found.values()];
 }
 
-/** A diagnostic line: the message reads once, and its evidence stays beside it. */
-function Finding({ item, fallback, guidance }: { item: Diagnostic; fallback: string; guidance: GuidanceContext | null }) {
-  const message = item.message ?? item.code ?? fallback;
+/**
+ * One finding line: the message reads once, and its evidence stays beside it.
+ *
+ * The message is the core's own finding text and is shown as saved; only the
+ * frames around it — which stage it belongs to and which source path it came
+ * from — are this page's own words.
+ */
+function Finding({ item, fallback, guidance }: { item: Diagnostic; fallback: WorkspaceKey; guidance: GuidanceContext | null }) {
+  const w = useWorkspaceCopy();
+  const message = item.message ?? item.code ?? w(fallback);
   // A code is evidence too, so it is kept rather than dropped whenever a message
   // happens to exist. Identical text is printed once, not twice.
   const code = item.code && item.code !== item.message ? item.code : null;
   return <p><strong>{message}</strong>
     {code && <code className="report-diagnostic-code">{code}</code>}
-    {item.stage && <span className="report-diagnostic-stage">阶段 {STAGE_LABELS[item.stage] ?? item.stage}</span>}
+    {item.stage && <span className="report-diagnostic-stage">{w('report.diagnostics.stage', { name: stageLabel(w, item.stage) })}</span>}
     {item.path && <code>{item.path}</code>}
-    {item.source_path && item.source_path !== item.path && <small>来源 {item.source_path}</small>}
+    {item.source_path && item.source_path !== item.path && <small>{w('report.diagnostics.source', { path: item.source_path })}</small>}
     <DiagnosticAction diagnostic={item} context={guidance} project={guidance?.snapshot ?? null} />
   </p>;
 }
 
-function triState(value: boolean | null | undefined): string {
-  return value === true ? '是 · 已声明' : value === false ? '否' : '未知 · 无结论';
+function triState(w: Copy, value: boolean | null | undefined): string {
+  return value === true ? w('report.tri.yes') : value === false ? w('report.tri.no') : w('report.tri.unknown');
 }
 
-function compareCompatible(left: AnalysisResult, right: AnalysisResult): boolean {
-  return left.condition_id === right.condition_id
-    && JSON.stringify(left.units) === JSON.stringify(right.units)
-    && JSON.stringify(left.method_versions) === JSON.stringify(right.method_versions)
-    && Object.entries(left.stages).every(([name, stage]) => {
-      const other = right.stages[name];
-      return !other || stage.status !== 'completed' || other.status !== 'completed'
-        || JSON.stringify(stage.method_versions) === JSON.stringify(other.method_versions);
-    });
-}
-
-function commonNumbers(left: AnalysisResult, right: AnalysisResult) {
-  // Each row keeps its original key: the displayed name alone would lose whether
-  // a value is an area, a volume, a mass or something that must stay canonical.
-  const rows: Array<{ name: string; key: string; left: number; right: number }> = [];
-  for (const [name, stage] of Object.entries(left.stages)) {
-    const counterpart = right.stages[name];
-    // Only a stage that was asked for and finished is a result. An unrequested
-    // stage may still hold numbers, and those are not comparable values.
-    if (stage.requested !== true || counterpart?.requested !== true) continue;
-    if (stage.status !== 'completed' || counterpart?.status !== 'completed' || !stage.data || !counterpart.data) continue;
-    for (const [key, value] of Object.entries(stage.data)) {
-      const other = counterpart.data[key];
-      // Only keys that are unambiguous quantities are compared: a force, a time,
-      // a density or a rate would otherwise be shown as a length or a speed. A
-      // number that is not finite on both sides is not a value to subtract.
-      if (typeof value === 'number' && typeof other === 'number'
-        && Number.isFinite(value) && Number.isFinite(other) && classifyKey(key)) {
-        rows.push({ name: `${STAGE_LABELS[name] ?? name} / ${key}`, key, left: value, right: other });
-      }
-      if (rows.length >= 8) return rows;
-    }
-  }
-  return rows;
-}
-
-export function Report({ result, runId, revision, compareResult, compareError, onBack }: {
+export function Report({ result, runId, revision, compareResult, compareError, run, compareRun, onBack }: {
   result: AnalysisResult; runId?: string; revision?: number; compareResult?: AnalysisResult;
-  compareError?: string; onBack?: () => void;
+  compareError?: string; run?: RunView; compareRun?: RunView; onBack?: () => void;
 }) {
   // A report is immutable: this local choice only re-wraps the page content in a
   // display provider. It never edits the stored snapshot, fingerprint or export.
   const [override, setOverride] = useState<Partial<DisplayPreferences>>({});
   return <UnitProvider preferences={{ ...(result.input_snapshot?.display_preferences as object ?? {}), ...override }}>
     <ReportBody result={result} runId={runId} revision={revision} compareResult={compareResult}
-      compareError={compareError} onBack={onBack} override={override} onOverrideChange={setOverride} />
+      compareError={compareError} run={run} compareRun={compareRun} onBack={onBack} override={override} onOverrideChange={setOverride} />
   </UnitProvider>;
 }
 
-function ReportBody({ result, runId, revision, compareResult, compareError, onBack, override, onOverrideChange }: {
+function ReportBody({ result, runId, revision, compareResult, compareError, run, compareRun, onBack, override, onOverrideChange }: {
   result: AnalysisResult; runId?: string; revision?: number; compareResult?: AnalysisResult; compareError?: string;
+  run?: RunView; compareRun?: RunView;
   onBack?: () => void; override: Partial<DisplayPreferences>; onOverrideChange: (next: Partial<DisplayPreferences>) => void;
 }) {
   const units = useUnits();
+  const w = useWorkspaceCopy();
   const host = useRef<HTMLDivElement>(null);
   // The provenance appendix is mounted when the reader opens it, or here for a
   // print. Once mounted it stays: it is read from one saved result, and the
@@ -161,8 +142,9 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
   const mountAudit = useCallback(() => setAuditMounted(true), []);
   useReportPrint(host, { mount: () => flushSync(() => setAuditMounted(true)) });
   const stages = useMemo(() => requestedStages(result), [result]);
-  const compatible = !!compareResult && compareCompatible(result, compareResult);
-  const compared = compareResult && compatible ? commonNumbers(result, compareResult) : [];
+  // The comparison is derived on every render and writes nothing back: both
+  // snapshots, their fingerprints and the exports stay exactly as saved.
+  const comparison = compareResult ? compareReports({ result, revision, run }, { result: compareResult, run: compareRun }, w) : null;
   const snapshot = result.input_snapshot;
   const shipName = snapshot?.name || result.project_id;
   const condition = snapshot?.loading_conditions?.find(item => item.id === result.condition_id);
@@ -181,39 +163,53 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
 
   return <div className="report-page page-pad" ref={host}>
     <div className="report-actions no-print">
-      {onBack && <button className="text-button" data-audio="manual" onClick={onBack}>← 返回运行</button>}
+      {onBack && <button className="text-button" data-audio="manual" onClick={onBack}>{w('report.back')}</button>}
       <div className="report-action-group">
-        {runId && <><a className="button button--secondary" href={api.exportUrl(runId, 'json')} download>导出 JSON</a><a className="button button--secondary" href={api.exportUrl(runId, 'csv')} download>导出 CSV</a></>}
-        <button className="button button--secondary" onClick={() => window.print()}>打印报告</button>
+        {runId && <><a className="button button--secondary" href={api.exportUrl(runId, 'json')} download>{w('report.exportJson')}</a><a className="button button--secondary" href={api.exportUrl(runId, 'csv')} download>{w('report.exportCsv')}</a></>}
+        <button className="button button--secondary" onClick={() => window.print()}>{w('report.print')}</button>
       </div>
     </div>
 
     <header className="report-cover report-identity">
-      <span className="section-kicker">REPORT / {runId ? `运行 ${runId.slice(0, 8).toUpperCase()}` : '独立预览'}</span>
+      <span className="section-kicker">REPORT / {runId ? w('report.kickerRun', { id: runId.slice(0, 8).toUpperCase() }) : w('report.kickerPreview')}</span>
       <h1>{shipName}</h1>
-      <p>工况 {condition?.label || result.condition_id}{condition?.label && condition.label !== result.condition_id ? ` · ${result.condition_id}` : ''}
-        {savedRevision ? ` · 保存修订 ${savedRevision}` : ''} · 运行 {runId ?? '预览'}</p>
+      <p>{w('report.condition', { label: condition?.label || result.condition_id })}
+        {condition?.label && condition.label !== result.condition_id ? ` · ${result.condition_id}` : ''}
+        {savedRevision ? ` · ${w('report.revision', { revision: savedRevision })}` : ''} · {runId ? w('report.runLabel', { id: runId }) : w('report.previewLabel')}</p>
       <div className="report-status-row">
-        <span className={`stage-pill stage-pill--${result.status}`}>{RESULT_LABELS[result.status]}</span>
-        <span>所请求阶段 {stages.length} 个</span>
-        <span>完整性：{result.validity.complete ? '所请求阶段已完成' : '存在未完成阶段'}</span>
-        <span>收敛：{triState(result.validity.converged)}</span>
-        <span>模型适用性：{triState(result.validity.model_applicable)}</span>
-        <span>史实验证：{triState(result.validity.historical_validated)}</span>
+        <span className={`stage-pill stage-pill--${result.status}`}>{w(RESULT_KEY[result.status])}</span>
+        <span>{w('report.stagesRequested', { count: stages.length })}</span>
+        <span>{w('report.fact', { label: w('report.complete.label') })}{result.validity.complete ? w('report.complete.all') : w('report.complete.some')}</span>
+        <span>{w('report.fact', { label: w('report.converged') })}{triState(w, result.validity.converged)}</span>
+        <span>{w('report.fact', { label: w('report.applicable') })}{triState(w, result.validity.model_applicable)}</span>
+        <span>{w('report.fact', { label: w('report.historical') })}{triState(w, result.validity.historical_validated)}</span>
       </div>
-      <p className="report-caveat">计算完成只表示模型执行情况，不代表史实、设计或适航认证。</p>
+      <p className="report-caveat">{w('report.caveat')}</p>
+      {/* Reading order for a report nobody has read before: status, then
+          diagnostics, then the identity the numbers belong to, then the values.
+          Screen-only, so it never joins the printed record. */}
+      <details className="first-use no-print">
+        <summary>{w('report.firstUse.summary')}</summary>
+        <ol className="first-use-steps">
+          <li><strong>{w('report.firstUse.1.title')}</strong>{w('report.firstUse.1.text')}</li>
+          <li><strong>{w('report.firstUse.2.title')}</strong>{w('report.firstUse.2.text')}</li>
+          <li><strong>{w('report.firstUse.3.title')}</strong>{w('report.firstUse.3.text')}</li>
+          <li><strong>{w('report.firstUse.4.title')}</strong>{w('report.firstUse.4.text')}</li>
+          <li><strong>{w('report.firstUse.5.title')}</strong>{w('report.firstUse.5.text')}</li>
+        </ol>
+      </details>
       <ReportUnitControls override={override} onChange={onOverrideChange} />
     </header>
 
     <ReportReadings result={result} />
 
-    {(rootSevere.length > 0 || rootOrdinary.length > 0) && <section className="report-root-diagnostics" aria-label="整体诊断">
+    {(rootSevere.length > 0 || rootOrdinary.length > 0) && <section className="report-root-diagnostics" aria-label={w('report.diagnostics.label')}>
       {rootSevere.length > 0 && <div className="stage-diagnostics-open" role="alert">
-        <strong>整体严重诊断 · {rootSevere.length} 条</strong>
-        {rootSevere.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="严重诊断" guidance={guidance} />)}
+        <strong>{w('report.diagnostics.severe', { count: rootSevere.length })}</strong>
+        {rootSevere.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="report.diagnostics.severeFallback" guidance={guidance} />)}
       </div>}
-      {rootOrdinary.length > 0 && <details className="report-root-diagnostics-fold"><summary>整体诊断与缺项 · {rootOrdinary.length} 条</summary>
-        {rootOrdinary.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="诊断" guidance={guidance} />)}
+      {rootOrdinary.length > 0 && <details className="report-root-diagnostics-fold"><summary>{w('report.diagnostics.ordinary', { count: rootOrdinary.length })}</summary>
+        {rootOrdinary.map((item, index) => <Finding key={`${item.code ?? ''}-${index}`} item={item} fallback="report.diagnostics.fallback" guidance={guidance} />)}
       </details>}
     </section>}
 
@@ -222,31 +218,41 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
       <StageIndex page="reports" runId={runId} stages={stages} />
       <main className="report-main">
         <section className="report-section">
-          <div className="section-heading"><h2>本次计算</h2><span>{stages.length} 个已请求阶段</span></div>
-          <p className="report-intro">报告直接读取保存的不可变运行结果。灰色或警示状态不是零值，也不是“安全”结论。显示单位只影响本页呈现，导出与指纹仍为规范单位。</p>
+          <div className="section-heading"><h2>{w('report.section.title')}</h2><span>{w('report.section.count', { count: stages.length })}</span></div>
+          <p className="report-intro">{w('report.section.intro')}</p>
           <div className="report-stage-list">{stages.map(({ name, stage }) =>
             <StageStatus key={name} name={name} stage={stage} guidance={guidance} />)}</div>
-          {stages.length === 0 && <p>本次结果没有请求阶段。</p>}
+          {stages.length === 0 && <p>{w('report.section.empty')}</p>}
         </section>
 
-        {(compareResult || compareError) && <section className="report-section comparison-section">
-          <div className="section-heading"><h2>两次运行对照</h2><span>先对齐口径，再比较值</span></div>
+        {(comparison || compareError) && <section className="report-section comparison-section">
+          <div className="section-heading"><h2>{w('report.compare.title')}</h2><span>{w('report.compare.note')}</span></div>
           {compareError
             ? <div className="notice notice--error" role="alert">{compareError}</div>
-            : <>
+            : comparison && <>
               <div className="comparison-meta">
-                <div><strong>当前运行</strong><span>工况 {result.condition_id}</span><span>单位 {JSON.stringify(result.units)}</span><span>方法 {JSON.stringify(result.method_versions)}</span><code>{result.request_fingerprint}</code></div>
-                <div><strong>对照运行</strong><span>工况 {compareResult!.condition_id}</span><span>单位 {JSON.stringify(compareResult!.units)}</span><span>方法 {JSON.stringify(compareResult!.method_versions)}</span><code>{compareResult!.request_fingerprint}</code></div>
+                <div><strong>{w('report.compare.current')}</strong><span>{w('workbench.save.revision', { revision: comparison.current.revision ?? w('units.unknown') })}</span>{comparison.current.runId && <span>{w('overview.result.run',{id:comparison.current.runId})}</span>}<span>{w('report.compare.condition', { id: comparison.current.condition })}</span><span>{w('report.compare.units', { value: JSON.stringify(result.units) })}</span><span>{w('report.compare.method', { value: JSON.stringify(result.method_versions) })}</span><code>{comparison.current.fingerprint}</code></div>
+                <div><strong>{w('report.compare.other')}</strong>{comparison.comparison.runId && <span>{w('overview.result.run',{id:comparison.comparison.runId})}</span>}<span>{w('workbench.save.revision', { revision: comparison.comparison.revision ?? w('units.unknown') })}</span><span>{w('report.compare.condition', { id: comparison.comparison.condition })}</span><span>{w('report.compare.units', { value: JSON.stringify(compareResult!.units) })}</span><span>{w('report.compare.method', { value: JSON.stringify(compareResult!.method_versions) })}</span><code>{comparison.comparison.fingerprint}</code></div>
               </div>
-              {!compatible ? <p className="comparison-warning">不可直接比较：工况、单位或方法版本不同。</p>
-                : compared.length === 0 ? <p className="comparison-warning">没有两次均有效的同名数值，可查看各自阶段结果。</p>
-                  : <table className="comparison-table"><thead><tr><th>指标</th><th>当前</th><th>对照</th><th>差值</th></tr></thead><tbody>{compared.map(row => <tr key={row.name}>
-                    <th>{row.name}</th><td>{compareCell(units, row, row.left)}</td><td>{compareCell(units, row, row.right)}</td><td>{compareCell(units, row, row.right - row.left)}</td></tr>)}</tbody></table>}
+              {/* A refusal that does not say what differs leaves the reader hunting
+                  for it, so every fact that breaks the shared basis is named. */}
+              {comparison.inputChanges.length > 0 && <ul className="comparison-changes">{comparison.inputChanges.map(change => <li key={change}>{change}</li>)}</ul>}
+              {comparison.warnings.map(warning => <p className="comparison-warning" key={warning}>{warning}</p>)}
+              {comparison.compatible && comparison.groups.length > 0 && <table className="comparison-table" tabIndex={0} aria-label={w('report.compare.title')}>
+                <thead><tr><th>{w('report.compare.metric')}</th><th>{w('report.compare.currentCol')}</th><th>{w('report.compare.otherCol')}</th><th title={w('report.compare.diffOrder')}>{w('report.compare.diffCol')}</th></tr></thead>
+                <tbody>{comparison.groups.flatMap(group => group.cells.map(cell => <tr key={cell.path}>
+                  <th>{group.label} / {dataLabel(w, cell.key)}{cell.point === undefined ? '' : ` · ${cell.point}${group.stage === 'gz' ? '°' : ' kn'}`}</th>
+                  {/* A cell with no number says why: unknown, not run, or a quantity
+                      whose unit this interface cannot resolve. Nothing is coerced. */}
+                  <td>{cell.current === null ? w(`report.compare.state.${cell.state}` as WorkspaceKey) : compareCell(units, cell, cell.current)}</td>
+                  <td>{cell.comparison === null ? w(`report.compare.state.${cell.state}` as WorkspaceKey) : compareCell(units, cell, cell.comparison)}</td>
+                  <td>{cell.delta === null ? w(cell.state === 'known' ? 'report.compare.noDelta' : `report.compare.state.${cell.state}` as WorkspaceKey) : compareCell(units, cell, cell.delta)}</td>
+                </tr>))}</tbody></table>}
             </>}
         </section>}
 
         <SourceInspector result={result} deferred={auditMounted} onOpen={mountAudit} />
-        <footer className="report-footer">Plimsoll · 计算结果与来源保持同一请求指纹 · 本报告不替代史实或适航认证</footer>
+        <footer className="report-footer">{w('report.footer')}</footer>
       </main>
     </div>
   </div>;
@@ -254,9 +260,8 @@ function ReportBody({ result, runId, revision, compareResult, compareError, onBa
 
 // Both sides and the difference use the row's own key: an area stays an area, a
 // volume stays a volume, and a stored kilogram mass is not read as tonnes.
-function compareCell(units: ReturnType<typeof useUnits>, row: { key: string }, value: number): string {
-  const kind = classifyKey(row.key);
-  return kind ? units.text(value, kind.dimension, kind.storedUnit) : `${value}`;
+function compareCell(units: ReturnType<typeof useUnits>, row: { key: string; dimension?: import('../components/units').Dimension; storedUnit?: string; canonicalUnit?: string }, value: number): string {
+  return row.dimension ? units.text(value, row.dimension, row.storedUnit) : `${value}${row.canonicalUnit ? ` ${row.canonicalUnit}` : ''}`;
 }
 
 // Report-local display controls. They change only what this page prints: the
@@ -265,11 +270,12 @@ function ReportUnitControls({ override, onChange }: {
   override: Partial<DisplayPreferences>; onChange: (next: Partial<DisplayPreferences>) => void;
 }) {
   const units = useUnits();
+  const w = useWorkspaceCopy();
   return <div className="report-units no-print">
-    <span className="section-kicker">DISPLAY / 本页显示单位</span>
+    <span className="section-kicker">{w('report.units.kicker')}</span>
     {DIMENSION_KEYS.map(key => <label className="field-label" key={key}>
-      {{ length: '长度', mass: '质量', power: '功率', speed: '航速', angle: '角度' }[key]}
-      <select aria-label={`报告${key}显示单位`} value={String(override[key] ?? units.prefs[key])}
+      {{ length: w('report.units.length'), mass: w('report.units.mass'), power: w('report.units.power'), speed: w('report.units.speed'), angle: w('report.units.angle') }[key]}
+      <select aria-label={w('report.units.select', { dimension: w(`report.units.${key}` as WorkspaceKey) })} value={String(override[key] ?? units.prefs[key])}
         onChange={event => {
           const value = event.target.value as DisplayPreferences[typeof key];
           const next: Record<string, string> = { ...override };
@@ -279,18 +285,21 @@ function ReportUnitControls({ override, onChange }: {
         {CHOICES[key].map(choice => <option key={choice.value} value={choice.value}>{choice.label}</option>)}
       </select>
     </label>)}
-    <small>规范单位（m / t / kW / kn / deg）与导出内容不变；本选择只影响本页显示。</small>
+    <small>{w('report.units.note')}</small>
   </div>;
 }
 
 export function ReportPage({ runId, onBack }: { runId: string; onBack: () => void }) {
+  const w = useWorkspaceCopy();
   const [run, setRun] = useState<RunView | null>(null);
   const [history, setHistory] = useState<RunView[]>([]);
   const [compareId, setCompareId] = useState('');
-  const [compareResult, setCompareResult] = useState<AnalysisResult | undefined>();
-  const [compareError, setCompareError] = useState('');
+  const [compareRun, setCompareRun] = useState<RunView | undefined>();
+  const compareResult = compareRun?.result ?? undefined;
+  const [historyError, setHistoryError] = useCopyMessage();
+  const [compareError, setCompareError] = useCopyMessage();
   const [compareBusy, setCompareBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useCopyMessage();
   const [attempt, setAttempt] = useState(0);
   // Late answers are rejected by ticket: a comparison that arrives after the
   // reader changed or cleared the selection is not the one they asked for.
@@ -304,65 +313,68 @@ export function ReportPage({ runId, onBack }: { runId: string; onBack: () => voi
     // A different run starts from nothing: its own result, its own history and
     // its own comparison, with no error or unit choice carried over.
     setRun(null);
-    setHistory([]);
+    setHistory([]); setHistoryError('');
     setCompareId('');
-    setCompareResult(undefined);
+    setCompareRun(undefined);
     setCompareError('');
     setCompareBusy(false);
     setError('');
     api.getRun(runId).then(current => {
       if (!active || loading.current !== ticket) return;
+      if (current.id !== runId || (current.result && !validReportIdentity({result:current.result,run:current}))) { setError(copy=>copy('report.compare.identityMismatch')); return; }
       setRun(current);
       void api.listRuns(current.project_id).then(items => {
         if (!active || loading.current !== ticket) return;
         setHistory(items.filter(item => item.id !== runId && (item.status === 'completed' || item.status === 'partial')));
-      }).catch(() => { /* Comparison list is optional; the stored report remains available. */ });
-    }).catch(cause => { if (active && loading.current === ticket) setError(cause instanceof Error ? cause.message : '无法读取报告'); });
+      }).catch(cause => { if (active && loading.current === ticket) setHistoryError(w => cause instanceof Error ? cause.message : w('report.compare.historyFailed')); });
+    }).catch(cause => { if (active && loading.current === ticket) setError(w => cause instanceof Error ? cause.message : w('report.readFailedGeneric')); });
     return () => { active = false; loading.current += 1; comparison.current += 1; };
   }, [runId, attempt]);
 
   async function selectComparison(id: string) {
     const ticket = ++comparison.current;
     setCompareId(id);
-    setCompareResult(undefined);
+    setCompareRun(undefined);
     setCompareError('');
     if (!id) { setCompareBusy(false); return; }
     setCompareBusy(true);
     try {
       const other = await api.getRun(id);
       if (comparison.current !== ticket) return;
-      if (!other.result) throw new Error('对照运行尚无已保存结果');
-      setCompareResult(other.result);
+      if (other.id !== id || other.project_id !== run?.project_id) { setCompareError(w => w('report.compare.identityMismatch')); return; }
+      if (!other.result) { setCompareError(w => w('report.compare.noResult')); outcome('hold'); return; }
+      setCompareRun(other);
     } catch (cause) {
       if (comparison.current !== ticket) return;
       outcome('hold');
-      setCompareError(cause instanceof Error ? cause.message : '无法读取对照运行');
+      setCompareError(w => cause instanceof Error ? cause.message : w('report.compare.unreadable'));
     } finally {
       if (comparison.current === ticket) setCompareBusy(false);
     }
   }
 
   if (error) return <div className="page-pad">
-    <ReadFailure title={`无法读取报告 ${runId}`} detail={error} retryLabel="重新读取报告"
-      onRetry={() => { setError(''); setAttempt(current => current + 1); }} onBack={onBack} backLabel="← 返回运行" /></div>;
-  if (!run) return <div className="page-pad"><ReadPending scope="report" object="计算报告" /></div>;
-  if (!run.result) return <div className="page-pad"><h1>暂无计算报告</h1><p>此运行尚未保存结果，状态：{run.status}。</p><button className="text-button" data-audio="manual" onClick={onBack}>← 返回运行</button></div>;
+    <ReadFailure title={w('report.readFailed', { id: runId })} detail={error} retryLabel={w('report.readFailedRetry')}
+      onRetry={() => { setError(''); setAttempt(current => current + 1); }} onBack={onBack} backLabel={w('report.back')} /></div>;
+  if (!run) return <div className="page-pad"><ReadPending scope="report" object={w('report.pending.object')} /></div>;
+  if (!run.result) return <div className="page-pad"><h1>{w('report.empty.title')}</h1><p>{w('report.empty.body', { status: run.status })}</p><button className="text-button" data-audio="manual" onClick={onBack}>{w('report.back')}</button></div>;
   // A stored report is immutable: display units come from its own input snapshot.
   const preferences = run.result.input_snapshot?.display_preferences;
   return <>
+    {historyError && <div className="notice notice--error" role="alert">{w('report.compare.historyFailed')} {historyError}<button className="text-button" onClick={() => { setHistoryError(''); setAttempt(value => value + 1); }}>{w('workbench.read.refresh')}</button></div>}
     <div className="report-compare-control no-print">
-      <label htmlFor="compare-run">对照另一运行</label>
+      <label htmlFor="compare-run">{w('report.compare.control')}</label>
       <select id="compare-run" value={compareId} onChange={event => { void selectComparison(event.target.value); }}>
-        <option value="">暂不对照</option>
-        {history.map(item => <option key={item.id} value={item.id}>修订 {item.revision} · {item.condition_id} · {item.id.slice(0, 8)}</option>)}
+        <option value="">{w('report.compare.noneSelected')}</option>
+        {history.map(item => <option key={item.id} value={item.id}>{w('report.compare.revisionOption', { revision: item.revision, condition: item.condition_id, id: item.id.slice(0, 8) })}</option>)}
       </select>
-      {compareBusy && <small className="report-compare-busy">正在读取对照运行…</small>}
+      {compareBusy && <small className="report-compare-busy">{w('report.compare.busy')}</small>}
     </div>
     <UnitProvider preferences={preferences}>
       {/* The page's own unit choice belongs to one saved result. Keying by its
           identity resets it for a different run, even when the next run loads so
           quickly that nothing ever unmounts. */}
       <Report key={`${runId}:${run.result.request_fingerprint}`} result={run.result} revision={run.revision} runId={runId}
-        compareResult={compareResult} compareError={compareError} onBack={onBack} />
+        compareResult={compareResult} compareError={compareError} run={run} compareRun={compareRun} onBack={onBack} />
     </UnitProvider></>;
 }

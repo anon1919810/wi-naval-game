@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { useLanguage } from './LanguageProvider';
 import {
   measureSections,
   RULER_MINOR_MARKS,
@@ -45,6 +46,7 @@ interface Props {
 }
 
 export function ReadingRuler({ pageRef, reading, current }: Props) {
+  const { language, t } = useLanguage();
   const [sections, setSections] = useState<readonly ReadingSection[]>([]);
   const [stops, setStops] = useState<readonly RulerStop[]>([]);
   const [hover, setHover] = useState<number | null>(null);
@@ -82,6 +84,19 @@ export function ReadingRuler({ pageRef, reading, current }: Props) {
     return () => { active = false; observer?.disconnect(); window.removeEventListener('resize', measure); };
   }, [measure, pageRef]);
 
+  /**
+   * A language switch re-flows the whole page: the section labels the marks are
+   * named from change, and Chinese and English set the same prose at different
+   * heights, so every section's top edge moves.
+   *
+   * The marks must therefore be re-measured and re-named. The reader's scroll
+   * position is deliberately not touched: `measure()` reads geometry and
+   * recomputes the current section from it, and `reading.refresh()` settles
+   * silently — it never scrolls, and it never arms the voice, so a switch mid
+   * page says nothing and moves nothing.
+   */
+  useLayoutEffect(() => { measure(); }, [language, measure]);
+
   /** Scroll to a section and hand its heading the keyboard. */
   const go = useCallback((index: number) => {
     const node = nodes.current[index];
@@ -94,8 +109,8 @@ export function ReadingRuler({ pageRef, reading, current }: Props) {
 
   if (!sections.length) return null;
 
-  return <div className="ff-ruler" role="navigation" aria-label="Reading position" data-ff-ruler={current}>
-    <p className="ff-ruler-label">{current >= 0 && sections[current] ? sectionLabel(current, sections[current].label) : 'READING'}</p>
+  return <div className="ff-ruler" role="navigation" aria-label={t('ruler.label')} data-ff-ruler={current}>
+    <p className="ff-ruler-label">{current >= 0 && sections[current] ? sectionLabel(current, sections[current].label) : t('ruler.reading')}</p>
     <div className="ff-ruler-track">
       <span className="ff-ruler-line" aria-hidden="true" />
       {stops.map((stop, position) => {

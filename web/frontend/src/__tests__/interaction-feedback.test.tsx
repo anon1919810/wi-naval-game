@@ -12,9 +12,9 @@ describe('interaction feedback policy', () => {
   it('shares the same persistent mute between public and workspace controls', () => {
     render(<><SoundToggle /><SoundToggle workspace /></>);
     fireEvent.click(screen.getByRole('button', { name: 'Sound' }));
-    expect(screen.getByRole('button', { name: '交互音效' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Interaction sound' })).toHaveAttribute('aria-pressed', 'false');
     expect(localStorage.getItem(SOUND_KEY)).toBe('muted');
-    fireEvent.click(screen.getByRole('button', { name: '交互音效' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Interaction sound' }));
     expect(screen.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'true');
     expect(localStorage.getItem(SOUND_KEY)).toBeNull();
   });

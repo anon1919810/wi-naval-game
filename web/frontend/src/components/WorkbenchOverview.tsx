@@ -3,8 +3,12 @@ import { CalculationReadiness } from './CalculationReadiness';
 import { declaredSource } from './InputTrace';
 import { number, object, type Raw } from './formModel';
 import type { DiagnosticLocation } from './diagnosticGuidance';
-import { STAGE_LABELS, STAGE_ORDER, STATUS_LABELS } from './StageStatus';
+import { stageLabel, STAGE_ORDER } from './StageStatus';
 import { StatusBadge } from './StatusBadge';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
+import { useLanguage, type SiteLanguage } from '../portfolio/LanguageProvider';
+import { workspaceCopy } from '../i18n/workspace';
+import { useDateText, useMomentText } from '../i18n/format';
 import type { Dimension } from './units';
 import type { ProjectDocument, RunView, StageEnvelope } from '../types';
 
@@ -31,11 +35,11 @@ export interface OverviewReading {
 }
 
 // Canonical saved keys only; nothing is derived from the inputs here.
-const RESULT_FIELDS: Array<{ key: string; stage: string; label: string; dimension: Dimension; storedUnit: string; paths: string[] }> = [
-  { key: 'loading.total_mass_t', stage: 'loading', label: '所选工况总质量', dimension: 'mass', storedUnit: 't', paths: ['values.total_mass_t'] },
-  { key: 'equilibrium.waterline_above_keel_m', stage: 'equilibrium', label: '龙骨基准水线高度', dimension: 'length', storedUnit: 'm', paths: ['waterline_above_keel_m'] },
-  { key: 'equilibrium.heel_deg', stage: 'equilibrium', label: '横倾角', dimension: 'angle', storedUnit: 'deg', paths: ['heel_deg', 'values.heel_deg'] },
-  { key: 'hydrostatics.gm_t_m', stage: 'hydrostatics', label: '初稳性高 GM', dimension: 'length', storedUnit: 'm', paths: ['values.gm_t_m'] },
+const RESULT_FIELDS: Array<{ key: string; stage: string; label: WorkspaceKey; dimension: Dimension; storedUnit: string; paths: string[] }> = [
+  { key: 'loading.total_mass_t', stage: 'loading', label: 'overview.reading.mass', dimension: 'mass', storedUnit: 't', paths: ['values.total_mass_t'] },
+  { key: 'equilibrium.waterline_above_keel_m', stage: 'equilibrium', label: 'overview.reading.waterline', dimension: 'length', storedUnit: 'm', paths: ['waterline_above_keel_m'] },
+  { key: 'equilibrium.heel_deg', stage: 'equilibrium', label: 'overview.reading.heel', dimension: 'angle', storedUnit: 'deg', paths: ['heel_deg', 'values.heel_deg'] },
+  { key: 'hydrostatics.gm_t_m', stage: 'hydrostatics', label: 'overview.reading.gm', dimension: 'length', storedUnit: 'm', paths: ['values.gm_t_m'] },
 ];
 
 function readPath(data: Raw, path: string): unknown {
@@ -52,26 +56,29 @@ function stageOf(run: RunView | null, name: string): StageEnvelope | null {
 
 // A stage that did not run, could not run or ran outside its method boundary is
 // reported as such. It is never replaced by zero and never by an input value.
-function stageReason(stage: StageEnvelope | null): string {
-  if (!stage) return '该运行没有保存此阶段';
-  if (!stage.requested && stage.status === 'not_requested') return '本次请求未运行该阶段';
-  if (stage.status === 'unavailable') return stage.reason ? `暂不可计算：${stage.reason}` : '暂不可计算';
-  if (stage.status === 'model_limit') return stage.reason ? `模型越界：${stage.reason}` : '模型越界';
-  if (stage.status === 'failed') return stage.reason ? `计算失败：${stage.reason}` : '计算失败';
-  if (stage.status === 'canceled') return '该阶段已取消';
+// The stage's own reason text is the core's and stays verbatim inside the frame.
+function stageReason(language: SiteLanguage, stage: StageEnvelope | null): string {
+  const say = (key: WorkspaceKey, params?: Record<string, string>) => workspaceCopy(language, key, params);
+  if (!stage) return say('stage.reason.missing');
+  if (!stage.requested && stage.status === 'not_requested') return say('stage.reason.notRequested');
+  if (stage.status === 'unavailable') return stage.reason ? say('stage.reason.unavailable', { reason: stage.reason }) : say('stage.reason.unavailableBare');
+  if (stage.status === 'model_limit') return stage.reason ? say('stage.reason.modelLimit', { reason: stage.reason }) : say('stage.reason.modelLimitBare');
+  if (stage.status === 'failed') return stage.reason ? say('stage.reason.failed', { reason: stage.reason }) : say('stage.reason.failedBare');
+  if (stage.status === 'canceled') return say('stage.reason.canceled');
   return '';
 }
 
-export function overviewReadings(run: RunView | null): OverviewReading[] {
+export function overviewReadings(run: RunView | null, language: SiteLanguage): OverviewReading[] {
+  const say = (key: WorkspaceKey, params?: Record<string, string>) => workspaceCopy(language, key, params);
   return RESULT_FIELDS.map(field => {
     const stage = stageOf(run, field.stage);
-    const blocked = stageReason(stage);
-    const stageName = STAGE_LABELS[field.stage] ?? field.stage;
+    const blocked = stageReason(language, stage);
+    const stageName = say(`stage.${field.stage}` as WorkspaceKey);
     // A stage that could not deliver a number never shows one, whatever partial
     // data the envelope happens to carry: unknown, zero and unavailable differ.
     if (blocked) {
-      return { key: field.key, label: field.label, value: null, dimension: field.dimension,
-        storedUnit: field.storedUnit, state: 'unavailable', note: `${blocked} · 阶段 ${stageName}` };
+      return { key: field.key, label: say(field.label), value: null, dimension: field.dimension,
+        storedUnit: field.storedUnit, state: 'unavailable', note: say('overview.reading.blocked', { reason: blocked, stage: stageName }) };
     }
     let value: number | null = null;
     for (const path of field.paths) {
@@ -79,11 +86,11 @@ export function overviewReadings(run: RunView | null): OverviewReading[] {
       if (typeof found === 'number' && Number.isFinite(found)) { value = found; break; }
     }
     if (value === null) {
-      return { key: field.key, label: field.label, value: null, dimension: field.dimension, storedUnit: field.storedUnit,
-        state: 'unknown', note: `该运行未给出 ${field.key.split('.').pop()}（阶段 ${stageName}）` };
+      return { key: field.key, label: say(field.label), value: null, dimension: field.dimension, storedUnit: field.storedUnit,
+        state: 'unknown', note: say('overview.reading.unknown', { field: field.key.split('.').pop() ?? '', stage: stageName }) };
     }
-    return { key: field.key, label: field.label, value, dimension: field.dimension, storedUnit: field.storedUnit,
-      state: 'known', note: `已保存运行 · 阶段 ${stageName}` };
+    return { key: field.key, label: say(field.label), value, dimension: field.dimension, storedUnit: field.storedUnit,
+      state: 'known', note: say('overview.reading.known', { stage: stageName }) };
   });
 }
 
@@ -98,13 +105,15 @@ export function overviewStages(run: RunView | null): Array<{ name: string; statu
 const SEVERE = new Set(['error', 'critical', 'severe', 'fatal']);
 
 // Severe diagnostics stay visible: an interaction may never fold an error away.
-export function severeDiagnostics(run: RunView | null): Array<{ stage: string | null; message: string }> {
+export function severeDiagnostics(language: SiteLanguage, run: RunView | null): Array<{ stage: string | null; message: string }> {
+  const fallback = workspaceCopy(language, 'overview.reading.fallbackSevere');
   const found: Array<{ stage: string | null; message: string }> = [];
   const seen = new Set<string>();
-  const append = (item: StageEnvelope['diagnostics'][number], fallback: string | null) => {
+  const append = (item: StageEnvelope['diagnostics'][number], fallbackStage: string | null) => {
     if (!SEVERE.has(String(item?.severity ?? ''))) return;
-    const stage = item.stage ?? fallback;
-    const message = String(item.message ?? item.code ?? '严重诊断');
+    const stage = item.stage ?? fallbackStage;
+    // The message is the core's own finding text and is shown as saved.
+    const message = String(item.message ?? item.code ?? fallback);
     const key = JSON.stringify([stage, item.code, item.source_path ?? item.path, message]);
     if (seen.has(key)) return;
     seen.add(key);
@@ -119,7 +128,7 @@ export function severeDiagnostics(run: RunView | null): Array<{ stage: string | 
   return found;
 }
 
-export function WorkbenchOverview({ draft, revision, conditionId, runs, current, previous, requestStages, requestError, dirty, onChapter, onRun, onNavigate }: {
+export function WorkbenchOverview({ draft, revision, conditionId, runs, current, previous, requestStages, requestError, dirty, historyState = 'ready', resultState = 'ready', previousState = 'ready', onRefreshRuns, onChapter, onRun, onNavigate }: {
   draft: ProjectDocument; revision: number; conditionId: string; runs: RunView[]; current: RunView | null;
   /** The owned previous check of this condition, kept across a save. */
   previous: RunView | null;
@@ -127,97 +136,120 @@ export function WorkbenchOverview({ draft, revision, conditionId, runs, current,
   requestStages: string[];
   /** The request builder's own refusal, when the request cannot be submitted. */
   requestError: string;
+  historyState?: 'loading' | 'ready' | 'failed';
+  resultState?: 'loading' | 'ready' | 'failed';
+  previousState?: 'loading' | 'ready' | 'failed';
+  onRefreshRuns?: () => void;
   dirty: boolean; onChapter: (chapter: 'hull') => void; onRun: (runId: string) => void;
   onNavigate: (location: DiagnosticLocation) => void;
 }) {
+  const w = useWorkspaceCopy();
+  const { language } = useLanguage();
+  const moment = useMomentText();
+  const date = useDateText();
   const hull = object(draft.hull);
   const condition = draft.loading_conditions.find(item => item.id === conditionId) ?? null;
   const ledgerCount = draft.weight_groups.reduce((sum, group) => sum + (Array.isArray(group.items) ? group.items.length : 0), 0);
-  const readings = overviewReadings(current);
+  const readings = overviewReadings(current, language);
   const stages = overviewStages(current);
-  const severe = severeDiagnostics(current);
+  const severe = severeDiagnostics(language, current);
   // Nothing here may claim a result identity the guard did not confirm.
   const absentReason = dirty
-    ? '草稿有未保存修改：旧运行不是当前结果'
-    : !conditionId ? '尚未选择工况'
-      : `该修订与工况尚无已保存结果${runs.length ? '（下方运行记录仍可查看）' : ''}`;
+    ? w('overview.result.absentDirty')
+    : !conditionId ? w('overview.result.absentNoCondition')
+      : w('overview.result.absentNone') + (runs.length ? w('overview.result.absentHistory') : '');
 
   return <div className="overview-page">
+    {/* First calculation, as a short disclosure above the groups. It states the
+        order the page is already laid out in and points at the existing report
+        link; it changes no control, no request and no guard. */}
+    <details className="first-use">
+      <summary>{w('overview.firstUse.summary')}</summary>
+      <ol className="first-use-steps">
+        <li><strong>{w('overview.firstUse.1.title')}</strong>{w('overview.firstUse.1.text')}</li>
+        <li><strong>{w('overview.firstUse.2.title')}</strong>{w('overview.firstUse.2.text')}</li>
+        <li><strong>{w('overview.firstUse.3.title')}</strong>{w('overview.firstUse.3.text')}</li>
+        <li><strong>{w('overview.firstUse.4.title')}</strong>{w('overview.firstUse.4.text')}</li>
+      </ol>
+    </details>
     <section className="chapter-group">
       <div className="group-head"><span className="group-index" aria-hidden="true">01</span>
-        <h2>输入 · Input</h2><span>草稿读数，未保存的修改也算</span></div>
+        <h2>{w('overview.input.title')}</h2><span>{w('overview.input.note')}</span></div>
       <div className="metric-grid">
-        <FactField label="船长" value={number(hull.loa_m ?? hull.length_m)} dimension="length"
-          status={number(hull.loa_m ?? hull.length_m) === null ? 'unknown' : 'known'} source={declaredSource(object(hull.sources).loa_m) ?? '未声明来源'} />
-        <FactField label="型宽" value={number(hull.beam_m)} dimension="length"
-          status={number(hull.beam_m) === null ? 'unknown' : 'known'} source={declaredSource(object(hull.sources).beam_m) ?? '未声明来源'} />
-        <FactField label="设计吃水" value={number(hull.draught_normal_m ?? hull.draft_m)} dimension="length"
-          status={number(hull.draught_normal_m ?? hull.draft_m) === null ? 'unknown' : 'known'} source={declaredSource(object(hull.sources).draught_normal_m) ?? '未声明来源'} />
-        <FactField label="重量条目" value={ledgerCount} unit="项" status="known" source="当前输入账本" />
+        <FactField label={w('field.loa_m')} value={number(hull.loa_m ?? hull.length_m)} dimension="length"
+          status={number(hull.loa_m ?? hull.length_m) === null ? 'unknown' : 'known'} source={declaredSource(object(hull.sources).loa_m) ?? w('overview.input.sourceUndeclared')} />
+        <FactField label={w('field.beam_m')} value={number(hull.beam_m)} dimension="length"
+          status={number(hull.beam_m) === null ? 'unknown' : 'known'} source={declaredSource(object(hull.sources).beam_m) ?? w('overview.input.sourceUndeclared')} />
+        <FactField label={w('field.draught_normal_m')} value={number(hull.draught_normal_m ?? hull.draft_m)} dimension="length"
+          status={number(hull.draught_normal_m ?? hull.draft_m) === null ? 'unknown' : 'known'} source={declaredSource(object(hull.sources).draught_normal_m) ?? w('overview.input.sourceUndeclared')} />
+        <FactField label={w('overview.input.label.items')} value={ledgerCount} unit={w('overview.input.items')} status="known" source={w('overview.input.itemsSource')} />
       </div>
-      <p className="group-note">这些是输入，不是结果。留空表示未知，不会补零，也不参与结果身份判断。</p>
+      <p className="group-note">{w('overview.input.note2')}</p>
     </section>
 
     <section className="chapter-group">
       <div className="group-head"><span className="group-index" aria-hidden="true">02</span>
-        <h2>当前工况与修订</h2><span>结果身份的唯一依据</span></div>
+        <h2>{w('overview.identity.title')}</h2><span>{w('overview.identity.note')}</span></div>
       <dl className="overview-identity">
-        <div><dt>当前工况</dt><dd>{condition ? (condition.label || condition.id) : '尚未选择工况'}</dd></div>
-        <div><dt>工况 id</dt><dd><code>{conditionId || '—'}</code></dd></div>
-        <div><dt>已保存修订</dt><dd>修订 {revision}</dd></div>
-        <div><dt>草稿状态</dt><dd>{dirty ? '未保存修改' : '与已保存修订一致'}</dd></div>
+        <div><dt>{w('overview.identity.condition')}</dt><dd>{condition ? (condition.label || condition.id) : w('overview.identity.none')}</dd></div>
+        <div><dt>{w('overview.identity.conditionId')}</dt><dd><code>{conditionId || '—'}</code></dd></div>
+        <div><dt>{w('overview.identity.revision')}</dt><dd>{w('workbench.save.revision', { revision })}</dd></div>
+        <div><dt>{w('overview.identity.draft')}</dt><dd>{dirty ? w('overview.identity.draftDirty') : w('overview.identity.draftClean')}</dd></div>
       </dl>
     </section>
 
     <CalculationReadiness stages={requestStages} previous={previous} live={draft} dirty={dirty}
-      revision={revision} conditionId={conditionId} invalidRequest={requestError} onNavigate={onNavigate} />
+      revision={revision} conditionId={conditionId} invalidRequest={requestError} previousState={previousState} onNavigate={onNavigate} />
 
     <section className="chapter-group">
       <div className="group-head"><span className="group-index" aria-hidden="true">04</span>
-        <h2>当前结果 · Result</h2><span>只取匹配本项目、修订与工况的已保存运行</span></div>
+        <h2>{w('overview.result.title')}</h2><span>{w('overview.result.note')}</span></div>
       {current
         ? <>
           <div className="result-identity">
             <strong><StatusBadge status={current.status} /></strong>
-            <span>运行 {current.id}</span>
-            <span>修订 {current.revision}</span>
-            <span>工况 {current.condition_id}</span>
-            <span>请求指纹 <code>{current.request_fingerprint}</code></span>
-            <span>完成 {current.finished_at ? new Date(current.finished_at).toLocaleString('zh-CN') : '未记录'}</span>
+            <span>{w('overview.result.run', { id: current.id })}</span>
+            <span>{w('workbench.save.revision', { revision: current.revision })}</span>
+            <span>{w('overview.result.condition', { id: current.condition_id })}</span>
+            <span>{w('overview.result.fingerprint', { fingerprint: current.request_fingerprint })}</span>
+            <span>{w('overview.result.finished', { date: moment(current.finished_at) ?? w('overview.result.finishedUnknown') })}</span>
           </div>
           <div className="metric-grid">{readings.map(reading =>
             <FactField key={reading.key} label={reading.label} value={reading.value}
               dimension={reading.dimension} storedUnit={reading.storedUnit}
               status={reading.state} source={reading.note} />)}</div>
           {stages.length > 0 && <ul className="stage-status-list">{stages.map(stage =>
-            <li key={stage.name}><span className={`stage-pill stage-pill--${stage.status}`}>{STATUS_LABELS[stage.status] ?? stage.status}</span>
-              <span>{STAGE_LABELS[stage.name] ?? stage.name}</span>
+            <li key={stage.name}><span className={`stage-pill stage-pill--${stage.status}`}><StatusBadge status={stage.status} /></span>
+              <span>{stageLabel(w, stage.name)}</span>
+              {/* The stage's own stop reason is the core's saved text. */}
               {stage.reason && <small>{stage.reason}</small>}</li>)}</ul>}
           {severe.length > 0 && <div className="stage-diagnostics-open" role="alert">
-            <strong>严重诊断 · {severe.length} 条</strong>
-            {severe.map((item, index) => <p key={index}>{item.stage ? `${STAGE_LABELS[item.stage] ?? item.stage}：` : '整体：'}{item.message}</p>)}
+            <strong>{w('overview.result.severeTitle', { count: severe.length })}</strong>
+            {severe.map((item, index) => <p key={index}>{item.stage ? `${w('reading.stageContext', { name: stageLabel(w, item.stage) })}：` : w('overview.result.severeOverall')}{item.message}</p>)}
           </div>}
-          <p className="group-note">计算完成只表示模型执行情况，不代表安全、适航或史实验证。</p>
+          <p className="group-note">{w('overview.result.caveat')}</p>
         </>
         : <div className="result-absent">
-          <p>尚无当前结果</p>
+          <p>{w(resultState === 'loading' ? 'workbench.read.resultLoading' : resultState === 'failed' ? 'workbench.read.resultFailed' : 'overview.result.absent')}</p>
           <p className="group-note">{absentReason}</p>
         </div>}
     </section>
 
     <section className="chapter-group">
       <div className="group-head"><span className="group-index" aria-hidden="true">05</span>
-        <h2>运行记录</h2><span>历史可查，身份必须明确</span></div>
+        <h2>{w('overview.history.title')}</h2><span>{w('overview.history.note')}</span></div>
+      {runs.length > 0 && historyState !== 'ready' && <p className="group-note" role="status">{w('workbench.read.historyStale')}</p>}
+      {onRefreshRuns && <button className="text-button" disabled={historyState === 'loading'} onClick={onRefreshRuns}>{w('workbench.read.refresh')}</button>}
       {runs.length === 0
-        ? <p className="group-note">还没有任何运行记录。保存输入后即可运行计算。</p>
+        ? <p className="group-note">{w(historyState === 'loading' ? 'workbench.read.historyLoading' : historyState === 'failed' ? 'workbench.read.historyFailed' : 'overview.history.empty')}</p>
         : <div className="run-history">{runs.slice(0, 6).map(item => <button key={item.id} data-audio="manual" onClick={() => onRun(item.id)}>
-          <span><span>修订 {item.revision}</span><span>工况 {item.condition_id}</span></span>
+          <span><span>{w('workbench.save.revision', { revision: item.revision })}</span><span>{w('overview.history.condition', { id: item.condition_id })}</span></span>
           <strong><StatusBadge status={item.status} /></strong>
-          <small>{new Date(item.created_at).toLocaleString('zh-CN')}</small>
+          <small>{date(item.created_at)}</small>
           <span aria-hidden="true">↗</span>
         </button>)}</div>}
-      {current && <p className="group-note">上方“当前结果”只对应运行 {current.id}；其余记录保留其各自的修订与工况身份。</p>}
-      <button className="text-button" data-audio="detent" onClick={() => onChapter('hull')}>编辑船型数据 ↗</button>
+      {current && <p className="group-note">{w('overview.history.caveat', { id: current.id })}</p>}
+      <button className="text-button" data-audio="detent" onClick={() => onChapter('hull')}>{w('overview.history.editHull')}</button>
     </section>
   </div>;
 }

@@ -1,15 +1,17 @@
 import type { ReactNode } from 'react';
 import { FactField } from './FactField';
 import { number, object, type Raw } from './formModel';
+import { useWorkspaceCopy } from '../i18n/workspace';
 import type { Dimension } from './units';
 
 export function Metric({ label, value, unit = '', dimension, storedUnit, estimate, source }: {
   label: string; value: unknown; unit?: string; dimension?: Dimension; storedUnit?: string;
   estimate?: unknown; source?: string | null;
 }) {
+  const w = useWorkspaceCopy();
   const known = number(value) !== null;
   return <FactField label={label} value={number(value)} unit={unit} dimension={dimension} storedUnit={storedUnit}
-    source={source ?? '当前工况运行结果'}
+    source={source ?? w('formResults.sourceRun')}
     status={!known ? 'unknown' : estimate === true ? 'estimate' : 'known'} />;
 }
 
@@ -18,18 +20,21 @@ export function Metric({ label, value, unit = '', dimension, storedUnit, estimat
 export function DeclaredFact({ label, unit, fact: supplied, dimension, storedUnit }: {
   label: string; unit: string; fact: unknown; dimension?: Dimension; storedUnit?: string;
 }) {
+  const w = useWorkspaceCopy();
   const entry = object(supplied);
   return <Metric label={label} value={entry.value} unit={unit} dimension={dimension} storedUnit={storedUnit}
     estimate={entry.estimate}
-    source={typeof entry.source === 'string' && entry.source ? entry.source : '未声明来源'} />;
+    source={typeof entry.source === 'string' && entry.source ? entry.source : w('formResults.sourceUndeclared')} />;
 }
 export function ResultSection({ available, children }: { available: boolean; children: ReactNode }) {
-  return <section className="form-results"><div className="section-heading"><h3>当前修订 · 所选工况结果</h3></div>
-    {available ? children : <p className="section-intro">保存并运行当前工况后显示结果</p>}</section>;
+  const w = useWorkspaceCopy();
+  return <section className="form-results"><div className="section-heading"><h3>{w('formResults.section')}</h3></div>
+    {available ? children : <p className="section-intro">{w('formResults.empty')}</p>}</section>;
 }
 export function Diagnostics({ value }: { value: unknown }) {
+  const w = useWorkspaceCopy();
   if (!Array.isArray(value) || !value.length) return null;
-  return <ul className="diagnostics-list">{value.map((d, i) => <li key={i}>{String(object(d).message ?? object(d).code ?? '未知诊断')}</li>)}</ul>;
+  return <ul className="diagnostics-list">{value.map((d, i) => <li key={i}>{String(object(d).message ?? object(d).code ?? w('formResults.diagnosticFallback'))}</li>)}</ul>;
 }
 // A study reports its own applicability, provenance and boundary. Only genuinely
 // unavailable or failed studies hide their numbers. `estimated_nonprimary` is a
@@ -39,6 +44,7 @@ const PRESENTED = new Set(['completed', 'estimated_nonprimary']);
 export function StudyResult({ label, data, metrics }: {
   label: string; data: unknown; metrics: Array<[string, string, string?, Dimension?, string?]>;
 }) {
+  const w = useWorkspaceCopy();
   const study = object(data);
   const status = typeof study.status === 'string' ? study.status : null;
   const available = status !== null && PRESENTED.has(status);
@@ -46,19 +52,20 @@ export function StudyResult({ label, data, metrics }: {
     || study.model_applicable === false || study.primary_result === false;
   const source = typeof study.source === 'string' && study.source ? study.source
     : typeof study.method === 'string' && study.method ? study.method : null;
-  return <div className="study-result"><h4>{label} <span>{status ?? (Object.keys(study).length ? 'declared' : '未请求')}</span></h4>
+  return <div className="study-result"><h4>{label} <span>{status ?? (Object.keys(study).length ? w('formResults.declared') : w('formResults.notRequested'))}</span></h4>
     {study.reason != null && <p>{String(study.reason)}</p>}
     <div className="metric-grid">{metrics.map(([key, name, unit, dimension, storedUnit]) =>
       <Metric key={key} label={name} value={available ? study[key] : null} unit={unit} dimension={dimension} storedUnit={storedUnit}
         estimate={available ? estimated : undefined}
-        source={available ? source : '该研究未完成，结果未知'} />)}</div>
-    {available && estimated && <p className="form-hint">该结果为工程估算 / 非主工况结果，仅供比较，不得当作确认值。</p>}
-    {study.model_applicable === false && <p className="form-hint">方法适用范围之外：所选几何不属于该模型的主工况。</p>}
-    {study.boundary != null && <p className="form-hint">边界：{String(study.boundary)}</p>}
+        source={available ? source : w('formResults.studyIncomplete')} />)}</div>
+    {available && estimated && <p className="form-hint">{w('formResults.estimateNote')}</p>}
+    {study.model_applicable === false && <p className="form-hint">{w('formResults.outOfRange')}</p>}
+    {study.boundary != null && <p className="form-hint">{w('formResults.boundary', { value: String(study.boundary) })}</p>}
     <Diagnostics value={study.diagnostics} /></div>;
 }
 export function RowResults({ view }: { view: Raw }) {
+  const w = useWorkspaceCopy();
   return <><div className="metric-grid">{Object.entries(object(view.groups)).map(([id, row]) =>
-    <Metric key={id} label={`${id} 小计`} value={object(row).weight_t} unit="t" dimension="mass" />)}</div>
+    <Metric key={id} label={w('formResults.subtotal', { id })} value={object(row).weight_t} unit="t" dimension="mass" />)}</div>
     <Diagnostics value={view.diagnostics} /></>;
 }

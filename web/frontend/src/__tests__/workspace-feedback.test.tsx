@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import App from '../App';
@@ -110,7 +111,11 @@ describe('project library · a failed read is not a failed creation', () => {
     expect(screen.getByText('读取失败')).toBeVisible();
     // Nothing about creating a project depends on being able to list the old ones.
     for (const label of ['解析方箱', '通用试验船', 'HMS Queen Mary']) {
-      expect(screen.getByRole('button', { name: new RegExp(label) })).toBeEnabled();
+      // The first-use guide names the same sample, so more than one entry can
+      // carry the name; every one of them has to stay usable.
+      const entries = screen.getAllByRole('button', { name: new RegExp(label) });
+      expect(entries.length).toBeGreaterThan(0);
+      for (const entry of entries) expect(entry).toBeEnabled();
     }
   });
 
@@ -228,7 +233,7 @@ describe('workspace entry · a retry re-reads the session, it does not mint one'
     window.history.back();
     for (let round = 0; round < 5; round += 1) await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
     expect(window.location.hash).toBe('#/projects');
-    expect(await screen.findByRole('heading', { level: 1, name: /Projects/ })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: /^项目库/ })).toBeVisible();
     expect(screen.queryByLabelText('船长')).toBeNull();
   });
 
@@ -314,7 +319,8 @@ describe('workspace entry · a retry re-reads the session, it does not mint one'
   it('offers the public way out of a workspace that never connected', async () => {
     vi.mocked(api.authConfig).mockRejectedValue(new Error('网关不可达'));
     render(<App returnHref="#/work" />);
-    expect(await screen.findByRole('button', { name: '返回总站' })).toBeVisible();
+    // The copy carries its own arrow, so the name is matched on the words.
+    expect(await screen.findByRole('button', { name: /返回总站/ })).toBeVisible();
     expect(screen.getByRole('link', { name: '↖ Y’s Formfield' })).toHaveAttribute('href', '#/work');
   });
 });

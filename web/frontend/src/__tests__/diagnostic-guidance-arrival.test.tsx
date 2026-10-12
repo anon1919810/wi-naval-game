@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '../api';
@@ -258,7 +259,7 @@ describe('what the overview says about calculation readiness', () => {
     const action = within(panel).getByRole('button', { name: /steamer-structure/ });
     expect(action.textContent).toContain('质量');
     fireEvent.click(action);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('lightship steamer-structure 质量'));
     // Following a finding is a view change and nothing else.
     expect(within(document.querySelector('.operation-bar') as HTMLElement).queryByText('未保存修改')).toBeNull();
@@ -337,7 +338,7 @@ describe('arriving from a report diagnostic', () => {
   it('focuses the named field of an owned run without saving, running or remounting', async () => {
     vi.mocked(api.getRun).mockResolvedValue(savedRun());
     await open(href);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('lightship steamer-structure 质量'));
     expect(api.getRun).toHaveBeenCalledWith('run-a');
     expect(api.saveProject).not.toHaveBeenCalled();
@@ -348,7 +349,7 @@ describe('arriving from a report diagnostic', () => {
     expect(screen.getByLabelText('lightship steamer-structure 质量')).toHaveValue(120);
     window.history.replaceState(null, '', diagnosticHref('p1', 'run-a', '$.hull.loa_m'));
     window.dispatchEvent(new HashChangeEvent('hashchange'));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Hull & Geometry' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '船型与几何' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('船长'));
     expect(api.getProject).toHaveBeenCalledTimes(1);
   });
@@ -396,7 +397,7 @@ describe('arriving from a report diagnostic', () => {
     vi.stubGlobal('cancelAnimationFrame', () => {});
     vi.mocked(api.getRun).mockResolvedValue(savedRun());
     await open(href);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     window.history.replaceState(null, '', '#/projects/p1');
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     act(() => { for (const callback of frames.splice(0)) callback(0); });
@@ -407,7 +408,7 @@ describe('arriving from a report diagnostic', () => {
   it('shows the literal fallback path beside the focused Project Data editor', async () => {
     vi.mocked(api.getRun).mockResolvedValue(savedRun());
     await open(diagnosticHref('p1', 'run-a', '$.hull.sources.loa_m'));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Project Data' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '项目数据' })).toBeVisible();
     await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('项目 JSON')));
     const alerts = document.querySelector('.workbench-alerts') as HTMLElement;
     expect(within(alerts).getByText(/原路径 \$\.hull\.sources\.loa_m/)).toBeVisible();
@@ -418,7 +419,7 @@ describe('arriving from a report diagnostic', () => {
   it('follows the same link again after the reader goes back and forward', async () => {
     vi.mocked(api.getRun).mockResolvedValue(savedRun());
     await open(href);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('lightship steamer-structure 质量'));
 
     // Back to the project's plain address: nothing is asked for again.
@@ -432,7 +433,7 @@ describe('arriving from a report diagnostic', () => {
     // already consumed.
     window.history.replaceState(null, '', href);
     window.dispatchEvent(new HashChangeEvent('hashchange'));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('lightship steamer-structure 质量'));
   });
 
@@ -476,7 +477,7 @@ describe('arriving from a report diagnostic', () => {
   it('keeps the newer-revision notice on screen after the jump succeeds', async () => {
     vi.mocked(api.getRun).mockResolvedValue(savedRun({ revision: 2 }));
     await open(href);
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('lightship steamer-structure 质量'));
     const alerts = document.querySelector('.workbench-alerts') as HTMLElement;
     expect(within(alerts).getByText(/该诊断来自修订 2/)).toBeVisible();
@@ -502,14 +503,14 @@ describe('arriving from a report diagnostic', () => {
     window.history.replaceState(null, '', href);
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     expect(await screen.findByText(/跳转会丢弃这段未应用的编辑/)).toBeVisible();
-    expect(screen.getByRole('heading', { level: 1, name: 'Project Data' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: '项目数据' })).toBeVisible();
     expect((screen.getByLabelText('项目 JSON') as HTMLTextAreaElement).value).toBe(broken);
     expect(api.saveProject).not.toHaveBeenCalled();
     expect(api.enqueueRun).not.toHaveBeenCalled();
 
     // Chapter navigation refuses for the same reason and never discards it.
     fireEvent.click(screen.getByRole('button', { name: '概览' }));
-    expect(screen.getByRole('heading', { level: 1, name: 'Project Data' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: '项目数据' })).toBeVisible();
     expect((screen.getByLabelText('项目 JSON') as HTMLTextAreaElement).value).toBe(broken);
 
     // The reader can throw invalid text away explicitly, and is then free to go.
@@ -517,7 +518,7 @@ describe('arriving from a report diagnostic', () => {
     await waitFor(() => expect(onDirtyChange).toHaveBeenLastCalledWith(false));
     expect((screen.getByLabelText('项目 JSON') as HTMLTextAreaElement).value).not.toBe(broken);
     window.dispatchEvent(new HashChangeEvent('hashchange'));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Weights & Loading' })).toBeVisible();
+    expect(await screen.findByRole('heading', { level: 1, name: '重量与载荷' })).toBeVisible();
     await waitFor(() => expect(focusedLabel()).toBe('lightship steamer-structure 质量'));
     expect(api.saveProject).not.toHaveBeenCalled();
   });

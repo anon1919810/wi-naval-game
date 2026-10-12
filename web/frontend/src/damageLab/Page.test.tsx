@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderZh as render } from '../__tests__/locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import DamageLabPage from './Page';
 import * as api from './api';
@@ -18,13 +19,13 @@ const experiment = { schema: 'plimsoll-damage-lab-experiment-1', source: 'test f
   impact: { position_m: [0,0,1], severity: .5, radius_m: 2, source: 'fixture', estimate: true },
   breaches: [], remaining_gz_angles_deg: [0,10], rules: { casualty_fraction: .4, fatal_fraction: .25,
     module_flood_threshold: .5, evacuate_fill_fraction: .3, source: 'fixture', estimate: true } } as Experiment;
-const project = { project_id: 'p', revision: 1, project: { id: 'p', name: 'Rig',
+const project = { project_id: 'p', revision: 1, project: { id: 'p', revision:1, name: 'Rig',
   loading_conditions: [{ id: 'normal', label: 'Normal' }], compartments: [], geometry: {} } } as unknown as ProjectView;
 const queued = { id: 'r', project_id: 'p', revision: 1, condition_id: 'normal', status: 'queued',
-  request_fingerprint: 'frozen', request: { experiment }, result: null, error: null, cancel_requested: false } as LabRun;
-const result = { request_fingerprint: 'frozen', snapshots: [{ time_s: 0, event_index: -1,
+  request_fingerprint: 'frozen', request: { schema:'plimsoll-damage-lab-request-1',condition_id:'normal',method_versions:{},experiment }, result: null, error: null, cancel_requested: false } as LabRun;
+const result = { final_state:{time_s:0,event_index:-1,ship:null,modules:[],crew_groups:[],compartments:[],capabilities:{shaft_power_kw:null,known_shaft_power_subtotal_kw:0}}, status:'completed',condition_id:'normal', request_fingerprint: 'frozen', snapshots: [{ time_s: 0, event_index: -1,
   ship: null, modules: [], crew_groups: [], compartments: [], capabilities: { shaft_power_kw: null } }],
-  request: { experiment }, input_snapshot: project.project, simulated_duration_s: 0,
+  request: queued.request, input_snapshot: project.project, simulated_duration_s: 0,
   core_analysis: { stages: { flooding: { status: 'completed', data: { stop_reason: 'requested_duration' } } } },
   assumptions: [], diagnostics: [], validity: {}, method_versions: {}, events: [] } as unknown as LabResult;
 
@@ -35,6 +36,8 @@ beforeEach(() => {
   vi.mocked(api.readSetup).mockResolvedValue({ revision: 1, experiment, diagnostics: [] });
   vi.mocked(api.listRuns).mockResolvedValue([]);
   vi.mocked(api.enqueue).mockResolvedValue(queued);
+  vi.mocked(api.readDemo).mockResolvedValue({project:project.project,experiment});
+  vi.mocked(api.preview).mockImplementation(async(_id,_revision,_condition,experiment)=>({experiment:experiment as Experiment,request_fingerprint:'preview'}));
 });
 describe('laboratory page lifetime and result ownership', () => {
   it('retains unknown layout as unavailable and offers an explicit demo', async () => {
@@ -123,5 +126,81 @@ describe('laboratory page lifetime and result ownership', () => {
     fireEvent.change(screen.getByLabelText('选择配置文件'), { target: { files: [newFile] } });
     await act(async()=>{second('new file');first('old file');});
     expect(screen.getByLabelText('完整配置 JSON')).toHaveValue('new file');
+  });
+
+  it('explains a vessel a preset cannot describe, and runs nothing', async () => {
+    render(<DamageLabPage projectId="p" onBack={vi.fn()} onProject={vi.fn()} />);
+    // This fixture's project declares no compartments, so the declared origin
+    // falls in no room: the page says so rather than guessing a wall.
+    fireEvent.click(await screen.findByRole('button', { name: '舱壁屏蔽' }));
+    expect(await screen.findByText(/无法把声明的原点落在任一舱室内/)).toBeVisible();
+    expect(api.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('prepares a preset draft and its assumptions without running anything', async () => {
+    const compartments = [
+      { id: 'starboard-machinery', label: 'Starboard machinery', x_m: -4, y_m: 1.6, keel_to_bottom_m: 0.8,
+        length_m: 8, beam_m: 3.2, height_m: 3.2, permeability: 0.8 },
+      { id: 'port-machinery', label: 'Port machinery', x_m: -4, y_m: -1.6, keel_to_bottom_m: 0.8,
+        length_m: 8, beam_m: 3.2, height_m: 3.2, permeability: 0.8 },
+      { id: 'forward-control', label: 'Forward control', x_m: 4, y_m: 0, keel_to_bottom_m: 1.2,
+        length_m: 7, beam_m: 5, height_m: 2.8, permeability: 0.8 },
+    ];
+    vi.mocked(api.readProject).mockResolvedValue({
+      ...project, project: { ...project.project, compartments } } as unknown as ProjectView);
+    vi.mocked(api.readSetup).mockResolvedValue({ revision: 1, diagnostics: [], experiment: {
+      ...experiment, impact: { ...experiment.impact, position_m: [-4, 1.6, 2.4] } } });
+    vi.mocked(api.readDemo).mockResolvedValue({project:{...project.project,compartments} as never,experiment:{...experiment,impact:{...experiment.impact,position_m:[-4,1.6,2.4]}}});
+    render(<DamageLabPage projectId="p" onBack={vi.fn()} onProject={vi.fn()} />);
+
+    fireEvent.click(await screen.findByRole('button', { name: '舱壁屏蔽' }));
+    expect(await screen.findByText(/内舱壁/)).toBeVisible();
+    // Preparing a draft is not running one: the form's own submit is the only
+    // path that enqueues, and nobody pressed it.
+    expect(api.enqueue).not.toHaveBeenCalled();
+    expect(api.preview).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(api.preview).mock.calls[0][3]).toMatchObject({impact:{radius_m:8},breaches:[]});
+  });
+
+  it('reads a comparison record only after it is chosen, and restores nothing', async () => {
+    const older = { ...queued, id: 'older-run', status: 'completed', has_result: true, result } as unknown as LabRun;
+    vi.mocked(api.listRuns).mockResolvedValue([older]);
+    vi.mocked(api.readRun).mockResolvedValue(older);
+    render(<DamageLabPage projectId="p" onBack={vi.fn()} onProject={vi.fn()} />);
+    await screen.findByRole('button', { name: '运行命中试验' });
+
+    // Nothing is read for the comparison until a side has been chosen…
+    expect(api.readRun).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('试验 A'), { target: { value: 'older-run' } });
+    // …and choosing a side reads that record without restoring it as the trial
+    // the page is looking at, and without running anything.
+    await waitFor(() => expect(api.readRun).toHaveBeenCalledWith('older-run', expect.anything()));
+    expect(api.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('lets both comparison reads finish independently and discards an older selection on one side', async () => {
+    const jobs = ['a','b','c'].map(id=>({...queued,id,status:'completed',has_result:true,result}) as LabRun);
+    vi.mocked(api.listRuns).mockResolvedValue(jobs);
+    const reads = new Map<string,{signal:AbortSignal;finish:(job:LabRun)=>void}>();
+    vi.mocked(api.readRun).mockImplementation((id,signal)=>new Promise(resolve=>{reads.set(id,{signal:signal!,finish:resolve});}));
+    render(<DamageLabPage projectId="p" onBack={vi.fn()} onProject={vi.fn()} />);
+    await screen.findByRole('button',{name:'运行命中试验'});
+    fireEvent.change(screen.getByLabelText('试验 A'),{target:{value:'a'}});
+    fireEvent.change(screen.getByLabelText('试验 B'),{target:{value:'b'}});
+    expect(reads.get('a')!.signal.aborted).toBe(false);
+    fireEvent.change(screen.getByLabelText('试验 A'),{target:{value:'c'}});
+    expect(reads.get('a')!.signal.aborted).toBe(true);expect(reads.get('b')!.signal.aborted).toBe(false);
+    await act(async()=>{reads.get('a')!.finish(jobs[0]);reads.get('b')!.finish(jobs[1]);reads.get('c')!.finish(jobs[2]);});
+    expect(screen.getByLabelText('试验 A')).toHaveValue('c');expect(screen.getByLabelText('试验 B')).toHaveValue('b');
+    expect(api.enqueue).not.toHaveBeenCalled();
+  });
+
+  it('refuses to restore an old revision before replacing the current draft', async () => {
+    const old={...queued,id:'old-revision',revision:0,status:'completed',result:{...result,input_snapshot:{...project.project,revision:0},request:{...queued.request,experiment:{...experiment,impact:{...experiment.impact,severity:0.9}}}}} as LabRun;
+    vi.mocked(api.listRuns).mockResolvedValue([old]);vi.mocked(api.readRun).mockResolvedValue(old);
+    render(<DamageLabPage projectId="p" onBack={vi.fn()} onProject={vi.fn()} />);
+    await screen.findByRole('button',{name:'运行命中试验'});
+    fireEvent.click(document.querySelector('.lab-record button') as HTMLElement);
+    await screen.findByText(/属于其他修订/);expect(screen.getByLabelText('命中强度')).toHaveValue('0.5');
   });
 });

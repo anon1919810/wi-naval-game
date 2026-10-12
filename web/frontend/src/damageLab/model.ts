@@ -17,6 +17,12 @@ export function frameAt(result: LabResult | null, position: number) {
   return result.snapshots[Math.max(0, Math.min(result.snapshots.length - 1, Math.trunc(position)))];
 }
 export const active = (run: LabRun | null) => run?.status === 'queued' || run?.status === 'running';
-export const numeric = (value: number | null | undefined, digits = 1) => value == null || !Number.isFinite(value) ? '未知' : value.toFixed(digits);
-export const percent = (value: number | null | undefined) => value == null ? '未知' : `${Math.round(value*100)}%`;
-export const STATUS: Record<string, string> = { queued: '排队中', running: '计算中', completed: '计算完成', partial: '部分结果', canceled: '已取消', failed: '失败' };
+
+/**
+ * The run statuses this page can show.
+ *
+ * The status strings are not here any more: they belong to the laboratory
+ * dictionary, so they follow the one language state rather than being a frozen
+ * Chinese literal inside a model module. `format.status` resolves them.
+ */
+export const STATUS_KEYS = ['queued', 'running', 'completed', 'partial', 'canceled', 'failed'] as const;

@@ -1,4 +1,5 @@
-import { object } from './formModel';
+import { englishCopy, object } from './formModel';
+import type { Copy } from './diagnosticGuidance';
 
 // Display-unit conversion for reading and typing.
 //
@@ -116,15 +117,15 @@ export function formatNumber(value: number): string {
   return Object.is(value, -0) ? '0' : formatter.format(value);
 }
 
-export function formatQuantity(dimension: Dimension, storedValue: unknown, prefs: DisplayPreferences, storedUnit?: string): string {
+export function formatQuantity(dimension: Dimension, storedValue: unknown, prefs: DisplayPreferences, storedUnit?: string, w: Copy = englishCopy): string {
   const displayed = toDisplay(dimension, storedValue, prefs, storedUnit);
-  if (displayed === null) return '未知';
+  if (displayed === null) return w('units.unknown');
   return `${formatNumber(displayed)} ${unitLabel(dimension, displayUnit(dimension, prefs))}`;
 }
 
-export function displayNumber(dimension: Dimension, storedValue: unknown, prefs: DisplayPreferences, storedUnit?: string): string {
+export function displayNumber(dimension: Dimension, storedValue: unknown, prefs: DisplayPreferences, storedUnit?: string, w: Copy = englishCopy): string {
   const displayed = toDisplay(dimension, storedValue, prefs, storedUnit);
-  return displayed === null ? '未知' : formatNumber(displayed);
+  return displayed === null ? w('units.unknown') : formatNumber(displayed);
 }
 
 /** Displayed number without a unit, for dense table cells. */
@@ -141,9 +142,9 @@ export function inputText(dimension: Dimension, storedValue: unknown, prefs: Dis
 // Fuel burn is a defined compound: the mass component follows the reader's mass
 // preference while the day is fixed, so t/day becomes kg/day and never anything
 // else. Flow rates (m³/s) and every other compound stay canonical.
-export function burnRateText(tPerDay: unknown, prefs: DisplayPreferences): string {
+export function burnRateText(tPerDay: unknown, prefs: DisplayPreferences, w: Copy = englishCopy): string {
   const value = finite(tPerDay);
-  if (value === null) return '未知';
+  if (value === null) return w('units.unknown');
   const unit = prefs.mass === 'kg' ? 'kg/day' : prefs.mass === 'long_ton' ? 'long ton/day' : 't/day';
   return `${formatNumber(value / factor(unit))} ${unit}`;
 }

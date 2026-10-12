@@ -150,7 +150,7 @@
 .ff-theme-group { justify-self: end; display: flex; align-items: center; gap: 4px; }
 /* Three geometric marks and nothing else: no text box, no word, no label in the
    layout. Each is a real 44px target with its own accessible name, pressed state
-   where it has one, and English title. The speaker is a body, one wave and a
+   where it has one, and a translated title. The speaker is a body, one wave and a
    diagonal slash through both when muted; the theme is a ring half filled; the
    replay is an incomplete circle that turns under the pointer or the key and
    stands perfectly still otherwise. */
@@ -158,6 +158,36 @@
 .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay) svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
 .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):hover { color: var(--ff-ink); }
 .ff-shell :is(.ff-preview-sound, .ff-theme)[aria-pressed='true'] { color: var(--ff-accent); }
+
+/* ---- The language choice -------------------------------------------------
+   Two bare words side by side in one labelled group, beside the three icons. No
+   dropdown, no menu, no disclosure: both languages are always on screen, each
+   one is an ordinary button in the tab order, and `aria-pressed` states which is
+   live.
+
+   The treatment is the header's own, not a new one: the live language takes the
+   cobalt accent and a short accent rule beneath it — the same blue the sound
+   toggle already turns on for its own pressed state — while the other stays
+   muted. No tiles, no filled frames, no boxes: a pair of framed rectangles would
+   read as two more buttons of a different kind sitting among three geometric
+   marks. A single hairline separates the pair, in the header's own rule colour.
+
+   Each button is 44px tall and 32px or wider, so the target is a real one for a
+   finger and for a key, and the pair is narrower than the three icons beside it
+   put together. */
+.ff-lang { display: flex; align-items: stretch; margin-right: 4px; padding-left: 7px; border-left: 1px solid var(--ff-line); }
+.ff-shell .ff-lang-option {
+  position: relative; display: grid; place-items: center; min-width: 32px; height: 44px; padding: 0 7px;
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600; line-height: 1;
+  letter-spacing: .04em; color: var(--ff-muted); transition: color .16s;
+}
+/* The rule under the live word. It is the same shape as the rail's underline and
+   the title's: it grows from the word's own left edge and is the only thing that
+   says which language is in use. */
+.ff-lang-option::after { content: ''; position: absolute; left: 7px; right: 7px; bottom: 8px; height: 2px; background-color: var(--ff-accent); transform: scaleX(0); transform-origin: left center; transition: transform var(--ff-nav-preview) var(--ff-nav-ease); }
+.ff-shell .ff-lang-option:hover { color: var(--ff-ink); }
+.ff-shell .ff-lang-option[aria-pressed='true'] { color: var(--ff-accent); }
+.ff-shell .ff-lang-option[aria-pressed='true']::after { transform: scaleX(1); }
 /* The mute slash exists only when muted: an unmuted speaker has no strike. */
 .ff-preview-sound-slash { opacity: 0; stroke: var(--ff-red); stroke-width: 1.6; }
 .ff-shell .ff-preview-sound[aria-pressed='false'] .ff-preview-sound-slash { opacity: 1; }
@@ -178,7 +208,7 @@
   .ff-main > :is(.ff-home, .ff-detail-slot, .ff-about-slot, .ff-credits-slot) { width: calc(100% - var(--ff-rail) - var(--ff-gap)); }
 }
 .ff-exhibit-label { display: flex; justify-content: space-between; align-items: center; padding: 27px 0 19px; font-size: 10px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; color: var(--ff-muted); }
-.ff-exhibit-label span:first-child { display: flex; align-items: center; gap: 8px; color: var(--ff-ink); }
+.ff-exhibit-label > span:first-child { display: flex; align-items: center; gap: 8px; color: var(--ff-ink); }
 .ff-live-dot { width: 5px; height: 5px; background: var(--ff-accent); border-radius: 50%; }
 .ff-exhibit { position: relative; width: 100%; aspect-ratio: 16 / 7; max-height: 620px; overflow: hidden; background: var(--ff-panel); touch-action: pan-y; cursor: none; }
 .ff-art-scene, .ff-artwork { display: block; width: 100%; height: 100%; }
@@ -322,7 +352,7 @@
   .ff-wordmark { font-size: clamp(14px, calc(10vw - 18px), 21px); }
   .ff-theme-group { grid-column: 2; grid-row: 1; }
   .ff-exhibit-label { font-size: 8px; padding: 22px 0 15px; gap: 12px; }
-  .ff-exhibit-label span:last-child { display: none; }
+  .ff-exhibit-label > span:last-child { display: none; }
   .ff-exhibit { height: 330px; }
   .ff-artwork { width: 125%; margin-left: -12.5%; }
   .ff-exhibit-note { left: 13px; right: 13px; bottom: 16px; font-size: 7px; letter-spacing: .04em; }
@@ -342,9 +372,49 @@
 @media (max-width: 360px) {
   .ff-work-info { flex-wrap: wrap; gap: 12px; }
 }
+/* ---- Narrower still: the header keeps every control ------------------------
+   Five 44px targets plus the wordmark cannot share one row at 320px without
+   either the brand or a target being shrunk past what it can be used at. So
+   below 480px the header stacks its two halves — the wordmark on one row, the
+   control group on the next — rather than letting either overflow or clip. The
+   group keeps its right edge, so the controls still read as a toolbar hung off
+   the top right corner rather than as a second left-aligned block. */
+@media (max-width: 480px) {
+  .ff-header { height: auto; min-height: 82px; padding: 10px 0; grid-template-columns: minmax(0, 1fr); row-gap: 2px; }
+  .ff-wordmark { grid-column: 1; grid-row: 1; }
+  .ff-theme-group { grid-column: 1; grid-row: 2; justify-self: end; }
+}
 @media (prefers-reduced-motion: reduce) {
   .ff-shell *, .ff-shell *::before, .ff-shell *::after { transition: none !important; animation: none !important; }
 }
+
+/* ---- Chinese type in the shell ---------------------------------------------
+   Latin display type is set tight: a negative tracking and a line box just under
+   the cap height, because Space Grotesk's own side bearings already keep Latin
+   words apart. CJK has none of that — every glyph is a full em square and
+   already carries its own spacing — so the same values pull the characters into
+   each other and clip tall strokes at the line box's edge.
+
+   So the Chinese edition drops the negative tracking to zero everywhere it is
+   applied and opens the line boxes. Nothing else changes: same font stack (which
+   already falls through Space Grotesk and Inter to PingFang SC and Microsoft
+   YaHei), same sizes, same scale, same Swiss grid. `data-ff-lang` is set once on
+   the shell, so this is one attribute rather than a class on every node. */
+.ff-shell[data-ff-lang='zh-CN'] :is(.ff-rail-link, .ff-eyebrow, .ff-exhibit-label, .ff-footer, .ff-detail-back, .ff-work-index, .ff-board-caption, .ff-lens-label, .ff-skip, .ff-image-wait, .ff-title-action) { letter-spacing: .01em; }
+/* The masthead headline is the largest translated type on the site, and it is
+   the case where the Latin values hurt most: -.03em pulls every full-em glyph
+   into its neighbour and a .96 line box crops the strokes above and below. Both
+   are dropped to zero / opened up here, next to the rule that set them, so the
+   override cannot be lost to load order. */
+.ff-shell[data-ff-lang='zh-CN'] .ff-about h1 { letter-spacing: 0; line-height: 1.16; }
+/* The rail's words are the largest type in the navigation and get the most room:
+   a CJK glyph is a full em, so the same font size needs a taller line box and a
+   little more leading between entries. The scale itself is untouched — all three
+   words are still the same size and still fit their column. */
+.ff-shell[data-ff-lang='zh-CN'] .ff-rail-link { line-height: 1.02; }
+.ff-shell[data-ff-lang='zh-CN'] .ff-rail { gap: clamp(4px, .8vw, 12px); }
+/* The Latin-only pieces keep their own tracking: the wordmark, the title and the
+   count are Space Grotesk in both languages and must not change. */
 
 .ff-image-wait { color: #c5c5c5; display: grid; place-items: center; font-family: var(--font-sans); font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: .05em; }
 /* Radial theme switch: keep both root snapshots unscaled and unmoved, clip only

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+import { useShellCopy } from '../i18n/shell';
+
 /**
  * The one reading placeholder the workspace uses, and the one reading failure.
  *
@@ -29,6 +31,7 @@ export const READ_WAIT_MS = 2000;
 
 
 export function ReadPending({ scope, object, className }: { scope: ReadScope; object: string; className?: string }) {
+  const w = useShellCopy();
   const [decorated, setDecorated] = useState(false);
   const [waiting, setWaiting] = useState(false);
   useEffect(() => {
@@ -36,13 +39,14 @@ export function ReadPending({ scope, object, className }: { scope: ReadScope; ob
     const slow = window.setTimeout(() => setWaiting(true), READ_WAIT_MS);
     return () => { window.clearTimeout(quick); window.clearTimeout(slow); };
   }, []);
+  const reading = w('read.status', { object });
   return <div className={`read-pending read-pending--${scope}${className ? ` ${className}` : ''}`}
-    role="status" aria-busy="true" aria-label={`正在读取${object}`}>
+    role="status" aria-busy="true" aria-label={reading}>
     {decorated && <span className="read-pending-lines" aria-hidden="true">
       <ReadShape scope={scope} />
     </span>}
-    <p className="read-pending-object">正在读取{object}</p>
-    {waiting && <p className="read-pending-wait">仍在等待{object}的读取结果，已超过 2 秒。</p>}
+    <p className="read-pending-object">{reading}</p>
+    {waiting && <p className="read-pending-wait">{w('read.waiting', { object })}</p>}
   </div>;
 }
 
@@ -52,7 +56,7 @@ export function ReadPending({ scope, object, className }: { scope: ReadScope; ob
  * index beside a body. Someone arriving at a slow page should recognise where
  * they are from the layout alone.
  *
- * Nothing here says anything about the data — no counts, no labels, no invented
+ * Nothing here says anything about the data —no counts, no labels, no invented
  * values. It is purely the frame the real content will fill.
  */
 function ReadShape({ scope }: { scope: ReadScope }) {
@@ -112,14 +116,15 @@ export interface ReadFailureProps {
  * behind this: a placeholder that cannot resolve is exactly what the reader must
  * not be left looking at. Retry stays on the page, and so does the way out.
  */
-export function ReadFailure({ title, detail, onRetry, retryLabel = '重新读取', onBack, backHref, backLabel = '返回' }: ReadFailureProps) {
+export function ReadFailure({ title, detail, onRetry, retryLabel, onBack, backHref, backLabel }: ReadFailureProps) {
+  const w = useShellCopy();
   return <div className="read-failed" role="alert">
     <strong>{title}</strong>
     <p className="read-failed-detail">{detail}</p>
     <div className="read-failed-actions">
-      <button type="button" className="button button--primary" onClick={onRetry}>{retryLabel}</button>
-      {onBack && <button type="button" className="button button--secondary" data-audio="manual" onClick={onBack}>{backLabel}</button>}
-      {!onBack && backHref && <a className="button button--secondary" href={backHref}>{backLabel}</a>}
+      <button type="button" className="button button--primary" onClick={onRetry}>{retryLabel ?? w('read.retry')}</button>
+      {onBack && <button type="button" className="button button--secondary" data-audio="manual" onClick={onBack}>{backLabel ?? w('read.back')}</button>}
+      {!onBack && backHref && <a className="button button--secondary" href={backHref}>{backLabel ?? w('read.back')}</a>}
     </div>
   </div>;
 }

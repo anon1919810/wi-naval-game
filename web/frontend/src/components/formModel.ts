@@ -1,4 +1,15 @@
 import type { ProjectDocument, RunView } from '../types';
+import { workspaceCopy } from '../i18n/workspace';
+import type { Copy } from './diagnosticGuidance';
+
+/**
+ * The English lookup every pure helper in this folder falls back to.
+ *
+ * The workspace's own default is English, and these modules are pure: they take
+ * the copy function as an argument so a component can hand its own bound lookup
+ * down, and a caller with none gets the English words rather than a stub.
+ */
+export const englishCopy: Copy = (key, params) => workspaceCopy('en', key, params);
 
 export type Raw = Record<string, unknown>;
 
@@ -98,14 +109,31 @@ export function uniqueId(base: string, taken: ReadonlyArray<unknown>): string {
 // instead of being written into the project.
 export type NumericDomain = 'signed' | 'nonnegative' | 'positive' | 'integer';
 
-export function numericProblem(kind: NumericDomain, raw: string): string | null {
+/**
+ * Why a typed number is refused, as a key rather than as a sentence.
+ *
+ * The check is about the *stored* value and knows nothing about the reader, so
+ * it returns the reason and leaves the wording to whoever prints it. A caller
+ * that stores the returned key — rather than the resolved string — can change
+ * language while the message is on screen and it will follow, which a stored
+ * sentence could not.
+ */
+export type NumericProblemCode = 'units.finiteRequired' | 'units.nonnegativeInteger' | 'units.positive' | 'units.nonnegative';
+
+export function numericProblemCode(kind: NumericDomain, raw: string): NumericProblemCode | null {
   if (raw.trim() === '') return null;
   const value = Number(raw);
-  if (!Number.isFinite(value)) return '必须是有限数值';
-  if (kind === 'integer') return Number.isInteger(value) && value >= 0 ? null : '必须是非负整数';
-  if (kind === 'positive') return value > 0 ? null : '必须是正数';
-  if (kind === 'nonnegative') return value >= 0 ? null : '不能为负数';
+  if (!Number.isFinite(value)) return 'units.finiteRequired';
+  if (kind === 'integer') return Number.isInteger(value) && value >= 0 ? null : 'units.nonnegativeInteger';
+  if (kind === 'positive') return value > 0 ? null : 'units.positive';
+  if (kind === 'nonnegative') return value >= 0 ? null : 'units.nonnegative';
   return null;
+}
+
+/** The same check, resolved into words for callers that print immediately. */
+export function numericProblem(kind: NumericDomain, raw: string, w: Copy = englishCopy): string | null {
+  const code = numericProblemCode(kind, raw);
+  return code ? w(code) : null;
 }
 
 export function numericValue(raw: string): number | null {

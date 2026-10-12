@@ -12,6 +12,7 @@ import {
   templatesFor, TORPEDO_LEAF, typedProblem, typedValue,
   WEAPONS_PAGE_LEAVES, withBoundary, withRows, type WeaponsLeafId,
 } from './weaponsModel';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 
 // Declared torpedo / mines / depth-charge / miscellaneous-zone inputs and the
 // aggregated weapon-page rows. `null` always means "unknown" — it must never be
@@ -48,7 +49,7 @@ function pickWeaponsView(runs: RunView[], leafId: string): WeaponsView | null {
   return object(object(data.page_rows)[key]) as WeaponsView;
 }
 
-const LEAF_TITLES: Record<WeaponsLeafId, string> = { torpedo: '鱼雷 / 水雷 / 深弹', misc_weight: '杂项位置分区质量' };
+const LEAF_TITLES: Record<WeaponsLeafId, WorkspaceKey> = { torpedo: 'weapons.leaf.torpedo', misc_weight: 'weapons.leaf.misc' };
 
 export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   weapons: Weapons;
@@ -56,13 +57,14 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   ledger: Array<{ id: string; label?: string }>;
   onPatchLeaf: (leafId: string, next: Raw) => void;
 }) {
+  const w = useWorkspaceCopy();
   const available = WEAPONS_PAGE_LEAVES.filter(id => weapons[id] && typeof weapons[id] === 'object');
   const [choice, setChoice] = useState<WeaponsLeafId | null>(null);
   const leafId = (choice && available.includes(choice) ? choice : available[0]) ?? TORPEDO_LEAF;
   const leaf = object(weapons[leafId]);
   const declared = declaredRows(leaf);
   const units = useUnits();
-  const [problems, setProblems] = useState<Record<string, string>>({});
+  const [problems, setProblems] = useState<Record<string, WorkspaceKey>>({});
   const bound = rowBoundIds(declared);
   const unassigned = unassignedIds(stringList(leaf.weight_item_ids), bound);
   const leafAbsent = leaf.status === 'absent';
@@ -82,6 +84,8 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   }
   function addRow(templateId: string) {
     const template = templatesFor(leafId).find(item => item.id === templateId) ?? templatesFor(leafId)[0];
+    // `template.label` is the label stored in the project document; this page's
+    // own label for the same template is `w(template.labelKey)`.
     const row: Raw = {
       row: uniqueId(template.id, declared.map(item => item.row)),
       label: template.label,
@@ -97,7 +101,7 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   }
   function setTyped(index: number, field: string, raw: string) {
     const key = `${leafId}/${declared[index]?.row ?? index}/${field}`;
-    const problem = typedProblem(field, raw);
+    const problem = typedProblem(field, raw, key => key) as WorkspaceKey | null;
     setProblems(previous => {
       const next = { ...previous };
       if (problem) next[key] = problem; else delete next[key];
@@ -117,25 +121,25 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
   const [template, setTemplate] = useState(templates[0].id);
 
   return <div className="weapons-editor form-stack">
-    <div className="form-card"><h3>武器页分区</h3>
-      <p>鱼雷与杂项分区是声明输入。质量只取自所选载荷账本；未知保持空缺，不按排水量倒填。</p>
-      {available.length === 0 && <p className="form-hint">空白项目尚未声明任何分区。请先建立分区，再逐行声明数量与来源。</p>}
+    <div className="form-card"><h3>{w('weapons.groups.title')}</h3>
+      <p>{w('weapons.groups.intro')}</p>
+      {available.length === 0 && <p className="form-hint">{w('weapons.groups.empty')}</p>}
       <div className="form-grid">
-        <label className="field-label">当前分区<select aria-label="选择武器分区" value={leafId}
+        <label className="field-label">{w('weapons.groups.current')}<select aria-label={w('weapons.groups.currentAria')} value={leafId}
           onChange={e => setChoice(e.target.value as WeaponsLeafId)}>
           {WEAPONS_PAGE_LEAVES.map(id => <option key={id} value={id} disabled={!available.includes(id)}>
-            {LEAF_TITLES[id]}{available.includes(id) ? '' : '（未声明）'}</option>)}
+            {w(LEAF_TITLES[id])}{available.includes(id) ? '' : w('weapons.groups.undeclared')}</option>)}
         </select></label>
         {!available.includes(TORPEDO_LEAF) && <button className="button button--secondary" type="button"
-          onClick={() => createLeaf(TORPEDO_LEAF)}>添加鱼雷分区</button>}
+          onClick={() => createLeaf(TORPEDO_LEAF)}>{w('weapons.groups.addTorpedo')}</button>}
         {!available.includes(MISC_LEAF) && <button className="button button--secondary" type="button"
-          onClick={() => createLeaf(MISC_LEAF)}>添加杂项分区</button>}
+          onClick={() => createLeaf(MISC_LEAF)}>{w('weapons.groups.addMisc')}</button>}
       </div>
     </div>
 
-    <div className="form-card"><h3>{LEAF_TITLES[leafId]}</h3>
-      <p>每行都需要自己的来源；行标识固定，账本绑定决定该行质量是否已知。</p>
-      {declared.length === 0 && <p className="form-hint">该分区还没有声明行。鱼雷分区可声明多组鱼雷管、水雷与深弹；杂项分区声明五个位置分区。</p>}
+    <div className="form-card"><h3>{w(LEAF_TITLES[leafId])}</h3>
+      <p>{w('weapons.rows.note')}</p>
+      {declared.length === 0 && <p className="form-hint">{w('weapons.rows.empty')}</p>}
       {declared.map((row, index) => {
         const typed = object(row.typed);
         const fields = Object.keys(typed).filter(field => field in TYPED_FIELDS);
@@ -144,65 +148,66 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
             <div className="form-grid">
               {fields.map(field => {
                 const spec = TYPED_FIELDS[field];
-                const key = `${leafId} ${String(row.row)} ${spec.label}`;
+                const label = w(spec.label);
+                const key = w('weapons.row.aria', { leaf: leafId, row: String(row.row), label });
                 const value = typed[field];
                 const problem = problems[`${leafId}/${String(row.row)}/${field}`];
-                if (!spec.dimension) return <label className="field-label" key={field}>{spec.label}
+                if (!spec.dimension) return <label className="field-label" key={field}>{label}
                   <input type={spec.kind === 'text' ? 'text' : 'number'} step={spec.kind === 'integer' ? 1 : 'any'}
-                    min={spec.kind === 'signed' ? undefined : 0} placeholder="未知" aria-label={key}
+                    min={spec.kind === 'signed' ? undefined : 0} placeholder={w('units.unknown')} aria-label={key}
                     aria-invalid={Boolean(problem)} value={value == null ? '' : String(value)}
                     onChange={e => setTyped(index, field, e.target.value)} />
-                  {problem && <span className="field-error" role="alert">{problem}</span>}</label>;
+                  {problem && <span className="field-error" role="alert">{w(problem)}</span>}</label>;
                 // A convertible quantity is typed in the reader's unit and stored
                 // canonically; the domain is still checked on the stored value.
-                return <QuantityField key={field} label={spec.label} ariaLabel={key} value={number(value)}
+                return <QuantityField key={field} label={label} ariaLabel={key} value={number(value)}
                   dimension={spec.dimension} storedUnit={spec.storedUnit} kind={spec.kind === 'integer' ? 'integer' : spec.kind === 'positive' ? 'positive' : spec.kind === 'nonnegative' ? 'nonnegative' : 'signed'}
                   invalid={Boolean(problem)}
                   onChange={next => setTyped(index, field, next === null ? '' : String(next))} />;
               })}
-              <label className="field-label">行来源<input aria-label={`${leafId} ${String(row.row)} 行来源`}
-                value={sourceText(row.source)} placeholder="待补充来源"
+              <label className="field-label">{w('weapons.rows.source')}<input aria-label={w('weapons.rows.sourceAria', { leaf: leafId, row: String(row.row) })}
+                value={sourceText(row.source)} placeholder={w('fact.sourcePlaceholder')}
                 onChange={e => patchRow(index, { source: e.target.value.trim() === '' ? null : e.target.value })} /></label>
-              <EstimateInput label={`${leafId} ${String(row.row)} 估算状态`} value={row.estimate}
+              <EstimateInput label={w('fact.estimateAria', { label: `${leafId} ${String(row.row)}` })} value={row.estimate}
                 onChange={estimate => patchRow(index, { estimate })} />
             </div>
-            <IdPicker label={`${leafId} ${String(row.row)} 账本绑定`} selected={row.weight_item_ids} options={ledger}
+            <IdPicker label={w('fact.bindingAria', { label: `${leafId} ${String(row.row)}` })} selected={row.weight_item_ids} options={ledger}
               onChange={ids => patchRow(index, { weight_item_ids: ids })} />
-            <button className="text-button" type="button" onClick={() => removeRow(index)}>移除声明行</button>
+            <button className="text-button" type="button" onClick={() => removeRow(index)}>{w('weapons.rows.remove')}</button>
           </div></details>;
       })}
       <div className="form-grid">
-        <label className="field-label">新增行模板<select aria-label="新增行模板" value={template}
+        <label className="field-label">{w('weapons.rows.template')}<select aria-label={w('weapons.rows.templateAria')} value={template}
           onChange={e => setTemplate(e.target.value)}>
-          {templates.map(item => <option key={item.id} value={item.id}>{item.label}（{item.id}）</option>)}
+          {templates.map(item => <option key={item.id} value={item.id}>{w('weapons.rows.option', { label: w(item.labelKey), id: item.id })}</option>)}
         </select></label>
-        <button className="button button--secondary" type="button" onClick={() => addRow(template)}>添加声明行</button>
+        <button className="button button--secondary" type="button" onClick={() => addRow(template)}>{w('weapons.rows.add')}</button>
       </div>
     </div>
 
-    <div className="form-card"><h3>分区账本绑定</h3>
-      <p>分区账本条目 = 各行绑定之和（自动同步）。未分配到行的条目仍计入分区质量，运行时会以 page_rows.item_uncovered 明确报告。</p>
-      <IdPicker label="未分配到行的分区账本条目" selected={unassigned} options={ledger}
+    <div className="form-card"><h3>{w('weapons.binding.title')}</h3>
+      <p>{w('weapons.binding.note')}</p>
+      <IdPicker label={w('weapons.binding.unassigned')} selected={unassigned} options={ledger}
         onChange={ids => commitRows(declared, ids)} />
       <p className="form-hint">
         {leafAbsent
-          ? '该分区已显式声明为不存在（status=absent），不参与系统质量。'
+          ? w('weapons.binding.absentNote')
           : bound.length + unassigned.length === 0
-            ? '该分区尚未绑定账本条目：运行时会报告 systems.present_without_weight_items。'
-            : `分区账本条目 ${bound.length + unassigned.length} 项，其中 ${unassigned.length} 项未分配到行。`}
+            ? w('weapons.binding.noneNote')
+            : w('weapons.binding.countNote', { count: bound.length + unassigned.length, unassigned: unassigned.length })}
       </p>
-      <label className="field-label">分区状态<select aria-label={`${leafId} 分区状态`} value={leafAbsent ? 'absent' : 'present'}
+      <label className="field-label">{w('weapons.status.label')}<select aria-label={w('weapons.status.aria', { leaf: leafId })} value={leafAbsent ? 'absent' : 'present'}
         onChange={e => {
           const absent = e.target.value === 'absent';
           const next: Raw = { ...leaf, status: absent ? 'absent' : 'present' };
-          if (absent) next.reason = typeof leaf.reason === 'string' && leaf.reason ? leaf.reason : '该分区未在本项目声明';
+          if (absent) next.reason = typeof leaf.reason === 'string' && leaf.reason ? leaf.reason : w('weapons.status.reason');
           else delete next.reason;
           emit(next);
         }}>
-        <option value="present">存在（present）</option><option value="absent">显式不存在（absent）</option>
+        <option value="present">{w('weapons.status.present')}</option><option value="absent">{w('weapons.status.absent')}</option>
       </select></label>
-      {leafAbsent && <label className="field-label">不存在原因<input aria-label={`${leafId} 不存在原因`}
-        value={sourceText(leaf.reason)} placeholder="必填：分区不存在的依据"
+      {leafAbsent && <label className="field-label">{w('weapons.status.reasonLabel')}<input aria-label={w('weapons.status.reasonAria', { leaf: leafId })}
+        value={sourceText(leaf.reason)} placeholder={w('weapons.status.reasonPlaceholder')}
         onChange={e => patchLeaf({ reason: e.target.value.trim() === '' ? null : e.target.value })} /></label>}
     </div>
 
@@ -215,17 +220,17 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
               const mass = numeric(row.weight_t);
               const declaredValue = declaredMass(row);
               return <div key={String(row.row ?? index)} className="metric-grid">
-                <ResultFact label={`${name} · 账本质量`} value={mass} unit="t" dimension="mass"
-                  note={row.mass_status === 'ledger_bound' ? null : '未绑定账本条目'} />
-                {declaredValue !== null && <ResultFact label={`${name} · 声明质量`} value={declaredValue} unit="t" dimension="mass"
-                  note="仅信息，不计入排水量" />}
+                <ResultFact label={w('weapons.result.ledgerMass', { name })} value={mass} unit="t" dimension="mass"
+                  note={row.mass_status === 'ledger_bound' ? null : w('weapons.result.unboundNote')} />
+                {declaredValue !== null && <ResultFact label={w('weapons.result.declaredMass', { name })} value={declaredValue} unit="t" dimension="mass"
+                  note={w('weapons.result.declaredNote')} />}
               </div>;
             })}
           </div>
-          <p className="form-hint">账本质量来自所选载荷账本。声明质量是设计输入，仅供参考：不参与排水量计算，也不会自动生成账本条目。</p>
+          <p className="form-hint">{w('weapons.result.note')}</p>
           <Diagnostics value={view.diagnostics} />
         </>
-        : <p className="section-intro">{leafId === MISC_LEAF ? '杂项分区：保存并运行后显示聚合值' : '鱼雷：保存并运行后显示聚合值'}</p>}
+        : <p className="section-intro">{w(leafId === MISC_LEAF ? 'weapons.result.miscEmpty' : 'weapons.result.torpedoEmpty')}</p>}
     </ResultSection>
   </div>;
 }
@@ -233,18 +238,20 @@ export function WeaponsEditor({ weapons, runs, ledger, onPatchLeaf }: {
 function ResultFact({ label, value, unit, note, dimension }: {
   label: string; value: number | null; unit: string; note: string | null; dimension?: Dimension;
 }) {
+  const w = useWorkspaceCopy();
   const units = useUnits();
   return <div className={`fact-field fact-field--${value === null ? 'unknown' : 'known'}`}>
     <span className="fact-label">{label}</span>
-    <strong className="fact-value">{value === null ? '未知' : dimension ? units.text(value, dimension) : `${value} ${unit}`}</strong>
-    <span className="fact-meta">{note ?? '当前工况运行结果'}</span>
+    <strong className="fact-value">{value === null ? w('factField.unknown') : dimension ? units.text(value, dimension) : `${value} ${unit}`}</strong>
+    <span className="fact-meta">{note ?? w('formResults.sourceRun')}</span>
   </div>;
 }
 
 function Diagnostics({ value }: { value: unknown }) {
+  const w = useWorkspaceCopy();
   const items = rows(value);
   if (items.length === 0) return null;
   return <ul className="diagnostics-list">
-    {items.map((item, index) => <li key={index}><code>{String(item.code ?? '诊断')}</code>{item.message ? `：${String(item.message)}` : ''}</li>)}
+    {items.map((item, index) => <li key={index}><code>{String(item.code ?? w('report.diagnostics.fallback'))}</code>{item.message ? w('report.fact', { label: String(item.message) }) : ''}</li>)}
   </ul>;
 }

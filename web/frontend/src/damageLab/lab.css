@@ -66,3 +66,14 @@
 .lab-fragment-target { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:15px; align-items:center; border-top:1px solid var(--line); padding:12px 0; font-size:14px; }.lab-fragment-target button { font-size:11px; padding:7px 9px; }.lab-fragment-target strong { font-weight:500; font-variant-numeric:tabular-nums; }.lab-path-caption { font-size:10px; line-height:1.7; color:var(--muted); margin:15px 0; }
 @media(max-width:1200px) { .lab-grid { grid-template-columns:210px minmax(0,1fr); gap:24px; }.lab-inspector { grid-column:1/-1; border-left:0; padding:24px 0 0; border-top:1px solid var(--line); display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }.lab-inspector>.lab-kicker,.lab-inspector>h2 { grid-column:1/-1; margin:0; }.lab-module-list { grid-column:1/-1; display:flex; gap:24px; }.lab-module-list button { width:auto; flex:1; }.lab-ship-metrics strong { font-size:20px; } }
 @media(max-width:720px) { .lab-head { display:block; }.lab-head .lab-link { margin-top:20px; }.lab-grid { grid-template-columns:minmax(0,1fr); }.lab-setup { border-right:0; padding:0 0 24px; border-bottom:1px solid var(--line); }.lab-scene { height:380px; }.lab-inspector { grid-template-columns:minmax(0,1fr); }.lab-inspector>* { grid-column:auto; }.lab-module-list { display:block; }.lab-module-list button { width:100%; }.lab-evidence,.lab-records { grid-template-columns:minmax(0,1fr); gap:32px; }.lab-identity { gap:10px 20px; }.lab-identity .lab-note { margin-left:0; }.lab-ship-metrics { grid-template-columns:1fr 1fr; row-gap:25px; }.lab-scene-caption { font-size:8px; } }
+
+/* The read-only comparison of two completed trials. */
+.lab-comparison { border-top:1px solid var(--line-strong); padding-top:28px; margin-top:40px; }
+.lab-comparison h3 { margin:24px 0 6px; font-size:13px; }
+.lab-comparison table { width:100%; border-collapse:collapse; font-size:12px; margin-top:10px; }
+.lab-comparison th,.lab-comparison td { text-align:left; vertical-align:top; padding:6px 12px 6px 0; border-bottom:1px solid var(--line); }
+.lab-comparison thead th { font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+.lab-comparison .lab-error { margin:10px 0 0; }
+@media(max-width:720px) {
+  .lab-comparison table { display:block; max-width:100%; overflow-x:auto; overscroll-behavior-inline:contain; }
+}

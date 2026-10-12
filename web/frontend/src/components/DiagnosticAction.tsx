@@ -1,4 +1,5 @@
 import { diagnosticHref, resolveDiagnosticLocation, type Diagnostic, type DiagnosticLocation } from './diagnosticGuidance';
+import { useWorkspaceCopy } from '../i18n/workspace';
 import type { ProjectDocument } from '../types';
 
 /**
@@ -40,10 +41,13 @@ export function DiagnosticAction({ diagnostic, context, project, onNavigate }: {
   /** The workspace's own jump: it is given the snapshot to re-resolve against. */
   onNavigate?: (location: DiagnosticLocation, snapshot: ProjectDocument | null) => void;
 }) {
+  const w = useWorkspaceCopy();
   if (!context) return null;
-  const location = resolveDiagnosticLocation(diagnostic, { snapshot: context.snapshot, live: project });
+  const location = resolveDiagnosticLocation(diagnostic, { snapshot: context.snapshot, live: project }, w);
   if (!location || location.kind === 'evidence' || !location.target) return null;
-  const label = `${location.kind === 'control' ? '编辑' : '打开'}${location.label}`;
+  // The verb says what the control does; the label is the destination's own
+  // name, which the resolver resolved in the reader's language.
+  const label = w(location.kind === 'control' ? 'action.edit' : 'action.open', { label: location.label });
   if (onNavigate) {
     return <button type="button" className="diagnostic-action no-print" title={location.note}
       onClick={() => onNavigate(location, context.snapshot)}>{label}</button>;

@@ -4,11 +4,31 @@ import { ShapeUtils, Vector2 } from 'three';
 type Contour = { x:number; points:number[][]; knots:number[]; perimeter:number };
 const EPS=1e-10;
 
+/**
+ * A refusal from this module, named rather than spoken.
+ *
+ * The geometry below is numeric and the errors say exactly what about the
+ * stored lines plan is unusable. They carry a *code* and nothing else: the
+ * sentence is resolved by whoever shows it, in the reader's language and at
+ * render time. A module-global locale would instead freeze whichever language
+ * happened to be current when the failure was raised, and would leave the
+ * renderer holding a sentence in a language that could no longer be chosen.
+ */
+export type HullErrorCode =
+  | 'hull.error.coords' | 'hull.error.profile' | 'hull.error.length'
+  | 'hull.error.stations' | 'hull.error.duplicate' | 'hull.error.mesh';
+
+export class HullGeometryError extends Error {
+  readonly code: HullErrorCode;
+  constructor(code: HullErrorCode) { super(code); this.code = code; }
+}
+const refuse = (code: HullErrorCode): never => { throw new HullGeometryError(code); };
+
 function contour(x:number, raw:number[][]):Contour {
-  if(!Number.isFinite(x) || raw.some(p=>p.length!==2 || p.some(v=>!Number.isFinite(v))))throw new Error('型线包含无效坐标。');
+  if(!Number.isFinite(x) || raw.some(p=>p.length!==2 || p.some(v=>!Number.isFinite(v))))refuse('hull.error.coords');
   let points=raw.filter((p,i)=>i===0 || Math.hypot(p[0]-raw[i-1][0],p[1]-raw[i-1][1])>EPS).map(p=>[...p]);
   if(points.length>1 && Math.hypot(points[0][0]-points.at(-1)![0],points[0][1]-points.at(-1)![1])<EPS)points.pop();
-  if(points.length<2)throw new Error('型线剖面没有可绘制的边。');
+  if(points.length<2)refuse('hull.error.profile');
   if(ShapeUtils.area(points.map(p=>new Vector2(...p as [number,number])))<0)points.reverse();
   // Anchor at the port deck corner, independent of file winding/cyclic origin.
   const anchor=points.reduce((best,p,i)=>p[1]>points[best][1]+EPS || Math.abs(p[1]-points[best][1])<=EPS && p[0]<points[best][0] ? i : best,0);
@@ -17,7 +37,7 @@ function contour(x:number, raw:number[][]):Contour {
   for(let i=0;i<points.length;i++){
     const a=points[i],b=points[(i+1)%points.length];perimeter+=Math.hypot(a[0]-b[0],a[1]-b[1]);knots.push(perimeter);
   }
-  if(perimeter<=EPS)throw new Error('型线剖面长度为零。');
+  if(perimeter<=EPS)refuse('hull.error.length');
   const starboardDeck=points.reduce((best,p,i)=>p[1]>points[best][1]+EPS || Math.abs(p[1]-points[best][1])<=EPS && p[0]>points[best][0] ? i : best,0);
   const deckStart=knots[starboardDeck];
   // Match sheer edges separately so narrowing stations cannot pull deck into side shell.
@@ -39,12 +59,12 @@ function at(row:Contour, t:number, keel:number):Vec3 {
 
 /** Every original section vertex survives. New points lie on original edges. */
 export function buildHullEnvelope(stations:Array<[number,number[][]]>, keelOffset:number):{sections:Vec3[][];faces:Vec3[][]} {
-  if(stations.length<2 || !Number.isFinite(keelOffset))throw new Error('需要有效的内联站位型线。');
+  if(stations.length<2 || !Number.isFinite(keelOffset))refuse('hull.error.stations');
   const rows=stations.map(([x,p])=>contour(x,p)).sort((a,b)=>a.x-b.x);
-  if(rows.some((r,i)=>i>0 && r.x<=rows[i-1].x))throw new Error('型线站位必须互不重复。');
+  if(rows.some((r,i)=>i>0 && r.x<=rows[i-1].x))refuse('hull.error.duplicate');
   const knots=rows.flatMap(r=>r.knots).sort((a,b)=>a-b).filter((v,i,all)=>i===0 || v-all[i-1]>EPS);
   // Keep exact corners, or report unavailable; never silently simplify input.
-  if(rows.length*knots.length>250000)throw new Error('精确型线检查网格过大；文字报告和计算结果仍可使用。');
+  if(rows.length*knots.length>250000)refuse('hull.error.mesh');
   const sections=rows.map(r=>knots.map(t=>at(r,t,keelOffset))),faces:Vec3[][]=[];
   for(let i=1;i<sections.length;i++)for(let j=0;j<knots.length;j++){
     const next=(j+1)%knots.length;

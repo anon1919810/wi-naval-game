@@ -58,6 +58,8 @@ export interface TankState { tank_id: string; volume_m3: number; plane_normal: V
 export interface ShipState {
   time_s: number; equilibrium: Equilibrium; total_onboard_water_mass_t: number; total_onboard_water_volume_m3: number;
   mass_conservation_error_t: number; tanks: TankState[];
+  flows?: Array<{ id?: string; from: string; to: string; flow_m3_s?: number; mass_flow_t_s?: number; status?: string }>;
+  edge_transfers?: Array<{ connection_id: string; from: string; to: string; transfer_m3?: number; transfer_t?: number; flow_m3_s?: number }>;
 }
 export interface LabState {
   time_s: number; event_index: number; ship: ShipState | null;

@@ -1,11 +1,14 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderZh as render, zhCopy } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Workbench } from '../pages/Workbench';
 import { declaredSource, estimateLabel, estimateState, InputTraceProvider, TracePanel, TracedField } from '../components/InputTrace';
-import { overviewReadings, overviewStages, severeDiagnostics } from '../components/WorkbenchOverview';
+import { overviewReadings as readingsInLanguage, overviewStages, severeDiagnostics as diagnosticsInLanguage } from '../components/WorkbenchOverview';
 import * as api from '../api';
 import type { AnalysisResult, ProjectDocument, RunView, StageEnvelope } from '../types';
+const overviewReadings = (run: RunView | null) => readingsInLanguage(run, 'zh-CN');
+const severeDiagnostics = (run: RunView | null) => diagnosticsInLanguage('zh-CN', run);
 
 vi.mock('../api', async original => ({ ...await original<typeof import('../api')>(),
   getProject: vi.fn(), saveProject: vi.fn(), listRuns: vi.fn(), enqueueRun: vi.fn(), getRun: vi.fn() }));
@@ -86,7 +89,7 @@ describe('workhead and chapter hierarchy', () => {
     await open();
     expect(screen.getByRole('heading', { level: 1, name: '解析方箱' })).toBeVisible();
     fireEvent.click(screen.getByRole('button', { name: '船型与几何' }));
-    expect(screen.getByRole('heading', { level: 1, name: 'Hull & Geometry' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: '船型与几何' })).toBeVisible();
     // The vessel stays reachable as smaller context, never a competing heading.
     expect(screen.queryByRole('heading', { name: '解析方箱' })).toBeNull();
     expect(document.querySelector('.chapter-context .chapter-vessel')!.textContent).toBe('解析方箱');
@@ -262,8 +265,11 @@ describe('overview reads inputs and the identity-guarded result', () => {
     vi.mocked(api.listRuns).mockResolvedValue([runWith(result)]);
     await open();
     const panel = group('当前结果 · Result');
-    expect(within(panel).getByText('暂不可计算')).toBeVisible();
-    expect(within(panel).getByText('模型越界')).toBeVisible();
+    expect(within(panel).getByText(/暂不可计算/)).toBeVisible();
+    // The composed status names its reason and its stage, and the panel prints it
+    // wherever the stage appears, so it shows more than once: what matters here is
+    // that a model-limit stage is never hidden.
+    expect(within(panel).getAllByText(/模型越界：超出方法适用范围/).length).toBeGreaterThan(0);
     expect(within(panel).getByText(/质量账本缺少关键条目/)).toBeVisible();
     expect(panel.textContent).not.toContain('仅供比较的提示');
     // An unavailable stage shows no number, not even one left in the envelope.
@@ -323,6 +329,69 @@ describe('overview projection', () => {
   });
 });
 
+describe('chapter index filter', () => {
+  /** The chapter names the index currently offers, in order. */
+  const index = () => Array.from(document.querySelectorAll('.nav-item .nav-label')).map(node => node.textContent);
+  const field = () => screen.getByLabelText('按名称筛选章节');
+
+  it('narrows the index to the chapters whose own words match, and gives it back', async () => {
+    await open();
+    expect(index().length).toBe(11);
+
+    fireEvent.change(field(), { target: { value: '稳性' } });
+    expect(index()).toContain('浮态与稳性');
+    expect(index()).not.toContain('概览');
+    // The count is always what is actually on screen, whatever the word matched.
+    expect(screen.getByText(`匹配 ${index().length} / 11`)).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: '清除章节筛选' }));
+    expect(index().length).toBe(11);
+    expect(field()).toHaveValue('');
+  });
+
+  it('keeps the word and the narrowed index while the reader moves between chapters', async () => {
+    await open();
+    fireEvent.change(field(), { target: { value: '武备' } });
+    const narrowed = index().length;
+    expect(narrowed).toBeLessThan(11);
+    expect(index()).toContain('火炮武备');
+
+    fireEvent.click(screen.getByRole('button', { name: '火炮武备' }));
+    expect(await screen.findByRole('heading', { level: 1, name: '火炮武备' })).toBeVisible();
+    // A chapter change is view state: it costs neither the filter nor its word.
+    expect(field()).toHaveValue('武备');
+    expect(index().length).toBe(narrowed);
+  });
+
+  it('opens the first chapter still standing on Enter, and clears the filter on Escape', async () => {
+    await open();
+    const input = field();
+    fireEvent.change(input, { target: { value: '稳性' } });
+    const first = index()[0]!;
+
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(await screen.findByRole('heading', { level: 1, name: first })).toBeVisible();
+    // Opening a chapter does not spend the word the reader typed.
+    expect(input).toHaveValue('稳性');
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(input).toHaveValue('');
+    expect(index().length).toBe(11);
+  });
+
+  it('says a word matches no chapter, and still offers the way back', async () => {
+    await open();
+    fireEvent.change(field(), { target: { value: '不存在的章节' } });
+    expect(index().length).toBe(0);
+    expect(screen.getByText('没有匹配的章节')).toBeVisible();
+    expect(screen.getByText('匹配 0 / 11')).toBeVisible();
+
+    fireEvent.keyDown(field(), { key: 'Escape' });
+    expect(index().length).toBe(11);
+    expect(screen.queryByText('没有匹配的章节')).toBeNull();
+  });
+});
+
 describe('input provenance and the Trace panel', () => {
   it('formats a ledger longitudinal position as length in Trace', async () => {
     await open('重量与载荷');
@@ -366,11 +435,11 @@ describe('input provenance and the Trace panel', () => {
   });
   it('never reads an undeclared estimate as confirmed', () => {
     expect(estimateState(null)).toBe('unknown');
-    expect(estimateLabel(null)).toBe('估算状态未声明');
+    expect(estimateLabel(null, zhCopy)).toBe('估算状态未声明');
     expect(estimateState(false)).toBe('declared');
-    expect(estimateLabel(false)).toBe('非估算（已声明）');
+    expect(estimateLabel(false, zhCopy)).toBe('非估算（已声明）');
     expect(estimateState(true)).toBe('estimate');
-    expect(estimateLabel(true)).toBe('工程估算');
+    expect(estimateLabel(true, zhCopy)).toBe('工程估算');
   });
 
   it('marks declared, estimated and unsourced fields from their own stored fields only', async () => {

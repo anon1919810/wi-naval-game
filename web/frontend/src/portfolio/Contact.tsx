@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { outcome } from '../audio/feedback';
+import { useLanguage } from './LanguageProvider';
 
 /** The real, public contact address and profile. Nothing here is a placeholder. */
 export const CONTACT_EMAIL = 'youxiang051110@163.com';
@@ -13,8 +14,14 @@ type CopyState = 'idle' | 'copied' | 'unavailable';
  * permission policy, or rejects. “Copied” is only ever shown after
  * `writeText` has actually resolved; every other outcome says plainly that it
  * did not happen and points at the link that always works.
+ *
+ * The two states are worded, not merely coloured: a Chinese visitor is told in
+ * Chinese that nothing was copied, and is pointed at the same address that always
+ * works. A refused clipboard is a browser's answer, and the message never claims
+ * more than what happened.
  */
 export function Contact() {
+  const { t } = useLanguage();
   const [state, setState] = useState<CopyState>('idle');
   const alive = useRef(true);
   const ticket = useRef(0);
@@ -37,15 +44,17 @@ export function Contact() {
     }
   };
 
-  return <section className="ff-contact" aria-labelledby="ff-contact-title" data-ff-section="Contact">
-    <h2 id="ff-contact-title" tabIndex={-1}>Get in touch</h2>
-    <p className="ff-contact-note">About the work, a bug in one of the tools, or something worth building together — email is the surest way.</p>
+  return <section className="ff-contact" aria-labelledby="ff-contact-title" data-ff-section={t('contact.section')}>
+    <h2 id="ff-contact-title" tabIndex={-1}>{t('contact.title')}</h2>
+    <p className="ff-contact-note">{t('contact.note')}</p>
     <div className="ff-contact-actions">
-      <a className="ff-contact-mail" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-      <button type="button" onClick={copy} className="ff-contact-copy">COPY EMAIL</button>
-      <a className="ff-contact-profile" href={CONTACT_PROFILE} target="_blank" rel="noopener noreferrer">GITHUB <span aria-hidden="true">↗</span></a>
+      {/* An address is an address in both languages, so it is marked as Latin
+          text rather than translated. */}
+      <a className="ff-contact-mail" href={`mailto:${CONTACT_EMAIL}`} lang="en">{CONTACT_EMAIL}</a>
+      <button type="button" onClick={copy} className="ff-contact-copy">{t('contact.copy')}</button>
+      <a className="ff-contact-profile" href={CONTACT_PROFILE} target="_blank" rel="noopener noreferrer" lang="en">{t('contact.github')} <span aria-hidden="true">↗</span></a>
     </div>
-    {state === 'copied' && <p className="ff-contact-status" role="status">COPIED — {CONTACT_EMAIL} is on your clipboard.</p>}
-    {state === 'unavailable' && <p className="ff-contact-status ff-contact-status--failed" role="alert">NOT COPIED — this browser did not give the page clipboard access. The address above is a plain mail link: select it, or open it directly.</p>}
+    {state === 'copied' && <p className="ff-contact-status" role="status">{t('contact.copied', { email: CONTACT_EMAIL })}</p>}
+    {state === 'unavailable' && <p className="ff-contact-status ff-contact-status--failed" role="alert">{t('contact.failed')}</p>}
   </section>;
 }

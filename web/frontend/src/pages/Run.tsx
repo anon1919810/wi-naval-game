@@ -1,3 +1,4 @@
+import { useCopyMessage } from '../i18n/useCopyMessage';
 import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
@@ -8,6 +9,8 @@ import { requestedStages } from '../components/resultReading';
 import { StageIndex } from '../components/StageIndex';
 import { StageStatus } from '../components/StageStatus';
 import { UnitProvider } from '../components/UnitProvider';
+import { useMomentText } from '../i18n/format';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import type { RunView } from '../types';
 
 /**
@@ -18,8 +21,8 @@ import type { RunView } from '../types';
  * only, so a queued or running run gets a plain waiting notice and never a
  * percentage, a bar or a guess about which stage is computing. `cancel_requested`
  * is the server's own word that a cancellation was asked for, and it stays that
- * way until the server actually reports `canceled`: "已请求取消" is never
- * reported as "已取消".
+ * way until the server actually reports `canceled`: a requested cancellation is
+ * never reported as a completed one.
  *
  * Reading the run and cancelling it are separate requests with separate errors:
  * a failing poll keeps the last loaded run on screen, and a failing cancel says
@@ -29,21 +32,20 @@ import type { RunView } from '../types';
  * run in front of the reader.
  */
 
-const LABELS: Record<RunView['status'], string> = {
-  queued: '排队中', running: '计算中', completed: '计算完成', partial: '部分完成', canceled: '已取消', failed: '计算失败',
+const STATUS_KEY: Record<RunView['status'], WorkspaceKey> = {
+  queued: 'run.status.queued', running: 'run.status.running', completed: 'run.status.completed',
+  partial: 'run.status.partial', canceled: 'run.status.canceled', failed: 'run.status.failed',
 };
 
 const TERMINAL = new Set<RunView['status']>(['completed', 'partial', 'canceled', 'failed']);
 const POLL_MS = 1500;
 
-function moment(value: string | null): string {
-  return value ? new Date(value).toLocaleString('zh-CN') : '未记录';
-}
-
 export function Run({ runId, onBack, onReport }: { runId: string; onBack: (projectId: string) => void; onReport: () => void }) {
+  const w = useWorkspaceCopy();
+  const moment = useMomentText();
   const [run, setRun] = useState<RunView | null>(null);
-  const [error, setError] = useState('');
-  const [cancelError, setCancelError] = useState('');
+  const [error, setError] = useCopyMessage();
+  const [cancelError, setCancelError] = useCopyMessage();
   const [canceling, setCanceling] = useState(false);
   // Every request carries a ticket. A newer request, a new run or an unmount
   // invalidates the older ones, so a late reply is dropped instead of applied.
@@ -86,7 +88,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
         // The run already on screen stays there: a failed read adds a notice,
         // it does not replace the result the reader came for.
         if (!active || ticket.current !== issued) return;
-        setError(cause instanceof Error ? cause.message : '无法读取运行');
+        setError(w => cause instanceof Error ? cause.message : w('run.readFailedGeneric'));
       }
     }
     poll.current = () => { void refresh(); };
@@ -119,7 +121,7 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
     } catch (cause) {
       if (ticket.current !== current) return;
       outcome('hold');
-      setCancelError(cause instanceof Error ? cause.message : '取消失败');
+      setCancelError(w => cause instanceof Error ? cause.message : w('run.cancel.failedGeneric'));
       // The cancel took the read loop down with it; a refused cancel must not
       // leave the run unwatched, so the loop goes back to work.
       poll.current();
@@ -136,67 +138,68 @@ export function Run({ runId, onBack, onReport }: { runId: string; onBack: (proje
   const waiting = !!run && (run.status === 'queued' || run.status === 'running');
   // A cancellation that was only requested is still a running run.
   const cancelPending = waiting && run.cancel_requested;
-  const statusText = cancelPending ? '已请求取消' : run ? LABELS[run.status] : '';
+  const statusText = cancelPending ? w('run.status.cancelRequested') : run ? w(STATUS_KEY[run.status]) : '';
 
   const page = <main className="run-page page-pad">
-    <button className="text-button" data-audio="manual" onClick={() => run && onBack(run.project_id)}>← 返回舰船</button>
+    <button className="text-button" data-audio="manual" onClick={() => run && onBack(run.project_id)}>{w('run.back')}</button>
     {/* A read that never succeeded has no run to show, so it says so and offers
         exactly one explicit retry instead of a skeleton that never resolves. */}
     {error && !run
-      ? <ReadFailure title={`无法读取运行 ${runId}`} detail={error} onRetry={() => { setError(''); poll.current(); }} />
-      : !run ? <ReadPending scope="run" object="运行" /> : <>
+      ? <ReadFailure title={w('run.readFailed', { id: runId })} detail={error} onRetry={() => { setError(''); poll.current(); }} />
+      : !run ? <ReadPending scope="run" object={w('run.pending.object')} /> : <>
       <div className="run-identity">
         <div className="run-identity-lead">
           <span className="section-kicker">RUN / {run.id.slice(0, 8).toUpperCase()}</span>
-          <h1>计算运行</h1>
+          <h1>{w('run.title')}</h1>
           {shipName && <p className="run-identity-ship">{shipName}</p>}
         </div>
         <dl className="run-identity-facts">
-          <div><dt>运行 id</dt><dd><code>{run.id}</code></dd></div>
-          <div><dt>保存修订</dt><dd>修订 {run.revision}</dd></div>
-          <div><dt>工况</dt><dd>{conditionLabel}</dd></div>
+          <div><dt>{w('run.identity.id')}</dt><dd><code>{run.id}</code></dd></div>
+          <div><dt>{w('run.identity.revision')}</dt><dd>{w('workbench.save.revision', { revision: run.revision })}</dd></div>
+          <div><dt>{w('run.identity.condition')}</dt><dd>{conditionLabel}</dd></div>
         </dl>
       </div>
 
       <div className="run-status" role="status">
-        <span className="section-kicker">STATUS / 当前状态</span>
+        <span className="section-kicker">{w('run.status.kicker')}</span>
         <h2>{statusText}</h2>
-        {cancelPending && <p className="run-status-note">已请求取消，等待服务端实际结束；当前服务端状态为 {LABELS[run.status]}。</p>}
+        {cancelPending && <p className="run-status-note">{w('run.status.cancelPending', { status: w(STATUS_KEY[run.status]) })}</p>}
         {waiting && <div className="run-pending">
           <span className="run-progress" data-status={run.status} aria-hidden="true" />
-          <p>{run.status === 'queued' ? '已排队，等待计算工作进程。' : '计算正在后台执行，离开页面后可再打开此运行。'}</p>
+          <p>{run.status === 'queued' ? w('run.pending.queued') : w('run.pending.running')}</p>
           <button className="button button--secondary" disabled={canceling || (run.cancel_requested && !cancelError)} onClick={cancel}>
-            {canceling ? '正在取消' : cancelError ? '重试取消' : run.cancel_requested ? '已请求取消' : '取消计算'}
+            {canceling ? w('run.cancel.busy') : cancelError ? w('run.cancel.retry') : run.cancel_requested ? w('run.cancel.requested') : w('run.cancel.action')}
           </button>
         </div>}
+        {/* The server's own failure is evidence and is shown exactly as saved. */}
         {run.error && <div className="notice notice--error" role="alert"><strong>{run.error.code}</strong><p>{run.error.message}</p></div>}
         {/* A later read failure is added to the run already on screen, never
             in place of it. */}
         {error && run && <div className="notice notice--error" role="alert">{error}
-          <button className="text-button" onClick={() => { setError(''); poll.current(); }}>重新读取</button>
+          <button className="text-button" onClick={() => { setError(''); poll.current(); }}>{w('run.readAgain')}</button>
         </div>}
-        {cancelError && <div className="notice notice--error" role="alert">取消失败：{cancelError}</div>}
+        {cancelError && <div className="notice notice--error" role="alert">{w('run.cancel.failed', { reason: cancelError })}</div>}
       </div>
 
       <details className="run-meta">
-        <summary>运行元信息 · 指纹与时间</summary>
+        <summary>{w('run.meta.summary')}</summary>
         <dl>
-          <div><dt>请求指纹</dt><dd><code>{run.request_fingerprint}</code></dd></div>
-          <div><dt>项目</dt><dd><code>{run.project_id}</code></dd></div>
-          <div><dt>创建</dt><dd>{moment(run.created_at)}</dd></div>
-          <div><dt>开始</dt><dd>{moment(run.started_at)}</dd></div>
-          <div><dt>结束</dt><dd>{moment(run.finished_at)}</dd></div>
-          <div><dt>取消请求</dt><dd>{run.cancel_requested ? '已请求' : '未请求'}</dd></div>
-          <div><dt>服务端状态</dt><dd>{LABELS[run.status]}</dd></div>
+          <div><dt>{w('run.meta.fingerprint')}</dt><dd><code>{run.request_fingerprint}</code></dd></div>
+          <div><dt>{w('run.meta.project')}</dt><dd><code>{run.project_id}</code></dd></div>
+          <div><dt>{w('run.meta.created')}</dt><dd>{moment(run.created_at) ?? w('run.moment.missing')}</dd></div>
+          <div><dt>{w('run.meta.started')}</dt><dd>{moment(run.started_at) ?? w('run.moment.missing')}</dd></div>
+          <div><dt>{w('run.meta.finished')}</dt><dd>{moment(run.finished_at) ?? w('run.moment.missing')}</dd></div>
+          <div><dt>{w('run.meta.cancelRequested')}</dt><dd>{run.cancel_requested ? w('run.meta.cancelYes') : w('run.meta.cancelNo')}</dd></div>
+          <div><dt>{w('run.meta.serverStatus')}</dt><dd>{w(STATUS_KEY[run.status])}</dd></div>
         </dl>
       </details>
 
       {run.result && <>
         <div className="run-result-heading">
-          <div><span className="section-kicker">RESULT / 已存结果</span>
-            <h2>{run.result.status === 'partial' ? '部分结果可供复核' : run.result.status === 'canceled' ? '已保存取消前的结果' : '计算结果已保存'}</h2>
-            <p>计算完成不等于史实验证。逐阶段检查有效性、缺项与诊断。</p></div>
-          <button className="button button--primary" data-audio="manual" onClick={onReport}>查看完整报告 ↗</button>
+          <div><span className="section-kicker">{w('run.result.kicker')}</span>
+            <h2>{run.result.status === 'partial' ? w('run.result.partial') : run.result.status === 'canceled' ? w('run.result.canceled') : w('run.result.saved')}</h2>
+            <p>{w('run.result.note')}</p></div>
+          <button className="button button--primary" data-audio="manual" onClick={onReport}>{w('run.result.report')}</button>
         </div>
         {/* Every requested stage is reachable: nothing is truncated, and the
             damage evidence lives inside the flooding stage rather than in a

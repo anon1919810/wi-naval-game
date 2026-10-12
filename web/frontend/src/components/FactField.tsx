@@ -1,4 +1,5 @@
 import { useUnits } from './UnitProvider';
+import { useWorkspaceCopy } from '../i18n/workspace';
 import type { Dimension } from './units';
 
 interface FactFieldProps {
@@ -15,16 +16,17 @@ interface FactFieldProps {
 }
 
 export function FactField({ label, value, unit = '', dimension, storedUnit, status = 'known', source }: FactFieldProps) {
+  const w = useWorkspaceCopy();
   const units = useUnits();
   const missing = value === null || value === undefined || status === 'unknown';
   const shown = missing
-    ? '未知'
+    ? w('factField.unknown')
     : dimension
       ? units.text(value, dimension, storedUnit)
       : `${value}${unit ? ` ${unit}` : ''}`;
   return <div className={`fact-field fact-field--${status}`}>
     <span className="fact-label">{label}</span>
     <strong className="fact-value">{shown}</strong>
-    <span className="fact-meta">{status === 'estimate' ? '估算 · ' : ''}{source || (missing ? '缺少输入或来源' : '查看来源')}</span>
+    <span className="fact-meta">{status === 'estimate' ? w('factField.estimatePrefix') : ''}{source || (missing ? w('factField.missing') : w('factField.viewSource'))}</span>
   </div>;
 }

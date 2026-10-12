@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '../api';
@@ -293,7 +294,7 @@ describe('stored results and the immutable report', () => {
       status: 'completed', requested: true, reason: null,
       validity: { complete: true, converged: true, model_applicable: true, historical_validated: null },
       method_versions: {}, assumptions: [], diagnostics: [],
-      data: { total_mass_t: 27200, awp_m2: 1450, volume_m3: 27200, heel_deg: 0 },
+      data: { values: { displacement_t: 27200, awp_m2: 1450, volume_m3: 27200, heel_deg: 0 } },
     };
     // A second stage carries the canonical-only quantities: density, force,
     // burn rate and period must never take a reader unit.
@@ -331,7 +332,7 @@ describe('stored results and the immutable report', () => {
   it('converts both comparison sides and the difference by the row key', async () => {
     const left = result({ length: 'ft', mass: 'kg' });
     const right = structuredClone(left);
-    right.stages.hydrostatics.data = { ...left.stages.hydrostatics.data, total_mass_t: 27000, awp_m2: 1400, volume_m3: 27000 };
+    right.stages.hydrostatics.data = { values: { displacement_t: 27000, awp_m2: 1400, volume_m3: 27000, heel_deg: 0 } };
     right.stages.propulsion.data = { ...left.stages.propulsion.data, coal_t: 110, total_resistance_kn: 1750 };
     await reportFor({ length: 'ft', mass: 'kg' }, right);
     const table = screen.getByRole('table');
@@ -345,7 +346,7 @@ describe('stored results and the immutable report', () => {
     const data = await reportFor({ mass: 't' });
     const original = JSON.stringify(data);
     const snapshot = data.input_snapshot;
-    const massSelect = screen.getByLabelText('报告mass显示单位');
+    const massSelect = screen.getByLabelText('报告质量显示单位');
     fireEvent.change(massSelect, { target: { value: 'kg' } });
     expect(screen.getAllByText('27,200,000 kg').length).toBeGreaterThan(0);
     // The immutable result object is untouched: exports and fingerprints keep
@@ -384,8 +385,8 @@ describe('stored results and the immutable report', () => {
     expect(card('稳态续航').textContent).toContain('工程估算');
 
     // Back to the canonical reading of the same saved numbers.
-    fireEvent.change(screen.getByLabelText('报告length显示单位'), { target: { value: 'm' } });
-    fireEvent.change(screen.getByLabelText('报告mass显示单位'), { target: { value: 't' } });
+    fireEvent.change(screen.getByLabelText('报告长度显示单位'), { target: { value: 'm' } });
+    fireEvent.change(screen.getByLabelText('报告质量显示单位'), { target: { value: 't' } });
     expect(card('龙骨基准水线高度').textContent).toContain('9.92 m');
     expect(card('所选工况总质量').textContent).toContain('27,200 t');
     expect(card('稳态续航').textContent).toContain('5,760 nmi');

@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { beforeEach, expect, it, vi } from 'vitest';
 import * as api from '../api';
 import { Workbench } from '../pages/Workbench';

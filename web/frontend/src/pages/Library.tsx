@@ -1,3 +1,4 @@
+import { useCopyMessage } from '../i18n/useCopyMessage';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
@@ -6,12 +7,18 @@ import { ReadFailure, ReadPending } from '../components/ReadPending';
 import type { ProjectSummary } from '../types';
 import { SiteGeometry } from '../portfolio/SiteGeometry';
 import { outcome } from '../audio/feedback';
+import { useDateText } from '../i18n/format';
+import { storedTemplateName, useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 
-const templates = [
-  { key: 'analytic_box', name: '解析方箱', tag: '解析基准', text: '有明确几何与解析解，适合熟悉项目和验证流程。' },
-  { key: 'generic_steamer', name: '通用试验船', tag: '示范案例', text: '带完整型线与载荷，用于探索多工况计算。' },
-  { key: 'queen_mary_1913', name: 'HMS Queen Mary', tag: '史实未认证代理', text: '一战战列巡洋舰工程代理。所有估算和史料缺口均保留标记。' },
-] as const;
+/**
+ * The templates the library offers, as keys only.
+ *
+ * A card's name, tag and text are application-authored words on a page this
+ * application writes, so they are bilingual dictionary entries. The name a
+ * created project is *saved* under is a separate thing and stays the raw stored
+ * name in either language — see `storedTemplateName`.
+ */
+const templates = ['analytic_box', 'generic_steamer', 'queen_mary_1913'] as const;
 
 /**
  * Reading the library and creating a project are two different failures.
@@ -28,17 +35,20 @@ type Read = { status: 'loading' | 'failed' | 'ready'; projects: ProjectSummary[]
  * How long a creation has been refused for, in words. Nothing here is invented:
  * the answer is either the server's own or the generic fallback.
  */
-function creationReason(cause: unknown): string {
-  return cause instanceof Error && cause.message ? cause.message : '请检查名称与模板后重试';
+function creationReason(cause: unknown, w: (key: WorkspaceKey, params?: any) => string): string {
+  return cause instanceof Error && cause.message ? cause.message : w('library.creationFailedGeneric');
 }
 
 export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: string) => void; onLab?: (id: string) => void; anonymous?: boolean }) {
+  const w = useWorkspaceCopy();
+  const date = useDateText();
   const [read, setRead] = useState<Read>({ status: 'loading', projects: [] });
-  const [readError, setReadError] = useState('');
-  const [createError, setCreateError] = useState('');
+  const [readError, setReadError] = useCopyMessage();
+  const [createError, setCreateError] = useCopyMessage();
   const [creating, setCreating] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const [name, setName] = useState('');
+  const [query, setQuery] = useState('');
   const [attempt, setAttempt] = useState(0);
   /**
    * One creation at a time across the whole page. Restoring a backup saves a
@@ -80,7 +90,7 @@ export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: str
     }).catch(cause => {
       if (!alive.current || readTicket.current !== ticket) return;
       setRead({ status: 'failed', projects: [] });
-      setReadError(cause instanceof Error ? cause.message : '无法读取项目库');
+      setReadError(w => cause instanceof Error ? cause.message : w('library.readFailedGeneric'));
     });
   }, [attempt]);
 
@@ -99,7 +109,7 @@ export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: str
     } catch (cause) {
       if (!alive.current || createTicket.current !== ticket) return;
       outcome('hold');
-      setCreateError(creationReason(cause));
+      setCreateError(w => creationReason(cause, w));
     } finally {
       if (alive.current && createTicket.current === ticket) {
         creatingNow.current = false;
@@ -108,48 +118,87 @@ export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: str
     }
   }
 
-  const count = read.status === 'loading' ? '读取中' : read.status === 'failed' ? '读取失败' : `${read.projects.length} 个项目`;
+  const count = read.status === 'loading' ? w('library.count.loading')
+    : read.status === 'failed' ? w('library.count.failed')
+      : w('library.count.ready', { count: read.projects.length });
+
+  /**
+   * The filter is a view of the list already read, never a second request: the
+   * reader's own project names are matched as they are stored, so a Chinese name
+   * and a Latin one are narrowed by one rule and no row costs a request to keep.
+   */
+  const needle = query.trim().toLowerCase();
+  const matches = needle ? read.projects.filter(project => project.name.toLowerCase().includes(needle)) : read.projects;
 
   return <main className="library-page page-pad">
-    <aside className="library-context" aria-label="工作区说明">
-      <header className="library-title"><span className="section-kicker">DESIGN WORKSPACE / 01</span><h1>Projects<span className="visually-hidden"> · 项目库</span></h1><p>从已保存的舰船继续，<br />或建立新的计算基线。</p></header>
+    <aside className="library-context" aria-label={w('library.contextLabel')}>
+      <header className="library-title"><span className="section-kicker">{w('library.kicker')}</span><h1>{w('library.title')}</h1><p>{w('library.ledeLine1')}<br />{w('library.ledeLine2')}</p></header>
       <div className="library-context-rule" aria-hidden="true"><SiteGeometry variant="rule" /></div>
       {anonymous && <div className="workspace-notice" role="note">
-      <strong>本浏览器工作区</strong>
-      <p className="workspace-summary">仅当前浏览器可见。请下载项目 JSON 备份；清除身份 Cookie 后无法自动找回。</p>
-      <details><summary>保存与恢复说明</summary>
-      <p>项目保存在这台设备的浏览器 Cookie 身份下，只有这个浏览器能看到它们。清除 Cookie、使用无痕窗口或换一台设备，都无法自动找回原来的工作区。需要留存时，请在项目页用「下载项目 JSON」保存完整文档；恢复时回到本页面「从备份恢复」，选择该文件，确认新项目名称后保存为新项目。运行页导出的 JSON/CSV 是计算报告，不是项目备份。</p>
+      <strong>{w('library.anonymous.title')}</strong>
+      <p className="workspace-summary">{w('library.anonymous.summary')}</p>
+      <details><summary>{w('library.anonymous.details')}</summary>
+      <p>{w('library.anonymous.body')}</p>
       </details>
       </div>}
-      <p className="library-context-foot">INPUT / REVISION / RESULT<br /><span>输入、修订与结果分别保存</span></p>
-      {onLab && <button className="button button--secondary" onClick={() => onLab('demo')}>损伤实验室 ↗</button>}
+      <p className="library-context-foot">{w('library.contextFoot')}<br /><span>{w('library.contextFootNote')}</span></p>
+      {onLab && <button className="button button--secondary" onClick={() => onLab('demo')}>{w('library.openLab')}</button>}
     </aside>
     <div className="library-body">
-    {createError && <div className="notice notice--error library-create-error" role="alert">创建失败：{createError}</div>}
+    {createError && <div className="notice notice--error library-create-error" role="alert">{w('library.createFailed', { reason: createError })}</div>}
+    {/* First use, as a disclosure rather than a modal: it teaches the order of
+        operations and never creates anything. It opens itself only on a
+        confirmed, empty, freshly read library — where there is genuinely nothing
+        else to read — and it stays a normal closed summary afterwards, so it is
+        still findable once projects exist. */}
+    <details className="first-use" open={read.status === 'ready' && read.projects.length === 0}>
+      <summary>{w('library.firstUse.summary')}</summary>
+      <ol className="first-use-steps">
+        <li><strong>{w('library.firstUse.1.title')}</strong>{w('library.firstUse.1.text')}</li>
+        <li><strong>{w('library.firstUse.2.title')}</strong>{w('library.firstUse.2.text')}</li>
+        <li><strong>{w('library.firstUse.3.title')}</strong>{w('library.firstUse.3.text')}</li>
+        <li><strong>{w('library.firstUse.4.title')}</strong>{w('library.firstUse.4.text')}</li>
+      </ol>
+      <button className="button first-use-cta" onClick={() => create('generic_steamer', storedTemplateName('generic_steamer'))} disabled={busy}>
+        {creating === 'generic_steamer' ? w('library.firstUse.creating') : w('library.firstUse.cta')}
+      </button>
+    </details>
     <section className="library-section" aria-labelledby="my-projects-title">
-      <div className="section-heading library-section-heading"><div><span className="section-kicker">01 / SAVED PROJECTS</span><h2 id="my-projects-title">我的舰船</h2></div><span data-read-state={read.status}>{count}</span><SiteGeometry /></div>
-      {read.status === 'loading' ? <ReadPending scope="library" object="项目库" className="library-read" />
-        : read.status === 'failed' ? <ReadFailure title="无法读取项目库" detail={readError} retryLabel="重新读取项目库"
+      <div className="section-heading library-section-heading"><div><span className="section-kicker">{w('library.saved.kicker')}</span><h2 id="my-projects-title">{w('library.saved.title')}</h2></div><span data-read-state={read.status}>{count}</span><SiteGeometry /></div>
+      {/* Offered only where there is something to sift: over an unread, failed or
+          genuinely empty library it would be a control that cannot change
+          anything, and its own empty state would be a second way of saying the
+          library is empty. */}
+      {read.status === 'ready' && read.projects.length > 0 && <div className="library-filter">
+        <label className="visually-hidden" htmlFor="library-filter">{w('library.filter.label')}</label>
+        <input id="library-filter" type="search" autoComplete="off" value={query} placeholder={w('library.filter.placeholder')} onChange={event => setQuery(event.target.value)} />
+        {needle && <span className="library-filter-count" role="status">{w('library.filter.matches', { count: matches.length, total: read.projects.length })}</span>}
+        {needle && <button type="button" className="text-button" onClick={() => setQuery('')}>{w('library.filter.clear')}</button>}
+      </div>}
+      {read.status === 'loading' ? <ReadPending scope="library" object={w('shell.place.library')} className="library-read" />
+        : read.status === 'failed' ? <ReadFailure title={w('library.readFailed')} detail={readError} retryLabel={w('library.readFailed.retry')}
             onRetry={() => setAttempt(current => current + 1)} onBack={undefined} />
           : read.projects.length === 0
-        ? <div className="empty-state"><span className="empty-glyph" aria-hidden="true">⌁</span><h3>还没有舰船项目</h3><p>选择下方的案例开始。每次计算都会固定输入修订，方便复核。</p></div>
-        : <div className="project-list">{read.projects.map(project => <button key={project.project_id} className="project-row" data-audio="manual" onClick={() => onOpen(project.project_id)}>
-            <span className="project-row-mark" aria-hidden="true" /><span className="project-row-main"><strong>{project.name}</strong><small>修订 {project.revision} · {new Date(project.updated_at).toLocaleDateString('zh-CN')}</small></span><span aria-hidden="true">↗</span>
+        ? <div className="empty-state"><span className="empty-glyph" aria-hidden="true">⌁</span><h3>{w('library.empty.title')}</h3><p>{w('library.empty.text')}</p></div>
+          : matches.length === 0
+        ? <div className="empty-state"><span className="empty-glyph" aria-hidden="true">⌁</span><h3>{w('library.filter.none.title')}</h3><p>{w('library.filter.none.text', { query: query.trim(), total: read.projects.length })}</p><button type="button" className="text-button" onClick={() => setQuery('')}>{w('library.filter.none.clear')}</button></div>
+        : <div className="project-list">{matches.map(project => <button key={project.project_id} className="project-row" data-audio="manual" onClick={() => onOpen(project.project_id)}>
+            <span className="project-row-mark" aria-hidden="true" /><span className="project-row-main"><strong>{project.name}</strong><small>{w('library.row.meta', { revision: project.revision, date: date(project.updated_at) ?? '' })}</small></span><span aria-hidden="true">↗</span>
           </button>)}</div>}
     </section>
     <section className="library-section" aria-labelledby="template-title">
-      <div className="section-heading library-section-heading"><div><span className="section-kicker">02 / NEW PROJECT</span><h2 id="template-title">从基线开始</h2></div><span>模板只作为起点</span><SiteGeometry /></div>
-      <div className="template-grid">{templates.map((template, index) => <button className="template-card" key={template.key} onClick={() => create(template.key, template.name)} disabled={busy}>
-        <span className="template-number">0{index + 1}</span><span className="template-identity"><strong>{template.name}</strong><span className="template-tag">{template.tag}</span></span><p>{template.text}</p><span className="template-action">{creating === template.key ? '建立中…' : '建立项目 ↗'}</span>
+      <div className="section-heading library-section-heading"><div><span className="section-kicker">{w('library.new.kicker')}</span><h2 id="template-title">{w('library.new.title')}</h2></div><span>{w('library.new.note')}</span><SiteGeometry /></div>
+      <div className="template-grid">{templates.map((key, index) => <button className="template-card" key={key} onClick={() => create(key, storedTemplateName(key))} disabled={busy}>
+        <span className="template-number">0{index + 1}</span><span className="template-identity"><strong>{w(`library.template.${key}.name` as WorkspaceKey)}</strong><span className="template-tag">{w(`library.template.${key}.tag` as WorkspaceKey)}</span></span><p>{w(`library.template.${key}.text` as WorkspaceKey)}</p><span className="template-action">{creating === key ? w('library.template.creating') : w('library.template.create')}</span>
       </button>)}</div>
       <form className="blank-project" onSubmit={event => { event.preventDefault(); if (name.trim()) void create(null, name); }}>
-        <div><strong>空白项目</strong><p>从自己的数据开始，未知输入会继续保持未知。</p></div>
-        <label className="visually-hidden" htmlFor="blank-name">新项目名称</label><input id="blank-name" required value={name} onChange={event => setName(event.target.value)} placeholder="新项目名称" />
-        <button className="button button--secondary" disabled={busy || !name.trim()} type="submit">{creating === 'blank' ? '建立中…' : '创建空白项目'}</button>
+        <div><strong>{w('library.blank.title')}</strong><p>{w('library.blank.text')}</p></div>
+        <label className="visually-hidden" htmlFor="blank-name">{w('library.blank.label')}</label><input id="blank-name" required value={name} onChange={event => setName(event.target.value)} placeholder={w('library.blank.label')} />
+        <button className="button button--secondary" disabled={busy || !name.trim()} type="submit">{creating === 'blank' ? w('library.template.creating') : w('library.blank.create')}</button>
       </form>
     </section>
     <section className="library-section" aria-labelledby="restore-title">
-      <div className="section-heading library-section-heading"><div><span className="section-kicker">03 / RESTORE FROM BACKUP</span><h2 id="restore-title">从备份恢复</h2></div><span>先校验，再另存为新项目</span><SiteGeometry /></div>
+      <div className="section-heading library-section-heading"><div><span className="section-kicker">{w('library.restore.kicker')}</span><h2 id="restore-title">{w('library.restore.title')}</h2></div><span>{w('library.restore.note')}</span><SiteGeometry /></div>
       <ProjectImport onOpen={onOpen} busy={creating !== null} isBlocked={importBlocked} onBusyChange={noteImport} />
     </section>
     </div>

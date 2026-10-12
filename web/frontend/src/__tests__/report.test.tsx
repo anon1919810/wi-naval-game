@@ -1,4 +1,5 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, screen, within } from '@testing-library/react';
+import { renderZh as render } from './locale';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { Report } from '../pages/Report';
@@ -38,6 +39,27 @@ describe('stored report semantics', () => {
     changed.stages.loading.method_versions = { kernel: 'new-kernel' };
     render(<Report result={completedFixture} compareResult={changed} />);
     expect(screen.getByText(/不可直接比较/)).toBeVisible();
+  });
+
+  it('lists every comparable metric, not the first eight', () => {
+    // The table used to stop at eight rows, so a project with more comparable
+    // metrics than that was indistinguishable from one with exactly eight.
+    const many = (offset: number) => {
+      const result = structuredClone(completedFixture);
+      result.stages.loading = {
+        ...result.stages.loading, requested: true, status: 'completed', reason: null,
+        diagnostics: [], assumptions: [], method_versions: {},
+        data: { values: Object.fromEntries(Array.from({ length: 12 }, (_, index) => [`m${index + 1}_m2`, offset + index])) },
+      };
+      return result;
+    };
+    render(<Report result={many(1)} compareResult={many(2)} />);
+    const table = document.querySelector('.comparison-table') as HTMLElement;
+    expect(table).not.toBeNull();
+    // Eight was the old ceiling for the whole table, so twelve rows proves it is
+    // gone; the fixture's own comparable rows may add to this count.
+    expect(table.querySelectorAll('tbody tr').length).toBeGreaterThanOrEqual(12);
+    expect(table.textContent).toContain('m12_m2');
   });
 
   it('shows resistance and shaft-power rows with applicability and estimate labels', () => {
@@ -275,7 +297,7 @@ describe('the report first screen', () => {
       validity: { complete: true, converged: true, model_applicable: true, historical_validated: null },
       method_versions: {}, assumptions: [], diagnostics: [],
       // NaN and Infinity are not values, and never become a difference.
-      data: { total_mass_t: mass, awp_m2: 1450 },
+      data: { values: { displacement_t: mass, awp_m2: 1450 } },
     });
     left.stages.hydrostatics = hydrostatics(NaN);
     right.stages.hydrostatics = hydrostatics(Infinity);

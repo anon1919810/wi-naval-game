@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 
 import { readStageTarget, stageHref } from './resultReading';
-import { STAGE_LABELS } from './StageStatus';
+import { stageLabel } from './StageStatus';
+import { useWorkspaceCopy } from '../i18n/workspace';
 import type { StageEnvelope } from '../types';
 
 /**
@@ -74,6 +75,7 @@ function positionWhenMounted(name: string, takeFocus: boolean, onDone: () => voi
 }
 
 export function StageIndex({ page, runId, stages }: StageIndexProps) {
+  const w = useWorkspaceCopy();
   const names = stages.map(item => item.name);
   // Only a stage this index lists can be positioned; an unknown or unrequested
   // target in the address leaves the reader exactly where they are.
@@ -113,9 +115,9 @@ export function StageIndex({ page, runId, stages }: StageIndexProps) {
   }, [follow]);
 
   if (names.length === 0) return null;
-  return <nav className="stage-index" aria-label="阶段索引">
+  return <nav className="stage-index" aria-label={w('stage.index.label')}>
     <ol>{names.map(name => {
-      const label = STAGE_LABELS[name] ?? name;
+      const label = stageLabel(w, name);
       // A real address only where one exists: without a run id there is no run
       // page to link to, so the entry stays a button and still positions.
       return <li key={name}>{runId

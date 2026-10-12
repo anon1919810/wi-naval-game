@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { reportReadings, requestedStages, readStageTarget, stageHref } from '../components/resultReading';
+import { reportReadings as readingsInLanguage, requestedStages, readStageTarget, stageHref } from '../components/resultReading';
 import type { AnalysisResult, StageEnvelope } from '../types';
+const reportReadings = (result: AnalysisResult) => readingsInLanguage(result, 'zh-CN');
 
 /**
  * Inline fixtures carry the shapes the coordinator actually writes
@@ -207,7 +208,7 @@ describe('saved-result readings', () => {
     expect(byKey(outOfScopeData, 'resistance.shaft_power_kw'))
       .toMatchObject({ state: 'unknown', value: null, reason: '该工作点不在经验适用范围，见阻力与功率' });
     expect(single({ speed_kn: 18, shaft_power_kw: null, complete: true, primary_result: true }))
-      .toMatchObject({ state: 'unknown', value: null, reason: '该工作点未给出有限航速或轴功率，见阻力与功率' });
+      .toMatchObject({ state: 'unknown', value: null, reason: '该工作点未完整求得，见阻力与功率' });
     expect(single({ speed_kn: 18, shaft_power_kw: 12894.8, complete: true, primary_result: true }, { primary_result: false }))
       .toMatchObject({ state: 'unknown', value: null, reason: '该工作点为非主试算，见阻力与功率' });
     expect(single({ speed_kn: 0, shaft_power_kw: 0, complete: true, primary_result: true }))

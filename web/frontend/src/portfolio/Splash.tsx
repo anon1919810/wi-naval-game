@@ -1,10 +1,19 @@
 import { useLayoutEffect, useRef, type RefObject } from 'react';
 import { Artwork, artworkTransform } from './Artwork';
+import { useLanguage } from './LanguageProvider';
 import { diagonalClip, introFrame, INTRO_DURATION } from './motion';
 import type { PlanSheet } from './plans';
 
 interface Props { sheet: PlanSheet; target: RefObject<HTMLDivElement | null>; dark: boolean; details: boolean; onDone: () => void; onSettle: () => void }
+
+/**
+ * The opening. The only words on it are the two the visitor can act on — the
+ * status name and the skip — and both come from the shell's dictionary, so a
+ * Chinese visitor is told in Chinese what is happening and how to skip it. The
+ * artwork it draws is the same drawing, unchanged.
+ */
 export function Splash({ sheet, target, dark, details, onDone, onSettle }: Props) {
+  const { t } = useLanguage();
   const root = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const reveal = useRef<HTMLDivElement>(null);
@@ -56,11 +65,11 @@ export function Splash({ sheet, target, dark, details, onDone, onSettle }: Props
     window.addEventListener('keydown', key);
     return () => { active = false; cancelAnimationFrame(frame); window.removeEventListener('resize', measure); window.removeEventListener('scroll', measure); window.removeEventListener('keydown', key); };
   }, [sheet, target, onDone, onSettle]);
-  return <div ref={root} className="ff-splash" data-phase="black" role="status" aria-label="Opening Y’s Formfield">
+  return <div ref={root} className="ff-splash" data-phase="black" role="status" aria-label={t('splash.status')}>
     <div ref={panel} className="ff-splash-panel">
       <div ref={reveal} className="ff-scan-layer ff-scan-dark"><Artwork compositionRef={firstArt} geometryRef={firstGeo} sheet={sheet} dark details={details} angle={-28} scale={1.85} /></div>
       <div ref={reverse} className={`ff-scan-layer ${dark ? 'ff-scan-dark' : 'ff-scan-light'}`}><Artwork compositionRef={secondArt} geometryRef={secondGeo} sheet={sheet} dark={dark} details={details} angle={-28} scale={1.85} /></div>
     </div>
-    <button ref={skip} hidden className="ff-skip" onClick={onDone}>SKIP INTRO <span>↗</span></button>
+    <button ref={skip} hidden className="ff-skip" onClick={onDone}>{t('work.skipIntro')} <span>↗</span></button>
   </div>;
 }

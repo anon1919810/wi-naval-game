@@ -1,5 +1,6 @@
 import type { Chapter } from './ProjectNav';
 import type { ProjectDocument, StageEnvelope } from '../types';
+import type { WorkspaceKey } from '../i18n/workspace';
 
 /**
  * Where one saved diagnostic can be followed to, and what it can honestly claim.
@@ -17,7 +18,16 @@ import type { ProjectDocument, StageEnvelope } from '../types';
  * point at generated output (`$.stages.*`, `$.diagnostics[...]`), at result
  * metadata, or at anything unrecognised stay plain evidence: a fabricated link
  * to a field that does not exist is worse than no link at all.
+ *
+ * Every sentence this module writes is application-owned prose, so the words are
+ * looked up rather than embedded. The lookup is a parameter and not a hidden
+ * global: the same path resolves to the same control, the same chapter and the
+ * same evidence in either language, and the diagnostic's own `path` is passed
+ * through verbatim because it is the record the reader is checking.
  */
+
+/** The resolver's dictionary, passed in so this module stays a pure function. */
+export type Copy = (key: WorkspaceKey, params?: Readonly<Record<string, string | number>>) => string;
 
 /** A diagnostic as the saved result stores it. */
 export type Diagnostic = StageEnvelope['diagnostics'][number];
@@ -60,17 +70,19 @@ export const PROJECT_JSON = 'chapter-json';
 export const CHAPTER_HEAD = 'guidance-chapter-head';
 
 /** The six hull scalars the workspace edits as their own controls. */
-const HULL_LABELS: Record<string, string> = {
-  loa_m: '船长', length_m: '船长', lwl_m: '水线长', beam_m: '型宽',
-  draught_normal_m: '设计吃水', draft_m: '设计吃水',
-  block_coeff: '方形系数', waterplane_coeff: '水线面系数',
+const HULL_LABELS: Record<string, WorkspaceKey> = {
+  loa_m: 'field.loa_m', length_m: 'field.loa_m', lwl_m: 'field.lwl_m', beam_m: 'field.beam_m',
+  draught_normal_m: 'field.draught_normal_m', draft_m: 'field.draught_normal_m',
+  block_coeff: 'field.block_coeff', waterplane_coeff: 'field.waterplane_coeff',
 };
 
 /** The legacy spellings one control answers to, never a second control. */
 const HULL_ALTERNATES: Record<string, string> = { length_m: 'loa_m', draft_m: 'draught_normal_m' };
 
 /** The three ledger facts each ledger row owns as its own control. */
-const LEDGER_LABELS: Record<string, string> = { mass_t: '质量', x_m: '纵向位置', source: '来源' };
+const LEDGER_LABELS: Record<string, WorkspaceKey> = {
+  mass_t: 'editor.ledger.mass', x_m: 'editor.ledger.position', source: 'editor.ledger.source',
+};
 
 /** Project roots the JSON chapter edits in full; nothing else is claimed here. */
 const PROJECT_JSON_ROOTS = new Set([
@@ -153,24 +165,24 @@ function section(path: string, chapter: Chapter, target: string, label: string, 
   return { kind: 'section', chapter, target, label, path, note };
 }
 
-function hullLocation(path: string, segments: Segment[]): DiagnosticLocation {
+function hullLocation(w: Copy, path: string, segments: Segment[]): DiagnosticLocation {
   const field = keyOf(segments[1]);
-  const label = field ? HULL_LABELS[field] : undefined;
+  const label = field ? w(HULL_LABELS[field]) : undefined;
   const control = field ? HULL_ALTERNATES[field] ?? field : undefined;
   // Only the number itself is a control, and one spelling of it. A declared
   // source has no editor of its own in the workspace, so it is never dressed up
   // as the dimension: typing a number would not repair missing provenance.
-  if (label && control && segments.length === 2) return hullControl(path, control, label);
-  if (field === 'warnings') return evidence(path, '这条路径是船型资料的历史警告，不是可编辑的项目输入。');
-  return section(path, 'json', PROJECT_JSON, '项目数据', `这条路径没有对应的独立表单控件：在“项目数据”中按原路径 ${path} 查看与编辑。`);
+  if (label && control && segments.length === 2) return hullControl(w, path, control, label);
+  if (field === 'warnings') return evidence(path, w('guidance.hullWarnings'));
+  return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'), w('guidance.hullJson', { path }));
 }
 
-function hullControl(path: string, key: string, label: string): DiagnosticLocation {
+function hullControl(w: Copy, path: string, key: string, label: string): DiagnosticLocation {
   return { kind: 'control', chapter: 'hull', target: hullGuidanceId(key), label, path,
-    note: `在“船型与几何”中编辑${label}，保存修订后重新运行才会生效。` };
+    note: w('guidance.hullControl', { label }) };
 }
 
-function ledgerLocation(path: string, segments: Segment[], source: DiagnosticSource): DiagnosticLocation {
+function ledgerLocation(w: Copy, path: string, segments: Segment[], source: DiagnosticSource): DiagnosticLocation {
   // The indices are read against the source snapshot, never against the live
   // ledger: only the ids that run actually saw may be looked up now.
   const groupIndex = indexOf(segments[1]);
@@ -180,19 +192,19 @@ function ledgerLocation(path: string, segments: Segment[], source: DiagnosticSou
     // A whole ledger, a group or a group list has no editor anywhere: the
     // workspace only edits rows that already exist, so the document is the only
     // honest place to go.
-    return section(path, 'json', PROJECT_JSON, '项目数据', `这条路径指向账本整体或分组，不是可编辑的单行：在“项目数据”中按原路径 ${path} 查看与编辑。`);
+    return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'), w('guidance.ledgerWhole', { path }));
   }
   if (keyOf(segments[2]) !== 'items') {
-    return section(path, 'json', PROJECT_JSON, '项目数据', `这条路径指向分组整体，不是可编辑的单行：在“项目数据”中按原路径 ${path} 查看与编辑。`);
+    return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'), w('guidance.ledgerGroup', { path }));
   }
   const itemIndex = indexOf(segments[3]);
   if (itemIndex === undefined) {
-    return section(path, 'json', PROJECT_JSON, '项目数据', `这条路径指向条目列表；“重量与载荷”只编辑已有条目，新增条目请在“项目数据”中按原路径 ${path} 进行。`);
+    return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'), w('guidance.ledgerItems', { path }));
   }
   const snapshotItem = entryAt(entries(snapshotGroup?.items), itemIndex);
   const itemId = idOf(snapshotItem);
   if (!itemId) {
-    return evidence(path, '来源运行中的这条账本路径没有可用的条目 id，无法定位到当前项目。');
+    return evidence(path, w('guidance.ledgerNoId'));
   }
   // Removal is checked before any fallback: an item that is gone is not
   // something the reader can edit anywhere, least of all in the document.
@@ -202,49 +214,49 @@ function ledgerLocation(path: string, segments: Segment[], source: DiagnosticSou
   const liveItems = entries(liveGroup?.items);
   const liveItemIndex = liveItems.findIndex(entry => entry.id === itemId);
   if (liveGroupIndex === -1 || liveItemIndex === -1) {
-    return evidence(path, `来源运行中的账本条目 ${groupId} / ${itemId} 已不在当前项目，无法定位到对应控件；原路径 ${path} 保留为证据。`);
+    return evidence(path, w('guidance.ledgerRemoved', { group: groupId, item: itemId, path }));
   }
   const currentPath = `$.weight_groups[${liveGroupIndex}].items[${liveItemIndex}]`;
   const field = keyOf(segments[4]);
-  const fieldLabel = field ? LEDGER_LABELS[field] : undefined;
+  const fieldLabel = field ? w(LEDGER_LABELS[field]) : undefined;
   // A scalar control exists for exactly `…items[i].mass_t|x_m|source` and nothing
   // longer: `…mass_t.value` is not that control.
   if (segments.length === 5 && field && fieldLabel) {
-    return control(path, 'weights', ledgerGuidanceId(groupId, itemId, field), `${groupId} · ${itemId} 的${fieldLabel}`,
-      `在“重量与载荷”中编辑 ${groupId} / ${itemId} 的${fieldLabel}，保存修订后重新运行才会生效。`);
+    return control(path, 'weights', ledgerGuidanceId(groupId, itemId, field), `${groupId} · ${itemId} · ${fieldLabel}`,
+      w('guidance.ledgerField', { group: groupId, item: itemId, field: fieldLabel }));
   }
   if (segments.length === 4) {
-    return section(path, 'weights', LEDGER_SECTION, '重量与载荷',
-      `这一行现在位于 ${currentPath}（${groupId} / ${itemId}）；保存修订后重新运行才会生效。`);
+    return section(path, 'weights', LEDGER_SECTION, w('guidance.label.weights'),
+      w('guidance.ledgerRow', { path: currentPath, group: groupId, item: itemId }));
   }
-  return section(path, 'json', PROJECT_JSON, '项目数据',
-    `${groupId} / ${itemId} 现在位于 ${currentPath}。该字段没有对应的表单控件：在“项目数据”中按当前路径编辑，原路径 ${path} 保留为证据。`);
+  return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'),
+    w('guidance.ledgerRowMoved', { group: groupId, item: itemId, path: currentPath, original: path }));
 }
 
-function conditionsLocation(path: string, segments: Segment[], source: DiagnosticSource): DiagnosticLocation {
+function conditionsLocation(w: Copy, path: string, segments: Segment[], source: DiagnosticSource): DiagnosticLocation {
   const index = indexOf(segments[1]);
   const snapshot = entryAt(entries(source.snapshot?.loading_conditions), index);
   const conditionId = idOf(snapshot);
   if (conditionId === null) {
-    return section(path, 'json', PROJECT_JSON, '项目数据', `这条路径指向工况列表；在“项目数据”中按原路径 ${path} 查看与编辑。`);
+    return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'), w('guidance.conditionsList', { path }));
   }
   const live = entries(source.live?.loading_conditions);
   const current = live.findIndex(entry => entry.id === conditionId);
   if (current === -1) {
-    return evidence(path, `来源运行中的工况 ${conditionId} 已不在当前项目，无法定位到对应控件；原路径 ${path} 保留为证据。`);
+    return evidence(path, w('guidance.conditionRemoved', { condition: conditionId, path }));
   }
-  return section(path, 'json', PROJECT_JSON, '项目数据',
-    `工况 ${conditionId} 现在位于 $.loading_conditions[${current}]：在“项目数据”中按当前路径编辑，原路径 ${path} 保留为证据。`);
+  return section(path, 'json', PROJECT_JSON, w('guidance.label.projectData'),
+    w('guidance.conditionMoved', { condition: conditionId, index: current, path }));
 }
 
-function optionsLocation(path: string, segments: Segment[]): DiagnosticLocation {
+function optionsLocation(w: Copy, path: string, segments: Segment[]): DiagnosticLocation {
   const head = keyOf(segments[1]);
   // The flooding request — including the shared environment density — is the
   // damage chapter's own request area; everything else is the performance one.
   if (head === 'flooding' || (head === 'equilibrium' && keyOf(segments[2]) === 'rho_t_m3')) {
-    return section(path, 'damage', REQUEST_DAMAGE, '破损研究的计算请求', `破损请求在“破损研究”中编辑；诊断原路径 ${path} 保持不变，不会自动重建旧请求。`);
+    return section(path, 'damage', REQUEST_DAMAGE, w('guidance.label.damageRequest'), w('guidance.requestDamage', { path }));
   }
-  return section(path, 'performance', REQUEST_PERFORMANCE, '性能与工况的计算请求', `计算请求在“性能与工况”中编辑；诊断原路径 ${path} 保持不变，不会自动重建旧请求。`);
+  return section(path, 'performance', REQUEST_PERFORMANCE, w('guidance.label.performanceRequest'), w('guidance.requestPerformance', { path }));
 }
 
 /**
@@ -252,23 +264,23 @@ function optionsLocation(path: string, segments: Segment[]): DiagnosticLocation 
  * path at all; a path it cannot place is still returned, as evidence, so the
  * caller can say so instead of quietly dropping the finding.
  */
-export function resolveDiagnosticPath(path: unknown, source: DiagnosticSource): DiagnosticLocation | null {
+export function resolveDiagnosticPath(path: unknown, source: DiagnosticSource, w: Copy): DiagnosticLocation | null {
   if (typeof path !== 'string' || path.trim() === '') return null;
   const literal = path.trim();
   const segments = parseDiagnosticPath(literal);
   if (!segments || segments.length === 0) {
-    return evidence(literal, '这条诊断的路径无法解析，只作为证据保留。');
+    return evidence(literal, w('guidance.unparseable'));
   }
   const root = keyOf(segments[0]);
-  if (!root) return evidence(literal, '这条诊断的路径没有可识别的项目字段，只作为证据保留。');
-  if (root === 'hull') return hullLocation(literal, segments);
-  if (root === 'weight_groups') return ledgerLocation(literal, segments, source);
-  if (root === 'loading_conditions') return conditionsLocation(literal, segments, source);
-  if (root === 'options') return optionsLocation(literal, segments);
+  if (!root) return evidence(literal, w('guidance.noRoot'));
+  if (root === 'hull') return hullLocation(w, literal, segments);
+  if (root === 'weight_groups') return ledgerLocation(w, literal, segments, source);
+  if (root === 'loading_conditions') return conditionsLocation(w, literal, segments, source);
+  if (root === 'options') return optionsLocation(w, literal, segments);
   if (PROJECT_JSON_ROOTS.has(root)) {
-    return section(literal, 'json', PROJECT_JSON, '项目数据', `在“项目数据”中按原路径 ${path} 查看与编辑。`);
+    return section(literal, 'json', PROJECT_JSON, w('guidance.label.projectData'), w('guidance.knownRoot', { path }));
   }
-  return evidence(literal, '这条路径不是可编辑的项目输入（结果、诊断或未知字段），只作为证据保留。');
+  return evidence(literal, w('guidance.notEditable'));
 }
 
 /**
@@ -276,9 +288,9 @@ export function resolveDiagnosticPath(path: unknown, source: DiagnosticSource): 
  * Both the diagnostic's `path` and its `source_path` are evidence and both stay
  * on screen; only the navigation is chosen here.
  */
-export function resolveDiagnosticLocation(diagnostic: Diagnostic, source: DiagnosticSource): DiagnosticLocation | null {
+export function resolveDiagnosticLocation(diagnostic: Diagnostic, source: DiagnosticSource, w: Copy): DiagnosticLocation | null {
   const found = [diagnostic.path, diagnostic.source_path]
-    .map(candidate => resolveDiagnosticPath(candidate, source))
+    .map(candidate => resolveDiagnosticPath(candidate, source, w))
     .filter((entry): entry is DiagnosticLocation => entry !== null);
   if (found.length === 0) return null;
   return found.find(entry => entry.kind !== 'evidence') ?? found[0];
@@ -310,19 +322,19 @@ export type DiagnosticTail =
   | { kind: 'target'; runId: string; path: string }
   | { kind: 'malformed'; reason: string };
 
-export function readDiagnosticTail(hash: string, projectId: string): DiagnosticTail {
+export function readDiagnosticTail(hash: string, projectId: string, w: Copy): DiagnosticTail {
   const parts = String(hash ?? '').replace(/^#/, '').replace(/^\/+/, '').split('/');
   // An ordinary project address carries nothing to do; a `…/diagnostics/…` tail
   // is one, and is judged rather than assumed.
   if (parts[0] !== 'projects' || parts[2] !== 'diagnostics') return { kind: 'none' };
-  if (parts.length !== 5) return { kind: 'malformed', reason: '地址里的诊断定位不完整，无法解析。' };
+  if (parts.length !== 5) return { kind: 'malformed', reason: w('guidance.tail.incomplete') };
   const id = safeDecode(parts[1]);
   const runId = safeDecode(parts[3]);
   const path = safeDecode(parts[4]);
-  if (id === null || runId === null || path === null) return { kind: 'malformed', reason: '地址里的诊断定位包含无法解码的内容。' };
-  if (id !== projectId) return { kind: 'malformed', reason: '这条诊断链接属于其他项目，已拒绝跳转。' };
-  if (runId === '') return { kind: 'malformed', reason: '地址里没有指明来源运行，无法定位输入。' };
-  if (!path.startsWith('$')) return { kind: 'malformed', reason: '地址里的诊断路径不是项目路径，只作为证据保留。' };
+  if (id === null || runId === null || path === null) return { kind: 'malformed', reason: w('guidance.tail.undecodable') };
+  if (id !== projectId) return { kind: 'malformed', reason: w('guidance.tail.foreign') };
+  if (runId === '') return { kind: 'malformed', reason: w('guidance.tail.noRun') };
+  if (!path.startsWith('$')) return { kind: 'malformed', reason: w('guidance.tail.notPath') };
   return { kind: 'target', runId, path };
 }
 
@@ -331,7 +343,7 @@ export function readDiagnosticTail(hash: string, projectId: string): DiagnosticT
  * diagnostic address. The reader stays where they are instead of being sent to
  * a wrong field.
  */
-export function readDiagnosticTarget(hash: string, projectId: string): { runId: string; path: string } | null {
-  const tail = readDiagnosticTail(hash, projectId);
+export function readDiagnosticTarget(hash: string, projectId: string, w: Copy): { runId: string; path: string } | null {
+  const tail = readDiagnosticTail(hash, projectId, w);
   return tail.kind === 'target' ? { runId: tail.runId, path: tail.path } : null;
 }

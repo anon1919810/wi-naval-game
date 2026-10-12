@@ -1,5 +1,7 @@
-import { object, rows, stringList, type Raw } from './formModel';
+import { englishCopy, object, rows, stringList, type Raw } from './formModel';
+import type { Copy } from './diagnosticGuidance';
 import type { Dimension } from './units';
+import type { WorkspaceKey } from '../i18n/workspace';
 
 // Weapons-page contract helpers.
 //
@@ -13,42 +15,47 @@ import type { Dimension } from './units';
 // miscellaneous zones. Their contract leaves are `torpedo` and `misc_weight`
 // (see tools/plimsoll/cases/projects/queen_mary_1913.project.json); every other
 // `systems.weapons` leaf is a gun battery and is edited on the Guns page.
+//
+// The typed-field labels are ordinary UI copy and come from the dictionary. A
+// row template carries two labels: `label`, the text written into the project
+// document when a row is created (stored row data, therefore one fixed value in
+// both languages), and `labelKey`, the card's own label on this page.
 
 export type TypedKind = 'text' | 'integer' | 'positive' | 'nonnegative' | 'signed';
 
-export interface TypedSpec { label: string; kind: TypedKind; dimension?: Dimension; storedUnit?: string }
+export interface TypedSpec { label: WorkspaceKey; kind: TypedKind; dimension?: Dimension; storedUnit?: string }
 
 /** Mirrors PAGE_ROW_TYPED_FIELDS including each field's numeric domain and the
  *  unit the value is stored in; dimension marks a convertible quantity. */
 export const TYPED_FIELDS: Record<string, TypedSpec> = {
-  tubes: { label: '管数', kind: 'integer' },
-  carried: { label: '携带数', kind: 'integer' },
-  sets: { label: '组数', kind: 'integer' },
-  diameter_mm: { label: '雷径', kind: 'positive', dimension: 'length', storedUnit: 'mm' },
-  length_m: { label: '雷长', kind: 'positive', dimension: 'length' },
-  arrangement: { label: '布置', kind: 'text' },
-  count: { label: '数量', kind: 'integer' },
-  reloads: { label: '再装填', kind: 'integer' },
-  kind: { label: '类型', kind: 'text' },
-  unit_weight_kg: { label: '单具质量', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
-  mass_t: { label: '质量', kind: 'nonnegative', dimension: 'mass' },
-  height_m: { label: '高度', kind: 'positive', dimension: 'length' },
-  inclination_deg: { label: '倾角', kind: 'signed', dimension: 'angle' },
-  beam_between_m: { label: '间距', kind: 'positive', dimension: 'length' },
-  construction_type: { label: '构造型式', kind: 'text' },
-  coverage_pct: { label: '覆盖度 · %', kind: 'nonnegative' },
+  tubes: { label: 'weaponsField.tubes', kind: 'integer' },
+  carried: { label: 'weaponsField.carried', kind: 'integer' },
+  sets: { label: 'weaponsField.sets', kind: 'integer' },
+  diameter_mm: { label: 'weaponsField.diameter_mm', kind: 'positive', dimension: 'length', storedUnit: 'mm' },
+  length_m: { label: 'weaponsField.length_m', kind: 'positive', dimension: 'length' },
+  arrangement: { label: 'weaponsField.arrangement', kind: 'text' },
+  count: { label: 'weaponsField.count', kind: 'integer' },
+  reloads: { label: 'weaponsField.reloads', kind: 'integer' },
+  kind: { label: 'weaponsField.kind', kind: 'text' },
+  unit_weight_kg: { label: 'weaponsField.unit_weight_kg', kind: 'nonnegative', dimension: 'mass', storedUnit: 'kg' },
+  mass_t: { label: 'weaponsField.mass_t', kind: 'nonnegative', dimension: 'mass' },
+  height_m: { label: 'weaponsField.height_m', kind: 'positive', dimension: 'length' },
+  inclination_deg: { label: 'weaponsField.inclination_deg', kind: 'signed', dimension: 'angle' },
+  beam_between_m: { label: 'weaponsField.beam_between_m', kind: 'positive', dimension: 'length' },
+  construction_type: { label: 'weaponsField.construction_type', kind: 'text' },
+  coverage_pct: { label: 'weaponsField.coverage_pct', kind: 'nonnegative' },
 };
 
-export function typedProblem(field: string, raw: string): string | null {
+export function typedProblem(field: string, raw: string, w: Copy = englishCopy): string | null {
   const spec = TYPED_FIELDS[field];
-  if (!spec) return '该字段不在契约允许的类型化字段中';
+  if (!spec) return w('weapons.typed.unknownField');
   if (raw.trim() === '') return null;
   if (spec.kind === 'text') return null;
   const value = Number(raw);
-  if (!Number.isFinite(value)) return '必须是有限数值';
-  if (spec.kind === 'integer') return Number.isInteger(value) && value >= 0 ? null : '必须是非负整数';
-  if (spec.kind === 'positive') return value > 0 ? null : '必须是正数';
-  if (spec.kind === 'nonnegative') return value >= 0 ? null : '不能为负数';
+  if (!Number.isFinite(value)) return w('units.finiteRequired');
+  if (spec.kind === 'integer') return Number.isInteger(value) && value >= 0 ? null : w('units.nonnegativeInteger');
+  if (spec.kind === 'positive') return value > 0 ? null : w('units.positive');
+  if (spec.kind === 'nonnegative') return value >= 0 ? null : w('units.nonnegative');
   return null;
 }
 
@@ -66,21 +73,28 @@ export function isWeaponsPageLeaf(id: string): boolean {
   return WEAPONS_PAGE_LEAVES.includes(id as WeaponsLeafId);
 }
 
-export interface RowTemplate { id: string; label: string; typed: Record<string, null> }
+export interface RowTemplate {
+  id: string;
+  /** The label written into the project document for a row from this template. */
+  label: string;
+  /** This page's own label for the same template. */
+  labelKey: WorkspaceKey;
+  typed: Record<string, null>;
+}
 
 export const TORPEDO_TEMPLATES: RowTemplate[] = [
-  { id: 'torpedo_main', label: '鱼雷管（主）', typed: { tubes: null, carried: null, diameter_mm: null, length_m: null, arrangement: null } },
-  { id: 'torpedo_secondary', label: '鱼雷管（副）', typed: { tubes: null, carried: null, diameter_mm: null, length_m: null, arrangement: null } },
-  { id: 'mines', label: '水雷', typed: { count: null, kind: null, unit_weight_kg: null } },
-  { id: 'depth_charges', label: '深弹', typed: { count: null, kind: null, unit_weight_kg: null } },
+  { id: 'torpedo_main', label: '鱼雷管（主）', labelKey: 'weapons.row.torpedo_main', typed: { tubes: null, carried: null, diameter_mm: null, length_m: null, arrangement: null } },
+  { id: 'torpedo_secondary', label: '鱼雷管（副）', labelKey: 'weapons.row.torpedo_secondary', typed: { tubes: null, carried: null, diameter_mm: null, length_m: null, arrangement: null } },
+  { id: 'mines', label: '水雷', labelKey: 'weapons.row.mines', typed: { count: null, kind: null, unit_weight_kg: null } },
+  { id: 'depth_charges', label: '深弹', labelKey: 'weapons.row.depth_charges', typed: { count: null, kind: null, unit_weight_kg: null } },
 ];
 
 export const MISC_TEMPLATES: RowTemplate[] = [
-  { id: 'hull_below', label: '水下船体', typed: { mass_t: null } },
-  { id: 'hull_above', label: '水上船体', typed: { mass_t: null } },
-  { id: 'on_deck', label: '甲板上', typed: { mass_t: null } },
-  { id: 'above_deck', label: '甲板以上', typed: { mass_t: null } },
-  { id: 'void', label: '空舱', typed: { mass_t: null } },
+  { id: 'hull_below', label: '水下船体', labelKey: 'weapons.row.hull_below', typed: { mass_t: null } },
+  { id: 'hull_above', label: '水上船体', labelKey: 'weapons.row.hull_above', typed: { mass_t: null } },
+  { id: 'on_deck', label: '甲板上', labelKey: 'weapons.row.on_deck', typed: { mass_t: null } },
+  { id: 'above_deck', label: '甲板以上', labelKey: 'weapons.row.above_deck', typed: { mass_t: null } },
+  { id: 'void', label: '空舱', labelKey: 'weapons.row.void', typed: { mass_t: null } },
 ];
 
 export function templatesFor(leafId: WeaponsLeafId): RowTemplate[] {

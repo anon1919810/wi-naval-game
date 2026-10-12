@@ -1,6 +1,8 @@
 import { reportReadings, type ReportReading } from './resultReading';
 import { useUnits } from './UnitProvider';
 import { formatNumber } from './units';
+import { useWorkspaceCopy } from '../i18n/workspace';
+import { useLanguage } from '../portfolio/LanguageProvider';
 import type { AnalysisResult } from '../types';
 
 /**
@@ -9,15 +11,16 @@ import type { AnalysisResult } from '../types';
  * The six readings are projections of six saved paths, so a value is here only
  * because the run stored it: no number is recomputed, averaged or interpolated,
  * and a stage that did not deliver one keeps its reason instead of a zero or a
- * borrowed figure. A true zero is shown as a value, an unknown field as 未知.
+ * borrowed figure. A true zero is shown as a value, an unknown field as unknown.
  *
  * Dimensions follow the reader's unit choice on this page only. A range has no
  * convertible reader unit and stays in nmi; the stored snapshot, the
  * fingerprints and the exports are untouched by any of it.
  */
 export function ReportReadings({ result }: { result: AnalysisResult }) {
+  const { language } = useLanguage();
   const units = useUnits();
-  return <div className="report-readings">{reportReadings(result).map(reading =>
+  return <div className="report-readings">{reportReadings(result, language).map(reading =>
     <Reading key={reading.key} reading={reading} units={units} />)}</div>;
 }
 
@@ -27,21 +30,22 @@ export function ReportReadings({ result }: { result: AnalysisResult }) {
  * in reader terms here: a saved stage reason is the run's own wording about why a
  * stage produced nothing, and it is passed through untouched.
  */
-function readerReason(reading: ReportReading): string | null {
+function readerReason(w: (key: any, params?: any) => string, reading: ReportReading): string | null {
   const reason = reading.reason;
   if (!reason || reading.state !== 'unknown') return reason;
-  if (/^保存结果中 .+ 为 null$/.test(reason)) return '本次保存结果将此读数标为未知。';
-  if (/^保存结果中 .+ 不是有限数字$/.test(reason)) return '本次保存结果未给出有效数字。';
+  if (/^保存结果中 .+ 为 null$/.test(reason)) return w('reading.reason.null');
+  if (/^保存结果中 .+ 不是有限数字$/.test(reason)) return w('reading.reason.notFinite');
   return reason;
 }
 
 function Reading({ reading, units }: { reading: ReportReading; units: ReturnType<typeof useUnits> }) {
+  const w = useWorkspaceCopy();
   const shown = reading.state !== 'known' || reading.value === null
-    ? '未知'
+    ? w('reading.unknown')
     : reading.dimension
       ? units.text(reading.value, reading.dimension, reading.storedUnit)
       : `${formatNumber(reading.value)}${reading.canonicalUnit ? ` ${reading.canonicalUnit}` : ''}`;
-  const reason = readerReason(reading);
+  const reason = readerReason(w, reading);
   return <div className={`report-reading report-reading--${reading.state}`}>
     <span className="report-reading-label">{reading.label}</span>
     <strong className="report-reading-value">{shown}</strong>
@@ -49,8 +53,8 @@ function Reading({ reading, units }: { reading: ReportReading; units: ReturnType
     {/* A missing reading always carries why; a long reason wraps rather than
         being cut off, because it is the only thing the reader gets. */}
     {reason && <span className="report-reading-reason">{reason}</span>}
-    {reading.source && <span className="report-reading-source" title={reading.source}>来源 {reading.source}</span>}
-    {reading.estimate === true && <span className="report-reading-estimate">工程估算</span>}
-    {reading.estimate === false && <span className="report-reading-estimate">非估算</span>}
+    {reading.source && <span className="report-reading-source" title={reading.source}>{w('reading.source', { source: reading.source })}</span>}
+    {reading.estimate === true && <span className="report-reading-estimate">{w('reading.estimate')}</span>}
+    {reading.estimate === false && <span className="report-reading-estimate">{w('reading.notEstimate')}</span>}
   </div>;
 }

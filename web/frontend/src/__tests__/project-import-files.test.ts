@@ -3,12 +3,16 @@ import { describe, expect, it } from 'vitest';
 import {
   BackupFileError,
   MAX_BACKUP_BYTES,
-  assertEnvelopeFits,
+  assertEnvelopeFits as assertFitsInLanguage,
   envelopeSize,
   findNonFiniteNumber,
-  parseBackup,
-  readBackupFile,
+  parseBackup as parseInLanguage,
+  readBackupFile as readInLanguage,
 } from '../components/backupFile';
+import { zhCopy } from './locale';
+const readBackupFile = (file: File) => readInLanguage(file, zhCopy);
+const parseBackup = (text: string, filename: string, size: number) => parseInLanguage(text, filename, size, zhCopy);
+const assertEnvelopeFits = (payload: unknown, label: string) => assertFitsInLanguage(payload, label, zhCopy);
 
 /**
  * What this file may refuse.

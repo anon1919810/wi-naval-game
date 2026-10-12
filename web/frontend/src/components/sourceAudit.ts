@@ -1,3 +1,5 @@
+import { englishCopy } from './formModel';
+import type { Copy } from './diagnosticGuidance';
 import type { AnalysisResult } from '../types';
 
 /**
@@ -66,8 +68,17 @@ function estimateOf(record: Record<string, unknown>): EstimateState {
   return record.estimate === true ? true : record.estimate === false ? false : null;
 }
 
-export function estimateLabel(estimate: EstimateState): string {
-  return estimate === true ? '估算' : estimate === false ? '非估算' : '未声明是否估算';
+/**
+ * The estimate state a declaration carries, in the reader's language.
+ *
+ * The three states stay three facts — an engineering estimate, a declared
+ * non-estimate, and a state the payload never declared at all. `w` is a
+ * parameter rather than a hidden global so the same saved result reads the same
+ * in either language; without one this module falls back to the English words
+ * rather than pretending to know the reader's preference.
+ */
+export function estimateLabel(estimate: EstimateState, w: Copy = englishCopy): string {
+  return estimate === true ? w('trace.estimate.estimate') : estimate === false ? w('trace.estimate.declared') : w('trace.estimate.unknown');
 }
 
 /** Every declaration under one value, in document order, with its path. */

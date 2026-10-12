@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { renderZh as render, zhCopy } from './locale';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as api from '../api';
@@ -32,7 +33,7 @@ let saved: ProjectDocument = project;
 describe('advanced boundary review', () => {
   it('blocks a locked-centroid tank connected to an open flooding edge', () => {
     const problems = scenarioProblems({ tanks: [{ id: 'tank', free_surface: false }],
-      connections: [{ from: 'sea', to: 'tank', open: true }] }, []);
+      connections: [{ from: 'sea', to: 'tank', open: true }] }, [], undefined, zhCopy);
     expect(problems.some(problem => problem.includes('无自由液面是锁定重心代理'))).toBe(true);
   });
   it('copies declared compartment geometry without adopting legacy water', () => {
@@ -88,8 +89,9 @@ beforeEach(() => {
 async function open(chapter: string) {
   render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
   fireEvent.click(await screen.findByRole('button', { name: chapter }));
-  // Chapters lead with their English structural title; the index keeps Chinese.
-  return screen.findByRole('heading', { level: 1, name: /Damage|Performance|Weights|Gunnery/ });
+  // The index and the chapter heading print the same localized name, so waiting
+  // for the name that was clicked is both the wait and the invariant.
+  return screen.findByRole('heading', { level: 1, name: chapter });
 }
 
 async function persist(): Promise<ProjectDocument> {
@@ -116,11 +118,11 @@ function inputsOf(scenario: Record<string, any>): Record<string, any> {
 function declareCompleteScenario() {
   change('flooding_1 进水时长 · s', '60');
   change('flooding_1 时间步长 · s', '0.5');
-  change('flooding_1 场景 来源', 'declared damage case');
-  change('flooding_1 场景 估算状态', 'confirmed');
+  change('flooding_1 场景名称 来源', 'declared damage case');
+  change('flooding_1 场景名称 估算状态', 'confirmed');
   change('flooding_1 海水密度', '1.025');
-  change('flooding_1 海水 来源', 'sea water density');
-  change('flooding_1 海水 估算状态', 'confirmed');
+  change('flooding_1 海水节点 来源', 'sea water density');
+  change('flooding_1 海水节点 估算状态', 'confirmed');
   fireEvent.click(screen.getByRole('button', { name: '添加舱室' }));
   change('flooding_1 舱室 tank_1 长度', '10');
   change('flooding_1 舱室 tank_1 型宽', '6');
@@ -154,7 +156,7 @@ describe('advanced inputs · resistance scenarios', () => {
     change('taylor 阻力方法', 'taylor_gertler_source_axis_strict');
     change('taylor 姿态策略', 'selected_plane_longitudinal_trim_proxy_v1');
     change('taylor 研究来源', 'Gertler table reproduction');
-    change('taylor 研究估算状态', 'estimate');
+    change('taylor 估算状态', 'estimate');
     change('taylor 表 ID', 'gertler-806');
     change('taylor 摩擦方法', 'schoenherr_implicit_ittc_0.242');
     change('taylor 艉部系数 c_stern', '-1');
@@ -163,7 +165,7 @@ describe('advanced inputs · resistance scenarios', () => {
     change('新阻力场景 id', 'holtrop');
     fireEvent.click(screen.getByRole('button', { name: '添加阻力场景' }));
     change('holtrop 研究来源', 'Holtrop 1982 inputs');
-    change('holtrop 研究估算状态', 'confirmed');
+    change('holtrop 估算状态', 'confirmed');
     const doc = await persist();
     const scenarios = doc.resistance_scenarios as Record<string, any>[];
     expect(scenarios.map(entry => entry.method)).toEqual(['taylor_gertler_source_axis_strict', 'holtrop_mennen_1982']);
@@ -241,15 +243,15 @@ describe('advanced inputs · system mass models', () => {
     fireEvent.change(screen.getByLabelText('选择系统叶'), { target: { value: 'weapons.main' } });
     fireEvent.click(await screen.findByRole('button', { name: '添加质量模型' }));
     change('model_1 模型方法', 'counted_ammunition_mass');
-    change('model_1 弹丸质量', '0.0159');
+    change('model_1 弹丸质量 值', '0.0159');
     change('model_1 弹丸质量 来源', 'munition label');
     change('model_1 弹丸质量 估算状态', 'confirmed');
-    change('model_1 装药质量', '0.0064');
+    change('model_1 装药质量 值', '0.0064');
     change('model_1 装药质量 来源', 'munition label');
     change('model_1 装药质量 估算状态', 'confirmed');
     change('model_1 装舰数量字段', 'installed_guns');
     change('model_1 模型来源', 'declared ammunition outfit');
-    change('model_1 模型估算状态', 'estimate');
+    change('model_1 估算状态', 'estimate');
     change('model_1 相对容差', '0.01');
     change('model_1 绝对容差', '0.01');
     // An estimated model needs provenance on the named count inputs too.
@@ -277,7 +279,7 @@ describe('advanced inputs · system mass models', () => {
     await open('重量与载荷');
     fireEvent.click(await screen.findByRole('button', { name: '添加质量模型' }));
     change('model_1 模型方法', 'counted_unit_mass');
-    change('model_1 单具质量', '12');
+    change('model_1 单具质量 值', '12');
     change('model_1 单具质量 来源', 'crane list');
     change('model_1 单具质量 估算状态', 'confirmed');
     change('model_1 计数方式', 'value');
@@ -291,7 +293,7 @@ describe('advanced inputs · system mass models', () => {
   it('adds and removes a model, and refuses an estimated model without input provenance', async () => {
     await open('重量与载荷');
     fireEvent.click(await screen.findByRole('button', { name: '添加质量模型' }));
-    change('model_1 模型估算状态', 'estimate');
+    change('model_1 估算状态', 'estimate');
     expect(screen.getByRole('status')).toHaveTextContent('估算模型必须为输入');
     fireEvent.click(screen.getByRole('button', { name: '移除模型 model_1' }));
     const doc = await persist();
@@ -306,7 +308,7 @@ describe('advanced inputs · guns page rows', () => {
     fireEvent.click(await screen.findByRole('button', { name: '添加炮组' }));
     change('battery_1 新增行', 'ammunition');
     fireEvent.click(screen.getByRole('button', { name: '添加炮页行' }));
-    fireEvent.click(screen.getByLabelText('battery_1 行 ammunition 账本绑定 belt'));
+    fireEvent.click(screen.getByLabelText('battery_1 ammunition 账本绑定 belt'));
     let doc = await persist();
     const battery = (doc.systems as any).weapons.battery_1;
     expect(battery.page_rows.map((row: any) => row.row)).toEqual(['ammunition']);
@@ -345,7 +347,7 @@ describe('advanced inputs · flooding scenarios', () => {
     await open('破损研究');
     fireEvent.click(await screen.findByRole('button', { name: '添加破损场景' }));
     change('flooding_1 进水时长 · s', '30');
-    change('flooding_1 场景 来源', 'declared case');
+    change('flooding_1 场景名称 来源', 'declared case');
     const doc = await persist();
     expect(scenarioOf(doc)).toMatchObject({ schema: 'plimsoll-flooding-scenario-1', id: 'flooding_1',
       duration_s: 30, time_step_s: null, source: 'declared case' });
@@ -354,7 +356,7 @@ describe('advanced inputs · flooding scenarios', () => {
     render(<Workbench projectId="p1" onBack={vi.fn()} onRun={vi.fn()} />);
     fireEvent.click(await screen.findByRole('button', { name: '破损研究' }));
     expect(await screen.findByLabelText('flooding_1 进水时长 · s')).toHaveValue(30);
-    expect(screen.getByLabelText('flooding_1 场景 来源')).toHaveValue('declared case');
+    expect(screen.getByLabelText('flooding_1 场景名称 来源')).toHaveValue('declared case');
     // Unknown stays unknown after reopening; it is never turned into a default.
     expect(screen.getByLabelText('flooding_1 时间步长 · s')).toHaveValue(null);
     expect(screen.getByLabelText('flooding_1 海水密度')).toHaveValue(null);
@@ -414,7 +416,7 @@ describe('advanced inputs · flooding scenarios', () => {
     change('新增开口 id', 'vent_2');
     fireEvent.click(screen.getByRole('button', { name: '添加开口' }));
     change('flooding_1 开口 vent_1 z_m', '5.4');
-    change('flooding_1 开口 vent_1 来源', 'ventilation plan');
+    change('flooding_1 开口 id vent_1 来源', 'ventilation plan');
     change('flooding_1 开口 vent_2 z_m', '6.1');
     change('flooding_1 开口 vent_2 开启', 'no');
     const doc = await persist();

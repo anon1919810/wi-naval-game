@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useLanguage } from './LanguageProvider';
 import { cfX, cfY, CF_HI, CF_LO, CF_TOP, connCf, PLOT } from './scrollStudies';
 
 /** Static studies: these coordinates never describe the archived vessel. */
@@ -82,9 +83,18 @@ export function PageField({ page }: { page: 'work' | 'about' }) { return page ==
 /* ---- typeset mathematics ---------------------------------------------------- */
 
 /** `role="img"` names the formula: a fraction of spans is otherwise read as a
- *  run of unrelated letters. Nothing is rendered by a library. */
+ *  run of unrelated letters. Nothing is rendered by a library.
+ *
+ *  Two languages are in play on one node, and they are deliberately separated.
+ *  The *name* of the formula is prose and follows the reader, so the accessible
+ *  node carries the active language and a Chinese visitor hears a Chinese
+ *  description of an equation that has not changed. The *formula* is not prose:
+ *  it is mathematical notation, identical in both editions, and is marked
+ *  `lang="en"` on the spans that hold it so it is typeset and announced as Latin
+ *  symbols rather than as Chinese text. */
 function MathLine({ label, compact, children }: { label: string; compact?: boolean; children: ReactNode }) {
-  return <p className={compact ? 'ff-math ff-math--compact' : 'ff-math'} role="img" aria-label={label}>{children}</p>;
+  const { language } = useLanguage();
+  return <p className={compact ? 'ff-math ff-math--compact' : 'ff-math'} role="img" aria-label={label} lang={language}>{children}</p>;
 }
 
 /* ---- About: the Lissajous hero --------------------------------------------- */
@@ -96,8 +106,9 @@ const PLOTS = FAMILIES.map(({ a, b, p }) => Array.from({ length: 481 }, (_, i) =
 }).join('') + 'Z');
 
 export function AboutFigure() {
+  const { t } = useLanguage();
   return <figure className="ff-about-figure" data-ff-study="harmonic">
-   <span className="ff-study-caption">FIG. 01 / HARMONIC STUDIES</span>
+   <span className="ff-study-caption">{t('figure.harmonic')}</span>
    <svg className="ff-curve" viewBox="0 0 320 320" aria-hidden="true" focusable="false">
     <path className="ff-curve-ruler" d="M20 20h280v280H20zM160 10v300M10 160h300"/><circle className="ff-curve-ruler" cx="160" cy="160" r="140"/>
     <path className="ff-curve-tick" d={Array.from({length:17},(_,i)=>`M${20+i*17.5} 20v${i%4===0?7:3}M20 ${20+i*17.5}h${i%4===0?7:3}`).join('')}/>
@@ -109,14 +120,14 @@ export function AboutFigure() {
     <circle className="ff-curve-cursor" data-ff-motion="cursor" cx="160" cy="20" r="3" style={{ opacity: 0 }}/>
     <circle className="ff-field-point" cx="300" cy="160" r="3"/>
    </svg>
-   <MathLine compact label="x equals sine of a t plus phi; y equals sine of b t; t from zero up to two pi.">
-    <span><i>x</i> = sin(<i>at</i> + <i>φ</i>)</span>
-    <span><i>y</i> = sin(<i>bt</i>)</span>
-    <span>0 ≤ <i>t</i> &lt; 2π</span>
+   <MathLine compact label={t('math.harmonic1')}>
+    <span lang="en"><i>x</i> = sin(<i>at</i> + <i>φ</i>)</span>
+    <span lang="en"><i>y</i> = sin(<i>bt</i>)</span>
+    <span lang="en">0 ≤ <i>t</i> &lt; 2π</span>
    </MathLine>
-   <MathLine compact label="Two families: a and b are 3 and 2 with phase pi over 2, 0 and pi over 4; a and b are 5 and 4 with phase 0 and pi over 3.">
-    <span>(<i>a</i>, <i>b</i>) = (3, 2) · <i>φ</i> = π/2, 0, π/4</span>
-    <span>(<i>a</i>, <i>b</i>) = (5, 4) · <i>φ</i> = 0, π/3</span>
+   <MathLine compact label={t('math.harmonic2')}>
+    <span lang="en">(<i>a</i>, <i>b</i>) = (3, 2) · <i>φ</i> = π/2, 0, π/4</span>
+    <span lang="en">(<i>a</i>, <i>b</i>) = (5, 4) · <i>φ</i> = 0, π/3</span>
    </MathLine>
   </figure>;
 }
@@ -124,8 +135,9 @@ export function AboutFigure() {
 /* ---- About: three naval studies -------------------------------------------- */
 
 function ScaleFigure() {
+  const { t } = useLanguage();
   return <figure className="ff-about-study-figure" data-ff-study="scale">
-   <span className="ff-study-caption">FIG. 02 / SPEED, LENGTH, GRAVITY, VISCOSITY</span>
+   <span className="ff-study-caption">{t('figure.scale')}</span>
    <svg className="ff-study-draw" viewBox="0 0 340 160" aria-hidden="true" focusable="false">
     <path className="ff-study-guide" d="M20 74h300"/>
     <path className="ff-study-wave" d={Array.from({ length: 25 }, (_, i) => `M${20 + i * 12} 74q6 -7 12 0`).join('')}/>
@@ -137,7 +149,7 @@ function ScaleFigure() {
     <text className="ff-study-tag" x="300" y="32" textAnchor="end">V</text>
     <text className="ff-study-tag" x="170" y="152" textAnchor="middle">L</text>
    </svg>
-   <figcaption>Speed and waterline length. Schematic.</figcaption>
+   <figcaption>{t('figure.scaleCaption')}</figcaption>
   </figure>;
 }
 
@@ -153,8 +165,9 @@ const CF_CURVE = Array.from({ length: 145 }, (_, i) => {
 }).join('');
 
 function FrictionFigure() {
+  const { t } = useLanguage();
   return <figure className="ff-about-study-figure" data-ff-study="friction">
-   <span className="ff-study-caption">FIG. 03 / SKIN FRICTION AGAINST REYNOLDS NUMBER</span>
+   <span className="ff-study-caption">{t('figure.friction')}</span>
    <svg className="ff-study-draw" viewBox="0 0 340 200" aria-hidden="true" focusable="false">
     <path className="ff-study-guide" d={`M${PLOT.x} ${PLOT.y}h${PLOT.w}v${PLOT.h}h${-PLOT.w}Z`}/>
     {MILLI.map(n => <path key={n} className="ff-study-grid" d={`M${PLOT.x} ${cfY(n / 1000).toFixed(2)}h${PLOT.w}`}/>)}
@@ -170,13 +183,14 @@ function FrictionFigure() {
     <text className="ff-study-tag ff-study-tag--name" x={PLOT.x + 6} y={PLOT.y + 16}>Cf</text>
     <text className="ff-study-tag ff-study-tag--name" x={PLOT.x + PLOT.w} y={PLOT.y + PLOT.h + 32} textAnchor="end">Re</text>
    </svg>
-   <figcaption>Conn, 1953 / Schoenherr approximation, over the interval Plimsoll declares valid.</figcaption>
+   <figcaption>{t('figure.frictionCaption')}</figcaption>
   </figure>;
 }
 
 function PowerFigure() {
+  const { t } = useLanguage();
   return <figure className="ff-about-study-figure" data-ff-study="power">
-   <span className="ff-study-caption">FIG. 04 / RESISTANCE AGAINST SPEED</span>
+   <span className="ff-study-caption">{t('figure.power')}</span>
    <svg className="ff-study-draw" viewBox="0 0 340 160" aria-hidden="true" focusable="false">
     <path className="ff-study-guide" d="M24 96h292"/>
     <path className="ff-study-body" d="M118 96V78h104v18"/>
@@ -187,73 +201,78 @@ function PowerFigure() {
     <text className="ff-study-tag" x="282" y="36" textAnchor="end">V</text>
     <text className="ff-study-tag" x="58" y="136" textAnchor="end">R</text>
    </svg>
-   <figcaption>The two quantities whose product is effective power.</figcaption>
+   <figcaption>{t('figure.powerCaption')}</figcaption>
   </figure>;
 }
 
 export function ScaleStudy() {
-  return <section className="ff-about-study" aria-labelledby="ff-about-scale" data-ff-section="Scale">
+  const { t } = useLanguage();
+  return <section className="ff-about-study" aria-labelledby="ff-about-scale" data-ff-section={t('study.scale.section')}>
    <div className="ff-about-study-text">
-    <span className="ff-eyebrow">01 / SCALE</span>
-    <h2 id="ff-about-scale" tabIndex={-1}>Scale</h2>
-    <p>Froude compares inertia with gravity. Reynolds compares inertia with viscosity.</p>
-    <MathLine label="Froude number equals speed divided by the square root of g times L; Reynolds number equals speed times L divided by nu.">
-     <span className="ff-equation">
+    <span className="ff-eyebrow">{t('study.scale.eyebrow')}</span>
+    <h2 id="ff-about-scale" tabIndex={-1}>{t('study.scale.title')}</h2>
+    <p>{t('study.scale.body')}</p>
+    <MathLine label={t('math.scale')}>
+     <span className="ff-equation" lang="en">
       <span><i>Fr</i></span><span>=</span>
       <span className="ff-frac"><span className="ff-frac-num"><i>V</i></span><span className="ff-frac-den"><span className="ff-radic"><span className="ff-radic-in"><i>gL</i></span></span></span></span>
      </span>
-     <span className="ff-equation">
+     <span className="ff-equation" lang="en">
       <span><i>Re</i></span><span>=</span>
       <span className="ff-frac"><span className="ff-frac-num"><i>VL</i></span><span className="ff-frac-den"><i>ν</i></span></span>
      </span>
     </MathLine>
     <ul className="ff-legend">
-     <li><i>V</i> speed</li><li><i>L</i> waterline length</li><li><i>g</i> gravity</li><li><i>ν</i> kinematic viscosity</li>
+     <li><i>V</i> {t('study.scale.speed')}</li><li><i>L</i> {t('study.scale.length')}</li><li><i>g</i> {t('study.scale.gravity')}</li><li><i>ν</i> {t('study.scale.viscosity')}</li>
     </ul>
-    <p className="ff-study-note">Residual-coefficient atlas: Molland, Turnock and Hudson, <cite>Ship Resistance and Propulsion</cite>, Appendix A3, after Gertler (1954).</p>
+    {/* The book and its authors are named the same way in either language; the
+        sentence introducing them is prose and is translated. */}
+    <p className="ff-study-note">{t('study.scale.note')}</p>
    </div>
    <ScaleFigure />
   </section>;
 }
 
 export function FrictionStudy() {
-  return <section className="ff-about-study ff-about-study--flip" aria-labelledby="ff-about-friction" data-ff-section="Friction">
+  const { t } = useLanguage();
+  return <section className="ff-about-study ff-about-study--flip" aria-labelledby="ff-about-friction" data-ff-section={t('study.friction.section')}>
    <div className="ff-about-study-text">
-    <span className="ff-eyebrow">02 / FRICTION</span>
-    <h2 id="ff-about-friction" tabIndex={-1}>Friction</h2>
-    <p>Skin friction is quoted as a dimensionless coefficient. Plimsoll uses Conn’s 1953 explicit approximation to the Kármán–Schoenherr line.</p>
-    <MathLine label="Cf equals 0.4631 divided by log base ten of Re raised to the power 2.6.">
-     <span className="ff-equation">
+    <span className="ff-eyebrow">{t('study.friction.eyebrow')}</span>
+    <h2 id="ff-about-friction" tabIndex={-1}>{t('study.friction.title')}</h2>
+    <p>{t('study.friction.body')}</p>
+    <MathLine label={t('math.friction')}>
+     <span className="ff-equation" lang="en">
       <span><i>C</i><sub>f</sub></span><span>=</span>
       <span className="ff-frac"><span className="ff-frac-num">0.4631</span><span className="ff-frac-den">(log<sub>10</sub> <i>Re</i>)<sup>2.6</sup></span></span>
      </span>
     </MathLine>
-    <p className="ff-study-note">Shown for 10⁶ ≤ <i>Re</i> ≤ 10⁹.</p>
+    <p className="ff-study-note">{t('study.friction.note')}</p>
    </div>
    <FrictionFigure />
   </section>;
 }
 
 export function PowerStudy() {
-  return <section className="ff-about-study" aria-labelledby="ff-about-power" data-ff-section="Power">
+  const { t } = useLanguage();
+  return <section className="ff-about-study" aria-labelledby="ff-about-power" data-ff-section={t('study.power.section')}>
    <div className="ff-about-study-text">
-    <span className="ff-eyebrow">03 / POWER</span>
-    <h2 id="ff-about-power" tabIndex={-1}>Power</h2>
-    <p>Effective power is resistance times speed. Plimsoll splits total resistance into friction and residual, within its own model.</p>
-    <MathLine label="Effective power equals total resistance times speed; total resistance is friction resistance plus residual resistance.">
-     <span className="ff-equation">
+    <span className="ff-eyebrow">{t('study.power.eyebrow')}</span>
+    <h2 id="ff-about-power" tabIndex={-1}>{t('study.power.title')}</h2>
+    <p>{t('study.power.body')}</p>
+    <MathLine label={t('math.power')}>
+     <span className="ff-equation" lang="en">
       <span><i>P</i><sub>E</sub></span><span>=</span>
       <span><i>R</i><sub>T</sub> · <i>V</i></span>
      </span>
-     <span className="ff-equation">
+     <span className="ff-equation" lang="en">
       <span><i>R</i><sub>T</sub></span><span>=</span>
       <span><i>R</i><sub>f</sub> + <i>R</i><sub>r</sub></span>
      </span>
     </MathLine>
     <ul className="ff-legend">
-     <li><i>R</i><sub>T</sub> total</li><li><i>R</i><sub>f</sub> friction</li><li><i>R</i><sub>r</sub> residual</li><li><i>V</i> speed</li>
+     <li><i>R</i><sub>T</sub> {t('study.power.total')}</li><li><i>R</i><sub>f</sub> {t('study.power.friction')}</li><li><i>R</i><sub>r</sub> {t('study.power.residual')}</li><li><i>V</i> {t('study.power.speed')}</li>
     </ul>
-    <p className="ff-study-note">Effective power in watts; kilowatts divide by 1000. Computed once resistance and speed are known.</p>
+    <p className="ff-study-note">{t('study.power.note')}</p>
    </div>
    <PowerFigure />
   </section>;

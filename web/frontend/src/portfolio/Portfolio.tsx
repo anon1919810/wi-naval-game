@@ -1,9 +1,11 @@
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent, type PointerEvent, type KeyboardEvent } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent, type KeyboardEvent } from 'react';
 import { flushSync } from 'react-dom';
 import { AboutContent } from './AboutContent';
 import { CreditsContent } from './CreditsContent';
 import { Artwork, artworkTransform, GEOMETRY_PARALLAX, maskTrackTransform } from './Artwork';
 import { readyImage, type ImageCache } from './images';
+import { initialLanguage, rememberLanguage, translate, type CopyParams, type SiteLanguage, type TranslationKey } from './language';
+import { LanguageProvider } from './LanguageProvider';
 import { introPlayed, markIntroPlayed } from './intro';
 import { lensFrame, RESTING_VIEW_BOX, type ExhibitRect } from './lens';
 import { createPreviewSound } from './previewAudio';
@@ -22,7 +24,8 @@ import { railView } from './navPreview';
 import { startScrollStudies } from './scrollStudies';
 import { storedTheme, THEME_KEY, type PortfolioTheme } from './theme';
 import { TitleEntry } from './TitleEntry';
-import { ToolModuleBoundary } from './ToolModule';
+import { ToolModuleBoundary, TOOL_MODULE_KEYS } from './ToolModule';
+import { shellCopy, type ShellKey } from '../i18n/shell';
 import { animateTheme, cancelTransitions, runTransition, TRANSITION_MS, transitionsActive, type TransitionKind, type TransitionOptions } from './transitions';
 import { ReadPending } from '../components/ReadPending';
 // The leave guard attaches at import time: before this component mounts, and
@@ -57,6 +60,51 @@ const SAMPLE_MOVES: Record<string, [number, number]> = { ArrowLeft: [-4, 0], Arr
 export default function Portfolio({ introEnabled = true }: { introEnabled?: boolean }) {
   const [route, setRoute] = useState(() => classifyHash(window.location.hash));
   const [theme, setTheme] = useState<PortfolioTheme>(storedTheme);
+  /**
+   * The public shell's interface, chosen once on the way in and then only by the
+   * visitor. It is plain state on this component, which is above the public
+   * route and above the workspace route, so leaving for the tool and coming back
+   * finds the same language; and a press on the header is an ordinary state
+   * change, not a navigation — no hash, no transition, no remount, and nothing
+   * below this component is reset by it.
+   */
+  const [language, setLanguage] = useState<SiteLanguage>(initialLanguage);
+  const t = useCallback(
+    (key: TranslationKey, params?: CopyParams) => translate(language, key, params),
+    [language],
+  );
+  /**
+   * The shared chrome's words, resolved from *this component's* language state.
+   *
+   * This is deliberately not the `useShellCopy()` hook. `LanguageProvider` is
+   * mounted by this component's own return value, so a hook called here would
+   * read the context's default — English — and the tool route's fallback panel
+   * and document title would ignore the visitor's choice entirely. Resolving
+   * against the same `language` the provider is given keeps the eager shell and
+   * the workspace reading one state, with no ordering assumption.
+   *
+   * Only the four sentences the eager shell itself prints are resolved here —
+   * the chunk-failure panel and the tool route's document title. The workspace
+   * dictionary is deliberately *not* imported by this module: the public shell
+   * is the eager entry chunk, and reaching into it would put every editor,
+   * report and laboratory string into the bundle the home page loads. The
+   * workspace route imports them through its own chunk.
+   */
+  const w = useCallback(
+    (key: ShellKey, params?: CopyParams) => shellCopy(language, key, params),
+    [language],
+  );
+  /** A deliberate choice is remembered; a derived one is not. */
+  const chooseLanguage = useCallback((next: SiteLanguage) => {
+    setLanguage(next);
+    rememberLanguage(next);
+  }, []);
+  const toolModuleCopy = useMemo(() => ({
+    title: w(TOOL_MODULE_KEYS.title),
+    note: w(TOOL_MODULE_KEYS.note),
+    reload: w(TOOL_MODULE_KEYS.reload),
+    returnLabel: w(TOOL_MODULE_KEYS.returnLabel),
+  }), [w]);
   const dark = theme === 'dark';
   /**
    * The opening plays once per browser session, and only on request after that:
@@ -513,15 +561,25 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
     window.addEventListener('hashchange', update);
     return () => { window.removeEventListener('hashchange', update); };
   }, [applyRoute]);
+  /**
+   * The document's own two names.
+   *
+   * `lang` is the document's language, and it is now one language everywhere:
+   * the visitor chose it once, at the top right, and the workspace follows it
+   * exactly as the public pages do. A Chinese reader who opens Plimsoll gets a
+   * Chinese document, and an English reader gets an English one, without the
+   * tool route hard-coding a language of its own. The title follows the route
+   * and the language together, so neither surface has to be reloaded to get one.
+   */
   useEffect(() => {
-    document.title = route.kind === 'app' ? 'Plimsoll · 舰船计算工作台'
-      : route.view === 'project' ? 'Plimsoll — Y’s Formfield'
-      : route.view === 'credits' ? 'Credits — Y’s Formfield'
-      : 'Y’s Formfield — Tools & Experiments';
-    document.documentElement.lang = route.kind === 'app' ? 'zh-CN' : 'en';
+    document.title = route.kind === 'app' ? w('doc.title.app')
+      : route.view === 'project' ? t('doc.title.project')
+      : route.view === 'credits' ? t('doc.title.credits')
+      : t('doc.title.home');
+    document.documentElement.lang = language;
     document.documentElement.dataset.formfieldSurface = route.kind;
     if (route.kind === 'public') document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-  }, [dark, route]);
+  }, [dark, route, language, t, w]);
   useEffect(() => {
     if (!publicActive) return;
     const root = document.documentElement;
@@ -626,25 +684,36 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
 
   const withdrawDrawingCursor = () => { hovered.current = false; keysOn.current = false; paint(); };
 
-  return <>
-    <div className="ff-shell" ref={shellRef} data-ff-theme={dark ? 'dark' : 'light'} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
+  return <LanguageProvider language={language} onLanguage={chooseLanguage}>
+    <div className="ff-shell" ref={shellRef} data-ff-theme={dark ? 'dark' : 'light'} data-ff-lang={language} data-opening={opening} data-settling={settling} data-switching={switching} hidden={!publicActive}>
       <ShellField />
       <header className="ff-header" inert={opening}>
-        <a className="ff-wordmark" href={publicHref('home')} aria-label="Y’s Formfield home">Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
+        <a className="ff-wordmark" href={publicHref('home')} aria-label={t('header.home')}>Y’s <span>Formfield</span><i aria-hidden="true">↗</i></a>
         <div className="ff-theme-group">
           {/* Three geometric marks, no words. The sound is a speaker with one
               wave and a diagonal slash through it when muted; the theme is a ring
               half filled; the replay is an incomplete circle that turns under the
               pointer or the key and stands still otherwise. Each keeps its
-              accessible name, its pressed state where it has one, and its English
-              title, so nothing here is only a picture. */}
-          <SoundToggle />
-          <button className="ff-theme" data-audio="manual" onClick={toggleTheme} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} title={dark ? 'Switch to light theme' : 'Switch to dark theme'}>
+              accessible name, its pressed state where it has one, and its title,
+              so nothing here is only a picture. */}
+          <SoundToggle label={t('header.sound')} onLabel={t('header.soundOn')} offLabel={t('header.soundOff')} />
+          <button className="ff-theme" data-audio="manual" onClick={toggleTheme} aria-label={dark ? t('header.themeLight') : t('header.themeDark')} title={dark ? t('header.themeLight') : t('header.themeDark')}>
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.4" /><path className="ff-theme-fill" d="M10 3.6a6.4 6.4 0 0 1 0 12.8z" /></svg>
           </button>
-          <button className="ff-replay" onClick={replay} aria-label="Replay intro" title="Replay intro">
+          <button className="ff-replay" onClick={replay} aria-label={t('header.replay')} title={t('header.replay')}>
             <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M15.2 12.6A6.4 6.4 0 1 1 10 3.6a6.4 6.4 0 0 1 5.2 9" /><path className="ff-replay-head" d="M15.6 6.2v3.6h-3.6" /></svg>
           </button>
+          {/* The language pair. Two ordinary buttons in one labelled group, no
+              dropdown and no menu to open: each is a 44px target, each is a real
+              tab stop, and `aria-pressed` states which one is on. Each carries
+              its own `lang`, so a screen reader pronounces 中文 as Chinese and
+              EN as English rather than reading one with the other's voice. */}
+          <div className="ff-lang" role="group" aria-label={t('header.languageGroup')}>
+            <button type="button" className="ff-lang-option" lang="zh-CN" aria-pressed={language === 'zh-CN'}
+              aria-label={t('header.languageZh')} title={t('header.languageZhTitle')} onClick={() => chooseLanguage('zh-CN')}>中文</button>
+            <button type="button" className="ff-lang-option" lang="en" aria-pressed={language === 'en'}
+              aria-label={t('header.languageEn')} title={t('header.languageEnTitle')} onClick={() => chooseLanguage('en')}>EN</button>
+          </div>
         </div>
       </header>
 
@@ -662,10 +731,13 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             the shell's faint field instead, and clears the paper under each of its
             own blocks. */}
         {onWork && !detail && <PageField page="work" />}
-        <section className="ff-home" hidden={!onWork || detail} aria-label="Selected work">
+        <section className="ff-home" hidden={!onWork || detail} aria-label={t('work.label')}>
           {/* The shared pale field surrounds the exhibit. */}
-          <div className="ff-exhibit-label"><span><i className="ff-live-dot" />SELECTED WORK</span><span>TOOLS & EXPERIMENTS / VOL. 01</span></div>
-          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? 'Interactive top-view drawing. Inspection on: arrow keys move the 2× lens over the same rendered scan, Home resets the lens, Escape leaves inspection.' : 'Interactive top-view drawing. Use arrow keys to explore, Home to reset.'} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (isExhibitControl(e.target)) withdrawDrawingCursor(); else if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (isExhibitControl(e.target)) return; if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
+          <div className="ff-exhibit-label">
+            <span><i className="ff-live-dot" />{t('work.exhibitHead')}</span>
+            <span>{t('work.exhibitMeta')} / <span lang="en">{t('work.exhibitFolio')}</span></span>
+          </div>
+          <div className="ff-exhibit" ref={exhibit} role="group" tabIndex={0} aria-label={inspect ? t('work.drawingInspect') : t('work.drawingIdle')} onKeyDown={keyboard} onBlur={() => { keysOn.current = false; paint(); }} onPointerMove={explore} onPointerEnter={e => { if (isExhibitControl(e.target)) withdrawDrawingCursor(); else if (e.pointerType === 'mouse') { hovered.current = true; paint(); } }} onPointerLeave={() => { hovered.current = false; paint(); }} onPointerDown={e => { if (isExhibitControl(e.target)) return; if (e.pointerType !== 'mouse') e.currentTarget.setPointerCapture(e.pointerId); explore(e); }}>
             {/* Hidden SVG images still fetch. Keep the exhibit frame and state,
                 but mount its bitmap only while this drawing is displayed. */}
             <div className="ff-art-scene">{onWork && !detail && <Artwork compositionRef={composition} geometryRef={geometry} maskRef={maskTrack} sheet={sheet} dark={dark} details={details} />}</div>
@@ -689,18 +761,18 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             </div>}
             {!inspect && <div ref={cursor} className="ff-cursor" aria-hidden="true" hidden><span className="ff-cursor-cross" /><i /></div>}
             <span className="ff-corner ff-corner-tl" /><span className="ff-corner ff-corner-tr" /><span className="ff-corner ff-corner-bl" /><span className="ff-corner ff-corner-br" />
-            <button className="ff-board-icon ff-board-inspect" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={() => setInspect(v => !v)} aria-label={`Inspect ${inspect ? 'On' : 'Off'}`} aria-pressed={inspect} title={inspect ? 'Leave inspection' : 'Inspect drawing · 2×'}>
+            <button className="ff-board-icon ff-board-inspect" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={() => setInspect(v => !v)} aria-label={inspect ? t('work.inspectOn') : t('work.inspectOff')} aria-pressed={inspect} title={inspect ? t('work.inspectActiveTitle') : t('work.inspectIdleTitle')}>
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5 M7.5 10.5h6 M10.5 7.5v6" /></svg>
             </button>
-            <span className="ff-board-caption">DRAWING {sheet.id} / 03</span>
-            <div className="ff-board-picker" data-exhibit-ui role="group" aria-label="Reference drawing" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>
-              {PLAN_SHEETS.map((s, i) => <button key={s.id} data-audio="manual" onClick={() => chooseReference(i)} aria-label={s.label} aria-pressed={i === marked} title={`View drawing ${s.shortLabel}`}>{s.shortLabel}</button>)}
+            <span className="ff-board-caption">{t('work.boardCaption', { id: sheet.id })}</span>
+            <div className="ff-board-picker" data-exhibit-ui role="group" aria-label={t('work.sheetGroup')} onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>
+              {PLAN_SHEETS.map((s, i) => <button key={s.id} data-audio="manual" onClick={() => chooseReference(i)} aria-label={t('work.sheetLabel', { id: s.id })} aria-pressed={i === marked} title={t('work.sheetTitle', { id: s.shortLabel })}>{s.shortLabel}</button>)}
             </div>
-            <button className="ff-board-icon ff-board-reset" data-audio="detent" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={reset} aria-label="Reset view" title="Reset view">
+            <button className="ff-board-icon ff-board-reset" data-audio="detent" data-exhibit-ui onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor} onClick={reset} aria-label={t('work.reset')} title={t('work.reset')}>
               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9a8 8 0 1 1-.5 6 M5 3v6h6" /></svg>
             </button>
-            {switchError !== null && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>Reference {PLAN_SHEETS[switchError].shortLabel} could not be loaded, so {sheet.shortLabel} stays on the exhibit. <button onClick={() => chooseReference(switchError)}>RETRY {PLAN_SHEETS[switchError].shortLabel}</button> or choose another reference.</p>}
-            {imageError && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert">The reference could not be loaded. Choose another reference or use Replay Intro to retry.</p>}
+            {switchError !== null && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert" onPointerEnter={withdrawDrawingCursor} onFocus={withdrawDrawingCursor}>{t('work.sheetError', { id: PLAN_SHEETS[switchError].shortLabel, kept: sheet.shortLabel })}<button onClick={() => chooseReference(switchError)}>{t('work.sheetErrorRetry', { id: PLAN_SHEETS[switchError].shortLabel })}</button>{t('work.sheetErrorRest')}</p>}
+            {imageError && <p className="ff-image-error ff-board-error" data-exhibit-ui role="alert">{t('work.imageError')}</p>}
           </div>
 
           <div className="ff-work-info">
@@ -710,9 +782,9 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
             <div className="ff-work-heading">
               <span className="ff-work-index">01 /</span>
               <div>
-                <TitleEntry headingRef={homeHeading} linkRef={cta} parts={['Pl', 'i', 'msoll']} dot={1} name="Open Plimsoll" href={APP_ENTRY_LINK}
-                  secondary={{ href: WORK_DETAIL_LINK, label: 'VIEW PROJECT' }} prefetch={prefetchApp} onEnter={enterTool} />
-                <p>Naval design, made explorable.</p>
+                <TitleEntry headingRef={homeHeading} linkRef={cta} parts={['Pl', 'i', 'msoll']} dot={1} name={t('work.openTool')} href={APP_ENTRY_LINK}
+                  secondary={{ href: WORK_DETAIL_LINK, label: t('work.viewProject') }} prefetch={prefetchApp} onEnter={enterTool} />
+                <p>{t('work.lede')}</p>
               </div>
             </div>
           </div>
@@ -758,13 +830,17 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           second address at the bottom of every page said the same thing twice.
           Replay is in the header for the same reason — one control, not two. */}
       <footer className="ff-footer" inert={opening}>
-        <span>BUILT BY YANG DUANMING</span>
+        {/* The builder's name is a signature and stays exactly as it is spelled, in
+            both languages; the motto beside the filing is prose and follows the
+            visitor's choice. The ICP record is a legal filing and is never
+            translated, restyled or hidden. */}
+        <span lang="en">BUILT BY YANG DUANMING</span>
         <a className="ff-filing" lang="zh-CN" href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">蜀ICP备2026059657号-1</a>
-        <span>PRECISE. MODERN. INTERACTIVE.</span>
+        <span>{t('footer.tagline')}</span>
       </footer>
       {opening && publicActive && (readyHref === sheet.href
         ? <Splash sheet={sheet} target={exhibit} dark={dark} details={details} onDone={finish} onSettle={beginSettle} />
-        : <div className="ff-splash ff-image-wait" role="status" aria-label="Loading reference"><span>PREPARING THE DRAWING</span><button className="ff-skip" onClick={finish}>SKIP INTRO <span>↗</span></button></div>)}
+        : <div className="ff-splash ff-image-wait" role="status" aria-label={t('work.loadingStatus')}><span>{t('work.preparing')}</span><button className="ff-skip" onClick={finish}>{t('work.skipIntro')} <span>↗</span></button></div>)}
     </div>
 
     {/* The fallback is the workspace's own shell, so the frame morph lands on a
@@ -777,13 +853,13 @@ export default function Portfolio({ introEnabled = true }: { introEnabled?: bool
           screen yet, so the same real return href is rendered here, and the
           shared read placeholder says what is being read. When the app mounts it
           owns the anchor and this fallback leaves with it. */}
-      <ToolModuleBoundary returnHref={publicHref(publicOrigin.current)}
+      <ToolModuleBoundary returnHref={publicHref(publicOrigin.current)} copy={toolModuleCopy}
         onFailure={() => { toolFailed.current = true; }}>
-        <Suspense fallback={<><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>↖ Y’s Formfield</a>
-          <div className="workspace-connect"><ReadPending scope="workspace" object="工作空间" /></div></>}>
+        <Suspense fallback={<><a className="ff-tool-return" href={publicHref(publicOrigin.current)}>{w('shell.toolReturn')}</a>
+          <div className="workspace-connect"><ReadPending scope="workspace" object={w('shell.connect.object')} /></div></>}>
           <Tool returnHref={publicHref(publicOrigin.current)} />
         </Suspense>
       </ToolModuleBoundary>
     </div></div>}
-  </>;
+  </LanguageProvider>;
 }

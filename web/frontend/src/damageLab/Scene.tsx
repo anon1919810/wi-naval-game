@@ -4,9 +4,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { ProjectDocument } from '../types';
 import type { Experiment, Fragmentation, LabState, Room, Vec3 } from './types';
 import { attitudeRows, bodyPoint, acceptedWaterFaces, roomBox, seaHeight } from './geometry';
-import { buildHullEnvelope, cutHullFaces } from './hull';
+import { buildHullEnvelope, cutHullFaces, HullGeometryError } from './hull';
 import { draftIdentity } from './model';
 import type { InspectionTarget } from './narrative';
+import { useLabCopy, type LabKey } from '../i18n/lab';
+import type { HullErrorCode } from './hull';
 
 function faceGeometry(faces:Vec3[][], classifyDeck=false):THREE.BufferGeometry {
   const batches:number[][]=[[],[]];
@@ -239,35 +241,59 @@ function createInspector(host:HTMLDivElement,project:ProjectDocument,experiment:
   }catch(error){destroy();throw error;}
 }
 
+/**
+ * Why the three-dimensional view is not on screen.
+ *
+ * A reason key rather than a sentence, because the failure outlives the render
+ * that produced it and may be printed in a language that changed in between. The
+ * browser's own cause, when there is one, is kept beside it and printed
+ * verbatim: it is the evidence for the sentence above it.
+ */
+type SceneFailure = { reason: 'scene.contextLost' | 'scene.unavailable' | HullErrorCode; cause?: string };
+
 export default function DamageLabScene({project,experiment,state,selected,inspection=null,eventTargets=[],fragments=null,selectedTrace=null,onSelect}:{
   project:ProjectDocument;experiment:Experiment;state:LabState|null;selected:string;inspection?:InspectionTarget|null;eventTargets?:InspectionTarget[];fragments?:Fragmentation|null;selectedTrace?:number|null;onSelect:(id:string)=>void;
 }) {
   const host=useRef<HTMLDivElement>(null),controller=useRef<Controller|null>(null),latest=useRef({experiment,state,selected,onSelect});
   latest.current={experiment,state,selected,onSelect};
-  const [section,setSection]=useState(false),[water,setWater]=useState(true),[paths,setPaths]=useState(true),[failure,setFailure]=useState(''),[retry,setRetry]=useState(0);
+  const l=useLabCopy();
+  const [section,setSection]=useState(false),[water,setWater]=useState(true),[paths,setPaths]=useState(true),[failure,setFailure]=useState<SceneFailure|null>(null),[retry,setRetry]=useState(0);
   const key=draftIdentity({geometry:project.geometry,compartments:project.compartments,modules:experiment.modules,crew:experiment.crew_groups});
   const chosen=inspection ?? {kind:'module' as const,id:selected};
   const selectedCrew=chosen.kind==='crew' ? experiment.crew_groups?.find(c=>c.id===chosen.id) : null;
   const selectedRoom=chosen.kind==='compartment' ? (project.compartments as Room[]|undefined)?.find(r=>r.id===chosen.id) : null;
   const name=selectedCrew?.label ?? selectedRoom?.label ?? selectedRoom?.id ?? experiment.modules.find(m=>m.id===chosen.id)?.label ?? chosen.id;
   useEffect(()=>{
-    if(!host.current)return;setFailure('');
+    if(!host.current)return;setFailure(null);
     try{
-      controller.current=createInspector(host.current,project,experiment,id=>latest.current.onSelect(id),()=>{controller.current?.destroy();controller.current=null;setFailure('三维上下文中断，文字结果与导出仍可使用。');});
+      // The context-loss callback is given a reason, not a sentence: it is held
+      // by the renderer for its lifetime, and a sentence captured here would be
+      // frozen in whatever language the page happened to be in when the frame
+      // was created. It is translated where it is printed instead, and the
+      // renderer's own dependency list stays exactly as it was.
+      controller.current=createInspector(host.current,project,experiment,id=>latest.current.onSelect(id),()=>{controller.current?.destroy();controller.current=null;setFailure({reason:'scene.contextLost'});});
       controller.current.update(latest.current.experiment,latest.current.state,latest.current.selected,section,water,inspection,eventTargets,fragments,selectedTrace,paths);
-    }catch(error){controller.current?.destroy();controller.current=null;setFailure('此浏览器无法创建三维视图；可使用右侧文字检查与完整导出。'+(error instanceof Error ? ' '+error.message : ''));}
+    }catch(error){
+      controller.current?.destroy();controller.current=null;
+      // A geometry refusal carries its own code, so it reads in the language
+      // chosen after the failure, not the one current when it was raised. Any
+      // other error keeps its own message as the raw evidence beside the frame.
+      setFailure(error instanceof HullGeometryError
+        ? {reason:error.code}
+        : {reason:'scene.unavailable',cause:error instanceof Error ? error.message : String(error)});
+    }
     return()=>{controller.current?.destroy();controller.current=null;};
     // Layout owns the graphics lifetime; changing a frame never resets orbit.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[key,retry]);
   useEffect(()=>controller.current?.update(experiment,state,selected,section,water,inspection,eventTargets,fragments,selectedTrace,paths),[experiment,state,selected,section,water,inspection,eventTargets,fragments,selectedTrace,paths]);
   return <div className="lab-scene-wrap">
-    <div ref={host} className="lab-scene" role="img" aria-label="船体、舱室、模块与接受的进水状态三维检查视图" />
-    {failure && <div className="lab-webgl-fallback" role="status"><p>{failure}</p><button onClick={()=>setRetry(v=>v+1)}>重试三维视图</button></div>}
-    <div className="lab-scene-tools"><button onClick={()=>controller.current?.reset()} disabled={!!failure}>复位视角</button><button onClick={()=>controller.current?.focus(chosen)} disabled={!!failure||!chosen.id}>定位</button><label><input type="checkbox" checked={section} onChange={e=>setSection(e.target.checked)} />局部剖视</label><label><input type="checkbox" checked={water} onChange={e=>setWater(e.target.checked)} />水面</label>{experiment.detonation&&<label><input type="checkbox" checked={paths} onChange={e=>setPaths(e.target.checked)} />破片路径</label>}</div>
-    {experiment.detonation&&<p className="lab-path-caption">PATH OVERLAY / 红点为阻挡端点 · 红线为所选路径 · 蓝点为生成破口位置；穿透显示仅供检查</p>}
-    <div className="lab-spatial-selection"><span className="lab-kicker">INSPECTING / {chosen.kind.toUpperCase()}</span><strong>{name}</strong><span>虚线为穿透定位轮廓；回放保持视角</span></div>
+    <div ref={host} className="lab-scene" role="img" aria-label={l('scene.label')} />
+    {failure && <div className="lab-webgl-fallback" role="status"><p>{l(failure.reason)}{failure.cause ? ` ${failure.cause}` : ''}</p><button onClick={()=>setRetry(v=>v+1)}>{l('scene.retry')}</button></div>}
+    <div className="lab-scene-tools"><button onClick={()=>controller.current?.reset()} disabled={!!failure}>{l('scene.reset')}</button><button onClick={()=>controller.current?.focus(chosen)} disabled={!!failure||!chosen.id}>{l('scene.focus')}</button><label><input type="checkbox" checked={section} onChange={e=>setSection(e.target.checked)} />{l('scene.section')}</label><label><input type="checkbox" checked={water} onChange={e=>setWater(e.target.checked)} />{l('scene.water')}</label>{experiment.detonation&&<label><input type="checkbox" checked={paths} onChange={e=>setPaths(e.target.checked)} />{l('scene.paths')}</label>}</div>
+    {experiment.detonation&&<p className="lab-path-caption">{l('scene.pathCaption')}</p>}
+    <div className="lab-spatial-selection"><span className="lab-kicker">INSPECTING / {chosen.kind.toUpperCase()}</span><strong>{name}</strong><span>{l('scene.selectionNote')}</span></div>
     <div className="lab-scene-caption"><span>{section ? 'STARBOARD CUTAWAY / PORT SHELL RETAINED' : 'FULL HULL / CANONICAL OFFSETS'}</span><span>{state?.ship ? 'ACCEPTED CORE ATTITUDE' : 'DECLARED LAYOUT / ATTITUDE UNSOLVED'}</span></div>
-    <div className="lab-legend"><span><i style={{background:'#68746d'}} />待试验 / 未知</span><span><i style={{background:'#3857e7'}} />可用 / 水</span><span><i style={{background:'#b58a3c'}} />受损</span><span><i style={{background:'#d9362b'}} />停用</span><span>{section ? '拖动旋转 · 滚轮缩放 · 点击露出的模块' : '拖动旋转 · 滚轮缩放 · 开启局部剖视检查舱室'}</span></div>
+    <div className="lab-legend"><span><i style={{background:'#68746d'}} />{l('scene.legend.pending')}</span><span><i style={{background:'#3857e7'}} />{l('scene.legend.available')}</span><span><i style={{background:'#b58a3c'}} />{l('scene.legend.damaged')}</span><span><i style={{background:'#d9362b'}} />{l('scene.legend.disabled')}</span><span>{section ? l('scene.legend.section') : l('scene.legend.full')}</span></div>
   </div>;
 }

@@ -3,8 +3,10 @@ import { EstimateInput, FactInput, IdPicker } from './FactInput';
 import { QuantityField } from './QuantityField';
 import { Metric, ResultSection, RowResults, StudyResult } from './FormResults';
 import { inputNumber, ledgerItems, number, object, rows, sourceText, stageData, stringList, unassignedIds, type Raw } from './formModel';
+import { useWorkspaceCopy } from '../i18n/workspace';
 
 export function ArmourEditor({ project, run, onChange }: { project: ProjectDocument; run: RunView | null; onChange: (project: ProjectDocument) => void }) {
+  const w = useWorkspaceCopy();
   const systems = object(project.systems); const armour = object(systems.armour); const fixed = object(armour.fixed);
   const declared = rows(fixed.page_rows); const ledger = ledgerItems(project);
   const data = stageData(run, 'systems'); const view = object(object(data.page_rows)['armour.fixed']);
@@ -21,23 +23,23 @@ export function ArmourEditor({ project, run, onChange }: { project: ProjectDocum
   function patchBelt(patch: Raw) { emit({ ...fixed, minimum_main_belt: { protected_compartment_ids: [], aft_margin_m: 0, fore_margin_m: 0,
     inventory_complete: false, source: null, estimate: true, ...belt, ...patch } }); }
   const weapons = object(systems.weapons);
-  return <div className="form-stack"><p className="section-intro">厚度、跨度和类型是声明输入；质量取自账本。修改这些声明后，请在重量页核对对应质量和质量模型。</p>
-    {declared.length === 0 && <p>尚无装甲行。可添加声明行并绑定已有账本条目。</p>}
+  return <div className="form-stack"><p className="section-intro">{w('armour.intro')}</p>
+    {declared.length === 0 && <p>{w('armour.empty')}</p>}
     {declared.map((row, index) => <details className="form-card" open key={String(row.row ?? index)}><summary>{String(row.label ?? row.row)}</summary><div className="form-card-body">
       {/* Plate thickness is stored in millimetres: the reader sees the preferred
           length unit and typing converts back to the stored millimetres. */}
-      <div className="form-grid"><QuantityField label="厚度 · mm" aria-label={`${row.row} 厚度 · mm`} value={number(row.thickness_mm)} dimension="length" storedUnit="mm" kind="nonnegative"
+      <div className="form-grid"><QuantityField label={w('armour.thickness')} aria-label={w('armour.thicknessAria', { row: String(row.row) })} value={number(row.thickness_mm)} dimension="length" storedUnit="mm" kind="nonnegative"
           onChange={value => patchRow(index, { thickness_mm: value })} />
-        {(['aft_m', 'fore_m'] as const).map((key, i) => <QuantityField key={key} label={i ? '艏端 · m' : '艉端 · m'} aria-label={`${row.row} ${i ? '艏端' : '艉端'} · m`}
+        {(['aft_m', 'fore_m'] as const).map((key, i) => <QuantityField key={key} label={i ? w('armour.fore') : w('armour.aft')} aria-label={w('armour.endAria', { row: String(row.row), end: i ? w('armour.fore') : w('armour.aft') })}
           value={number(object(row.extents_m)[key])} dimension="length" storedUnit="m"
           onChange={value => patchRow(index, { extents_m: { ...object(row.extents_m), [key]: value } })} />)}
-        <QuantityField label="高度 · m" aria-label={`${row.row} 高度 · m`} value={number(object(row.typed).height_m)} dimension="length" storedUnit="m" kind="positive"
+        <QuantityField label={w('armour.height')} aria-label={w('armour.heightAria', { row: String(row.row) })} value={number(object(row.typed).height_m)} dimension="length" storedUnit="m" kind="positive"
           onChange={value => patchRow(index, { typed: { ...object(row.typed), height_m: value } })} />
-        <label className="field-label">类型<input aria-label={`${row.row} 类型`} placeholder="未知" value={String(object(row.typed).construction_type ?? '')} onChange={e => patchRow(index, { typed: { ...object(row.typed), construction_type: e.target.value.trim() ? e.target.value : null } })} /></label>
-        <label className="field-label">分组<input aria-label={`${row.row} 分组`} value={String(row.group ?? '')} onChange={e => patchRow(index, { group: e.target.value || 'unclassified' })} /></label>
-        <label className="field-label">来源<input aria-label={`${row.row} 来源`} value={sourceText(row.source)} onChange={e => patchRow(index, { source: e.target.value || null })} /></label>
-        <EstimateInput label={`${row.row} 估算状态`} value={row.estimate} onChange={estimate => patchRow(index, { estimate })} />
-      </div><IdPicker label={`${row.row} 账本绑定`} selected={row.weight_item_ids} options={ledger} onChange={ids => patchRow(index, { weight_item_ids: ids })} />
+        <label className="field-label">{w('armour.type')}<input aria-label={w('armour.typeAria', { row: String(row.row) })} placeholder={w('units.unknown')} value={String(object(row.typed).construction_type ?? '')} onChange={e => patchRow(index, { typed: { ...object(row.typed), construction_type: e.target.value.trim() ? e.target.value : null } })} /></label>
+        <label className="field-label">{w('armour.group')}<input aria-label={w('armour.groupAria', { row: String(row.row) })} value={String(row.group ?? '')} onChange={e => patchRow(index, { group: e.target.value || 'unclassified' })} /></label>
+        <label className="field-label">{w('fact.source')}<input aria-label={w('fact.sourceAria', { label: String(row.row) })} value={sourceText(row.source)} onChange={e => patchRow(index, { source: e.target.value || null })} /></label>
+        <EstimateInput label={w('fact.estimateAria', { label: String(row.row) })} value={row.estimate} onChange={estimate => patchRow(index, { estimate })} />
+      </div><IdPicker label={w('fact.bindingAria', { label: String(row.row) })} selected={row.weight_item_ids} options={ledger} onChange={ids => patchRow(index, { weight_item_ids: ids })} />
       <button className="text-button" type="button" onClick={() => { const kept = declared.filter((_, i) => i !== index);
         // Drop the removed row's bindings from the leaf too: an id no row
         // declares would otherwise linger and be reported as uncovered mass.
@@ -48,41 +50,43 @@ export function ArmourEditor({ project, run, onChange }: { project: ProjectDocum
         // so an empty declaration omits the key instead of writing [].
         const next: Raw = { ...fixed, weight_item_ids: ids };
         if (kept.length === 0) delete next.page_rows; else next.page_rows = kept;
-        emit(next); }}>移除声明行</button>
+        emit(next); }}>{w('armour.removeRow')}</button>
     </div></details>)}
     <button className="button button--secondary" type="button" onClick={() => { let n = 1; while (declared.some(r => r.row === `armour_${n}`)) n++;
-      emit({ ...fixed, page_rows: [...declared, { row: `armour_${n}`, label: `Armour ${n}`, group: 'unclassified', weight_item_ids: [], source: null, estimate: null }] }); }}>添加装甲行</button>
-    <IdPicker label="固定装甲系统账本条目" selected={fixed.weight_item_ids} options={ledger} onChange={ids => emit({ ...fixed, weight_item_ids: ids })} />
-    <div className="form-card"><h3>装甲甲板平面覆盖率</h3><p>受保护平面面积与参考平面面积需要各自来源；它们与装甲展开面积分开记录。</p>
-      {(['covered_plan_area_m2', 'reference_plan_area_m2'] as const).map((key, i) => <FactInput key={key} label={i ? '参考平面面积' : '受保护平面面积'} dimension="area" storedUnit="m"
+      // `Armour ${n}` is the label written *into the project document*, so it is
+      // a stored row name rather than a translatable string on this page.
+      emit({ ...fixed, page_rows: [...declared, { row: `armour_${n}`, label: `Armour ${n}`, group: 'unclassified', weight_item_ids: [], source: null, estimate: null }] }); }}>{w('armour.addRow')}</button>
+    <IdPicker label={w('armour.leafBinding')} selected={fixed.weight_item_ids} options={ledger} onChange={ids => emit({ ...fixed, weight_item_ids: ids })} />
+    <div className="form-card"><h3>{w('armour.coverage.title')}</h3><p>{w('armour.coverage.note')}</p>
+      {(['covered_plan_area_m2', 'reference_plan_area_m2'] as const).map((key, i) => <FactInput key={key} label={i ? w('armour.coverage.reference') : w('armour.coverage.protected')} dimension="area" storedUnit="m"
           value={coverage[key]} onChange={v => emit({ ...fixed, deck_coverage: { ...coverage, [key]: v } })} />)}
-    </div><details className="form-card"><summary>主装甲带连续覆盖长度 · 工程估算</summary><div className="form-card-body"><p>使用已声明舱室的几何范围及端部余量。勾选完整清单表示你已核对全部关键舱段；结果保留工程估算标记。</p>
-      <IdPicker label="主带保护舱室" selected={belt.protected_compartment_ids} options={rows(project.compartments).map(c => ({ id: String(c.id), label: String(c.label ?? c.id) }))} onChange={ids => patchBelt({ protected_compartment_ids: ids })} />
-      <div className="form-grid">{(['aft_margin_m', 'fore_margin_m'] as const).map((key, i) => <QuantityField key={key} label={(i ? '艏' : '艉') + '端余量'}
-          aria-label={`主带 ${key}`} value={number(belt[key])} dimension="length" storedUnit="m" kind="nonnegative"
+    </div><details className="form-card"><summary>{w('armour.belt.title')}</summary><div className="form-card-body"><p>{w('armour.belt.note')}</p>
+      <IdPicker label={w('armour.belt.protected')} selected={belt.protected_compartment_ids} options={rows(project.compartments).map(c => ({ id: String(c.id), label: String(c.label ?? c.id) }))} onChange={ids => patchBelt({ protected_compartment_ids: ids })} />
+      <div className="form-grid">{(['aft_margin_m', 'fore_margin_m'] as const).map((key, i) => <QuantityField key={key} label={w('armour.belt.margin', { end: w(i ? 'armour.belt.fore' : 'armour.belt.aft') })}
+          aria-label={w('armour.belt.marginAria', { field: key })} value={number(belt[key])} dimension="length" storedUnit="m" kind="nonnegative"
           onChange={value => patchBelt({ [key]: value })} />)}
-      <label className="field-label">研究来源<input aria-label="主带研究来源" value={sourceText(belt.source)} onChange={e => patchBelt({ source: e.target.value || null })} /></label></div>
-      <label><input type="checkbox" checked={belt.inventory_complete === true} onChange={e => patchBelt({ inventory_complete: e.target.checked })} />关键舱段清单已完整核对</label>
-      {fixed.minimum_main_belt != null && <button className="text-button" onClick={() => { const next = { ...fixed }; delete next.minimum_main_belt; emit(next); }}>取消主带研究</button>}
+      <label className="field-label">{w('armour.belt.source')}<input aria-label={w('armour.belt.sourceAria')} value={sourceText(belt.source)} onChange={e => patchBelt({ source: e.target.value || null })} /></label></div>
+      <label><input type="checkbox" checked={belt.inventory_complete === true} onChange={e => patchBelt({ inventory_complete: e.target.checked })} />{w('armour.belt.inventory')}</label>
+      {fixed.minimum_main_belt != null && <button className="text-button" onClick={() => { const next = { ...fixed }; delete next.minimum_main_belt; emit(next); }}>{w('armour.belt.cancel')}</button>}
     </div></details>
     {Object.entries(weapons).filter(([, v]) => rows(object(v).page_rows).some(r => r.row === 'mounts')).map(([id, v]) => {
       const leaf = object(v); const component = object(leaf.rotating_armour_component);
       const mounts = rows(leaf.page_rows).filter(r => r.row === 'mounts').flatMap(r => Array.isArray(r.weight_item_ids) ? r.weight_item_ids as string[] : []);
       function patch(p: Raw) { onChange({ ...project, systems: { ...systems, weapons: { ...weapons, [id]: { ...leaf, rotating_armour_component: { ...component, ...p } } } } }); }
-      return <details className="form-card" key={id}><summary>{id} 炮座内旋转装甲拆分</summary><div className="form-card-body"><p>仅拆分已有炮座质量，不再加入全舰重量。</p>
-        <label className="field-label">炮座条目<select aria-label={`${id} 旋转装甲炮座条目`} value={String(component.mount_weight_item_id ?? '')} onChange={e => patch({ mount_weight_item_id: e.target.value || null })}><option value="">选择已绑定炮座</option>{mounts.map(m => <option key={m}>{m}</option>)}</select></label>
-        <FactInput label={`${id} 旋转装甲质量`} dimension="mass" storedUnit="t" value={{ value: component.mass_t ?? null, source: component.source ?? null, estimate: component.estimate ?? null }}
+      return <details className="form-card" key={id}><summary>{w('armour.rotating.title', { id })}</summary><div className="form-card-body"><p>{w('armour.rotating.note')}</p>
+        <label className="field-label">{w('armour.rotating.entry')}<select aria-label={w('armour.rotating.entryAria', { id })} value={String(component.mount_weight_item_id ?? '')} onChange={e => patch({ mount_weight_item_id: e.target.value || null })}><option value="">{w('armour.rotating.pick')}</option>{mounts.map(m => <option key={m}>{m}</option>)}</select></label>
+        <FactInput label={w('armour.rotating.mass', { id })} dimension="mass" storedUnit="t" value={{ value: component.mass_t ?? null, source: component.source ?? null, estimate: component.estimate ?? null }}
           onChange={f => patch({ mass_t: f.value, source: f.source, estimate: f.estimate })} />
         {leaf.rotating_armour_component != null && <button className="text-button" onClick={() => { const next = { ...leaf }; delete next.rotating_armour_component;
-          onChange({ ...project, systems: { ...systems, weapons: { ...weapons, [id]: next } } }); }}>取消拆分研究</button>}
+          onChange({ ...project, systems: { ...systems, weapons: { ...weapons, [id]: next } } }); }}>{w('armour.rotating.cancel')}</button>}
       </div></details>;
     })}
-    <ResultSection available={!!run}><div className="metric-grid"><Metric label="装甲行质量合计" value={object(view.values).declared_rows_total_t} unit="t" /></div><RowResults view={view} />
-      <StudyResult label="甲板覆盖率" data={data.deck_coverage} metrics={[["coverage_pct", "平面覆盖率", "%"]]} />
-      <StudyResult label="主装甲带工程估算" data={object(data.minimum_main_belt)}
-        metrics={[["length_m", "连续覆盖长度", "m", "length"]]} />
-      {Object.keys(weapons).map(id => <StudyResult key={id} label={`${id} 旋转装甲拆分`} data={object(object(data.page_rows)[`weapons.${id}`]).rotating_armour_component}
-        metrics={[["rotating_armour_mass_t", "旋转装甲", "t", "mass"], ["other_mount_mass_t", "炮座其余部分", "t", "mass"]]} />)}
+    <ResultSection available={!!run}><div className="metric-grid"><Metric label={w('armour.result.rowsTotal')} value={object(view.values).declared_rows_total_t} unit="t" /></div><RowResults view={view} />
+      <StudyResult label={w('armour.result.coverage')} data={data.deck_coverage} metrics={[["coverage_pct", w('armour.result.coveragePct'), "%"]]} />
+      <StudyResult label={w('armour.result.belt')} data={object(data.minimum_main_belt)}
+        metrics={[["length_m", w('armour.result.beltLength'), "m", "length"]]} />
+      {Object.keys(weapons).map(id => <StudyResult key={id} label={w('armour.rotating.short', { id })} data={object(object(data.page_rows)[`weapons.${id}`]).rotating_armour_component}
+        metrics={[["rotating_armour_mass_t", w('armour.result.rotating'), "t", "mass"], ["other_mount_mass_t", w('armour.result.otherMount'), "t", "mass"]]} />)}
     </ResultSection>
   </div>;
 }

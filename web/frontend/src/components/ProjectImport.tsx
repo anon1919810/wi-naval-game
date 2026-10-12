@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 import * as api from '../api';
 import { outcome } from '../audio/feedback';
-import { assertEnvelopeFits, readBackupFile } from './backupFile';
+import { assertEnvelopeFits, readBackupFile, BackupFileError } from './backupFile';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import type { ProjectDiagnostic, ProjectDocument, ProjectImportPreview } from '../types';
 import '../styles/projectImport.css';
 
@@ -31,27 +32,27 @@ import '../styles/projectImport.css';
 
 /** Counts, in the order a reader reads a project: its conditions to its holes. */
 const COUNT_ROWS = [
-  { key: 'loading_conditions', label: '载荷工况' },
-  { key: 'weight_groups', label: '重量分组' },
-  { key: 'weight_items', label: '重量条目' },
-  { key: 'damage_scenarios', label: '破损场景' },
-  { key: 'compartments', label: '舱室' },
-  { key: 'openings', label: '开口' },
-] as const;
+  { key: 'loading_conditions', label: 'import.count.loadingConditions' },
+  { key: 'weight_groups', label: 'import.count.weightGroups' },
+  { key: 'weight_items', label: 'import.count.weightItems' },
+  { key: 'damage_scenarios', label: 'import.count.damageScenarios' },
+  { key: 'compartments', label: 'import.count.compartments' },
+  { key: 'openings', label: 'import.count.openings' },
+] as const satisfies ReadonlyArray<{ key: string; label: WorkspaceKey }>;
 
-const GEOMETRY_LABEL: Record<string, string> = {
-  offsets: '型值表（内嵌）',
-  parameters: '参数化几何',
+const GEOMETRY_LABEL: Record<string, WorkspaceKey> = {
+  offsets: 'import.geometry.offsets',
+  parameters: 'import.geometry.parameters',
 };
 
 /** How many findings are shown before the rest move into a disclosure. */
 const SHOWN_FINDINGS = 4;
 
 /** One canonical validator finding, rendered as its own code, path and message. */
-function Finding({ diagnostic }: { diagnostic: ProjectDiagnostic }) {
+function Finding({ diagnostic, w }: { diagnostic: ProjectDiagnostic; w: (key: WorkspaceKey, params?: Record<string, string | number>) => string }) {
   return <li className="project-import-finding">
     <span className="project-import-finding-severity" data-severity={diagnostic.severity}>
-      {diagnostic.severity === 'error' ? '错误' : '提示'}
+      {diagnostic.severity === 'error' ? w('import.severity.error') : w('import.severity.notice')}
     </span>
     <code className="project-import-finding-path">{diagnostic.path}</code>
     <span className="project-import-finding-message">{diagnostic.message}</span>
@@ -69,41 +70,44 @@ type ImportFailure = { message: string; code?: string; severity?: string };
  * reader where to look. A request-shape rejection from the same endpoint is a
  * Pydantic error with a location rather than a field path, so it is rendered as
  * its message beside the location it named. Anything else is shown as text.
+ * Only the one sentence this file authors is localized; every path, code and
+ * message the server sent is printed exactly as it arrived.
  */
-function importFailures(detail: unknown): ImportFailure[] {
+function importFailures(detail: unknown, w: (key: WorkspaceKey, params?: Record<string, string | number>) => string): ImportFailure[] {
   if (!Array.isArray(detail)) return [];
   return detail.map(item => {
     if (typeof item === 'string') return { message: item };
     if (item && typeof item === 'object') {
       const record = item as Record<string, unknown>;
       if (typeof record.path === 'string' && typeof record.message === 'string') {
-        return { message: `${record.path}：${record.message}`,
+        return { message: w('workbench.error.validation', { path: record.path, message: record.message }),
           code: typeof record.code === 'string' ? record.code : undefined,
           severity: typeof record.severity === 'string' ? record.severity : undefined };
       }
       if (typeof record.msg === 'string') {
         const location = Array.isArray(record.loc) ? record.loc.join('.') : '';
-        return { message: location ? `${location}：${record.msg}` : record.msg,
+        return { message: location ? w('workbench.error.validation', { path: location, message: record.msg }) : record.msg,
           code: typeof record.type === 'string' ? record.type : undefined, severity: 'error' };
       }
     }
-    return { message: '工作区拒绝了该备份，请检查项目文档的结构。' };
+    return { message: w('import.rejected') };
   });
 }
 
-function failureText(cause: unknown): ImportFailure[] {
+function failureText(cause: unknown, w: (key: WorkspaceKey, params?: Record<string, string | number>) => string): ImportFailure[] {
+  if (cause instanceof BackupFileError) return [{ message: w(cause.key, cause.params) }];
   const detail = cause instanceof api.ApiError ? cause.detail : null;
-  const fromServer = importFailures(detail);
+  const fromServer = importFailures(detail, w);
   if (fromServer.length) return fromServer;
   if (typeof detail === 'string' && detail) return [{ message: detail }];
   if (cause instanceof Error && cause.message) return [{ message: cause.message }];
-  return [{ message: '导入失败，请检查备份文件后重试。' }];
+  return [{ message: w('import.failed') }];
 }
 
-function FailureList({ failures }: { failures: ImportFailure[] }) {
+function FailureList({ failures, w }: { failures: ImportFailure[]; w: (key: WorkspaceKey, params?: Record<string, string | number>) => string }) {
   return <ul className="project-import-failure-list">{failures.map((failure, index) =>
     <li key={index}>{failure.severity && <span className="project-import-finding-severity" data-severity={failure.severity}>
-      {failure.severity === 'error' ? '错误' : '提示'}
+      {failure.severity === 'error' ? w('import.severity.error') : w('import.severity.notice')}
     </span>}<span>{failure.message}</span>{failure.code && <code>{failure.code}</code>}</li>)}</ul>;
 }
 
@@ -120,12 +124,14 @@ export function ProjectImport({
   /** Reports only this section's own work, never what it was told. */
   onBusyChange?: (busy: boolean) => void;
 }) {
+  const w = useWorkspaceCopy();
   /** The chosen file, before the workspace server has seen it. */
   const [file, setFile] = useState<{ name: string; size: number } | null>(null);
   const [preview, setPreview] = useState<ProjectImportPreview | null>(null);
   const [name, setName] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
-  const [failures, setFailures] = useState<ImportFailure[]>([]);
+  const [failure, setFailure] = useState<{cause: unknown} | null>(null);
+  const failures = failure ? failureText(failure.cause, w) : [];
 
   /**
    * This section's lifetime and its current ticket. A file read, a preview and
@@ -181,7 +187,7 @@ export function ProjectImport({
     ticket.current += 1;
     document_.current = null;
     setFile(null); setPreview(null); setName('');
-    work('idle'); setFailures([]);
+    work('idle'); setFailure(null);
     if (input.current) input.current.value = '';
   }
 
@@ -195,10 +201,10 @@ export function ProjectImport({
     // starts, so a stale answer can never be shown against a new filename.
     document_.current = null;
     setFile({ name: selected.name, size: selected.size });
-    setPreview(null); setName(''); setFailures([]);
+    setPreview(null); setName(''); setFailure(null);
     work('reading');
     try {
-      const backup = await readBackupFile(selected);
+      const backup = await readBackupFile(selected, w);
       if (!current(mine)) return;
       document_.current = backup.project as ProjectDocument;
       work('validating');
@@ -210,7 +216,7 @@ export function ProjectImport({
     } catch (cause) {
       if (!current(mine)) return;
       outcome('hold');
-      setFailures(failureText(cause));
+      setFailure({cause});
     } finally {
       if (current(mine)) work('idle');
     }
@@ -227,11 +233,11 @@ export function ProjectImport({
     if (!confirmed || confirmed.length > 200) return;
     const mine = ++ticket.current;
     work('saving');
-    setFailures([]);
+    setFailure(null);
     try {
       // Measured as it will be encoded, so an oversized request is refused here
       // rather than by a middleware the reader never sees.
-      assertEnvelopeFits({ project, name: confirmed }, '本次导入');
+      assertEnvelopeFits({ project, name: confirmed }, w('import.envelopeLabel'), w);
       const view = await api.importProject(project, confirmed);
       if (!current(mine)) return;
       outcome('resolve');
@@ -241,7 +247,7 @@ export function ProjectImport({
       outcome('hold');
       // The file, the preview and the entered name all survive, so this is a
       // retry rather than a restart.
-      setFailures(failureText(cause));
+      setFailure({cause});
     } finally {
       if (current(mine)) work('idle');
     }
@@ -254,81 +260,81 @@ export function ProjectImport({
 
   return <div className="project-import">
     <div className="project-import-pick">
-      <label className="project-import-label" htmlFor="project-import-file">选择项目备份 JSON</label>
+      <label className="project-import-label" htmlFor="project-import-file">{w('import.pick.label')}</label>
       <input ref={input} id="project-import-file" className="project-import-file" type="file"
         accept=".json,application/json" disabled={saving || outsideBusy}
         aria-describedby="project-import-file-help"
         onChange={event => { const chosen = event.target.files?.[0]; void choose(chosen); }} />
       <p className="project-import-help" id="project-import-file-help">
-        选择从项目页下载的项目 JSON 备份（上限 8 MiB）。文件会发送到工作区进行校验；确认后才保存为新项目。
+        {w('import.pick.help')}
       </p>
       {file && <p className="project-import-file-name">
         <span className="project-import-file-name-text">{file.name}</span>
         <span className="project-import-file-size">{(file.size / 1024).toFixed(0)} KiB</span>
       </p>}
       {(phase === 'reading' || phase === 'validating') && <p className="project-import-progress" role="status">
-        {phase === 'reading' ? '正在读取备份' : '正在校验备份'}：{file?.name}…
+        {w('import.progress', { phase: w(phase === 'reading' ? 'import.progress.reading' : 'import.progress.validating'), name: file?.name ?? '' })}
       </p>}
       {file && !preview && <button type="button" className="button button--secondary" disabled={saving || outsideBusy}
-        data-audio="manual" onClick={() => { reset(); input.current?.focus(); }}>取消</button>}
+        data-audio="manual" onClick={() => { reset(); input.current?.focus(); }}>{w('import.cancel')}</button>}
     </div>
 
     {failures.length > 0 && <div className="notice notice--error project-import-failure" role="alert">
-      <p className="project-import-failure-title">{preview ? '保存失败，请重试' : '这个备份无法导入'}</p>
-      <FailureList failures={failures.slice(0, SHOWN_FINDINGS)} />
+      <p className="project-import-failure-title">{preview ? w('import.failure.saveTitle') : w('import.failure.title')}</p>
+      <FailureList failures={failures.slice(0, SHOWN_FINDINGS)} w={w} />
       {failures.length > SHOWN_FINDINGS && <details className="project-import-findings-more">
-        <summary>查看其余 {failures.length - SHOWN_FINDINGS} 条校验信息</summary>
-        <FailureList failures={failures.slice(SHOWN_FINDINGS)} />
+        <summary>{w('import.failure.more', { count: failures.length - SHOWN_FINDINGS })}</summary>
+        <FailureList failures={failures.slice(SHOWN_FINDINGS)} w={w} />
       </details>}
     </div>}
 
     {preview && <div className="project-import-preview">
       <dl className="project-import-identity">
-        <div><dt>备份内名称</dt><dd>{preview.name}</dd></div>
-        <div><dt>备份内 ID</dt><dd><code>{preview.source_id}</code></dd></div>
-        <div><dt>备份内修订</dt><dd>修订 {preview.source_revision}</dd></div>
-        <div><dt>几何</dt><dd>{preview.geometry_kind
-          ? GEOMETRY_LABEL[preview.geometry_kind] ?? preview.geometry_kind
-          : '未定义几何'}</dd></div>
+        <div><dt>{w('import.identity.name')}</dt><dd>{preview.name}</dd></div>
+        <div><dt>{w('import.identity.id')}</dt><dd><code>{preview.source_id}</code></dd></div>
+        <div><dt>{w('import.identity.revision')}</dt><dd>{w('workbench.chapter.revision', { revision: preview.source_revision })}</dd></div>
+        <div><dt>{w('import.identity.geometry')}</dt><dd>{preview.geometry_kind && GEOMETRY_LABEL[preview.geometry_kind]
+          ? w(GEOMETRY_LABEL[preview.geometry_kind])
+          : w('import.geometry.undefined')}</dd></div>
       </dl>
 
       <dl className="project-import-counts">
         {COUNT_ROWS.map(row => <div key={row.key}>
-          <dt>{row.label}</dt><dd>{preview.counts[row.key]}</dd>
+          <dt>{w(row.label)}</dt><dd>{preview.counts[row.key]}</dd>
         </div>)}
       </dl>
 
-      <p className="project-import-note">以上是文件结构校验的结果，不代表计算已就绪或经过历史验证。</p>
+      <p className="project-import-note">{w('import.note')}</p>
 
       {findings.length > 0 && <div className="project-import-findings">
-        <h3 className="project-import-findings-title">校验提示（{findings.length}）</h3>
+        <h3 className="project-import-findings-title">{w('import.findings.title', { count: findings.length })}</h3>
         <ul className="project-import-finding-list">
-          {shown.map((diagnostic, index) => <Finding diagnostic={diagnostic} key={`${diagnostic.path}-${index}`} />)}
+          {shown.map((diagnostic, index) => <Finding diagnostic={diagnostic} w={w} key={`${diagnostic.path}-${index}`} />)}
         </ul>
         {hidden > 0 && <details className="project-import-findings-more">
-          <summary>查看其余 {hidden} 条校验提示</summary>
+          <summary>{w('import.findings.more', { count: hidden })}</summary>
           <ul className="project-import-finding-list">
             {findings.slice(SHOWN_FINDINGS).map((diagnostic, index) =>
-              <Finding diagnostic={diagnostic} key={`more-${diagnostic.path}-${index}`} />)}
+              <Finding diagnostic={diagnostic} w={w} key={`more-${diagnostic.path}-${index}`} />)}
           </ul>
         </details>}
       </div>}
 
       <form className="project-import-confirm" onSubmit={event => { event.preventDefault(); void save(); }}>
         <div className="project-import-name-field">
-          <label className="project-import-label" htmlFor="project-import-name">恢复后的项目名称</label>
+          <label className="project-import-label" htmlFor="project-import-name">{w('import.confirm.label')}</label>
           <input id="project-import-name" type="text" value={name} maxLength={200} required disabled={saving || outsideBusy}
             aria-describedby="project-import-name-help"
             onChange={event => setName(event.target.value)} />
-          <p className="project-import-note" id="project-import-name-help">名称最多 200 个字符。</p>
+          <p className="project-import-note" id="project-import-name-help">{w('import.confirm.nameHelp')}</p>
         </div>
-        <p className="project-import-explain">导入只恢复项目输入，不恢复运行记录；不会覆盖已有项目。</p>
+        <p className="project-import-explain">{w('import.confirm.explain')}</p>
         <div className="project-import-actions">
           <button type="submit" className="button button--primary" disabled={disabled || !name.trim() || name.trim().length > 200}>
-            {saving ? '保存中…' : '保存为新项目'}
+            {saving ? w('workbench.save.busy') : w('import.confirm.submit')}
           </button>
           <button type="button" className="button button--secondary" data-audio="manual"
-            disabled={saving || outsideBusy} onClick={() => { reset(); input.current?.focus(); }}>取消</button>
+            disabled={saving || outsideBusy} onClick={() => { reset(); input.current?.focus(); }}>{w('import.cancel')}</button>
         </div>
       </form>
     </div>}
