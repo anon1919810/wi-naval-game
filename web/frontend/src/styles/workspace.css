@@ -328,13 +328,14 @@
 .app-shell .editor-section .resistance-results, .app-shell .editor-section .study-result { border-top: 1px solid var(--line); }
 /* Per-field provenance: a marker sits next to the control it describes. */
 .app-shell .traced-field { display: grid; gap: 5px; min-width: 0; }
+.app-shell .field-label select { width: 100%; min-width: 0; max-width: 100%; }
 .app-shell .weight-row .traced-field { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .app-shell .field-provenance { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
 .app-shell .source-mark { font-size: 9px; letter-spacing: .03em; }
 .app-shell .source-mark--declared { color: var(--accent); }
 .app-shell .source-mark--estimate { color: var(--warning); }
 .app-shell .source-mark--unknown, .app-shell .source-mark--none { color: var(--faint); }
-.app-shell .trace-pick { padding: 1px 6px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 9px; cursor: pointer; }
+.app-shell .trace-pick { position: relative; padding: 1px 6px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 9px; cursor: pointer; }
 .app-shell .trace-pick--active { border-color: var(--accent); color: var(--accent); }
 .app-shell .traced-field--active > .field-provenance .trace-pick { background: var(--accent-soft); }
 .app-shell .deck-segment-source { display: flex; align-items: baseline; gap: 6px; font-size: 9px; color: var(--muted); }

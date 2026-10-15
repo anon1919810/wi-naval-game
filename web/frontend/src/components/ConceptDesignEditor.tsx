@@ -541,6 +541,7 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
       <div className="form-card">
         <h3>{c('concept.group.roles')}</h3>
         {ledger.length === 0 ? <p className="form-hint">{c('concept.battery.bindingHint')}</p> : <>
+          <div className="stage-table-scroll" role="region" aria-label={c('concept.group.roles')} tabIndex={0}>
           <table className="stage-table"><thead><tr>
             <th>{c('proposals.col.item')}</th><th>{c('concept.group.roles')}</th>
           </tr></thead><tbody>{ledger.map(item => <tr key={item.id}>
@@ -553,6 +554,7 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
               {ROLES.map(role => <option key={role} value={role}>{c(`concept.role.${role}` as ConceptKey)}</option>)}
             </select></td>
           </tr>)}</tbody></table>
+          </div>
           {mismatched.length > 0 && <p className="form-error" role="alert">
             {c('concept.roles.suggestion')}: {mismatched.join(', ')}
           </p>}
