@@ -154,21 +154,22 @@ function canonicalReport(): AnalysisResult {
 }
 
 describe('the report first screen', () => {
-  it('reads the six saved values and keeps every unknown with its reason', () => {
+  it('reads the saved values and keeps every unknown with its reason', () => {
     render(<Report result={canonicalReport()} runId="run-7" />);
     // The readings project the saved stages, so a value also appears in its
     // stage card; these assertions are about the reading itself.
     const readings = within(document.querySelector('.report-readings') as HTMLElement);
-    expect(document.querySelectorAll('.report-reading')).toHaveLength(6);
+    expect(document.querySelectorAll('.report-reading')).toHaveLength(8);
 
     expect(readings.getByText('27,200 t')).toBeVisible();
     // The waterline is blocked with the equilibrium stage, so no number is shown.
     expect(readings.queryByText('9.92 m')).toBeNull();
     // Both equilibrium readings are blocked by that one stage, so both carry it.
     expect(readings.getAllByText(/模型越界：超出方法适用范围/)).toHaveLength(2);
-    // The residual GM of an unavailable stage is not a result either.
+    // The residual GM of an unavailable stage is not a result either, and the
+    // stage's own reason speaks for all three hydrostatics readings it blocks.
     expect(readings.queryByText('9.99')).toBeNull();
-    expect(readings.getByText(/暂不可计算：型线资料不足/)).toBeVisible();
+    expect(readings.getAllByText(/暂不可计算：型线资料不足/)).toHaveLength(3);
     // Power comes from the single complete work point, with its speed.
     expect(readings.getByText('12,894.8 kW')).toBeVisible();
     expect(readings.getByText('阶段 阻力与功率 · 工作点 18 kn')).toBeVisible();
@@ -227,7 +228,7 @@ describe('the report first screen', () => {
     expect(screen.getByText('试航轴功率（试航声明）')).toBeVisible();
     // They are never offered as the report's own power reading.
     const readings = within(document.querySelector('.report-readings') as HTMLElement);
-    expect(document.querySelectorAll('.report-reading')).toHaveLength(6);
+    expect(document.querySelectorAll('.report-reading')).toHaveLength(8);
     expect(readings.getByText('12,894.8 kW')).toBeVisible();
     expect(readings.queryByText(/设计轴功率|试航轴功率/)).toBeNull();
   });

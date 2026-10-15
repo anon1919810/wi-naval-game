@@ -130,6 +130,15 @@ def _calculated_mass(model: dict, system: dict, path: str) -> tuple[float, str]:
             f"mass_t = {count_basis} × rounds_per_gun × "
             "(projectile_mass_kg + charge_mass_kg) / 1000"
         )
+    if method == "empirical_estimate_v1":
+        # A versioned concept estimate arrives in long tons because the recovered
+        # methods are imperial. It is a model, never a ledger mass.
+        estimate = _number(inputs.get("estimate_long_tons"),
+                           f"{path}.inputs.estimate_long_tons", nonnegative=True)
+        return estimate * 1016.0469088 / 1000.0, (
+            "mass_t = estimate_long_tons x 1016.0469088 / 1000 "
+            "(versioned empirical concept estimate, not a ledger mass)"
+        )
     raise ValueError(f"{path}.method has unsupported value {method!r}")
 
 
@@ -148,12 +157,35 @@ def _system_leaves(systems: dict, prefix: str = "") -> list[tuple[str, dict]]:
     return leaves
 
 
-def summary(project: dict, state: dict) -> dict:
+def _generated_from_project(project: dict, state: dict) -> tuple:
+    """Compose the optional concept models, ignoring an unconfigured project.
+
+    A project without ``concept_design`` keeps exactly its previous behaviour, and
+    a configuration this stage cannot evaluate reports diagnostics rather than
+    removing the existing physical models.
+    """
+    if not isinstance(project.get("concept_design"), dict):
+        return {}, []
+    try:
+        from . import concept_design
+    except ImportError:                                   # pragma: no cover - direct import
+        import concept_design
+    try:
+        generated = concept_design.generated_models(project, state)
+    except concept_design.ConceptDesignError as error:
+        return {}, error.diagnostics
+    return generated.get("systems", {}), generated.get("diagnostics", [])
+
+
+def summary(project: dict, state: dict, generated_models: dict | None = None) -> dict:
     """Summarize system rows without changing authoritative loading masses.
 
     Args:
         project (dict): Canonical project containing an optional systems object.
         state (dict): Selected ``plimsoll-loading-1`` result.
+        generated_models (dict, optional): Versioned concept models keyed by
+            system ID, supplied by ``concept_design``. They are models, never
+            ledger mass, and they never displace a declared model.
 
     Returns:
         (dict): Linked ledger masses, physical checks, proposals, and diagnostics.
@@ -165,6 +197,10 @@ def summary(project: dict, state: dict) -> dict:
     declared = project.get("systems")
     if not isinstance(declared, dict):
         raise ValueError("project.systems must be an object")
+    if generated_models is None:
+        generated_models, concept_diagnostics = _generated_from_project(project, state)
+    else:
+        concept_diagnostics = []
     effective_items = state.get("effective_items")
     if not isinstance(effective_items, list):
         raise ValueError("state.effective_items must be an array")
@@ -175,6 +211,7 @@ def summary(project: dict, state: dict) -> dict:
         item_by_id[item["id"]] = item
 
     diagnostics = []
+    diagnostics.extend(copy.deepcopy(concept_diagnostics))
     loading_diagnostics = copy.deepcopy(state.get("diagnostics", []))
     if not state.get("complete_mass", False):
         diagnostics.append(
@@ -321,14 +358,35 @@ def summary(project: dict, state: dict) -> dict:
         mass_models = system.get("mass_models", [])
         if not isinstance(mass_models, list):
             raise ValueError(f"{path}.mass_models must be an array")
-        model_ids = set()
+        mass_models = list(mass_models)
+        generated = (generated_models or {}).get(system_id, [])
+        model_ids = {model["id"] for model in mass_models if isinstance(model, dict)}
+        usable = []
+        for model in generated:
+            if model["id"] in model_ids:
+                diagnostics.append(
+                    _diagnostic(
+                        "systems.generated_model_duplicate",
+                        "error",
+                        f"{path}.mass_models",
+                        f"Generated model {model['id']!r} collides with a declared model ID; "
+                        "generated and user model IDs must be distinct.",
+                        True,
+                    )
+                )
+                continue
+            usable.append(model)
+        # A physical and an empirical model may compare the same item; both stay
+        # visible and neither becomes the mass authority.
+        mass_models = mass_models + usable
+        seen_model_ids = set()
         for model_index, model in enumerate(mass_models):
             model_path = f"{path}.mass_models[{model_index}]"
             if not isinstance(model, dict) or not isinstance(model.get("id"), str):
                 raise ValueError(f"{model_path} must have a string id")
-            if model["id"] in model_ids:
+            if model["id"] in seen_model_ids:
                 raise ValueError(f"{model_path}.id is duplicated")
-            model_ids.add(model["id"])
+            seen_model_ids.add(model["id"])
             linked_id = model.get("linked_weight_item_id")
             if linked_id not in seen_here:
                 raise ValueError(f"{model_path}.linked_weight_item_id must be linked by this system")
@@ -361,16 +419,26 @@ def summary(project: dict, state: dict) -> dict:
                 "input_provenance": copy.deepcopy(model.get("input_provenance")),
                 "comparison_policy": model.get("comparison_policy"),
             }
+            for key in ("concept_component", "concept_battery_id", "capacity_display_factor",
+                        "capacity_note", "note", "inversion",
+                        "component_breakdown", "guns_in_mount_selector", "assumptions"):
+                if key in model:
+                    check[key] = copy.deepcopy(model[key])
+            if model.get("concept_component") == "fuel":
+                check["capacity_estimate_t"] = calculated * model["capacity_display_factor"]
             row["mass_models"].append(check)
-            if difference is not None and abs(difference) > tolerance:
-                diagnostics.append(
-                    _diagnostic(
-                        "systems.mass_mismatch",
-                        "warning",
-                        model_path,
-                        f"Physical model {model['id']!r} differs from ledger item {linked_id!r} by {difference} t.",
+            # An unknown target is a legitimate proposal: the current mass and the
+            # difference stay null and the review decides.
+            if difference is None or abs(difference) > tolerance:
+                if difference is not None:
+                    diagnostics.append(
+                        _diagnostic(
+                            "systems.mass_mismatch",
+                            "warning",
+                            model_path,
+                            f"Declared model {model['id']!r} differs from ledger item {linked_id!r} by {difference} t.",
+                        )
                     )
-                )
                 proposals.append(
                     {
                         "operation": "replace_weight_item_mass",
@@ -381,7 +449,9 @@ def summary(project: dict, state: dict) -> dict:
                         "source_system_id": system_id,
                         "source_model_id": model["id"],
                         "requires_review": True,
-                        "reason": "A declared physical formula differs from the selected ledger mass.",
+                        "reason": ("A declared model estimates a value for an unknown target mass."
+                                   if difference is None else
+                                   "A declared formula differs from the selected ledger mass."),
                     }
                 )
         rows[system_id] = row

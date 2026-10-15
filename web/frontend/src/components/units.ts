@@ -203,6 +203,10 @@ const EXPLICIT: Record<string, QuantityKey> = {
   ledger_mass_t: { dimension: 'mass' }, weight_t: { dimension: 'mass' },
   ship_wide_ammunition_t: { dimension: 'mass' },
   kg_m: { dimension: 'length' }, gm_t_m: { dimension: 'length' },
+  // The equilibrium restoring height of the small-angle stability result, in the
+  // same metres as the upright GM it is shown beside. Its roll period is a time
+  // and is deliberately absent here, like every other duration.
+  equilibrium_gm_t_m: { dimension: 'length' }, equilibrium_gm_m: { dimension: 'length' },
   thickness_mm: { dimension: 'length', storedUnit: 'mm' },
   rotating_armour_mass_t: { dimension: 'mass' },
   projectile_mass_kg: { dimension: 'mass', storedUnit: 'kg' }, charge_mass_kg: { dimension: 'mass', storedUnit: 'kg' },

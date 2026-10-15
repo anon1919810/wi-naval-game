@@ -115,6 +115,11 @@ describe('unit factors are exact and reversible', () => {
     expect(classifyKey('awp_m2')).toEqual({ dimension: 'area' });
     expect(classifyKey('kg_m')).toEqual({ dimension: 'length' });
     expect(classifyKey('ledger_mass_t')).toEqual({ dimension: 'mass' });
+    // The saved equilibrium restoring height follows the reader's length unit,
+    // like the upright GM it now sits beside; the roll period stays canonical.
+    expect(classifyKey('equilibrium_gm_t_m')).toEqual({ dimension: 'length' });
+    expect(classifyKey('equilibrium_gm_m')).toEqual({ dimension: 'length' });
+    expect(classifyKey('period_s')).toBeNull();
   });
 
   it('falls back to canonical units for an old project without preferences', () => {

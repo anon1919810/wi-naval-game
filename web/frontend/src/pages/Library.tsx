@@ -18,7 +18,7 @@ import { storedTemplateName, useWorkspaceCopy, type WorkspaceKey } from '../i18n
  * created project is *saved* under is a separate thing and stays the raw stored
  * name in either language — see `storedTemplateName`.
  */
-const templates = ['analytic_box', 'generic_steamer', 'queen_mary_1913'] as const;
+const templates = ['analytic_box', 'concept_cruiser', 'generic_steamer', 'queen_mary_1913'] as const;
 
 /**
  * Reading the library and creating a project are two different failures.

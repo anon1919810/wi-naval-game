@@ -4,7 +4,9 @@ import { QuantityField, QuantityListField } from './QuantityField';
 import { useUnits } from './UnitProvider';
 import { Diagnostics, Metric, ResultSection, StudyResult } from './FormResults';
 import { englishCopy, fact, inputNumber, number, object, rows, sourceText, stageData, type Raw } from './formModel';
-import { useWorkspaceCopy } from '../i18n/workspace';
+import { equilibriumGmReading, rollPeriodReading, uprightGmReading } from './resultReading';
+import { useLanguage } from '../portfolio/LanguageProvider';
+import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import type { Copy } from './diagnosticGuidance';
 
 const BASE_STAGES = ['loading', 'systems', 'l0', 'geometry', 'equilibrium', 'hydrostatics', 'deck', 'propulsion'];
@@ -139,10 +141,47 @@ export function PerformanceRequest({ project, request, onRequestChange }: Pick<E
 export function PerformanceResults({ run }: Pick<EditorProps, 'run'>) {
   const w = useWorkspaceCopy();
   const units = useUnits();
+  const { language } = useLanguage();
   const loading = stageData(run, 'loading'); const hydro = stageData(run, 'hydrostatics');
   const equilibrium = stageData(run, 'equilibrium'); const resistance = stageData(run, 'resistance');
-  return <ResultSection available={!!run}>{run && <p>{w('performance.result.context', { id: run.id, fingerprint: run.request_fingerprint.slice(0, 16) })}</p>}<div className="metric-grid"><Metric label={w('reading.mass')} value={object(loading.values).total_mass_t} dimension="mass" storedUnit="t" /><Metric label={w('reading.gm')} value={object(hydro.values).gm_t_m} dimension="length" storedUnit="m" /></div>
-    <StudyResult label={w('performance.result.roll')} data={hydro.loaded_roll} metrics={[["period_s", w('performance.result.rollPeriod'), "s"]]} />
+  // Every stability reading on this page comes from the same saved projections
+  // the run and report pages read, including the plain upright GM: it is a bare
+  // saved scalar, so reading it straight out of `stage.data` is exactly how a
+  // failed or unrequested stage would leak it. One gate, one answer.
+  const hydroStage = run?.result?.stages?.hydrostatics ?? null;
+  const uprightGm = uprightGmReading(language, hydroStage);
+  const restoring = equilibriumGmReading(language, hydroStage);
+  const period = rollPeriodReading(language, hydroStage);
+  const study = object(hydro.loaded_roll);
+  // The saved method identity speaks for itself: shown as saved, never compared
+  // against the current request, the old roll method or another run.
+  const method = typeof study.method === 'string' && study.method ? study.method : null;
+  const rollStatus = typeof study.status === 'string' ? study.status
+    : Object.keys(study).length ? w('formResults.declared') : w('formResults.notRequested');
+  // Provenance and explanation are different sentences. A card's source line
+  // carries only what the core declared; what a number is, or why it is absent,
+  // is a separate note beside it and is never dressed up as a source.
+  const provenance = (reading: typeof uprightGm) => reading.source ?? undefined;
+  const noted = (label: string, reading: typeof uprightGm, note: WorkspaceKey) => reading.state === 'known'
+    ? w('reading.context.note', { context: label, note: w(note) })
+    : w('reading.reason.withReason', { label, reason: reading.reason ?? w('formResults.studyIncomplete') });
+  return <ResultSection available={!!run}>{run && <p>{w('performance.result.context', { id: run.id, fingerprint: run.request_fingerprint.slice(0, 16) })}</p>}
+    <div className="metric-grid"><Metric label={w('reading.mass')} value={object(loading.values).total_mass_t} dimension="mass" storedUnit="t" />
+      {/* The upright GM and the equilibrium GM are two readings, never one value
+          shown twice: a null or blocked upright GM stays unknown here. */}
+      <Metric label={w('reading.gm')} value={uprightGm.value} dimension="length" storedUnit="m" estimate={uprightGm.estimate} source={provenance(uprightGm)} />
+      <Metric label={w('reading.equilibriumGm')} value={restoring.value} dimension="length" storedUnit="m" estimate={restoring.estimate} source={provenance(restoring)} /></div>
+    {uprightGm.state !== 'known' && uprightGm.reason
+      && <p className="form-hint">{w('reading.reason.withReason', { label: w('reading.gm'), reason: uprightGm.reason })}</p>}
+    <p className="form-hint">{noted(w('reading.equilibriumGm'), restoring, 'reading.equilibriumGmNote')}</p>
+    <div className="study-result"><h4>{w('performance.result.roll')} <span>{rollStatus}</span></h4>
+      {method && <p className="form-hint"><code>{method}</code></p>}
+      {/* Seconds keep a canonical label, exactly like the nmi of a range: a
+          period has no convertible reader unit. */}
+      <div className="metric-grid"><Metric label={w('reading.rollPeriod')} value={period.value} unit="s"
+        estimate={period.estimate} source={provenance(period)} /></div>
+      <p className="form-hint">{noted(w('reading.rollPeriod'), period, 'reading.rollPeriodNote')}</p>
+      <Diagnostics value={study.diagnostics} /></div>
     <StudyResult label={w('performance.result.trimStudy')} data={equilibrium.trim_target_study} metrics={[["required_longitudinal_moment_kNm", w('performance.result.trimMoment'), "kN·m"]]} />
     <StudyResult label={w('performance.result.fixedPower')} data={resistance.fixed_power_study} metrics={[["speed_kn", w('performance.result.studySpeed'), "kn", "speed"]]} />
     <div className="metric-grid">{rows(resistance.power_rows).map((r, i) => <Metric key={i} label={w('performance.result.powerAtSpeed', { speed: units.number(r.speed_kn, "speed") })} value={r.shaft_power_kw} dimension="power" storedUnit="kW"

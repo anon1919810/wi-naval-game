@@ -1,0 +1,383 @@
+{
+  "schema": "plimsoll-project-1",
+  "id": "concept-cruiser",
+  "name": "Concept Cruiser (synthetic concept design)",
+  "revision": 0,
+  "units": {
+    "length": "m",
+    "mass": "t",
+    "power": "kW",
+    "speed": "kn",
+    "angle": "deg"
+  },
+  "coordinates": {
+    "x_positive": "forward",
+    "y_positive": "starboard",
+    "z_origin": "keel"
+  },
+  "hull": {
+    "lwl_m": 152.0,
+    "beam_m": 18.3,
+    "draught_normal_m": 5.2,
+    "draught_deep_m": 6.1,
+    "loa_m": 163.0,
+    "block_coeff": 0.5
+  },
+  "geometry": null,
+  "opening_definition": "unknown",
+  "openings": [],
+  "weight_groups": [
+    {
+      "id": "weights",
+      "label": "declared concept design",
+      "source": "synthetic concept-cruiser case; no vessel corresponds to this design",
+      "items": [
+        {
+          "id": "hull.structure",
+          "mass_t": 2213.763,
+          "x_m": 82.0,
+          "y_m": 0.0,
+          "kg_m": 9.6,
+          "source": "synthetic concept-cruiser case; no vessel corresponds to this design",
+          "estimate": true
+        },
+        {
+          "id": "weapons.guns",
+          "mass_t": 60.9628,
+          "x_m": 104.0,
+          "y_m": 0.0,
+          "kg_m": 12.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "weapons.mounts",
+          "mass_t": 152.407,
+          "x_m": 104.0,
+          "y_m": 0.0,
+          "kg_m": 13.5,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "weapons.ammunition",
+          "mass_t": 45.7221,
+          "x_m": 92.0,
+          "y_m": 0.0,
+          "kg_m": 6.5,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "weapons.rotating_armour",
+          "mass_t": 182.8884,
+          "x_m": 104.0,
+          "y_m": 0.0,
+          "kg_m": 13.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "propulsion.machinery",
+          "mass_t": 1168.4539,
+          "x_m": 58.0,
+          "y_m": 0.0,
+          "kg_m": 5.2,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "propulsion.fuel",
+          "mass_t": 711.2328,
+          "x_m": 40.0,
+          "y_m": 0.0,
+          "kg_m": 3.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.belt_main",
+          "mass_t": 629.9491,
+          "x_m": 76.0,
+          "y_m": 8.2,
+          "kg_m": 7.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.belt_upper",
+          "mass_t": 345.4559,
+          "x_m": 76.0,
+          "y_m": 8.6,
+          "kg_m": 9.5,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.belt_ends",
+          "mass_t": 213.3699,
+          "x_m": 26.0,
+          "y_m": 8.2,
+          "kg_m": 7.2,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.bulkhead",
+          "mass_t": 86.364,
+          "x_m": 96.0,
+          "y_m": 0.0,
+          "kg_m": 11.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.bulge",
+          "mass_t": 96.5245,
+          "x_m": 76.0,
+          "y_m": 7.8,
+          "kg_m": 3.4,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.deck",
+          "mass_t": 264.1722,
+          "x_m": 76.0,
+          "y_m": 0.0,
+          "kg_m": 10.2,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "armour.conning",
+          "mass_t": 132.0861,
+          "x_m": 88.0,
+          "y_m": 0.0,
+          "kg_m": 14.5,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "misc.vital",
+          "mass_t": 91.4442,
+          "x_m": 30.0,
+          "y_m": 0.0,
+          "kg_m": 4.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "misc.hull",
+          "mass_t": 223.5303,
+          "x_m": 78.0,
+          "y_m": 2.0,
+          "kg_m": 6.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "misc.deck",
+          "mass_t": 162.5675,
+          "x_m": 70.0,
+          "y_m": 3.0,
+          "kg_m": 6.5,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "misc.above",
+          "mass_t": 60.9628,
+          "x_m": 98.0,
+          "y_m": 2.0,
+          "kg_m": 11.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "misc.void",
+          "mass_t": 0.0,
+          "x_m": 60.0,
+          "y_m": 0.0,
+          "kg_m": 8.0,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        },
+        {
+          "id": "weapons.other",
+          "mass_t": 121.9256,
+          "x_m": 86.0,
+          "y_m": 1.0,
+          "kg_m": 8.5,
+          "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+          "estimate": true
+        }
+      ]
+    }
+  ],
+  "loading_conditions": [
+    {
+      "id": "normal"
+    },
+    {
+      "id": "deep",
+      "overrides": {
+        "propulsion.fuel": {
+          "mass_t": 1480.7278
+        }
+      }
+    }
+  ],
+  "sources": {
+    "concept": "synthetic concept-cruiser case; no vessel corresponds to this design"
+  },
+  "concept_design": {
+    "schema": "plimsoll-concept-design-1",
+    "method": "sps-3b3-adapted-v1",
+    "source": "synthetic concept-cruiser case; no vessel corresponds to this design",
+    "estimate": true,
+    "target_displacement_t": 8200.0,
+    "hull_year": 1918,
+    "freeboard_m": 4.6,
+    "stern": "cruiser",
+    "screws": 2,
+    "batteries": [
+      {
+        "id": "main",
+        "system_id": "weapons.main",
+        "calibre_mm": 152.4,
+        "barrel_calibres": 45,
+        "year": 1918,
+        "gun_type": "breech_loading",
+        "mount_type": "deck_hoist",
+        "mount_count": 4,
+        "barrels_per_mount": 2,
+        "rounds_per_gun": 120,
+        "shell_mass_kg": null,
+        "shared_cradle": false,
+        "guns_item_id": "weapons.guns",
+        "mounts_item_id": "weapons.mounts",
+        "ammunition_item_id": "weapons.ammunition",
+        "broadside_guns": null
+      }
+    ],
+    "machinery": {
+      "system_id": "propulsion.machinery",
+      "item_id": "propulsion.machinery",
+      "year": 1905,
+      "kind": "compound",
+      "coal_pct": 50.0,
+      "speed_kn": 18.0,
+      "shaft_power_kw": null
+    },
+    "fuel": {
+      "system_id": "propulsion.fuel",
+      "item_id": "propulsion.fuel",
+      "range_nm": 4000.0,
+      "cruise_speed_kn": 14.0
+    },
+    "balance": {
+      "roles": {
+        "hull.structure": "structure",
+        "weapons.guns": "guns",
+        "weapons.mounts": "mounts",
+        "weapons.ammunition": "ammunition",
+        "weapons.rotating_armour": "rotating_armour",
+        "propulsion.machinery": "machinery",
+        "propulsion.fuel": "fuel",
+        "armour.belt_main": "belt_main",
+        "armour.belt_upper": "belt_upper",
+        "armour.belt_ends": "belt_ends",
+        "armour.bulkhead": "bulkhead",
+        "armour.bulge": "armour_bulge",
+        "armour.deck": "armour_deck",
+        "armour.conning": "conning",
+        "misc.vital": "misc_vital",
+        "misc.hull": "misc_hull",
+        "misc.deck": "misc_deck",
+        "misc.above": "misc_above",
+        "misc.void": "misc_void",
+        "weapons.other": "other"
+      },
+      "structure_system_id": "hull.structure",
+      "structure_item_id": "hull.structure",
+      "assumption_source": "synthetic concept-cruiser starting assumptions; editable estimates, not a vessel's builder's figures",
+      "bulkhead_beam_m": 12.0,
+      "steadiness": 50,
+      "space_hull_fraction": 0.0,
+      "space_deck_fraction": 0.0,
+      "super_factor": 1.0,
+      "super_factor_long": 1.0,
+      "concentration": 1.0,
+      "strength_target": 1.0
+    }
+  },
+  "systems": {
+    "hull": {
+      "structure": {
+        "source": "synthetic concept-cruiser case; no vessel corresponds to this design",
+        "estimate": true,
+        "weight_item_ids": [
+          "hull.structure"
+        ]
+      }
+    },
+    "weapons": {
+      "main": {
+        "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+        "estimate": true,
+        "installed_guns": 8,
+        "rounds_per_gun": 120,
+        "weight_item_ids": [
+          "weapons.guns",
+          "weapons.mounts",
+          "weapons.ammunition",
+          "weapons.rotating_armour"
+        ]
+      },
+      "misc_weight": {
+        "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+        "estimate": true,
+        "weight_item_ids": [
+          "misc.vital",
+          "misc.hull",
+          "misc.deck",
+          "misc.above",
+          "misc.void",
+          "weapons.other"
+        ]
+      }
+    },
+    "armour": {
+      "fixed": {
+        "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+        "estimate": true,
+        "weight_item_ids": [
+          "armour.belt_main",
+          "armour.belt_upper",
+          "armour.belt_ends",
+          "armour.bulkhead",
+          "armour.bulge",
+          "armour.deck",
+          "armour.conning"
+        ]
+      }
+    },
+    "propulsion": {
+      "machinery": {
+        "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+        "estimate": true,
+        "weight_item_ids": [
+          "propulsion.machinery"
+        ]
+      },
+      "fuel": {
+        "source": "synthetic declared placeholder for the concept-cruiser case (editable estimate)",
+        "estimate": true,
+        "weight_item_ids": [
+          "propulsion.fuel"
+        ]
+      }
+    }
+  }
+}

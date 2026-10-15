@@ -8,10 +8,12 @@ from importlib import resources
 import itertools
 import json
 import math
+import os
 from pathlib import Path
 import sys
+import time
 
-from . import analysis, exports, geometry_import, project_store
+from . import analysis, exports, geometry_import, project_io, project_store
 
 # The bundled usage guide is a fixed package resource, addressed by one
 # constant so the read is discoverable and is never assembled from the working
@@ -611,7 +613,64 @@ def _parser() -> argparse.ArgumentParser:
     geometry.add_argument("--output", required=True)
 
     commands.add_parser("readme", help="print the bundled command-line guide")
+    sship = commands.add_parser(
+        "import-sship", help="read a SpringSharp 3.0 file into a preview or a draft project")
+    sship.add_argument("input", help="SpringSharp 3.0 .sship or .dat source file")
+    sship.add_argument("--preview", action="store_true",
+                       help="emit the full preview instead of a canonical project")
+    sship.add_argument("--name", help="explicit project name; the source name is kept "
+                                      "when omitted")
+    sship.add_argument("--output", default="-", help="destination path, or - for stdout")
+    verify = commands.add_parser("verify", help="explicit offline core verification (no external experimental validation)")
+    verify.add_argument("--suite", choices=("quick", "extended", "all"), default="quick")
+    verify.add_argument("--output-dir", required=True, help="absolute directory for JSON/CSV/Markdown evidence")
+    verify.add_argument("--case-timeout-s", type=_positive_timeout, default=180.0)
+    verify.add_argument("--total-timeout-s", type=_positive_timeout, default=1800.0)
     return parser
+
+
+def _positive_timeout(text):
+    try:
+        value = float(text)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("timeout must be a positive finite number") from error
+    if not math.isfinite(value) or value <= 0.0:
+        raise argparse.ArgumentTypeError("timeout must be a positive finite number")
+    return value
+
+
+def _verify(args):
+    from . import verification, verification_report
+    began = False
+    # The runner budgets the whole run from just after this line, so this
+    # instant is the command's own total deadline. Publication retries wait
+    # inside it and never push `verify` past --total-timeout-s; once it is spent
+    # a snapshot is published with the single, non-retried attempt the failure
+    # evidence needs. It is a local value: no global deadline, no report field.
+    retry_deadline = time.monotonic() + args.total_timeout_s
+    try:
+        with verification_report.output_session(Path(args.output_dir)) as output:
+            began = True
+            report = verification.run_verification(
+                args.suite, case_timeout_s=args.case_timeout_s, total_timeout_s=args.total_timeout_s,
+                checkpoint=lambda snapshot: verification_report.write_report(
+                    snapshot, output, retry_deadline=retry_deadline))
+            code = verification_report.exit_code_for(report)
+        counts = {state: sum(row["state"] == state for row in report["cases"])
+                  for state in verification_report.CASE_STATES}
+        sys.stdout.write(exports.serialize_document({"schema": "plimsoll-cli-verification-summary-1",
+            "run_id": report["run_id"], "state": report["state"], "suite": report["suite"],
+            "exit_code": code, "cases": counts, "source_consistent": report["source_identity"]["consistent"],
+            "elapsed_s": report["elapsed_s"], "outputs": {
+                "json": str(output / verification_report.JSON_NAME),
+                "csv": str(output / verification_report.CSV_NAME),
+                "markdown": str(output / verification_report.MD_NAME)}}, format="json"))
+        return code
+    except verification_report.PublishError as error:
+        raise _CLIError("cli.verification_publication_failed", str(error), exit_code=1) from error
+    except (verification_report.ReportError, OSError, ValueError, TypeError) as error:
+        raise _CLIError("cli.verification_failed" if began else "cli.verification_output_invalid",
+                        str(error), exit_code=1 if began else 2) from error
 
 
 def _import_geometry(args):
@@ -674,6 +733,75 @@ def _import_geometry(args):
     return 0
 
 
+def _same_file(left, right):
+    """Report whether two paths already name the same filesystem object."""
+    try:
+        left_stat, right_stat = os.stat(left), os.stat(right)
+    except OSError:
+        return False
+    return (left_stat.st_dev, left_stat.st_ino) == (right_stat.st_dev, right_stat.st_ino)
+
+
+def _import_sship(args):
+    """Read a SpringSharp 3.0 file into a preview or a canonical draft.
+
+    The core reader owns every format decision; this adapter only refuses an
+    unsafe destination and writes what the core already produced.
+    """
+    source = Path(args.input)
+    if args.output != '-':
+        destination = Path(args.output)
+        # An existing file, a dangling symlink and a hard link to the input are
+        # all refused before anything is read or written. The alias check comes
+        # first so an input named as its own output is reported as an alias.
+        if _same_file(source, destination):
+            raise _CLIError("cli.output_alias", "output destination aliases the input",
+                            input_path=destination)
+        if os.path.lexists(destination):
+            raise _CLIError("cli.output_exists", "output destination already exists",
+                            input_path=destination)
+    from . import sship_import
+    try:
+        with source.open("rb") as stream:
+            data = stream.read(sship_import.MAX_BYTES + 1)
+    except OSError as error:
+        raise _CLIError("cli.input_read", f"cannot read input: {error}",
+                        input_path=source) from error
+    try:
+        if args.preview:
+            payload = sship_import.preview(data, filename=source.name)
+        else:
+            payload = sship_import.convert(data, filename=source.name, name=args.name)
+    except sship_import.SshipImportError as error:
+        raise _CLIError("cli.sship_import", str(error), input_path=source,
+                        diagnostics=error.diagnostics) from error
+    if args.output == '-':
+        sys.stdout.write(exports.serialize_document(payload, format="json"))
+        return 0
+    try:
+        if args.preview:
+            _write_new_json(args.output, exports.serialize_document(payload, format="json"))
+        else:
+            # Serialize first, then create the destination exclusively. A file
+            # that appears after the pre-flight check is never replaced.
+            project = project_io.normalize_project(payload)
+            _write_new_json(args.output, json.dumps(
+                project, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
+    except FileExistsError as error:
+        raise _CLIError("cli.output_exists", "output destination already exists",
+                        input_path=args.output) from error
+    except Exception as error:
+        raise _CLIError("cli.output_write", f"cannot write output: {error}",
+                        input_path=args.output) from error
+    return 0
+
+
+def _write_new_json(destination, text):
+    """Create one destination exclusively; an existing path is never replaced."""
+    with open(destination, "x", encoding="utf-8", newline="\n") as stream:
+        stream.write(text)
+
+
 def main(argv=None) -> int:
     """Run the calculation-core command line."""
     _configure_utf8()
@@ -689,8 +817,12 @@ def main(argv=None) -> int:
             return _sweep(args)
         if args.command == "import-geometry":
             return _import_geometry(args)
+        if args.command == "import-sship":
+            return _import_sship(args)
         if args.command == "readme":
             return _readme(args)
+        if args.command == "verify":
+            return _verify(args)
         raise NotImplementedError(f"command {args.command!r} is not implemented")
     except _CLIError as error:
         _emit_error(command, error)

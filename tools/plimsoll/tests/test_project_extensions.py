@@ -124,7 +124,7 @@ class OverrideProvenanceTests(unittest.TestCase):
             "override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"], record)
         for patch in ({"new_mass_t": 11}, {"condition_id": "normal"}, {"request_fingerprint": "stale"},
                       {"new_mass_t": True}, {"inputs": {"volume_m3": True}}, {"input_provenance": {}},
-                      {"previous_mass_t": None}, {"previous_mass_t": True},
+                      {"previous_mass_t": True},
                       {"previous_mass_t": -1}, {"previous_mass_t": float("inf")}):
             bad = copy.deepcopy(raw)
             bad["loading_conditions"][1]["override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"].update(patch)
@@ -136,6 +136,9 @@ class OverrideProvenanceTests(unittest.TestCase):
         record["previous_mass_t"] = 0
         self.assertEqual(project_io.normalize_project(raw)["loading_conditions"][1][
             "override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"]["previous_mass_t"], 0)
+        record["previous_mass_t"] = None
+        self.assertIsNone(project_io.normalize_project(raw)["loading_conditions"][1][
+            "override_provenance"]["plate.a[1]"]["mass_t"]["acceptance"]["previous_mass_t"])
 
     def test_mixed_estimated_and_unknown_fields_do_not_certify_provenance(self):
         raw = project()

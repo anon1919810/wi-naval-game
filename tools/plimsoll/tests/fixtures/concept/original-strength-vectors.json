@@ -1,0 +1,143 @@
+﻿{
+    "schema":  "sps-original-strength-vectors-1",
+    "scope":  "Original strength formula prefixes with explicitly supplied allocations. Downstream UI status update stops after composite assignment. Independent mathematical fixture only, not full SPS/Plimsoll bookkeeping parity.",
+    "sha256":  "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+    "inputs":  {
+                   "belt_ends_long_tons":  100,
+                   "super_factor":  1.1,
+                   "super_factor_long":  1.2,
+                   "beam_ft":  60,
+                   "borne_long_tons":  100,
+                   "hp":  30000,
+                   "freeboard_ft":  20,
+                   "waterplane_sqft":  24000,
+                   "wetted_sqft":  30000,
+                   "rotating_armour_long_tons":  200,
+                   "displacement_long_tons":  10000,
+                   "length_ft":  500,
+                   "draught_ft":  20,
+                   "conning_long_tons":  50
+               },
+    "rows":  [
+                 {
+                     "hull_year":  1850,
+                     "structure_long_tons":  500,
+                     "broadside_lb":  0,
+                     "concentration":  1,
+                     "structure_lb_sqft":  15.1351347,
+                     "cross":  0.08674159,
+                     "long":  0.123411976,
+                     "composite":  0.08985461
+                 },
+                 {
+                     "hull_year":  1850,
+                     "structure_long_tons":  500,
+                     "broadside_lb":  800,
+                     "concentration":  1,
+                     "structure_lb_sqft":  15.1351347,
+                     "cross":  0.08014128,
+                     "long":  0.123411976,
+                     "composite":  0.08367705
+                 },
+                 {
+                     "hull_year":  1850,
+                     "structure_long_tons":  2500,
+                     "broadside_lb":  0,
+                     "concentration":  1,
+                     "structure_lb_sqft":  75.6756744,
+                     "cross":  0.433707952,
+                     "long":  0.6170599,
+                     "composite":  0.44927305
+                 },
+                 {
+                     "hull_year":  1850,
+                     "structure_long_tons":  2500,
+                     "broadside_lb":  800,
+                     "concentration":  1,
+                     "structure_lb_sqft":  75.6756744,
+                     "cross":  0.4007064,
+                     "long":  0.6170599,
+                     "composite":  0.418385267
+                 },
+                 {
+                     "hull_year":  1900,
+                     "structure_long_tons":  500,
+                     "broadside_lb":  0,
+                     "concentration":  1,
+                     "structure_lb_sqft":  15.1351347,
+                     "cross":  0.173483178,
+                     "long":  0.246823952,
+                     "composite":  0.179709226
+                 },
+                 {
+                     "hull_year":  1900,
+                     "structure_long_tons":  500,
+                     "broadside_lb":  800,
+                     "concentration":  1,
+                     "structure_lb_sqft":  15.1351347,
+                     "cross":  0.160282567,
+                     "long":  0.246823952,
+                     "composite":  0.1673541
+                 },
+                 {
+                     "hull_year":  1900,
+                     "structure_long_tons":  2500,
+                     "broadside_lb":  0,
+                     "concentration":  1,
+                     "structure_lb_sqft":  75.6756744,
+                     "cross":  0.8674159,
+                     "long":  1.23411977,
+                     "composite":  0.8985461
+                 },
+                 {
+                     "hull_year":  1900,
+                     "structure_long_tons":  2500,
+                     "broadside_lb":  800,
+                     "concentration":  1,
+                     "structure_lb_sqft":  75.6756744,
+                     "cross":  0.8014128,
+                     "long":  1.23411977,
+                     "composite":  0.836770535
+                 },
+                 {
+                     "hull_year":  1950,
+                     "structure_long_tons":  500,
+                     "broadside_lb":  0,
+                     "concentration":  1,
+                     "structure_lb_sqft":  15.1351347,
+                     "cross":  0.173483178,
+                     "long":  0.246823952,
+                     "composite":  0.179709226
+                 },
+                 {
+                     "hull_year":  1950,
+                     "structure_long_tons":  500,
+                     "broadside_lb":  800,
+                     "concentration":  1,
+                     "structure_lb_sqft":  15.1351347,
+                     "cross":  0.160282567,
+                     "long":  0.246823952,
+                     "composite":  0.1673541
+                 },
+                 {
+                     "hull_year":  1950,
+                     "structure_long_tons":  2500,
+                     "broadside_lb":  0,
+                     "concentration":  1,
+                     "structure_lb_sqft":  75.6756744,
+                     "cross":  0.8674159,
+                     "long":  1.23411977,
+                     "composite":  0.8985461
+                 },
+                 {
+                     "hull_year":  1950,
+                     "structure_long_tons":  2500,
+                     "broadside_lb":  800,
+                     "concentration":  1,
+                     "structure_lb_sqft":  75.6756744,
+                     "cross":  0.8014128,
+                     "long":  1.23411977,
+                     "composite":  0.836770535
+                 }
+             ]
+}

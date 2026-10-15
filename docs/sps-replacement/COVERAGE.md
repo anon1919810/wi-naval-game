@@ -1,5 +1,7 @@
 # 覆盖度检查表 · Plimsoll 与 SpringSharp · 2026-09-22
 
+> 2026-10-15 更新：191 条观察清单的语义修复见 [覆盖审计快照](../plimsoll-1.0/seven-page-coverage-status.md)；已新增版本化自然速度、火炮/炮座/弹药/机械/燃料估重、结构需求与设计平衡闭环，见 [当前覆盖及证据边界](../plimsoll-1.0/concept-design-coverage.md)。下列旧表中的“待实现”和旧范围描述保留为历史盘点，不代表上述新增能力的当前状态。
+
 > 本表保留七页参考字段的盘点；功能状态只能在实现和验证后更新。
 > 1.0 的范围与验收以 [批准目标](../plimsoll-1.0/spec.md) 为准，执行状态见 [当前状态](../plimsoll-1.0/current-status.md)。
 > 不以字段数量、单元测试数量推算产品完成百分比；未做同输入基准比较，不宣称全面超越 SpringSharp。
@@ -52,7 +54,7 @@
 | **Waterplane area** | 输出 | ✅ | L0 `Cwp·L·B`=4613.5；L1 积分=4610.4（差 0.07%）|
 | **Wetted surface area** | 输出 | **◐→✅** | `hull.py`：Mumford 经验式（L0）+ 逐站湿周长积分（L1）。正常载荷经验式 6147.6 / 满载模型积分 6407.9 m²；工况不同，不作两法互证 |
 | **Length:Beam** | 输出 | **✅** | `hull.form_ratios()`，定义式（QM 7.852） |
-| **Natural Speed** | 输出 | **◐→✅** | `hull.natural_speed()`：**两口径并列** —— Froude 兴波速度（有源，35.43 kn）+ SPS 惯例 1.09·√L_ft（**estimate，常数无公开出处**，28.8 kn），并给出 Fn=0.324 |
+| **Natural Speed** | 输出 | **◐ 独立指标；SPS 方法待实现** | `hull.natural_speed()`：**两口径并列** —— Froude 兴波速度（有源，35.43 kn）+ 旧经验口径 1.09·√L_ft（**estimate，常数无公开出处，28.8 kn**），并给出 Fn=0.324。⚠️ 1.09·√L_ft 是**独立旧启发式，不是 SpringSharp 3b3 的自然速度定义**（该二进制用 `√lengthEffect`，艉型条件）；本阶段未实现 SPS 兼容口径 |
 
 ### 2.2 Freeboard（26 项）——模块已建（v0），但**数据是本页最大的缺口**
 

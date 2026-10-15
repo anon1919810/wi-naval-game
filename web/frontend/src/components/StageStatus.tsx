@@ -18,7 +18,7 @@ import { useLanguage } from '../portfolio/LanguageProvider';
  */
 export const STAGE_ORDER = [
   'loading', 'systems', 'l0', 'geometry', 'equilibrium', 'hydrostatics', 'gz', 'deck',
-  'hydrostatic_curve', 'bonjean', 'resistance', 'propulsion', 'endurance', 'historical', 'flooding',
+  'hydrostatic_curve', 'bonjean', 'resistance', 'propulsion', 'endurance', 'historical', 'flooding', 'design_balance',
 ];
 
 /** A stage name in one language. An unknown key keeps its own name. */
@@ -101,8 +101,13 @@ function datumFor(key: string, value: unknown): Datum {
  * already, and `dataLabel` names what the registry knows while anything else
  * keeps its raw key, so showing them all is both honest and bounded by the
  * payload itself.
+ *
+ * `quotable` narrows that one exception: a key that only repeats a nested
+ * result's own scalar is quoted only when that nested result declared itself
+ * completed. The card already applies the parent stage's gate before it calls
+ * this, so this is the second half of the same rule, not a new one.
  */
-function extract(data: Record<string, unknown> | null): Datum[] {
+function extract(data: Record<string, unknown> | null, quotable: (subkey: string) => boolean = () => true): Datum[] {
   if (!data) return [];
   const found: Datum[] = [];
   for (const [key, value] of Object.entries(data)) {
@@ -118,6 +123,7 @@ function extract(data: Record<string, unknown> | null): Datum[] {
           source: typeof row.source === 'string' ? row.source : undefined, estimate: row.estimate === true });
       } else if (key === 'values') {
         for (const [subkey, subvalue] of Object.entries(row)) {
+          if (!quotable(subkey)) continue;
           if (typeof subvalue === 'number' || subvalue === null) found.push(datumFor(subkey, subvalue));
         }
       }
@@ -224,7 +230,16 @@ export function StageStatus({ name, stage, guidance }: {
   // are not results: they stay reachable in the raw data, never in the reading
   // area.
   const delivered = stage.requested === true && stage.status === 'completed';
-  const values = delivered ? extract(stage.data) : [];
+  // `values.equilibrium_gm_t_m` is a saved alias of
+  // `small_angle_stability.equilibrium_gm_m`, so it is quoted only when that
+  // nested result declared itself completed. A residual scalar beside an
+  // unavailable nested result stays in the raw data, never in the readings.
+  const smallAngle = record(record(stage.data).small_angle_stability);
+  const quotable = (subkey: string) =>
+    subkey !== 'equilibrium_gm_t_m' || (smallAngle.status === 'completed'
+      && typeof smallAngle.equilibrium_gm_m === 'number'
+      && Number.isFinite(smallAngle.equilibrium_gm_m));
+  const values = delivered ? extract(stage.data, quotable) : [];
   const diagnostics = stage.diagnostics ?? [];
   const serious = (item: StageEnvelope['diagnostics'][number]) => SEVERE.has(String(item.severity ?? '')) || isBlocking(item);
   const severe = diagnostics.filter(serious);

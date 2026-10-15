@@ -3,6 +3,7 @@ import { CalculationReadiness } from './CalculationReadiness';
 import { declaredSource } from './InputTrace';
 import { number, object, type Raw } from './formModel';
 import type { DiagnosticLocation } from './diagnosticGuidance';
+import { equilibriumGmReading } from './resultReading';
 import { stageLabel, STAGE_ORDER } from './StageStatus';
 import { StatusBadge } from './StatusBadge';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
@@ -34,7 +35,10 @@ export interface OverviewReading {
   note: string;
 }
 
-// Canonical saved keys only; nothing is derived from the inputs here.
+// Canonical saved keys only; nothing is derived from the inputs here. The
+// equilibrium equivalent GM is deliberately not in this table: it is saved as a
+// nested result with its own completed/unavailable status, so it is projected
+// by the shared reading instead of by a plain field walk.
 const RESULT_FIELDS: Array<{ key: string; stage: string; label: WorkspaceKey; dimension: Dimension; storedUnit: string; paths: string[] }> = [
   { key: 'loading.total_mass_t', stage: 'loading', label: 'overview.reading.mass', dimension: 'mass', storedUnit: 't', paths: ['values.total_mass_t'] },
   { key: 'equilibrium.waterline_above_keel_m', stage: 'equilibrium', label: 'overview.reading.waterline', dimension: 'length', storedUnit: 'm', paths: ['waterline_above_keel_m'] },
@@ -60,7 +64,7 @@ function stageOf(run: RunView | null, name: string): StageEnvelope | null {
 function stageReason(language: SiteLanguage, stage: StageEnvelope | null): string {
   const say = (key: WorkspaceKey, params?: Record<string, string>) => workspaceCopy(language, key, params);
   if (!stage) return say('stage.reason.missing');
-  if (!stage.requested && stage.status === 'not_requested') return say('stage.reason.notRequested');
+  if (!stage.requested) return say('stage.reason.notRequested');
   if (stage.status === 'unavailable') return stage.reason ? say('stage.reason.unavailable', { reason: stage.reason }) : say('stage.reason.unavailableBare');
   if (stage.status === 'model_limit') return stage.reason ? say('stage.reason.modelLimit', { reason: stage.reason }) : say('stage.reason.modelLimitBare');
   if (stage.status === 'failed') return stage.reason ? say('stage.reason.failed', { reason: stage.reason }) : say('stage.reason.failedBare');
@@ -70,7 +74,7 @@ function stageReason(language: SiteLanguage, stage: StageEnvelope | null): strin
 
 export function overviewReadings(run: RunView | null, language: SiteLanguage): OverviewReading[] {
   const say = (key: WorkspaceKey, params?: Record<string, string>) => workspaceCopy(language, key, params);
-  return RESULT_FIELDS.map(field => {
+  const readings: OverviewReading[] = RESULT_FIELDS.map(field => {
     const stage = stageOf(run, field.stage);
     const blocked = stageReason(language, stage);
     const stageName = say(`stage.${field.stage}` as WorkspaceKey);
@@ -92,6 +96,21 @@ export function overviewReadings(run: RunView | null, language: SiteLanguage): O
     return { key: field.key, label: say(field.label), value, dimension: field.dimension, storedUnit: field.storedUnit,
       state: 'known', note: say('overview.reading.known', { stage: stageName }) };
   });
+  // The equilibrium equivalent GM follows the upright GM it does not replace,
+  // and keeps the same note vocabulary: what it is, or why it is absent.
+  const hydrostatics = stageOf(run, 'hydrostatics');
+  const equilibrium = equilibriumGmReading(language, hydrostatics);
+  const stageName = say('stage.hydrostatics');
+  const hydroContext = say('reading.stageContext', { name: stageLabel(say, 'hydrostatics') });
+  const note = equilibrium.state === 'known'
+    ? say('reading.context.note', { context: say('overview.reading.known', { stage: stageName }), note: say('reading.equilibriumGmNote') })
+    : equilibrium.state === 'unknown'
+      ? say('reading.context.note', { context: hydroContext, note: equilibrium.reason ?? '' })
+      : say('overview.reading.blocked', { reason: equilibrium.reason ?? '', stage: stageName });
+  readings.push({ key: equilibrium.key, label: equilibrium.label, value: equilibrium.value,
+    dimension: equilibrium.dimension, storedUnit: equilibrium.storedUnit,
+    state: equilibrium.state === 'known' ? 'known' : equilibrium.state === 'unknown' ? 'unknown' : 'unavailable', note });
+  return readings;
 }
 
 /** Requested stages of the current run, in the canonical stage order. */

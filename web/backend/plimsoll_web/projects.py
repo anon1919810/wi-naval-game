@@ -9,7 +9,7 @@ from typing import TypedDict
 import uuid
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from plimsoll import project_io
@@ -19,6 +19,7 @@ from .models import Project, ProjectRevision, utc_now
 
 TEMPLATES = {
     "analytic_box": "analytic_box.project.json",
+    "concept_cruiser": "concept_cruiser.project.json",
     "generic_steamer": "generic_steamer.project.json",
     "queen_mary_1913": "queen_mary_1913.project.json",
 }
@@ -60,6 +61,54 @@ class ImportPreview(TypedDict):
 class RevisionConflict(Exception):
     def __init__(self, current_revision: int):
         self.current_revision = current_revision
+
+
+def current_revision(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID) -> int | None:
+    """Read the owner's current revision after a refused compare-and-set.
+
+    A losing writer cannot trust the row it loaded before the refusal, so the
+    number it reports to the reader is re-read inside its own fresh transaction
+    rather than carried out of a rolled-back one. The owner and project are
+    passed in as values rather than read back off an expired row.
+    """
+    return db.scalar(select(Project.current_revision).where(
+        Project.id == project_id, Project.owner_id == owner_id))
+
+
+def advance_revision(db: Session, owner_id: uuid.UUID, project_id: uuid.UUID,
+                     base_revision: int, next_revision: int, normalized: dict) -> None:
+    """Advance the current revision with a conditional write, or nothing at all.
+
+    ``SELECT ... FOR UPDATE`` is not a lock on SQLite, and a plain assignment
+    turns two browsers saving the same base revision into a silent lost update:
+    both read revision N, both insert a revision N+1, and whichever row lands
+    last silently overwrites the other's document. The revision column is
+    therefore advanced by a single ``UPDATE ... WHERE current_revision =
+    base_revision``, and the database re-reads that predicate at write time.
+
+    The order matters. This runs **before** the new revision row is added, so a
+    writer that lost the race has nothing to insert: it would otherwise raise a
+    primary-key ``IntegrityError`` on ``(project_id, revision)`` and answer 500
+    for what is an ordinary lost update. The comparison is evaluated with
+    autoflush disabled so no pending state can be written ahead of it.
+
+    Exactly one writer advances the pointer, exactly one immutable revision is
+    inserted, and the loser rolls back and reports the revision that actually
+    holds the project now.
+    """
+    with db.no_autoflush:
+        result = db.execute(
+            update(Project)
+            .where(Project.id == project_id, Project.owner_id == owner_id,
+                   Project.current_revision == base_revision)
+            .values(current_revision=next_revision, name=normalized["name"],
+                    updated_at=utc_now()),
+            execution_options={"synchronize_session": False})
+        won = result.rowcount == 1
+    if won:
+        return
+    db.rollback()
+    raise RevisionConflict(current_revision(db, owner_id, project_id) or base_revision)
 
 
 def _normalize(document: dict) -> dict:
@@ -127,7 +176,18 @@ def save_project(
     owner_id: uuid.UUID, project_id: uuid.UUID, base_revision: int,
     payload: dict, db: Session,
 ) -> ProjectView:
-    row = owned_project(db, owner_id, project_id, lock=True)
+    """Write exactly one new immutable revision, or write nothing.
+
+    The current-revision pointer is moved by a conditional write **first**, and
+    only the writer that wins it inserts the revision row. A writer that lost the
+    race therefore rolls back having inserted nothing, so a rejected save never
+    leaves a revision behind and never answers a lost update as a server fault.
+    """
+    row = owned_project(db, owner_id, project_id)
+    # Captured as values: the row is expired by the rollback inside
+    # `advance_revision`, and a concurrently deleted project must not be read
+    # back off an instance whose identity is no longer loaded.
+    owner = row.owner_id
     if row.current_revision != base_revision:
         raise RevisionConflict(row.current_revision)
     if payload.get("id") != str(project_id):
@@ -136,11 +196,9 @@ def save_project(
     document = copy.deepcopy(payload)
     document["revision"] = next_revision
     normalized = _normalize(document)
+    advance_revision(db, owner, project_id, base_revision, next_revision, normalized)
     saved = ProjectRevision(project_id=project_id, revision=next_revision, document=normalized)
     db.add(saved)
-    row.current_revision = next_revision
-    row.name = normalized["name"]
-    row.updated_at = utc_now()
     db.commit()
     return _view(row, saved)
 

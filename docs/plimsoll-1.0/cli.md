@@ -10,7 +10,7 @@ On a usage, input, serialization or output-write error, the CLI writes a single
 structured JSON object to **stderr** whose `schema` is `plimsoll-cli-error-1`,
 with empty stdout. A completed or partial calculation report may be written to
 stdout; normal partial completion exits `1` with its report and empty stderr.
-Exit codes are:
+For `analyze`, `batch` and `sweep`, exit codes are:
 
 - `0` — every requested stage / case / grid point completed and was persisted.
   The payload `status` is `"completed"`.
@@ -29,6 +29,69 @@ Exit codes are:
 explicit geometry bytes into a self-contained project copy. `analyze`,
 `batch` and `sweep` return `0 if result["status"] == "completed" else 1`;
 `import-geometry` returns `0` on success or `2` on any CLI error.
+
+## verify — explicit offline core verification
+
+`verify [--suite quick|extended|all] --output-dir <absolute-directory> [--case-timeout-s 180] [--total-timeout-s 1800]`
+
+This performs real calculations against declared idealized reference cases.
+`quick` is the default (15 cases); `extended` has 26 cases; `all` is their
+deduplicated union (38). The coverage includes dry/liquid scale, mirror and
+keel-datum laws, nine ellipsoid meshes with three solved diagonal refinements,
+and 12 actual single/pair flooding requests: 60/300 seconds at
+0.5/0.25/0.125-second steps. Capacity, cancellation, opposite initial flow
+directions and reversal prevention are separate controls. A requested duration
+is a bound, not a promise to continue after hydraulic equilibrium.
+
+```powershell
+$env:PYTHONPATH=(Resolve-Path -LiteralPath './tools').Path
+$env:PYTHONIOENCODING='utf-8'
+& web/backend/.venv/Scripts/python.exe -B -m plimsoll verify --suite quick --output-dir 'C:\PlimsollVerify\quick'
+& web/backend/.venv/Scripts/python.exe -B -m plimsoll verify --suite all --output-dir 'C:\PlimsollVerify\all'
+```
+
+These commands can take minutes. Positive finite wall-time limits are owned
+by the parent; a stalled worker is terminated and reaped. Earlier evidence and
+not-started/timeout/error cases remain visible. `--help` and `readme` perform
+no calculation or output-file write. The packaged command uses only the
+Python standard library and Plimsoll, without repository docs/tests or network.
+
+The verification exit contract is distinct:
+
+| Code | Meaning |
+|---:|---|
+| `0` | Complete, consistent measured package identity, every requested verification assertion passed, evidence published |
+| `1` | Failed assertion, worker, deadline, or publication after execution began; inspect surviving evidence and diagnostics |
+| `2` | Invalid usage or an unsafe/busy output directory rejected before calculation |
+
+Success stdout is `plimsoll-cli-verification-summary-1`, with counts and the
+actual paths of `core-verification.json`, `.csv` and `.md`. Anticipated errors
+use `plimsoll-cli-error-1` on stderr. A failed output medium cannot promise
+fresh files. An expected `model_limit` or `canceled` control may pass its
+verification assertion; its raw physics status is retained separately.
+
+All formats carry the same UUID `run_id` and `generation`. JSON, schema
+`plimsoll-core-verification-1`, is authoritative: a partial checkpoint precedes
+the first case and follows each case; CSV and Markdown are replaced before
+the final JSON. This is not a three-file transaction. Partial or mixed-generation
+files must never be treated as passing. Reuse is allowed only for this tool's
+valid evidence; unrelated files, links/junctions and concurrent writers are
+refused. Unknown/abandoned locks are retained rather than guessed stale; verify
+the owner before manually removing `.plimsoll-core-verification.lock`.
+
+Evidence includes literal requests, raw flags/residuals, signed transfer and
+conservation records, loaded origins, file hashes and input seals at each
+public-call boundary. It identifies measured disk sources rather than arbitrary
+in-memory callable changes. Changes restored within the same call are outside
+the input seal's scope. File locking also does not eliminate an adversarial OS
+race between the last ownership check and filesystem replacement.
+
+Analytic consistency, transformations, numerical refinement and model-boundary
+controls are different evidence categories. None establishes external
+experimental accuracy, historical-input accuracy or certification. The local
+accepted result, costs and limits are in
+[2026-10-10 verification](core-verification-2026-10-10.md); publication is a
+separate step.
 
 ## analyze
 

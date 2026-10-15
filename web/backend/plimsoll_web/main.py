@@ -9,7 +9,7 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from . import auth, damage_lab_runs, projects, runs
+from . import auth, damage_lab_runs, mass_proposals, projects, runs, sship_imports
 from .config import Settings
 from .db import get_db, make_session_factory
 from .mailer import mailer_from_settings
@@ -32,8 +32,26 @@ class Preferences(BaseModel):
 
 class ProjectCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    template: Literal["analytic_box", "generic_steamer", "queen_mary_1913"] | None
+    template: Literal["analytic_box", "concept_cruiser", "generic_steamer", "queen_mary_1913"] | None
     name: str = Field(min_length=1, max_length=200)
+
+
+class MassProposalsApply(BaseModel):
+    """One explicit batch of reviewed proposals, applied against one saved run.
+
+    ``current_options`` is the caller's own assembly of the request, not a hash of
+    it and not the normalized form: the server normalizes it again and requires
+    that it means the same thing as the request the named run was computed with.
+    ``proposals`` is submitted exactly as the stored result presented it; the
+    server recomputes every entry and refuses the batch if any of them differs.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    base_revision: int = Field(ge=1)
+    run_id: uuid.UUID
+    condition_id: str = Field(min_length=1, max_length=120)
+    current_options: dict = Field(default_factory=dict)
+    proposals: list[dict]
 
 
 class ProjectSave(BaseModel):
@@ -58,6 +76,31 @@ class ProjectImport(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
     project: dict
+    name: str | None = Field(default=None, max_length=200)
+
+
+class SshipPreview(BaseModel):
+    """A SpringSharp 3.0 source file, still only a file the reader chose.
+
+    The original bytes travel as base64 and nothing about the file is interpreted
+    here: the name is a bare name, and the content is decoded and read by the
+    shared core importer, which owns what those bytes mean.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    filename: str = Field(min_length=1, max_length=255)
+    content_base64: str
+
+
+class SshipImport(SshipPreview):
+    """A source file plus the digest its current preview reported.
+
+    ``source_sha256`` binds the save to the bytes that were previewed: the server
+    reads the file again and refuses anything that no longer hashes to it. It is
+    content binding, not proof that anybody looked at the preview.
+    """
+
+    source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     name: str | None = Field(default=None, max_length=200)
 
 
@@ -207,6 +250,24 @@ def create_app(settings: Settings) -> FastAPI:
         user = auth.get_current_user(request, db)
         return projects.import_project(user.id, body.project, body.name, db)
 
+    @app.post("/api/projects/sship-preview")
+    def preview_sship_import(
+        body: SshipPreview, request: Request, db: Session = Depends(get_db),
+    ):
+        # A source file preview only reads the bytes it was sent. It never looks
+        # up a project, so it is declared with the other import routes it must
+        # not be shadowed by.
+        auth.get_current_user(request, db)
+        return sship_imports.preview(body.filename, body.content_base64)
+
+    @app.post("/api/projects/sship-import", status_code=201)
+    def import_sship(
+        body: SshipImport, request: Request, db: Session = Depends(get_db),
+    ):
+        user = auth.get_current_user(request, db)
+        return sship_imports.import_source(
+            user.id, body.filename, body.content_base64, body.source_sha256, body.name, db)
+
     @app.get("/api/projects/{project_id}")
     def get_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
@@ -224,6 +285,19 @@ def create_app(settings: Settings) -> FastAPI:
     def delete_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
         projects.delete_project(user.id, project_id, db)
+
+    @app.post("/api/projects/{project_id}/mass-proposals")
+    def apply_mass_proposals(
+        project_id: uuid.UUID, body: MassProposalsApply, request: Request,
+        db: Session = Depends(get_db),
+    ):
+        user = auth.get_current_user(request, db)
+        try:
+            return mass_proposals.apply_selected(
+                user.id, project_id, body.base_revision, body.run_id, body.condition_id,
+                body.current_options, body.proposals, db)
+        except projects.RevisionConflict as error:
+            return JSONResponse(status_code=409, content={"current_revision": error.current_revision})
 
     @app.get("/api/projects/{project_id}/runs")
     def list_runs(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):

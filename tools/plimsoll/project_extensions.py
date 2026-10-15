@@ -1,5 +1,6 @@
 """Validate optional calculation-core inputs without invoking numerical kernels."""
 
+import copy
 import json
 import math
 
@@ -65,6 +66,8 @@ def _value(value, kind, path, diagnostics, nullable=True):
         return False
     if kind == "text":
         valid = isinstance(value, str) and bool(value.strip())
+    elif kind == "boolean":
+        valid = isinstance(value, bool)
     else:
         valid = (isinstance(value, (int, float)) and not isinstance(value, bool)
                  and math.isfinite(value))
@@ -586,6 +589,15 @@ def _flooding_scenarios(value, item_ids, diagnostics):
             _flooding_openings(row["openings"], p + ".openings", diagnostics)
 
 
+# Stored acceptance inputs may carry text (a formula, a source location) and an
+# explicit boolean alongside the numeric ones. Each type is checked, not assumed.
+ACCEPTANCE_TEXT_INPUTS = frozenset({
+    "count_field", "count_basis", "kernel", "source_location", "formula",
+    "method_version", "source_sha256", "gun_type", "mount_type", "kind", "origin",
+})
+ACCEPTANCE_BOOL_INPUTS = frozenset({"shared_cradle"})
+
+
 def validate_acceptance(record, condition_id, field, nominal, path):
     """Validate a stored audit record; this is not authorization to apply a proposal."""
     diagnostics = []
@@ -601,11 +613,14 @@ def validate_acceptance(record, condition_id, field, nominal, path):
     for key in ("source_system_id", "source_model_id", "formula"):
         _value(record.get(key), "text", path + "." + key, diagnostics, False)
     if "method" in record and record["method"] not in (
-            "volume_density_mass", "plate_area_thickness_density_mass", "counted_unit_mass", "counted_ammunition_mass"):
-        _diag(diagnostics, path + ".method", "unsupported physical model method")
+            "volume_density_mass", "plate_area_thickness_density_mass", "counted_unit_mass",
+            "counted_ammunition_mass", "empirical_estimate_v1"):
+        _diag(diagnostics, path + ".method", "unsupported accepted model method")
     for key in ("project_fingerprint", "input_fingerprint", "request_fingerprint"):
         _sha256(record.get(key), path + "." + key, diagnostics)
-    _value(record.get("previous_mass_t"), "nonnegative", path + ".previous_mass_t", diagnostics, False)
+    if "previous_mass_t" not in record:
+        _diag(diagnostics, path + ".previous_mass_t", "previous mass must be recorded, explicitly null if unknown")
+    _value(record.get("previous_mass_t"), "nonnegative", path + ".previous_mass_t", diagnostics, True)
     _value(record.get("new_mass_t"), "nonnegative", path + ".new_mass_t", diagnostics, False)
     if record.get("new_mass_t") != nominal:
         _diag(diagnostics, path + ".new_mass_t", "accepted mass must equal the numeric override")
@@ -613,8 +628,13 @@ def validate_acceptance(record, condition_id, field, nominal, path):
     if _object(inputs, path + ".inputs", diagnostics) and _object(provenance, path + ".input_provenance", diagnostics):
         _keys(provenance, set(inputs), path + ".input_provenance", diagnostics)
         for key, value in inputs.items():
-            _value(value, "text" if key in ("count_field", "count_basis") else "nonnegative",
-                   path + ".inputs." + str(key), diagnostics, False)
+            if key in ACCEPTANCE_TEXT_INPUTS or key.endswith(("_origin", "_field", "_basis")):
+                kind = "text"
+            elif key in ACCEPTANCE_BOOL_INPUTS:
+                kind = "boolean"
+            else:
+                kind = "nonnegative"
+            _value(value, kind, path + ".inputs." + str(key), diagnostics, False)
             meta, mp = provenance.get(key), path + ".input_provenance." + str(key)
             if _object(meta, mp, diagnostics):
                 _metadata(meta, mp, diagnostics, required=True)
@@ -677,6 +697,15 @@ def validate_extensions(project, item_ids):
         if isinstance(value, (int, float)) and not isinstance(value, bool) and value > 1:
             _diag(diagnostics, "$.hull.design_facts.block_coeff_deep.value", "block coefficient must not exceed one")
     _condition_definitions(project, item_ids, diagnostics)
+    if "concept_design" in project and project["concept_design"] is not None:
+        try:
+            from . import concept_design
+        except ImportError:                               # pragma: no cover - direct import
+            import concept_design
+        try:
+            concept_design.validate_config(project, item_ids)
+        except concept_design.ConceptDesignError as error:
+            diagnostics.extend(copy.deepcopy(error.diagnostics))
     if "display_preferences" in project:
         prefs = project["display_preferences"]
         if _object(prefs, "$.display_preferences", diagnostics):

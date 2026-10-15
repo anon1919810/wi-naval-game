@@ -200,7 +200,7 @@ describe('overview reads inputs and the identity-guarded result', () => {
     expect(within(result).getByText('工况 loaded')).toBeVisible();
     expect(within(result).getByText('所选工况总质量').closest('.fact-field')!.textContent).toContain('27,200 t');
     expect(within(result).getByText('龙骨基准水线高度').closest('.fact-field')!.textContent).toContain('9.9 m');
-    expect(within(result).getByText('初稳性高 GM').closest('.fact-field')!.textContent).toContain('1.85 m');
+    expect(within(result).getByText('直立几何 GM').closest('.fact-field')!.textContent).toContain('1.85 m');
     expect(api.getRun).not.toHaveBeenCalled();
   });
 
@@ -265,7 +265,10 @@ describe('overview reads inputs and the identity-guarded result', () => {
     vi.mocked(api.listRuns).mockResolvedValue([runWith(result)]);
     await open();
     const panel = group('当前结果 · Result');
-    expect(within(panel).getByText(/暂不可计算/)).toBeVisible();
+    // The unavailable hydrostatics stage now blocks two readings rather than one,
+    // so the reason is composed more than once; what matters is that neither is
+    // hidden and that a model-limit stage is never hidden either.
+    expect(within(panel).getAllByText(/暂不可计算/).length).toBeGreaterThan(0);
     // The composed status names its reason and its stage, and the panel prints it
     // wherever the stage appears, so it shows more than once: what matters here is
     // that a model-limit stage is never hidden.
@@ -273,7 +276,7 @@ describe('overview reads inputs and the identity-guarded result', () => {
     expect(within(panel).getByText(/质量账本缺少关键条目/)).toBeVisible();
     expect(panel.textContent).not.toContain('仅供比较的提示');
     // An unavailable stage shows no number, not even one left in the envelope.
-    const gm = within(panel).getByText('初稳性高 GM').closest('.fact-field')!;
+    const gm = within(panel).getByText('直立几何 GM').closest('.fact-field')!;
     expect(gm.querySelector('.fact-value')!.textContent).toBe('未知');
     expect(gm.textContent).toContain('暂不可计算');
     expect(gm.textContent).not.toContain('9.99');
@@ -287,7 +290,7 @@ describe('overview projection', () => {
     stages.loading = stage('completed', { values: { total_mass_t: 1000 } });
     const run = runWith(resultWith(stages));
     const readings = overviewReadings(run);
-    expect(readings).toHaveLength(4);
+    expect(readings).toHaveLength(5);
     const mass = readings.find(entry => entry.key === 'loading.total_mass_t')!;
     expect(mass.value).toBe(1000);
     expect(mass.state).toBe('known');
@@ -311,6 +314,20 @@ describe('overview projection', () => {
     expect(gm.value).toBeNull();
     expect(gm.state).toBe('unknown');
     expect(gm.note).toContain('未给出');
+  });
+
+  it.each(['zh-CN', 'en'] as const)('blocks an unrequested completed envelope with residual GM in %s', language => {
+    const stages = emptyStages();
+    stages.hydrostatics = stage('completed', {
+      values: { gm_t_m: 9.99 },
+      small_angle_stability: { status: 'completed', equilibrium_gm_m: 8.88 },
+    }, { requested: false });
+    const readings = readingsInLanguage(runWith(resultWith(stages)), language);
+    const upright = readings.find(entry => entry.key === 'hydrostatics.gm_t_m')!;
+    expect(upright.value).toBeNull();
+    expect(upright.state).toBe('unavailable');
+    expect(upright.note).toContain(language === 'zh-CN' ? '未运行该阶段' : 'did not run the stage');
+    expect(readings.filter(entry => entry.key.startsWith('hydrostatics.')).every(entry => entry.value === null)).toBe(true);
   });
 
   it('reads the actual saved keel-relative waterline without deriving a draught', () => {

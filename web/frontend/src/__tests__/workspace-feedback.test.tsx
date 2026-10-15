@@ -42,7 +42,7 @@ const box: ProjectDocument = {
   weight_groups: [], loading_conditions: [{ id: 'loaded', label: '满载' }],
 };
 
-const view = (project = box, revision = 1): ProjectView => ({ project_id: 'p1', revision, project });
+const view = (project = box, revision = 1): ProjectView => ({ project_id: project.id, revision, project });
 const summary = { project_id: 'p1', name: '解析方箱', revision: 1, updated_at: '2026-10-06T00:00:00Z' };
 
 function runOf(patch: Partial<RunView> & { status: RunView['status'] }): RunView {

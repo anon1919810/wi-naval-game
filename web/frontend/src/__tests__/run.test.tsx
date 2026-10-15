@@ -430,6 +430,6 @@ describe('stage evidence on the run page', () => {
     render(<Run runId="run-1" onBack={vi.fn()} onReport={vi.fn()} />);
     expect(await screen.findByText('型线资料不足')).toBeVisible();
     expect(screen.queryByText('9.99')).toBeNull();
-    expect(screen.queryByText('初稳性高 GM')).toBeNull();
+    expect(screen.queryByText('直立几何 GM')).toBeNull();
   });
 });

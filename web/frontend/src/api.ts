@@ -1,4 +1,4 @@
-import type { AuthConfig, ProjectDocument, ProjectImportPreview, ProjectSummary, ProjectView, RunView, Theme, UserSession } from './types';
+import type { AuthConfig, MassProposalView, ProjectDocument, ProjectImportPreview, ProjectSummary, ProjectView, RunView, SshipProjectImportPreview, Theme, UserSession } from './types';
 
 export class ApiError extends Error {
   constructor(public status: number, public detail: unknown) {
@@ -80,12 +80,53 @@ export const importProject = (project: ProjectDocument, name?: string) =>
   call<ProjectView>('/projects/import', {
     method: 'POST', body: JSON.stringify(name === undefined ? { project } : { project, name }),
   });
+/**
+ * Read a SpringSharp 3.0 source file without saving anything.
+ *
+ * The bytes travel exactly as the reader chose them, base64-encoded and never
+ * decoded, so the server sees the same file and this browser asserts nothing
+ * about its contents. The answer describes what the server read out of those
+ * bytes; it is not a project and it is not trusted again on a save.
+ */
+export const previewSshipImport = (filename: string, content_base64: string) =>
+  call<SshipProjectImportPreview>('/projects/sship-preview', {
+    method: 'POST', body: JSON.stringify({ filename, content_base64 }),
+  });
+/**
+ * Save a SpringSharp source as a new project.
+ *
+ * `source_sha256` is the digest the preview reported for the bytes being sent:
+ * the server re-reads the file and refuses anything that no longer hashes to it,
+ * so a source replaced between preview and save cannot be saved behind the
+ * reader's back.
+ */
+export const importSshipProject = (filename: string, content_base64: string,
+                                    source_sha256: string, name: string) =>
+  call<ProjectView>('/projects/sship-import', {
+    method: 'POST', body: JSON.stringify({ filename, content_base64, source_sha256, name }),
+  });
 export const saveProject = (id: string, body: { base_revision: number; project: ProjectDocument }) =>
   call<ProjectView>(`/projects/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify(body) });
 export const deleteProject = (id: string) =>
   call<void>(`/projects/${encodeURIComponent(id)}`, { method: 'DELETE', body: '{}' });
 export const enqueueRun = (id: string, body: { revision: number; condition_id: string; options: Record<string, unknown> }) =>
   call<RunView>(`/projects/${encodeURIComponent(id)}/runs`, { method: 'POST', body: JSON.stringify(body) });
+
+/**
+ * Apply one explicit batch of reviewed proposals and save exactly one revision.
+ *
+ * `current_options` is this browser's own assembly of the request, not the
+ * normalized form the server stored; the server normalizes it again and requires
+ * that it means the same thing as the request the named run was computed with.
+ * The proposals travel exactly as the stored result presented them — the server
+ * recomputes every one and refuses the batch if any of them differs.
+ */
+export const applyMassProposals = (id: string, body: {
+  base_revision: number; run_id: string; condition_id: string;
+  current_options: Record<string, unknown>; proposals: Array<Record<string, unknown>>;
+}) => call<MassProposalView>(`/projects/${encodeURIComponent(id)}/mass-proposals`, {
+  method: 'POST', body: JSON.stringify(body),
+});
 export const listRuns = (id: string) => call<RunView[]>(`/projects/${encodeURIComponent(id)}/runs`);
 export const getRun = (id: string) => call<RunView>(`/runs/${encodeURIComponent(id)}`);
 export const cancelRun = (id: string) => call<RunView>(`/runs/${encodeURIComponent(id)}/cancel`, { method: 'POST', body: '{}' });

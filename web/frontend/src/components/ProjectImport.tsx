@@ -3,17 +3,27 @@ import { useEffect, useRef, useState } from 'react';
 import * as api from '../api';
 import { outcome } from '../audio/feedback';
 import { assertEnvelopeFits, readBackupFile, BackupFileError } from './backupFile';
+import { readSshipFile, SshipFileError, type SshipSourceFile } from './sshipFile';
+import { SshipMigrationPreview } from './SshipMigrationPreview';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
-import type { ProjectDiagnostic, ProjectDocument, ProjectImportPreview } from '../types';
+import type { ProjectDiagnostic, ProjectDocument, ProjectImportPreview, ProjectView, SshipProjectImportPreview } from '../types';
 import '../styles/projectImport.css';
 
 /**
- * Restoring a project backup, in three explicit steps.
+ * Restoring a project backup, or migrating a SpringSharp source, in three steps.
  *
- * A chosen file is read, then sent to the workspace server to validate, and the
- * answer is a description of what the file holds and what the canonical
+ * A chosen file is read, then sent to the workspace server to be read there, and
+ * the answer is a description of what the file holds and what the canonical
  * validator still warns about. Only then may the reader confirm a name and ask
  * for it to be saved as a new project. Nothing is written before that button.
+ *
+ * Two sources, one section. A JSON backup and a SpringSharp 3.0 `.sship`/`.dat`
+ * file are different things with different readers, so each has its own chooser,
+ * its own progress and its own confirmation, and they never share a preview: a
+ * choice in one drops what the other was showing. The SpringSharp flow is
+ * deliberately the same three steps and the same locks — a `.sship` file is
+ * somebody's ship, and the reader of one deserves exactly the care a backup
+ * reader already gets.
  *
  * What this component is careful about:
  *
@@ -28,6 +38,10 @@ import '../styles/projectImport.css';
  *   navigate to a project.
  * - **A recoverable failure keeps the work.** A failed save leaves the file, the
  *   preview and the entered name exactly as they were, so it is a retry.
+ * - **A migration saves the bytes that were previewed.** The SpringSharp file is
+ *   held as read and sent unchanged under the digest the preview reported for it,
+ *   so the project that is saved is the one the reader was shown — and a file
+ *   replaced in the meantime cannot be saved behind their back.
  */
 
 /** Counts, in the order a reader reads a project: its conditions to its holes. */
@@ -95,7 +109,9 @@ function importFailures(detail: unknown, w: (key: WorkspaceKey, params?: Record<
 }
 
 function failureText(cause: unknown, w: (key: WorkspaceKey, params?: Record<string, string | number>) => string): ImportFailure[] {
-  if (cause instanceof BackupFileError) return [{ message: w(cause.key, cause.params) }];
+  if (cause instanceof BackupFileError || cause instanceof SshipFileError) {
+    return [{ message: w(cause.key, cause.params) }];
+  }
   const detail = cause instanceof api.ApiError ? cause.detail : null;
   const fromServer = importFailures(detail, w);
   if (fromServer.length) return fromServer;
@@ -113,6 +129,15 @@ function FailureList({ failures, w }: { failures: ImportFailure[]; w: (key: Work
 
 type Phase = 'idle' | 'reading' | 'validating' | 'saving';
 
+/**
+ * Which chooser is in play.
+ *
+ * The two are kept apart deliberately. A reader who chooses a SpringSharp file
+ * after a backup preview is starting again, not refining the backup, so the two
+ * previews are never shown together and one choice always retires the other.
+ */
+type Source = 'backup' | 'sship';
+
 export function ProjectImport({
   onOpen, busy: outsideBusy = false, isBlocked, onBusyChange,
 }: {
@@ -125,9 +150,12 @@ export function ProjectImport({
   onBusyChange?: (busy: boolean) => void;
 }) {
   const w = useWorkspaceCopy();
+  /** Which chooser this section is currently working through, if either. */
+  const [source, setSource] = useState<Source | null>(null);
   /** The chosen file, before the workspace server has seen it. */
   const [file, setFile] = useState<{ name: string; size: number } | null>(null);
   const [preview, setPreview] = useState<ProjectImportPreview | null>(null);
+  const [migration, setMigration] = useState<SshipProjectImportPreview | null>(null);
   const [name, setName] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
   const [failure, setFailure] = useState<{cause: unknown} | null>(null);
@@ -143,6 +171,12 @@ export function ProjectImport({
   /** The parsed document behind the current preview, held for the save. */
   const document_ = useRef<ProjectDocument | null>(null);
   /**
+   * The SpringSharp bytes behind the current preview, held for the save exactly
+   * as they were read: never decoded, never re-read from disk, never replaced by
+   * whatever the chooser holds when Save is finally pressed.
+   */
+  const source_ = useRef<SshipSourceFile | null>(null);
+  /**
    * A synchronous lock for the save. The button's `disabled` is decided by a
    * render, so two submissions in one batch would both see it enabled; this
    * ref is set before the first await and is what actually prevents a second
@@ -152,10 +186,19 @@ export function ProjectImport({
   const busyReporter = useRef(onBusyChange);
   busyReporter.current = onBusyChange;
   const input = useRef<HTMLInputElement>(null);
+  const sourceInput = useRef<HTMLInputElement>(null);
 
   /** Busy because of this section's own work, which is all the parent is told. */
   const localBusy = phase !== 'idle';
   const saving = phase === 'saving';
+  /**
+   * The preview currently on screen, whichever reader produced it.
+   *
+   * A migration answer without its migration section is not a usable preview:
+   * it cannot be confirmed, so it is treated as no answer at all rather than as
+   * one with nothing in it.
+   */
+  const answered = source === 'sship' ? (migration?.migration ? migration : null) : preview;
 
   useEffect(() => {
     alive.current = true;
@@ -186,22 +229,42 @@ export function ProjectImport({
     if (phaseNow.current === 'saving') return;
     ticket.current += 1;
     document_.current = null;
-    setFile(null); setPreview(null); setName('');
+    source_.current = null;
+    setSource(null); setFile(null); setPreview(null); setMigration(null); setName('');
     work('idle'); setFailure(null);
     if (input.current) input.current.value = '';
+    if (sourceInput.current) sourceInput.current.value = '';
+  }
+
+  /** Whether a chooser may start, checked before any input is taken out of it. */
+  function mayChoose() {
+    return !(outsideBusy || isBlocked?.() || phaseNow.current === 'saving');
+  }
+
+  /**
+   * Forget whatever the other chooser had produced, before the new one starts.
+   *
+   * Dropping the previous preview here — rather than letting the new answer
+   * overwrite it — is what stops a stale answer being shown against a new
+   * filename, and what makes choosing a second file a replacement rather than
+   * an addition.
+   */
+  function begin(next: Source, chosen: File) {
+    const mine = ++ticket.current;
+    document_.current = null;
+    source_.current = null;
+    setSource(next);
+    setFile({ name: chosen.name, size: chosen.size });
+    setPreview(null); setMigration(null); setName(''); setFailure(null);
+    return mine;
   }
 
   async function choose(selected: File | undefined) {
-    if (!selected || outsideBusy || isBlocked?.() || phaseNow.current === 'saving') return;
-    const mine = ++ticket.current;
+    if (!selected || !mayChoose()) return;
     // The native input is cleared as soon as the file is taken out of it, so
     // choosing the very same file again after a failure still raises `change`.
     if (input.current) input.current.value = '';
-    // Everything the previous file had produced is dropped before the new one
-    // starts, so a stale answer can never be shown against a new filename.
-    document_.current = null;
-    setFile({ name: selected.name, size: selected.size });
-    setPreview(null); setName(''); setFailure(null);
+    const mine = begin('backup', selected);
     work('reading');
     try {
       const backup = await readBackupFile(selected, w);
@@ -222,23 +285,70 @@ export function ProjectImport({
     }
   }
 
+  /**
+   * Read a SpringSharp source and ask the server what it holds.
+   *
+   * The bytes are sent as they were read, so what the server parses is the file
+   * the reader chose. The browser learns the version, the digest and the field
+   * dispositions and shows them; it decides nothing about the format, and the
+   * preview it holds is a description rather than anything it can save on its
+   * own.
+   */
+  async function chooseSship(selected: File | undefined) {
+    if (!selected || !mayChoose()) return;
+    if (sourceInput.current) sourceInput.current.value = '';
+    const mine = begin('sship', selected);
+    work('reading');
+    try {
+      const original = await readSshipFile(selected, w);
+      if (!current(mine)) return;
+      source_.current = original;
+      work('validating');
+      const answer = await api.previewSshipImport(original.filename, original.content_base64);
+      if (!current(mine)) return;
+      setMigration(answer);
+      setName(answer.name);
+    } catch (cause) {
+      if (!current(mine)) return;
+      outcome('hold');
+      setFailure({cause});
+    } finally {
+      if (current(mine)) work('idle');
+    }
+  }
+
   async function save() {
-    const project = document_.current;
     // Every reason to refuse is checked before anything is sent: no preview, a
     // read still running, another creation in flight, a save already started,
     // or a name the reader has not actually filled in. The required name is
     // never quietly replaced by the backup's own.
-    if (!project || !preview || phaseNow.current !== 'idle' || outsideBusy || isBlocked?.()) return;
+    if (phaseNow.current !== 'idle' || outsideBusy || isBlocked?.()) return;
     const confirmed = name.trim();
     if (!confirmed || confirmed.length > 200) return;
+    const migrating = source === 'sship';
+    const original = source_.current;
+    const digest = migration?.migration?.source.sha256;
+    if (migrating ? !(original && digest) : !(document_.current && preview)) return;
     const mine = ++ticket.current;
     work('saving');
     setFailure(null);
     try {
-      // Measured as it will be encoded, so an oversized request is refused here
-      // rather than by a middleware the reader never sees.
-      assertEnvelopeFits({ project, name: confirmed }, w('import.envelopeLabel'), w);
-      const view = await api.importProject(project, confirmed);
+      let view: ProjectView;
+      if (migrating && original && digest) {
+        // The frozen bytes and the digest the reader was shown for them: the
+        // server re-reads the file and refuses anything that no longer matches.
+        const { filename, content_base64 } = original;
+        assertEnvelopeFits({ filename, content_base64, source_sha256: digest, name: confirmed },
+          w('import.envelopeLabel'), w);
+        view = await api.importSshipProject(filename, content_base64, digest, confirmed);
+      } else {
+        const project = document_.current;
+        if (!project) return;
+        // Measured as it will be encoded, so an oversized request is refused here
+        // rather than by a middleware the reader never sees.
+        assertEnvelopeFits({ project, name: confirmed }, w('import.envelopeLabel'), w);
+        view = await api.importProject(project, confirmed);
+      }
       if (!current(mine)) return;
       outcome('resolve');
       onOpen(view.project_id);
@@ -257,6 +367,8 @@ export function ProjectImport({
   const shown = findings.slice(0, SHOWN_FINDINGS);
   const hidden = findings.length - shown.length;
   const disabled = localBusy || outsideBusy;
+  const isMigration = source === 'sship';
+  const busyPhase = phase === 'reading' || phase === 'validating';
 
   return <div className="project-import">
     <div className="project-import-pick">
@@ -268,19 +380,27 @@ export function ProjectImport({
       <p className="project-import-help" id="project-import-file-help">
         {w('import.pick.help')}
       </p>
+      <label className="project-import-label" htmlFor="project-import-sship-file">{w('sship.pick.label')}</label>
+      <input ref={sourceInput} id="project-import-sship-file" className="project-import-file" type="file"
+        accept=".sship,.dat" disabled={saving || outsideBusy}
+        aria-describedby="project-import-sship-file-help"
+        onChange={event => { const chosen = event.target.files?.[0]; void chooseSship(chosen); }} />
+      <p className="project-import-help" id="project-import-sship-file-help">
+        {w('sship.pick.help')}
+      </p>
       {file && <p className="project-import-file-name">
         <span className="project-import-file-name-text">{file.name}</span>
         <span className="project-import-file-size">{(file.size / 1024).toFixed(0)} KiB</span>
       </p>}
-      {(phase === 'reading' || phase === 'validating') && <p className="project-import-progress" role="status">
-        {w('import.progress', { phase: w(phase === 'reading' ? 'import.progress.reading' : 'import.progress.validating'), name: file?.name ?? '' })}
+      {busyPhase && <p className="project-import-progress" role="status">
+        {w('import.progress', { phase: w(`${isMigration ? 'sship' : 'import'}.progress.${phase}` as WorkspaceKey), name: file?.name ?? '' })}
       </p>}
-      {file && !preview && <button type="button" className="button button--secondary" disabled={saving || outsideBusy}
-        data-audio="manual" onClick={() => { reset(); input.current?.focus(); }}>{w('import.cancel')}</button>}
+      {file && !answered && <button type="button" className="button button--secondary" disabled={saving || outsideBusy}
+        data-audio="manual" onClick={() => { reset(); (isMigration ? sourceInput : input).current?.focus(); }}>{w('import.cancel')}</button>}
     </div>
 
     {failures.length > 0 && <div className="notice notice--error project-import-failure" role="alert">
-      <p className="project-import-failure-title">{preview ? w('import.failure.saveTitle') : w('import.failure.title')}</p>
+      <p className="project-import-failure-title">{w(`${isMigration ? 'sship' : 'import'}.failure.${answered ? 'saveTitle' : 'title'}` as WorkspaceKey)}</p>
       <FailureList failures={failures.slice(0, SHOWN_FINDINGS)} w={w} />
       {failures.length > SHOWN_FINDINGS && <details className="project-import-findings-more">
         <summary>{w('import.failure.more', { count: failures.length - SHOWN_FINDINGS })}</summary>
@@ -288,53 +408,57 @@ export function ProjectImport({
       </details>}
     </div>}
 
-    {preview && <div className="project-import-preview">
-      <dl className="project-import-identity">
-        <div><dt>{w('import.identity.name')}</dt><dd>{preview.name}</dd></div>
-        <div><dt>{w('import.identity.id')}</dt><dd><code>{preview.source_id}</code></dd></div>
-        <div><dt>{w('import.identity.revision')}</dt><dd>{w('workbench.chapter.revision', { revision: preview.source_revision })}</dd></div>
-        <div><dt>{w('import.identity.geometry')}</dt><dd>{preview.geometry_kind && GEOMETRY_LABEL[preview.geometry_kind]
-          ? w(GEOMETRY_LABEL[preview.geometry_kind])
-          : w('import.geometry.undefined')}</dd></div>
-      </dl>
+    {answered && <div className="project-import-preview">
+      {isMigration
+        ? <SshipMigrationPreview preview={answered} w={w} />
+        : <>
+          <dl className="project-import-identity">
+            <div><dt>{w('import.identity.name')}</dt><dd>{preview!.name}</dd></div>
+            <div><dt>{w('import.identity.id')}</dt><dd><code>{preview!.source_id}</code></dd></div>
+            <div><dt>{w('import.identity.revision')}</dt><dd>{w('workbench.chapter.revision', { revision: preview!.source_revision })}</dd></div>
+            <div><dt>{w('import.identity.geometry')}</dt><dd>{preview!.geometry_kind && GEOMETRY_LABEL[preview!.geometry_kind]
+              ? w(GEOMETRY_LABEL[preview!.geometry_kind])
+              : w('import.geometry.undefined')}</dd></div>
+          </dl>
 
-      <dl className="project-import-counts">
-        {COUNT_ROWS.map(row => <div key={row.key}>
-          <dt>{w(row.label)}</dt><dd>{preview.counts[row.key]}</dd>
-        </div>)}
-      </dl>
+          <dl className="project-import-counts">
+            {COUNT_ROWS.map(row => <div key={row.key}>
+              <dt>{w(row.label)}</dt><dd>{preview!.counts[row.key]}</dd>
+            </div>)}
+          </dl>
 
-      <p className="project-import-note">{w('import.note')}</p>
+          <p className="project-import-note">{w('import.note')}</p>
 
-      {findings.length > 0 && <div className="project-import-findings">
-        <h3 className="project-import-findings-title">{w('import.findings.title', { count: findings.length })}</h3>
-        <ul className="project-import-finding-list">
-          {shown.map((diagnostic, index) => <Finding diagnostic={diagnostic} w={w} key={`${diagnostic.path}-${index}`} />)}
-        </ul>
-        {hidden > 0 && <details className="project-import-findings-more">
-          <summary>{w('import.findings.more', { count: hidden })}</summary>
-          <ul className="project-import-finding-list">
-            {findings.slice(SHOWN_FINDINGS).map((diagnostic, index) =>
-              <Finding diagnostic={diagnostic} w={w} key={`more-${diagnostic.path}-${index}`} />)}
-          </ul>
-        </details>}
-      </div>}
+          {findings.length > 0 && <div className="project-import-findings">
+            <h3 className="project-import-findings-title">{w('import.findings.title', { count: findings.length })}</h3>
+            <ul className="project-import-finding-list">
+              {shown.map((diagnostic, index) => <Finding diagnostic={diagnostic} w={w} key={`${diagnostic.path}-${index}`} />)}
+            </ul>
+            {hidden > 0 && <details className="project-import-findings-more">
+              <summary>{w('import.findings.more', { count: hidden })}</summary>
+              <ul className="project-import-finding-list">
+                {findings.slice(SHOWN_FINDINGS).map((diagnostic, index) =>
+                  <Finding diagnostic={diagnostic} w={w} key={`more-${diagnostic.path}-${index}`} />)}
+              </ul>
+            </details>}
+          </div>}
+        </>}
 
       <form className="project-import-confirm" onSubmit={event => { event.preventDefault(); void save(); }}>
         <div className="project-import-name-field">
-          <label className="project-import-label" htmlFor="project-import-name">{w('import.confirm.label')}</label>
+          <label className="project-import-label" htmlFor="project-import-name">{w(isMigration ? 'sship.confirm.label' : 'import.confirm.label')}</label>
           <input id="project-import-name" type="text" value={name} maxLength={200} required disabled={saving || outsideBusy}
             aria-describedby="project-import-name-help"
             onChange={event => setName(event.target.value)} />
           <p className="project-import-note" id="project-import-name-help">{w('import.confirm.nameHelp')}</p>
         </div>
-        <p className="project-import-explain">{w('import.confirm.explain')}</p>
+        <p className="project-import-explain">{w(isMigration ? 'sship.confirm.explain' : 'import.confirm.explain')}</p>
         <div className="project-import-actions">
           <button type="submit" className="button button--primary" disabled={disabled || !name.trim() || name.trim().length > 200}>
             {saving ? w('workbench.save.busy') : w('import.confirm.submit')}
           </button>
           <button type="button" className="button button--secondary" data-audio="manual"
-            disabled={saving || outsideBusy} onClick={() => { reset(); input.current?.focus(); }}>{w('import.cancel')}</button>
+            disabled={saving || outsideBusy} onClick={() => { reset(); (isMigration ? sourceInput : input).current?.focus(); }}>{w('import.cancel')}</button>
         </div>
       </form>
     </div>}

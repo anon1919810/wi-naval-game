@@ -5,15 +5,20 @@ import json
 import math
 
 try:
-    from . import project_io, geometry_analysis, stability
+    from . import project_io, geometry_analysis, stability, small_angle_stability
 except ImportError:
-    import project_io, geometry_analysis, stability
+    import project_io, geometry_analysis, stability, small_angle_stability
 
 STAGES = ("loading", "systems", "l0", "geometry", "equilibrium", "hydrostatics", "gz", "deck",
-          "hydrostatic_curve", "bonjean", "resistance", "propulsion", "endurance", "historical", "flooding")
+          "hydrostatic_curve", "bonjean", "resistance", "propulsion", "endurance", "historical",
+          "flooding", "design_balance")
 DEFAULT_STAGES = ("loading", "systems", "l0", "geometry", "equilibrium", "hydrostatics", "deck", "propulsion")
+# The kernel method version belongs to the request identity: a result computed by
+# a different small-angle method must never be replayed as current.
 VERSIONS = {"coordinator": "selected-loading-analysis-2", "geometry": geometry_analysis.METHOD_VERSION,
-            "stability": stability.METHOD_VERSION, "request": "plimsoll-analysis-request-1"}
+            "stability": stability.METHOD_VERSION,
+            "small_angle_stability": small_angle_stability.METHOD_VERSION,
+            "request": "plimsoll-analysis-request-1"}
 
 
 class AnalysisInputError(ValueError):

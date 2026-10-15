@@ -1,0 +1,256 @@
+﻿{
+    "scope":  "Isolated original-assembly speedHpCalc invocation; not a full UI or same-ship accuracy benchmark",
+    "sha256":  "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+    "method_token":  "0x0600007e",
+    "inputs":  {
+                   "length_ft":  600,
+                   "block":  0.55,
+                   "wetted_surface_sqft":  51900,
+                   "beam_bulges_ft":  80,
+                   "draught_ft":  25,
+                   "displacement_long_tons":  18857.1426,
+                   "coSharp":  0.38188827
+               },
+    "rows":  [
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1880,
+                     "speed_kn":  10,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  2365.12573
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1880,
+                     "speed_kn":  15,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  8647.399
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1880,
+                     "speed_kn":  20,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  23521.21
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1880,
+                     "speed_kn":  25,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  54325.0078
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1880,
+                     "speed_kn":  30,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  112393.469
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1910,
+                     "speed_kn":  10,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  2150.11426
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1910,
+                     "speed_kn":  15,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  7861.27246
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1910,
+                     "speed_kn":  20,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  21382.918
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1910,
+                     "speed_kn":  25,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  49386.37
+                 },
+                 {
+                     "stern_index":  0,
+                     "engine_year":  1910,
+                     "speed_kn":  30,
+                     "length_effect_ft":  600,
+                     "length_hp_ft":  600,
+                     "power_hp":  102175.875
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1880,
+                     "speed_kn":  10,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  495.257324,
+                     "power_hp":  2422.08643
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1880,
+                     "speed_kn":  15,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  495.257324,
+                     "power_hp":  9079.947
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1880,
+                     "speed_kn":  20,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  600,
+                     "power_hp":  23521.21
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1880,
+                     "speed_kn":  25,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  704.7427,
+                     "power_hp":  50415.91
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1880,
+                     "speed_kn":  30,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  704.7427,
+                     "power_hp":  102666.359
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1910,
+                     "speed_kn":  10,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  495.257324,
+                     "power_hp":  2201.89673
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1910,
+                     "speed_kn":  15,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  495.257324,
+                     "power_hp":  8254.497
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1910,
+                     "speed_kn":  20,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  600,
+                     "power_hp":  21382.918
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1910,
+                     "speed_kn":  25,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  704.7427,
+                     "power_hp":  45832.6445
+                 },
+                 {
+                     "stern_index":  1,
+                     "engine_year":  1910,
+                     "speed_kn":  30,
+                     "length_effect_ft":  704.7427,
+                     "length_hp_ft":  704.7427,
+                     "power_hp":  93333.0547
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1880,
+                     "speed_kn":  10,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  390.514648,
+                     "power_hp":  2509.603
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1880,
+                     "speed_kn":  15,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  390.514648,
+                     "power_hp":  9744.526
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1880,
+                     "speed_kn":  20,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  600,
+                     "power_hp":  23521.21
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1880,
+                     "speed_kn":  25,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  809.485352,
+                     "power_hp":  47518.4375
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1880,
+                     "speed_kn":  30,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  809.485352,
+                     "power_hp":  95456.52
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1910,
+                     "speed_kn":  10,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  390.514648,
+                     "power_hp":  2281.45728
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1910,
+                     "speed_kn":  15,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  390.514648,
+                     "power_hp":  8858.66
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1910,
+                     "speed_kn":  20,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  600,
+                     "power_hp":  21382.918
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1910,
+                     "speed_kn":  25,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  809.485352,
+                     "power_hp":  43198.58
+                 },
+                 {
+                     "stern_index":  2,
+                     "engine_year":  1910,
+                     "speed_kn":  30,
+                     "length_effect_ft":  809.485352,
+                     "length_hp_ft":  809.485352,
+                     "power_hp":  86778.66
+                 }
+             ]
+}

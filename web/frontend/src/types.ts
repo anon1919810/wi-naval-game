@@ -32,6 +32,26 @@ export interface ProjectView {
   project: ProjectDocument;
 }
 
+/**
+ * The result of one accepted proposal batch: the saved project at its new
+ * revision, and the changes that were written to the selected condition. The
+ * changes are the record of what was accepted and from which method; the
+ * project is the whole document, because a reviewable apply must not be a
+ * partial write a reader has to reconstruct.
+ */
+export interface MassProposalView extends ProjectView {
+  changes: Array<{
+    target: string;
+    condition_id: string;
+    item_id: string;
+    old_mass_t: number | null;
+    new_mass_t: number | null;
+    estimate: boolean;
+    source: Record<string, unknown>;
+    [key: string]: unknown;
+  }>;
+}
+
 export interface ProjectSummary {
   project_id: string;
   name: string;
@@ -69,6 +89,58 @@ export interface ProjectImportPreview {
   geometry_kind: string | null;
   counts: ProjectImportCounts;
   diagnostics: ProjectDiagnostic[];
+}
+
+/**
+ * One SpringSharp 3.0 positional field, exactly as the core read it.
+ *
+ * `disposition` is what the reader is asked to confirm before anything is saved:
+ * a field the migration used as an active value (`mapped`), one kept only as
+ * evidence (`preserved`, `duplicate`), or the source file's trailing padding,
+ * which the original reader ignored and this import preserves without treating
+ * it as a parameter (`reserved`).
+ */
+export interface SshipMigrationField {
+  index: number;
+  line: number;
+  name: string;
+  raw: string;
+  disposition: 'mapped' | 'preserved' | 'duplicate' | 'reserved' | string;
+  destinations: string[];
+  reason: string | null;
+}
+
+/** The source file as it was sent, identified rather than interpreted. */
+export interface SshipSourceInfo {
+  filename: string;
+  sha256: string;
+  byte_length: number;
+  encoding: string;
+  header: string;
+  version: string;
+  decimal_separator: string;
+}
+
+/**
+ * What the migration read out of one source file.
+ *
+ * This is evidence about the file, not a converted project: the browser needs
+ * the counts and the field list to explain itself, and nothing here is trusted
+ * back on a save — the server parses the original bytes again.
+ */
+export interface SshipMigration {
+  method_version: string;
+  source: SshipSourceInfo;
+  fields: SshipMigrationField[];
+  /** Disposition counts, which together account for all 280 fields. */
+  counts: Record<string, number>;
+  diagnostics: ProjectDiagnostic[];
+  /** What this migration cannot give the reader, in the core's own words. */
+  limitations: Array<string | { code?: string; message?: string }>;
+}
+
+export interface SshipProjectImportPreview extends ProjectImportPreview {
+  migration?: SshipMigration;
 }
 
 export type StageStatus = 'completed' | 'not_requested' | 'unavailable' | 'failed' | 'canceled' | 'model_limit';

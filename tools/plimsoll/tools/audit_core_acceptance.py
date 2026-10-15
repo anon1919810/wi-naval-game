@@ -61,7 +61,7 @@ LIMITS = {
     "B6": "Queen Mary positional miscellaneous stores and some historical centroids remain unknown; the ledger is operable, not historically validated.",
     "C4": "Selected small-angle roll is unavailable when GM or the sourced gyration radius is missing.",
     "D6": "Timeline and remaining-GZ data are delivered; graphical cutaway/highlighting is deferred with the UI.",
-    "E1": "Natural speed remains method-undefined and one editor field was unobserved. Optional turret-armour splitting does not supply Queen Mary history or full SPS parity.",
+    "E1": "The SpringSharp natural-speed method is now known (sqrt(lengthEffect), stern-conditioned) but no versioned parity method is implemented or validated. Set Trim is a 0..100 steadiness adjustment and Steadiness a 0..100 score; neither is implemented. The previously unobserved gun editor is transcribed in a versioned supplement; its estimating chain is not implemented. Optional turret-armour splitting does not supply Queen Mary history or full SPS parity.",
     "E2": "A sourced rotating-armour subcomponent is a nonadditive split of selected mount mass; Queen Mary has no independent sourced value.",
     "E4": "Strict Taylor lookup returns unavailable outside populated axes; no clipping or tuned historical match.",
     "E5": "Holtrop on selected trimmed proxies is marked nonprimary; only eligible upright method results can be primary.",

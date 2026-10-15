@@ -8,12 +8,20 @@ SPS Hull 页缺的三项（COVERAGE.md §2.1）：**Wetted surface area**、**Le
   2) **几何法（L1）** 逐站把剖面裁到水线以下、取湿周长（**扣除贴在水线上的闭合边**），
      沿 x 梯形积分 —— 有型线时优先用这个。
 - Length:Beam：`Lwl / B`，定义式，无估计成分。
-- Natural Speed：**两个口径并列**（不二选一，因为 SPS 的常数没有公开出处）：
+- Natural Speed：**两个口径并列**（不二选一，因为第二个口径的常数没有公开出处）：
   1) **Froude 兴波速度（有源）** `V = √(g·L/2π)` —— 波长等于水线长时的深水波速，
      即教科书 hull speed（1.34·√L_ft / 2.428·√L_m）；
-  2) **SPS 惯例（estimate）** `V = k·√L_ft`，k 默认 1.09（S/L ratio ~1.1，
-     兴波阻力显著上升的门槛；**1.09 这个常数无公开文献出处，标 estimate**）。
+  2) **旧经验口径（estimate，独立启发式）** `V = k·√L_ft`，k 默认 1.09
+     （S/L ratio ~1.1，兴波阻力显著上升的门槛；**1.09 无公开文献出处**）。
   同时输出 `froude_at_natural`，方便对着 Froude 数判断是否可信。
+
+⚠️ `natural_speed_kn` 的 1.09·√L_ft **不是** SpringSharp 3b3 的自然速度定义。本机
+SpringSharpMono 3.0.3032.29945 的实际定义是 `√lengthEffect`
+（HullControl.coSharpCalc，艉型条件：`lengthEffect = L`、`L + 0.5·B/coSharp` 或
+`L + B/coSharp`，其中 `coSharp = 0.4·(B_bulges·6/L)^(1/3)·√(Cb/0.52)`），它依赖艉型、
+最大型宽与方形系数，本函数不依赖。两者定义不同、数值不同，**不得互相顶替**。
+本模块在本阶段**不实现** SPS 自然速度兼容口径；1.09 这一支只作为**向后兼容的旧数值
+API** 保留（数值不变），并继续标 estimate。
 
 设计纪律（承 SPEC §2，含 §2.7 通用性）：纯函数 dict→dict；输出带 formula/source/estimate；
 核心不做四舍五入；**不出现任何具体船只的常量**。
@@ -26,7 +34,14 @@ import math
 G = 9.81                    # m/s²
 KNOT_MPS = 0.514444         # 1 kn = 0.514444 m/s（国际定义 1852 m/h）
 FT_PER_M = 3.280839895      # 1 m = 3.280839895 ft（1 ft = 0.3048 m 精确反算）
-SLR_SPS = 1.09              # SPS 惯例常数（kn / √ft）—— 无公开出处，estimate
+# 旧经验常数（kn/√ft）。**不是** SpringSharp 3b3 的自然速度常数：该二进制用
+# √lengthEffect（艉型条件，HullControl.coSharpCalc）。本常量无公开文献出处，
+# 仅作为向后兼容的旧数值 API 保留，恒为 estimate。
+SLR_LEGACY = 1.09
+
+# 已弃用别名：旧名暗示这是 SpringSharp 的自然速度常数，而 3b3 实为 √lengthEffect。
+# 仅为避免既有 import 断裂而保留；新代码请用 SLR_LEGACY，数值完全相同。
+SLR_SPS = SLR_LEGACY  # noqa: N816  deprecated alias, kept for import compatibility
 
 
 def _req(hull: dict, key: str) -> float:
@@ -69,8 +84,12 @@ def form_ratios(hull: dict) -> dict:
 # ---------------------------------------------------------------- 自然航速
 
 
-def natural_speed(hull: dict, slr: float = SLR_SPS) -> dict:
-    """自然航速：Froude 兴波速度（有源）+ SPS 惯例（estimate），两个口径并列。"""
+def natural_speed(hull: dict, slr: float = SLR_LEGACY) -> dict:
+    """自然航速：Froude 兴波速度（有源）+ 旧经验口径 1.09·√L_ft（estimate）。
+
+    ⚠️ 第二支是**独立旧启发式**，不是 SpringSharp 3b3 的自然速度定义（见模块
+    文档）。本阶段不提供 SPS 兼容口径；本函数保留 1.09 只是向后兼容的数值 API。
+    """
     L = _req(hull, "lwl_m")
     L_ft = L * FT_PER_M
     trace = []
@@ -83,16 +102,18 @@ def natural_speed(hull: dict, slr: float = SLR_SPS) -> dict:
        "V = √(g·Lwl / 2π) ÷ 0.514444",
        "深水波速 λ=Lwl（Froude 兴波速度，教科书 hull speed；等价 1.34·√L_ft）")
 
-    # 2) SPS 惯例
+    # 2) 旧经验口径（保留仅为数值向后兼容）
     natural_kn = slr * math.sqrt(L_ft)
     _T(trace, "natural_speed_kn", natural_kn, "V = k·√Lwl(ft)，k=%.3f" % slr,
-       "SPS 惯例常数（S/L ratio≈1.1 门槛）；**该常数无公开文献出处**", True)
+       "旧经验常数（S/L ratio≈1.1 门槛）；无公开文献出处，**不是** SpringSharp 3b3 的"
+       "自然速度定义（该二进制用 √lengthEffect，艉型条件）", True)
 
     froude_at_natural = (natural_kn * KNOT_MPS) / math.sqrt(G * L)
     _T(trace, "froude_at_natural", froude_at_natural,
        "Fn = V(m/s) / √(g·Lwl)", "由上面两项推得", True)
 
-    warnings.append("Natural speed 的 k=%.3f 是 SPS 惯例常数，无公开文献出处（标 estimate）；"
+    warnings.append("natural_speed_kn 的 k=%.3f 是旧经验常数（无公开文献出处），"
+                    "它是独立启发式而非 SpringSharp 3b3 的自然速度定义；"
                     "可信度更高的口径是同表给出的 hull_speed_kn（Froude 兴波速度）。" % slr)
     if froude_at_natural > 0.45:
         warnings.append("自然航速对应 Fn=%.3f 偏高：该船已超出排水型船的常规区间，"

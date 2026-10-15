@@ -63,7 +63,9 @@ output.
 | `batch` | Calculate an explicit list of cases from one manifest |
 | `sweep` | Calculate a bounded grid over speed / QPC |
 | `import-geometry` | Materialize explicitly supplied geometry bytes into a project copy |
+| `import-sship` | Read a SpringSharp 3.0 `.sship` / `.dat` file into a preview or a canonical draft project |
 | `readme` | Print this guide |
+| `verify` | Explicit offline verification of analytic consistency, transformation laws, mesh refinement and flooding boundaries |
 
 ---
 
@@ -74,6 +76,66 @@ output.
 | `0` | The command did what it was asked. For `analyze`, every requested stage completed and the result was emitted to the configured outputs; for `batch` and `sweep`, every case / grid point completed and was persisted; for `readme`, the guide was written to stdout; for `import-geometry`, the project was written |
 | `1` | The request was well formed and ran, but at least one requested stage, case or grid point did not complete. The result is still written, to stdout and/or to the requested files, and it is the real answer |
 | `2` | Input, usage, schema, serialization or output-write error. One `plimsoll-cli-error-1` object on stderr, empty stdout |
+
+`verify` uses a stricter evidence contract: `0` requires a complete report,
+unchanged measured package sources and every requested assertion passing.
+`1` means an assertion/worker/deadline failed, or report publication failed;
+`2` means invalid usage or an unsafe/busy output directory rejected before
+computation. A failed output medium cannot promise newly written evidence.
+
+## Offline core verification
+
+```powershell
+python -m plimsoll verify --suite quick --output-dir 'C:\verification\quick'
+python -m plimsoll verify --suite all --output-dir 'C:\verification\all' --case-timeout-s 180 --total-timeout-s 1800
+```
+
+Supply an absolute output directory. The default `quick` suite has 15 cases:
+dry/liquid scale and mirror laws, explicit keel datum, and three solved
+ellipsoid refinements. `extended` has 26 cases, including all nine meshes,
+12 actual 60/300-second flooding requests at 0.5/0.25/0.125-second steps,
+opposite initial heads, capacity, cancellation and reversal prevention.
+`all` is their deduplicated union (38 cases). A long requested duration can
+legitimately stop at hydraulic equilibrium; the report retains the accepted
+time and actual reason. The finest time-step trajectory has the predeclared
+accuracy gate; coarse errors remain visible diagnostics.
+
+These commands perform real calculations and can take minutes. Parent-owned
+per-case/total wall-time limits default to 180/1800 seconds and must be positive
+finite numbers. A worker that hangs is terminated and reaped; pending work and
+earlier results stay in the report. `--help` and `readme` compute nothing.
+
+The fixed outputs are `core-verification.json`, `.csv` and `.md`, sharing a
+UUID run identity and generation. JSON is authoritative. A partial checkpoint
+is published before the first case and after each case; derived CSV/Markdown
+are replaced before JSON. After interruption or write failure, compare all
+three identities: mixed generations and partial results never constitute a
+pass. Reusing this tool's valid evidence is allowed; unrelated files at these
+names, links/junctions, and a concurrently locked directory are refused.
+An abandoned lock is not guessed stale: inspect its owner before manually
+removing `.plimsoll-core-verification.lock`. Publication is not an atomic
+three-file transaction; earlier derived replacements can survive a later
+failure. No report is claimed written unless publication succeeds.
+If lock metadata cannot be read during creation, the unknown lock is retained
+with the I/O error and recovery note; verify ownership before removing it.
+
+Each case retains literal requests, raw solver flags, signed conservation
+errors, source hashes, loaded file origins, and input seals at each public-call
+boundary. File hashes measure disk sources, not arbitrary in-memory changes;
+an input change restored inside the same call is outside this seal's scope.
+Transfer records keep the declared connection orientation: reverse volume,
+mass and flow are signed negative. Verification recomputes each accepted
+volume/mass ledger against the supplied tank and connection identities.
+The command imports only the bundled package and the Python standard library;
+it needs no repository docs, tests, personal paths, or network access.
+
+Interpret evidence separately: exact analytic controls establish consistency;
+same-mesh transformation checks establish laws; mesh/time-step ladders measure
+numerical error; truthful capacity stops test model boundaries. None establishes
+historical safety, class approval, or agreement with external experiments.
+External primary-data validation remains pending. Verification fixtures are
+declared idealized boxes/ellipsoids and fully vented, same-density point-orifice
+networks; they do not supply missing pressure/air/overflow physics.
 
 Where the result goes on a successful run differs by command, because the
 commands do different things:
@@ -321,6 +383,53 @@ an unresolved `offsets_reference` reports the `geometry` stage as `unavailable`
 with `analysis.geometry_not_materialized`, and nothing is filled in silently.
 Import is how you turn an external reference into owned, self-contained
 geometry.
+
+---
+
+## 7a. `import-sship` — read a SpringSharp 3.0 file
+
+```bash
+# What the file contains, before anything is created.
+python -m plimsoll import-sship ship.sship --preview
+
+# An editable canonical draft; the default destination is stdout.
+python -m plimsoll import-sship ship.sship --name "HMS Example" \
+        --output converted.project.json
+```
+
+Only the exact headers `SpringSharp Version 3.0` and `SpringSharp Version 3,0`
+are accepted; 2.0, SpringStyle 1.x and unknown headers are refused with a
+diagnostic (`sship.version_unsupported`) because their field meanings differ.
+The file must hold exactly 280 positional records followed by an optional
+notes tail. UTF-8, UTF-8 with a BOM and BOM-marked UTF-16 LE/BE are decoded
+strictly, and the decimal convention comes from the header alone.
+
+`--preview` emits the full report: `source` (filename, SHA-256, byte length,
+encoding, header, version, decimal separator), the canonical `project`, all 280
+ordered `fields` with their `mapped` / `preserved` / `duplicate` / `reserved`
+disposition, the four `counts` (which sum to 280), non-blocking `diagnostics`
+and `limitations`. Without `--preview` the command writes only the canonical
+project JSON.
+
+Read the draft as a **draft**. It archives the original bytes, all 280 raw
+field strings, the notes tail and the field mapping under `migration`, and it
+maps what the file declares — but it creates no geometry, no centre of gravity,
+no complete weight ledger and no ballast condition, and every concept estimate
+stays unadopted with a null ledger mass. Shell weights are always read as
+pounds, the five miscellaneous weights always as long tons, and each scale
+selector governs only its own group. An out-of-domain or internally
+inconsistent bank keeps its editable facts and its archive and simply has no
+concept estimate.
+
+One working condition is explicitly generated for reviewing the draft; it has
+no mass reference or overrides and is not a historical source condition.
+Gun and fuel estimates can be reviewed independently. Machinery weight remains
+unavailable until a user supplies shaft power or the balance inputs required
+by the existing speed-to-power estimate. The importer supplies neither.
+
+The destination is created exclusively. An existing file, a symlink (including a
+dangling one) and a hard link to the input are all refused, so an input is never
+clobbered and an invalid file creates no output.
 
 ---
 

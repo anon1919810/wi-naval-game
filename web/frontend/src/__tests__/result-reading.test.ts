@@ -51,7 +51,8 @@ describe('saved-result readings', () => {
     const readings = reportReadings(result(completeStages()));
     expect(readings.map(item => item.key)).toEqual([
       'loading.total_mass_t', 'equilibrium.waterline_above_keel_m', 'equilibrium.heel_deg',
-      'hydrostatics.gm_t_m', 'resistance.shaft_power_kw', 'endurance.range_nm',
+      'hydrostatics.gm_t_m', 'hydrostatics.small_angle_stability.equilibrium_gm_m',
+      'hydrostatics.loaded_roll.period_s', 'resistance.shaft_power_kw', 'endurance.range_nm',
     ]);
 
     const mass = readings[0];
@@ -66,13 +67,13 @@ describe('saved-result readings', () => {
     const gm = readings[3];
     expect(gm).toMatchObject({ state: 'known', value: 1.85, dimension: 'length', storedUnit: 'm' });
 
-    const power = readings[4];
+    const power = readings[6];
     expect(power).toMatchObject({ state: 'known', value: 12894.8, dimension: 'power', storedUnit: 'kW' });
     expect(power.context).toBe('阶段 阻力与功率 · 工作点 18 kn');
     expect(power.source).toBe('QPC study');
     expect(power.estimate).toBe(true);
 
-    const range = readings[5];
+    const range = readings[7];
     // nmi is canonical: a range has no dimension to convert.
     expect(range).toMatchObject({ state: 'known', value: 5760, canonicalUnit: 'nmi' });
     expect(range.dimension).toBeUndefined();

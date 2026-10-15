@@ -14,6 +14,10 @@ import { ArmourEditor } from '../components/ArmourEditor';
 import { EnginesEditor } from '../components/EnginesEditor';
 import { HullSupplementEditor } from '../components/HullSupplementEditor';
 import { BASE_STAGES, EMPTY_REQUEST, PerformanceInputs, PerformanceRequest, PerformanceResults, requestedExtraStages, buildOptions, type RequestDraft } from '../components/PerformanceEditor';
+import { ConceptDesignEditor } from '../components/ConceptDesignEditor';
+import { DesignBalanceDiagnostics, DesignBalanceResults, ConceptDesignLink } from '../components/DesignBalanceResults';
+import { MassProposalPanel } from '../components/MassProposalPanel';
+import { conceptEnabled, IDLE_APPLY, resultIdentity, requestOptionsMatch, withDesignBalance, type ApplyState } from '../components/conceptDesign';
 import { buildFloodingRequest, EMPTY_FLOODING_REQUEST, type FloodingRequest } from '../components/floodingModel';
 import { CalculationReadiness } from '../components/CalculationReadiness';
 import { currentRun, eligibleResultRun, latestOwnedRun, ledgerItems, RESULT_STATUSES } from '../components/formModel';
@@ -31,7 +35,11 @@ import { UnitProvider } from '../components/UnitProvider';
 import { useMotionToken } from '../components/useLocalMotion';
 import { WorkbenchOverview } from '../components/WorkbenchOverview';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
+import { useConceptCopy } from '../i18n/concept';
 import type { ProjectDocument, ProjectView, RunView } from '../types';
+
+/** The anchor the entry links from other chapters point at. */
+const CONCEPT_SECTION = 'concept-design';
 
 // Dimensionless coefficients keep a plain number input; lengths speak the
 // reader's unit while the project keeps metres. Each entry names the dictionary
@@ -253,6 +261,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // marker, the scroll position and the trace panel all live in the state below
   // and none of them is touched by a dictionary changing.
   const w = useWorkspaceCopy();
+  const c = useConceptCopy();
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
   const [chapter, setChapter] = useState<Chapter>('overview');
@@ -300,17 +309,23 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // request *explicitly* selects — the existing shared base stages plus the
   // studies the reader picked — rather than reporting none.
   const assembledStages = Array.isArray(performanceOptions.options.stages) ? (performanceOptions.options.stages as string[]) : [];
+  // The concept screen is requested only while the section exists, so a project
+  // that never enabled it keeps the old request defaults and the old results.
+  const conceptOn = conceptEnabled(draft);
+  const performanceWithConcept = conceptOn
+    ? { ...performanceOptions.options, stages: withDesignBalance(assembledStages, draft) }
+    : performanceOptions.options;
   const runOptions = floodingChoice.flooding
     ? {
-      ...performanceOptions.options,
+      ...performanceWithConcept,
       ...(floodingChoice.rho === null ? {} : { equilibrium: { ...equilibrium, rho_t_m3: floodingChoice.rho } }),
-      stages: [...assembledStages, 'flooding'],
+      stages: [...assembledStages, ...(conceptOn ? ['design_balance'] : []), 'flooding'],
       flooding: floodingChoice.flooding,
     }
-    : performanceOptions.options;
+    : performanceWithConcept;
   /** The stages this request will actually submit, read from the request itself. */
   const requestStages = runError
-    ? [...BASE_STAGES, ...requestedExtraStages(performanceRequest), ...(floodingRequest.scenario.trim() ? ['flooding'] : [])]
+    ? [...BASE_STAGES, ...requestedExtraStages(performanceRequest), ...(conceptOn ? ['design_balance'] : []), ...(floodingRequest.scenario.trim() ? ['flooding'] : [])]
     : Array.isArray(runOptions.stages) ? (runOptions.stages as string[]) : [];
   /** The field a followed diagnostic is waiting to focus, and its own ticket. */
   const [focusRequest, setFocusRequest] = useState<{ target: string; seq: number } | null>(null);
@@ -344,7 +359,35 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     return () => { alive.current = false; writeTicket.current += 1; loadTicket.current += 1; };
   }, []);
   const current = () => alive.current;
-  const busy = operation !== null;
+  /**
+   * The reviewed-batch apply, guarded at every asynchronous boundary.
+   *
+   * `applyTicket` retires a whole apply chain the moment a newer one starts or
+   * the page goes away; `applyInFlight` is what makes a double click physically
+   * unable to produce two revisions, because the second click finds an apply
+   * already in progress and returns without issuing a request.
+   *
+   * `revisionRef`, `conditionRef`, `optionsRef` and `draftGeneration` are the
+   * rest of the guard. An answer that arrives after the reader moved to another
+   * project, another revision, another condition, another request, or after they
+   * typed into the draft or into the raw JSON, is an answer to a question this
+   * page is no longer asking, and it is dropped at each await rather than
+   * written into whatever is on screen now.
+   */
+  const [applyState, setApplyState] = useState<ApplyState>(IDLE_APPLY);
+  const applyOwner = useRef(projectId);
+  const applyTicket = useRef(0);
+  const applyInFlight = useRef(false);
+  const revisionRef = useRef(view?.revision ?? -1);
+  revisionRef.current = view?.revision ?? -1;
+  const optionsKey = JSON.stringify(runOptions ?? {});
+  const optionsRef = useRef(optionsKey);
+  optionsRef.current = optionsKey;
+  const projectIdRef = useRef(projectId);
+  const contextGeneration = useRef(0);
+  if (projectIdRef.current !== projectId) contextGeneration.current += 1;
+  projectIdRef.current = projectId;
+  const busy = operation !== null || applyState.phase === 'applying' || applyState.phase === 'queueing';
   // The chapter reveal is a local one-shot keyed on the chapter itself. The
   // container is never re-keyed, so a hand-edited JSON document, the focused
   // control and the reader's selection all survive the switch untouched.
@@ -353,6 +396,11 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   useEffect(() => {
     let active = true;
     const mine = ++loadTicket.current;
+    writeTicket.current += 1;
+    applyTicket.current += 1;
+    applyInFlight.current = false;
+    setOperation(null);
+    setApplyState(IDLE_APPLY);
     setLoad('loading');
     setLoadError('');
     setError('');
@@ -657,6 +705,20 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     setChapter(next);
   }
 
+  /**
+   * The entry links from the chapters a concept design touches.
+   *
+   * Guns, machinery and performance are all places a reader reaches for when
+   * they want to *change* something the screen depends on, so each of them
+   * offers the way in. The jump is a view change and nothing else: no input is
+   * written, nothing is saved and the Workbench is never remounted.
+   */
+  function openConceptDesign() {
+    if (chapterRef.current !== 'weights') goChapter('weights');
+    focusTicket.current += 1;
+    setFocusRequest({ target: CONCEPT_SECTION, seq: focusTicket.current });
+  }
+
   function updateDraft(next: ProjectDocument) {
     draftGeneration.current += 1;
     setDraft(next);
@@ -755,7 +817,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   }
 
   async function save() {
-    if (!view || !draft || !dirty || operation) return;
+    if (!view || view.project_id !== projectId || !draft || !dirty || operation || applyInFlight.current) return;
     const submittedGeneration = draftGeneration.current;
     const ticket = ++writeTicket.current;
     const mine = () => current() && writeTicket.current === ticket;
@@ -792,7 +854,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   }
 
   async function reload() {
-    if (operation) return;
+    if (operation || applyInFlight.current) return;
     if (jsonEditedRef.current) { setError(w => w('workbench.reload.unapplied')); return; }
     const submittedGeneration = draftGeneration.current;
     const ticket = ++writeTicket.current;
@@ -818,21 +880,142 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   }
 
   async function run() {
-    if (!view || !conditionId || dirty || jsonEditedRef.current || runError || operation) return;
+    if (!view || !conditionId || dirty || jsonEditedRef.current || runError || operation || applyInFlight.current) return;
+    if (view.project_id !== projectId) return;
     const ticket = ++writeTicket.current;
     const mine = () => current() && writeTicket.current === ticket;
+    const scope = { projectId, revision: view.revision, conditionId, options: optionsRef.current,
+      context: contextGeneration.current, generation: draftGeneration.current };
+    const unchanged = () => projectIdRef.current === scope.projectId
+      && revisionRef.current === scope.revision && conditionRef.current === scope.conditionId
+      && optionsRef.current === scope.options && contextGeneration.current === scope.context
+      && draftGeneration.current === scope.generation && !jsonEditedRef.current;
     setOperation('starting');
     setError('');
     try {
       const queued = await api.enqueueRun(projectId, { revision: view.revision, condition_id: conditionId, options: runOptions });
-      // The queueing succeeded and this page is still the one that asked, so the
-      // run it created is the destination. A page that has since been left does
-      // not navigate anywhere.
-      if (!mine()) return;
+      // The queue entry stands even if the reader has moved on; only the page
+      // that still shows its submitted context follows the delayed answer.
+      if (!mine() || !unchanged()) return;
       expectRunResult(queued.id);
       onRun(queued.id);
-    } catch (cause) { if (mine()) { setError(w => errorMessage(w, cause)); outcome('hold'); } }
+    } catch (cause) { if (mine() && unchanged()) { setError(w => errorMessage(w, cause)); outcome('hold'); } }
     finally { if (mine()) setOperation(null); }
+  }
+
+  /**
+   * Apply a reviewed batch and recompute it, as one guarded operation.
+   *
+   * Three things are deliberately separate. The *save* is the change: once the
+   * server has written the new revision it is real, and nothing afterwards —
+   * including a failed re-run — is described as undoing it. The *recompute* is a
+   * convenience that re-queues the very same options against the new revision;
+   * if it fails the reader is told the save stands and offered the run again.
+   * And the *navigation* to the new run only happens while this page is still
+   * the page that asked, so a late enqueue cannot drag the reader onto a
+   * calculation for a project, revision, condition or request they have left.
+   */
+  async function applyProposals(proposals: Array<Record<string, unknown>>) {
+    // One apply at a time. A second click returns without issuing anything.
+    if (applyInFlight.current) return;
+    const source = selectedRun;
+    if (!view || view.project_id !== projectId || !source || !conditionId || dirty || jsonEditedRef.current || proposals.length === 0 || operation || runError) return;
+    if (source.revision !== view.revision || source.condition_id !== conditionId) return;
+    if (!requestOptionsMatch(source, runOptions)) return;
+    applyInFlight.current = true;
+    applyOwner.current = projectId;
+    const ticket = ++applyTicket.current;
+    const baseline = {
+      projectId, revision: view.revision, conditionId,
+      optionsKey: optionsRef.current, generation: draftGeneration.current, context: contextGeneration.current,
+    };
+    const matches = () => alive.current && applyTicket.current === ticket
+      && projectIdRef.current === baseline.projectId
+      && revisionRef.current === baseline.revision
+      && conditionRef.current === baseline.conditionId
+      && optionsRef.current === baseline.optionsKey
+      && draftGeneration.current === baseline.generation
+      && contextGeneration.current === baseline.context
+      && !jsonEditedRef.current;
+    setApplyState({ phase: 'applying', revision: null, reason: null });
+    try {
+      let saved: Awaited<ReturnType<typeof api.applyMassProposals>>;
+      try {
+        saved = await api.applyMassProposals(projectId, {
+          base_revision: baseline.revision, run_id: source.id, condition_id: baseline.conditionId,
+          current_options: runOptions as Record<string, unknown>, proposals,
+        });
+      } catch (cause) {
+        if (!matches()) return;
+        if (cause instanceof api.ApiError && cause.status === 409) {
+          const detail = cause.detail as { current_revision?: number };
+          setApplyState({ phase: 'conflict', revision: detail.current_revision ?? null, reason: null });
+        } else {
+          setApplyState({ phase: 'failed', revision: null, reason: errorMessage(w, cause) });
+        }
+        return;
+      }
+      if (!matches()) {
+        // The save happened, but this page is no longer the page that asked for
+        // it. The newer draft is the reader's and is left alone; the known
+        // revision is raised so the ordinary conflict notice offers a reload
+        // instead of pretending the page and the server still agree.
+        if (alive.current && projectIdRef.current === baseline.projectId && applyTicket.current === ticket) {
+          setConflict(saved.revision);
+        }
+        return;
+      }
+      setView(saved);
+      revisionRef.current = saved.revision;
+      setDraft(structuredClone(saved.project));
+      setDirty(false);
+      setConflict(null);
+      setFieldErrors([]);
+      setRunsAttempt(value => value + 1);
+      outcome('resolve');
+      // Re-baseline: the revision this page is now looking at is the saved one,
+      // and the request it will re-queue is the same one it just applied.
+      const next = { ...baseline, revision: saved.revision, generation: draftGeneration.current };
+      const stillCurrent = () => alive.current && applyTicket.current === ticket
+        && projectIdRef.current === next.projectId
+        && revisionRef.current === next.revision
+        && conditionRef.current === next.conditionId
+        && optionsRef.current === next.optionsKey
+        && draftGeneration.current === next.generation
+        && contextGeneration.current === next.context
+        && !jsonEditedRef.current;
+      setApplyState({ phase: 'queueing', revision: saved.revision, reason: null });
+      try {
+        const queued = await api.enqueueRun(projectId, {
+          revision: saved.revision, condition_id: baseline.conditionId,
+          options: runOptions as Record<string, unknown>,
+        });
+        if (!stillCurrent()) return;
+        setApplyState({ phase: 'saved', revision: saved.revision, reason: null });
+        expectRunResult(queued.id);
+        onRun(queued.id);
+      } catch (cause) {
+        if (!stillCurrent()) return;
+        // The batch is saved. Only the recompute failed, and it is reported as
+        // exactly that, with the run offered again.
+        setApplyState({ phase: 'queueFailed', revision: saved.revision, reason: errorMessage(w, cause) });
+      }
+    } finally {
+      // Released whatever happened, so a failed apply cannot leave the panel
+      // permanently disabled. A newer apply owns the flag by then and is not
+      // released by this one.
+      if (applyTicket.current === ticket) {
+        applyInFlight.current = false;
+        if (alive.current) setApplyState(previous => previous.phase === 'applying' || previous.phase === 'queueing' ? IDLE_APPLY : previous);
+      }
+    }
+  }
+
+  /** Run the saved revision again with the options now on screen. */
+  function rerunAfterApply() {
+    if (!view || !conditionId || dirty || jsonEditedRef.current) return;
+    if (applyInFlight.current) return;
+    void run();
   }
 
   function applyJson() {
@@ -857,7 +1040,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
 
   // A project that never loaded is its own content: the reason, one explicit
   // retry, and the real way back to the library. There is no skeleton behind it.
-  if (!draft || !view) return <div className="page-pad"><p className="section-kicker">WORKSPACE / {w(load === 'failed' ? 'workbench.load.kickerFailed' : 'workbench.load.kickerLoading')}</p>
+  if (!draft || !view || view.project_id !== projectId) return <div className="page-pad"><p className="section-kicker">WORKSPACE / {w(load === 'failed' ? 'workbench.load.kickerFailed' : 'workbench.load.kickerLoading')}</p>
   {load === 'failed'
     ? <ReadFailure title={w('workbench.load.failed', { id: projectId })} detail={loadError} onRetry={() => setAttempt(current => current + 1)} onBack={onBack} backLabel={w('workbench.load.back')} />
     : <ReadPending scope="workbench" object={w('workbench.load.pending')} />}</div>;
@@ -868,6 +1051,10 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // run: a stale or in-flight result must never be displayed for the current
   // revision/condition.
   const selectedRun = currentRun(runResult, projectId, view.revision, conditionId, dirty || jsonEdited);
+  // The reviewed proposals belong to exactly this saved result; a different
+  // revision, condition or run retires the reader's selection along with it.
+  const proposalIdentity = resultIdentity(selectedRun, projectId, view.revision, conditionId);
+  const proposalRequestCurrent = !runError && requestOptionsMatch(selectedRun, runOptions);
   // History and result are two different things from two different runs: the
   // guarded result above is what the saved revision may present, and the owned
   // previous check below is what the reader still needs after a save.
@@ -885,7 +1072,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
         <div className="operation-bar">
           <div className="operation-identity">
             <label htmlFor="condition">{w('workbench.condition.label')}</label>
-            <select id="condition" value={conditionId} onChange={event => setConditionId(event.target.value)}>
+            <select id="condition" value={conditionId} onChange={event => {
+              contextGeneration.current += 1; conditionRef.current = event.target.value; setConditionId(event.target.value);
+            }}>
               {draft.loading_conditions.length === 0 ? <option value="">{w('workbench.condition.none')}</option>
                 : draft.loading_conditions.map(item => <option key={item.id} value={item.id}>{item.label || item.id}</option>)}
             </select>
@@ -973,9 +1162,11 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
         {chapter === 'performance' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.resistance')} note={w('editor.group.resistance.note')} />
           <ResistanceEditor project={draft} onChange={updateDraft} /></section>}
         {chapter === 'performance' && <section className="editor-section" id={REQUEST_PERFORMANCE} tabIndex={-1}><InputGroup index="03" title={w('editor.group.request')} note={w('editor.group.request.note')} />
-          <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={setPerformanceRequest} /></section>}
+          <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={next => {
+            contextGeneration.current += 1; setPerformanceRequest(next);
+          }} /></section>}
         {chapter === 'performance' && <section className="editor-section"><InputGroup index="04" title={w('editor.group.results')} note={w('editor.group.results.note')} />
-          <PerformanceResults run={selectedRun} /></section>}
+          <PerformanceResults run={selectedRun} /><ConceptDesignLink label={c('balance.title')} onOpen={openConceptDesign} /></section>}
         {chapter === 'weights' && <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}><InputGroup index="01" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
           {draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>{w('editor.ledger.empty.title')}</h3><p>{w('editor.ledger.empty.text')}</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{w('editor.ledger.items', { count: group.items.length })}</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
             // An entry with no id of its own still needs a name on screen; the
@@ -998,13 +1189,27 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
                 <label>{w('editor.ledger.source')}<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
               </TracedField></div>;
           })}</div></div>)}</section>}
-        {chapter === 'weights' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.massModel')} note={w('editor.group.massModel.note')} /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'weights' && <section className="editor-section" id={CONCEPT_SECTION} tabIndex={-1}><InputGroup index="02" title={c('concept.enable')} note={c('concept.enableHint')} />
+          <ConceptDesignEditor project={draft} onChange={updateDraft} />
+          <DesignBalanceDiagnostics run={selectedRun} />
+        </section>}
+        {chapter === 'weights' && <section className="editor-section"><InputGroup index="03" title={c('proposals.title')} note={c('proposals.order')} />
+          <MassProposalPanel run={proposalRequestCurrent ? selectedRun : null} identity={`${proposalIdentity}|${optionsKey}`} dirty={dirty || jsonEdited}
+            requestChanged={!!selectedRun && !proposalRequestCurrent}
+            apply={applyOwner.current === projectId ? applyState : IDLE_APPLY} onApply={applyProposals} onRerun={rerunAfterApply} />
+        </section>}
+        {chapter === 'weights' && <section className="editor-section"><InputGroup index="04" title={w('editor.group.massModel')} note={w('editor.group.massModel.note')} /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'weights' && <section className="editor-section"><InputGroup index="05" title={c('balance.title')} note={c('balance.intro')} />
+          <DesignBalanceResults run={selectedRun} available={conceptOn && !dirty && !jsonEdited} />
+        </section>}
         {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.endpoints')} note={w('editor.group.endpoints.note')} /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.advanced')} note={w('editor.json.advancedText')} label={w('editor.json.label')} /></section>}
-        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.guns')} note={w('editor.group.guns.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.systems')} note={w('editor.json.systemsText')} label={w('editor.json.label')} /></section>}
+        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.guns')} note={w('editor.group.guns.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><ConceptDesignLink label={c('concept.enable')} onOpen={openConceptDesign} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.systems')} note={w('editor.json.systemsText')} label={w('editor.json.label')} /></section>}
         {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.weapons')} note={w('editor.group.weapons.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.weapons')} note={w('editor.json.weaponsText')} label={w('editor.json.label')} /></section>}
         {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.armour')} /><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.propulsion')} /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'damage' && <section className="editor-section" id={REQUEST_DAMAGE} tabIndex={-1}><InputGroup index="01" title={w('editor.group.damage')} note={w('editor.group.damage.note')} /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={setFloodingRequest} requestError={floodingChoice.error} /></section>}
+        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.propulsion')} /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /><ConceptDesignLink label={c('concept.group.machinery')} onOpen={openConceptDesign} /></section>}
+        {chapter === 'damage' && <section className="editor-section" id={REQUEST_DAMAGE} tabIndex={-1}><InputGroup index="01" title={w('editor.group.damage')} note={w('editor.group.damage.note')} /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={next => {
+          contextGeneration.current += 1; setFloodingRequest(next);
+        }} requestError={floodingChoice.error} /></section>}
         {chapter === 'damage' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.damageAdvanced')} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.damage')} note={w('editor.json.damageText')} label={w('editor.json.damageLabel')} /></section>}
         {chapter === 'json' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.projectJson')} note={w('editor.group.projectJson.note')} /><p className="section-intro">{w('editor.json.projectIntro')}</p><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary="" note="" label={w('editor.json.projectLabel')} /></section>}
       </div>

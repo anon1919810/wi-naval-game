@@ -64,13 +64,40 @@ const STATUS_REASON: Record<string, WorkspaceKey> = {
   model_limit: 'reading.reason.modelLimit', failed: 'reading.reason.failed', canceled: 'reading.reason.canceled',
 };
 
+/** One saved scalar of one stage, projected only through the stage gate. */
+type ScalarSpec = { key: string; stage: string; label: WorkspaceKey; dimension: Dimension; storedUnit: string; path: string };
+
+/** The stage that carries both nested results, and so gates both readings. */
+const HYDROSTAGE = 'hydrostatics';
+
+/**
+ * The upright geometric GM, declared once so the report list and every other
+ * surface that shows it cannot drift apart: the same spec, and so the same
+ * requested/completed gate, everywhere.
+ */
+const UPRIGHT_GM: ScalarSpec = { key: 'hydrostatics.gm_t_m', stage: HYDROSTAGE, label: 'reading.gm', dimension: 'length', storedUnit: 'm', path: 'values.gm_t_m' };
+
 /** The only saved paths the first-screen readings are allowed to read. */
-const SCALARS: Array<{ key: string; stage: string; label: WorkspaceKey; dimension: Dimension; storedUnit: string; path: string }> = [
+const SCALARS: ScalarSpec[] = [
   { key: 'loading.total_mass_t', stage: 'loading', label: 'reading.mass', dimension: 'mass', storedUnit: 't', path: 'values.total_mass_t' },
   { key: 'equilibrium.waterline_above_keel_m', stage: 'equilibrium', label: 'reading.waterline', dimension: 'length', storedUnit: 'm', path: 'waterline_above_keel_m' },
   { key: 'equilibrium.heel_deg', stage: 'equilibrium', label: 'reading.heel', dimension: 'angle', storedUnit: 'deg', path: 'heel_deg' },
-  { key: 'hydrostatics.gm_t_m', stage: 'hydrostatics', label: 'reading.gm', dimension: 'length', storedUnit: 'm', path: 'values.gm_t_m' },
+  UPRIGHT_GM,
 ];
+
+/**
+ * The two metacentric heights are separate readings of separate saved paths.
+ *
+ * `values.gm_t_m` is the upright geometric KM minus the effective KG and is
+ * null by definition for an inclined or contacting state. The equilibrium
+ * equivalent GM is the restoring slope the core solved at the free-trim
+ * equilibrium heel, saved under `small_angle_stability`. Neither number stands
+ * in for the other: an old saved result simply has no second reading, and the
+ * first keeps the meaning it always had.
+ */
+export const EQUILIBRIUM_GM_KEY = 'hydrostatics.small_angle_stability.equilibrium_gm_m';
+/** The saved roll period. A scalar estimate, not a full dynamic solution. */
+export const ROLL_PERIOD_KEY = 'hydrostatics.loaded_roll.period_s';
 
 function stageOf(result: AnalysisResult | null | undefined, name: string): StageEnvelope | null {
   const stage = object(object(result?.stages)[name]);
@@ -111,6 +138,100 @@ function scalarReason(language: SiteLanguage, field: string, raw: unknown): stri
 
 function stageContext(language: SiteLanguage, name: string): string {
   return workspaceCopy(language, 'reading.stageContext', { name: stageLabel(key => workspaceCopy(language, key), name) });
+}
+
+/** The stage's own context plus one sentence of saved-method explanation. */
+function notedContext(language: SiteLanguage, name: string, note: WorkspaceKey): string {
+  return workspaceCopy(language, 'reading.context.note', { context: stageContext(language, name), note: workspaceCopy(language, note) });
+}
+
+/**
+ * One nested result inside a stage that must itself be readable.
+ *
+ * Both the small-angle stability result and the loaded-roll study are saved
+ * under a stage of their own, so both are gated twice: the parent stage has to
+ * be requested and completed, and the nested result has to declare `completed`
+ * for itself. Either gate blocks the reading before a single field is touched,
+ * so a residual scalar inside a failed, unavailable, model-limited, cancelled
+ * or unrequested envelope never reaches the reader.
+ *
+ * A nested result the run never saved is `unknown` with its own reason. It is
+ * not a zero, not the parent stage's other scalar and not another run's value.
+ */
+function nestedReading(language: SiteLanguage, stage: StageEnvelope | null, spec: {
+  key: string; label: WorkspaceKey; nested: string; field: string; dimension?: Dimension; storedUnit?: string;
+  canonicalUnit?: string; note: WorkspaceKey; absent: WorkspaceKey;
+}): ReportReading {
+  const base: ReportReading = {
+    key: spec.key, stage: HYDROSTAGE, label: workspaceCopy(language, spec.label), value: null,
+    dimension: spec.dimension, storedUnit: spec.storedUnit, canonicalUnit: spec.canonicalUnit ?? spec.storedUnit,
+    state: 'unknown', reason: null, context: notedContext(language, HYDROSTAGE, spec.note),
+    source: null, estimate: null,
+  };
+  const access = stageAccess(stage, language);
+  if (!access.ok) return { ...base, state: access.state, reason: access.reason };
+  const study = object(readPath(object(access.stage.data), spec.nested));
+  const status = typeof study.status === 'string' ? study.status : null;
+  if (status === null) return { ...base, reason: workspaceCopy(language, spec.absent) };
+  const source = declaredSource(study.source);
+  const estimate = flag(study.estimate);
+  if (status !== 'completed') {
+    const label = workspaceCopy(language, STATUS_REASON[status] ?? STATUS_REASON.failed);
+    const saved = study.reason == null ? '' : String(study.reason);
+    // The nested stop reason is the core's saved text and stays verbatim; only
+    // the sentence around it is localized. Its number, if any, is never read.
+    return { ...base, state: STATUS_STATE[status] ?? 'failed', source, estimate,
+      reason: saved ? workspaceCopy(language, 'reading.reason.withReason', { label, reason: saved }) : label };
+  }
+  const raw = study[spec.field];
+  const value = number(raw);
+  // A finite negative and a genuine zero are results like any other; they are
+  // never folded into a positive number or into a safe-looking fallback.
+  if (value === null) return { ...base, reason: scalarReason(language, spec.field, raw), source, estimate };
+  return { ...base, state: 'known', value, reason: null, source, estimate };
+}
+
+/**
+ * The upright geometric GM, behind the same gate as every other reading.
+ *
+ * It is a plain saved scalar rather than a nested result, so it is exactly the
+ * one a surface is most likely to read straight out of `stage.data`. Exported so
+ * that the overview, the run and report readings and the performance results all
+ * answer for it through one projection: a hydrostatics stage that failed or was
+ * never requested cannot leak the value it happens to carry.
+ */
+export function uprightGmReading(language: SiteLanguage, stage: StageEnvelope | null): ReportReading {
+  return scalarReading(language, UPRIGHT_GM, stage);
+}
+
+/**
+ * The equilibrium equivalent GM of the saved small-angle stability result.
+ *
+ * Read only when hydrostatics completed and that nested result declared
+ * `completed`: a saved run that predates the nested result stays unknown with a
+ * missing-result reason instead of borrowing the upright GM.
+ */
+export function equilibriumGmReading(language: SiteLanguage, stage: StageEnvelope | null): ReportReading {
+  return nestedReading(language, stage, {
+    key: EQUILIBRIUM_GM_KEY, label: 'reading.equilibriumGm', nested: 'small_angle_stability',
+    field: 'equilibrium_gm_m', dimension: 'length', storedUnit: 'm',
+    note: 'reading.equilibriumGmNote', absent: 'reading.reason.noSmallAngle',
+  });
+}
+
+/**
+ * The saved roll period, or the saved reason there is none.
+ *
+ * The eligibility behind an unavailable period — trim, an inertia axis, a
+ * sourced gyration coefficient, the sign of the restoring slope — is the
+ * core's decision and is never re-made here. Seconds have no convertible reader
+ * unit, exactly like the nmi of a steady range.
+ */
+export function rollPeriodReading(language: SiteLanguage, stage: StageEnvelope | null): ReportReading {
+  return nestedReading(language, stage, {
+    key: ROLL_PERIOD_KEY, label: 'reading.rollPeriod', nested: 'loaded_roll', field: 'period_s',
+    canonicalUnit: 's', note: 'reading.rollPeriodNote', absent: 'reading.reason.noLoadedRoll',
+  });
 }
 
 function scalarReading(language: SiteLanguage, spec: typeof SCALARS[number], stage: StageEnvelope | null): ReportReading {
@@ -216,10 +337,15 @@ export function requestedStages(result: AnalysisResult | null | undefined): Arra
     .map(entry => ({ name: entry.name, stage: entry.stage }));
 }
 
-/** The six first-screen readings, in a fixed reading order, in one language. */
+/** The first-screen readings, in a fixed reading order, in one language. */
 export function reportReadings(result: AnalysisResult | null | undefined, language: SiteLanguage): ReportReading[] {
   const readings: ReportReading[] = [];
   for (const spec of SCALARS) readings.push(scalarReading(language, spec, stageOf(result, spec.stage)));
+  // The equilibrium GM and the roll period sit beside the upright GM they
+  // accompany: same stage, same gate, their own saved paths.
+  const hydrostatics = stageOf(result, HYDROSTAGE);
+  readings.push(equilibriumGmReading(language, hydrostatics));
+  readings.push(rollPeriodReading(language, hydrostatics));
   readings.push(powerReading(language, stageOf(result, 'resistance')));
   readings.push(enduranceReading(language, stageOf(result, 'endurance')));
   return readings;
