@@ -1,0 +1,650 @@
+/* =========================================================================
+   Clear liquid glass — Formfield / Plimsoll
+   -------------------------------------------------------------------------
+   One material, applied through scoped adapters. This file adds no markup, no
+   component, no behaviour and no JavaScript: every rule below changes a
+   background, a rim, a shadow, a corner radius or a hover response on a surface
+   that already exists. Layout, hit-target dimensions, absolute and sticky
+   positioning, z-index, event handlers, routes and data are all untouched.
+
+   The material is CSS clear glass, not refraction: a near-transparent body at the
+   approved 92 % transmission tint (0.077), the soft 16 px Gaussian backdrop blur,
+   a narrow polished rim on the upper and side edges, a lower inner shadow and a
+   contact shadow. There is no milky white face anywhere, and no whole-page
+   filter, opacity change, SVG filter, WebGL, `transition: all`, perpetual motion
+   or animated blur.
+
+   Five rules hold the module together:
+
+   - **Blur lives on bounded surfaces only.** A backdrop filter is bought once, on
+     a header, a toolbar, a picker or the rail plate. Controls *inside* one of
+     those surfaces take a transparent fill, a rim and a shadow — never a second
+     filter.
+   - **Glass is additive.** A surface that was a reading surface (report prose,
+     editor fields, tables, dense lists) keeps its own paper. Nothing here blankets
+     a field, a table, or the giant editorial type of the public pages, and no
+     semantic error or warning surface is ever a glass target: the material tokens
+     are all `--ff-glass-*`, so they cannot be mistaken for `--error` / `--warning`
+     and cannot repaint a destructive or warning control's meaning.
+   - **Nothing changes size.** The rim is an *inset* shadow, so it can never grow a
+     surface outward; a control's border is made transparent rather than removed,
+     so its border box keeps its exact width; and a corner radius rounds an
+     existing box without moving a pixel of type. The radii below are the
+     prototype's polished rounded controls (11–12 px) and its larger surfaces
+     (16–18 px). The workspace's blanket `border-radius: 0` is undone for exactly
+     the four components listed below and for nothing else.
+   - **Every workspace adapter outranks the rule it has to beat.** See "Workspace
+     adapters" below: `workspace.css`'s flattening selector is `(0,2,1)`, not
+     `(0,2,0)`, and the material is specified at `(0,3,1)` everywhere so that the
+     result never depends on a source-order tie.
+   - **Nothing decorative is interactive and nothing animated is taken over.**
+     Every layer added here is `pointer-events: none`, and the pseudo-elements the
+     site already animates (`ff-board-picker button::after`, `ff-rail-word::after`,
+     `ff-title-action::after`, the reveal layers) are never written to.
+
+   The tokens are scoped to the three shells that own a surface — `.ff-shell`
+   (public), `.app-shell` and `.ff-tool-shell` (workspace) — plus the root
+   `data-formfield-surface='app'` state, so the application header that renders
+   before the workspace chunk arrives already has the material. The two standalone
+   `ff-glass-*` utility recipes carry the same token block, so applying a recipe
+   outside those shells still resolves every value it reads.
+   ========================================================================= */
+
+
+/* -------------------------------------------------------------------------
+   Material tokens
+   ------------------------------------------------------------------------- */
+
+:root[data-formfield-surface='app'],
+.ff-tool-shell,
+.app-shell,
+.ff-shell,
+.ff-glass-surface,
+.ff-glass-button {
+  /* The approved clear preset. 92 % transmission: the *body* of a glass surface
+     is almost nothing, and that is the point — thickness is expressed by the
+     edge, never by filling the face. */
+  --ff-glass-blur: 16px;
+  --ff-glass-sat: 1.28;
+  --ff-glass-rim: .55;
+  /* The clear preset's own surface tint: 0.077 over the page. */
+  --ff-glass-tint: .077;
+  /* A bounded host — the sticky header, the sticky operation bar, the exhibit's
+     reference picker — carries a little more body than a standalone control
+     because real content moves underneath it. Still clear, still glass: this is
+     the lower end of the readable band, and legibility is judged in a browser,
+     not by adding white. */
+  --ff-glass-scrim: .18;
+  /* The rail plate is the quietest of the three: the words on it are 74–110 px and
+     the plate mostly sits over flat page colour rather than over text. */
+  --ff-glass-plate: .1;
+  --ff-glass-tint-rgb: 255, 255, 255;
+  --ff-glass-rim-rgb: 255, 255, 255;
+
+  /* Corner radii, from the source prototype: rounded polished controls, and
+     larger radii for the larger surfaces. A radius rounds the box that is
+     already there; it moves no glyph and changes no hit target. */
+  --ff-glass-radius-control: 11px;
+  --ff-glass-radius-icon: 12px;
+  --ff-glass-radius-surface: 18px;
+  --ff-glass-radius-plate: 16px;
+
+  --ff-glass-dur: 180ms;
+  --ff-glass-ease: cubic-bezier(.2, .7, .3, 1);
+
+  /* Edge and depth. Every one is prefixed, so none of them can be mistaken for
+     one of the shells' own brand or semantic tokens. */
+  --ff-glass-edge-top: rgba(255, 255, 255, .92);
+  --ff-glass-edge-top-hi: rgba(255, 255, 255, 1);
+  --ff-glass-edge-top-down: rgba(255, 255, 255, .55);
+  --ff-glass-edge-inner: rgba(26, 34, 48, .14);
+  --ff-glass-contact: 0 1px 1px rgba(24, 32, 44, .12);
+  --ff-glass-lift: 0 10px 20px -14px rgba(24, 32, 44, .42);
+  --ff-glass-drop: 0 26px 50px -28px rgba(24, 32, 44, .5), 0 2px 8px -5px rgba(24, 32, 44, .2);
+
+  /* The curved highlight: a bright arc held to the upper-left edge by the
+     gradient's own falloff, so the face of a control stays transparent and the
+     light stays on the rim. Declared once and replaced whole in the dark theme. */
+  --ff-glass-face: radial-gradient(130% 100% at 4% -6%, rgba(255, 255, 255, .5) 0%, rgba(255, 255, 255, .14) 34%, rgba(255, 255, 255, 0) 62%);
+  --ff-glass-over: inset 0 7px 9px -9px rgba(255, 255, 255, .5);
+  --ff-glass-sheen: linear-gradient(0deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 16%), radial-gradient(120% 80% at 18% 108%, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 58%);
+
+  /* The rim is an *inset* shadow, so it can never grow a surface outward. */
+  --ff-glass-rim-line: inset 0 0 0 1px rgba(var(--ff-glass-rim-rgb), calc(var(--ff-glass-rim) * .55));
+  --ff-glass-rim-line-hi: inset 0 0 0 1px rgba(var(--ff-glass-rim-rgb), calc(var(--ff-glass-rim) * .95));
+  --ff-glass-rim-line-down: inset 0 0 0 1px rgba(var(--ff-glass-rim-rgb), calc(var(--ff-glass-rim) * .48));
+  --ff-glass-top-line: inset 0 1px 0 var(--ff-glass-edge-top);
+  --ff-glass-foot-line: inset 0 -1px 0 rgba(var(--ff-glass-rim-rgb), calc(var(--ff-glass-rim) * .22));
+  --ff-glass-under: inset 0 -8px 12px -9px var(--ff-glass-edge-inner);
+
+  /* Panel thickness: rim, upper edge, lower edge, lower inner shadow, contact. */
+  --ff-glass-panel-stack:
+    var(--ff-glass-rim-line), var(--ff-glass-top-line), var(--ff-glass-foot-line),
+    var(--ff-glass-under), var(--ff-glass-contact), var(--ff-glass-drop);
+  --ff-glass-panel-hover-stack:
+    var(--ff-glass-rim-line-hi), var(--ff-glass-top-line), var(--ff-glass-foot-line),
+    inset 0 -9px 14px -10px var(--ff-glass-edge-inner),
+    var(--ff-glass-contact), var(--ff-glass-lift);
+
+  /* Control thickness: the same structure, tighter, with the short lift that says
+     a control stands a little above the page. */
+  --ff-glass-control-stack:
+    var(--ff-glass-rim-line), var(--ff-glass-top-line), var(--ff-glass-foot-line),
+    var(--ff-glass-under), var(--ff-glass-over), var(--ff-glass-contact), var(--ff-glass-lift);
+  --ff-glass-control-hover-stack:
+    var(--ff-glass-rim-line-hi), inset 0 1.5px 0 var(--ff-glass-edge-top-hi),
+    var(--ff-glass-foot-line), inset 0 -9px 14px -10px var(--ff-glass-edge-inner),
+    var(--ff-glass-over), var(--ff-glass-contact), var(--ff-glass-lift);
+  /* Pressed: the top light dims, the inner shadow gathers and the lift collapses,
+     so a press that happens while hovered still reads as a press. */
+  --ff-glass-control-down-stack:
+    var(--ff-glass-rim-line-down), inset 0 1px 0 var(--ff-glass-edge-top-down),
+    inset 0 -1px 0 rgba(var(--ff-glass-rim-rgb), .14),
+    inset 0 -5px 9px -7px var(--ff-glass-edge-inner),
+    inset 0 6px 8px -9px rgba(255, 255, 255, .35),
+    var(--ff-glass-contact);
+}
+
+/* Dark: the rim stays fine and clear while the thickness moves into the inner and
+   contact shadows, which is where a dark surface can carry it without going milky.
+   Bound to the two conventions this site actually uses — the public shell's own
+   `data-ff-theme`, and the root `data-theme` the application sets — plus the
+   standalone recipes, which follow the same root theme as everything else. */
+:root[data-theme='dark'] :is(.ff-tool-shell, .app-shell),
+:root[data-formfield-surface='app'][data-theme='dark'],
+:root[data-theme='dark'] :is(.ff-glass-surface, .ff-glass-button),
+.ff-shell[data-ff-theme='dark'] {
+  --ff-glass-sat: 1.16;
+  --ff-glass-rim: .16;
+  --ff-glass-scrim: .24;
+  --ff-glass-plate: .12;
+  --ff-glass-tint-rgb: 30, 33, 39;
+
+  --ff-glass-edge-top: rgba(255, 255, 255, .46);
+  --ff-glass-edge-top-hi: rgba(255, 255, 255, .62);
+  --ff-glass-edge-top-down: rgba(255, 255, 255, .24);
+  --ff-glass-edge-inner: rgba(0, 0, 0, .44);
+  --ff-glass-contact: 0 1px 1px rgba(0, 0, 0, .55);
+  --ff-glass-lift: 0 12px 22px -14px rgba(0, 0, 0, .68);
+  --ff-glass-drop: 0 30px 56px -30px rgba(0, 0, 0, .78), 0 2px 8px -5px rgba(0, 0, 0, .5);
+
+  --ff-glass-face: radial-gradient(130% 100% at 4% -6%, rgba(255, 255, 255, .26) 0%, rgba(255, 255, 255, .07) 34%, rgba(255, 255, 255, 0) 64%);
+  --ff-glass-over: inset 0 7px 9px -9px rgba(255, 255, 255, .12);
+  --ff-glass-sheen: linear-gradient(0deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, 0) 18%), radial-gradient(120% 80% at 18% 108%, rgba(255, 255, 255, .06), rgba(255, 255, 255, 0) 60%);
+
+  --ff-glass-control-down-stack:
+    var(--ff-glass-rim-line-down), inset 0 1px 0 var(--ff-glass-edge-top-down),
+    inset 0 -1px 0 rgba(var(--ff-glass-rim-rgb), .1),
+    inset 0 -5px 9px -7px var(--ff-glass-edge-inner),
+    inset 0 6px 8px -9px rgba(255, 255, 255, .08),
+    var(--ff-glass-contact);
+}
+
+
+/* -------------------------------------------------------------------------
+   Reusable recipe 1 — a bounded surface (one backdrop filter)
+   -------------------------------------------------------------------------
+   A surface that filters its backdrop is a *host*: it has edges, it has a bounded
+   height, and nothing inside it filters again. `.ff-glass-surface` is the recipe;
+   the adapters listed beside it are the same declarations pointed at the hosts
+   this site already renders.
+   ------------------------------------------------------------------------- */
+
+.ff-glass-surface,
+:root .app-shell :is(.site-header, .workbench-toolbar),
+.ff-shell .ff-board-picker {
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-scrim));
+  background-image: var(--ff-glass-sheen);
+  border-radius: var(--ff-glass-radius-icon);
+  box-shadow: var(--ff-glass-panel-stack);
+  -webkit-backdrop-filter: blur(var(--ff-glass-blur)) saturate(var(--ff-glass-sat));
+  backdrop-filter: blur(var(--ff-glass-blur)) saturate(var(--ff-glass-sat));
+}
+/* The lighter of the two bounded tints, for a host whose content underneath is
+   page colour rather than text. */
+.ff-glass-surface--plate { background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-plate)); }
+/* A host that also carries a decorative layer needs a positioning context. It is
+   a separate recipe on purpose: asking for the material must never be what gives
+   an element a positioning context. */
+.ff-glass-surface--layer { position: relative; }
+/* A host flush against another, with no drop shadow and a larger radius. */
+.ff-glass-surface--flush {
+  border-radius: var(--ff-glass-radius-surface);
+  box-shadow: var(--ff-glass-rim-line), var(--ff-glass-top-line), var(--ff-glass-foot-line), var(--ff-glass-under);
+}
+
+
+/* -------------------------------------------------------------------------
+   Reusable recipe 2 — a standalone control (no backdrop filter)
+   -------------------------------------------------------------------------
+   A control gets the same thickness as a panel from a transparent fill, a rim, a
+   rounded edge and a shadow. It never filters its own backdrop: a 44 px target
+   inside a blurred bar is the one combination that costs the most and shows the
+   least. `.ff-glass-button` is the recipe; the adapters beside it are the same
+   declarations pointed at the controls this site already renders.
+
+   `border-color: transparent` rather than `border: 0`: the border box keeps its
+   exact width, and the rim — drawn inside it — becomes the only visible edge. The
+   hover borders `layout.css` puts on `.button--secondary` and `.icon-button` are
+   cancelled in the hover block below for the same reason, so a second hairline can
+   never appear beside the rim.
+
+   The workspace adapter is `:root .app-shell :is(.button, .icon-button):is(button,
+   a)` — element-qualified, because `.button` is rendered as both a `<button>` and
+   an `<a>` (the report's JSON and CSV exports, and the failed-read back link). See
+   "Workspace adapters" for the specificity arithmetic.
+   ------------------------------------------------------------------------- */
+
+.ff-glass-button,
+:root .app-shell :is(.button, .icon-button):is(button, a),
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay),
+.ff-shell .ff-board-icon,
+.ff-shell .ff-board-picker button,
+.ff-shell .ff-lang-option[aria-pressed='true'] {
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-tint));
+  background-image: var(--ff-glass-face);
+  border-color: transparent;
+  border-radius: var(--ff-glass-radius-control);
+  box-shadow: var(--ff-glass-control-stack);
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    border-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease),
+    transform var(--ff-glass-dur) var(--ff-glass-ease),
+    color .16s;
+}
+/* The square icon targets carry the larger of the two control radii, because at
+   32–44 px a control reads from its corner curve rather than from its edge. */
+:root .app-shell :is(button, a).icon-button,
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay),
+.ff-shell .ff-board-icon {
+  border-radius: var(--ff-glass-radius-icon);
+}
+
+/* The selected chapter is the same material with one difference: its 2 px accent
+   edge and its 10 px left padding are the site's own answer to "which chapter am
+   I in", so nothing here removes them. */
+:root .app-shell :is(button, a).nav-item--active {
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-tint));
+  background-image: var(--ff-glass-face);
+  border-radius: var(--ff-glass-radius-control);
+  box-shadow: var(--ff-glass-control-stack);
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease),
+    transform var(--ff-glass-dur) var(--ff-glass-ease);
+}
+
+/* Hover. `:not(:disabled):not([aria-disabled='true'])` is what keeps a control
+   that cannot be pressed — disabled, or busy behind a disabled attribute, or
+   marked `aria-disabled` by the shared interaction module in `audio/feedback.ts`
+   — from lightening, lifting or re-rimming at all. Every hover and active rule
+   below carries the same guard, so a busy control is completely inert. */
+.ff-glass-button:hover:not(:disabled):not([aria-disabled='true']),
+:root .app-shell :is(.button, .icon-button):is(button, a):hover:not(:disabled):not([aria-disabled='true']),
+:root .app-shell :is(button, a).nav-item--active:hover:not(:disabled):not([aria-disabled='true']),
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):hover:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-board-icon:hover:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-board-picker button:hover:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-lang-option[aria-pressed='true']:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) + .15));
+  border-color: transparent;
+  box-shadow: var(--ff-glass-control-hover-stack);
+}
+/* The lift belongs only to a control that can actually be pressed. */
+.ff-glass-button:hover:not(:disabled):not([aria-disabled='true']),
+:root .app-shell :is(.button, .icon-button):is(button, a):hover:not(:disabled):not([aria-disabled='true']),
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):hover:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-board-icon:hover:not(:disabled):not([aria-disabled='true']) {
+  transform: translateY(-1px);
+}
+
+/* Pressed. Declared after hover at the same specificity, so a press that happens
+   while hovered still goes down instead of staying lifted. */
+.ff-glass-button:active:not(:disabled):not([aria-disabled='true']),
+:root .app-shell :is(.button, .icon-button):is(button, a):active:not(:disabled):not([aria-disabled='true']),
+:root .app-shell :is(button, a).nav-item--active:active:not(:disabled):not([aria-disabled='true']),
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):active:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-board-icon:active:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-board-picker button:active:not(:disabled):not([aria-disabled='true']),
+.ff-shell .ff-lang-option[aria-pressed='true']:active:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) - .02));
+  border-color: transparent;
+  box-shadow: var(--ff-glass-control-down-stack);
+  transform: translateY(1px);
+}
+
+/* Focus. The ring sits outside the rim so it is never read as part of the
+   material, and it is each shell's own accent rather than a new colour. */
+.ff-glass-button:focus-visible,
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay, .ff-board-icon, .ff-board-picker button, .ff-lang-option):focus-visible {
+  outline: 2px solid var(--ff-accent, var(--accent, #3857e7));
+  outline-offset: 2px;
+}
+:root .app-shell :is(.button, .icon-button, .nav-item--active, .template-card):is(button, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The primary action: the prototype's *clear* primary — a faint accent-tinted
+   body that stays in the light, with its label in the shell's own readable accent
+   ink (`--accent-hover`).
+   No opaque slab and no canvas-white label on a bright face. The tint is a tint:
+   it stains, it does not fill. A destructive or warning control keeps its own
+   semantic colour, because nothing here targets `--error` / `--warning` and the
+   glass recipes never apply to a `.notice`, a `.status-badge` or any diagnostic. */
+:root .app-shell :is(button, a).button:where(.button--primary) {
+  color: var(--accent-hover);
+  background-color: transparent;
+  background-image: var(--ff-glass-face), linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), color-mix(in srgb, var(--accent) 7%, transparent));
+  border-color: transparent;
+  box-shadow: var(--ff-glass-control-stack);
+}
+:root .app-shell :is(button, a).button:where(.button--primary):hover:not(:disabled):not([aria-disabled='true']) {
+  color: var(--accent-hover);
+  background-color: transparent;
+  background-image: var(--ff-glass-face), linear-gradient(180deg, color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--accent) 11%, transparent));
+  border-color: transparent;
+  box-shadow: var(--ff-glass-control-hover-stack);
+  transform: translateY(-1px);
+}
+:root .app-shell :is(button, a).button:where(.button--primary):active:not(:disabled):not([aria-disabled='true']) {
+  color: var(--accent-hover);
+  box-shadow: var(--ff-glass-control-down-stack);
+  transform: translateY(1px);
+}
+
+/* Keep the current chapter's accent edge during pointer feedback. */
+:root .app-shell :is(button, a).nav-item--active:is(:hover, :active):not(:disabled):not([aria-disabled='true']) {
+  border-left-color: var(--accent);
+}
+
+
+/* -------------------------------------------------------------------------
+   Public adapters
+   -------------------------------------------------------------------------
+   The public shell is typographic and restrained. The glass is confined to the
+   compact header controls, the exhibit's own controls, and a quiet plate behind
+   the rail navigation. The artwork, the reading pages, the ruler and the giant
+   editorial type are left exactly as they are.
+
+   Nothing here needs a bump: the only public-shell rule that flattens a control is
+   `.ff-shell button { border: 0; box-shadow: none; border-radius: 0 }` at (0,1,1),
+   which every adapter above already exceeds.
+   ------------------------------------------------------------------------- */
+
+/* The header's three geometric marks. Their existing `color` transition is kept
+   inside the new list rather than replaced by it, and the replay ring's rotation
+   stays on its own `svg`. */
+.ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay) {
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    border-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease),
+    transform var(--ff-glass-dur) var(--ff-glass-ease),
+    color .16s;
+}
+
+/* The exhibit's two icon controls and its reference picker. They are absolutely
+   positioned inside the exhibit and stay that way: no `position`, no `top`/`left`,
+   no size and no `z-index` is touched here — only the body, the radius and the
+   rim. */
+.ff-shell .ff-board-icon {
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    border-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease),
+    transform var(--ff-glass-dur) var(--ff-glass-ease),
+    color .16s;
+}
+.ff-shell .ff-board-picker {
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease);
+}
+
+/* The picker's children sit on the group's own single blur, so they take a
+   transparent fill and a rim and never a second filter. The reference under each
+   label — `ff-board-picker button::after`, which owns the site's own scale
+   transition — is not written to. */
+.ff-shell .ff-board-picker button {
+  background-color: transparent;
+  background-image: none;
+  box-shadow: inset 0 0 0 1px transparent;
+}
+.ff-shell .ff-board-picker button[aria-pressed='true'] {
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-tint));
+  background-image: var(--ff-glass-face);
+  box-shadow: var(--ff-glass-control-stack);
+}
+.ff-shell .ff-board-picker button:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) + .12));
+}
+.ff-shell .ff-board-picker button[aria-pressed='true']:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) + .15));
+  box-shadow: var(--ff-glass-control-hover-stack);
+}
+.ff-shell .ff-board-picker button[aria-pressed='true']:active:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) - .02));
+  box-shadow: var(--ff-glass-control-down-stack);
+}
+
+/* The language pair. Only the language in use is given a body, and it takes the
+   material through its own background and shadow — so the accent rule under the
+   word, which is `.ff-lang-option::after` and owns the site's own underline
+   motion, keeps animating exactly as before. */
+.ff-shell .ff-lang-option[aria-pressed='true'] {
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-tint));
+  background-image: var(--ff-glass-face);
+  box-shadow: var(--ff-glass-control-stack);
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    border-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease),
+    transform var(--ff-glass-dur) var(--ff-glass-ease),
+    color .16s;
+}
+
+/* The rail plate.
+   `position: relative` here adds one positioning context and nothing else: no
+   absolutely positioned descendant of `.ff-rail` resolves against it today, so
+   the word boxes, the underline measured from the first glyph, the `01` badge and
+   the reveal's clip-path circle are all untouched. The plate reaches *outward* on
+   the two sides only and takes no vertical breathing room at all, so it can meet
+   neither the header's hairline above nor the reading ruler below, and it cannot
+   overflow the shell's gutter — the smallest of which is 18 px. Its radius sits
+   entirely inside that 14 px of horizontal room, so no corner of the plate can
+   reach a glyph. It is `pointer-events: none`, so the rail keeps its own hit
+   areas. */
+.ff-shell .ff-rail { position: relative; }
+.ff-shell .ff-rail::before {
+  content: '';
+  position: absolute;
+  inset: 0 -14px;
+  z-index: 0;
+  border-radius: var(--ff-glass-radius-plate);
+  pointer-events: none;
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-plate));
+  box-shadow: var(--ff-glass-rim-line), var(--ff-glass-top-line), var(--ff-glass-foot-line),
+    inset 0 -12px 18px -16px var(--ff-glass-edge-inner), var(--ff-glass-contact), var(--ff-glass-drop);
+  -webkit-backdrop-filter: blur(var(--ff-glass-blur)) saturate(var(--ff-glass-sat));
+  backdrop-filter: blur(var(--ff-glass-blur)) saturate(var(--ff-glass-sat));
+}
+@media (max-width: 650px) {
+  .ff-shell .ff-rail::before { inset: 0 -6px; border-radius: 12px; }
+}
+
+
+/* -------------------------------------------------------------------------
+   Workspace adapters — and the specificity they are written at
+   -------------------------------------------------------------------------
+   The workspace is a dense Swiss tool: ruled rows, square corners, a reading
+   measure. The glass is confined to the primary controls, the selected chapter,
+   the two sticky bars and the template entry cards. Editor fields, table cells,
+   report prose and every other reading surface keep their own paper.
+
+   The rule these adapters have to beat is `workspace.css:78`:
+
+     .app-shell :is(.button, .icon-button, .nav-item, …, .comparison-meta > div)
+       { border-radius: 0; box-shadow: none }
+
+   `:is()` takes the specificity of its *most specific* argument, and
+   `.comparison-meta > div` is (0,1,1) — so the whole selector is **(0,2,1)**, and
+   it outranks every (0,2,0) adapter regardless of which file is loaded last. That
+   is why the material here is never written at (0,2,0).
+
+   Every workspace adapter below is written as
+
+     :root .app-shell :is(…):is(button, a)
+
+   which is `:root` (0,1,0) + `.app-shell` (0,1,0) + `:is()` class (0,1,0) +
+   `:is(button, a)` type (0,0,1) = **(0,3,1)** — one full step above the flattening
+   rule, so nothing here rests on a source-order tie. `:root` is a real ancestor of
+   the shell, so this costs no match. `:is(button, a)` is a real requirement rather
+   than padding: `.button` is rendered as a `<button>` *and* as an `<a>` (the
+   report's JSON and CSV exports, the failed-read back link), and a bare
+   `button.button` would silently miss the anchors.
+
+   State rules inherit the same base, so hover (0,6,1), pressed (0,6,1), focus
+   (0,4,1) and the reduced-motion and print resets all clear (0,2,1) too, and hover
+   still precedes pressed at equal specificity.
+
+   Only the components named here get a radius; every other element on
+   `workspace.css`'s flattening list keeps the square corners the workspace chose.
+   ------------------------------------------------------------------------- */
+
+/* The sticky bars. Both are bounded, both are positioned already, and neither
+   its `position` nor its `z-index` is touched. The operation bar keeps its own
+   hairline; the glass sits beneath it. */
+:root .app-shell :is(.site-header, .workbench-toolbar) {
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease);
+}
+
+/* Template entry cards. The four-column grid and the row rhythm are kept exactly;
+   the glass is a body, a rounded rim, an inner shadow and a contact shadow inside
+   the same border box, and no padding, border width or row height changes. The
+   card's own 1 px border is made transparent rather than removed — it still holds
+   the row apart — so the rounded rim is the only visible edge. The card is never
+   given a nested blur of its own. */
+:root .app-shell :is(button, a).template-card {
+  background-color: rgba(var(--ff-glass-tint-rgb), var(--ff-glass-tint));
+  background-image: var(--ff-glass-face);
+  border-bottom-color: transparent;
+  border-radius: var(--ff-glass-radius-surface);
+  box-shadow: var(--ff-glass-panel-stack);
+  transition: background-color var(--ff-glass-dur) var(--ff-glass-ease),
+    box-shadow var(--ff-glass-dur) var(--ff-glass-ease),
+    transform var(--ff-glass-dur) var(--ff-glass-ease);
+}
+:root .app-shell :is(button, a).template-card:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) + .15));
+  box-shadow: var(--ff-glass-panel-hover-stack);
+  transform: translateY(-2px);
+}
+:root .app-shell :is(button, a).template-card:active:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgba(var(--ff-glass-tint-rgb), calc(var(--ff-glass-tint) - .02));
+  box-shadow: var(--ff-glass-control-down-stack);
+  transform: translateY(0);
+}
+
+
+/* -------------------------------------------------------------------------
+   Unsupported backdrop filtering
+   -------------------------------------------------------------------------
+   Without a filter there is no transmission, so a host that leans on the filter
+   for its readability is given an opaque paper instead. Controls do not need this:
+   their body is a tint over a background that is already opaque.
+   ------------------------------------------------------------------------- */
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ff-glass-surface { background-color: var(--ff-panel, var(--canvas, #f6f6f3)); background-image: none; }
+  :root .app-shell :is(.site-header, .workbench-toolbar) { background-color: var(--canvas); background-image: none; }
+  .ff-shell .ff-board-picker { background-color: var(--ff-panel); background-image: none; }
+  .ff-shell .ff-rail::before { background-color: var(--ff-panel); background-image: none; }
+}
+
+
+/* -------------------------------------------------------------------------
+   Reduced motion
+   -------------------------------------------------------------------------
+   Every transition this file introduces is named and removed here, and both the
+   hover lift and the pressed shift go with it: a press that jumps a pixel with no
+   animation is still a movement. The public shell and the workspace each already
+   neutralise their own transitions under the same preference; this block makes
+   the material independent of them rather than relying on them.
+   ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ff-glass-surface,
+  .ff-glass-button,
+  .ff-shell .ff-rail::before,
+  .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay, .ff-board-icon, .ff-board-picker, .ff-board-picker button, .ff-lang-option),
+  :root .app-shell :is(.site-header, .workbench-toolbar),
+  :root .app-shell :is(.button, .icon-button, .nav-item--active, .template-card):is(button, a) {
+    transition: none;
+  }
+  .ff-glass-button:hover:not(:disabled):not([aria-disabled='true']),
+  :root .app-shell :is(.button, .icon-button):is(button, a):hover:not(:disabled):not([aria-disabled='true']),
+  .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):hover:not(:disabled):not([aria-disabled='true']),
+  .ff-shell .ff-board-icon:hover:not(:disabled):not([aria-disabled='true']),
+  :root .app-shell :is(button, a).template-card:hover:not(:disabled):not([aria-disabled='true']) {
+    transform: none;
+  }
+  .ff-glass-button:active:not(:disabled):not([aria-disabled='true']),
+  :root .app-shell :is(.button, .icon-button):is(button, a):active:not(:disabled):not([aria-disabled='true']),
+  :root .app-shell :is(button, a).nav-item--active:active:not(:disabled):not([aria-disabled='true']),
+  .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay):active:not(:disabled):not([aria-disabled='true']),
+  .ff-shell .ff-board-icon:active:not(:disabled):not([aria-disabled='true']),
+  .ff-shell .ff-board-picker button:active:not(:disabled):not([aria-disabled='true']),
+  .ff-shell .ff-lang-option[aria-pressed='true']:active:not(:disabled):not([aria-disabled='true']),
+  :root .app-shell :is(button, a).template-card:active:not(:disabled):not([aria-disabled='true']) {
+    transform: none;
+  }
+}
+
+
+/* -------------------------------------------------------------------------
+   Print
+   -------------------------------------------------------------------------
+   Paper is a reading surface, never a lens: no backdrop filtering, no rim, no
+   lift, and every glass surface falls back to the flat colour its own theme
+   already names. The primary action prints as the ink slab it has always been,
+   with the canvas-coloured label it has always had, so the pair never inverts.
+   ------------------------------------------------------------------------- */
+
+@media print {
+  .ff-shell .ff-rail::before { content: none; }
+  .ff-glass-surface,
+  .ff-glass-button,
+  .ff-glass-button:is(:hover, :active):not(:disabled):not([aria-disabled='true']),
+  .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay, .ff-board-icon, .ff-board-picker, .ff-board-picker button[aria-pressed], .ff-lang-option[aria-pressed]),
+  .ff-shell :is(.ff-preview-sound, .ff-theme, .ff-replay, .ff-board-icon, .ff-board-picker button[aria-pressed], .ff-lang-option[aria-pressed]):is(:hover, :active):not(:disabled):not([aria-disabled='true']) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border-radius: 0;
+    transform: none;
+    transition: none;
+  }
+  :root .app-shell :is(.site-header, .workbench-toolbar) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--canvas);
+    background-image: none;
+    box-shadow: none;
+    border-radius: 0;
+    transition: none;
+  }
+  :root .app-shell :is(.button, .icon-button, .nav-item--active, .template-card):is(button, a),
+  :root .app-shell :is(.button, .icon-button, .nav-item--active, .template-card):is(button, a):is(:hover, :active):not(:disabled):not([aria-disabled='true']) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: var(--surface);
+    background-image: none;
+    box-shadow: none;
+    border-radius: 0;
+    transform: none;
+    transition: none;
+  }
+  :root .app-shell :is(button, a).button:where(.button--primary),
+  :root .app-shell :is(button, a).button:where(.button--primary):is(:hover, :active):not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--ink);
+    color: var(--canvas);
+  }
+}

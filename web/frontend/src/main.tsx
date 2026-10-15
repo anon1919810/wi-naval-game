@@ -11,5 +11,8 @@ import './styles/layout.css';
 // styles cannot depend on it. Every rule here is already scoped to
 // `.app-shell` / `.ff-tool-shell`, so the public pages are unaffected.
 import './styles/workspace.css';
+// Shared glass loads eagerly; scoped adapters outrank the workspace's square
+// control reset without relying on lazy stylesheet insertion order.
+import './styles/liquid-glass.css';
 
 createRoot(document.getElementById('root')!).render(<StrictMode><Portfolio /></StrictMode>);
