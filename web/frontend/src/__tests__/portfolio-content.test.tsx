@@ -536,7 +536,6 @@ describe('about and contact', () => {
     expect(about.parentElement).toHaveClass('ff-about-slot');
     expect(about.querySelector('h1')!.textContent).toBe('A field foruseful ideas.');
     // The new content hangs off the same article rather than replacing it.
-    expect(about.querySelector('.ff-about-author')).not.toBeNull();
     expect(about.querySelector('.ff-about-built')).not.toBeNull();
     expect(about.querySelector('.ff-contact')).not.toBeNull();
   });

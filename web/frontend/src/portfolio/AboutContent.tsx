@@ -77,13 +77,7 @@ export function AboutContent({ headingRef, pageRef }: Props) {
       <AboutFigure />
     </div>
 
-    <section className="ff-about-author" aria-labelledby="ff-about-author-title" data-ff-section={t('about.sectionPerson')}>
-      <h2 id="ff-about-author-title" tabIndex={-1}>{t('about.authorTitle')}</h2>
-      <p>{t('about.authorP1')}</p>
-      <p>{t('about.authorP2')}</p>
-    </section>
-
-    <div className="ff-about-work" data-ff-section={t('about.sectionPlimsoll')}>
+        <div className="ff-about-work" data-ff-section={t('about.sectionPlimsoll')}>
       <span>{t('about.workLabel')}</span>
       <h2 tabIndex={-1}>{t('about.workTitle')}</h2>
       <p>{t('about.workText')}</p>
