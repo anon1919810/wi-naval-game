@@ -11,7 +11,9 @@ import math
 
 import pytest
 
-from plimsoll import concept_design, loading, project_io, sship_import
+from plimsoll import concept_design, concept_estimates, loading, project_io, sship_import
+from plimsoll import fixed_armour
+from plimsoll.battery_layout import evaluate as layout_module_evaluate
 
 
 def test_independent_imperial_plate_thickness_anchor():
@@ -52,10 +54,12 @@ def test_import_has_a_generated_working_condition_for_estimates_only():
     assert result["stages"]["hydrostatics"]["status"] != "completed"
     proposals = result["stages"]["systems"]["data"]["update_proposals"]
     # Shaft power is absent and the speed-to-power screen needs user-supplied
-    # balance inputs. Guns/mounts/ammunition/fuel remain independently usable.
+    # balance inputs. Guns/mounts/ammunition/fuel remain independently usable,
+    # and so does the one declared fixed region the saved file fully describes.
     assert {row["item_id"] for row in proposals} == {
         "weapons.bank1.g1.guns", "weapons.bank1.g1.mounts",
-        "weapons.bank1.g1.ammunition", "propulsion.fuel"}
+        "weapons.bank1.g1.ammunition", "propulsion.fuel",
+        "armour.fixed.belt_main"}
     assert any(d["code"] == "concept_design.machinery_unavailable"
                for d in result["stages"]["systems"]["data"]["diagnostics"])
     assert all(row["current_mass_t"] is None and row["requires_review"] for row in proposals)
@@ -646,17 +650,241 @@ def test_group_two_mounts_split_into_separate_canonical_batteries():
     assert len({item["guns_item_id"] for item in batteries}) == 2
 
 
-def test_identical_groups_stay_one_canonical_battery():
+def test_identical_active_groups_keep_two_separate_canonical_batteries():
+    """Two saved groups that read alike are still two groups.
+
+    The original's two-group layout identity is preserved: each group keeps its
+    own weight targets, so the import never merges them into one averaged row.
+    """
     result = sship_import.preview(build(imperial_fields({
         IDX_MOUNTS: "6", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
         IDX_SUPER_MOUNT_G2: "1", IDX_DECK_MOUNT_G2: "0", IDX_SUB_MOUNT_G2: "1",
         IDX_GUNS_IN_MOUNT_G1: "3", IDX_GUNS_IN_MOUNT_G2: "3", IDX_BARRELS: "12",
+        IDX_LAYOUT_G2: "0",
     })))
     batteries = result["project"]["concept_design"]["batteries"]
-    assert len(batteries) == 1
-    assert batteries[0]["mount_count"] == 6
-    assert batteries[0]["barrels_per_mount"] == 2
-    assert batteries[0]["shared_cradle"] is True
+    assert [item["id"] for item in batteries] == ["bank1-g1", "bank1-g2"]
+    assert [item["mount_count"] for item in batteries] == [4, 2]
+    assert [item["barrels_per_mount"] for item in batteries] == [2, 2]
+    assert [item["shared_cradle"] for item in batteries] == [True, True]
+    assert len({item["guns_item_id"] for item in batteries}) == 2
+    layouts = result["project"]["concept_design"]["battery_layouts"]
+    assert [layout["id"] for layout in layouts] == ["bank1-layout"]
+    assert layouts[0]["group1"]["battery_id"] == "bank1-g1"
+    assert layouts[0]["group2"]["battery_id"] == "bank1-g2"
+
+
+def layouts_of(result):
+    return result["project"]["concept_design"]["battery_layouts"]
+
+
+def test_the_saved_group_counts_selectors_and_layouts_are_mapped():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "6", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "0",
+        IDX_SUPER_MOUNT_G2: "1", IDX_DECK_MOUNT_G2: "1", IDX_SUB_MOUNT_G2: "0",
+        IDX_GUNS_IN_MOUNT_G1: "4", IDX_GUNS_IN_MOUNT_G2: "7",
+        IDX_LAYOUT_G1: "3", IDX_LAYOUT_G2: "9", IDX_BARRELS: "14",
+    })))
+    layout = layouts_of(result)[0]
+    assert layout["group1"] == {"battery_id": "bank1-g1", "mount_selector": 4,
+                                "layout_index": 3, "elevated_mounts": 2,
+                                "deck_mounts": 2, "depressed_mounts": 0}
+    assert layout["group2"] == {"battery_id": "bank1-g2", "mount_selector": 7,
+                                "layout_index": 9, "elevated_mounts": 1,
+                                "deck_mounts": 1, "depressed_mounts": 0}
+    assert layout["id"] == "bank1-layout"
+    assert layout["source"]
+
+
+def test_the_saved_height_flags_are_mapped_as_booleans_or_unknown():
+    both = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "6", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "1",
+        IDX_SUPER_MOUNT_G2: "1", IDX_DECK_MOUNT_G2: "0", IDX_SUB_MOUNT_G2: "0",
+        IDX_GUNS_IN_MOUNT_G1: "0", IDX_GUNS_IN_MOUNT_G2: "0", IDX_BARRELS: "6",
+        IDX_LAYOUT_G2: "0", IDX_SUPER_SUPER: "True", IDX_SUB_SUB: "False",
+    })))
+    assert layouts_of(both)[0]["group2_double_elevation"] is True
+    assert layouts_of(both)[0]["group2_double_depression"] is False
+    unchecked = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_SUPER_MOUNT_G2: "0", IDX_DECK_MOUNT_G2: "0", IDX_SUB_MOUNT_G2: "0",
+        IDX_BARRELS: "4",
+    })))
+    # A blank saved checkbox is unknown, never unchecked.
+    assert layouts_of(unchecked)[0]["group2_double_elevation"] is None
+    assert layouts_of(unchecked)[0]["group2_double_depression"] is None
+
+
+def test_the_saved_deck_profile_is_mapped_in_canonical_metres():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_FC_LENGTH: "20", IDX_FD_LENGTH: "30",
+        IDX_FD_FORE: "8", IDX_FD_AFT: "7", IDX_AD_FORE: "6", IDX_AD_AFT: "8",
+    })))
+    profile = layouts_of(result)[0]["deck_profile"]
+    assert profile["forecastle_fraction"] == pytest.approx(0.20)
+    assert profile["forward_deck_fraction"] == pytest.approx(0.30)
+    assert profile["forward_fore_m"] == pytest.approx(8 * FT_M)
+    assert profile["forward_aft_m"] == pytest.approx(7 * FT_M)
+    assert profile["aft_fore_m"] == pytest.approx(6 * FT_M)
+    assert profile["aft_aft_m"] == pytest.approx(8 * FT_M)
+
+
+def test_a_second_group_without_a_first_group_keeps_its_own_identity():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "2", IDX_SUPER_MOUNT_G1: "0", IDX_SUB_MOUNT_G1: "0",
+        IDX_SUPER_MOUNT_G2: "1", IDX_DECK_MOUNT_G2: "0", IDX_SUB_MOUNT_G2: "1",
+        IDX_GUNS_IN_MOUNT_G1: "0", IDX_GUNS_IN_MOUNT_G2: "7",
+        IDX_LAYOUT_G2: "9", IDX_BARRELS: "6",
+    })))
+    batteries = result["project"]["concept_design"]["batteries"]
+    assert [item["id"] for item in batteries] == ["bank1-g2"]
+    layout = layouts_of(result)[0]
+    assert layout["group1"] is None
+    assert layout["group2"]["battery_id"] == "bank1-g2"
+    assert layout["group2"]["elevated_mounts"] == 1
+    assert layout["group2"]["depressed_mounts"] == 1
+
+
+def test_an_unset_or_out_of_range_layout_selection_is_archived_not_inferred():
+    for value in ("18", "20"):
+        result = sship_import.preview(build(imperial_fields({
+            IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+            IDX_BARRELS: "4", IDX_LAYOUT_G1: value,
+        })))
+        assert "sship.enum.unsupported" in codes(result)
+        assert layouts_of(result) == []
+        assert result["project"]["migration"]["raw_fields"][IDX_LAYOUT_G1] == value
+        # The bank keeps its facts and its own single-group battery row.
+        assert result["project"]["concept_design"]["batteries"][0]["id"] == "bank1-g1"
+
+
+def test_a_missing_saved_height_keeps_the_bank_and_archives_the_layout():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_FD_FORE: "",
+    })))
+    assert "sship.layout.draft" in codes(result)
+    assert layouts_of(result) == []
+    assert result["project"]["concept_design"]["batteries"][0]["id"] == "bank1-g1"
+    assert result["project"]["migration"]["raw_fields"][IDX_FD_FORE] == ""
+
+
+def test_an_inconsistent_saved_count_never_yields_a_dangling_layout_reference():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "1", IDX_SUPER_MOUNT_G1: "5", IDX_SUB_MOUNT_G1: "5",
+    })))
+    assert layouts_of(result) == []
+    assert result["project"]["concept_design"].get("batteries", []) == []
+    assert "sship.battery.count_inconsistent" in codes(result)
+
+
+def test_the_imported_layout_armour_stays_null_with_a_pending_diagnostic():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_GUN_ARM_FACE: "12",
+    })))
+    layout = layouts_of(result)[0]
+    assert layout["armour"] is None
+    assert "sship.layout.armour_pending" in codes(result)
+    # The saved turret plate survives as its own exact archive fact.
+    facts = result["project"]["systems"]["armour"]["fixed"]["rotating_armour"]["bank1"]["facts"]
+    assert facts["thickness_m"]["value"] == pytest.approx(12 * IN_MM / 1000.0)
+
+
+def test_the_import_generates_no_layout_mass_and_adopts_nothing():
+    preview = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4",
+    })))
+    normalized = project_io.normalize_project(preview["project"])
+    concept_design.validate_config(normalized, {item["id"] for group in
+                                                normalized["weight_groups"]
+                                                for item in group["items"]})
+    config = concept_design.validate_config(
+        normalized, {item["id"] for group in normalized["weight_groups"]
+                     for item in group["items"]})
+    layout = config["battery_layouts"][0]
+    assert layout["armour"] is None
+    result = layout_module_evaluate(layout, config["batteries"])
+    assert result["armour"] is None
+    assert result["freeboard_m"] is not None
+    ledger = {item["id"]: item for group in normalized["weight_groups"]
+              for item in group["items"]}
+    assert all(item["mass_t"] is None or item["mass_t"] == ledger[item["id"]]["mass_t"]
+               for item in ledger.values())
+
+
+def test_a_fractional_saved_percentage_is_a_valid_declaration():
+    """The source reads those percentages as ordinary floats, so 35.5 is valid."""
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_FC_LENGTH: "20.5", IDX_FD_LENGTH: "35.5",
+    })))
+    profile = layouts_of(result)[0]["deck_profile"]
+    assert profile["forecastle_fraction"] == pytest.approx(0.205)
+    assert profile["forward_deck_fraction"] == pytest.approx(0.355)
+    assert field(result, IDX_FD_LENGTH)["disposition"] == "mapped"
+
+
+def test_percentages_outside_the_domain_leave_a_draft_and_the_archive():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_FC_LENGTH: "20", IDX_FD_LENGTH: "90.5",
+    })))
+    assert "sship.layout.draft" in codes(result)
+    assert layouts_of(result) == []
+    assert result["project"]["migration"]["raw_fields"][IDX_FD_LENGTH] == "90.5"
+
+
+def test_a_paired_barrel_count_above_the_layout_domain_stays_a_draft():
+    # Each row is inside its own domain; the pair this bank forms is not.
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "1200", IDX_SUPER_MOUNT_G1: "600", IDX_SUB_MOUNT_G1: "0",
+        IDX_SUPER_MOUNT_G2: "600", IDX_DECK_MOUNT_G2: "0", IDX_SUB_MOUNT_G2: "0",
+        IDX_GUNS_IN_MOUNT_G1: "14", IDX_GUNS_IN_MOUNT_G2: "14",
+        IDX_LAYOUT_G1: "0", IDX_LAYOUT_G2: "0", IDX_BARRELS: "12000",
+    })))
+    assert "sship.layout.draft" in codes(result)
+    assert layouts_of(result) == []
+    # Both battery rows and the whole archive survive the draft.
+    assert [row["id"] for row in result["project"]["concept_design"]["batteries"]] == \
+        ["bank1-g1", "bank1-g2"]
+    assert result["project"]["migration"]["raw_fields"][IDX_LAYOUT_G2] == "0"
+
+
+def test_a_saved_deck_height_above_the_layout_domain_stays_a_draft():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_FD_FORE: "500",        # 152.4 m, above the domain
+    })))
+    assert "sship.layout.draft" in codes(result)
+    assert layouts_of(result) == []
+    assert result["project"]["concept_design"]["batteries"][0]["id"] == "bank1-g1"
+    assert result["project"]["migration"]["raw_fields"][IDX_FD_FORE] == "500"
+
+
+def test_an_empty_saved_bank_creates_no_layout_and_no_pending_warning():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "0", IDX_SUPER_MOUNT_G1: "0", IDX_SUB_MOUNT_G1: "0",
+        IDX_BARRELS: "0",
+    })))
+    assert layouts_of(result) == []
+    assert "sship.layout.draft" not in codes(result)
+    assert "sship.layout.armour_pending" not in codes(result)
+
+
+def test_layout_mappings_are_recorded_in_the_field_dispositions():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_MOUNTS: "4", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "2",
+        IDX_BARRELS: "4", IDX_LAYOUT_G1: "3",
+    })))
+    for index in (IDX_LAYOUT_G1, IDX_FC_LENGTH, IDX_FD_LENGTH, IDX_FD_FORE, IDX_FD_AFT,
+                  IDX_AD_FORE, IDX_AD_AFT, IDX_GUNS_IN_MOUNT_G1):
+        entry = field(result, index)
+        assert entry["disposition"] == "mapped", (index, entry)
+        assert any("bank1-layout" in destination for destination in entry["destinations"]), \
+            (index, entry["destinations"])
 
 
 def test_shared_cradle_index_is_taken_from_the_original_table():
@@ -1077,3 +1305,297 @@ def test_armour_extents_follow_the_armour_scale_selector():
     assert belt["thickness_m"]["value"] == pytest.approx(0.1524)
     assert belt["length_m"]["value"] == pytest.approx(300 * FT_M)
     assert imperial["project"]["hull"]["beam_m"] == pytest.approx(50.0)
+
+
+# ------------------------------------------------------- the fixed regions --
+
+FIXED_ARMOUR_SYSTEM = "armour.fixed.%s"
+IDX_BELT_ENDS = 83
+IDX_BELT_ENDS_LENGTH = 84
+IDX_BELT_ENDS_HEIGHT = 85
+IDX_BELT_UPPER = 86
+IDX_BELT_UPPER_LENGTH = 87
+IDX_BELT_UPPER_HEIGHT = 88
+IDX_BULKHEAD = 89
+IDX_BULKHEAD_LENGTH = 90
+IDX_BULKHEAD_HEIGHT = 91
+
+
+def fixed_armour_records(project):
+    return {record["kind"]: record
+            for record in project["concept_design"].get("fixed_armour") or []}
+
+
+def ledger(project):
+    return {item["id"]: item for group in project["weight_groups"] for item in group["items"]}
+
+
+def test_each_declared_fixed_region_gets_its_own_independent_unknown_mass_target():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_BELT_ENDS: "5", IDX_BELT_ENDS_LENGTH: "20", IDX_BELT_ENDS_HEIGHT: "18",
+        IDX_BELT_UPPER: "4", IDX_BULKHEAD: "3", IDX_BULKHEAD_LENGTH: "1",
+        IDX_BULKHEAD_HEIGHT: "30",
+        IDX_BULGE: "3", IDX_BULGE_LENGTH: "100", IDX_BULGE_HEIGHT: "8",
+        IDX_DECK_COVERAGE: "4",
+    })))
+    project = result["project"]
+    records = fixed_armour_records(project)
+    assert sorted(records) == ["belt_ends", "belt_main", "belt_upper", "bulge", "bulkhead",
+                               "conning", "deck"]
+    for kind, record in records.items():
+        item_id = FIXED_ARMOUR_SYSTEM % kind
+        assert record["item_id"] == item_id
+        assert record["system_id"] == item_id
+        assert project["systems"]["armour"]["fixed"][kind]["weight_item_ids"] == [item_id]
+        target = ledger(project)[item_id]
+        assert target["mass_t"] is None
+        assert target["x_m"] is None and target["y_m"] is None and target["kg_m"] is None
+        assert target["role"] == fixed_armour.ROLE_BY_KIND[kind]
+    assert "sship.concept.fixed_armour_unadopted" in codes(result)
+
+
+def test_a_region_the_source_leaves_blank_gets_no_target_and_no_record():
+    project = sship_import.preview(build(imperial_fields({
+        IDX_BELT_MAIN: "", IDX_BELT_MAIN_LENGTH: "", IDX_BELT_MAIN_HEIGHT: "",
+    })))["project"]
+    records = fixed_armour_records(project)
+    assert "belt_main" not in records
+    assert FIXED_ARMOUR_SYSTEM % "belt_main" not in ledger(project)
+    assert project["systems"]["armour"]["fixed"]["belt_main"]["weight_item_ids"] == []
+    # The archived zone fact survives even with no declaration behind it.
+    assert project["systems"]["armour"]["fixed"]["belt_main"]["facts"]["zone"]["value"] \
+        == "belt_main"
+
+
+def test_a_deliberately_declared_zero_region_is_a_declaration_not_an_empty_one():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_BELT_MAIN: "0", IDX_BELT_MAIN_LENGTH: "300", IDX_BELT_MAIN_HEIGHT: "20",
+    })))
+    project = result["project"]
+    record = fixed_armour_records(project)["belt_main"]
+    assert record["thickness_mm"] == pytest.approx(0.0)
+    assert ledger(project)[FIXED_ARMOUR_SYSTEM % "belt_main"]["mass_t"] is None
+    assert project["systems"]["armour"]["fixed"]["belt_main"]["facts"]["thickness_m"][
+        "value"] == pytest.approx(0.0)
+    normalized = project_io.normalize_project(project)
+    state = loading.resolve_loading(normalized, normalized["loading_conditions"][0]["id"])
+    generated = concept_design.generated_models(normalized, state)
+    model = next(m for models in generated["systems"].values() for m in models
+                 if m["id"] == "concept_fixed_armour.sship_belt_main")
+    assert model["inputs"]["estimate_long_tons"] == pytest.approx(0.0)
+
+
+def test_the_belt_thickness_and_extents_follow_the_armour_scale_selector():
+    # The same belt saved in the metric scale is the same armour, in the
+    # canonical millimetres and metres the concept declaration uses.
+    imperial = sship_import.preview(build(imperial_fields({})))["project"]
+    metric = sship_import.preview(build(imperial_fields({
+        IDX_ARMOUR_SCALE: "1", IDX_BELT_MAIN: "152.4", IDX_BELT_MAIN_LENGTH: "91.44",
+        IDX_BELT_MAIN_HEIGHT: "6.096"})))["project"]
+    first = fixed_armour_records(imperial)["belt_main"]
+    second = fixed_armour_records(metric)["belt_main"]
+    for field in ("thickness_mm", "length_m", "height_m"):
+        assert second[field] == pytest.approx(first[field]), field
+    assert second["thickness_mm"] == pytest.approx(152.4)
+    assert second["length_m"] == pytest.approx(91.44)
+
+
+def test_the_saved_deck_plates_keep_their_own_layers_and_the_central_thickness():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_DECK_ARMOUR: "2", IDX_DECK_FC: "1.5", IDX_DECK_QD: "1", IDX_DECK_COVERAGE: "0",
+    })))
+    project = result["project"]
+    record = fixed_armour_records(project)["deck"]
+    assert record["thickness_mm"] == pytest.approx(2 * IN_MM)
+    assert record["forecastle_mm"] == pytest.approx(1.5 * IN_MM)
+    assert record["quarterdeck_mm"] == pytest.approx(1.0 * IN_MM)
+    assert record["coverage_index"] == 0
+    assert "length_m" not in record and "height_m" not in record
+    facts = project["systems"]["armour"]["fixed"]["deck"]["facts"]
+    assert facts["deck_layer"]["value"] == "deckFCBox; deckQDBox"
+    # The three plates are three canonical layers, never merged into one.
+    assert field(result, IDX_DECK_FC)["disposition"] == "mapped"
+    assert field(result, IDX_DECK_QD)["disposition"] == "mapped"
+    assert field(result, IDX_DECK_FC)["destinations"] == [
+        "$.systems.armour.fixed.deck.facts.deck_layer",
+        "$.concept_design.fixed_armour.sship_deck.forecastle_mm"]
+
+
+def test_the_saved_coverage_selector_is_mapped_as_an_index_into_the_recovered_table():
+    for selector in range(fixed_armour.DECK_SELECTOR_COUNT):
+        project = sship_import.preview(build(imperial_fields({
+            IDX_DECK_COVERAGE: str(selector)})))["project"]
+        assert fixed_armour_records(project)["deck"]["coverage_index"] == selector
+
+
+def test_an_unsupported_saved_coverage_selector_is_archived_not_clamped():
+    result = sship_import.preview(build(imperial_fields({IDX_DECK_COVERAGE: "9"})))
+    project = result["project"]
+    assert "coverage_index" not in fixed_armour_records(project)["deck"]
+    assert "sship.armour.coverage_unsupported" in codes(result)
+    assert field(result, IDX_DECK_COVERAGE)["disposition"] == "preserved"
+    assert project["migration"]["raw_fields"][IDX_DECK_COVERAGE] == "9"
+
+
+def test_a_fractional_saved_coverage_selector_is_refused_at_the_source_boundary():
+    with pytest.raises(sship_import.SshipImportError) as error:
+        sship_import.preview(build(imperial_fields({IDX_DECK_COVERAGE: "2.5"})))
+    assert "whole number" in str(error.value)
+
+
+def test_the_saved_deck_segment_percentages_become_canonical_fractions():
+    project = sship_import.preview(build(imperial_fields({
+        IDX_FC_LENGTH: "26", IDX_QD_LENGTH: "20"})))["project"]
+    record = fixed_armour_records(project)["deck"]
+    assert record["forecastle_fraction"] == pytest.approx(0.26)
+    assert record["quarterdeck_fraction"] == pytest.approx(0.20)
+
+
+def test_deck_fractions_that_do_not_form_a_plan_stay_unknown():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_FC_LENGTH: "60", IDX_QD_LENGTH: "45"})))
+    record = fixed_armour_records(result["project"])["deck"]
+    assert "forecastle_fraction" not in record
+    assert "quarterdeck_fraction" not in record
+    assert "sship.armour.deck_fraction_domain" in codes(result)
+
+
+def test_an_out_of_domain_saved_thickness_is_archived_and_its_field_stays_unknown():
+    # 100 inches is 2540 mm, above the declared 2000 mm domain.
+    result = sship_import.preview(build(imperial_fields({IDX_BELT_MAIN: "100"})))
+    project = result["project"]
+    assert "thickness_mm" not in fixed_armour_records(project)["belt_main"]
+    assert "sship.armour.value_out_of_domain" in codes(result)
+    assert project["systems"]["armour"]["fixed"]["belt_main"]["facts"]["thickness_m"][
+        "value"] == pytest.approx(2.54)
+    # The region still has its own target, because its declared extents are known.
+    assert FIXED_ARMOUR_SYSTEM % "belt_main" in ledger(project)
+    assert project_io.normalize_project(project) is not None
+
+
+def test_an_out_of_domain_saved_extent_leaves_its_own_field_unknown():
+    result = sship_import.preview(build(imperial_fields({
+        IDX_BELT_MAIN_LENGTH: "20000"})))
+    record = fixed_armour_records(result["project"])["belt_main"]
+    assert "length_m" not in record
+    assert "sship.armour.value_out_of_domain" in codes(result)
+
+
+def test_the_saved_conning_aft_plate_is_its_own_declaration():
+    project = sship_import.preview(build(imperial_fields({
+        IDX_CONNING_FORE: "8", IDX_CONNING_AFT: "5"})))["project"]
+    record = fixed_armour_records(project)["conning"]
+    assert record["thickness_mm"] == pytest.approx(8 * IN_MM)
+    assert record["aft_mm"] == pytest.approx(5 * IN_MM)
+
+
+def test_the_import_adopts_no_fixed_armour_mass_and_creates_no_cost_section():
+    result = sship_import.preview(sship())
+    project = result["project"]
+    assert "cost" not in project["concept_design"]
+    assert project["concept_design"]["balance"] is None
+    assert all(item["mass_t"] is None
+               for item in ledger(project).values()
+               if item["id"].startswith("armour.fixed."))
+
+
+def test_the_imported_fixed_regions_normalize_and_read_through_the_kernel():
+    project = project_io.normalize_project(sship_import.preview(build(imperial_fields({
+        IDX_BELT_MAIN: "6", IDX_BELT_MAIN_LENGTH: "300", IDX_BELT_MAIN_HEIGHT: "20",
+        IDX_CONNING_FORE: "8", IDX_CONNING_AFT: "4", IDX_DECK_ARMOUR: "2",
+        IDX_DECK_COVERAGE: "0", IDX_FC_LENGTH: "20", IDX_QD_LENGTH: "10",
+        IDX_DECK_FC: "1.5", IDX_DECK_QD: "1"})))["project"])
+    config = concept_design.validate_config(project, set(ledger(project)))
+    readings = [fixed_armour.evaluate(record, _sship_context(config, project))
+                for record in config["fixed_armour"]]
+    by_kind = {reading["kind"]: reading for reading in readings}
+    assert by_kind["belt_main"]["status"] == "available"
+    assert by_kind["belt_main"]["values"]["total_long_tons"] > 0
+    assert by_kind["conning"]["status"] == "available"
+    assert by_kind["deck"]["status"] == "available"
+    assert by_kind["deck"]["values"]["coverage_index"] == 0
+    # The three saved deck plates stay three layers, not one merged thickness.
+    breakdown = fixed_armour.component_breakdown(by_kind["deck"]["values"], "deck")
+    assert breakdown["central_long_tons"] > 0
+    assert breakdown["fore_long_tons"] > 0
+    assert breakdown["quarter_long_tons"] > 0
+    assert sum(breakdown.values()) == pytest.approx(
+        by_kind["deck"]["values"]["total_long_tons"])
+
+
+def test_an_imported_box_coverage_still_reads_its_fore_and_quarter_layers():
+    # The recovered method adds the forecastle and quarter-deck terms after the
+    # coverage switch for every selector, so an imported box deck is the recovered
+    # box PLUS its two upper plates.
+    project = project_io.normalize_project(sship_import.preview(build(imperial_fields({
+        IDX_DECK_ARMOUR: "4", IDX_DECK_COVERAGE: "4", IDX_FC_LENGTH: "26",
+        IDX_QD_LENGTH: "20", IDX_DECK_FC: "1.5", IDX_DECK_QD: "1",
+    })))["project"])
+    config = concept_design.validate_config(project, set(ledger(project)))
+    record = next(row for row in config["fixed_armour"] if row["kind"] == "deck")
+    context = _sship_context(config, project)
+    context.update(machinery_mass_t=0.0, ammunition_mass_t=0.0)
+    reading = fixed_armour.evaluate(record, context)
+    assert reading["status"] == "available"
+    values = reading["values"]
+    assert values["coverage_index"] == 4
+    assert values["central_area_sqft"] == pytest.approx(
+        (16.0 * (context["beam_m"] / 0.3048 + 16.0) - 256.0))
+    assert values["fore_long_tons"] > 0.0
+    assert values["quarter_long_tons"] > 0.0
+    assert values["total_long_tons"] == pytest.approx(
+        values["central_long_tons"] + values["fore_long_tons"] + values["quarter_long_tons"])
+
+
+def test_an_imported_deck_without_its_saved_segment_percentages_stays_unread():
+    # The two segment percentages are the saved freeboard fields, so a file that
+    # does not declare them leaves the deck plates unknown rather than at zero.
+    fields = imperial_fields({IDX_DECK_ARMOUR: "4", IDX_DECK_COVERAGE: "4",
+                              IDX_FC_LENGTH: "", IDX_QD_LENGTH: ""})
+    project = project_io.normalize_project(sship_import.preview(build(fields))["project"])
+    config = concept_design.validate_config(project, set(ledger(project)))
+    record = next(row for row in config["fixed_armour"] if row["kind"] == "deck")
+    assert record["forecastle_fraction"] is None
+    assert record["quarterdeck_fraction"] is None
+    reading = fixed_armour.evaluate(record, _sship_context(config, project))
+    assert reading["status"] == "unavailable"
+    assert any(d["field"] in ("forecastle_fraction", "quarterdeck_fraction")
+               for d in reading["diagnostics"])
+
+
+def _sship_context(config, project):
+    """The canonical context the concept model builds for one imported project."""
+    hull = project["hull"]
+    length_ft = hull["lwl_m"] / 0.3048
+    beam_ft = hull["beam_m"] / 0.3048
+    block = hull["block_coeff"]
+    return {
+        "length_m": hull["lwl_m"], "beam_m": hull["beam_m"],
+        "co_waterplane": concept_estimates.waterplane_coefficient(
+            block, config["stern"], config["screws"], "$.hull"),
+        "waterplane_area_m2": concept_estimates.waterplane_area_sqft(
+            concept_estimates.waterplane_coefficient(block, config["stern"],
+                                                    config["screws"], "$.hull"),
+            length_ft, beam_ft, "$.hull") * 0.3048 * 0.3048,
+        "displacement_t": config["target_displacement_t"],
+        "machinery_mass_t": None, "ammunition_mass_t": None,
+    }
+
+
+def test_the_original_archive_and_both_mount_group_identities_are_preserved():
+    overrides = {IDX_MOUNTS: "6", IDX_SUPER_MOUNT_G1: "2", IDX_SUB_MOUNT_G1: "0",
+                 IDX_SUPER_MOUNT_G2: "1", IDX_DECK_MOUNT_G2: "1", IDX_SUB_MOUNT_G2: "0",
+                 IDX_GUNS_IN_MOUNT_G1: "4", IDX_GUNS_IN_MOUNT_G2: "7",
+                 IDX_LAYOUT_G1: "3", IDX_LAYOUT_G2: "9", IDX_BARRELS: "14",
+                 IDX_BELT_MAIN: "6", IDX_DECK_COVERAGE: "0", IDX_DECK_FC: "1.5"}
+    result = sship_import.preview(build(imperial_fields(overrides)))
+    project = result["project"]
+    assert project["migration"]["raw_fields"] == imperial_fields(overrides)
+    assert [battery["id"] for battery in project["concept_design"]["batteries"]] == \
+        ["bank1-g1", "bank1-g2"]
+    layout = project["concept_design"]["battery_layouts"][0]
+    assert layout["group1"]["battery_id"] == "bank1-g1"
+    assert layout["group2"]["battery_id"] == "bank1-g2"
+    assert project["migration"]["mapping"]["scale_selectors"]["armour"]["selector"] == 0
+    # The added fixed regions sit beside both mount groups and neither replaces them.
+    assert sorted(fixed_armour_records(project)) == ["belt_main", "conning", "deck"]

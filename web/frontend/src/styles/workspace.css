@@ -369,6 +369,9 @@
 .app-shell .weight-group, .app-shell .deck-group { overflow-x: auto; }
 .app-shell :is(.weight-row, .deck-row) { min-width: 550px; }
 .app-shell .form-grid > *, .app-shell .field-grid > * { min-width: 0; }
+/* Keep the mass-model editor's intrinsic select widths inside its grid track. */
+.app-shell .mass-model-editor.form-stack { grid-template-columns: minmax(0, 1fr); }
+.app-shell .concept-balance-group .form-hint { overflow-wrap: anywhere; }
 .app-shell .overview-callout { background: transparent; border: 1px solid var(--line); }
 /* Reports retain their own scrolling tables and semantic status palette. */
 .app-shell .run-page > h1, .app-shell .report-cover h1 { font-size: clamp(30px, 3vw, 44px); font-weight: 600; letter-spacing: -.025em; }
@@ -535,7 +538,8 @@
 .app-shell .report-columns { grid-template-columns: 200px minmax(0, 1fr); gap: 26px; align-items: start; margin-top: 22px; }
 .app-shell .report-columns > .stage-index { position: sticky; top: 14px; margin-top: 0; padding-top: 0; border-top: 0; }
 .app-shell .report-columns > .stage-index ol { display: grid; gap: 7px; }
-.app-shell .report-main { display: grid; gap: 22px; min-width: 0; }
+.app-shell .report-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; min-width: 0; }
+.app-shell .comparison-changes { overflow-wrap: anywhere; }
 .app-shell .report-main .report-section { padding: 20px 0; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: transparent; }
 .app-shell .report-main .report-section:first-child { border-top: 0; }
 /* A stage heading is a real focus target, and a sticky header never covers it. */

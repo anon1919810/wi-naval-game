@@ -2,7 +2,8 @@ import { type ReactNode } from 'react';
 
 import { useConceptCopy } from '../i18n/concept';
 import { useUnits } from './UnitProvider';
-import { object, rows } from './formModel';
+import { object, rows, type Raw } from './formModel';
+import { ConceptComponentReadings } from './ConceptComponentReadings';
 import { balanceData, balanceStage, metric } from './conceptDesign';
 import type { RunView } from '../types';
 
@@ -19,6 +20,15 @@ import type { RunView } from '../types';
  * A value the declared inputs cannot support is shown as unknown with the
  * reason beside it. An all-green card that quietly omits the half of the screen
  * the reader cannot yet compute would be a worse reading than no card at all.
+ *
+ * The three optional component readings — the fixed armour regions, the two-group
+ * layouts and the empirical cost — are printed by the shared
+ * `ConceptComponentReadings` projection under the workbench's *independent*
+ * availability policy: each keeps its own method, source and status and stays
+ * readable when an unrelated part of the screen is incomplete, which is exactly
+ * what the contract promises by exposing them before the screen's early returns.
+ * The saved full report calls the same projection under its own stricter
+ * requested-and-completed gate.
  */
 
 /** One long-ton metric. Long tons are the screen's own unit and are not converted. */
@@ -45,6 +55,7 @@ function Quantity({ label, text }: { label: string; text: string }) {
   return <div className="fact-field"><span className="fact-label">{label}</span><span className="fact-value">{text}</span></div>;
 }
 
+/** One group's own section of the balance screen's own scalar readings. */
 function Group({ title, children, note }: { title: string; children: ReactNode; note?: string }) {
   return <section className="concept-balance-group">
     <h4>{title}</h4>
@@ -161,6 +172,10 @@ export function DesignBalanceResults({ run, available }: { run: RunView | null; 
 
     {unclassified.length > 0 && <p className="notice" role="status">
       {c('balance.unclassified', { items: unclassified.join(', ') })}</p>}
+
+    {/* The three optional component families share one projection with the saved
+        full report, under this surface's own independent availability policy. */}
+    <ConceptComponentReadings data={data} policy="independent" />
 
     {warnings.length === 0 ? null : <div className="concept-balance-warnings">
       <h4>{c('balance.section.warnings')}</h4>

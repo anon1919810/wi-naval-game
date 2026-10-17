@@ -33,7 +33,7 @@ import type { ProjectDocument, RunView, StageEnvelope } from '../types';
  * stay four separate facts.
  */
 const READINESS_LABEL: Record<StageEnvelope['status'], WorkspaceKey> = {
-  completed: 'status.completed', not_requested: 'status.not_requested', unavailable: 'status.unavailable',
+  completed: 'status.completed', partial: 'status.partial', not_requested: 'status.not_requested', unavailable: 'status.unavailable',
   failed: 'status.failed', canceled: 'status.canceled', model_limit: 'status.model_limit',
 };
 

@@ -1,0 +1,141 @@
+{
+  "schema": "plimsoll-remaining-source-semantics-1",
+  "audited_date": "2026-10-16",
+  "original_binary_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+  "scope": "Static recovered-source inspection for next implementation units; not native execution evidence.",
+  "original_methods_executed_in_this_audit": false,
+  "implementation_or_parity_upgraded": false,
+  "frozen_inventory_modified": false,
+  "feature_completion_percentage": null,
+  "sources": {
+    "ArmourControl.cs": {
+      "sha256": "bfd136e627fdc27220cb65e854d7f7669fad4153e233005db638677e2ea8d1c7",
+      "ranges": [
+        {
+          "start": 422,
+          "end": 445,
+          "anchor": "private void beltButtonClick"
+        },
+        {
+          "start": 628,
+          "end": 652,
+          "anchor": "public float weightBeltsCalc"
+        },
+        {
+          "start": 737,
+          "end": 759,
+          "anchor": "public float weightCalc"
+        }
+      ]
+    },
+    "WeaponControl.cs": {
+      "sha256": "9035e984c05ee32952d9adf0a2478e5aff2b73e7c98c5c3f8394b135c96e92d5",
+      "ranges": [
+        {
+          "start": 324,
+          "end": 378,
+          "anchor": "private void sizeNweight"
+        }
+      ]
+    },
+    "WeaponsControl.cs": {
+      "sha256": "a6077161e26c120b7cad70a9b562979986290ffa8ce5ec5cadbe03dd23698393",
+      "ranges": [
+        {
+          "start": 166,
+          "end": 199,
+          "anchor": "public void spaceNweightCalc"
+        }
+      ]
+    },
+    "GunControl.cs": {
+      "sha256": "b1e1517de14e1bb42a8ab5de6649b7825a026d9178827b9d4b5ff3cd7981453e",
+      "ranges": [
+        {
+          "start": 564,
+          "end": 634,
+          "anchor": "public void mountsCalc"
+        },
+        {
+          "start": 815,
+          "end": 906,
+          "anchor": "private float gunWeightCalc"
+        }
+      ]
+    },
+    "HullControl.cs": {
+      "sha256": "85cd4644f191843af3954e6e89e4c58603c7f3a0ba9716198bcb6fe737144a8f",
+      "ranges": [
+        {
+          "start": 1246,
+          "end": 1246,
+          "anchor": "draughtSide ="
+        }
+      ]
+    }
+  },
+  "entries": [
+    {
+      "baseline_id": "armour.belts.total_weight",
+      "status": "source_semantics_known_parity_not_closed",
+      "source": "ArmourControl.cs:628-652",
+      "priority": 1,
+      "correction": "The original weightBelts value sums main + ends + upper only. Despite the group title, bulkhead and bulge are excluded.",
+      "current_product_boundary": "Selected role totals already exist for physical/empirical inputs; no new aggregate ledger item should be created."
+    },
+    {
+      "baseline_id": "armour.total",
+      "status": "canonical_selected_aggregate_exists_source_comparison_not_closed",
+      "source": "ArmourControl.cs:737-759",
+      "priority": 1,
+      "correction": "The source total adds three belts, bulkhead, bulge, deck, conning and gun armour.",
+      "current_product_boundary": "A selected ledger total and a sum of current component estimates are distinct readings; never add them together or adopt the aggregate again."
+    },
+    {
+      "baseline_id": "guns.weights.mounts",
+      "status": "per_row_model_exists_whole_battery_parity_not_closed",
+      "source": "GunControl.cs:564-634,815-906",
+      "priority": 1,
+      "correction": "The original applies a mount-count-weighted layout factor to a whole-battery mount estimate using all barrels.",
+      "current_product_boundary": "Two-row adapted proposals remain authoritative for adoption until an explicit whole-battery allocation policy is designed and checked."
+    },
+    {
+      "baseline_id": "guns.weights.total",
+      "status": "canonical_ledger_total_exists_source_total_parity_not_closed",
+      "source": "GunControl.cs:629-633",
+      "priority": 1,
+      "correction": "The source total is gun + mount + armour and excludes magazine. Magazine and broadside are separate.",
+      "current_product_boundary": "A linked system ledger may contain ammunition; it cannot silently substitute for this source-labelled total."
+    },
+    {
+      "baseline_id": "weapons.misc_weight.deck_space",
+      "status": "source_known_not_implemented",
+      "source": "WeaponControl.cs:324-378;WeaponsControl.cs:166-178",
+      "priority": 2,
+      "correction": "Only the two torpedo rows with location 0..3 contribute; footprint sum is divided by waterplane area.",
+      "current_product_boundary": "Sets are a divisor with integer division in two source branches; do not infer a free physical deck area or weapon firing arcs."
+    },
+    {
+      "baseline_id": "weapons.misc_weight.hull_space",
+      "status": "source_known_not_implemented",
+      "source": "WeaponControl.cs:324-378;WeaponsControl.cs:179-188",
+      "priority": 2,
+      "correction": "Only torpedo locations 4..8 contribute a volume-like term divided by length * bulged beam * draught * block coefficient.",
+      "current_product_boundary": "The source variable is called area in both branches but has different dimensions. Missing bulged beam cannot silently become unbulged beam."
+    },
+    {
+      "baseline_id": "armour.settings.default_preset",
+      "status": "source_known_action_not_implemented",
+      "source": "ArmourControl.cs:422-445;HullControl.cs:1246",
+      "priority": 3,
+      "correction": "Default is a button that proposes eight dimension fields. It is not an opaque armour-type preset and does not set plate thicknesses.",
+      "current_product_boundary": "Main height uses source side draught derived from block coefficient. Text is rounded to two decimals in the active source scale before parse-back; this is distinct from the exact raw formula."
+    }
+  ],
+  "source_behaviour_requiring_policy": [
+    "Torpedo zero sets are mutated to one in the original UI; current canonical input must not be mutated.",
+    "Integer number/sets truncation and sets greater than number can produce odd footprint results.",
+    "Zero torpedo count may still leave a positive footprint in source trainable branches; decide and document supported product domain before parity claims.",
+    "Default text rounding may produce different canonical dimensions in metric and imperial source scales."
+  ]
+}

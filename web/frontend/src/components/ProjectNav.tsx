@@ -11,6 +11,7 @@ import { useWorkspaceCopy, workspaceCopy, type WorkspaceKey } from '../i18n/work
 const CHAPTERS = [
   ['overview', undefined, 'chapter.overview'],
   ['hull', undefined, 'chapter.hull'],
+  ['freeboard', undefined, 'chapter.freeboard'],
   ['weights', undefined, 'chapter.weights'],
   ['armour', 'systems', 'chapter.armour'],
   ['guns', 'systems', 'chapter.guns'],

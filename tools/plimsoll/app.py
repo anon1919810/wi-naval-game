@@ -114,7 +114,8 @@ def _guard_destinations(inputs, outputs):
 
 def _analyze(args):
     input_paths = [args.project, args.options]
-    _guard_destinations(input_paths, [args.output, args.csv])
+    extra_outputs=[(getattr(args,kind,None),kind) for kind in ('txt','rtf','ssr','sship') if getattr(args,kind,None)]
+    _guard_destinations(input_paths, [args.output, args.csv]+[path for path,_ in extra_outputs])
     _read_json(args.project)
     try:
         project = project_store.load(args.project)
@@ -137,6 +138,8 @@ def _analyze(args):
         json_text = exports.serialize_report(result, format='json')
         if args.csv:
             exports.serialize_report(result, format='csv')
+        for _,kind in extra_outputs:
+            exports.serialize_report(result,format=kind)
     except (ValueError, TypeError, OverflowError) as error:
         raise _CLIError('cli.output_serialization_failed', f'cannot serialize analysis result: {error}',
             calculation_status=result.get('status'), persisted_outputs=[]) from error
@@ -144,6 +147,7 @@ def _analyze(args):
     outputs = [] if args.output == '-' else [(args.output, 'json')]
     if args.csv:
         outputs.append((args.csv, 'csv'))
+    outputs.extend(extra_outputs)
     for destination, format_name in outputs:
         try:
             exports.write_report(result, destination, format=format_name)
@@ -588,6 +592,8 @@ def _parser() -> argparse.ArgumentParser:
     analyze.add_argument("--options")
     analyze.add_argument("--output", default="-")
     analyze.add_argument("--csv")
+    for format_name in ('txt','rtf','ssr','sship'):
+        analyze.add_argument('--'+format_name,help='export the saved SPS 3b3 result in '+format_name+' format')
 
     batch = commands.add_parser("batch", help="calculate an explicit case manifest")
     batch.add_argument("manifest")

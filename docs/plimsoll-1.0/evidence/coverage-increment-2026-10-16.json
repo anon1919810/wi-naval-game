@@ -1,0 +1,615 @@
+{
+  "schema": "plimsoll-coverage-increment-2026-10-16",
+  "scope": "Bounded fixed armour, auxiliary mass, dimensional review, historical cost and reviewed workflow",
+  "baseline": {
+    "observations": 191,
+    "page_fields": 184,
+    "sha256": "b4b979b73b48a8e8b9f668375f4be0616ee3af5f882b72ede05b46b32f007d07",
+    "modified": false
+  },
+  "counting_rule": "These are typed relations for a subset of frozen observations, not an equivalent-feature percentage. Inputs, unit workflows and numerical segments are counted separately.",
+  "relation_counts": {
+    "canonical_declaration_and_migration_verified": 43,
+    "canonical_conversion_and_own_import_scale_verified": 5,
+    "original_numeric_segment_verified": 14,
+    "original_numeric_segment_and_availability_gate_verified": 1,
+    "declared_warning_input_and_migration_verified": 1
+  },
+  "entries": [
+    {
+      "baseline_id": "weapons.torpedoes.main.number",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.main.sets",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.main.diameter",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.main.diameter_unit",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_conversion_and_own_import_scale_verified",
+      "result_quantity": null,
+      "limit": "Own source-row scale is preserved on import; normal display preference is project-wide.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.main.length",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.main.arrangement",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.main.weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.weapon_long_tons",
+      "limit": "Original row excludes mount weight. The reviewed ledger proposal includes weapon + mount once.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.number",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.sets",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.diameter",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.diameter_unit",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_conversion_and_own_import_scale_verified",
+      "result_quantity": null,
+      "limit": "Own source-row scale is preserved on import; normal display preference is project-wide.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.length",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.arrangement",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.torpedoes.second.weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.weapon_long_tons",
+      "limit": "Original row excludes mount weight. The reviewed ledger proposal includes weapon + mount once.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.mines.number",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.mines.reloads",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.mines.unit_weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.mines.weight_unit",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_conversion_and_own_import_scale_verified",
+      "result_quantity": null,
+      "limit": "Own source-row scale is preserved on import; normal display preference is project-wide.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.mines.arrangement",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.mines.total_weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.weapon_long_tons",
+      "limit": "Original row excludes mount weight. The reviewed ledger proposal includes weapon + mount once.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_main.number",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_main.reloads",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_main.unit_weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_main.weight_unit",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_conversion_and_own_import_scale_verified",
+      "result_quantity": null,
+      "limit": "Own source-row scale is preserved on import; normal display preference is project-wide.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_main.arrangement",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_main.total_weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.weapon_long_tons",
+      "limit": "Original row excludes mount weight. The reviewed ledger proposal includes weapon + mount once.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_second.number",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_second.reloads",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_second.unit_weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_second.weight_unit",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_conversion_and_own_import_scale_verified",
+      "result_quantity": null,
+      "limit": "Own source-row scale is preserved on import; normal display preference is project-wide.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_second.arrangement",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Torpedo loads means sets, not tubes per set or a weight multiplier; stores loads means reloads. No space/arc calculation.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "weapons.depth_charge_second.total_weight",
+      "feature": "auxiliary_weapons",
+      "method_version": "sps-3b3-auxiliary-weapons-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.weapon_long_tons",
+      "limit": "Original row excludes mount weight. The reviewed ledger proposal includes weapon + mount once.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.settings.minimum_main_belt_length",
+      "feature": "armour_review",
+      "method_version": "sps-3b3-armour-review-v1",
+      "relation": "original_numeric_segment_and_availability_gate_verified",
+      "result_quantity": "values.minimum_main_belt_length_m",
+      "limit": "Minimum length needs returned room ratio and composite strength >=0.5; inclination changes height checks, not mass.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.main.thickness",
+      "feature": "fixed_armour.belt_main",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.main.length",
+      "feature": "fixed_armour.belt_main",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.main.height",
+      "feature": "fixed_armour.belt_main",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.main.weight",
+      "feature": "fixed_armour.belt_main",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.ends.thickness",
+      "feature": "fixed_armour.belt_ends",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.ends.length",
+      "feature": "fixed_armour.belt_ends",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.ends.height",
+      "feature": "fixed_armour.belt_ends",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.ends.weight",
+      "feature": "fixed_armour.belt_ends",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.upper.thickness",
+      "feature": "fixed_armour.belt_upper",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.upper.length",
+      "feature": "fixed_armour.belt_upper",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.upper.height",
+      "feature": "fixed_armour.belt_upper",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.upper.weight",
+      "feature": "fixed_armour.belt_upper",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.bulge.thickness",
+      "feature": "fixed_armour.bulge",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.bulge.length",
+      "feature": "fixed_armour.bulge",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.bulge.height",
+      "feature": "fixed_armour.bulge",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.bulge.weight",
+      "feature": "fixed_armour.bulge",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.thickness",
+      "feature": "fixed_armour.bulkhead",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.length",
+      "feature": "fixed_armour.bulkhead",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.height",
+      "feature": "fixed_armour.bulkhead",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.weight",
+      "feature": "fixed_armour.bulkhead",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Declared dimensions only; no physical plate geometry or protective performance.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.bulkhead_geometry.main_belt_incline",
+      "feature": "armour_review",
+      "method_version": "sps-3b3-armour-review-v1",
+      "relation": "declared_warning_input_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Minimum length needs returned room ratio and composite strength >=0.5; inclination changes height checks, not mass.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.deck.forecastle",
+      "feature": "fixed_armour.deck",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.deck.fore_aft",
+      "feature": "fixed_armour.deck",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.deck.quarter",
+      "feature": "fixed_armour.deck",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.deck.total",
+      "feature": "fixed_armour.deck",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.deck.coverage",
+      "feature": "fixed_armour.deck",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.conning.forward",
+      "feature": "fixed_armour.conning",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.conning.aft",
+      "feature": "fixed_armour.conning",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "canonical_declaration_and_migration_verified",
+      "result_quantity": null,
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "armour.conning.total",
+      "feature": "fixed_armour.conning",
+      "method_version": "sps-3b3-fixed-armour-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.total_long_tons",
+      "limit": "Seven deck selectors preserve the source mass branches; no actual deck/tower mesh.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "performance.cost_gbp",
+      "feature": "cost",
+      "method_version": "sps-3b3-cost-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.gbp_million",
+      "limit": "Selected ledger basis and original fixed currency convention; no modern price or FX.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    },
+    {
+      "baseline_id": "performance.cost_usd",
+      "feature": "cost",
+      "method_version": "sps-3b3-cost-v1",
+      "relation": "original_numeric_segment_verified",
+      "result_quantity": "values.usd_million",
+      "limit": "Selected ledger basis and original fixed currency convention; no modern price or FX.",
+      "acceptance_reference": "coverage-marathon-2026-10-16.json"
+    }
+  ],
+  "additional_behaviours": [
+    "Independent unknown-mass import targets",
+    "Per-component reviewed adoption and retained source archive",
+    "Selected/proposed cost separation",
+    "Read-only height checks, unique main/end pairing and normal-length ratios",
+    "ID-keyed/method-gated saved comparisons",
+    "Strict full-report parent gate with independent workbench readings"
+  ],
+  "not_closed_here": [
+    "armour total/belt aggregate parity",
+    "source default presets and diagrams",
+    "physical armour or weapon geometry and CG",
+    "weapon space and firing arcs",
+    "source full GUI event-chain equivalence",
+    "full mixed gun-mount mass parity",
+    "modern price estimates",
+    "real user .sship files and real-ship accuracy"
+  ],
+  "acceptance_file": "coverage-marathon-2026-10-16.json"
+}

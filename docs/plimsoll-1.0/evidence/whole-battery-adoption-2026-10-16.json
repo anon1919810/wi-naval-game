@@ -1,0 +1,57 @@
+{
+  "schema": "plimsoll-whole-battery-adoption-1",
+  "accepted": true,
+  "scope": "explicit whole-battery allocation policy and existing gun/layout-armour adoption; no ammunition",
+  "source_method": "sps-3b3-battery-totals-v1",
+  "allocation_method": "plimsoll-battery-mount-allocation-v1",
+  "policy": "proportional-row-mounts-v1",
+  "whole_battery_exact_alignment": "whole-battery-exact-alignment-v1",
+  "independent": {
+    "accepted": true,
+    "source_mounts_t": 841.3244781676505,
+    "legacy_row_mounts_t": 865.3623204010116,
+    "allocated_mounts_t": [
+      420.66223908382517,
+      420.66223908382517
+    ],
+    "source_vs_policy_distinct": true,
+    "cohort_subset_rejected": true,
+    "no_input_mutation": true,
+    "stale_rejected": true,
+    "base_and_other_conditions_unchanged": true,
+    "receipts_reopen": true,
+    "selected_balance_updated": true,
+    "existing_gun_and_layout_armour_proposals_complete_the_whole_battery": true,
+    "complete_battery_selected_t": 1645.8913831352731
+  },
+  "browser": {
+    "accepted": true,
+    "project_id": "93707266-ff97-4d6f-9c6a-0c113392158d",
+    "revision": 2,
+    "run_id": "7a1ec897-075e-4bd5-b87c-ab0b2073849e",
+    "ordinary_ui_five_proposal_adoption": true,
+    "one_mount_checkbox_selected_both_pending_members": true,
+    "base_ledger_and_other_conditions_preserved": true,
+    "unrelated_receipts_preserved": true,
+    "source_and_selected_mounts_t": 841.3244781676505,
+    "source_and_selected_battery_total_t": 1645.8913831352734,
+    "stale_refusal_preserved_project": true
+  },
+  "review": {
+    "unresolved_group_boundary_fixed": true,
+    "full_declared_target_ui_conflicts_fixed": true,
+    "already_exact_member_transaction_guard_fixed": true,
+    "cross_system_local_model_id_collision_fixed": true,
+    "final_inline_guard": "only matched recomputed _allocation_cohort(proposal)==group is exempt"
+  },
+  "final_focused_tests": [
+    "allocation-final-guard.log:21passed",
+    "allocation-review-ui.log:22passed"
+  ],
+  "exports_and_reopened_project_verified": true,
+  "source_snapshot_sha256": "4089d95adf20b09fa5d2c57c0731dd5fa137324e9f00b56dfe0a6c33b0cefdac",
+  "frozen_inventory_modified": false,
+  "equivalent_percentage": null,
+  "submitted": false,
+  "deployed": false
+}

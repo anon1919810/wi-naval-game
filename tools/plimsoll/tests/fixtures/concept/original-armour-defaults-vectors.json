@@ -1,0 +1,1118 @@
+{
+  "schema": "plimsoll-original-armour-defaults-vectors-1",
+  "source_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+  "raw_vectors_sha256": "bebb558cdd57dad172302bc9f9ccec69d74f9dfcbea98eae8b3274cbcf7571fe",
+  "scope": "Original completed methods; pre-N2 dimensions; invalid input and negative output guards are not numerical parity successes.",
+  "rows": [
+    {
+      "id": "B1_S1_default_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B1_S2_default_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 188.976,
+        "beam_m": 18.8976,
+        "draught_m": 6.5532,
+        "block_coeff": 0.5,
+        "freeboard_m": 2.286
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 122.8344,
+        "main_height_m": 2.8799971733093264,
+        "ends_length_m": 66.1355026977539,
+        "ends_height_m": 2.8799971733093264,
+        "upper_length_m": 122.8344,
+        "upper_height_m": 2.286,
+        "bulkhead_length_m": 122.8344,
+        "bulkhead_height_m": 5.766196293640137
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "403.00",
+        "beltMainHeightBox": "9.45",
+        "beltEndsLengthBox": "216.98",
+        "beltEndsHeightBox": "9.45",
+        "beltUpperLengthBox": "403.00",
+        "beltUpperHeightBox": "7.50",
+        "bulkheadLengthBox": "403.00",
+        "bulkheadHeightBox": "18.92"
+      }
+    },
+    {
+      "id": "B1_S3_default_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 207.264,
+        "beam_m": 25.6032,
+        "draught_m": 10.0584,
+        "block_coeff": 0.62,
+        "freeboard_m": 2.9718
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 134.72159069824218,
+        "main_height_m": 3.3522456733703616,
+        "ends_length_m": 72.53631199951172,
+        "ends_height_m": 3.3522456733703616,
+        "upper_length_m": 134.72159069824218,
+        "upper_height_m": 2.4384,
+        "bulkhead_length_m": 134.72159069824218,
+        "bulkhead_height_m": 9.56132278289795
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "442.00",
+        "beltMainHeightBox": "11.00",
+        "beltEndsLengthBox": "237.98",
+        "beltEndsHeightBox": "11.00",
+        "beltUpperLengthBox": "442.00",
+        "beltUpperHeightBox": "8.00",
+        "bulkheadLengthBox": "442.00",
+        "bulkheadHeightBox": "31.37"
+      }
+    },
+    {
+      "id": "B1_S1_default_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023956298828,
+        "main_height_m": 2.2308361530303955,
+        "ends_length_m": 48.2132682800293,
+        "ends_height_m": 2.2308361530303955,
+        "upper_length_m": 89.55023956298828,
+        "upper_height_m": 1.6002000570297241,
+        "bulkhead_length_m": 89.55023956298828,
+        "bulkhead_height_m": 2.709300994873047
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "89.55",
+        "beltMainHeightBox": "2.23",
+        "beltEndsLengthBox": "48.21",
+        "beltEndsHeightBox": "2.23",
+        "beltUpperLengthBox": "89.55",
+        "beltUpperHeightBox": "1.60",
+        "bulkheadLengthBox": "89.55",
+        "bulkheadHeightBox": "2.71"
+      }
+    },
+    {
+      "id": "B1_S2_default_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 188.976,
+        "beam_m": 18.8976,
+        "draught_m": 6.5532,
+        "block_coeff": 0.5,
+        "freeboard_m": 2.286
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 122.83440399169922,
+        "main_height_m": 2.8799972534179688,
+        "ends_length_m": 66.13550567626953,
+        "ends_height_m": 2.8799972534179688,
+        "upper_length_m": 122.83440399169922,
+        "upper_height_m": 2.2860000133514404,
+        "bulkhead_length_m": 122.83440399169922,
+        "bulkhead_height_m": 5.766196250915527
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "122.83",
+        "beltMainHeightBox": "2.88",
+        "beltEndsLengthBox": "66.14",
+        "beltEndsHeightBox": "2.88",
+        "beltUpperLengthBox": "122.83",
+        "beltUpperHeightBox": "2.29",
+        "bulkheadLengthBox": "122.83",
+        "bulkheadHeightBox": "5.77"
+      }
+    },
+    {
+      "id": "B1_S3_default_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 207.264,
+        "beam_m": 25.6032,
+        "draught_m": 10.0584,
+        "block_coeff": 0.62,
+        "freeboard_m": 2.9718
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 134.72158813476562,
+        "main_height_m": 3.352245807647705,
+        "ends_length_m": 72.53631591796875,
+        "ends_height_m": 3.352245807647705,
+        "upper_length_m": 134.72158813476562,
+        "upper_height_m": 2.4384000301361084,
+        "bulkhead_length_m": 134.72158813476562,
+        "bulkhead_height_m": 9.561323165893555
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "134.72",
+        "beltMainHeightBox": "3.35",
+        "beltEndsLengthBox": "72.54",
+        "beltEndsHeightBox": "3.35",
+        "beltUpperLengthBox": "134.72",
+        "beltUpperHeightBox": "2.44",
+        "bulkheadLengthBox": "134.72",
+        "bulkheadHeightBox": "9.56"
+      }
+    },
+    {
+      "id": "B2_S1_fc0_qd0_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0,
+        "quarterdeck_fraction": 0
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 137.7696,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": -0.006095999863743783,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 137.7696,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 137.7696,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "452.00",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "-0.02",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "452.00",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "452.00",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B2_S1_fc0_qd0_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0,
+        "quarterdeck_fraction": 0
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 137.7696075439453,
+        "main_height_m": 2.2308361530303955,
+        "ends_length_m": -0.006095999851822853,
+        "ends_height_m": 2.2308361530303955,
+        "upper_length_m": 137.7696075439453,
+        "upper_height_m": 1.6002000570297241,
+        "bulkhead_length_m": 137.7696075439453,
+        "bulkhead_height_m": 2.709300994873047
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "137.77",
+        "beltMainHeightBox": "2.23",
+        "beltEndsLengthBox": "-0.01",
+        "beltEndsHeightBox": "2.23",
+        "beltUpperLengthBox": "137.77",
+        "beltUpperHeightBox": "1.60",
+        "bulkheadLengthBox": "137.77",
+        "bulkheadHeightBox": "2.71"
+      }
+    },
+    {
+      "id": "B2_S1_fc50_qd50_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.5,
+        "quarterdeck_fraction": 0.5
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 0,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 137.76350734863283,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 0,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 0,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "0.00",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "451.98",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "0.00",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "0.00",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B2_S1_fc50_qd50_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.5,
+        "quarterdeck_fraction": 0.5
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 0,
+        "main_height_m": 2.2308361530303955,
+        "ends_length_m": 137.7635040283203,
+        "ends_height_m": 2.2308361530303955,
+        "upper_length_m": 0,
+        "upper_height_m": 1.6002000570297241,
+        "bulkhead_length_m": 0,
+        "bulkhead_height_m": 2.709300994873047
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "0.00",
+        "beltMainHeightBox": "2.23",
+        "beltEndsLengthBox": "137.76",
+        "beltEndsHeightBox": "2.23",
+        "beltUpperLengthBox": "0.00",
+        "beltUpperHeightBox": "1.60",
+        "bulkheadLengthBox": "0.00",
+        "bulkheadHeightBox": "2.71"
+      }
+    },
+    {
+      "id": "B2_S1_fc60_qd50_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.6,
+        "quarterdeck_fraction": 0.5
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": -13.776963720703126,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 151.54047106933595,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": -13.776963720703126,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": -13.776963720703126,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "-45.20",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "497.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "-45.20",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "-45.20",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B2_S1_fc100_qd0_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 1,
+        "quarterdeck_fraction": 0
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 0,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 137.76350734863283,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 0,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 0,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "0.00",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "451.98",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "0.00",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "0.00",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B2_S2_fc0_qd0_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0,
+        "quarterdeck_fraction": 0
+      },
+      "context": {
+        "length_m": 188.976,
+        "beam_m": 18.8976,
+        "draught_m": 6.5532,
+        "block_coeff": 0.5,
+        "freeboard_m": 2.286
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 188.976,
+        "main_height_m": 2.8799971733093264,
+        "ends_length_m": -0.006095999863743783,
+        "ends_height_m": 2.8799971733093264,
+        "upper_length_m": 188.976,
+        "upper_height_m": 2.286,
+        "bulkhead_length_m": 188.976,
+        "bulkhead_height_m": 5.766196293640137
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "620.00",
+        "beltMainHeightBox": "9.45",
+        "beltEndsLengthBox": "-0.02",
+        "beltEndsHeightBox": "9.45",
+        "beltUpperLengthBox": "620.00",
+        "beltUpperHeightBox": "7.50",
+        "bulkheadLengthBox": "620.00",
+        "bulkheadHeightBox": "18.92"
+      }
+    },
+    {
+      "id": "B2_S2_fc50_qd50_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.5,
+        "quarterdeck_fraction": 0.5
+      },
+      "context": {
+        "length_m": 188.976,
+        "beam_m": 18.8976,
+        "draught_m": 6.5532,
+        "block_coeff": 0.5,
+        "freeboard_m": 2.286
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 0,
+        "main_height_m": 2.8799971733093264,
+        "ends_length_m": 188.96989804687502,
+        "ends_height_m": 2.8799971733093264,
+        "upper_length_m": 0,
+        "upper_height_m": 2.286,
+        "bulkhead_length_m": 0,
+        "bulkhead_height_m": 5.766196293640137
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "0.00",
+        "beltMainHeightBox": "9.45",
+        "beltEndsLengthBox": "619.98",
+        "beltEndsHeightBox": "9.45",
+        "beltUpperLengthBox": "0.00",
+        "beltUpperHeightBox": "7.50",
+        "bulkheadLengthBox": "0.00",
+        "bulkheadHeightBox": "18.92"
+      }
+    },
+    {
+      "id": "B3_S1_F0_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 0.0
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 0,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "0.00",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B3_S1_F5p25_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B3_S1_F8_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 2.4384
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 2.4384,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "8.00",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B3_S1_F9p75_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 2.9718
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 2.4384,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 2.7093009063720705
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "8.00",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "8.89"
+      }
+    },
+    {
+      "id": "B3_S1_F8_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "freeboard_m": 2.4384
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023956298828,
+        "main_height_m": 2.2308361530303955,
+        "ends_length_m": 48.2132682800293,
+        "ends_height_m": 2.2308361530303955,
+        "upper_length_m": 89.55023956298828,
+        "upper_height_m": 2.4384000301361084,
+        "bulkhead_length_m": 89.55023956298828,
+        "bulkhead_height_m": 2.709300994873047
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "89.55",
+        "beltMainHeightBox": "2.23",
+        "beltEndsLengthBox": "48.21",
+        "beltEndsHeightBox": "2.23",
+        "beltUpperLengthBox": "89.55",
+        "beltUpperHeightBox": "2.44",
+        "bulkheadLengthBox": "89.55",
+        "bulkheadHeightBox": "2.71"
+      }
+    },
+    {
+      "id": "B3_S2_F7p5_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 188.976,
+        "beam_m": 18.8976,
+        "draught_m": 6.5532,
+        "block_coeff": 0.5,
+        "freeboard_m": 2.286
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 122.8344,
+        "main_height_m": 2.8799971733093264,
+        "ends_length_m": 66.1355026977539,
+        "ends_height_m": 2.8799971733093264,
+        "upper_length_m": 122.8344,
+        "upper_height_m": 2.286,
+        "bulkhead_length_m": 122.8344,
+        "bulkhead_height_m": 5.766196293640137
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "403.00",
+        "beltMainHeightBox": "9.45",
+        "beltEndsLengthBox": "216.98",
+        "beltEndsHeightBox": "9.45",
+        "beltUpperLengthBox": "403.00",
+        "beltUpperHeightBox": "7.50",
+        "bulkheadLengthBox": "403.00",
+        "bulkheadHeightBox": "18.92"
+      }
+    },
+    {
+      "id": "B4_S1_Cb0p20_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.2,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": -7.0122667465209965,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": -7.0122667465209965,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": -8.612466746520996
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "-23.01",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "-23.01",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "-28.26"
+      }
+    },
+    {
+      "id": "B4_S1_Cb0p30_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.3,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 0.6997870822906495
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "2.30"
+      }
+    },
+    {
+      "id": "B4_S1_Cb0p35_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.35,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 1.915427851867676
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "6.28"
+      }
+    },
+    {
+      "id": "B4_S1_Cb0p45_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.45,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 2.898506508636475
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "9.51"
+      }
+    },
+    {
+      "id": "B4_S1_Cb0p20_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.2,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023956298828,
+        "main_height_m": -7.012266635894775,
+        "ends_length_m": 48.2132682800293,
+        "ends_height_m": -7.012266635894775,
+        "upper_length_m": 89.55023956298828,
+        "upper_height_m": 1.6002000570297241,
+        "bulkhead_length_m": 89.55023956298828,
+        "bulkhead_height_m": -8.612466812133789
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "89.55",
+        "beltMainHeightBox": "-7.01",
+        "beltEndsLengthBox": "48.21",
+        "beltEndsHeightBox": "-7.01",
+        "beltUpperLengthBox": "89.55",
+        "beltUpperHeightBox": "1.60",
+        "bulkheadLengthBox": "89.55",
+        "bulkheadHeightBox": "-8.61"
+      }
+    },
+    {
+      "id": "B4_S2_Cb0p25_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 188.976,
+        "beam_m": 18.8976,
+        "draught_m": 6.5532,
+        "block_coeff": 0.25,
+        "freeboard_m": 2.286
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 122.8344,
+        "main_height_m": -1.2916743553161623,
+        "ends_length_m": 66.1355026977539,
+        "ends_height_m": -1.2916743553161623,
+        "upper_length_m": 122.8344,
+        "upper_height_m": 2.286,
+        "bulkhead_length_m": 122.8344,
+        "bulkhead_height_m": -3.5776743553161623
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "403.00",
+        "beltMainHeightBox": "-4.24",
+        "beltEndsLengthBox": "216.98",
+        "beltEndsHeightBox": "-4.24",
+        "beltUpperLengthBox": "403.00",
+        "beltUpperHeightBox": "7.50",
+        "bulkheadLengthBox": "403.00",
+        "bulkheadHeightBox": "-11.74"
+      }
+    },
+    {
+      "id": "B5_S1_Cb0p75_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.75,
+        "freeboard_m": 1.6002
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 89.55023627929688,
+        "main_height_m": 2.2308362159729005,
+        "ends_length_m": 48.21326641845703,
+        "ends_height_m": 2.2308362159729005,
+        "upper_length_m": 89.55023627929688,
+        "upper_height_m": 1.6002,
+        "bulkhead_length_m": 89.55023627929688,
+        "bulkhead_height_m": 3.467834257507324
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "293.80",
+        "beltMainHeightBox": "7.32",
+        "beltEndsLengthBox": "158.18",
+        "beltEndsHeightBox": "7.32",
+        "beltUpperLengthBox": "293.80",
+        "beltUpperHeightBox": "5.25",
+        "bulkheadLengthBox": "293.80",
+        "bulkheadHeightBox": "11.38"
+      }
+    },
+    {
+      "id": "B5_S3_Cb0p62_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 207.264,
+        "beam_m": 25.6032,
+        "draught_m": 10.0584,
+        "block_coeff": 0.62,
+        "freeboard_m": 2.9718
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 134.72159069824218,
+        "main_height_m": 3.3522456733703616,
+        "ends_length_m": 72.53631199951172,
+        "ends_height_m": 3.3522456733703616,
+        "upper_length_m": 134.72159069824218,
+        "upper_height_m": 2.4384,
+        "bulkhead_length_m": 134.72159069824218,
+        "bulkhead_height_m": 9.56132278289795
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "442.00",
+        "beltMainHeightBox": "11.00",
+        "beltEndsLengthBox": "237.98",
+        "beltEndsHeightBox": "11.00",
+        "beltUpperLengthBox": "442.00",
+        "beltUpperHeightBox": "8.00",
+        "bulkheadLengthBox": "442.00",
+        "bulkheadHeightBox": "31.37"
+      }
+    },
+    {
+      "id": "B5_S4_shallow_F3_scale0",
+      "complete_method": true,
+      "scale_index": 0,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 91.44,
+        "beam_m": 30.48,
+        "draught_m": 1.2192,
+        "block_coeff": 0.6,
+        "freeboard_m": 0.9144000000000001
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 59.436,
+        "main_height_m": 2.0640764820098876,
+        "ends_length_m": 31.99790502319336,
+        "ends_height_m": 2.0640764820098876,
+        "upper_length_m": 59.436,
+        "upper_height_m": 0.9144000000000001,
+        "bulkhead_length_m": 59.436,
+        "bulkhead_height_m": 1.1496764820098877
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "195.00",
+        "beltMainHeightBox": "6.77",
+        "beltEndsLengthBox": "104.98",
+        "beltEndsHeightBox": "6.77",
+        "beltUpperLengthBox": "195.00",
+        "beltUpperHeightBox": "3.00",
+        "bulkheadLengthBox": "195.00",
+        "bulkheadHeightBox": "3.77"
+      }
+    },
+    {
+      "id": "B5_S4_shallow_F3_scale1",
+      "complete_method": true,
+      "scale_index": 1,
+      "config": {
+        "source": "controlled original method",
+        "forecastle_fraction": 0.2,
+        "quarterdeck_fraction": 0.15
+      },
+      "context": {
+        "length_m": 91.44,
+        "beam_m": 30.48,
+        "draught_m": 1.2192,
+        "block_coeff": 0.6,
+        "freeboard_m": 0.9144000000000001
+      },
+      "pre_n2_dimensions_m": {
+        "main_length_m": 59.43600082397461,
+        "main_height_m": 2.0640764236450195,
+        "ends_length_m": 31.997905731201172,
+        "ends_height_m": 2.0640764236450195,
+        "upper_length_m": 59.43600082397461,
+        "upper_height_m": 0.9143999814987183,
+        "bulkhead_length_m": 59.43600082397461,
+        "bulkhead_height_m": 1.1496764421463013
+      },
+      "source_textboxes": {
+        "beltMainLengthBox": "59.44",
+        "beltMainHeightBox": "2.06",
+        "beltEndsLengthBox": "32.00",
+        "beltEndsHeightBox": "2.06",
+        "beltUpperLengthBox": "59.44",
+        "beltUpperHeightBox": "0.91",
+        "bulkheadLengthBox": "59.44",
+        "bulkheadHeightBox": "1.15"
+      }
+    }
+  ]
+}

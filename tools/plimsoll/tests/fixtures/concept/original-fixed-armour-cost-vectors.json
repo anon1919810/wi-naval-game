@@ -1,0 +1,6894 @@
+{
+ "armour": [
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 33.0336,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 99.1008,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p35_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p35_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 167.694,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p35_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 503.082,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p65_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p65_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 281.49057,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p65_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 844.4717,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p9_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p9_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 372.959167,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.55,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p55_len0p9_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 1118.87744,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 33.0336,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 99.1008,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p35_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p35_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 168.891876,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p35_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 506.675659,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p65_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p65_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 283.7704,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p65_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 851.3111,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p9_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p9_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 375.993958,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.65,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p65_len0p9_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 1127.98193,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 33.0336,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 99.1008,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p35_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p35_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 170.7883,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p35_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 512.364868,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p65_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p65_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 287.671875,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p65_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 863.015564,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p9_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p9_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 382.081177,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.8,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p8_len0p9_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 1146.24353,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 33.0336,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 99.1008,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p35_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p35_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 172.8113,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p35_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 48.21935906982422,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 518.4339,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p65_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p65_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 292.238739,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p65_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 89.55023627929688,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 876.716248,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p9_t0",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p9_t4",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_main",
+   "long_tons": 390.679626,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp0p95_len0p9_t12",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 123.99263627929687,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "belt_main",
+   "long_tons": 1172.03882,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p2_t0",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 37.7952,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p55_t0",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 103.9368,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p85_t0",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 160.6296,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p2_t2",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 37.7952,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_main",
+   "long_tons": 101.581551,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p55_t2",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 103.9368,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_main",
+   "long_tons": 218.121323,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p85_t2",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 160.6296,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_main",
+   "long_tons": 315.1536,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p2_t6",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 37.7952,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "belt_main",
+   "long_tons": 304.744659,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p55_t6",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 103.9368,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "belt_main",
+   "long_tons": 654.363953,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p85_t6",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 160.6296,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "belt_main",
+   "long_tons": 945.4608,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p2_t15",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 37.7952,
+    "thickness_mm": 381
+   },
+   "kind": "belt_main",
+   "long_tons": 761.861633,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p55_t15",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 103.9368,
+    "thickness_mm": 381
+   },
+   "kind": "belt_main",
+   "long_tons": 1635.90991,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "length_m": 188.976
+   },
+   "family": "F1_belt_main",
+   "id": "F1_B_cwp0p78_len0p85_t15",
+   "in": {
+    "height_m": 2.286,
+    "length_m": 160.6296,
+    "thickness_mm": 381
+   },
+   "kind": "belt_main",
+   "long_tons": 2363.652,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p1_t0",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 20.7264,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p5_t0",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 103.632,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p92_t0",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 190.68289116210937,
+    "thickness_mm": 0
+   },
+   "kind": "belt_main",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p1_t5",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 20.7264,
+    "thickness_mm": 127
+   },
+   "kind": "belt_main",
+   "long_tons": 390.043182,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p5_t5",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 103.632,
+    "thickness_mm": 127
+   },
+   "kind": "belt_main",
+   "long_tons": 1075.32166,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p92_t5",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 190.68289116210937,
+    "thickness_mm": 127
+   },
+   "kind": "belt_main",
+   "long_tons": 1765.53979,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p1_t18",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 20.7264,
+    "thickness_mm": 457.2
+   },
+   "kind": "belt_main",
+   "long_tons": 1404.15552,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p5_t18",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 103.632,
+    "thickness_mm": 457.2
+   },
+   "kind": "belt_main",
+   "long_tons": 3871.158,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 25.6032,
+    "co_waterplane": 0.84,
+    "length_m": 207.264
+   },
+   "family": "F1_belt_main",
+   "id": "F1_C_cwp0p84_len0p92_t18",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 190.68289116210937,
+    "thickness_mm": 457.2
+   },
+   "kind": "belt_main",
+   "long_tons": 6355.94336,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 1,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp1p00_len0_t6",
+   "in": {
+    "height_m": 1.524,
+    "length_m": 0,
+    "thickness_mm": 152.4
+   },
+   "kind": "belt_main",
+   "long_tons": 41.292,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 1,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp1p00_len0p5_t6",
+   "in": {
+    "height_m": 1.524,
+    "length_m": 68.8848,
+    "thickness_mm": 152.4
+   },
+   "kind": "belt_main",
+   "long_tons": 292.152,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 1,
+    "length_m": 137.7696
+   },
+   "family": "F1_belt_main",
+   "id": "F1_A_cwp1p00_len1_t6",
+   "in": {
+    "height_m": 1.524,
+    "length_m": 137.7696,
+    "thickness_mm": 152.4
+   },
+   "kind": "belt_main",
+   "long_tons": 543.012,
+   "method": "ArmourControl.weightBeltMainCalc",
+   "source_location": "ArmourControl.cs:602-608 weightBeltMainCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 14.4522009,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 36.1305,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 65.0349045,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p5_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p5_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 98.75372,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p5_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 246.884308,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p5_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 444.391754,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p85_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p85_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 156.0283,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p85_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 390.07077,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.6,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p6_len0p85_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 702.1274,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 14.4522009,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 36.1305,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 65.0349045,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p5_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p5_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 99.953804,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p5_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 249.8845,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p5_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 449.7921,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p85_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p85_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 158.255783,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p85_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 395.639465,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.75,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p75_len0p85_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 712.151062,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 14.4522009,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 36.1305,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 0,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 65.0349045,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p5_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p5_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 101.76091,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p5_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 254.402267,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p5_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 68.8848,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 457.924072,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p85_t0",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 0
+   },
+   "kind": "belt_upper",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p85_t2",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_upper",
+   "long_tons": 162.406036,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p85_t5",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 127
+   },
+   "kind": "belt_upper",
+   "long_tons": 406.0151,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.95,
+    "length_m": 137.7696
+   },
+   "family": "F2_belt_upper",
+   "id": "F2_cwp0p95_len0p85_t9",
+   "in": {
+    "height_m": 1.6002,
+    "length_m": 117.10416372070313,
+    "thickness_mm": 228.6
+   },
+   "kind": "belt_upper",
+   "long_tons": 730.827148,
+   "method": "ArmourControl.weightBeltUpperCalc",
+   "source_location": "ArmourControl.cs:620-626 weightBeltUpperCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L0_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L0_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L20_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 6.096,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L20_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 6.096,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L60_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 18.288,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L60_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 18.288,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L140_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t0_L140_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 0
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L0_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 0,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L0_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 0,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L20_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 6.096,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 2.96,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L20_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 6.096,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 5.92,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L60_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 18.288,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 8.88,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L60_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 18.288,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 17.76,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L140_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 20.7200012,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t1_L140_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 25.4
+   },
+   "kind": "belt_ends",
+   "long_tons": 41.4400024,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L0_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L0_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L20_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 6.096,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 5.92,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L20_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 6.096,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 11.84,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L60_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 18.288,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 17.76,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L60_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 18.288,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 35.52,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L140_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 41.4400024,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t2_L140_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 50.8
+   },
+   "kind": "belt_ends",
+   "long_tons": 82.8800049,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L0_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L0_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L20_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 6.096,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 11.84,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L20_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 6.096,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 23.68,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L60_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 18.288,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 35.52,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L60_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 18.288,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 71.04,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L140_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 82.8800049,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t4_L140_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 101.6
+   },
+   "kind": "belt_ends",
+   "long_tons": 165.76001,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L0_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 0,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L0_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 0,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L20_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 6.096,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 20.7200012,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L20_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 6.096,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 41.4400024,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L60_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 18.288,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 62.16,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L60_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 18.288,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 124.32,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L140_H4",
+   "in": {
+    "height_m": 1.2192,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 145.040009,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F3_belt_ends",
+   "id": "F3_t7_L140_H8",
+   "in": {
+    "height_m": 2.4384,
+    "length_m": 42.672000000000004,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "belt_ends",
+   "long_tons": 290.080017,
+   "method": "ArmourControl.weightBeltEndsCalc",
+   "source_location": "ArmourControl.cs:610-618 weightBeltEndsCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L0_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L0_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L8_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 2.4384,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L8_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 2.4384,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L30_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 9.144,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L30_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 9.144,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L70_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t0_L70_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 0
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L0_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L0_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 0,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L8_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 2.4384,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 2.664,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L8_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 2.4384,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 6.216,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L30_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 9.144,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 9.99,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L30_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 9.144,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 23.31,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L70_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 23.31,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t1.5_L70_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 38.099999999999994
+   },
+   "kind": "bulkhead",
+   "long_tons": 54.39,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L0_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L0_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 0,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L8_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 2.4384,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 5.328,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L8_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 2.4384,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 12.432,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L30_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 9.144,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 19.98,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L30_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 9.144,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 46.62,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L70_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 46.62,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t3_L70_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "bulkhead",
+   "long_tons": 108.78,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L0_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 0,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L0_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 0,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L8_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 2.4384,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 10.656,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L8_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 2.4384,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 24.864,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L30_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 9.144,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 39.96,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L30_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 9.144,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 93.24,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L70_H6",
+   "in": {
+    "height_m": 1.8288000000000002,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 93.24,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F4_bulkhead",
+   "id": "F4_t6_L70_H14",
+   "in": {
+    "height_m": 4.2672,
+    "length_m": 21.336000000000002,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "bulkhead",
+   "long_tons": 217.56,
+   "method": "ArmourControl.weightBulkheadCalc",
+   "source_location": "ArmourControl.cs:654-669 weightBulkheadCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L0_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L0_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 0,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L15_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 4.572,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L15_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 4.572,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L55_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 16.764,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L55_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 16.764,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L120_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 36.576,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t0_L120_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 36.576,
+    "thickness_mm": 0
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L0_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L0_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 0,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L15_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 4.572,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 3.33,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L15_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 4.572,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 7.77,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L55_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 16.764,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 12.21,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L55_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 16.764,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 28.49,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L120_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 36.576,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 26.64,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t2_L120_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 36.576,
+    "thickness_mm": 50.8
+   },
+   "kind": "bulge",
+   "long_tons": 62.16,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L0_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L0_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 0,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L15_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 4.572,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 6.66,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L15_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 4.572,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 15.54,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L55_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 16.764,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 24.42,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L55_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 16.764,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 56.98,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L120_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 36.576,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 53.28,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t4_L120_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 36.576,
+    "thickness_mm": 101.6
+   },
+   "kind": "bulge",
+   "long_tons": 124.32,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L0_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 0,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L0_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 0,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 0,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L15_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 4.572,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 11.655,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L15_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 4.572,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 27.195,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L55_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 16.764,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 42.735,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L55_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 16.764,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 99.715004,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L120_H3",
+   "in": {
+    "height_m": 0.9144000000000001,
+    "length_m": 36.576,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 93.24,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {},
+   "family": "F5_bulge",
+   "id": "F5_t7_L120_H7",
+   "in": {
+    "height_m": 2.1336,
+    "length_m": 36.576,
+    "thickness_mm": 177.79999999999998
+   },
+   "kind": "bulge",
+   "long_tons": 217.56,
+   "method": "ArmourControl.weightBulgeCalc",
+   "source_location": "ArmourControl.cs:671-686 weightBulgeCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 834.0984,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1668.19678,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 768.3231,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1536.64624,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 769.394531,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel0_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 0,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1538.78906,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 834.0984,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1668.19678,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 768.3231,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1536.64624,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 769.394531,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel1_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 1,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1538.78906,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 834.0984,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1668.19678,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 768.3231,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1536.64624,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 769.394531,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel2_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 2,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1538.78906,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 834.0984,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1668.19678,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 768.3231,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1536.64624,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 769.394531,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel3_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 3,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1538.78906,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 732.8665,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1465.733,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 836.9758,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1673.95166,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 868.5543,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel4_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1737.10864,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 77.60278,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 155.205566,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 181.712128,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 363.424255,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 213.290543,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel5_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 426.5811,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.00_qd0.00_all0",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.00_qd0.00_c4_f3_q2",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 766.424561,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.00_qd0.00_c8_f6_q4",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1532.84912,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.20_qd0.15_all0",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.20_qd0.15_c4_f3_q2",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 870.533936,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.20_qd0.15_c8_f6_q4",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.20000000298023224,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.15000000596046448,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1741.06787,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.30_qd0.10_all0",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 0,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "deck",
+   "long_tons": 0,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.30_qd0.10_c4_f3_q2",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 76.19999999999999,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 50.8,
+    "thickness_mm": 101.6
+   },
+   "kind": "deck",
+   "long_tons": 902.1124,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 28.957336900799998,
+    "beam_m": 11.338560000000001,
+    "co_waterplane": 0.72,
+    "displacement_t": 1061.769019696,
+    "length_m": 137.7696,
+    "machinery_mass_t": 198.12914721599998,
+    "waterplane_area_m2": 1036.79748
+   },
+   "family": "F6_deck_selectors",
+   "id": "F6_sel6_fc0.30_qd0.10_c8_f6_q4",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.30000001192092896,
+    "forecastle_mm": 152.39999999999998,
+    "quarterdeck_fraction": 0.10000000149011612,
+    "quarterdeck_mm": 101.6,
+    "thickness_mm": 203.2
+   },
+   "kind": "deck",
+   "long_tons": 1804.22485,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 0.0,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 0.0,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel4_machinery0_ammo0",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 474.081482,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 0.0,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 609.6281452799999,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel4_machinery600_ammo0",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 1281.01331,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 223.53031993599998,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 0.0,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel4_machinery0_ammo220",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 474.081482,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 182.888443584,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 1473.2680177599998,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel4_machinery1450_ammo180",
+   "in": {
+    "coverage_index": 4,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 2424.167,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 0.0,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 0.0,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel5_machinery0_ammo0",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 474.081482,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 0.0,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 609.6281452799999,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel5_machinery600_ammo0",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 474.081482,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 223.53031993599998,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 0.0,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel5_machinery0_ammo220",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 572.7065,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 182.888443584,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 1473.2680177599998,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel5_machinery1450_ammo180",
+   "in": {
+    "coverage_index": 5,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 554.774658,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 0.0,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 0.0,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel6_machinery0_ammo0",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 474.081482,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 0.0,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 609.6281452799999,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel6_machinery600_ammo0",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 1281.01331,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 223.53031993599998,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 0.0,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel6_machinery0_ammo220",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 572.7065,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "ammunition_mass_t": 182.888443584,
+    "beam_m": 18.8976,
+    "co_waterplane": 0.78,
+    "displacement_t": 7010.723670719999,
+    "length_m": 188.976,
+    "machinery_mass_t": 1473.2680177599998,
+    "waterplane_area_m2": 2505.779716
+   },
+   "family": "F6b_deck_box_selectors",
+   "id": "F6b_sel6_machinery1450_ammo180",
+   "in": {
+    "coverage_index": 6,
+    "forecastle_fraction": 0.25,
+    "forecastle_mm": 101.6,
+    "quarterdeck_fraction": 0.125,
+    "quarterdeck_mm": 63.5,
+    "thickness_mm": 127
+   },
+   "kind": "deck",
+   "long_tons": 2504.86035,
+   "method": "ArmourControl.weightDeckCalc",
+   "source_location": "ArmourControl.cs:694-725 weightDeckCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for0_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 0,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for0_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 8.87437,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for0_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 22.1859245,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for3_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 6.65577745,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for3_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 15.5301476,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for3_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 28.8417015,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for6_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 13.3115549,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for6_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 22.1859245,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for6_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 35.49748,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for12_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 26.62311,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for12_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 35.49748,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 1061.769019696
+   },
+   "family": "F7_conning",
+   "id": "F7_A_destroyer_for12_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 48.8090363,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for0_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 0,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for0_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 31.2338886,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for0_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 78.08472,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for3_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 23.4254169,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for3_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 54.6593056,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for3_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 101.510139,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for6_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 46.8508339,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for6_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 78.08472,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for6_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 124.935555,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for12_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 93.70167,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for12_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 124.935555,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 7010.723670719999
+   },
+   "family": "F7_conning",
+   "id": "F7_B_cruiser_for12_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 171.786392,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for0_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 0,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for0_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 82.27628,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for0_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 0
+   },
+   "kind": "conning",
+   "long_tons": 205.69072,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for3_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 61.7072144,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for3_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 143.9835,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for3_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 76.19999999999999
+   },
+   "kind": "conning",
+   "long_tons": 267.397919,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for6_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 123.414429,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for6_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 205.69072,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for6_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 152.39999999999998
+   },
+   "kind": "conning",
+   "long_tons": 329.105133,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for12_aft0",
+   "in": {
+    "aft_mm": 0,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 246.828857,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for12_aft4",
+   "in": {
+    "aft_mm": 101.6,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 329.105133,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  },
+  {
+   "ctx": {
+    "displacement_t": 29973.383809599996
+   },
+   "family": "F7_conning",
+   "id": "F7_C_battleship_for12_aft10",
+   "in": {
+    "aft_mm": 254,
+    "thickness_mm": 304.79999999999995
+   },
+   "kind": "conning",
+   "long_tons": 452.519562,
+   "method": "ArmourControl.weightConningCalc",
+   "source_location": "ArmourControl.cs:727-735 weightConningCalc"
+  }
+ ],
+ "canonical_conversions": {
+  "feet_to_m": 0.3048,
+  "inches_to_mm": 25.4,
+  "long_tons_to_t": 1.0160469088,
+  "note": "The canonical columns are unit conversions of the float32 values the original received and returned; no original formula is translated.",
+  "sqft_to_m2": 0.092903
+ },
+ "cost": [
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1850_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1850,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1850_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1850,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801361083984,
+    "borne_usd_million": 3.2928004264831543,
+    "gbp_million": 2.109450101852417,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005950927734,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440003395080566,
+    "usd_million": 8.437800407409668,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1870_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1870,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1870_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1870,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801361083984,
+    "borne_usd_million": 3.2928004264831543,
+    "gbp_million": 2.109450101852417,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005950927734,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440003395080566,
+    "usd_million": 8.437800407409668,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1890_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1890,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1890_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1890,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801361083984,
+    "borne_usd_million": 3.2928004264831543,
+    "gbp_million": 2.109450101852417,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005950927734,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440003395080566,
+    "usd_million": 8.437800407409668,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1900_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1900,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1900_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1900,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801361083984,
+    "borne_usd_million": 3.2928004264831543,
+    "gbp_million": 2.109450101852417,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005950927734,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440003395080566,
+    "usd_million": 8.437800407409668,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1911_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1911,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1911_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1911,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801361083984,
+    "borne_usd_million": 3.2928004264831543,
+    "gbp_million": 2.109450101852417,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005950927734,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440003395080566,
+    "usd_million": 8.437800407409668,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1912_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1912_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1912,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801361083984,
+    "borne_usd_million": 3.2928004264831543,
+    "gbp_million": 2.109450101852417,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005950927734,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440003395080566,
+    "usd_million": 8.437800407409668,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1913_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1913,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.39250403394301614,
+    "borne_usd_million": 0.15120001957681445,
+    "gbp_million": 0.10704655200242996,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210401843992078,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.1091999959262809,
+    "usd_million": 0.42818620800971985,
+    "year_factor": 1.09090913922736
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1913_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1913,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437800407409668,
+    "borne_usd_million": 3.2928000203962235,
+    "gbp_million": 2.301218271255493,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.801000432210994,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3439999548024506,
+    "usd_million": 9.204873085021973,
+    "year_factor": 1.090909080634178
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1914_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1914,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.3925040066242218,
+    "borne_usd_million": 0.15120000367764705,
+    "gbp_million": 0.12488763779401779,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400159139135,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000135518339,
+    "usd_million": 0.49955055117607117,
+    "year_factor": 1.272727265824663
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1914_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1914,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.43780115672522,
+    "borne_usd_million": 3.2928005062329313,
+    "gbp_million": 2.6847546100616455,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010005509116818,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440000995806074,
+    "usd_million": 10.739018440246582,
+    "year_factor": 1.2727272419025337
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1920_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1920,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.39250403184157273,
+    "borne_usd_million": 0.1512000081212524,
+    "gbp_million": 0.23193417489528656,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210401785497136,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000586534896,
+    "usd_million": 0.9277366995811462,
+    "year_factor": 2.3636362531946054
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1920_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1920,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437802021320078,
+    "borne_usd_million": 3.2928004837394043,
+    "gbp_million": 4.985972881317139,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.8010006978655495,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.344000839715124,
+    "usd_million": 19.943891525268555,
+    "year_factor": 2.3636363225367116
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1950_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1950,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.3925040066242218,
+    "borne_usd_million": 0.15120000527108346,
+    "gbp_million": 0.7671669125556946,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210399924043364,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000211270471,
+    "usd_million": 3.0686676502227783,
+    "year_factor": 7.81818172154528
+   }
+  },
+  {
+   "family": "F8a_cost_year_sweep",
+   "id": "F8a_year1950_cfg1",
+   "in": {
+    "ammunition_mass_t": 314.974541728,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 1473.2680177600002,
+    "hull_year": 1950,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 8.437801871188762,
+    "borne_usd_million": 3.2928008373257924,
+    "gbp_million": 16.4920654296875,
+    "light_basis_long_tons": 27150,
+    "light_usd_million": 3.801000542732127,
+    "load_long_tons": 2350,
+    "machinery_usd_million": 1.3440004911308434,
+    "usd_million": 65.96826171875,
+    "year_factor": 7.818182290827816
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_machinery0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 0
+   },
+   "out": {
+    "base_usd_million": 0.28330402076244354,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.07082600146532059,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.0,
+    "usd_million": 0.28330400586128235,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_borne0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 0,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.24130399525165558,
+    "borne_usd_million": 0.0,
+    "gbp_million": 0.060325998812913895,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210399448871613,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.24130399525165558,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_ammo0_fuel0",
+   "in": {
+    "ammunition_mass_t": 0,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 0,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.4037739932537079,
+    "borne_usd_million": 0.15119999647140503,
+    "gbp_million": 0.10094349831342697,
+    "light_basis_long_tons": 1024.1000003814697,
+    "light_usd_million": 0.1433739960193634,
+    "load_long_tons": 20.9,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.4037739932537079,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_heavy_machinery",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 2438.5125811200005
+   },
+   "out": {
+    "base_usd_million": 1.627303808927536,
+    "borne_usd_million": 0.15119993686676025,
+    "gbp_million": 0.406825989484787,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210391998291016,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 1.3439999520778656,
+    "usd_million": 1.627303957939148,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_heavy_borne",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 995.7259706240002,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 3.534104272723198,
+    "borne_usd_million": 3.2928001135587692,
+    "gbp_million": 0.8835260272026062,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210415840148926,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 3.534104108810425,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_small_displacement",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 121.92562905600002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.2655940130352974,
+    "borne_usd_million": 0.15120000392198563,
+    "gbp_million": 0.0663985013961792,
+    "light_basis_long_tons": 37.099998474121094,
+    "light_usd_million": 0.0051940083503723145,
+    "load_long_tons": 82.9,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.2655940055847168,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_large_displacement",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 4.296529591083527,
+    "borne_usd_million": 0.1511998176574707,
+    "gbp_million": 1.0741324424743652,
+    "light_basis_long_tons": 28829.5,
+    "light_usd_million": 4.0361297726631165,
+    "load_long_tons": 670.5,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 4.296529769897461,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_mid_displacement",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 4267.397016960001,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.8253700137138367,
+    "borne_usd_million": 0.15119999647140503,
+    "gbp_million": 0.20634250342845917,
+    "light_basis_long_tons": 4035.5,
+    "light_usd_million": 0.5649700164794922,
+    "load_long_tons": 164.5,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.8253700137138367,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8b_cost_mass_sweep",
+   "id": "F8b_1912_all_zero_but_disp",
+   "in": {
+    "ammunition_mass_t": 0,
+    "borne_mass_t": 0,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 0,
+    "hull_year": 1912,
+    "machinery_mass_t": 0
+   },
+   "out": {
+    "base_usd_million": 0.1433739960193634,
+    "borne_usd_million": 0.0,
+    "gbp_million": 0.03584349900484085,
+    "light_basis_long_tons": 1024.1000003814697,
+    "light_usd_million": 0.1433739960193634,
+    "load_long_tons": 20.9,
+    "machinery_usd_million": 0.0,
+    "usd_million": 0.1433739960193634,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8c_cost_displacement_sweep",
+   "id": "F8c_1912_disp500",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 508.02345440000005,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.31773003935813904,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.07943250238895416,
+    "light_basis_long_tons": 409.5,
+    "light_usd_million": 0.05733001232147217,
+    "load_long_tons": 90.5,
+    "machinery_usd_million": 0.10920001566410065,
+    "usd_million": 0.31773000955581665,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8c_cost_displacement_sweep",
+   "id": "F8c_1912_disp1045",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8c_cost_displacement_sweep",
+   "id": "F8c_1912_disp6950",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 7061.526016160001,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 1.20266991853714,
+    "borne_usd_million": 0.15119993686676025,
+    "gbp_million": 0.30066749453544617,
+    "light_basis_long_tons": 6730.5,
+    "light_usd_million": 0.9422699809074402,
+    "load_long_tons": 219.5,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 1.2026699781417847,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8c_cost_displacement_sweep",
+   "id": "F8c_1912_disp29500",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 29973.383809600004,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 4.296529591083527,
+    "borne_usd_million": 0.1511998176574707,
+    "gbp_million": 1.0741324424743652,
+    "light_basis_long_tons": 28829.5,
+    "light_usd_million": 4.0361297726631165,
+    "load_long_tons": 670.5,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 4.296529769897461,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8d_cost_branch_boundary",
+   "id": "F8d_year1912_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.392504021525383,
+    "borne_usd_million": 0.15120001137256622,
+    "gbp_million": 0.09812600165605545,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210400938987732,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.10920000076293945,
+    "usd_million": 0.3925040066242218,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8d_cost_branch_boundary",
+   "id": "F8d_year1912_cfg1",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 223.53031993600004,
+    "displacement_t": 4267.397016960001,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1912,
+    "machinery_mass_t": 711.2328361600001
+   },
+   "out": {
+    "base_usd_million": 1.6961699724197388,
+    "borne_usd_million": 0.7391999959945679,
+    "gbp_million": 0.4240424931049347,
+    "light_basis_long_tons": 4035.5,
+    "light_usd_million": 0.5649700164794922,
+    "load_long_tons": 164.5,
+    "machinery_usd_million": 0.3919999599456787,
+    "usd_million": 1.6961699724197388,
+    "year_factor": 1
+   }
+  },
+  {
+   "family": "F8d_cost_branch_boundary",
+   "id": "F8d_year1913_cfg0",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 45.722110896000004,
+    "displacement_t": 1061.7690196960002,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1913,
+    "machinery_mass_t": 198.12914721600004
+   },
+   "out": {
+    "base_usd_million": 0.39250403394301614,
+    "borne_usd_million": 0.15120001957681445,
+    "gbp_million": 0.10704655200242996,
+    "light_basis_long_tons": 943.5999984741211,
+    "light_usd_million": 0.13210401843992078,
+    "load_long_tons": 101.4,
+    "machinery_usd_million": 0.1091999959262809,
+    "usd_million": 0.42818620800971985,
+    "year_factor": 1.09090913922736
+   }
+  },
+  {
+   "family": "F8d_cost_branch_boundary",
+   "id": "F8d_year1913_cfg1",
+   "in": {
+    "ammunition_mass_t": 28.957336900800005,
+    "borne_mass_t": 223.53031993600004,
+    "displacement_t": 4267.397016960001,
+    "fuel_mass_t": 52.83443925760001,
+    "hull_year": 1913,
+    "machinery_mass_t": 711.2328361600001
+   },
+   "out": {
+    "base_usd_million": 1.696170081694917,
+    "borne_usd_million": 0.7392000296231868,
+    "gbp_million": 0.46259182691574097,
+    "light_basis_long_tons": 4035.5,
+    "light_usd_million": 0.5649700462965718,
+    "load_long_tons": 164.5,
+    "machinery_usd_million": 0.3920000057751586,
+    "usd_million": 1.8503673076629639,
+    "year_factor": 1.0909091292444286
+   }
+  }
+ ],
+ "cost_guarded": {
+  "note": "The original produced a price for these rows from a NEGATIVE light basis because the load exceeds the displacement. This project refuses them: an impossible negative light basis is reported unavailable and never becomes a plausible zero price, even though the original emitted one.",
+  "rows": [
+   {
+    "family": "F8b_cost_mass_sweep",
+    "id": "F8b_1912_heavy_ammo_fuel",
+    "in": {
+     "ammunition_mass_t": 314.974541728,
+     "borne_mass_t": 45.722110896000004,
+     "displacement_t": 1061.7690196960002,
+     "fuel_mass_t": 1473.2680177600002,
+     "hull_year": 1912,
+     "machinery_mass_t": 198.12914721600004
+    },
+    "out": {
+     "base_usd_million": 0.1573739922605455,
+     "borne_usd_million": 0.1511999978683889,
+     "gbp_million": 0.03934349864721298,
+     "light_basis_long_tons": -735.9000244140625,
+     "light_usd_million": -0.10302600264549255,
+     "load_long_tons": 1780.9,
+     "machinery_usd_million": 0.10919999703764915,
+     "usd_million": 0.15737399458885193,
+     "year_factor": 1
+    }
+   },
+   {
+    "family": "F8c_cost_displacement_sweep",
+    "id": "F8c_1912_disp50",
+    "in": {
+     "ammunition_mass_t": 28.957336900800005,
+     "borne_mass_t": 45.722110896000004,
+     "displacement_t": 50.80234544000001,
+     "fuel_mass_t": 52.83443925760001,
+     "hull_year": 1912,
+     "machinery_mass_t": 198.12914721600004
+    },
+    "out": {
+     "base_usd_million": 0.25598999857902527,
+     "borne_usd_million": 0.15119999647140503,
+     "gbp_million": 0.06399749964475632,
+     "light_basis_long_tons": -31.5,
+     "light_usd_million": -0.004409998655319214,
+     "load_long_tons": 81.5,
+     "machinery_usd_million": 0.10920000076293945,
+     "usd_million": 0.25598999857902527,
+     "year_factor": 1
+    }
+   }
+  ]
+ },
+ "coverage": {
+  "armour_valid_cases": 323,
+  "cost_guarded_cases": 2,
+  "cost_supported_cases": 37,
+  "cost_years_covered": [
+   1850,
+   1870,
+   1890,
+   1900,
+   1911,
+   1912,
+   1913,
+   1914,
+   1920,
+   1950
+  ],
+  "deck_selectors_covered": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6
+  ],
+  "unsupported_boundary_rows": 16
+ },
+ "limitations": [
+  "Evidence only: no parity judgement, no replacement implementation, no ship validation, no whole-program or GUI parity claim.",
+  "Synthetic numerical inputs in imperial units; they are not user files and not ship data.",
+  "Original singleton-free instances only: no MainForm window is constructed, no designer InitializeComponent runs, no event handler is subscribed, no file of the installed application is opened for writing.",
+  "waterplaneArea_sqft of the synthetic ships is an input prepared from the standard Cwp = Aw/(L*B) relation; it is not produced by any method under test.",
+  "Unknown/null inputs are deliberately NOT probed here: the original fields are floats and cannot hold a null float, so the kernel unknown policy is outside this probe.",
+  "Deck selector, machinery and ammunition, forecastle and quarterdeck fractions, conning fore/aft and the year branch are swept; the paired cost readings isolate the three cost terms by zeroing one input at a time in the original costCalc, never by translating the formula."
+ ],
+ "method_identities": {
+  "cost": "sps-3b3-cost-v1",
+  "fixed_armour": "sps-3b3-fixed-armour-v1"
+ },
+ "original_binary": {
+  "assembly": "SpringSharpMono, Version=3.0.3032.29945, Culture=neutral, PublicKeyToken=null",
+  "file_size": 438272,
+  "load_mode": "Reflection.Assembly.LoadFile (read-only, in memory, no process launched)",
+  "sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+  "sha256_matches": true
+ },
+ "original_convention": {
+  "INCH": 0.0185,
+  "lengths": "feet",
+  "mass": "long tons (2240 lb)",
+  "note": "canonical m / mm / t values in this document are unit conversions of the float32 values the original assembly received and returned (ft*0.3048, in*25.4, LT*1.0160469088, sqft*0.092903); no original formula is translated in the harness",
+  "thickness": "inches"
+ },
+ "reading_convention": {
+  "note": "The probe isolates each cost term by differencing two complete costCalc readings at the same hull year, so its three term columns already carry the recovered year factor. This fixture stores them divided by that same factor, because the three contributions this project reports are the terms of the un-factored base. No original formula is translated and no original control wiring is reproduced."
+ },
+ "recovered_source": {
+  "ArmourControl.weightBeltEndsCalc": "ArmourControl.cs:610-618",
+  "ArmourControl.weightBeltMainCalc": "ArmourControl.cs:602-608",
+  "ArmourControl.weightBeltUpperCalc": "ArmourControl.cs:620-626",
+  "ArmourControl.weightBeltsCalc": "ArmourControl.cs:628-652",
+  "ArmourControl.weightBulgeCalc": "ArmourControl.cs:671-686",
+  "ArmourControl.weightBulkheadCalc": "ArmourControl.cs:654-669",
+  "ArmourControl.weightCalc": "ArmourControl.cs:737-760",
+  "ArmourControl.weightConningCalc": "ArmourControl.cs:727-735",
+  "ArmourControl.weightDeckCalc": "ArmourControl.cs:694-725",
+  "EngineControl.hullWeightCalc": "EngineControl.cs:936-947",
+  "EngineControl.loadWeightCalc": "EngineControl.cs:924-934",
+  "PerformanceControl.costCalc": "PerformanceControl.cs:534-544"
+ },
+ "relative_tolerance": 1e-05,
+ "schema": "plimsoll-original-fixed-armour-cost-vectors-1",
+ "scope": "The original SpringSharpMono fixed armour weight methods and empirical cost methods executed directly on the recovered assembly, curated into a compact regression fixture. It is numerical evidence for the recovered expressions, nothing more: not whole-program parity, not GUI parity, not ship validation, and not a replacement implementation. No original code, control wiring or array initializer is reproduced here, only the inputs the original received and the numbers it returned.",
+ "unsupported_boundary": {
+  "armour": [
+   {
+    "boundary_note": "beltMainLength > hull.length makes the pow() base negative (non-integer exponent), so the original produces NaN, not a negative mass.",
+    "id": "U01_belt_main_length_exceeds_hull",
+    "kind": "belt_main"
+   },
+   {
+    "boundary_note": "hull.length = 0 divides by zero inside the original; the result is a non-finite float, not an exception.",
+    "id": "U02_belt_main_zero_hull_length",
+    "kind": "belt_main"
+   },
+   {
+    "boundary_note": "Cwp = 1.5 makes the exponent (1 - Cwp) negative.",
+    "id": "U03_belt_main_cwp_above_one",
+    "kind": "belt_main"
+   },
+   {
+    "boundary_note": "Negative thickness input: the original multiplies it straight through and returns a negative mass.",
+    "id": "U04_belt_main_negative_thickness",
+    "kind": "belt_main"
+   },
+   {
+    "boundary_note": "Upper belt longer than the hull.",
+    "id": "U05_belt_upper_length_exceeds_hull",
+    "kind": "belt_upper"
+   },
+   {
+    "boundary_note": "Negative height input.",
+    "id": "U06_belt_ends_negative_height",
+    "kind": "belt_ends"
+   },
+   {
+    "boundary_note": "Negative bulkhead thickness input.",
+    "id": "U07_bulkhead_negative_thickness",
+    "kind": "bulkhead"
+   },
+   {
+    "boundary_note": "Negative bulge length input.",
+    "id": "U08_bulge_negative_length",
+    "kind": "bulge"
+   },
+   {
+    "boundary_note": "Selector 7 is outside the original 0..6 switch and falls into default, so only the fore/quarter terms survive.",
+    "id": "U09_deck_selector_7_out_of_range",
+    "kind": "deck"
+   },
+   {
+    "boundary_note": "Selector 9 is outside the original switch.",
+    "id": "U10_deck_selector_9_out_of_range",
+    "kind": "deck"
+   },
+   {
+    "boundary_note": "fc fraction 0 with Cwp > 1 evaluates pow(0, negative) = Infinity, which the original then multiplies by a zero factor.",
+    "id": "U11_deck_zero_fc_with_cwp_above_one",
+    "kind": "deck"
+   },
+   {
+    "boundary_note": "Selector 4 (machinery box) with zero displacement divides by zero inside the original.",
+    "id": "U12_deck_zero_displacement_box_selector",
+    "kind": "deck"
+   },
+   {
+    "boundary_note": "Negative deck thicknesses multiply straight through to a negative deck mass.",
+    "id": "U13_deck_negative_thickness",
+    "kind": "deck"
+   },
+   {
+    "boundary_note": "Negative conning fore thickness.",
+    "id": "U14_conning_negative_thickness",
+    "kind": "conning"
+   },
+   {
+    "boundary_note": "Zero displacement makes pow(0, 2/3) = 0: a known zero result, not an unknown, and not NaN.",
+    "id": "U15_conning_zero_displacement",
+    "kind": "conning"
+   },
+   {
+    "boundary_note": "Negative displacement makes pow(negative, 2/3) NaN.",
+    "id": "U16_conning_negative_displacement",
+    "kind": "conning"
+   }
+  ],
+  "cost_case_ids": [
+   "U17_cost_year_2025",
+   "U18_cost_year_1500",
+   "U19_cost_negative_displacement",
+   "U20_cost_load_exceeds_displacement",
+   "U21_cost_zero_displacement"
+  ]
+ }
+}

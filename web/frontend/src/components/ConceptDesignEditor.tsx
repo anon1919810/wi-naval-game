@@ -1,18 +1,28 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 
 import { useWorkspaceCopy } from '../i18n/workspace';
 import { useConceptCopy, type ConceptKey } from '../i18n/concept';
 import { QuantityField } from './QuantityField';
-import { number, numericProblem, object, sourceText, stringList, type NumericDomain, type Raw } from './formModel';
+import { number, object, sourceText, stringList, type Raw } from './formModel';
 import { systemLeaves } from './massModels';
+import { DeclaredNumber, ItemSelect } from './declaredInputs';
+import { BatteryLayoutEditor } from './BatteryLayoutEditor';
+import { FixedArmourEditor } from './FixedArmourEditor';
+import { ArmourGeometryEditor } from './ArmourGeometryEditor';
+import { AuxiliaryWeaponsEditor } from './AuxiliaryWeaponsEditor';
+import { MassSummaryPanel } from './MassSummaryPanel';
+import { BatteryMassAllocationPanel } from './BatteryMassAllocationPanel';
+import { ArmourDefaultsPanel } from './ArmourDefaultsPanel';
+import { AuxiliarySpacePanel } from './AuxiliarySpacePanel';
 import {
-  addArmour, armourEnabled, armourOf, BALANCE_ASSUMPTION_KEYS, batteries, batteryTargets,
-  conceptEnabled, conceptOf, ENGINE_KINDS, GUN_TYPES, mismatchedRoles, MOUNT_TYPES, newBattery,
-  newConcept, patchArmour, patchBattery, patchRole, removeArmour, removeBattery, ROLES, roles,
-  STERN_TYPES, withConcept, withoutConcept,
+  addArmour, armourEnabled, armourOf, BALANCE_ASSUMPTION_KEYS, batteries, batteryLayoutReferences,
+  batteryTargets, conceptEnabled, conceptOf, ENGINE_KINDS, ENGINE_KIND_LABELS, GUN_TYPES,
+  GUN_TYPE_LABELS, mismatchedRoles, MOUNT_TYPES, MOUNT_TYPE_LABELS, newBattery, newConcept,
+  patchArmour, patchBattery, patchRole, removeArmour, removeBattery, ROLES, roles, STERN_TYPES,
+  STERN_LABELS, withConcept, withoutConcept,
   type Role,
 } from './conceptDesign';
-import type { ProjectDocument } from '../types';
+import type { ProjectDocument, RunView } from '../types';
 
 /**
  * The declared concept design, edited as ordinary project inputs.
@@ -22,7 +32,7 @@ import type { ProjectDocument } from '../types';
  * a server result, and a number typed into this editor is a *declaration*. That
  * is why an empty numeric input is written as `null` and left editable instead
  * of being filled with a plausible default, and why the one set of numbers the
- * contract lets the GUI offer — the starting balance assumptions — is written
+ * contract lets the GUI offer 鈥?the starting balance assumptions 鈥?is written
  * explicitly and labelled as editable estimates everywhere it is shown.
  *
  * Bindings are choices among what the project already declares. The items a
@@ -34,27 +44,15 @@ import type { ProjectDocument } from '../types';
 interface EditorProps {
   project: ProjectDocument;
   onChange: (project: ProjectDocument) => void;
+  /** The current saved run, so the default-size copy can be attributed to it. */
+  run?: RunView | null;
+  /** The identity the copy selection belongs to; a new one retires it. */
+  identity?: string;
+  /** Whether the draft has edits the saved run cannot see. */
+  dirty?: boolean;
+  /** Whether the run's request options still match the options on screen. */
+  requestCurrent?: boolean;
 }
-
-const CONCEPT_STERN: Readonly<Record<string, ConceptKey>> = {
-  cruiser: 'concept.stern.cruiser', small_transom: 'concept.stern.small_transom',
-  large_transom: 'concept.stern.large_transom', round: 'concept.stern.round',
-};
-const CONCEPT_GUN: Readonly<Record<string, ConceptKey>> = {
-  muzzle_loading: 'concept.gunType.muzzle_loading', breech_loading: 'concept.gunType.breech_loading',
-  quick_firing: 'concept.gunType.quick_firing', anti_air: 'concept.gunType.anti_air',
-  dual_purpose: 'concept.gunType.dual_purpose', automatic: 'concept.gunType.automatic',
-  machine_gun: 'concept.gunType.machine_gun',
-};
-const CONCEPT_MOUNT: Readonly<Record<string, ConceptKey>> = {
-  broadside: 'concept.mountType.broadside', coles_turret: 'concept.mountType.coles_turret',
-  open_barbette: 'concept.mountType.open_barbette', turret_barbette: 'concept.mountType.turret_barbette',
-  deck_hoist: 'concept.mountType.deck_hoist', deck: 'concept.mountType.deck',
-  casemate: 'concept.mountType.casemate',
-};
-const CONCEPT_KIND: Readonly<Record<string, ConceptKey>> = {
-  simple: 'concept.kind.simple', compound: 'concept.kind.compound', turbine: 'concept.kind.turbine',
-};
 
 /**
  * The starting assumptions, each with the name a reader reads.
@@ -71,48 +69,6 @@ const ASSUMPTION_LABELS: Readonly<Record<string, ConceptKey>> = {
   concentration: 'concept.balance.concentration',
   strength_target: 'concept.balance.strengthTarget',
 };
-
-/**
- * A declared number, stored exactly as typed.
- *
- * Nothing is rounded, truncated or clamped on the way in. A fractional count or
- * a wrong-signed year is *kept* and marked, so the reader can see and correct
- * what they typed and so the server sees the same value the reader did; a silent
- * `Math.trunc` here would store a number nobody entered.
- */
-function DeclaredNumber({ label, value, onChange, hint, kind = 'signed', min, max, unit, ariaLabel }: {
-  label: string; value: unknown; onChange: (next: number | null) => void; hint?: string;
-  kind?: NumericDomain; min?: number; max?: number; unit?: string; ariaLabel?: string;
-}) {
-  const w = useWorkspaceCopy();
-  const stored = number(value);
-  const [text, setText] = useState(() => (stored === null ? '' : String(stored)));
-  // Re-derive only when the stored value changed underneath this control (a
-  // save, a reload, another row), never while the reader is mid-type.
-  const [editing, setEditing] = useState(false);
-  useEffect(() => {
-    if (!editing) setText(stored === null ? '' : String(stored));
-  }, [stored, editing]);
-  const problem = numericProblem(kind, text, w);
-  return <label className="field-label">{label}
-    <input type="number" step="any" min={min} max={max} placeholder={w('units.unknown')}
-      aria-label={ariaLabel ?? label} aria-invalid={Boolean(problem)}
-      value={text}
-      onFocus={() => setEditing(true)}
-      onBlur={() => setEditing(false)}
-      onChange={event => {
-        const raw = event.target.value;
-        setText(raw);
-        if (raw.trim() === '') { onChange(null); return; }
-        const typed = Number(raw);
-        // Kept verbatim: a wrong value is refused with a message, not rewritten.
-        onChange(Number.isFinite(typed) ? typed : null);
-      }} />
-    {unit && <span className="field-unit">{unit}</span>}
-    {hint && <small>{hint}</small>}
-    {problem && <span className="field-error" role="alert">{problem}</span>}
-  </label>;
-}
 
 /** A declared number in a unit of its own, printed and stored as that unit. */
 function CanonicalNumber({ label, value, onChange, unit, hint, ariaLabel, min, max, step = 'any' }: {
@@ -148,27 +104,6 @@ function EnumSelect({ label, value, options, labels, onChange, placeholder, hint
       {options.map(option => <option key={option} value={option}>
         {labels[option] ? c(labels[option]) : option}
       </option>)}
-    </select>
-    {hint && <small>{hint}</small>}
-  </label>;
-}
-
-/** One existing, owned ledger item, chosen by the reader. Never invented. */
-function ItemSelect({ label, value, options, onChange, hint, emptyLabel, ariaLabel }: {
-  label: string; value: unknown; options: Array<{ id: string; label: string }>;
-  onChange: (next: string | null) => void; hint?: string; emptyLabel?: string; ariaLabel?: string;
-}) {
-  const c = useConceptCopy();
-  const current = typeof value === 'string' ? value : '';
-  const listed = options.some(option => option.id === current);
-  return <label className="field-label">{label}
-    <select aria-label={ariaLabel ?? label} value={current}
-      onChange={event => onChange(event.target.value === '' ? null : event.target.value)}>
-      <option value="">{emptyLabel ?? c('concept.roles.unallocated')}</option>
-      {/* A binding that no longer resolves is still shown, as unresolved, so the
-          reader sees what is there rather than watching it vanish. */}
-      {current !== '' && !listed && <option value={current}>{current}</option>}
-      {options.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}
     </select>
     {hint && <small>{hint}</small>}
   </label>;
@@ -253,7 +188,8 @@ function BatteryArmourBlock({ project, config, index, commit }: {
   </div>;
 }
 
-export function ConceptDesignEditor({ project, onChange }: EditorProps) {
+export function ConceptDesignEditor({ project, onChange, run = null, identity = '',
+  dirty = false, requestCurrent = false }: EditorProps) {
   const c = useConceptCopy();
   const config = conceptOf(project);
   const enabled = conceptEnabled(project);
@@ -274,11 +210,30 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
   const batteryRows = batteries(config);
   while (rowKeys.current.length < batteryRows.length) rowKeys.current.push(nextRowKey.current++);
   rowKeys.current.length = batteryRows.length;
+  // The row whose deletion was refused, so the reason stays on the row it is
+  // about until the reference itself is cleared.
+  const [blockedRow, setBlockedRow] = useState<string | null>(null);
 
   function commit(next: Raw) { onChange(withConcept(project, next)); }
   function patch(patchValue: Raw) { commit({ ...config, ...patchValue }); }
   function patchBalance(patchValue: Raw) { commit({ ...config, balance: { ...balance, ...patchValue } }); }
   function updateBattery(index: number, patchValue: Raw) { commit(patchBattery(config, index, patchValue)); }
+
+  /**
+   * Delete one battery row, unless a declared layout still names it.
+   *
+   * A layout that points at a row which no longer exists is a dangling
+   * reference, so the deletion is refused and the layouts that block it are
+   * named. Nothing about the layout is changed for the reader: which reference
+   * goes is their decision, not this screen's.
+   */
+  function deleteBattery(index: number) {
+    const references = batteryLayoutReferences(config, String(batteryRows[index]?.id ?? ''));
+    if (references.length > 0) { setBlockedRow(String(batteryRows[index]?.id ?? '')); return; }
+    setBlockedRow(null);
+    rowKeys.current.splice(index, 1);
+    commit(removeBattery(config, index));
+  }
 
   /**
    * The items a system owns, with their ledger labels.
@@ -342,7 +297,7 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
             value={number(config.freeboard_m)} dimension="length" storedUnit="m" kind="positive"
             hint={c('concept.freeboard.hint')} onChange={next => patch({ freeboard_m: next })} />
           <EnumSelect label={c('concept.stern.label')} value={config.stern} options={STERN_TYPES}
-            labels={CONCEPT_STERN} placeholder={c('concept.roles.unallocated')}
+            labels={STERN_LABELS} placeholder={c('concept.roles.unallocated')}
             onChange={next => patch({ stern: next })} />
           <DeclaredNumber label={c('concept.screws.label')} kind="integer" min={1} max={8}
             value={config.screws} hint={c('concept.screws.hint')} onChange={next => patch({ screws: next })} />
@@ -400,10 +355,10 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
                   value={battery.year}
                   onChange={next => updateBattery(index, { year: next })} />
                 <EnumSelect label={c('concept.battery.gunType')} value={battery.gun_type} options={GUN_TYPES}
-                  labels={CONCEPT_GUN} placeholder={c('concept.roles.unallocated')}
+                  labels={GUN_TYPE_LABELS} placeholder={c('concept.roles.unallocated')}
                   onChange={next => updateBattery(index, { gun_type: next })} />
                 <EnumSelect label={c('concept.battery.mountType')} value={battery.mount_type}
-                  options={MOUNT_TYPES} labels={CONCEPT_MOUNT} placeholder={c('concept.roles.unallocated')}
+                  options={MOUNT_TYPES} labels={MOUNT_TYPE_LABELS} placeholder={c('concept.roles.unallocated')}
                   onChange={next => updateBattery(index, { mount_type: next })} />
                 <DeclaredNumber label={c('concept.battery.mountCount')} kind="integer" min={0} max={1000}
                   value={battery.mount_count}
@@ -430,7 +385,11 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
                 </label>
               </div>
               <button className="text-button" type="button"
-                onClick={() => { rowKeys.current.splice(index, 1); commit(removeBattery(config, index)); }}>{c('concept.battery.remove')}</button>
+                onClick={() => deleteBattery(index)}>{c('concept.battery.remove')}</button>
+              {blockedRow !== null && blockedRow === String(battery.id ?? '') ? <p className="form-error" role="alert">
+                {c('concept.battery.removeBlocked', {
+                  layouts: batteryLayoutReferences(config, blockedRow).join(', ') })}
+              </p> : null}
               <BatteryArmourBlock project={project} config={config} index={index}
                 commit={commit} />
             </div>
@@ -441,6 +400,36 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
           {c('concept.battery.add')}
         </button>
       </div>
+
+      <BatteryLayoutEditor project={project} config={config} commit={commit} />
+
+      {/* The recovered seven fixed armour regions and the optional empirical cost
+          reading sit beside the layout editor rather than inside it: the layout's
+          complete two-group armour and a single fixed region are two different
+          declarations with two different roles, and this screen refuses the pair
+          that would weigh the same guns twice without removing either. */}
+      <FixedArmourEditor project={project} config={config} commit={commit} />
+
+      {/* The optional geometric panels sit beside the recovered regions they
+          replace: selecting a fixed region opts it into the rectangular model,
+          which suppresses that region's empirical suggestion for adoption while
+          its old reading stays for comparison. This form declares geometry only
+          and computes no mass; the server owns every area, volume and tonne. */}
+      <ArmourGeometryEditor config={config} commit={commit} />
+
+      {/* The recovered default sizes sit beside the records they fill: the reader
+          chooses which existing belt or bulkhead and which of its two dimensions
+          to take, and one copy writes that and nothing else. It never invents a
+          record, never adopts a mass and never targets a deck or a tower. */}
+      <ArmourDefaultsPanel config={config} commit={commit} run={run} identity={identity}
+        dirty={dirty} requestCurrent={requestCurrent} />
+
+      {/* The recovered auxiliary weapons are a third, independent family: a
+          torpedo, a mine or a depth charge is not a gun battery and not a fixed
+          armour region, and its own target carries the `other` role rather than
+          being relabelled as guns or ammunition. */}
+      <AuxiliaryWeaponsEditor project={project} config={config} commit={commit} />
+      <AuxiliarySpacePanel config={config} commit={commit} />
 
       <div className="form-card">
         <h3>{c('concept.group.machinery')}</h3>
@@ -467,7 +456,7 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
           <DeclaredNumber label={c('concept.machinery.year')} kind="integer" min={1850} max={1950}
             value={machinery.year} onChange={next => patch({ machinery: { ...machinery, year: next } })} />
           <EnumSelect label={c('concept.machinery.kind')} value={machinery.kind} options={ENGINE_KINDS}
-            labels={CONCEPT_KIND} placeholder={c('concept.roles.unallocated')}
+            labels={ENGINE_KIND_LABELS} placeholder={c('concept.roles.unallocated')}
             onChange={next => patch({ machinery: { ...machinery, kind: next } })} />
           <DeclaredNumber label={c('concept.machinery.coal')} kind="nonnegative" min={0} max={100} unit="%"
             value={machinery.coal_pct} hint={c('concept.machinery.coalHint')}
@@ -537,6 +526,14 @@ export function ConceptDesignEditor({ project, onChange }: EditorProps) {
             onChange={next => patchBalance({ bulkhead_beam_m: next })} />
         </div>
       </div>
+
+      <MassSummaryPanel config={config} commit={commit} />
+
+      {/* The optional whole-battery mount allocation is a scope declaration of a
+          second kind: it names a source and an explicit set of two-group
+          layouts, owns no ledger target and adopts nothing. Its source total and
+          its per-row allocations are the server's readings. */}
+      <BatteryMassAllocationPanel config={config} commit={commit} />
 
       <div className="form-card">
         <h3>{c('concept.group.roles')}</h3>

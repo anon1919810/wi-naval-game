@@ -1,0 +1,1724 @@
+{
+  "schema": "plimsoll-original-auxiliary-space-observations-1",
+  "source_assembly_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+  "raw_sha256": {
+    "original-next-space-vectors.json": "4f70e72329b05fe62a0f59312e7ad6940992a304f0021d63dad1f04a4ecf5b52",
+    "auxiliary-space-source-readiness.json": "ada507ddc7b91053c029e41e2a8582c5f3bee60fed5a561f2b729bbbadf5e870"
+  },
+  "scope": "Controlled numeric observations only, original source code excluded; old area_sqft on submerged rows means ft3.",
+  "rows": [
+    {
+      "id": "C0_reproduce_A_torp_loc0",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C0_reproduce_A_torp_loc4",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 4
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "C1_loc1_count8_sets3",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 8,
+          "loads": 3,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 33.3919074096,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.0322067626,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C1_loc2_count8_sets3",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 8,
+          "loads": 3,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 210.58573624704002,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.203111649,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C3_loc1_count4_sets0",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 40.427542607978886,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.03899269,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C3_loc2_count4_sets0",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 73.92166287121728,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.07129804,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C3_loc0_count4_sets0",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C5_torp1_loc0_torp2_loc4",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        },
+        {
+          "id": "torp2",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 2,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 4
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 49.530592594709596,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0.02135207
+      }
+    },
+    {
+      "id": "C5_torp1_loc3_torp2_loc8",
+      "records": [
+        {
+          "id": "torp1",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 3
+        },
+        {
+          "id": "torp2",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 2,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 8
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 22.528987200000003,
+        "hull_volume_m3": 8.841824912650292,
+        "deck_ratio": 0.0217293911,
+        "hull_ratio": 0.003811609
+      }
+    },
+    {
+      "id": "A_torp_loc0",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "A_torp_loc1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 40.427542607978886,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.03899269,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "A_torp_loc2",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 73.92166287121728,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.07129804,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "A_torp_loc3",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 3
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 22.528987200000003,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.0217293911,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "A_torp_loc4",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 4
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "A_torp_loc5",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 5
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "A_torp_loc6",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 6
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "A_torp_loc7",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 7
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "A_torp_loc8",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 8
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 17.683649825300584,
+        "deck_ratio": 0,
+        "hull_ratio": 0.007623218
+      }
+    },
+    {
+      "id": "B_torp_loc0",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "B_torp_loc1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 40.427542607978886,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.03899269,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "B_torp_loc2",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 73.92166287121728,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.07129804,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "B_torp_loc3",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 3
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 22.528987200000003,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.0217293911,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "B_torp_loc4",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 4
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "B_torp_loc5",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 5
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "B_torp_loc6",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 6
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "B_torp_loc7",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 7
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 99.06118518941919,
+        "deck_ratio": 0,
+        "hull_ratio": 0.04270414
+      }
+    },
+    {
+      "id": "B_torp_loc8",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 8
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0,
+        "hull_volume_m3": 17.683649825300584,
+        "deck_ratio": 0,
+        "hull_ratio": 0.007623218
+      }
+    },
+    {
+      "id": "C_torp_year1800",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C_torp_year1890",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C_torp_year1906",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C_torp_year1907",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C_torp_year1912",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "C_torp_year1945",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "D_torp_count1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 1,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 2.82580073806464,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.0027255076,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "D_torp_count4",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "D_torp_count12",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 12,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 33.9096096,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.032706093,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "I_torp_zero_size",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 0.0,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0.0,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "I_torp_zero_length",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 0.0,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 0.0,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads0",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads4",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 4,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads12",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 12,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads0",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 40.427542607978886,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.03899269,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 40.427542607978886,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.03899269,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads4",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 4,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 1
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 30.76801656448896,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.0296760015,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads0",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 73.92166287121728,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.07129804,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 1,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 73.92166287121728,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.07129804,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads4",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 4,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 2
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 277.27765137907204,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.267436534,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "K_torp2_same_inputs",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "J1_torp_scale0_canonical",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "J2_torp_scale1_same_canonical",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "J3_torp_fpcheck_metric_scale1",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    },
+    {
+      "id": "J4_torp_fpcheck_metric_scale0",
+      "records": [
+        {
+          "id": "torpedo",
+          "kind": "torpedo",
+          "system_id": null,
+          "item_id": null,
+          "source": "controlled source evidence",
+          "count": 4,
+          "loads": 0,
+          "diameter_mm": 463.54999999999995,
+          "length_m": 6.096,
+          "location_index": 0
+        }
+      ],
+      "bulged_beam_m": 11.338560000000001,
+      "context": {
+        "length_m": 137.7696,
+        "beam_m": 11.338560000000001,
+        "draught_m": 3.53568,
+        "block_coeff": 0.42,
+        "waterplane_area_m2": 1036.7979264
+      },
+      "expected": {
+        "deck_area_m2": 11.30320295225856,
+        "hull_volume_m3": 0,
+        "deck_ratio": 0.01090203,
+        "hull_ratio": 0
+      }
+    }
+  ],
+  "excluded": [
+    {
+      "id": "C2_loc1_count0_sets1",
+      "reason": "product_policy"
+    },
+    {
+      "id": "C2_loc2_count0_sets1",
+      "reason": "product_policy"
+    },
+    {
+      "id": "C2_loc1_count0_sets0",
+      "reason": "product_policy"
+    },
+    {
+      "id": "C4_loc1_count4_sets12",
+      "reason": "product_policy"
+    },
+    {
+      "id": "C4_loc2_count4_sets12",
+      "reason": "product_policy"
+    },
+    {
+      "id": "D_torp_count0",
+      "reason": "product_policy"
+    },
+    {
+      "id": "E_torp_loc1_loads12",
+      "reason": "product_policy"
+    },
+    {
+      "id": "E_torp_loc2_loads12",
+      "reason": "product_policy"
+    },
+    {
+      "id": "U05_torpedo_negative_diameter",
+      "reason": "product_input_domain"
+    },
+    {
+      "id": "U06_torpedo_negative_length",
+      "reason": "product_input_domain"
+    },
+    {
+      "id": "U07_torpedo_negative_count",
+      "reason": "product_input_domain"
+    }
+  ]
+}

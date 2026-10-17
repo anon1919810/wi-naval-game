@@ -10,7 +10,7 @@
 > [计算完整性修正](../../docs/sps-replacement/2026-09-22-calculation-integrity.md)。
 
 自研舰船设计与静水力计算核心。规格见 [`docs/sps-replacement/SPEC.md`](../../docs/sps-replacement/SPEC.md)。
-与 SpringSharp **无代码关系**；其界面仅作需求覆盖度检查表（参考图在 `docs/sps-reference/`）。
+物理计算核独立实现；经验兼容模块参考恢复的 SpringSharp 3b3 数学段，独立编码并按方法版本记录原程序集数值对照。界面资料也用于需求清单（参考图在 `docs/sps-reference/`）。数值段一致不等于整个程序、GUI 事件链或实船精度等价；当前范围见[覆盖与边界](../../docs/plimsoll-1.0/concept-design-coverage.md)。
 
 配对游戏：**《敌前转向》（Gefahrwend）**。
 命名约定：**平台用历史意象，模块用方法命名** —— `plimsoll.hydrostatics` / `.bonjean` / `.stability` / `.damage`。

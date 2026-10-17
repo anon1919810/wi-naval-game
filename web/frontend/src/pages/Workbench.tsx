@@ -1,5 +1,5 @@
 import { useCopyMessage } from '../i18n/useCopyMessage';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import * as api from '../api';
 import { outcome } from '../audio/feedback';
@@ -16,14 +16,14 @@ import { HullSupplementEditor } from '../components/HullSupplementEditor';
 import { BASE_STAGES, EMPTY_REQUEST, PerformanceInputs, PerformanceRequest, PerformanceResults, requestedExtraStages, buildOptions, type RequestDraft } from '../components/PerformanceEditor';
 import { ConceptDesignEditor } from '../components/ConceptDesignEditor';
 import { DesignBalanceDiagnostics, DesignBalanceResults, ConceptDesignLink } from '../components/DesignBalanceResults';
+import { ConceptReviewGuide } from '../components/ConceptReviewGuide';
 import { MassProposalPanel } from '../components/MassProposalPanel';
 import { conceptEnabled, IDLE_APPLY, resultIdentity, requestOptionsMatch, withDesignBalance, type ApplyState } from '../components/conceptDesign';
 import { buildFloodingRequest, EMPTY_FLOODING_REQUEST, type FloodingRequest } from '../components/floodingModel';
-import { CalculationReadiness } from '../components/CalculationReadiness';
 import { currentRun, eligibleResultRun, latestOwnedRun, ledgerItems, RESULT_STATUSES } from '../components/formModel';
 import { getDeck, type DeckInput } from '../components/deckModel';
 import {
-  CHAPTER_HEAD, hullGuidanceId, LEDGER_SECTION, ledgerGuidanceId, PROJECT_JSON,
+  CHAPTER_HEAD, hullGuidanceId, LEDGER_SECTION, ledgerGuidanceId,
   readDiagnosticTail, REQUEST_DAMAGE, REQUEST_PERFORMANCE, resolveDiagnosticPath,
   type DiagnosticLocation,
 } from '../components/diagnosticGuidance';
@@ -36,9 +36,15 @@ import { useMotionToken } from '../components/useLocalMotion';
 import { WorkbenchOverview } from '../components/WorkbenchOverview';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import { useConceptCopy } from '../i18n/concept';
-import type { ProjectDocument, ProjectView, RunView } from '../types';
+import { useShipDesignCopy } from '../i18n/shipDesign';
+import { Sps3b3Readings } from '../components/Sps3b3Readings';
+import {
+  ShipDesignChapter, ShipDesignLedgerSection, ShipDesignOverview, useShipDesignHost,
+} from '../components/ShipDesignEditor';
+import { shipDesignEnabled, shipDesignOf, shipDesignRunOptions } from '../components/sps3b3Model';
+import type { ProjectDocument, ProjectView, RunView, ShipDesign } from '../types';
 
-/** The anchor the entry links from other chapters point at. */
+/** The anchor the concept screen keeps for a project that still declares one. */
 const CONCEPT_SECTION = 'concept-design';
 
 // Dimensionless coefficients keep a plain number input; lengths speak the
@@ -59,6 +65,48 @@ const CHAPTER_JSON = chapterJsonKeys();
 
 function numeric(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : null;
+}
+
+/**
+ * Which ledger items the native declaration manages, and how.
+ *
+ * A managed item's mass belongs to the core: an estimated role carries a scoped
+ * overlay, and a declared role keeps the reader's own mass but is still bound.
+ * Binding every `item_ids` entry of every role — declared included — is what
+ * makes the row's mass read-only instead of hand-editable.
+ */
+function bindingModes(design: ShipDesign | null): Map<string, 'estimated' | 'declared'> {
+  const modes = new Map<string, 'estimated' | 'declared'>();
+  const bindings = design?.mass_bindings;
+  if (!bindings) return modes;
+  for (const entry of Object.values(bindings)) {
+    const mode: 'estimated' | 'declared' = entry?.mode === 'estimated' ? 'estimated' : 'declared';
+    for (const id of entry?.item_ids ?? []) if (typeof id === 'string') modes.set(id, mode);
+  }
+  return modes;
+}
+
+/**
+ * The effective selected mass of one managed item for the design's own case.
+ *
+ * This mirrors the core's own precedence exactly and computes nothing: the
+ * scoped estimated overlay first, then any ordinary owner-condition override
+ * (whatever its provenance), then the item's base mass. An unbound item is not
+ * managed and is never read through this path.
+ */
+function effectiveMass(item: Record<string, unknown>, mode: 'estimated' | 'declared' | undefined,
+  condition: Record<string, unknown> | null, itemId: string): number | null {
+  if (mode === 'estimated') {
+    const overlay = record(item.design_mass)?.mass_t;
+    if (typeof overlay === 'number' && Number.isFinite(overlay)) return overlay;
+  }
+  const override = record(record(condition?.overrides)?.[itemId])?.mass_t;
+  if (typeof override === 'number' && Number.isFinite(override)) return override;
+  return numeric(item.mass_t);
 }
 
 function errorMessage(w: (key: WorkspaceKey, params?: any) => string, cause: unknown): string {
@@ -262,6 +310,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // and none of them is touched by a dictionary changing.
   const w = useWorkspaceCopy();
   const c = useConceptCopy();
+  const d = useShipDesignCopy();
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
   const [chapter, setChapter] = useState<Chapter>('overview');
@@ -295,6 +344,25 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   const [pendingRunId, setPendingRunId] = useState<string | null>(null);
   const [performanceRequest, setPerformanceRequest] = useState<RequestDraft>(EMPTY_REQUEST);
   const [floodingRequest, setFloodingRequest] = useState<FloodingRequest>(EMPTY_FLOODING_REQUEST);
+  // The optional additional physical checks belong to this request and nothing
+  // else: they add existing analysis stages on top of the native design stage,
+  // and they are not a data mode or a second product mode.
+  const [physicalChecks, setPhysicalChecks] = useState(false);
+  // The native host's own outstanding edits. They are counted by the host and
+  // block a save or a run until every confirmed reply has settled.
+  const [hostPending, setHostPending] = useState(0);
+  const hostPendingRef = useRef(0);
+  const hostBusyRef = useRef(false);
+
+  // The unified declaration. A project that declares the native design is edited
+  // through the native host; a project that still declares only the old
+  // compatibility section becomes a pending-save native draft once, and a plain
+  // physical project simply offers to start one. The old physical request and
+  // its results are preserved for a project that keeps them.
+  const native = shipDesignEnabled(draft);
+  const conceptOn = !native && conceptEnabled(draft);
+  const physicalRequest = !native || physicalChecks;
+
   // The flooding request joins the existing performance request only when a
   // saved scenario is chosen; otherwise the stage stays unrequested exactly as
   // before. Both requests use the same project revision and condition.
@@ -303,30 +371,37 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // An explicit environment density belongs to the whole request: the flooding
   // stage is required to use the same equilibrium options as every other stage.
   const equilibrium = { ...(performanceOptions.options.equilibrium as Record<string, unknown> | undefined) };
-  const runError = performanceOptions.error || floodingChoice.error;
   // An invalid request carries no assembled stage list at all, and the flooding
   // choice must never spread one. The panel therefore names the stages this
   // request *explicitly* selects — the existing shared base stages plus the
   // studies the reader picked — rather than reporting none.
   const assembledStages = Array.isArray(performanceOptions.options.stages) ? (performanceOptions.options.stages as string[]) : [];
-  // The concept screen is requested only while the section exists, so a project
-  // that never enabled it keeps the old request defaults and the old results.
-  const conceptOn = conceptEnabled(draft);
+  // The concept screen is requested only while the section exists and only for a
+  // project that still declares one. A native design never asks for a second
+  // adoption authority, so its balance is never requested either.
   const performanceWithConcept = conceptOn
     ? { ...performanceOptions.options, stages: withDesignBalance(assembledStages, draft) }
     : performanceOptions.options;
-  const runOptions = floodingChoice.flooding
-    ? {
-      ...performanceWithConcept,
-      ...(floodingChoice.rho === null ? {} : { equilibrium: { ...equilibrium, rho_t_m3: floodingChoice.rho } }),
-      stages: [...assembledStages, ...(conceptOn ? ['design_balance'] : []), 'flooding'],
-      flooding: floodingChoice.flooding,
-    }
-    : performanceWithConcept;
+  const runOptions = !physicalRequest
+    ? shipDesignRunOptions()
+    : floodingChoice.flooding
+      ? {
+        ...performanceWithConcept,
+        ...(floodingChoice.rho === null ? {} : { equilibrium: { ...equilibrium, rho_t_m3: floodingChoice.rho } }),
+        stages: [...(native ? ['ship_design'] : []), ...assembledStages, ...(conceptOn ? ['design_balance'] : []), 'flooding'],
+        flooding: floodingChoice.flooding,
+      }
+      : native
+        ? { ...performanceWithConcept, stages: ['ship_design', ...assembledStages] }
+        : performanceWithConcept;
+  // The native-only request never carries a request error: it has no fields to
+  // assemble. The physical request builder owns its own refusal.
+  const runError = physicalRequest ? (performanceOptions.error || floodingChoice.error) : '';
   /** The stages this request will actually submit, read from the request itself. */
-  const requestStages = runError
-    ? [...BASE_STAGES, ...requestedExtraStages(performanceRequest), ...(conceptOn ? ['design_balance'] : []), ...(floodingRequest.scenario.trim() ? ['flooding'] : [])]
-    : Array.isArray(runOptions.stages) ? (runOptions.stages as string[]) : [];
+  const requestStages = !physicalRequest ? ['ship_design']
+    : runError
+      ? [...(native ? ['ship_design'] : []), ...BASE_STAGES, ...requestedExtraStages(performanceRequest), ...(conceptOn ? ['design_balance'] : []), ...(floodingRequest.scenario.trim() ? ['flooding'] : [])]
+      : Array.isArray(runOptions.stages) ? (runOptions.stages as string[]) : [];
   /** The field a followed diagnostic is waiting to focus, and its own ticket. */
   const [focusRequest, setFocusRequest] = useState<{ target: string; seq: number } | null>(null);
   const [guidanceNotice, setGuidanceNotice] = useCopyMessage();
@@ -393,6 +468,24 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // control and the reader's selection all survive the switch untouched.
   const chapterMotion = useMotionToken(chapter);
 
+  /**
+   * The one native host, called once and persistent across chapters.
+   *
+   * It is created before any early return so a chapter switch never remounts the
+   * queue: the host owns the serial/optimistic edit queue, the catalogue and the
+   * single legacy upgrade, and a confirmed reply is applied to the draft through
+   * `updateDraft` exactly like any other edit. Its outstanding-edits count is
+   * what blocks a save or a run.
+   */
+  const host = useShipDesignHost({
+    project: draft,
+    onChange: updateDraft,
+    disabled: busy,
+    onPendingChange: count => { hostPendingRef.current = count; setHostPending(count); },
+  });
+  hostBusyRef.current = host.busy;
+  const hostBlocked = hostPending > 0 || host.busy;
+
   useEffect(() => {
     let active = true;
     const mine = ++loadTicket.current;
@@ -400,6 +493,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     applyTicket.current += 1;
     applyInFlight.current = false;
     setOperation(null);
+    setPhysicalChecks(false);
+    setHostPending(0); hostPendingRef.current = 0;
     setApplyState(IDLE_APPLY);
     setLoad('loading');
     setLoadError('');
@@ -428,7 +523,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   // The leave guard is told about edits, not about renders: one call when the
   // workspace stops matching what the reader can recover — an edited draft, or
   // hand-written JSON that has not been applied yet and would be lost by leaving.
-  useEffect(() => { onDirtyChange?.(dirty || jsonEdited); }, [dirty, jsonEdited, onDirtyChange]);
+  useEffect(() => { onDirtyChange?.(dirty || jsonEdited || hostPending > 0); }, [dirty, jsonEdited, hostPending, onDirtyChange]);
 
   useEffect(() => {
     let active = true;
@@ -708,10 +803,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   /**
    * The entry links from the chapters a concept design touches.
    *
-   * Guns, machinery and performance are all places a reader reaches for when
-   * they want to *change* something the screen depends on, so each of them
-   * offers the way in. The jump is a view change and nothing else: no input is
-   * written, nothing is saved and the Workbench is never remounted.
+   * A project that still declares the old concept section keeps its way in from
+   * guns, machinery and performance. The jump is a view change and nothing else:
+   * no input is written, nothing is saved and the Workbench is never remounted.
    */
   function openConceptDesign() {
     if (chapterRef.current !== 'weights') goChapter('weights');
@@ -729,17 +823,17 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     setFieldErrors([]);
   }
 
-  function updateHull(key: string, value: string | number | null) {
-    if (!draft) return;
-    const next = structuredClone(draft);
-    next.hull[key] = value === null || value === '' ? null : Number(value);
-    updateDraft(next);
-  }
-
   function updateMass(groupIndex: number, itemIndex: number, key: string, value: string | number | null) {
     if (!draft) return;
     const next = structuredClone(draft);
     next.weight_groups[groupIndex].items[itemIndex][key] = key === 'source' ? value : value === null || value === '' ? null : Number(value);
+    updateDraft(next);
+  }
+
+  function updateHull(key: string, value: string | number | null) {
+    if (!draft) return;
+    const next = structuredClone(draft);
+    next.hull[key] = value === null || value === '' ? null : Number(value);
     updateDraft(next);
   }
 
@@ -817,7 +911,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   }
 
   async function save() {
-    if (!view || view.project_id !== projectId || !draft || !dirty || operation || applyInFlight.current) return;
+    if (!view || view.project_id !== projectId || !draft || !dirty || operation || applyInFlight.current
+      || hostPendingRef.current > 0 || hostBusyRef.current) return;
     const submittedGeneration = draftGeneration.current;
     const ticket = ++writeTicket.current;
     const mine = () => current() && writeTicket.current === ticket;
@@ -854,6 +949,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   }
 
   async function reload() {
+    if (hostPendingRef.current > 0 || hostBusyRef.current) return;
     if (operation || applyInFlight.current) return;
     if (jsonEditedRef.current) { setError(w => w('workbench.reload.unapplied')); return; }
     const submittedGeneration = draftGeneration.current;
@@ -871,6 +967,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
       setDraft(structuredClone(saved.project));
       setPerformanceRequest(EMPTY_REQUEST);
       setFloodingRequest(EMPTY_FLOODING_REQUEST);
+      setPhysicalChecks(false);
       setDirty(false);
       setConflict(null);
       setError('');
@@ -880,7 +977,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   }
 
   async function run() {
-    if (!view || !conditionId || dirty || jsonEditedRef.current || runError || operation || applyInFlight.current) return;
+    if (!view || !conditionId || dirty || jsonEditedRef.current || runError || operation || applyInFlight.current
+      || hostPendingRef.current > 0 || hostBusyRef.current) return;
     if (view.project_id !== projectId) return;
     const ticket = ++writeTicket.current;
     const mine = () => current() && writeTicket.current === ticket;
@@ -1045,8 +1143,6 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
     ? <ReadFailure title={w('workbench.load.failed', { id: projectId })} detail={loadError} onRetry={() => setAttempt(current => current + 1)} onBack={onBack} backLabel={w('workbench.load.back')} />
     : <ReadPending scope="workbench" object={w('workbench.load.pending')} />}</div>;
 
-  const hull = draft.hull ?? {};
-  const hullSources = (hull.sources && typeof hull.sources === 'object' ? hull.sources : {}) as Record<string, unknown>;
   // Validate identity here, in render, rather than relying on the effect having
   // run: a stale or in-flight result must never be displayed for the current
   // revision/condition.
@@ -1061,8 +1157,59 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   const latestCheck = runResult?.id === historyCandidate?.id ? runResult : historyRun;
   const historyOfSelected = matchesSavedCheck(latestCheck, historyCandidate, projectId, view.revision, conditionId)
     ? latestCheck : null;
-  const ledger = ledgerItems(draft);
   const visibleRuns = selectedRun ? [selectedRun] : [];
+  // The authoritative native declaration, its owner condition and the items it
+  // manages. A managed row shows the core's own case value and can never be
+  // typed over; every other item is the reader's own.
+  const nativeDesign = shipDesignOf(draft);
+  const ownerCondition = nativeDesign?.condition_id
+    ? draft.loading_conditions.find(item => item.id === nativeDesign.condition_id) as Record<string, unknown> | undefined ?? null
+    : null;
+  const boundModes = bindingModes(nativeDesign);
+  const hull = draft.hull ?? {};
+  const hullSources = (hull.sources && typeof hull.sources === 'object' ? hull.sources : {}) as Record<string, unknown>;
+  const ledger = ledgerItems(draft);
+  // The reader's own raw ledger rows: one row per item, showing its longitudinal
+  // position and its declared source. For a native design these sit underneath
+  // the core's managed ledger, folded away; a plain physical project shows them
+  // directly, because they are the only ledger it has.
+  const ledgerRows = draft.weight_groups.length === 0
+    ? <div className="empty-state compact"><h3>{w('editor.ledger.empty.title')}</h3><p>{w('editor.ledger.empty.text')}</p></div>
+    : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{w('editor.ledger.items', { count: group.items.length })}</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
+      // An entry with no id of its own still needs a name on screen; the
+      // fallback is positional furniture, not a stored label.
+      const itemId = String(item.id ?? w('editor.ledger.itemFallback', { index: itemIndex + 1 }));
+      const source = declaredSource(item.source);
+      const estimate = item.estimate === true ? true : item.estimate === false ? false : null;
+      // A managed item's mass is the core's own: it is read for the design's
+      // own condition and shown, never edited through this old row field.
+      // Declared bindings are managed too, so they are matched by item id.
+      const boundMode = typeof item.id === 'string' ? boundModes.get(item.id) : undefined;
+      const managed = boundMode !== undefined;
+      const managedValue = managed ? effectiveMass(item, boundMode, ownerCondition, itemId) : numeric(item.mass_t);
+      // Mass and longitudinal position are two facts of one ledger item, and
+      // each shows the item's own declared source rather than a shared note.
+      const massFact: TraceFact = { key: `ledger.${group.id}.${itemId}.mass_t`, label: w('editor.ledger.massLabel', { item: itemId }), value: managedValue, dimension: 'mass', storedUnit: 't', source, estimate, path: `weight_groups[${groupIndex}].items[${itemId}].mass_t` };
+      const positionFact: TraceFact = { ...massFact, key: `ledger.${group.id}.${itemId}.x_m`, label: w('editor.ledger.positionLabel', { item: itemId }), value: numeric(item.x_m), dimension: 'length', storedUnit: 'm', path: `weight_groups[${groupIndex}].items[${itemId}].x_m` };
+      // A followed diagnostic addresses one ledger row by the ids the
+      // source run saw, so only a row with a real id can be reached.
+      const keyed = typeof item.id === 'string' && item.id !== '';
+      const rowId = (field: string) => keyed ? ledgerGuidanceId(String(group.id), itemId, field) : undefined;
+      return <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{itemId}</strong>
+        <TracedField fact={massFact} id={rowId('mass_t')}>{managed
+          // A managed mass is the core's: it is shown read-only for the
+          // design's own condition and can never be typed over here.
+          ? <QuantityField small readOnly label={w('editor.ledger.mass')} ariaLabel={w('editor.ledger.massLabel', { item: `${group.id} ${itemId}` })} value={managedValue} dimension="mass" kind="nonnegative" onChange={() => {}} />
+          : <QuantityField small label={w('editor.ledger.mass')} ariaLabel={w('editor.ledger.massLabel', { item: `${group.id} ${itemId}` })} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} />}</TracedField>
+        <TracedField fact={positionFact} id={rowId('x_m')}><QuantityField small label={w('editor.ledger.position')} ariaLabel={w('editor.ledger.positionLabel', { item: `${group.id} ${itemId}` })} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
+        <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: w('editor.ledger.sourceLabel', { item: itemId }), value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }} id={rowId('source')}>
+          <label>{w('editor.ledger.source')}<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
+        </TracedField></div>;
+    })}</div></div>);
+  // The saved native stage of the selected run, read for the native report only
+  // when it is the request this page currently assembles.
+  const nativeStage = selectedRun && requestOptionsMatch(selectedRun, runOptions)
+    ? selectedRun.result?.stages?.ship_design?.data : undefined;
   // Display units follow the edited draft. They change presentation only: the
   // saved revision, the request and every export stay canonical.
   const page = <div className="workbench-layout" data-trace={traceOpen ? 'open' : 'closed'}>
@@ -1092,9 +1239,10 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           <div className="toolbar-actions">
             {/* Each control names the operation it is actually waiting on. A save
                 in progress keeps the run control reading as a run, because it is
-                not one. */}
-            <button className="button button--secondary" onClick={save} disabled={!dirty || busy}>{operation === 'saving' ? w('workbench.save.busy') : w('workbench.save.action')}</button>
-            <button className="button button--primary" onClick={run} disabled={dirty || jsonEdited || !conditionId || busy || !!runError}
+                not one. A pending native edit blocks both, because a save or a
+                run submitted before it settles would carry a stale draft. */}
+            <button className="button button--secondary" onClick={save} disabled={!dirty || busy || hostBlocked}>{operation === 'saving' ? w('workbench.save.busy') : w('workbench.save.action')}</button>
+            <button className="button button--primary" onClick={run} disabled={dirty || jsonEdited || !conditionId || busy || hostBlocked || !!runError}
               title={jsonEdited ? w('workbench.reload.unapplied') : dirty ? w('workbench.run.blockedDirty') : runError || undefined}>{operation === 'starting' ? w('workbench.run.busy') : w('workbench.run.action')}</button>
             <details className="secondary-actions">
               <summary aria-label={w('workbench.more.label')}>{w('workbench.more.summary')}</summary>
@@ -1133,80 +1281,130 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           and its selection. */}
       <div className="workbench-content" data-motion={chapterMotion}>
         <ChapterHead chapter={chapter} name={draft.name} projectId={draft.id} revision={view.revision} proxy={draft.name.toLowerCase().includes('queen mary')} />
-        {chapter === 'overview' && <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
-          runs={runs} current={selectedRun} previous={historyOfSelected} requestStages={requestStages}
-          requestError={runError} dirty={dirty || jsonEdited} historyState={runsState} resultState={resultState} previousState={historyCandidate?.id === currentResultId ? resultState : previousState} onRefreshRuns={() => setRunsAttempt(value => value + 1)} onChapter={goChapter} onRun={onRun} onNavigate={jumpTo} />}
-        {chapter === 'hull' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.mainDimensions')} note={w('editor.group.mainDimensions.note')} />
-          <p className="section-intro">{w('editor.hull.intro')}</p>
-          <div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`));
-            // A main dimension carries no per-field source of its own; only an
-            // explicitly declared `hull.sources` entry is ever read as one.
-            const declared = hullSources[key];
-            const label = w(field.label as WorkspaceKey), hint = w(field.hint as WorkspaceKey);
-            const fact: TraceFact = { key: `hull.${key}`, label, value: numeric(hull[key]),
-              dimension: field.dimension ?? undefined, storedUnit: field.dimension ? 'm' : undefined,
-              // No per-dimension estimate flag is stored alongside hull.sources.
-              source: declaredSource(declared),
-              estimate: null, path: `hull.${key}` };
-            return <TracedField fact={fact} className="hull-field" key={field.key} id={hullGuidanceId(field.key)}>
-          {field.dimension
-            ? <QuantityField label={label} ariaLabel={label} value={numeric(hull[key])} dimension={field.dimension} kind="positive" invalid={Boolean(issue)} hint={hint} onChange={next => updateHull(key, next === null ? null : String(next))} />
-            : <label className="field-label">{label}<input type="number" step="any" aria-label={label} aria-invalid={Boolean(issue)} value={typeof hull[key] === 'number' ? hull[key] : ''} onChange={event => updateHull(key, event.target.value)} placeholder={w('editor.unknown')} /><small>{hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>}
-          {field.dimension && issue && <span className="field-error" role="alert">{issue.message}</span>}
-        </TracedField>; })}</div></section>}
-        {chapter === 'hull' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.hullSupplement')} /><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {/* Reading order: every input first, then the optional request, then the
-            results that request produces. Nothing is recomputed to reorder this. */}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.performanceInputs')} note={w('editor.group.performanceInputs.note')} />
-          <PerformanceInputs project={draft} onChange={updateDraft} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="02" title={w('editor.group.resistance')} note={w('editor.group.resistance.note')} />
-          <ResistanceEditor project={draft} onChange={updateDraft} /></section>}
-        {chapter === 'performance' && <section className="editor-section" id={REQUEST_PERFORMANCE} tabIndex={-1}><InputGroup index="03" title={w('editor.group.request')} note={w('editor.group.request.note')} />
-          <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={next => {
-            contextGeneration.current += 1; setPerformanceRequest(next);
-          }} /></section>}
-        {chapter === 'performance' && <section className="editor-section"><InputGroup index="04" title={w('editor.group.results')} note={w('editor.group.results.note')} />
-          <PerformanceResults run={selectedRun} /><ConceptDesignLink label={c('balance.title')} onOpen={openConceptDesign} /></section>}
-        {chapter === 'weights' && <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}><InputGroup index="01" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
-          {draft.weight_groups.length === 0 ? <div className="empty-state compact"><h3>{w('editor.ledger.empty.title')}</h3><p>{w('editor.ledger.empty.text')}</p></div> : draft.weight_groups.map((group, groupIndex) => <div className="weight-group" key={group.id}><div className="weight-group-title"><h3>{group.label || group.id}</h3><span>{w('editor.ledger.items', { count: group.items.length })}</span></div><div className="weight-list">{group.items.map((item, itemIndex) => {
-            // An entry with no id of its own still needs a name on screen; the
-            // fallback is positional furniture, not a stored label.
-            const itemId = String(item.id ?? w('editor.ledger.itemFallback', { index: itemIndex + 1 }));
-            const source = declaredSource(item.source);
-            const estimate = item.estimate === true ? true : item.estimate === false ? false : null;
-            // Mass and longitudinal position are two facts of one ledger item, and
-            // each shows the item's own declared source rather than a shared note.
-            const massFact: TraceFact = { key: `ledger.${group.id}.${itemId}.mass_t`, label: w('editor.ledger.massLabel', { item: itemId }), value: numeric(item.mass_t), dimension: 'mass', storedUnit: 't', source, estimate, path: `weight_groups[${groupIndex}].items[${itemId}].mass_t` };
-            const positionFact: TraceFact = { ...massFact, key: `ledger.${group.id}.${itemId}.x_m`, label: w('editor.ledger.positionLabel', { item: itemId }), value: numeric(item.x_m), dimension: 'length', storedUnit: 'm', path: `weight_groups[${groupIndex}].items[${itemId}].x_m` };
-            // A followed diagnostic addresses one ledger row by the ids the
-            // source run saw, so only a row with a real id can be reached.
-            const keyed = typeof item.id === 'string' && item.id !== '';
-            const rowId = (field: string) => keyed ? ledgerGuidanceId(String(group.id), itemId, field) : undefined;
-            return <div className="weight-row" key={String(item.id ?? itemIndex)}><strong>{itemId}</strong>
-              <TracedField fact={massFact} id={rowId('mass_t')}><QuantityField small label={w('editor.ledger.mass')} ariaLabel={w('editor.ledger.massLabel', { item: `${group.id} ${itemId}` })} value={numeric(item.mass_t)} dimension="mass" kind="nonnegative" onChange={next => updateMass(groupIndex, itemIndex, 'mass_t', next)} /></TracedField>
-              <TracedField fact={positionFact} id={rowId('x_m')}><QuantityField small label={w('editor.ledger.position')} ariaLabel={w('editor.ledger.positionLabel', { item: `${group.id} ${itemId}` })} value={numeric(item.x_m)} dimension="length" onChange={next => updateMass(groupIndex, itemIndex, 'x_m', next)} /></TracedField>
-              <TracedField fact={{ ...massFact, key: `ledger.${group.id}.${itemId}.source`, label: w('editor.ledger.sourceLabel', { item: itemId }), value: source, dimension: undefined, storedUnit: undefined, path: `weight_groups[${groupIndex}].items[${itemId}].source` }} id={rowId('source')}>
-                <label>{w('editor.ledger.source')}<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
-              </TracedField></div>;
-          })}</div></div>)}</section>}
-        {chapter === 'weights' && <section className="editor-section" id={CONCEPT_SECTION} tabIndex={-1}><InputGroup index="02" title={c('concept.enable')} note={c('concept.enableHint')} />
-          <ConceptDesignEditor project={draft} onChange={updateDraft} />
+        {chapter === 'overview' && <>
+          {/* The native design is always reachable: a project that declares none
+              is offered a setup, and a project that only carried the old
+              compatibility section is upgraded into a pending-save draft once. */}
+          <ShipDesignOverview host={host} disabled={busy} />
+          {nativeStage && <Sps3b3Readings data={nativeStage} runId={selectedRun?.id} variant="native" />}
+          <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
+            runs={runs} current={selectedRun} previous={historyOfSelected} requestStages={requestStages}
+            requestError={runError} dirty={dirty || jsonEdited} historyState={runsState} resultState={resultState} previousState={historyCandidate?.id === currentResultId ? resultState : previousState} onRefreshRuns={() => setRunsAttempt(value => value + 1)} onChapter={goChapter} onRun={onRun} onNavigate={jumpTo} />
+        </>}
+        {chapter === 'hull' && <>
+          <section className="editor-section"><InputGroup index="01" title={w('editor.group.mainDimensions')} note={w('editor.group.mainDimensions.note')} />
+            {native
+              // The native declaration owns the overlapping principal dimensions;
+              // the recovered field form is never shown beside it. A plain
+              // physical project keeps its own form.
+              ? <ShipDesignChapter page="hull" host={host} disabled={busy} />
+              : <><p className="section-intro">{w('editor.hull.intro')}</p>
+                <div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`));
+                  // A main dimension carries no per-field source of its own; only
+                  // an explicitly declared `hull.sources` entry is ever read as one.
+                  const declared = hullSources[key];
+                  const label = w(field.label as WorkspaceKey), hint = w(field.hint as WorkspaceKey);
+                  const fact: TraceFact = { key: `hull.${key}`, label, value: numeric(hull[key]),
+                    dimension: field.dimension ?? undefined, storedUnit: field.dimension ? 'm' : undefined,
+                    source: declaredSource(declared), estimate: null, path: `hull.${key}` };
+                  return <TracedField fact={fact} className="hull-field" key={field.key} id={hullGuidanceId(field.key)}>
+                    {field.dimension
+                      ? <QuantityField label={label} ariaLabel={label} value={numeric(hull[key])} dimension={field.dimension} kind="positive" invalid={Boolean(issue)} hint={hint} onChange={next => updateHull(key, next === null ? null : String(next))} />
+                      : <label className="field-label">{label}<input type="number" step="any" aria-label={label} aria-invalid={Boolean(issue)} value={typeof hull[key] === 'number' ? hull[key] : ''} onChange={event => updateHull(key, event.target.value)} placeholder={w('editor.unknown')} /><small>{hint}</small>{issue && <span className="field-error" role="alert">{issue.message}</span>}</label>}
+                    {field.dimension && issue && <span className="field-error" role="alert">{issue.message}</span>}
+                  </TracedField>; })}</div></>}
+          </section>
+          <section className="editor-section"><InputGroup index="02" title={w('editor.group.hullSupplement')} /><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>
+        </>}
+        {chapter === 'freeboard' && (native
+          ? <section className="editor-section"><ShipDesignChapter page="freeboard" host={host} disabled={busy} /></section>
+          // A plain physical project has no native freeboard to edit; the design
+          // is started from the overview, where the setup lives. It is never left
+          // as a blank chapter.
+          : <section className="editor-section"><p className="section-intro">{d('shipDesign.setup.hint')}</p><ConceptDesignLink label={d('shipDesign.setup.fresh')} onOpen={() => goChapter('overview')} /></section>)}
+        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.guns')} note={w('editor.group.guns.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p>
+          {native
+            ? <ShipDesignChapter page="guns" host={host} disabled={busy} />
+            : <><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><ConceptDesignLink label={c('concept.enable')} onOpen={openConceptDesign} /></>}
+          <ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.systems')} note={w('editor.json.systemsText')} label={w('editor.json.label')} /></section>}
+        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.weapons')} note={w('editor.group.weapons.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p>
+          {native
+            ? <ShipDesignChapter page="weapons" host={host} disabled={busy} />
+            : <WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} />}
+          <ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.weapons')} note={w('editor.json.weaponsText')} label={w('editor.json.label')} /></section>}
+        {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.armour')} />
+          {native ? <ShipDesignChapter page="armour" host={host} disabled={busy} /> : <ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} />}</section>}
+        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.propulsion')} />
+          {native ? <ShipDesignChapter page="engine" host={host} disabled={busy} />
+            : <><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /><ConceptDesignLink label={c('concept.group.machinery')} onOpen={openConceptDesign} /></>}</section>}
+        {/* Reading order: the native performance fields lead the chapter; the
+            optional request and the results that request produces follow, and
+            nothing is recomputed to reorder them. */}
+        {chapter === 'performance' && native && <section className="editor-section">
+          {/* The native performance fields lead the chapter and carry no group
+              number of their own; the physical request and its results follow. */}
+          <ShipDesignChapter page="performance" host={host} disabled={busy} />
+          {/* Additional physical checks are request tasks, not a data mode: they
+              add the ordinary physical stages on top of the native design stage
+              for this run only, and they never change the declaration. */}
+          <label className="field-label">
+            <input type="checkbox" checked={physicalChecks} disabled={busy || hostBlocked}
+              onChange={event => { contextGeneration.current += 1; setPhysicalChecks(event.target.checked); }} />
+            {' '}附加物理检查 / Additional physical checks
+          </label></section>}
+        {chapter === 'performance' && physicalRequest && <>
+          <section className="editor-section"><InputGroup index="01" title={w('editor.group.performanceInputs')} note={w('editor.group.performanceInputs.note')} />
+            <PerformanceInputs project={draft} onChange={updateDraft} /></section>
+          <section className="editor-section"><InputGroup index="02" title={w('editor.group.resistance')} note={w('editor.group.resistance.note')} />
+            <ResistanceEditor project={draft} onChange={updateDraft} /></section>
+          <section className="editor-section" id={REQUEST_PERFORMANCE} tabIndex={-1}><InputGroup index="03" title={w('editor.group.request')} note={w('editor.group.request.note')} />
+            <PerformanceRequest project={draft} request={performanceRequest} onRequestChange={next => {
+              contextGeneration.current += 1; setPerformanceRequest(next);
+            }} /></section>
+          <section className="editor-section"><InputGroup index="04" title={w('editor.group.results')} note={w('editor.group.results.note')} />
+            <PerformanceResults run={selectedRun} />{!native && <ConceptDesignLink label={c('balance.title')} onOpen={openConceptDesign} />}</section>
+        </>}
+        {chapter === 'weights' && native && <>
+          {/* The managed ledger and its balance are the authority for a native
+              design, so they lead the chapter. The reader's own raw ledger rows
+              follow, folded away: they are the position and source facts that sit
+              underneath the core's managed mass. */}
+          <section className="editor-section"><InputGroup index="01" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
+            <ShipDesignLedgerSection host={host} disabled={busy} /></section>
+          <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}>
+            <details className="advanced-json"><summary>{d('shipDesign.ledger.positions')}</summary>
+              <p className="section-intro">{d('shipDesign.ledger.positionsHint')}</p>
+              <InputGroup index="02" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
+              {ledgerRows}
+            </details></section>
+        </>}
+        {chapter === 'weights' && !native && <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}><InputGroup index="01" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
+          {ledgerRows}
+        </section>}
+        {chapter === 'weights' && !native && <section className="editor-section" id={CONCEPT_SECTION} tabIndex={-1}><InputGroup index="02" title={c('concept.enable')} note={c('concept.enableHint')} />
+          {/* One compact reading of state this page already owns: enabled, saved,
+              run for this saved revision and condition, and reviewable against the
+              options now on screen. It adds no request and changes nothing. */}
+          <ConceptReviewGuide enabled={conceptOn} dirty={dirty || jsonEdited} revision={view.revision}
+            conditionId={conditionId} current={selectedRun}
+            requested={requestStages.includes('design_balance')}
+            requestCurrent={proposalRequestCurrent} />
+          <ConceptDesignEditor project={draft} onChange={updateDraft}
+            run={proposalRequestCurrent ? selectedRun : null}
+            identity={`${proposalIdentity}|${optionsKey}`}
+            dirty={dirty || jsonEdited} requestCurrent={proposalRequestCurrent} />
           <DesignBalanceDiagnostics run={selectedRun} />
         </section>}
-        {chapter === 'weights' && <section className="editor-section"><InputGroup index="03" title={c('proposals.title')} note={c('proposals.order')} />
+        {chapter === 'weights' && !native && <section className="editor-section"><InputGroup index="03" title={c('proposals.title')} note={c('proposals.order')} />
           <MassProposalPanel run={proposalRequestCurrent ? selectedRun : null} identity={`${proposalIdentity}|${optionsKey}`} dirty={dirty || jsonEdited}
             requestChanged={!!selectedRun && !proposalRequestCurrent}
             apply={applyOwner.current === projectId ? applyState : IDLE_APPLY} onApply={applyProposals} onRerun={rerunAfterApply} />
         </section>}
-        {chapter === 'weights' && <section className="editor-section"><InputGroup index="04" title={w('editor.group.massModel')} note={w('editor.group.massModel.note')} /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'weights' && <section className="editor-section"><InputGroup index="05" title={c('balance.title')} note={c('balance.intro')} />
+        {chapter === 'weights' && !native && <section className="editor-section"><InputGroup index="04" title={w('editor.group.massModel')} note={w('editor.group.massModel.note')} /><MassModelEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
+        {chapter === 'weights' && !native && <section className="editor-section"><InputGroup index="05" title={c('balance.title')} note={c('balance.intro')} />
           <DesignBalanceResults run={selectedRun} available={conceptOn && !dirty && !jsonEdited} />
         </section>}
         {chapter === 'stability' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.endpoints')} note={w('editor.group.endpoints.note')} /><DeckFreeboardEditor deck={getDeck(draft)} runs={visibleRuns} onPatchDeck={patchDeck} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.advanced')} note={w('editor.json.advancedText')} label={w('editor.json.label')} /></section>}
-        {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.guns')} note={w('editor.group.guns.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><ConceptDesignLink label={c('concept.enable')} onOpen={openConceptDesign} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.systems')} note={w('editor.json.systemsText')} label={w('editor.json.label')} /></section>}
-        {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.weapons')} note={w('editor.group.weapons.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p><WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} /><ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.weapons')} note={w('editor.json.weaponsText')} label={w('editor.json.label')} /></section>}
-        {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.armour')} /><ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>}
-        {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.propulsion')} /><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /><ConceptDesignLink label={c('concept.group.machinery')} onOpen={openConceptDesign} /></section>}
         {chapter === 'damage' && <section className="editor-section" id={REQUEST_DAMAGE} tabIndex={-1}><InputGroup index="01" title={w('editor.group.damage')} note={w('editor.group.damage.note')} /><DamageEditor project={draft} run={selectedRun} request={floodingRequest} onChange={updateDraft} onRequestChange={next => {
           contextGeneration.current += 1; setFloodingRequest(next);
         }} requestError={floodingChoice.error} /></section>}

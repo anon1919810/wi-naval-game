@@ -1,6 +1,7 @@
 import type {
   ProjectDiagnostic, SshipMigration, SshipMigrationField, SshipProjectImportPreview,
 } from '../types';
+import { useShipDesignCopy } from '../i18n/shipDesign';
 import type { WorkspaceKey } from '../i18n/workspace';
 
 /**
@@ -36,6 +37,30 @@ const COUNT_ROWS: ReadonlyArray<{ key: string; label: WorkspaceKey }> = [
 ];
 
 type Copy = (key: WorkspaceKey, params?: Record<string, string | number>) => string;
+type DesignCopy = ReturnType<typeof useShipDesignCopy>;
+
+/**
+ * The native import's method marker.
+ *
+ * A native preview describes the file as the pure codec read it, not as the
+ * legacy mapping projected it, so this component can tell the two apart and
+ * never render a native answer with the legacy field/count vocabulary.
+ */
+const NATIVE_METHOD_VERSION = 'native-sship-import-v1';
+
+/** What a native preview's migration section carries. */
+interface NativeMigration {
+  method_version: string;
+  source: {
+    filename?: string; sha256?: string; version?: string;
+    header?: string; encoding?: string; byte_length?: number;
+  };
+  /** The 222 canonical design fields, kept apart from the raw record count. */
+  parameter_count?: number;
+  /** The raw record block the file held: 280 for 3.0, 136 for 2.0. */
+  raw_record_count?: number;
+  diagnostics?: ProjectDiagnostic[];
+}
 
 /** A migration limit, whether the core sent it as a sentence or as a finding. */
 function limitationText(limitation: SshipMigration['limitations'][number]): string | null {
@@ -69,9 +94,75 @@ function MigrationField({ field, w }: { field: SshipMigrationField; w: Copy }) {
   </li>;
 }
 
+/**
+ * What one native import contains, described on its own terms.
+ *
+ * This is deliberately not the legacy field table. It shows the full source
+ * identity and the two counts that mean something to a native reader — the 222
+ * canonical design fields and the raw record block the file held (280 for 3.0,
+ * 136 for 2.0) — while the detailed parameters stay in the design and the
+ * original bytes stay archived. Every value is rendered as React text.
+ */
+function NativeMigrationView({ migration, canonical, w, d }: {
+  migration: NativeMigration; canonical: ProjectDiagnostic[]; w: Copy; d: DesignCopy;
+}) {
+  const source = migration.source ?? {};
+  const findings = migration.diagnostics ?? [];
+  return <>
+    <p className="project-import-note">{d('shipDesign.title')}</p>
+
+    <dl className="project-import-identity">
+      {source.version !== undefined &&
+        <div><dt>{w('sship.identity.version')}</dt><dd>{source.version}</dd></div>}
+      {source.header !== undefined &&
+        <div><dt>{w('sship.identity.header')}</dt><dd><code>{source.header}</code></dd></div>}
+      {source.filename !== undefined &&
+        <div><dt>{w('sship.identity.file')}</dt><dd>{source.filename}</dd></div>}
+      {source.sha256 !== undefined &&
+        <div><dt>{w('sship.identity.hash')}</dt><dd><code>{source.sha256}</code></dd></div>}
+      {typeof source.byte_length === 'number' &&
+        <div><dt>{w('sship.identity.size')}</dt><dd>{(source.byte_length / 1024).toFixed(0)} KiB</dd></div>}
+      <div><dt>{w('sship.identity.method')}</dt><dd><code>{migration.method_version}</code></dd></div>
+    </dl>
+
+    <dl className="project-import-counts">
+      {typeof migration.parameter_count === 'number' &&
+        <div><dt>{w('stage.ship_design')}</dt><dd>{migration.parameter_count}</dd></div>}
+      {typeof migration.raw_record_count === 'number' &&
+        <div><dt>{w('sship.count.total')}</dt><dd>{migration.raw_record_count}</dd></div>}
+    </dl>
+
+    {findings.length > 0 && <div className="project-import-findings">
+      <h3 className="project-import-findings-title">{w('sship.findings.title', { count: findings.length })}</h3>
+      <ul className="project-import-finding-list">
+        {findings.map((diagnostic, index) =>
+          <MigrationFinding diagnostic={diagnostic} w={w} key={`${diagnostic.path ?? ''}-${index}`} />)}
+      </ul>
+    </div>}
+
+    {canonical.length > 0 && <details className="project-import-findings-more">
+      <summary>{w('sship.canonical.title', { count: canonical.length })}</summary>
+      <ul className="project-import-finding-list">
+        {canonical.map((diagnostic, index) =>
+          <MigrationFinding diagnostic={diagnostic} w={w} key={`native-canonical-${diagnostic.path ?? ''}-${index}`} />)}
+      </ul>
+    </details>}
+  </>;
+}
+
 export function SshipMigrationPreview({ preview, w }: { preview: SshipProjectImportPreview; w: Copy }) {
+  const d = useShipDesignCopy();
   const migration = preview.migration;
   if (!migration) return null;
+
+  // A native import is one first-class design, not a projection: it has its own
+  // method marker and its own two counts, so it is described on its own terms
+  // rather than through the legacy 280-field disposition table.
+  if (migration.method_version === NATIVE_METHOD_VERSION) {
+    return <NativeMigrationView
+      migration={migration as unknown as NativeMigration}
+      canonical={preview.diagnostics ?? []} w={w} d={d} />;
+  }
 
   const findings = migration.diagnostics ?? [];
   // What the canonical validator still warns about about the *draft*: a draft

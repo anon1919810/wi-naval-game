@@ -1,0 +1,393 @@
+{
+  "schema": "plimsoll-coverage-marathon-acceptance-1",
+  "accepted": true,
+  "local_only": true,
+  "started_utc": "2026-10-15T18:03:47+00:00",
+  "accepted_utc": "2026-10-15T20:03:54.926360+00:00",
+  "elapsed_seconds": 7208,
+  "minimum_effective_work_seconds": 7200,
+  "minimum_duration_reached": true,
+  "base_commit": "7ce1cb9eb62045470b6fba338ad349dd2cc1574a",
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "units": [
+    "fixed_armour",
+    "historical_cost",
+    "continuous_workflow_reports_comparison",
+    "auxiliary_weapons_mass_and_import",
+    "armour_dimensional_review"
+  ],
+  "core": {
+    "passed": 979,
+    "subtests_passed": 2837,
+    "skipped": 2,
+    "scope": "relevant combined batch"
+  },
+  "semantic_followup": {
+    "passed": 195,
+    "subtests_passed": 46
+  },
+  "backend": {
+    "passed": 98,
+    "scope": "mass proposals, source import and project import"
+  },
+  "frontend": {
+    "files_passed": 64,
+    "tests_passed": 1063,
+    "build": "passed",
+    "pool": "threads",
+    "maxWorkers": 1
+  },
+  "original": {
+    "numeric_readings": 862,
+    "relative_tolerance": 1e-05,
+    "fixed_armour_cases": 323,
+    "cost_cases": 37,
+    "auxiliary_cases": 99,
+    "review_cases": 45,
+    "minimum_length_cases": 8,
+    "max_relative_difference": 1.399146772514499e-07,
+    "source_unsupported_rows_excluded": 30,
+    "product_domain_refusals": 5,
+    "finite_serialization_boundary_guards": 2,
+    "whole_gui_verified": false,
+    "real_ship_validated": false
+  },
+  "quick": {
+    "cases_passed": 15,
+    "source_matches_current": true,
+    "run_id": "b703a79b-11b4-4fd3-a467-36e57fe79671"
+  },
+  "browser": {
+    "accepted": true,
+    "project_id": "cf938dd4-449d-43cd-bff8-8d2e6a85e6d0",
+    "revisions": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "real_browser_api_worker": true,
+    "normal_form_save": true,
+    "explicit_single_armour_adoption": true,
+    "selected_additional_components": 10,
+    "base_and_other_condition_preserved": true,
+    "main_adopted_mass_t": 852.055588873935,
+    "changed_input_proposal_t": 994.0648536862577,
+    "cost_before_usd_million": 4.894143005536006,
+    "cost_after_explicit_ammunition_adoption": 4.841681046572149,
+    "armour_and_auxiliary_adoption_does_not_change_cost": true,
+    "stale_status": 409,
+    "canonical_values_survive_feet_preference": true,
+    "concept_390_overflow": [],
+    "comparison_rows": 60,
+    "source_import_records": 12,
+    "imported_archive_bytes_preserved": true,
+    "imported_single_mine_adopted_t": 18.75,
+    "unavailable_report_parent_hides_components": true,
+    "json_csv_export_preserved": true,
+    "native_download_dialog_verified": false
+  },
+  "independent_combined_workflow": {
+    "accepted": true,
+    "fixed_proposals": 7,
+    "layout_proposals": 1,
+    "auxiliary_proposals": 3,
+    "independent_hand_mines_t": 18.75,
+    "independent_hand_plate_t": 99.5707683325362,
+    "cost_before_usd_million": 4.894143005536006,
+    "cost_after_relevant_adoption_usd_million": 4.841681046572149,
+    "unadopted_proposal_does_not_change_cost": true,
+    "armour_only_does_not_change_cost": true,
+    "explicit_relevant_adoption_changes_cost": true,
+    "base_and_other_condition_preserved": true,
+    "old_proposal_rejected": "proposal identity no longer matches the current project/loading/request",
+    "no_automatic_replacement": true,
+    "import_fixed_records": 7,
+    "import_cost_not_enabled": true,
+    "import_auxiliary_records": 5,
+    "import_targets_unknown_unadopted": true,
+    "archive_roundtrip_preserved": true
+  },
+  "cli": {
+    "accepted": true,
+    "actual_cli": true,
+    "source_and_reviewed_backup_unchanged": true,
+    "preview_and_exclusive_new_import": true,
+    "source_archive_bytes_preserved": true,
+    "canonical_fixed_records": 7,
+    "canonical_auxiliary_import_records": 5,
+    "import_does_not_enable_cost_or_balance": true,
+    "states": {
+      "imported": {
+        "status": "partial",
+        "design_balance": "unavailable",
+        "returncode": 1,
+        "json_sha256": "b612eeeb765f4579eed4ef25fe1d5127d8e73f63303c4d91a143e284d9f24aed",
+        "csv_sha256": "1528294285eddf3608bb99488b10fa1cca1890f252b383762ecefe6ee479c33f"
+      },
+      "reviewed": {
+        "status": "partial",
+        "design_balance": "completed",
+        "returncode": 1,
+        "json_sha256": "9adc5d5765d4232510500f5f2604276516554e505c5dbb85d0db735158d99a57",
+        "csv_sha256": "d38ca558253a2d2d39d8faa7e8bdeb787c6027d4bbd4612f74dd33b8899a2096"
+      }
+    },
+    "commands": [
+      {
+        "argv": [
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\web\\backend\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-m",
+          "plimsoll",
+          "import-sship",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\combined-import.sship",
+          "--preview",
+          "--output",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\preview.json"
+        ],
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\web\\backend\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-m",
+          "plimsoll",
+          "import-sship",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\combined-import.sship",
+          "--output",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\imported.project.json"
+        ],
+        "returncode": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\web\\backend\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-m",
+          "plimsoll",
+          "analyze",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\imported.project.json",
+          "--condition",
+          "imported-working",
+          "--options",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\options.json",
+          "--output",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\imported.result.json",
+          "--csv",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\imported.result.csv"
+        ],
+        "returncode": 1,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\web\\backend\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-m",
+          "plimsoll",
+          "analyze",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\combined-reviewed.project.json",
+          "--condition",
+          "normal",
+          "--options",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\options.json",
+          "--output",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\reviewed.result.json",
+          "--csv",
+          "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16\\cli-delivery\\reviewed.result.csv"
+        ],
+        "returncode": 1,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "boundary": "Synthetic files; partial status is retained when physical inputs are unavailable."
+  },
+  "coverage": {
+    "frozen_observations": 191,
+    "append_only_typed_relations": 64,
+    "relation_counts": {
+      "canonical_declaration_and_migration_verified": 43,
+      "canonical_conversion_and_own_import_scale_verified": 5,
+      "original_numeric_segment_verified": 14,
+      "original_numeric_segment_and_availability_gate_verified": 1,
+      "declared_warning_input_and_migration_verified": 1
+    },
+    "equivalent_percentage": null
+  },
+  "methods": {
+    "plimsoll.stability": "loaded-projected-equilibrium-2",
+    "plimsoll.geometry_analysis": "geometry-analysis-1",
+    "plimsoll.small_angle_stability": "free_trim_equilibrium_roll_stiffness_v1",
+    "plimsoll.tank_geometry": "rectangular-liquid-geometry-1",
+    "plimsoll.flooding": "connected-quasi-static-flooding-3",
+    "plimsoll._flooding_kernel": "vented-orifice-network-2",
+    "plimsoll.verification_oracles": null,
+    "plimsoll.battery_armour": "sps-3b3-battery-armour-v1",
+    "plimsoll.battery_layout": "sps-3b3-battery-layout-v1",
+    "plimsoll.fixed_armour": "sps-3b3-fixed-armour-v1",
+    "plimsoll.concept_cost": "sps-3b3-cost-v1",
+    "plimsoll.auxiliary_weapons": "sps-3b3-auxiliary-weapons-v1",
+    "plimsoll.armour_review": "sps-3b3-armour-review-v1",
+    "plimsoll.verification": "offline-core-verification-1"
+  },
+  "frozen_inventory_sha256": "b4b979b73b48a8e8b9f668375f4be0616ee3af5f882b72ede05b46b32f007d07",
+  "source_identity_sha256": "c943a4a154340c58521fad17c228801720b24040b31d4a18755a2c18f95cad2e",
+  "changed_code_sha256": {
+    "tools/plimsoll/README.md": "bea25e4996cd60cf3a19a8cb6b3ec9352dd3e7012cbfbe130e3583c654373829",
+    "tools/plimsoll/armour_review.py": "97b6b5c0fb614af2bae7de0dac42baa3121d53bde30aa5cd4443d28d30185337",
+    "tools/plimsoll/auxiliary_weapons.py": "205bf9d602cee787feb16abbc8a3df5ed85215044c2a798bcea6d53308554b9d",
+    "tools/plimsoll/battery_layout.py": "e3d7d7938677a84e89685c1f1b45a58246bc3c529aedc860804fb655771c1e47",
+    "tools/plimsoll/concept_cost.py": "5f3d3db8237b48a095431a86bad912631e5e00b60fac8670f9537c4ac3432fdf",
+    "tools/plimsoll/concept_design.py": "78cf0782c73668ff3a8b2ac06566f16e759acc612d69060f73d67491372cbbdd",
+    "tools/plimsoll/fixed_armour.py": "e5bf946016d87c246e1979a04d3e55a927472167abfac53b9cb08f5e5d8eb4b9",
+    "tools/plimsoll/sship_import.py": "5f38cef1c34c16745ade0fd631ea44ac5dccf5be6586b25ce71f7bc47aa0013e",
+    "tools/plimsoll/sship_mapping.py": "4d32d4784b3bf3791be817fa57be809544a2bbdcf4dbe10e26ad6dbf03b168c2",
+    "tools/plimsoll/tests/fixtures/concept/original-auxiliary-review-vectors.json": "a9a904878a6abb7e7fe202a6fbb22c0e5409f59adec9fe6a7d213650a1785c77",
+    "tools/plimsoll/tests/fixtures/concept/original-fixed-armour-cost-vectors.json": "944e164f756d6c945dd7cc8c3b416442a01de6224854482dfa14bc644f9bf752",
+    "tools/plimsoll/tests/fixtures/concept/original-layout-vectors.json": "87c86cd905fbcdb04fa18aee0b5269895abb3bf85b72a03c5eaa64383dbb6d7d",
+    "tools/plimsoll/tests/test_additional_original_vectors.py": "b5ec0d1d47ec0fedfccf621e69e4453aeeb3dfc5720d54393961973cca5b700f",
+    "tools/plimsoll/tests/test_armour_review.py": "ab5da82cee3e6042c5a01d54045f82676d8ee0060f95bc5edde3c0dc1d973934",
+    "tools/plimsoll/tests/test_auxiliary_weapons.py": "a7a48cdb54c60b3cfa5eab4e17d1b25cb1b637e5e2c0073c5b554bef86adb2aa",
+    "tools/plimsoll/tests/test_auxiliary_workflow.py": "c3c291916e36589f420799045393e03e7d8923785c25571f895547e9a3d75fc9",
+    "tools/plimsoll/tests/test_battery_layout.py": "104043504cbfd9793cad42352633e5c8bda6b56149bf3c1be91f29d2e36e1524",
+    "tools/plimsoll/tests/test_battery_layout_workflow.py": "85f44b53aaa056ae65675e255c4a0d89ca27705e02512cd9a7e0d50f36432780",
+    "tools/plimsoll/tests/test_concept_cost.py": "c108d7f449bd8d920029198eeabe065a22a6512a179efb0296855f3e03aea8f0",
+    "tools/plimsoll/tests/test_fixed_armour.py": "4dd38db1a2eebc558a7f4d516e1effccca4ff8159ae0a6c7907bb8293b666d2b",
+    "tools/plimsoll/tests/test_fixed_armour_workflow.py": "9b2f7dda03ae44727ebdae02b5b7f202dabc2617bc2448d6b9828e26957958c6",
+    "tools/plimsoll/tests/test_marathon_review_regressions.py": "8b42bd236cafab20510b9ffbb3621d84c17ae69e66256f629d35a65b14fd3e11",
+    "tools/plimsoll/tests/test_sship_import.py": "bc5880435cd8c1a59fc8c9e8a44f1582a91f4b179f08f1ee3e61c377684ee8b1",
+    "tools/plimsoll/verification.py": "49c0b13257d9af5d5cf3913eb843d9339dd3b1692964147502a8f81104ad49d5",
+    "web/frontend/src/__tests__/armour-review.test.tsx": "f294045915758b819ce69b8fbf29ca690441965635d1ef379a3b81f67c058f28",
+    "web/frontend/src/__tests__/auxiliary-weapons.test.tsx": "f6d2dd036518fb6cfddeeccc648ec4c2cb29d083d9a4375cd9df91d75c52cbf8",
+    "web/frontend/src/__tests__/battery-layout-results.test.tsx": "acc2b2f2f1c826b90b14cd7d605313ff0817ef6cbf416be8e2a73679e0f077b4",
+    "web/frontend/src/__tests__/battery-layout.test.tsx": "224f6b850028c34778021efe114e4a2f92151b068b6a0efc5b1a7d0548ecb1dc",
+    "web/frontend/src/__tests__/concept-component-report.test.tsx": "fe6289aa45b12465bdcc19cc5f2444d0ddeb6c7bc5c3ee22960071e7cba88bc4",
+    "web/frontend/src/__tests__/concept-cost.test.tsx": "9c87ad3ac723d3a1ccc8c5f80a9b1651d021270f140e46695371ce16bc4cc6e4",
+    "web/frontend/src/__tests__/fixed-armour.test.tsx": "c9ae2d978b71402cb6ce3c7b1c5abc4490a37ead54cfad548a912b7ca4b71062",
+    "web/frontend/src/components/AuxiliaryWeaponsEditor.tsx": "2e28eeb113ebb0d574f91d8ff62dd51fc4b1cc2a259e9412ab211bb29c523b12",
+    "web/frontend/src/components/BatteryLayoutEditor.tsx": "336a85ab0e05dbb799e644dafead28ab24d6653486009de87b3a15138b663f9a",
+    "web/frontend/src/components/ConceptComponentReadings.tsx": "6894d18518487af6368393d9a77fb9bc9a74bfaee3a031c279254ed372528698",
+    "web/frontend/src/components/ConceptDesignEditor.tsx": "538e4b81a1e78df39726fd4e3ff7780ca64622e88c22ca49be6d43d7a304efe4",
+    "web/frontend/src/components/ConceptReviewGuide.tsx": "042b9095cc72f6ab9b6882a8b824a54c71a5164b593cb83f4330c6337782c1c5",
+    "web/frontend/src/components/DesignBalanceResults.tsx": "dd05403ea4060c761bfb4915d94a36461bb4e64d20d038e19105529d990125fa",
+    "web/frontend/src/components/FixedArmourEditor.tsx": "c80869a9c6c0de079ca440dd08138cbea6b49c14325c8ee2ea9ec157e8b7e73f",
+    "web/frontend/src/components/MassProposalPanel.tsx": "51b817e0dbb1666ee1a418249b1694d2e5f29e908f494f1e1c5c748c0e680479",
+    "web/frontend/src/components/StageStatus.tsx": "a0c8ba9e8b71bb7c354dfacccaafd829c3d08013ea31c2bbab151517934bd234",
+    "web/frontend/src/components/conceptDesign.ts": "16338909ad925ba4dd248789299fd177dd3010ea772bfb96b03795ba463d5e25",
+    "web/frontend/src/components/declaredInputs.tsx": "e2d95dd094b480f8610d695396ebe64e957f5673bdce8eda3f5d7d9c68b24535",
+    "web/frontend/src/components/reportMetrics.ts": "bfdbe1e781a75aac8c19ecd7abd7c55722997cf9ce164e14b047909772b970dc",
+    "web/frontend/src/i18n/concept.ts": "e1e12f8da68c4d4d05c8788105a4c096b7a75e5397dc348974e60e0e8ab43ab7",
+    "web/frontend/src/i18n/workspace.ts": "33d6154d44c02e52f068bf82b90893b7e0a59f2368a67f5df2cbaac075f19781",
+    "web/frontend/src/pages/Workbench.tsx": "2436347db55588c68cf61818d4d3f2522d218fd25f7c87564fcd47e8760cf7c2"
+  },
+  "evidence_sha256": {
+    "core-final-independent.log": "fed0cda15ad593138807409771e7a18f584ae3cb6b9c4513df3c34188d581b52",
+    "core-final-tests.txt": "085dc47e549e5d96084f07abce9f99e2f649a0124dc8a94a9f1332f1b176416b",
+    "backend-final-independent.log": "36e8eb76bb0a450651c8c34db67f1fe1ec0b5bd9742d0b7a263008ecc242f20d",
+    "frontend-frozen-final.log": "60caec39ad8d46bc2139492efdf94322ca08abf6ab983a5e67d5f85648564dbe",
+    "frontend-frozen-build.log": "5657e3e02f775bd5a2557ac6d0272721dbdf4f115812052fa01b812cea038ecd",
+    "semantic-final-core.log": "47510215770749473cd92247c1c84549e1e450a86eac19a316a5cefafc0e66fd",
+    "independent-original-comparison.json": "a0c8b0e0920b61dffc8001e3e82e3f3d6596e7636a9572cf6c9b61d1a467983c",
+    "additional-original-comparison.json": "29fc2d678bfb8bf11d7e63a2d6b5b13f38be032881730fc8692ea0645cc1fbdc",
+    "independent-combined-workflow.json": "8cb486627dceb54ed429ff63861feaceca7b96bc999ede7830978320c077273f",
+    "browser-workflow-acceptance.json": "d026e405e517e0cb3db9b0421e7c51dd14ec677c5cc6bf2599d75d9e52d79cab",
+    "cli-workflow-acceptance.json": "361b11e7683978e6e4b7f58e28447d2b87e4a3da28a92e3d7aa37521448dbb71",
+    "working-copy-delivery.json": "340c98dd9f13461a032e324f607f19d71bda7828e2a972893fd2aa5a101c95fb",
+    "source-attribution.json": "d1d7b27963797bdb786d7d78643934af72191010e1975041e59d6fdcf8181147",
+    "service-stop-verification.json": "a0be25033eae6b7901015730b6dfb4bf020847d45010ad13e22e101683734162",
+    "documentation-link-check.json": "a56ab54c0d8d620f0e975b05935bdca811070d1509c347c6f478acc1c89ecc0b",
+    "auxiliary-space-source-readiness.json": "ada507ddc7b91053c029e41e2a8582c5f3bee60fed5a561f2b729bbbadf5e870",
+    "original-fixed-armour-cost-vectors.json": "0e00dccb2d4b4aaf03ae2fe86d50c3dad71d8ff49847497438a1646c7397895a",
+    "original-auxiliary-weapons-vectors.json": "6cefede227f70ab62777cb9ebc99bd6df3c49775db6e695402f94d995e9f7ffd",
+    "original-armour-review-vectors.json": "6fc7c070c20402ba92e4c36fc1fc346f9581604a2bd5ea35f6e0608818005847",
+    "quick-frozen/core-verification.json": "02329d11640f982e0f575bc59522f784f4ece3dc73b5e3b92caad6cd9e127834",
+    "browser-run-r6-export.json": "2444f602222a1b6ed775e79a29359e9b22211d663731d8f299907b8587a0457e",
+    "browser-run-r6-export.csv": "af6d17eebbabbabbdb69e0cddf099b8685a11778b19cea4a8936523423da5099",
+    "combined-study.project.json": "3cf2da1812d3df27779abc04786ff1fe60b397a19625704cd555cb92eb8c2633",
+    "combined-reviewed.project.json": "97054abd0cc91c2d43f7e843cd1c36e784be234ee347fab4f0d791f4df7493d0",
+    "combined-import.sship": "5e9ad8db73ead630d8667c2d70069def7193b7fe63a2bc41f08cd3fc9731596c",
+    "final-source-preservation.json": "b929ff5eeaf0d868f7ebd5ced6f27053dc312b27b2c313d1698206d66d32b9f8",
+    "source-boundary-audit.md": "abd40e15e42c1f4e4c3f610278e5e19da6bc93ac3cfe6ceda6561548a034a9c3"
+  },
+  "documentation_sha256": {
+    "coverage-marathon-2026-10-16.md": "77a0b2352f9c871b1e386fd36b6895006adbc923e9c0acddc20fdda3c72a7c20",
+    "fixed-armour-auxiliary-contract.md": "162d273401c1f584d6f9230cf4b339d6ef11d2d2d341c3fddeb3aa1e04c65b04",
+    "fixed-armour-cost-workflow.md": "9141ba09b9b6bfc8425d6780bc95f47e53ca140252f0a9487a0a3a91e0133cae",
+    "remaining-coverage-plan-2026-10-16.md": "f50fa5d7f68dc1e92325cb7a6e1d5f184d7ad93f7b35016404ccef6b534e293b",
+    "current-status.md": "30187721cfb6a41b50b38c789bd53036c7d3ad2a22a92bb16099668de1637f4a",
+    "concept-design-coverage.md": "118f8460f4b476453acc086318e9b77f66e5f2c7a0a53899007cf2f68e4221d6",
+    "concept-design-workflow.md": "ece1dd15915bb048b2ab3020b664c3f429da5a7959701bfe5fe0586427c3fc4e",
+    "evidence/coverage-increment-2026-10-16.json": "373c3a8e8c72193280b9244c91db61e5b13329425c4939e73e66b638a0bda365",
+    "evidence/coverage-remaining-source-audit-2026-10-16.json": "0ad0d0d44cf82850723bb7517ee49d0a4c074bcd459732a97c591fe16a647789"
+  },
+  "temporary_services_stopped": true,
+  "remaining_source_audit": {
+    "entries": 7,
+    "static_only": true,
+    "implementation_or_parity_upgraded": false,
+    "existing_space_rows_extracted": 50,
+    "new_native_probe_runs": 0
+  },
+  "evidence_directory": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-coverage-marathon-2026-10-16",
+  "original_binary_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+  "preservation": {
+    "accepted": true,
+    "head": "7ce1cb9eb62045470b6fba338ad349dd2cc1574a",
+    "expected_base": "7ce1cb9",
+    "original_binaries": [
+      {
+        "path": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\work\\target\\SpringSharp3b3.exe",
+        "sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc"
+      },
+      {
+        "path": "C:\\Users\\杨睿\\Desktop\\HMS_Queen_Mary_建模成果_2026-09-17\\SpringSharp3b3\\SpringSharp3b3.exe",
+        "sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc"
+      }
+    ],
+    "frozen_inventory_sha256": "b4b979b73b48a8e8b9f668375f4be0616ee3af5f882b72ede05b46b32f007d07",
+    "unchanged_prior_kernel_and_fixture_files": {
+      "tools/plimsoll/battery_layout.py": "e3d7d7938677a84e89685c1f1b45a58246bc3c529aedc860804fb655771c1e47",
+      "tools/plimsoll/tests/fixtures/concept/original-layout-vectors.json": "87c86cd905fbcdb04fa18aee0b5269895abb3bf85b72a03c5eaa64383dbb6d7d",
+      "tools/plimsoll/tests/test_battery_layout.py": "104043504cbfd9793cad42352633e5c8bda6b56149bf3c1be91f29d2e36e1524",
+      "tools/plimsoll/tests/test_battery_layout_workflow.py": "85f44b53aaa056ae65675e255c4a0d89ca27705e02512cd9a7e0d50f36432780",
+      "tools/plimsoll/battery_armour.py": "fd1c4c865a1a4f412c4c0c3cff58a05b78786edf78da3ef3501ba2eb470b560d"
+    },
+    "prior_dirty_snapshot_zip_sha256": "90adec85fdc8af5ee99047993129522f8ba9c31cbb7afd282b28cf11487ec8ac",
+    "integrated_prior_files_intentionally_extended": true,
+    "committed": false,
+    "deployed": false
+  },
+  "limitations": [
+    "armour total/belt aggregate parity",
+    "source default presets and diagrams",
+    "physical armour or weapon geometry and CG",
+    "weapon space and firing arcs",
+    "source full GUI event-chain equivalence",
+    "full mixed gun-mount mass parity",
+    "modern price estimates",
+    "real user .sship files and real-ship accuracy",
+    "Synthetic project and source files only; no real user .sship supplied",
+    "Actual API exports verified; native OS download dialog not verified",
+    "Narrow screen audit scoped to new concept forms; existing tables retain horizontal scrolling",
+    "Aggregate run remains partial without physical geometry/CG",
+    "Historical source currency is not a modern price estimate"
+  ],
+  "delegation": {
+    "implementation": "OpenCode followed by Codex recovery of unfinished units",
+    "recovery_reason": "Space Bunny and Cat Jam provider quota 429; all delegated runs canceled",
+    "paid_model_or_configuration_change": false
+  }
+}

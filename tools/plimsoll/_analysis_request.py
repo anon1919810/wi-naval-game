@@ -1,6 +1,7 @@
 """Serializable request validation and identity, without numerical execution."""
 import copy
 import hashlib
+import importlib
 import json
 import math
 
@@ -11,13 +12,61 @@ except ImportError:
 
 STAGES = ("loading", "systems", "l0", "geometry", "equilibrium", "hydrostatics", "gz", "deck",
           "hydrostatic_curve", "bonjean", "resistance", "propulsion", "endurance", "historical",
-          "flooding", "design_balance")
+          "flooding", "design_balance", "sps_compat", "ship_design")
 DEFAULT_STAGES = ("loading", "systems", "l0", "geometry", "equilibrium", "hydrostatics", "deck", "propulsion")
+# A project carrying a SpringSharp 3b3 compatibility declaration is its own entry
+# point: the compatibility stage alone is requested unless the caller names
+# stages explicitly, so a design the original program completes is never reported
+# as blocked by physical geometry or a CG it never needed.
+SPS_DEFAULT_STAGES = ("sps_compat",)
+# A project carrying the native authoritative declaration is the product's own
+# entry point. Its basic design stage alone is requested unless the caller names
+# stages explicitly: the empirical native screen reads declared parameters and
+# the managed ledger, never hull lines or a centre of gravity, so a fresh empty
+# design is never reported as blocked by physical geometry it does not have yet.
+SHIP_DESIGN_DEFAULT_STAGES = ("ship_design",)
+#: Version identity for the compatibility stage while its kernel is absent. The
+#: contract fixes this value; the kernel's own ``METHOD_VERSION`` replaces it once
+#: the sibling module is importable.
+SPS_COMPAT_CONTRACT_VERSION = "sps-3b3-compat-v1"
+
+
+def kernel_module(name):
+    """Import one sibling compatibility kernel (normally an ``sps_*`` module).
+
+    Those kernels import each other by bare module name and are authored next to
+    every other core module, so the package directory has to be importable before
+    any of them loads. The repository's own test runner already adds it to
+    ``sys.path``; the production path does not, so the entry is appended once
+    here. A kernel that is missing or still being written returns ``None`` so a
+    caller degrades instead of failing an unrelated request.
+    """
+    qualified=(__package__+'.'+name) if __package__ else name
+    try:
+        return importlib.import_module(qualified)
+    except ModuleNotFoundError as error:
+        if error.name==qualified:return None
+        raise
+
+
+def _sps_compat_version():
+    module = kernel_module("sps_compat")
+    version = getattr(module, "METHOD_VERSION", None) if module is not None else None
+    return version if isinstance(version, str) and version else SPS_COMPAT_CONTRACT_VERSION
+
+
+def _native_version(name, fallback):
+    return getattr(kernel_module(name), "METHOD_VERSION", fallback)
+
+
 # The kernel method version belongs to the request identity: a result computed by
 # a different small-angle method must never be replayed as current.
 VERSIONS = {"coordinator": "selected-loading-analysis-2", "geometry": geometry_analysis.METHOD_VERSION,
             "stability": stability.METHOD_VERSION,
             "small_angle_stability": small_angle_stability.METHOD_VERSION,
+            "sps_compat": _sps_compat_version(),
+            "ship_design": _native_version("ship_design", "ship-design-native-v1"),
+            "ship_design_mass": _native_version("ship_design_mass", "ship-design-mass-v1"),
             "request": "plimsoll-analysis-request-1"}
 
 
@@ -114,7 +163,16 @@ def normalize(project, condition_id, options=None):
     supplied = {} if options is None else json_copy(options, "$.options")
     obj(supplied, {"stages", "equilibrium", "gz_angles_deg", "hydrostatic_waterlines_above_keel_m",
                   "bonjean_waterlines_above_keel_m", "resistance", "endurance_scenario_id", "flooding"}, "$.options")
-    stages = supplied.get("stages", list(DEFAULT_STAGES))
+    # The native authoritative declaration is the product's own entry point and
+    # outranks the legacy compatibility declaration; the two can never coexist in
+    # a normalized project, but the order states which one wins if they ever do.
+    if isinstance(snapshot.get("ship_design"), dict):
+        default_stages = list(SHIP_DESIGN_DEFAULT_STAGES)
+    elif isinstance(snapshot.get("sps_3b3_design"), dict):
+        default_stages = list(SPS_DEFAULT_STAGES)
+    else:
+        default_stages = list(DEFAULT_STAGES)
+    stages = supplied.get("stages", default_stages)
     if (not isinstance(stages, list) or not stages or any(not isinstance(s, str) or s not in STAGES for s in stages)
             or len(set(stages)) != len(stages)):
         reject("stages must be a nonempty array of unique supported names", "$.options.stages")

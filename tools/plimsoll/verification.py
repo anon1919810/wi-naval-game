@@ -19,7 +19,7 @@ import tempfile
 import time
 import uuid
 
-from . import battery_armour, geometry, geometry_analysis, stability, small_angle_stability, tank_geometry, flooding
+from . import armour_defaults, armour_geometry, armour_review, armour_totals, auxiliary_weapons, auxiliary_space, battery_armour, battery_layout, battery_mass_allocation, battery_totals, concept_cost, fixed_armour, geometry, geometry_analysis, stability, small_angle_stability, tank_geometry, flooding
 from .verification_cases import build_cases
 from . import verification_oracles as oracle
 
@@ -45,9 +45,15 @@ def _source_identity():
     guide = PACKAGE / "CLI_README.md"
     files.append({"module": "plimsoll.CLI_README", "path": str(guide),
                   "sha256": hashlib.sha256(guide.read_bytes()).hexdigest()})
+    # Every versioned kernel is named here, not only the ones the numeric cases
+    # happen to measure, so an independent method identity can never be silently
+    # dropped from the signed report. No older identity is removed to make room.
     versions = {m.__name__: getattr(m, "METHOD_VERSION", None)
                 for m in (stability, geometry_analysis, small_angle_stability, tank_geometry,
-                          flooding, flooding.kernel, oracle, battery_armour)}
+                          flooding, flooding.kernel, oracle, battery_armour, battery_layout,
+                          battery_mass_allocation, armour_geometry, fixed_armour, concept_cost, auxiliary_weapons,
+                          armour_review, battery_totals, armour_totals, armour_defaults,
+                          auxiliary_space)}
     versions[__name__] = METHOD_VERSION
     return {"files": files, "method_versions": versions, "consistent": True}
 

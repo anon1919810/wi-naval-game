@@ -1,0 +1,107 @@
+{
+  "schema": "plimsoll-delivery-mass-loop-1",
+  "accepted": true,
+  "accepted_utc": "2026-10-16T15:41:52.895052+00:00",
+  "head": "7ce1cb9eb62045470b6fba338ad349dd2cc1574a",
+  "local_only": true,
+  "stages": {
+    "closeout": "accepted",
+    "whole_battery_adoption": "accepted",
+    "flat_armour_geometry": "accepted"
+  },
+  "proofs": {
+    "next-coverage-closeout.json": "1b1d7ef7fa85b01c752394babcbb0fd602e5ff3745d5ce1fe9ba92188344e0b7",
+    "allocation-stage-acceptance.json": "41ee4274e1564f76a6856f49b11d8f6e9c5262c8f7cfeeb84fb37de041d68c09",
+    "geometry-independent-acceptance.json": "a7b8b5ef9ee6dd0e8697a66835f726bf1a884a8bc80cf4fa9ea60dea1ef2bf47",
+    "geometry-browser-acceptance.json": "db7e13f3413efb8e9e9f774ccf52238faab70e914b819f16c6f50112d9ac66f9",
+    "geometry-archive-acceptance.json": "f6a2198c96a08053861c56fcccf17cacc908e7250396f2825f75bc7eba8cde74",
+    "final-cli-acceptance.json": "1e5b32f1a9b9648214cef1bd1d93ffe55b9277af7721230d4ce084548b1e0308"
+  },
+  "logs": {
+    "geometry-core-stage-independent.log": "717a77de0a4bfb7c3305b94541b3a6e4aa7b240a43b8702974329994bd0acf85",
+    "geometry-ui-stage-independent.log": "734754fda81db987f6c1635309fc61c1820a56793721f4badc1cee1557c208ab",
+    "geometry-review-green.log": "1cb269ac1dbf1b98b2629e4712be428a620ee5c2b7a68682efb9c173b5ca8b03",
+    "geometry-provenance-green.log": "09ca1c89d888d335edf818334a041a0d0f308f67b5dddd53c7962d7b7833773e",
+    "geometry-ui-source-green.log": "ac0a850128debfdeb3d4c95c1aa8463deae8156f620686bfb0fa1139375143be",
+    "final-build-independent.log": "115f7741e3059e33507f8f76dc47a631fbdf184d8abf7bb4f725acb543fee3d6"
+  },
+  "quick": {
+    "suite": "quick",
+    "cases": 15,
+    "source_files": 65,
+    "run_id": "9718f48c-846c-43af-a2a9-b187d3693531",
+    "current_hashes_match": true,
+    "evidence": "quick-delivery/core-verification.json"
+  },
+  "test_policy": "Relevant phase batches, then issue-specific regressions; old broad core/frontend suites not repeated. Counts are not feature coverage.",
+  "browser": {
+    "accepted": true,
+    "project_id": "e3e8149f-f699-4ae4-a569-c9767b54d1fa",
+    "revision": 2,
+    "run_id": "9e7d0721-1a5b-4dc1-853c-4c1b71bb6849",
+    "prior_missing_density_ui_edit_verified": true,
+    "final_source_ui_adoption_worker_reopen": true,
+    "canonical_SI_values": true,
+    "display_units_convert_area_volume_and_mass": true,
+    "one_active_model_per_target": true,
+    "no_SPS_assembly_attribution_on_new_geometry": true,
+    "base_positions_other_conditions_and_unrelated_receipts_preserved": true,
+    "negative_requests_refused_without_mutation": true,
+    "json_csv_and_history_comparison": true,
+    "desktop_and_mobile_no_page_overflow": true,
+    "run_status": "partial",
+    "design_balance": "completed",
+    "limitation": "Synthetic fixture lacks some positions and materialized hull geometry; overall partial is expected and not a full-vessel certification."
+  },
+  "archive": {
+    "accepted": true,
+    "actual_previously_imported_archive": true,
+    "archive_object_unchanged": true,
+    "original_bytes_unchanged": true,
+    "source_sha256": "5e9ad8db73ead630d8667c2d70069def7193b7fe63a2bc41f08cd3fc9731596c",
+    "base_ledger_and_other_conditions_unchanged": true,
+    "geometry_physical_receipt_reopened": true
+  },
+  "method_versions": {
+    "source_battery_totals": "sps-3b3-battery-totals-v1",
+    "allocation": "plimsoll-battery-mount-allocation-v1",
+    "policy": "proportional-row-mounts-v1",
+    "armour_geometry": "plimsoll-armour-panels-v1",
+    "physical_adoption": "armour_panels_mass_v1"
+  },
+  "preservation": {
+    "starting_manifest_files": 89,
+    "all_paths_present": true,
+    "head_unchanged": true,
+    "source_binary_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+    "frozen_inventory_sha256": "b4b979b73b48a8e8b9f668375f4be0616ee3af5f882b72ede05b46b32f007d07",
+    "frozen_inventory_modified": false,
+    "baseline_snapshot_hashes": {
+      "closeout-source-snapshot.zip": "edc9d5f166dd6458eb9076eeb8927ca747c4089125de6b103c89054a84a07b54",
+      "allocation-source-snapshot.zip": "4089d95adf20b09fa5d2c57c0731dd5fa137324e9f00b56dfe0a6c33b0cefdac"
+    },
+    "old_receipts_and_other_conditions_preserved": true
+  },
+  "final_source_snapshot": "final-source-snapshot.zip",
+  "crlf_aware_diff_check": true,
+  "evidence_directory": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-delivery-mass-loop-2026-10-16",
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "equivalent_percentage": null,
+  "final_parent_review": [
+    "Overflow diagnostics and ID grammar",
+    "Verification method identity",
+    "Physical geometry has declared sources, no SPS assembly attribution",
+    "Report displays actual region/plate/density sources",
+    "Long receipt paths cannot force report grid beyond viewport"
+  ],
+  "limits": [
+    "Synthetic hand anchors and workflows, not real-vessel calibration",
+    "Whole original event chain and full-program equivalence not claimed",
+    "Curved bulge/conning/gunhouse geometry, CG, protection, overlap union and fabrication allowances excluded",
+    "Controlled run remains partial for missing physical hull geometry and some positions; design_balance completed",
+    "Native OS download dialog not tested; actual JSON/CSV response bodies inspected",
+    "Existing frontend bundle-size warning remains non-fatal"
+  ]
+}

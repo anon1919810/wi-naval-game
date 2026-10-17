@@ -9,7 +9,7 @@ from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from . import auth, damage_lab_runs, mass_proposals, projects, runs, sship_imports
+from . import auth, damage_lab_runs, mass_proposals, projects, runs, ship_design, sship_imports, sps3b3
 from .config import Settings
 from .db import get_db, make_session_factory
 from .mailer import mailer_from_settings
@@ -32,7 +32,7 @@ class Preferences(BaseModel):
 
 class ProjectCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    template: Literal["analytic_box", "concept_cruiser", "generic_steamer", "queen_mary_1913"] | None
+    template: Literal["analytic_box", "concept_cruiser", "generic_steamer", "queen_mary_1913", "ship_design"] | None
     name: str = Field(min_length=1, max_length=200)
 
 
@@ -84,12 +84,17 @@ class SshipPreview(BaseModel):
 
     The original bytes travel as base64 and nothing about the file is interpreted
     here: the name is a bare name, and the content is decoded and read by the
-    shared core importer, which owns what those bytes mean.
+    shared core reader, which owns what those bytes mean.
+
+    ``native`` selects the reader. Omitted (``False``) keeps the legacy mapping
+    path exactly as it always was; ``True`` reads the original 3.0 *and* 2.0
+    layouts through the pure codec and describes a first-class native design.
     """
 
     model_config = ConfigDict(extra="forbid")
     filename: str = Field(min_length=1, max_length=255)
     content_base64: str
+    native: bool = False
 
 
 class SshipImport(SshipPreview):
@@ -102,6 +107,72 @@ class SshipImport(SshipPreview):
 
     source_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     name: str | None = Field(default=None, max_length=200)
+
+
+class Sps3b3Preview(BaseModel):
+    """A draft compatibility declaration and an optional pure edit command."""
+
+    model_config = ConfigDict(extra="forbid")
+    design: dict
+    command: dict | None = None
+
+
+class Sps3b3ImportPreview(BaseModel):
+    """A SpringSharp source the reader chose, as bounded standard base64.
+
+    The bounds match the ``.sship`` preview exactly: the same bare filename and
+    the same maximum source size, so the compatibility reader is not a larger
+    door into the same parsers.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    filename: str = Field(min_length=1, max_length=255)
+    content_base64: str
+
+
+class Sps3b3FromMigration(BaseModel):
+    """A project's archived original source, to be converted without mutation."""
+
+    model_config = ConfigDict(extra="forbid")
+    migration: dict
+
+
+class ShipDesignInitialize(BaseModel):
+    """A project draft to be initialized or upgraded into a native declaration."""
+
+    model_config = ConfigDict(extra="forbid")
+    project: dict
+
+
+class ShipDesignPreview(BaseModel):
+    """A project draft, an optional pure edit command and the last confirmed draft."""
+
+    model_config = ConfigDict(extra="forbid")
+    project: dict
+    command: dict | None = None
+    design: dict | None = None
+
+
+class ShipDesignImportPreview(BaseModel):
+    """A project draft plus a chosen source file, as bounded standard base64.
+
+    The bounds match the ``.sship`` preview exactly: the same bare filename and
+    the same maximum source size, so the native reader is not a larger door into
+    the same parsers.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+    project: dict
+    filename: str = Field(min_length=1, max_length=255)
+    content_base64: str
+
+
+class ShipDesignFromMigration(BaseModel):
+    """A project draft plus its archived original source, converted without mutation."""
+
+    model_config = ConfigDict(extra="forbid")
+    project: dict
+    migration: dict
 
 
 class RunCreate(BaseModel):
@@ -258,7 +329,7 @@ def create_app(settings: Settings) -> FastAPI:
         # up a project, so it is declared with the other import routes it must
         # not be shadowed by.
         auth.get_current_user(request, db)
-        return sship_imports.preview(body.filename, body.content_base64)
+        return sship_imports.preview(body.filename, body.content_base64, native=body.native)
 
     @app.post("/api/projects/sship-import", status_code=201)
     def import_sship(
@@ -266,7 +337,81 @@ def create_app(settings: Settings) -> FastAPI:
     ):
         user = auth.get_current_user(request, db)
         return sship_imports.import_source(
-            user.id, body.filename, body.content_base64, body.source_sha256, body.name, db)
+            user.id, body.filename, body.content_base64, body.source_sha256, body.name, db,
+            native=body.native)
+
+    @app.get("/api/sps3b3/catalog")
+    def sps3b3_catalog(request: Request, db: Session = Depends(get_db)):
+        # A read-only catalogue of the 222 effective compatibility fields. It
+        # looks no project up and writes nothing.
+        auth.get_current_user(request, db)
+        return sps3b3.catalog()
+
+    @app.get("/api/sps3b3/default")
+    def sps3b3_default(request: Request, db: Session = Depends(get_db)):
+        auth.get_current_user(request, db)
+        return sps3b3.default_design()
+
+    @app.post("/api/sps3b3/preview")
+    def sps3b3_preview(
+        body: Sps3b3Preview, request: Request, db: Session = Depends(get_db),
+    ):
+        # A pure preview: it computes a draft and returns it, never saving a
+        # project or enqueuing a run.
+        auth.get_current_user(request, db)
+        return sps3b3.preview(body.design, body.command)
+
+    @app.post("/api/sps3b3/import-preview")
+    def sps3b3_import_preview(
+        body: Sps3b3ImportPreview, request: Request, db: Session = Depends(get_db),
+    ):
+        auth.get_current_user(request, db)
+        return sps3b3.import_preview(body.filename, body.content_base64)
+
+    @app.post("/api/sps3b3/from-migration")
+    def sps3b3_from_migration(
+        body: Sps3b3FromMigration, request: Request, db: Session = Depends(get_db),
+    ):
+        auth.get_current_user(request, db)
+        return sps3b3.from_migration(body.migration)
+
+    @app.get("/api/design/catalog")
+    def ship_design_catalog(request: Request, db: Session = Depends(get_db)):
+        # A read-only catalogue of the native declaration's fields. It looks no
+        # project up and writes nothing.
+        auth.get_current_user(request, db)
+        return ship_design.catalog()
+
+    @app.post("/api/design/initialize")
+    def ship_design_initialize(
+        body: ShipDesignInitialize, request: Request, db: Session = Depends(get_db),
+    ):
+        # A pure preview of the resulting project: it is returned, never saved.
+        auth.get_current_user(request, db)
+        return ship_design.initialize(body.project)
+
+    @app.post("/api/design/preview")
+    def ship_design_preview(
+        body: ShipDesignPreview, request: Request, db: Session = Depends(get_db),
+    ):
+        # A pure preview: it computes a native draft and returns it, never saving a
+        # project or enqueuing a run.
+        auth.get_current_user(request, db)
+        return ship_design.preview(body.project, body.command, body.design)
+
+    @app.post("/api/design/import-preview")
+    def ship_design_import_preview(
+        body: ShipDesignImportPreview, request: Request, db: Session = Depends(get_db),
+    ):
+        auth.get_current_user(request, db)
+        return ship_design.import_preview(body.project, body.filename, body.content_base64)
+
+    @app.post("/api/design/from-migration")
+    def ship_design_from_migration(
+        body: ShipDesignFromMigration, request: Request, db: Session = Depends(get_db),
+    ):
+        auth.get_current_user(request, db)
+        return ship_design.from_migration(body.project, body.migration)
 
     @app.get("/api/projects/{project_id}")
     def get_project(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):
@@ -326,7 +471,12 @@ def create_app(settings: Settings) -> FastAPI:
     def export_run(run_id: uuid.UUID, format: str, request: Request, db: Session = Depends(get_db)):
         user = auth.get_current_user(request, db)
         data = runs.export_run(user.id, run_id, format, db)
-        return PlainTextResponse(data, media_type="application/json" if format == "json" else "text/csv; charset=utf-8")
+        media_type = runs.export_media_type(format)
+        if format in ("json", "csv"):
+            # The two original exports keep their exact response, headers included.
+            return PlainTextResponse(data, media_type=media_type)
+        return Response(content=data, media_type=media_type, headers={
+            "Content-Disposition": f'attachment; filename="{runs.export_filename(run_id, format)}"'})
 
     @app.get("/api/projects/{project_id}/damage-lab-setup")
     def lab_setup(project_id: uuid.UUID, request: Request, db: Session = Depends(get_db)):

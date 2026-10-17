@@ -1,0 +1,57 @@
+{
+  "schema": "plimsoll-next-coverage-closeout-1",
+  "accepted": true,
+  "local_only": true,
+  "accepted_utc": "2026-10-16T21:29:17.524476+08:00",
+  "functional_stage_acceptance": true,
+  "core": {
+    "passed": 1109,
+    "subtests": 4298,
+    "skipped": 2,
+    "reused_log": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-next-coverage-2026-10-16\\core-final-independent.log"
+  },
+  "backend": {
+    "passed": 98,
+    "reused_log": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-next-coverage-2026-10-16\\backend-final-independent.log"
+  },
+  "frontend": {
+    "passed": 1143,
+    "files": 67,
+    "log": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-delivery-mass-loop-2026-10-16\\frontend-closeout.log"
+  },
+  "source_identity_current": true,
+  "quick_cases": 15,
+  "quick_reused": true,
+  "source_binary_and_inventory_unchanged": true,
+  "persisted_default_copy": {
+    "accepted": true,
+    "revisions": [
+      1,
+      2
+    ],
+    "canonical_before_m": 70,
+    "canonical_after_m": 98.8,
+    "ledger_unchanged": true,
+    "conditions_unchanged": true,
+    "migration_present": false,
+    "all_other_fields_including_receipts_unchanged": true,
+    "only_selected_dimension_and_source_changed": true,
+    "scope": "Readonly persisted database inspection, not a claim of new API/browser operation."
+  },
+  "space_selection_and_unknown_denominator": true,
+  "real_api_worker_browser": true,
+  "report_comparison": true,
+  "canonical_metres_and_m2_m3": true,
+  "mobile_page_overflow_fixed": true,
+  "only_css_changed_after_frontend_suite": true,
+  "old_partial_status_preserved": true,
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "limits": [
+    "Synthetic controlled projects, not real-ship validation",
+    "Native OS download dialog not tested",
+    "Original whole-program event equivalence not claimed",
+    "Earlier uncompleted frontend log retained; cause not established"
+  ]
+}

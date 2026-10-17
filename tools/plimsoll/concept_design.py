@@ -29,11 +29,33 @@ import copy
 import math
 
 try:
+    from . import armour_geometry as armour_geometry_kernel
+    from . import armour_review as armour_review_kernel
+    from . import armour_defaults as armour_defaults_kernel
+    from . import auxiliary_space as auxiliary_space_kernel
+    from . import armour_totals as armour_totals_kernel
+    from . import auxiliary_weapons as auxiliary_kernel
     from . import battery_armour as armour_kernel
+    from . import battery_layout as layout_kernel
+    from . import battery_mass_allocation as allocation_kernel
+    from . import battery_totals as battery_totals_kernel
+    from . import concept_cost as cost_kernel
     from . import concept_estimates as kernels
+    from . import fixed_armour as fixed_armour_kernel
 except ImportError:                                   # pragma: no cover - direct import
+    import armour_geometry as armour_geometry_kernel
+    import armour_review as armour_review_kernel
+    import armour_defaults as armour_defaults_kernel
+    import auxiliary_space as auxiliary_space_kernel
+    import armour_totals as armour_totals_kernel
+    import auxiliary_weapons as auxiliary_kernel
     import battery_armour as armour_kernel
+    import battery_layout as layout_kernel
+    import battery_mass_allocation as allocation_kernel
+    import battery_totals as battery_totals_kernel
+    import concept_cost as cost_kernel
     import concept_estimates as kernels
+    import fixed_armour as fixed_armour_kernel
 
 SCHEMA = "plimsoll-concept-design-1"
 BALANCE_SCHEMA = "plimsoll-concept-balance-1"
@@ -69,11 +91,75 @@ EMPIRICAL_METHOD = "empirical_estimate_v1"
 COMPARISON_TOLERANCE = {"relative": 0.05, "absolute_t": 0.5}
 COMPARISON_POLICY = "empirical_concept_screening_tolerance"
 
+# The optional whole-battery mount allocation section. It selects existing
+# layouts explicitly, suppresses their old per-row mount models and registers one
+# allocation model per bound mount target. The declaration and the policy live in
+# :mod:`battery_mass_allocation`; this module only wires the section into the
+# concept model, the generated models and the balance reading.
+BATTERY_MASS_ALLOCATION_FIELDS = ("source", "layout_ids")
+BATTERY_MASS_ALLOCATION_SCOPE = (
+    "Product allocation policy: the recovered source provides one whole-battery "
+    "mounts estimate and no per-group split. This component divides that source "
+    "across the selected layout's referenced rows in the proportion of each row's "
+    "own independent mount estimate (proportional-row-mounts-v1). It is a declared "
+    "product decision, never the original program's own per-group allocation, and "
+    "it claims no gun, ammunition or complete layout-armour mass."
+)
+
 # The optional per-battery armour block. It is an independent component: its own
 # owned target, its own kernel identity, and no dependence on the ammunition
 # inputs the three original estimates share.
 ARMOUR_FIELDS = ("system_id", "item_id", "face_mm", "rear_roof_mm", "barbette_mm",
                  "freeboard_m", "super_factor")
+
+# The optional two-group layout section. A layout only *references* existing
+# battery rows, so the normalization, the recovered selector and layout tables and
+# the whole numerical reading belong to the layout kernel. This module owns the
+# system and item ownership of the layout's own armour target and the role that
+# target must carry, exactly as it does for the per-battery armour block.
+LAYOUT_ARMOUR_ROLE = "gun_mount_armour"
+
+# The optional fixed-armour section. The seven recovered regions, their declared
+# domain, their recovered expressions and the whole numerical reading belong to
+# the fixed-armour kernel. This module owns only what belongs to the concept
+# model: the minimal canonical context each reading may use, the one owned target
+# each record must have and the one balance role that target must carry.
+#
+# That context is deliberately **not** built behind :func:`hull_proxy`. The
+# design hull proxy needs a declared freeboard, stern and screw count as well as
+# the four canonical hull keys, while a simple planar plate and a conning tower
+# read none of those. Putting every fixed-armour reading behind it would disable
+# exactly the regions that need the least context, so each kernel reads the
+# smallest canonical fact set it actually needs.
+FIXED_ARMOUR_MODEL_PREFIX = "concept_fixed_armour"
+
+# The optional armour-panel geometry family. It selects an existing eligible fixed
+# region and replaces that region's old SPS mass model with a declared
+# rectangular-plate model. The physical systems method recomputes the pure panel
+# kernel from the complete declaration; the concept model is only a presentation
+# and proposal carrier and is never an opaque mass.
+GEOMETRY_MODEL_PREFIX = "concept_geometry"
+ARMOUR_PANELS_METHOD = "armour_panels_mass_v1"
+
+# The optional empirical cost reading. Money is a reading and never a weight:
+# there is no ledger target, no cost model and no adoption path for it.
+COST_FIELDS = ("source",)
+
+# The optional auxiliary-weapon section. Torpedoes, mines and depth charges are
+# independent of gun batteries and fixed armour: the recovered page owns their
+# whole reading, and this module adds only the one owned target and the one
+# existing balance role that target must carry. ``other`` is deliberately not in
+# SUPPORTING_ROLES, MISC_ROLES or ARMOUR_ROLES, so a combined auxiliary mass
+# contributes to the selected ledger without inventing a strength or space term.
+AUXILIARY_MODEL_PREFIX = "concept_auxiliary"
+
+# The optional component families a design-balance result may declare the method
+# version of. These keys are what a saved report and a saved comparison gate on;
+# they are deliberately *not* global request identities, and they are absent
+# whenever no optional section is declared.
+METHOD_FAMILY_BY_SECTION = ("fixed_armour", "armour_geometry", "layout", "cost", "auxiliary_weapons",
+                             "armour_review", "battery_totals", "battery_mass_allocation",
+                             "armour_totals", "armour_defaults", "auxiliary_space")
 
 # Declared bands, used only to raise a visible warning. The design never iterates
 # towards a preferred rating.
@@ -218,7 +304,10 @@ def validate_config(project, item_ids=None):
     if not _object(raw, path, diagnostics):
         raise ConceptDesignError(diagnostics)
     _keys(raw, {"schema", "method", "source", "estimate", "target_displacement_t", "hull_year",
-                "freeboard_m", "stern", "screws", "batteries", "machinery", "fuel", "balance"},
+                "freeboard_m", "stern", "screws", "batteries", "battery_layouts",
+                "battery_mass_allocation",
+                "fixed_armour", "armour_geometry", "auxiliary_weapons", "armour_review", "cost", "machinery", "fuel",
+                "balance", "mass_summary", "armour_defaults", "auxiliary_space"},
           path, diagnostics)
     if raw.get("schema") != SCHEMA:
         diagnostics.append(_diag("concept_design.schema", "schema must be %r" % (SCHEMA,),
@@ -244,6 +333,11 @@ def validate_config(project, item_ids=None):
         target_displacement_t=target_t, hull_year=hull_year,
         freeboard_m=freeboard_m, stern=stern, screws=screws,
         batteries=[], machinery=None, fuel=None, balance=None)
+    if raw.get('armour_review') is not None:
+        try:
+            config['armour_review'] = armour_review_kernel.validate_config(raw['armour_review'])
+        except armour_review_kernel.ReviewValidationError as error:
+            diagnostics.extend(error.diagnostics)
 
     known = set(item_ids or ())
     leaves = _declared_system_leaves(project.get("systems"))
@@ -374,10 +468,83 @@ def validate_config(project, item_ids=None):
             claimed, diagnostics, owned_by, identity or "battery %d" % index)
         config["batteries"].append(record)
 
+    # The optional two-group layouts. An absent or empty section leaves every
+    # existing result exactly as it was, so the key is only added when the
+    # declaration exists.
+    if "battery_layouts" in raw and raw["battery_layouts"] is not None:
+        config["battery_layouts"] = _battery_layouts(
+            raw["battery_layouts"], config["batteries"], path + ".battery_layouts", known,
+            owned_targets, diagnostics, owned_by)
+
+    # The optional whole-battery mount allocation section. It selects existing
+    # layout IDs explicitly; absent or null it adds no family and changes no prior
+    # model, so nothing here is set unless the declaration exists.
+    if "battery_mass_allocation" in raw and raw["battery_mass_allocation"] is not None:
+        config["battery_mass_allocation"] = _battery_mass_allocation(
+            raw["battery_mass_allocation"], config.get("battery_layouts") or [],
+            config["batteries"], path + ".battery_mass_allocation", diagnostics)
+
+    # The optional fixed-armour regions, added before the balance section so a
+    # fixed-armour target can never steal the adjustable-structure target and the
+    # adjustable structure can never take a fixed-armour one.
+    if "fixed_armour" in raw and raw["fixed_armour"] is not None:
+        config["fixed_armour"] = _fixed_armour(
+            raw["fixed_armour"], path + ".fixed_armour", known, owned_targets, diagnostics,
+            owned_by)
+
+    # The optional armour-panel geometry declaration, normalized only against the
+    # existing fixed regions. It owns no ledger target of its own: it selects an
+    # existing eligible fixed region and replaces that one region's old SPS mass
+    # model with a declared rectangular-plate model. An absent or null section
+    # preserves the complete old shape and every old empirical model.
+    if "armour_geometry" in raw and raw["armour_geometry"] is not None:
+        try:
+            config["armour_geometry"] = armour_geometry_kernel.normalize(
+                raw["armour_geometry"], config.get("fixed_armour") or [],
+                path + ".armour_geometry")
+        except armour_geometry_kernel.ArmourGeometryError as error:
+            diagnostics.extend(error.diagnostics)
+
+    # The optional auxiliary weapon groups, added before the balance section so an
+    # auxiliary target can never steal the adjustable-structure target either.
+    if "auxiliary_weapons" in raw and raw["auxiliary_weapons"] is not None:
+        config["auxiliary_weapons"] = _auxiliary_weapons(
+            raw["auxiliary_weapons"], path + ".auxiliary_weapons", known, owned_targets,
+            diagnostics, owned_by)
+
+    # The optional mass-summary declaration. It is a scope statement with no
+    # ledger target of its own: absent or null adds no result family at all, and
+    # present it turns on the two read-only whole-battery and armour-totals
+    # readings. Nothing here is ever adopted as mass.
+    if "mass_summary" in raw and raw["mass_summary"] is not None:
+        config["mass_summary"] = _mass_summary(
+            raw["mass_summary"], path + ".mass_summary", diagnostics)
+
+    if raw.get("armour_defaults") is not None:
+        try:
+            config["armour_defaults"] = armour_defaults_kernel.validate_config(
+                raw["armour_defaults"], path + ".armour_defaults")
+        except armour_defaults_kernel.ArmourDefaultsError as error:
+            diagnostics.extend(error.diagnostics)
+
+    if raw.get("auxiliary_space") is not None:
+        try:
+            space = auxiliary_space_kernel.validate_config(raw["auxiliary_space"],
+                config.get("auxiliary_weapons") or [], path + ".auxiliary_space")
+            beam = _hull_number(project, "beam_m")
+            width = space["bulged_beam_m"]
+            if width is not None and beam is not None and width < beam:
+                diagnostics.append(_diag("concept_design.domain",
+                    "bulged_beam_m must be at least the canonical beam_m", path + ".auxiliary_space.bulged_beam_m"))
+            config["auxiliary_space"] = space
+        except auxiliary_space_kernel.AuxiliarySpaceError as error:
+            diagnostics.extend(error.diagnostics)
+
     config["machinery"] = _machinery(raw.get("machinery"), path + ".machinery", known, leaves,
                                      owned_targets, diagnostics, owned_by)
     config["fuel"] = _fuel(raw.get("fuel"), path + ".fuel", known, leaves, owned_targets,
                            config["machinery"], diagnostics, owned_by)
+    config["cost"] = _cost(raw.get("cost"), path + ".cost", diagnostics)
     config["balance"] = _balance(raw.get("balance"), path + ".balance", known, leaves,
                                  owned_targets, diagnostics, owned_by)
     if config["balance"] is not None:
@@ -397,6 +564,23 @@ def validate_config(project, item_ids=None):
                 # A barbette is fixed structure, so the target must carry the
                 # complete-armour role rather than the rotating one.
                 required_roles.append((armour.get("item_id"), "gun_mount_armour"))
+        for layout in config.get("battery_layouts") or []:
+            armour = layout.get("armour")
+            # The layout's own target is complete two-group gun-mount armour, so
+            # it carries the same role as a single-group target and nothing else.
+            required_roles.append(((armour or {}).get("item_id"), LAYOUT_ARMOUR_ROLE))
+        for record in config.get("fixed_armour") or []:
+            # Each fixed region keeps the one role its own recovered identity
+            # carries: a conning tower is fixed structure, a bulge is its own
+            # compartment, and none of the seven is ever merged into another.
+            role = fixed_armour_kernel.ROLE_BY_KIND.get(record.get("kind"))
+            if role is not None:
+                required_roles.append((record.get("item_id"), role))
+        for record in config.get("auxiliary_weapons") or []:
+            # One combined weapon-and-mount mass on one target, under the existing
+            # 'other' role. It is never relabelled as guns, mounts or ammunition,
+            # and it contributes no strength or space term of its own.
+            required_roles.append((record.get("item_id"), auxiliary_kernel.TARGET_ROLE))
         for key in ("machinery", "fuel"):
             if config[key] is not None:
                 required_roles.append((config[key].get("item_id"), key))
@@ -451,6 +635,245 @@ def _battery_armour(raw, path, known, leaves, owned_targets, claimed, diagnostic
         super_factor=_number(raw.get("super_factor"), path + ".super_factor", diagnostics,
                              low=0, high=armour_kernel.MAX_SUPER_FACTOR),
     )
+
+
+def _battery_layouts(raw, batteries, path, known, owned_targets, diagnostics, owned_by):
+    """The optional two-group layout declarations, with their own ownership rules.
+
+    The declaration itself is normalized by the layout kernel, which owns the
+    recovered selector tables, the reference checks and the numeric domain. This
+    module only adds what belongs to the concept model: an independent owned
+    target for the layout's complete two-group armour, and the refusal to let one
+    battery group's armour be weighed twice under two models.
+    """
+    try:
+        layouts = layout_kernel.validate_layouts(raw, batteries, path)
+    except layout_kernel.LayoutValidationError as error:
+        for entry in error.diagnostics:
+            diagnostics.append(_diag(entry.get("code", "concept_design.invalid"),
+                                     entry["message"], entry.get("path", path),
+                                     blocking=entry.get("blocking", True)))
+        return []
+    by_id = {battery["id"]: battery for battery in batteries if battery.get("id")}
+    for position, layout in enumerate(layouts):
+        armour = layout.get("armour")
+        lpath = "%s[%d]" % (path, position)
+        if not isinstance(armour, dict):
+            continue
+        identity = layout.get("id") or "layout %d" % position
+        owner = "%s layout armour" % (identity,)
+        system_id = _string(armour.get("system_id"), lpath + ".armour.system_id", diagnostics,
+                            nullable=True)
+        item = _unbound_item(armour.get("item_id"), lpath + ".armour.item_id", known, diagnostics)
+        if item is not None:
+            if item in owned_targets:
+                diagnostics.append(_diag("concept_design.duplicate_target",
+                                         "item %r is already owned by %s" % (
+                                             item, owned_targets[item]),
+                                         lpath + ".armour.item_id"))
+            else:
+                owned_targets[item] = owner
+                owned_by(system_id, item, lpath + ".armour.item_id", owner)
+        # The complete two-group armour and the single-group v1 estimate of the
+        # same row would weigh the same guns twice, so they are mutually exclusive.
+        for field in ("group1", "group2"):
+            group = layout.get(field)
+            battery_id = group.get("battery_id") if isinstance(group, dict) else None
+            battery = by_id.get(battery_id)
+            if battery is not None and battery.get("armour") is not None:
+                diagnostics.append(_diag(
+                    "concept_design.duplicate_target",
+                    "battery %r is already weighted by its own armour estimate, so this "
+                    "layout may not weight the same group's armour a second time"
+                    % (battery_id,), lpath + ".%s.battery_id" % (field,)))
+    return layouts
+
+
+def _battery_mass_allocation(raw, layouts, batteries, path, diagnostics):
+    """The optional whole-battery mount allocation selection.
+
+    ``layout_ids`` names the layouts whose old per-row mount models this product
+    policy replaces with one proportional whole-battery allocation. A null
+    selection is *unknown* and an empty list is an explicit *no layouts*; only
+    explicit, existing layout IDs opt in. The declaration is normalized here and
+    only here -- the allocation policy itself belongs to
+    :mod:`battery_mass_allocation`, and this never imports a source total, a
+    weight or a target.
+    """
+    if not _object(raw, path, diagnostics):
+        return {"source": None, "layout_ids": None}
+    _keys(raw, set(BATTERY_MASS_ALLOCATION_FIELDS), path, diagnostics)
+    source = _string(raw.get("source"), path + ".source", diagnostics, nullable=True)
+    by_id = {layout.get("id"): layout for layout in layouts if isinstance(layout, dict)}
+    tol = {battery.get("id"): battery.get("mounts_item_id") for battery in batteries
+           if isinstance(battery, dict)}
+    declared = raw.get("layout_ids")
+    if declared is None:
+        return {"source": source, "layout_ids": None}
+    if not isinstance(declared, list):
+        diagnostics.append(_diag("concept_design.invalid",
+                                 "must be an array of layout IDs or null", path + ".layout_ids"))
+        return {"source": source, "layout_ids": None}
+    selected = []
+    battery_claims = {}
+    targets = {}
+    for position, value in enumerate(declared):
+        where = "%s.layout_ids[%d]" % (path, position)
+        if not isinstance(value, str) or not value:
+            diagnostics.append(_diag("concept_design.invalid",
+                                     "must be a non-empty layout ID", where))
+            continue
+        if value in selected:
+            diagnostics.append(_diag("concept_design.duplicate",
+                                     "layout %r is selected more than once" % (value,), where))
+            continue
+        layout = by_id.get(value)
+        if layout is None:
+            diagnostics.append(_diag("concept_design.reference_unknown",
+                                     "must name a declared concept_design battery layout", where))
+            continue
+        # One selected layout owns each referenced battery row and each mount
+        # target exactly once. Two selected layouts may never claim the same
+        # battery or the same mount target, or the same row's weight would be
+        # allocated twice and one target would receive two allocations.
+        for name in ("group1", "group2"):
+            group = layout.get(name)
+            battery_id = group.get("battery_id") if isinstance(group, dict) else None
+            if battery_id is None:
+                continue
+            owner = battery_claims.get(battery_id)
+            if owner is not None:
+                diagnostics.append(_diag(
+                    "concept_design.duplicate_target",
+                    "battery %r is already claimed by selected layout %r; a selected layout "
+                    "allocates its referenced rows once" % (battery_id, owner), where))
+            else:
+                battery_claims[battery_id] = value
+            target = tol.get(battery_id)
+            if target is None:
+                continue
+            target_owner = targets.get(target)
+            if target_owner is not None:
+                diagnostics.append(_diag(
+                    "concept_design.duplicate_target",
+                    "mount target %r is already claimed by selected layout %r; one target "
+                    "receives one allocation" % (target, target_owner), where))
+            else:
+                targets[target] = value
+        selected.append(value)
+    return {"source": source, "layout_ids": selected}
+
+
+def _fixed_armour(raw, path, known, owned_targets, diagnostics, owned_by):
+    """The optional fixed-armour declarations, with their own ownership rules.
+
+    The declaration itself is normalized by the fixed-armour kernel, which owns
+    the seven recovered kinds, the recovered selector table, the numeric domain
+    and the whole reading. This module only adds what belongs to the concept
+    model: an independent owned target per record and the refusal to let one
+    fixed region, a layout component or a legacy battery component weigh the
+    same ledger item twice.
+
+    An unfinished binding is a legal editable state: it is never refused and
+    never filled in, so a draft project stays saveable.
+    """
+    try:
+        records = fixed_armour_kernel.validate_configs(raw, path)
+    except fixed_armour_kernel.ArmourValidationError as error:
+        for entry in error.diagnostics:
+            diagnostics.append(_diag(entry.get("code", "concept_design.invalid"),
+                                     entry["message"], entry.get("path", path),
+                                     blocking=entry.get("blocking", True)))
+        return []
+    for position, record in enumerate(records):
+        rpath = "%s[%d]" % (path, position)
+        system_id = _string(record.get("system_id"), rpath + ".system_id", diagnostics,
+                            nullable=True)
+        item = _unbound_item(record.get("item_id"), rpath + ".item_id", known, diagnostics)
+        if item is None:
+            continue
+        owner = "%s fixed armour" % (record.get("id") or "record %d" % position,)
+        if item in owned_targets:
+            diagnostics.append(_diag("concept_design.duplicate_target",
+                                     "item %r is already owned by %s" % (
+                                         item, owned_targets[item]), rpath + ".item_id"))
+            continue
+        owned_targets[item] = owner
+        owned_by(system_id, item, rpath + ".item_id", owner)
+    return records
+
+
+def _auxiliary_weapons(raw, path, known, owned_targets, diagnostics, owned_by):
+    """The optional auxiliary weapon groups, with their own ownership rules.
+
+    The recovered page owns the three kinds, their declared domain and the whole
+    reading. This module only adds what belongs to the concept model: one
+    independent owned target per group and the refusal to let an auxiliary group,
+    a battery component, a layout component, a fixed region or the adjustable
+    structure weigh the same ledger item twice.
+    """
+    try:
+        records = auxiliary_kernel.validate_configs(raw, path)
+    except auxiliary_kernel.AuxiliaryValidationError as error:
+        for entry in error.diagnostics:
+            diagnostics.append(_diag(entry.get("code", "concept_design.invalid"),
+                                     entry["message"], entry.get("path", path),
+                                     blocking=entry.get("blocking", True)))
+        return []
+    for position, record in enumerate(records):
+        rpath = "%s[%d]" % (path, position)
+        system_id = _string(record.get("system_id"), rpath + ".system_id", diagnostics,
+                            nullable=True)
+        item = _unbound_item(record.get("item_id"), rpath + ".item_id", known, diagnostics)
+        if item is None:
+            continue
+        owner = "%s auxiliary weapons" % (record.get("id") or "record %d" % position,)
+        if item in owned_targets:
+            diagnostics.append(_diag("concept_design.duplicate_target",
+                                     "item %r is already owned by %s" % (
+                                         item, owned_targets[item]), rpath + ".item_id"))
+            continue
+        owned_targets[item] = owner
+        owned_by(system_id, item, rpath + ".item_id", owner)
+    return records
+
+
+def _mass_summary(raw, path, diagnostics):
+    """The optional mass-summary declaration: a source text and a scope flag.
+
+    It owns no ledger target and no mass of its own, so nothing here is claimed,
+    bound or refused beyond the section's own shape. ``armour_scope_complete`` is
+    ``null`` until the reader confirms it: only ``True`` says the declarations
+    cover every armour category and every category left out is a declared zero. A
+    ``null`` or ``false`` flag keeps the known subtotal readable but never
+    produces a complete estimated total.
+    """
+    if not _object(raw, path, diagnostics):
+        return None
+    _keys(raw, {"source", "armour_scope_complete"}, path, diagnostics)
+    source = _string(raw.get("source"), path + ".source", diagnostics, nullable=True)
+    complete = raw.get("armour_scope_complete")
+    if complete is not None and not isinstance(complete, bool):
+        diagnostics.append(_diag("concept_design.invalid",
+                                 "armour_scope_complete must be a boolean or null",
+                                 path + ".armour_scope_complete"))
+        complete = None
+    return {"source": source, "armour_scope_complete": complete}
+
+
+def _cost(raw, path, diagnostics):
+    """The optional empirical cost declaration: an explicit on/off and a source.
+
+    An absent or null section is disabled and adds no field anywhere. The cost
+    reading owns no ledger target, so there is nothing here to claim, bind or
+    refuse beyond the section's own shape.
+    """
+    if raw is None:
+        return None
+    if not _object(raw, path, diagnostics):
+        return None
+    _keys(raw, set(COST_FIELDS), path, diagnostics)
+    return {"source": _string(raw.get("source"), path + ".source", diagnostics, nullable=True)}
 
 
 def _machinery(raw, path, known, leaves, owned_targets, diagnostics, owned_by):
@@ -694,8 +1117,25 @@ def generated_models(project, state, item_ids=None):
     def register(system_id, model):
         out.setdefault(system_id, []).append(model)
 
+    suppressed = _suppressed_mount_batteries(config)
     for battery in config["batteries"]:
-        _battery_models(config, battery, register, diagnostics)
+        _battery_models(config, battery, register, diagnostics, suppressed)
+    # The layout armour is generated independently of, and before, the design
+    # hull proxy: a project whose hull is not physical yet still gets its own
+    # layout reading, exactly as it still gets its own battery estimates.
+    _layout_models(config, register, diagnostics)
+    # The whole-battery mount allocation is generated here too. It reads the
+    # recovered source total and the row weights but no hull fact, and it is the
+    # selected layouts' replacement for the per-row mount models suppressed
+    # above; an unavailable allocation contributes a diagnostic instead.
+    _allocation_models(config, register, diagnostics)
+    # The fixed armour is generated the same way and for the same reason: a
+    # simple planar plate and a conning tower read none of the hull proxy's
+    # freeboard, stern or screw facts, so they must not be behind it.
+    _fixed_armour_models(project, config, state, register, diagnostics)
+    # Auxiliary weapon groups read no hull geometry at all, so they are generated
+    # here too rather than behind the design hull proxy.
+    _auxiliary_models(config, register, diagnostics)
     try:
         hull = hull_proxy(project, config)
     except ValueError as error:
@@ -757,7 +1197,13 @@ def generated_models(project, state, item_ids=None):
             "power": power}
 
 
-def _battery_models(config, battery, register, diagnostics):
+def _exact_whole_battery_comparison(active):
+    """Explicit whole mode exposes small differences without changing formulas."""
+    return ({"comparison_tolerance": {"relative": 0.0, "absolute_t": 0.0},
+             "comparison_policy": "whole-battery-exact-alignment-v1"} if active else {})
+
+
+def _battery_models(config, battery, register, diagnostics, suppressed=frozenset()):
     # The three original components keep their own all-or-nothing behaviour:
     # nothing about the armour block may change when they are generated.
     if None not in (battery["system_id"], battery["guns_item_id"],
@@ -781,13 +1227,19 @@ def _battery_models(config, battery, register, diagnostics):
             for key, field, kernel in (("guns", "guns_item_id", "guns"),
                                       ("mounts", "mounts_item_id", "mounts"),
                                       ("ammunition", "ammunition_item_id", "ammunition")):
+                if key == "mounts" and battery["id"] in suppressed:
+                    # A selected layout now owns this row's mount mass through the
+                    # whole-battery allocation; the old per-row model is retired
+                    # even when the allocation itself is still unavailable.
+                    continue
                 provenance = estimates["provenance"][kernel]
                 register(battery["system_id"], _model(
                     "%s.%s" % (prefix, key), battery[field],
                     estimates["values"][key + "_long_tons"],
                     provenance["kernel"], provenance["source_location"], provenance["formula"],
                     provenance["inputs"], config["source"],
-                    extra={"concept_battery_id": battery["id"], "concept_component": key}))
+                    extra={"concept_battery_id": battery["id"], "concept_component": key,
+                           **_exact_whole_battery_comparison(key == "guns" and battery["id"] in suppressed)}))
     _battery_armour_model(config, battery, register, diagnostics)
 
 
@@ -859,6 +1311,711 @@ def _battery_armour_model(config, battery, register, diagnostics):
                         "split is generated and nothing is deducted from a declared mount "
                         "mass automatically. One homogeneous row only: multi-row and mixed "
                         "arrangements are outside this method")}))
+
+
+def _layout_models(config, register, diagnostics):
+    """One ``concept_layout.<id>.armour`` model per declared layout, if it has one.
+
+    The layout kernel owns the whole reading: this stage only registers a model on
+    the layout's own already-validated target, in the layout's own method, and
+    keeps an unavailable or unadopted declaration a diagnostic instead of a model.
+    """
+    for layout in config.get("battery_layouts") or []:
+        armour = layout.get("armour")
+        if not isinstance(armour, dict) or None in (armour.get("system_id"),
+                                                     armour.get("item_id")):
+            continue
+        identity = layout.get("id")
+        exact_alignment = identity in ((config.get("battery_mass_allocation") or {}).get("layout_ids") or [])
+        path = "$.concept_design.battery_layouts[%s].armour" % (identity,)
+        try:
+            result = layout_kernel.evaluate(layout, config["batteries"], path)
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.layout_unavailable", str(error), path,
+                                     blocking=False))
+            continue
+        for entry in result.get("diagnostics", ()):
+            diagnostics.append(_diag(entry.get("code", "concept_design.layout_unavailable"),
+                                     entry["message"], entry.get("path", path),
+                                     blocking=False))
+        armour_result = result.get("armour")
+        if not isinstance(armour_result, dict):
+            continue
+        values = armour_result["values"]
+        if values.get("total_long_tons") is None:
+            continue
+        # The existing empirical pipeline converts LT via kg before tonnes. Do not
+        # register a model whose otherwise finite LT would overflow that boundary.
+        if not math.isfinite(values["total_long_tons"] * kernels.LONG_TON_KG):
+            diagnostics.append(_diag(
+                "concept_design.layout_unavailable",
+                "the derived layout armour mass exceeds the supported weight-conversion range",
+                path, blocking=False))
+            continue
+        provenance = armour_result["provenance"]
+        register(armour["system_id"], _model(
+            "concept_layout.%s.armour" % (identity,), armour["item_id"],
+            values["total_long_tons"], provenance["kernel"], provenance["source_location"],
+            provenance["formula"], provenance["inputs"], config["source"],
+            method_version=layout_kernel.ARMOUR_METHOD_VERSION,
+            boundary=layout_kernel.ARMOUR_SOURCE_SCOPE,
+            extra={"concept_layout_id": identity, "concept_component": "armour",
+                   **_exact_whole_battery_comparison(exact_alignment),
+                   "assumptions": provenance["assumptions"],
+                   "component_breakdown": {
+                       "face_long_tons": values["face_long_tons"],
+                       "rear_roof_long_tons": values["rear_roof_long_tons"],
+                       "barbette_long_tons": values["barbette_long_tons"]},
+                   "guns_in_mount_selector_g1": values["guns_in_mount_selector_g1"],
+                   "guns_in_mount_selector_g2": values["guns_in_mount_selector_g2"],
+                   "per_mounts": values["per_mounts"],
+                   "freeboard_m": result.get("freeboard_m"),
+                   "super_factor": result.get("super_factor"),
+                   "note": ("complete gun-house and barbette armour of both recovered mount "
+                            "groups of this layout, read with both recovered diameter classes; "
+                            "it is not the sum of the per-row gun, mount and ammunition "
+                            "estimates, which stay sps-3b3-adapted-v1, and it contains no part "
+                            "of either mount's mass. A barbette is fixed structure, not "
+                            "rotating armour. A reader who already carries this armour inside "
+                            "a mount item must split the target first; no split is generated "
+                            "and nothing is deducted from a declared mount mass automatically")}))
+
+
+# ------------------------------------------------- the mount allocation --
+
+def _suppressed_mount_batteries(config):
+    """The battery rows whose old per-row mount model a selected layout replaces.
+
+    Suppression is by **layout scope**, not by whether the new estimate exists:
+    once a layout is selected, its referenced rows' old mount models are retired
+    even while the whole-battery allocation itself is still unavailable, so an
+    unavailable group never silently falls back to the old per-row number. Guns,
+    ammunition and layout-armour formulas are never replaced. Explicit whole
+    mode exposes even in-tolerance gun/layout-armour differences for alignment.
+    """
+    selection = config.get("battery_mass_allocation")
+    if not selection:
+        return frozenset()
+    selected = set(selection.get("layout_ids") or [])
+    if not selected:
+        return frozenset()
+    rows = set()
+    for layout in config.get("battery_layouts") or []:
+        if layout.get("id") not in selected:
+            continue
+        for name in ("group1", "group2"):
+            group = layout.get(name)
+            if isinstance(group, dict) and group.get("battery_id") is not None:
+                rows.add(group["battery_id"])
+    return frozenset(rows)
+
+
+def _row_mount_weight_t(battery, path):
+    """One row's own independent mount estimate in tonnes, or ``None`` if unknown.
+
+    The weight reads only the facts the recovered mount expression needs -- the
+    calibre, the barrel length, the year, the gun and mount classes, the mount
+    count and the cradle. It deliberately reads **no** ammunition input, so the
+    allocation can never depend on ``rounds_per_gun`` or on a shell override.
+    """
+    mounts = battery.get("mount_count")
+    if mounts == 0:
+        # A declared zero mount count multiplies the recovered expression into a
+        # determined zero, exactly as the per-row estimate reads it.
+        return 0.0
+    numeric = (battery.get("calibre_mm"), battery.get("barrel_calibres"), battery.get("year"),
+               battery.get("gun_type"), battery.get("mount_type"), mounts,
+               battery.get("barrels_per_mount"))
+    shared = battery.get("shared_cradle")
+    if any(value is None or isinstance(value, bool) for value in numeric) \
+            or not isinstance(shared, bool):
+        return None
+    try:
+        calibre_in = kernels.millimetres_to_inches(battery["calibre_mm"], path)
+        date_factor = kernels.gun_date_factor(battery["year"], path)
+        count = mounts * battery["barrels_per_mount"]
+        gun_lt = kernels.gun_mass_long_tons(calibre_in, battery["barrel_calibres"], date_factor,
+                                            count, path)
+        mounts_lt = kernels.mount_mass_long_tons(
+            gun_lt, calibre_in, battery["gun_type"], battery["mount_type"],
+            shared_cradle=shared, path=path)
+        return kernels.long_tons_to_tonnes(mounts_lt, path)
+    except (ValueError, ArithmeticError):
+        return None
+
+
+def _allocation_context(config, layout, batteries_by_id, source, layout_reading=None,
+                        diagnostics=None):
+    """The referenced rows, the recovered source total and the proportional split.
+
+    The source total is the recovered whole-battery **mounts** estimate of this
+    layout, in tonnes, read from :mod:`battery_totals` -- never the gun or the
+    ammunition total, and never a per-row figure. The weight of a row is that
+    row's own independent mount estimate. The split is decided by
+    :func:`battery_mass_allocation.allocate`, which owns the product policy.
+    """
+    identity = layout.get("id")
+    path = "$.concept_design.battery_mass_allocation[%s]" % (identity,)
+    referenced = []
+    seen = set()
+    unresolved = False
+    for name in ("group1", "group2"):
+        if name not in layout:
+            continue
+        group = layout.get(name)
+        if group is None:
+            continue
+        battery_id = group.get("battery_id") if isinstance(group, dict) else None
+        battery = batteries_by_id.get(battery_id) if battery_id is not None else None
+        if battery is None:
+            # A declared, non-empty group whose referenced row is unresolved opens
+            # the selected boundary: the membership of what it carries cannot be
+            # closed, so the parent mount subtotal is unknown even while a
+            # surviving row's own bound actual stays readable. This mirrors the
+            # battery-totals selected mirror exactly.
+            unresolved = True
+            continue
+        if battery["id"] not in seen:
+            seen.add(battery["id"])
+            referenced.append(battery)
+    source_t = None
+    try:
+        source_t = battery_totals_kernel.evaluate(
+            layout, config["batteries"], layout_reading, path)["values"]["mounts_t"]
+    except (ValueError, ArithmeticError) as error:
+        if diagnostics is not None:
+            diagnostics.append(_diag("concept_design.battery_mass_allocation_unavailable",
+                                     str(error), path, blocking=False))
+    rows = [{"battery_id": battery["id"], "target_id": battery.get("mounts_item_id"),
+             "weight_t": _row_mount_weight_t(battery, path)} for battery in referenced]
+    known = [row["weight_t"] for row in rows if row["weight_t"] is not None]
+    legacy_t = (sum(known) if rows and not unresolved and len(known) == len(rows) else None)
+    allocation = None
+    # A required mount target that is not bound, or a declared group that never
+    # resolved to a row, blocks the whole allocation: the policy could still
+    # divide, but the boundary of what the split would cover cannot be closed.
+    if rows and not unresolved and all(row["target_id"] is not None for row in rows):
+        try:
+            allocation = allocation_kernel.allocate(identity, source_t, rows, source=source)
+        except allocation_kernel.AllocationError as error:
+            if diagnostics is not None:
+                diagnostics.extend(
+                    _diag(entry.get("code", "concept_design.battery_mass_allocation_invalid"),
+                          entry["message"], entry.get("path", path), blocking=False)
+                    for entry in error.diagnostics)
+            allocation = None
+    return {"layout_id": identity, "source": source, "rows": rows, "referenced": referenced,
+            "source_t": source_t, "legacy_t": legacy_t, "unresolved": unresolved,
+            "allocation": allocation}
+
+
+def _allocation_reading(context, state):
+    """The read-only allocation record, merged with the independent selected mirror."""
+    allocation = context["allocation"]
+    pure_by_id = ({record["id"]: record for record in allocation["records"]}
+                  if allocation is not None else {})
+    records = []
+    for row in context["rows"]:
+        target_id = row["target_id"]
+        pure = pure_by_id.get(row["battery_id"])
+        records.append({
+            "id": row["battery_id"],
+            "method_version": allocation_kernel.METHOD_VERSION,
+            "target_id": target_id,
+            "weight_t": row["weight_t"],
+            "share": pure["share"] if pure is not None else None,
+            "allocated_mass_t": pure["allocated_mass_t"] if pure is not None else None,
+            "selected_mass_t": _mass_of(state, target_id) if target_id is not None else None,
+        })
+    targets = [row["target_id"] for row in context["rows"] if row["target_id"] is not None]
+    # The parent subtotal is closed only when every declared group resolved to a
+    # bound target. An unresolved declared group, or a resolved row whose mount
+    # target is unbound, leaves it unknown rather than reporting a smaller sum --
+    # the same boundary the battery-totals selected mirror draws.
+    if context["unresolved"] or any(row["target_id"] is None for row in context["rows"]):
+        selected_mounts_t = None
+    else:
+        selected_mounts_t = _selected_target_t(state, targets)
+    values = {
+        "source_mounts_t": context["source_t"],
+        "legacy_mounts_t": (allocation["values"]["legacy_mounts_t"]
+                            if allocation is not None else context["legacy_t"]),
+        "allocated_total_t": (allocation["values"]["allocated_total_t"]
+                              if allocation is not None else None),
+        "selected_mounts_t": selected_mounts_t,
+    }
+    status = ("available" if allocation is not None and allocation["status"] == "available"
+              else "unavailable")
+    if status != "available" and (selected_mounts_t is not None
+                                  or any(record["selected_mass_t"] is not None
+                                         for record in records)):
+        # The source or a weight could not be closed, but the selected ledger
+        # actuals are independent of it, so the record is partial rather than
+        # unavailable and the ledger is never written into the missing values.
+        status = "partial"
+    return {
+        "id": context["layout_id"],
+        "method_version": allocation_kernel.METHOD_VERSION,
+        "status": status,
+        "values": values,
+        "records": records,
+        "diagnostics": list(allocation["diagnostics"]) if allocation is not None else [],
+        "provenance": (allocation["provenance"] if allocation is not None else {
+            "source_method_version": allocation_kernel.SOURCE_METHOD_VERSION,
+            "allocation_policy": allocation_kernel.POLICY,
+            "declared_source": context["source"]}),
+    }
+
+
+def _allocation_readings(config, layout_readings, state, diagnostics):
+    """One allocation reading per explicitly selected layout, in layout order."""
+    selection = config.get("battery_mass_allocation") or {}
+    selected = set(selection.get("layout_ids") or [])
+    if not selected:
+        return []
+    by_id = {reading.get("id"): reading for reading in layout_readings
+             if isinstance(reading, dict)}
+    batteries_by_id = {battery["id"]: battery for battery in config["batteries"]
+                       if battery.get("id")}
+    readings = []
+    for layout in config.get("battery_layouts") or []:
+        if layout.get("id") not in selected:
+            continue
+        context = _allocation_context(config, layout, batteries_by_id, selection.get("source"),
+                                      by_id.get(layout.get("id")), diagnostics)
+        readings.append(_allocation_reading(context, state))
+    return readings
+
+
+def _allocation_model(config, layout, battery, record, context, target_ids, long_tons):
+    """One zero-tolerance allocation model on a bound existing mount target.
+
+    The model carries the recomputed cohort metadata in its own ``inputs`` (the
+    group, the policy, the target list and the source and weight details), so the
+    server can rebuild the cohort from an immutable snapshot and never trust a
+    client-supplied one.
+    """
+    identity = layout.get("id")
+    group_id = "battery-mounts:%s" % (identity,)
+    inputs = {
+        "battery_id": battery["id"],
+        "layout_id": identity,
+        "target_id": record["target_id"],
+        "weight_t": record["weight_t"],
+        "share": record["share"],
+        "source_mounts_t": context["source_t"],
+        "legacy_mounts_t": context["legacy_t"],
+        "allocated_mass_t": record["allocated_mass_t"],
+        "allocation_group_id": group_id,
+        "allocation_policy": allocation_kernel.POLICY,
+        "allocation_target_ids": list(target_ids),
+        "source_method_version": allocation_kernel.SOURCE_METHOD_VERSION,
+        "declared_source": context["source"],
+    }
+    return _model(
+        "concept_allocation.%s.%s" % (identity, battery["id"]), record["target_id"], long_tons,
+        "battery_mount_allocation_long_tons",
+        "product policy proportional-row-mounts-v1 over the recovered whole-battery mounts",
+        "allocated_lt = recovered whole-battery mounts x (row weight / legacy row weight sum); "
+        "a zero-weight row is an explicit zero and the floating residual goes to the last "
+        "positive row",
+        inputs, config["source"],
+        method_version=allocation_kernel.METHOD_VERSION,
+        boundary=BATTERY_MASS_ALLOCATION_SCOPE,
+        extra={"concept_battery_id": battery["id"], "concept_layout_id": identity,
+               "concept_component": "allocation", "allocation_group_id": group_id,
+               "allocation_policy": allocation_kernel.POLICY,
+               "allocation_target_ids": list(target_ids),
+               "comparison_tolerance": {"relative": 0.0, "absolute_t": 0.0},
+               "note": ("a declared product split of the recovered whole-battery mount estimate "
+                        "across this layout's referenced rows, in proportion to each row's own "
+                        "independent mount estimate; it is not the recovered program's own "
+                        "per-group allocation, it claims no gun, ammunition or complete "
+                        "layout-armour mass, and the whole cohort is adopted together or not "
+                        "at all")})
+
+
+def _allocation_models(config, register, diagnostics):
+    """One allocation model per bound mount target of every selected layout.
+
+    A selected layout whose allocation is unavailable registers no substitute
+    model -- its old per-row mount models are already suppressed -- and a target
+    that is not bound is never invented.
+    """
+    selection = config.get("battery_mass_allocation") or {}
+    selected = set(selection.get("layout_ids") or [])
+    if not selected:
+        return
+    batteries_by_id = {battery["id"]: battery for battery in config["batteries"]
+                       if battery.get("id")}
+    for layout in config.get("battery_layouts") or []:
+        if layout.get("id") not in selected:
+            continue
+        context = _allocation_context(config, layout, batteries_by_id, selection.get("source"),
+                                      None, diagnostics)
+        allocation = context["allocation"]
+        if allocation is None or allocation["status"] != "available":
+            continue
+        target_ids = [row["target_id"] for row in context["rows"]
+                      if row["target_id"] is not None]
+        for record in allocation["records"]:
+            if record["allocated_mass_t"] is None:
+                continue
+            battery = batteries_by_id.get(record["id"])
+            if battery is None or battery.get("system_id") is None:
+                continue
+            long_tons = record["allocated_mass_t"] * 1000.0 / kernels.LONG_TON_KG
+            if not math.isfinite(long_tons * kernels.LONG_TON_KG):
+                diagnostics.append(_diag(
+                    "concept_design.battery_mass_allocation_unavailable",
+                    "the allocated mount mass exceeds the supported weight-conversion range",
+                    "$.concept_design.battery_mass_allocation[%s]" % (layout.get("id"),),
+                    blocking=False))
+                continue
+            register(battery["system_id"], _allocation_model(
+                config, layout, battery, record, context, target_ids, long_tons))
+
+
+# ------------------------------------------------------- the fixed armour --
+
+def _hull_number(project, key):
+    value = (project.get("hull") or {}).get(key)
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    number = float(value)
+    return number if math.isfinite(number) else None
+
+
+def _declared_fact(value, source, estimate=False):
+    """One canonical context fact with its own recorded provenance."""
+    return None if value is None else {"value": value, "source": source, "estimate": estimate}
+
+
+def _selected_role_mass_t(resolved, role):
+    """The selected ledger mass of one explicit balance role, in metric tonnes.
+
+    An empty explicitly allocated role is a determined zero. An unknown selected
+    mass stays ``None``: it is never read as zero, because the recovered box-deck
+    expression keeps a positive margin for a known zero and that margin would
+    read as a real machinery box.
+    """
+    if resolved is None:
+        return None
+    entries = resolved["by_role"].get(role) or []
+    if any(mass is None for _item, mass in entries):
+        return None
+    return sum(float(mass) for _item, mass in entries)
+
+
+def _auxiliary_space_context(project, config, diagnostics):
+    """Only the space denominators' dependencies; freeboard is unrelated."""
+    length = _hull_number(project, "lwl_m")
+    beam = _hull_number(project, "beam_m")
+    block = _hull_number(project, "block_coeff")
+    context = {key: _declared_fact(value, origin) for key, value, origin in (
+        ("length_m", length, "canonical $.hull.lwl_m"),
+        ("beam_m", beam, "canonical $.hull.beam_m"),
+        ("draught_m", _hull_number(project, "draught_normal_m"), "canonical $.hull.draught_normal_m"),
+        ("block_coeff", block, "canonical $.hull.block_coeff"))}
+    area = None
+    if (length is not None and length > 0 and beam is not None and beam > 0 and block is not None
+            and config.get("stern") and config.get("screws") is not None):
+        try:
+            coefficient = kernels.waterplane_coefficient(block, config["stern"], config["screws"], "$.hull")
+            area = kernels.waterplane_area_sqft(coefficient, kernels.metres_to_feet(length, "$.hull.lwl_m"),
+                kernels.metres_to_feet(beam, "$.hull.beam_m"), "$.hull") * kernels.M_PER_FT**2
+            if not math.isfinite(area):
+                raise ValueError("waterplane area proxy exceeds the finite domain")
+        except (ValueError, OverflowError) as error:
+            area = None
+            diagnostics.append(_diag("concept_design.auxiliary_space_context", str(error), "$.hull", blocking=False))
+    context["waterplane_area_m2"] = _declared_fact(area,
+        "sps-3b3-adapted-v1 waterplane proxy from L, ordinary B, Cb, stern and screws; not measured geometry", True)
+    return context
+
+
+def _fixed_armour_context(project, config, state, diagnostics):
+    """The minimal canonical context the fixed-armour kernels may read.
+
+    The waterplane facts come from the same versioned proxy helpers
+    :func:`hull_proxy` uses, but they are read directly here so a project without
+    a declared freeboard, stern or screw count still gets its simple planar
+    plates, belts and conning towers. A helper that cannot evaluate one of its
+    own inputs leaves exactly that fact unknown with a non-blocking diagnostic
+    instead of failing the stage.
+    """
+    length_m = _hull_number(project, "lwl_m")
+    beam_m = _hull_number(project, "beam_m")
+    block = _hull_number(project, "block_coeff")
+    context = {
+        "length_m": _declared_fact(length_m, "canonical hull key $.hull.lwl_m"),
+        "beam_m": _declared_fact(beam_m, "canonical hull key $.hull.beam_m"),
+        "displacement_t": _declared_fact(
+            config.get("target_displacement_t"),
+            "declared concept target $.concept_design.target_displacement_t"),
+    }
+    coefficient = None
+    if (length_m is not None and beam_m is not None and length_m > 0.0 and beam_m > 0.0
+            and block is not None and config.get("stern") and config.get("screws") is not None):
+        try:
+            coefficient = kernels.waterplane_coefficient(
+                block, config["stern"], config["screws"], "$.hull")
+        except ValueError as error:
+            diagnostics.append(_diag("concept_design.fixed_armour_context", str(error),
+                                     "$.hull", blocking=False))
+    context["co_waterplane"] = _declared_fact(
+        coefficient,
+        "recovered sps-3b3-adapted-v1 waterplane proxy from $.hull.block_coeff, "
+        "$.concept_design.stern and $.concept_design.screws", True)
+    waterplane_m2 = None
+    if coefficient is not None:
+        waterplane_m2 = kernels.waterplane_area_sqft(
+            coefficient, kernels.metres_to_feet(length_m, "$.hull.lwl_m"),
+            kernels.metres_to_feet(beam_m, "$.hull.beam_m"),
+            "$.hull") * kernels.M_PER_FT * kernels.M_PER_FT
+    context["waterplane_area_m2"] = _declared_fact(
+        waterplane_m2,
+        "recovered sps-3b3-adapted-v1 waterplane area = co_waterplane x length x beam, "
+        "converted to square metres", True)
+    resolved = _role_masses(config, state)
+    context["machinery_mass_t"] = _declared_fact(
+        _selected_role_mass_t(resolved, "machinery"),
+        "selected ledger items mapped to the declared 'machinery' balance role")
+    context["ammunition_mass_t"] = _declared_fact(
+        _selected_role_mass_t(resolved, "ammunition"),
+        "selected ledger items mapped to the declared 'ammunition' balance role")
+    return context
+
+
+def _fixed_armour_note(kind):
+    return (
+        "independent recovered estimate of this one fixed armour region (%s), in its own "
+        "sps-3b3-fixed-armour-v1 method and its own long tons. It is not the sum of any "
+        "other component and it contains no part of any other item's mass. A reader who "
+        "already carries this armour inside another weight must split that target first; "
+        "no split is generated and nothing is deducted from a declared mass automatically. "
+        "No armour mesh, inclination, protection rating or centre of gravity is created"
+        % (kind,))
+
+
+def _fixed_armour_models(project, config, state, register, diagnostics):
+    """One ``concept_fixed_armour.<id>`` model per bound, available fixed region.
+
+    These models are generated before the design hull proxy on purpose: a simple
+    planar plate and a conning tower need none of the hull proxy's freeboard,
+    stern or screw facts, so a project whose design hull is not physical yet
+    still gets its own fixed-armour reading.
+
+    A fixed region that the armour-panel geometry selects is suppressed here even
+    when its geometry is incomplete or unsourced: an opted region never keeps its
+    old empirical model as a hidden fallback. Its replacement, when the geometry
+    is adoptable and its mass is known, is registered by :func:`_geometry_models`.
+    """
+    records = config.get("fixed_armour") or []
+    if not records:
+        return
+    opted = _geometry_opted_ids(config)
+    context = _fixed_armour_context(project, config, state, diagnostics)
+    for record in records:
+        identity = record.get("id")
+        if identity in opted:
+            continue
+        path = "$.concept_design.fixed_armour[%s]" % (identity,)
+        try:
+            result = fixed_armour_kernel.evaluate(record, context, path)
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.fixed_armour_unavailable", str(error),
+                                     path, blocking=False))
+            continue
+        for entry in result["diagnostics"]:
+            diagnostics.append(_diag(entry.get("code", "concept_design.fixed_armour_unavailable"),
+                                     entry["message"], entry.get("path", path), blocking=False))
+        if identity is None or None in (record.get("system_id"), record.get("item_id")):
+            continue
+        values = result["values"]
+        if values["total_long_tons"] is None:
+            continue
+        # The existing empirical pipeline converts LT via kg before tonnes. Do not
+        # register a model whose otherwise finite LT would overflow that boundary.
+        if not math.isfinite(values["total_long_tons"] * kernels.LONG_TON_KG):
+            diagnostics.append(_diag(
+                "concept_design.fixed_armour_unavailable",
+                "the derived fixed armour mass exceeds the supported weight-conversion range",
+                path, blocking=False))
+            continue
+        provenance = result["provenance"]
+        # Persisted mass receipts accept a flat scalar input map. The whole
+        # declaration, the whole context and the whole provenance travel as
+        # explicit origin text instead of widening the receipt schema.
+        model_inputs = dict(provenance["inputs"], origin=result["origin"])
+        register(record["system_id"], _model(
+            "%s.%s" % (FIXED_ARMOUR_MODEL_PREFIX, identity,), record["item_id"],
+            values["total_long_tons"], provenance["kernel"], provenance["source_location"],
+            provenance["formula"], model_inputs, config["source"],
+            method_version=fixed_armour_kernel.METHOD_VERSION,
+            boundary=fixed_armour_kernel.SOURCE_SCOPE,
+            extra={"concept_component": "fixed_armour",
+                   "assumptions": provenance["assumptions"],
+                   "component_breakdown": fixed_armour_kernel.component_breakdown(
+                       values, record.get("kind")),
+                   "note": _fixed_armour_note(record.get("kind"))}))
+    _geometry_models(config, register, diagnostics)
+
+
+def _geometry_opted_ids(config):
+    """The fixed-armour ids the armour-panel geometry selects, even if unfinished."""
+    geometry = config.get("armour_geometry")
+    if not geometry:
+        return set()
+    return {region.get("fixed_armour_id") for region in geometry.get("regions") or []
+            if region.get("fixed_armour_id") is not None}
+
+
+def _geometry_note(region, kind):
+    return (
+        "declared rectangular-plate geometry of this one fixed armour region (%s), "
+        "recomputed by the pure plimsoll-armour-panels-v1 kernel from the complete "
+        "plate declaration; it replaces this region's old empirical SPS reading rather "
+        "than adding to it. Area sums every declared layer and is never a coverage "
+        "union; there is no fabrication allowance, taper, support, fastener or curved "
+        "area and no centre of gravity." % (kind,))
+
+
+def _geometry_model(region, kind, source, record, config_source):
+    """One physical ``armour_panels_mass_v1`` model carrying the complete region.
+
+    The inputs are exactly the four pinned keys, so a receipt recomputes the panel
+    model from the declaration itself instead of trusting an opaque mass.
+    """
+    inputs = {
+        "method_version": armour_geometry_kernel.METHOD_VERSION,
+        "region_kind": kind,
+        "geometry_source": source,
+        "region": copy.deepcopy(region),
+    }
+    provenance_source = source if isinstance(source, str) and source.strip() else config_source
+    return dict(
+        id="%s.%s" % (GEOMETRY_MODEL_PREFIX, region.get("fixed_armour_id")),
+        method=ARMOUR_PANELS_METHOD, linked_weight_item_id=record["item_id"],
+        inputs=inputs,
+        source=dict(
+            source=declaration_of(source, "plimsoll-armour-panels-v1",
+                                  "declared plate geometry"),
+            method_version=armour_geometry_kernel.METHOD_VERSION),
+        estimate=True,
+        input_provenance={key: dict(source=provenance_source, estimate=True) for key in inputs},
+        comparison_tolerance={"relative": 0.0, "absolute_t": 0.0},
+        comparison_policy=COMPARISON_POLICY,
+        boundary=("declared rectangular armour plate geometry; no fabrication allowance, "
+                  "fastener, curved area, coverage union or centre of gravity"),
+        concept_component="fixed_armour",
+        component_breakdown={"plate_count": len(region.get("plates") or [])},
+        note=_geometry_note(region, kind),
+    )
+
+
+def _geometry_models(config, register, diagnostics):
+    """One physical geometry model per opted region whose reading is adoptable.
+
+    A region whose reading is not adoptable, or whose complete mass is unknown,
+    produces no model: it still suppresses the old SPS model and still exposes its
+    own design-balance reading, but it never contributes a mass anywhere.
+    """
+    geometry = config.get("armour_geometry")
+    if not geometry:
+        return
+    source = geometry.get("source")
+    by_id = {record.get("id"): record for record in config.get("fixed_armour") or []}
+    for region in geometry.get("regions") or []:
+        record = by_id.get(region.get("fixed_armour_id"))
+        if not isinstance(record, dict):
+            continue
+        if record.get("system_id") is None or record.get("item_id") is None:
+            continue
+        kind = record.get("kind")
+        if kind not in armour_geometry_kernel.ELIGIBLE_KINDS:
+            continue
+        result = armour_geometry_kernel.evaluate(region, kind, source=source)
+        if not result["adoptable"]:
+            continue
+        mass = result["values"]["mass_t"]
+        if mass is None or not math.isfinite(mass):
+            continue
+        register(record["system_id"], _geometry_model(region, kind, source, record, config["source"]))
+
+
+def _auxiliary_context(config):
+    """The one canonical fact an auxiliary weapon reading may read.
+
+    An active torpedo reads the declared hull year; a mine or depth charge does not
+    read it at all, so a missing or refused year never disables those two.
+    """
+    return {"hull_year": _declared_fact(config.get("hull_year"),
+                                        "declared concept hull year")}
+
+
+def _auxiliary_models(config, register, diagnostics):
+    """One ``concept_auxiliary.<id>`` model per bound, available auxiliary group.
+
+    These models are generated before the design hull proxy for the same reason
+    the fixed armour ones are: an auxiliary weapon group's mass reads no hull
+    geometry at all, so it must not sit behind a proxy it does not use.
+    """
+    records = config.get("auxiliary_weapons") or []
+    if not records:
+        return
+    context = _auxiliary_context(config)
+    for record in records:
+        identity = record.get("id")
+        path = "$.concept_design.auxiliary_weapons[%s]" % (identity,)
+        try:
+            result = auxiliary_kernel.evaluate(record, context, path)
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.auxiliary_unavailable", str(error),
+                                     path, blocking=False))
+            continue
+        for entry in result["diagnostics"]:
+            diagnostics.append(_diag(entry.get("code", "concept_design.auxiliary_unavailable"),
+                                     entry["message"], entry.get("path", path), blocking=False))
+        if identity is None or None in (record.get("system_id"), record.get("item_id")):
+            continue
+        values = result["values"]
+        if values["total_long_tons"] is None:
+            continue
+        if not math.isfinite(values["total_long_tons"] * kernels.LONG_TON_KG):
+            diagnostics.append(_diag(
+                "concept_design.auxiliary_unavailable",
+                "the derived auxiliary weapon mass exceeds the supported "
+                "weight-conversion range", path, blocking=False))
+            continue
+        provenance = result["provenance"]
+        # Persisted mass receipts accept a flat scalar input map, so the whole
+        # declaration, context and provenance travel as their own origin text.
+        model_inputs = dict(provenance["inputs"], origin=result["origin"])
+        register(record["system_id"], _model(
+            "%s.%s" % (AUXILIARY_MODEL_PREFIX, identity,), record["item_id"],
+            values["total_long_tons"], provenance["kernel"], provenance["source_location"],
+            provenance["formula"], model_inputs, config["source"],
+            method_version=auxiliary_kernel.METHOD_VERSION,
+            boundary=auxiliary_kernel.SOURCE_SCOPE,
+            extra={"concept_component": "auxiliary_weapons",
+                   "assumptions": provenance["assumptions"],
+                   "component_breakdown": auxiliary_kernel.component_breakdown(
+                       values, record.get("kind")),
+                   "note": _auxiliary_note(record.get("kind"))}))
+
+
+def _auxiliary_note(kind):
+    return (
+        "independent recovered mass reading of this one auxiliary weapon group (%s), in "
+        "its own sps-3b3-auxiliary-weapons-v1 method and its own long tons: the group's "
+        "weapon mass plus its own recovered mount factor, counted once on one target "
+        "carrying the existing 'other' balance role. It is not bare guns, not mounts and "
+        "not ammunition, it contributes no strength or space term, and it contains no "
+        "weapon space, firing arc, reload geometry or explosive performance. A reader who "
+        "already carries these weapons inside another item must split that target first; "
+        "no split is generated and nothing is deducted from a declared mass automatically"
+        % (kind,))
 
 
 def _power(config, hull):
@@ -992,11 +2149,11 @@ def _selected_borne(config, state, diagnostics):
             float(mass) * 1000.0 / kernels.LONG_TON_KG, adjustment)
     stray = [item for item, mass in resolved["by_role"]["guns"] if item not in bound]
     positive = [item for item in stray
-                if _mass_of(state, item) is not None and float(_mass_of(state, item)) > 0]
+                if _mass_of(state, item) is None or float(_mass_of(state, item)) > 0]
     if positive:
         diagnostics.append(_diag(
             "concept_design.guns_role_unbound",
-            "guns-role items %r have a positive selected mass but are not bound to a declared "
+            "guns-role items %r have a positive or unknown selected mass but are not bound to a declared "
             "battery, so no borne weight can be derived for them" % (positive,),
             "$.concept_design.balance.roles"))
         return None, resolved
@@ -1268,6 +2425,451 @@ def _fuel_estimate(config, hull, power):
 
 # ------------------------------------------------------------------- balance
 
+def _layout_readings(config, diagnostics):
+    """One derived reading per declared layout, in declaration order.
+
+    The readings are the server's own returned values: the caller never recomputes
+    a freeboard, a height factor or a mass on the client.
+    """
+    readings = []
+    for layout in config.get("battery_layouts") or []:
+        path = "$.concept_design.battery_layouts[%s]" % (layout.get("id"),)
+        try:
+            readings.append(layout_kernel.evaluate(layout, config["batteries"], path))
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.layout_unavailable", str(error), path,
+                                     blocking=False))
+    return readings
+
+
+def _fixed_armour_readings(project, config, state, diagnostics):
+    """One derived reading per declared fixed region, in declaration order.
+
+    These are the server's own returned values: the caller never recomputes an
+    area, a thickness or a mass on the client. They are exposed before every
+    early return in :func:`evaluate`, so a project without a physical design
+    hull or without a balance section still reports what its declared fixed
+    regions actually derive.
+    """
+    records = config.get("fixed_armour") or []
+    if not records:
+        return []
+    opted = _geometry_opted_ids(config)
+    context = _fixed_armour_context(project, config, state, diagnostics)
+    readings = []
+    for record in records:
+        path = "$.concept_design.fixed_armour[%s]" % (record.get("id"),)
+        try:
+            reading = fixed_armour_kernel.evaluate(record, context, path)
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.fixed_armour_unavailable", str(error),
+                                     path, blocking=False))
+            continue
+        if record.get("id") in opted:
+            # The old SPS reading stays its own numbers and its own method, but it
+            # is explicitly inactive for adoption: the opted geometry is the one
+            # active model for this region, even while it is incomplete.
+            reading["active_mass_model"] = "geometry"
+            reading["geometry_selected"] = True
+            reading["adoption_notice"] = (
+                "this region's armour geometry is selected, so this empirical SPS reading "
+                "is an inactive numerical comparison; it is never adopted in place of the "
+                "selected geometry")
+        readings.append(reading)
+    return readings
+
+
+def _geometry_readings(config):
+    """One pure panel reading per opted region, in declaration order.
+
+    The reading is exposed independently of the empirical fixed-armour readings and
+    before every hull and balance early return. Its values keep the complete mass
+    unknown whenever any declared plate is unknown; the known subtotal is never a
+    substitute for the complete mass.
+    """
+    geometry = config.get("armour_geometry")
+    if not geometry:
+        return []
+    source = geometry.get("source")
+    by_id = {record.get("id"): record for record in config.get("fixed_armour") or []}
+    readings = []
+    for region in geometry.get("regions") or []:
+        record = by_id.get(region.get("fixed_armour_id"))
+        kind = record.get("kind") if isinstance(record, dict) else None
+        if kind not in armour_geometry_kernel.ELIGIBLE_KINDS:
+            continue
+        readings.append(armour_geometry_kernel.evaluate(region, kind, source=source))
+    return readings
+
+
+def _auxiliary_readings(config, diagnostics):
+    """One derived reading per declared auxiliary group, in declaration order.
+
+    These are the server's own returned values: the caller never recomputes a
+    mass or a mount factor on the client. They are exposed before every early
+    return in :func:`evaluate`, so a project without a physical design hull or
+    without a balance section still reports what its groups actually derive.
+    """
+    context = _auxiliary_context(config)
+    readings = []
+    for record in config.get("auxiliary_weapons") or []:
+        path = "$.concept_design.auxiliary_weapons[%s]" % (record.get("id"),)
+        try:
+            readings.append(auxiliary_kernel.evaluate(record, context, path))
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.auxiliary_unavailable", str(error),
+                                     path, blocking=False))
+    return readings
+
+
+def _long_tons_to_t(value_lt):
+    """A long-ton mass as metric tonnes, or ``None`` for an unknown one."""
+    if value_lt is None:
+        return None
+    try:
+        number = float(value_lt)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(number):
+        return None
+    return number * kernels.LONG_TON_KG / 1000.0
+
+
+def _armour_components(config, state, diagnostics, fixed_readings, layout_readings):
+    """Every declared armour estimate, namespaced by its own family.
+
+    The three families never share a local id, so a fixed region, a layout and a
+    single-group battery estimate with the same local name stay three distinct
+    components. A component whose owning kernel cannot evaluate it stays in the
+    list with ``mass_t = None``: it is never dropped, because dropping it would
+    turn an incomplete declaration into an apparently complete one, and the ledger
+    value is never copied into its place.
+    """
+    components = []
+    fixed_by_id = {reading.get("id"): reading for reading in fixed_readings
+                   if isinstance(reading, dict)}
+    geometry_readings = ({reading.get("id"): reading
+                          for reading in _geometry_readings(config)}
+                         if config.get("armour_geometry") is not None else {})
+    for record in config.get("fixed_armour") or []:
+        # One chosen component per fixed region: the opted geometry when the region
+        # is selected, otherwise the old SPS reading. An unknown geometry mass stays
+        # unknown and never falls back to a known SPS mass, and the two are never
+        # added together.
+        chosen = geometry_readings.get(record.get("id"))
+        if chosen is not None:
+            mass_t = chosen["values"]["mass_t"]
+            method_version = armour_geometry_kernel.METHOD_VERSION
+        else:
+            reading = fixed_by_id.get(record.get("id"))
+            mass_t = None
+            if isinstance(reading, dict):
+                mass_t = _long_tons_to_t((reading.get("values") or {}).get("total_long_tons"))
+            method_version = fixed_armour_kernel.METHOD_VERSION
+        components.append({
+            "id": "fixed:%s" % (record.get("id"),),
+            # The fixed kernel's kind is its own recovered vocabulary; the role the
+            # armour-totals kernel reads is the balance role (bulge -> armour_bulge,
+            # deck -> armour_deck). They are mapped here rather than passed through.
+            "kind": fixed_armour_kernel.ROLE_BY_KIND.get(record.get("kind"), record.get("kind")),
+            "target_id": record.get("item_id"),
+            "method_version": method_version, "mass_t": mass_t})
+    layout_by_id = {reading.get("id"): reading for reading in layout_readings
+                    if isinstance(reading, dict)}
+    covered = set()
+    for layout in config.get("battery_layouts") or []:
+        armour = layout.get("armour")
+        if not isinstance(armour, dict):
+            continue
+        reading = layout_by_id.get(layout.get("id"))
+        mass_t = None
+        if isinstance(reading, dict) and isinstance(reading.get("armour"), dict):
+            mass_t = _long_tons_to_t(
+                (reading["armour"].get("values") or {}).get("total_long_tons"))
+        components.append({
+            "id": "layout:%s" % (layout.get("id"),), "kind": LAYOUT_ARMOUR_ROLE,
+            "target_id": armour.get("item_id"),
+            "method_version": layout_kernel.ARMOUR_METHOD_VERSION, "mass_t": mass_t})
+        for name in ("group1", "group2"):
+            group = layout.get(name)
+            battery_id = group.get("battery_id") if isinstance(group, dict) else None
+            if battery_id is not None:
+                covered.add(battery_id)
+    for battery in config["batteries"]:
+        armour = battery.get("armour")
+        if armour is None:
+            continue
+        # A battery already weighted by its layout's complete two-group armour is
+        # not weighed a second time through its own old single-group estimate.
+        if battery.get("id") in covered:
+            continue
+        mass_t = None
+        path = "$.concept_design.batteries[%s].armour" % (battery.get("id"),)
+        try:
+            result = armour_kernel.estimate(
+                calibre_mm=battery["calibre_mm"], year=battery["year"],
+                gun_type=battery["gun_type"], mount_type=battery["mount_type"],
+                mount_count=battery["mount_count"],
+                barrels_per_mount=battery["barrels_per_mount"],
+                shared_cradle=battery["shared_cradle"],
+                face_mm=armour["face_mm"], rear_roof_mm=armour["rear_roof_mm"],
+                barbette_mm=armour["barbette_mm"], freeboard_m=armour["freeboard_m"],
+                super_factor=armour["super_factor"], path=path)
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.armour_totals_unavailable", str(error),
+                                     path, blocking=False))
+        else:
+            mass_t = _long_tons_to_t(result["values"].get("total_long_tons"))
+        components.append({
+            "id": "battery:%s" % (battery.get("id"),), "kind": "gun_mount_armour",
+            "target_id": armour.get("item_id"),
+            "method_version": armour_kernel.METHOD_VERSION, "mass_t": mass_t})
+    return components
+
+
+def _armour_selected_roles(config, state):
+    """The nine canonical armour-role masses in tonnes, plus the classification flag."""
+    resolved = _role_masses(config, state)
+    if resolved is None:
+        return None
+    roles = {role: _long_tons_to_t(resolved["totals"].get(role)) for role in ARMOUR_ROLES}
+    roles["classification_complete"] = not resolved["unclassified"]
+    return roles
+
+
+def _selected_target_t(state, item_ids):
+    """The selected tonne mass of a set of DISTINCT ledger targets, or unknown."""
+    if not item_ids:
+        return None
+    total = 0.0
+    for item_id in item_ids:
+        value = _mass_of(state, item_id)
+        if value is None:
+            return None
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            return None
+        if not math.isfinite(number):
+            return None
+        total += number
+    return total
+
+
+def _battery_selected_values(layout, batteries_by_id, state):
+    """The current condition's gun, mount and armour target masses for one layout.
+
+    The targets are collected by leaf item id and never by array position, an
+    ammunition target is never counted, and a duplicated id is counted once. The
+    declared boundary is tracked for each output category separately, so an open
+    boundary is never silently closed into a subtotal:
+
+    * a group the layout does not declare at all (absent, or a null group)
+      contributes nothing;
+    * a group the layout *does* declare whose membership is unresolved (no chosen
+      row, or a row that does not exist) leaves its guns and mounts unknown,
+      because the boundary of what it carries cannot be closed;
+    * a declared but unbound target -- a row binding with no leaf id, an armour
+      block with no leaf id -- leaves its own category unknown rather than
+      dropping it and reporting the remaining bound targets as a subtotal.
+
+    The layout's own bound armour covers the whole battery, so an unresolved group
+    leaves the armour known when the layout declares that bound target and unknown
+    when it does not. A referenced row's existing ledger mass is always counted,
+    including a zero-count row: an unfinished membership is never read as a zero.
+    """
+    guns, mounts, armour_targets = [], [], []
+    unbound = set()
+    unresolved = False
+    for name in ("group1", "group2"):
+        if name not in layout:
+            continue
+        group = layout.get(name)
+        if group is None:
+            continue
+        battery_id = group.get("battery_id") if isinstance(group, dict) else None
+        battery = batteries_by_id.get(battery_id)
+        if battery is None:
+            unresolved = True
+            continue
+        for bucket, field in ((guns, "guns_item_id"), (mounts, "mounts_item_id")):
+            item = battery.get(field)
+            if item is None:
+                unbound.add(field)
+            elif item not in bucket:
+                bucket.append(item)
+        record = battery.get("armour")
+        if isinstance(record, dict):
+            item = record.get("item_id")
+            if item is None:
+                unbound.add("armour_item_id")
+            elif item not in armour_targets:
+                armour_targets.append(item)
+    record = layout.get("armour")
+    layout_armour_bound = False
+    if isinstance(record, dict):
+        item = record.get("item_id")
+        if item is None:
+            unbound.add("armour_item_id")
+        else:
+            layout_armour_bound = True
+            if item not in armour_targets:
+                armour_targets.append(item)
+    if unresolved and not layout_armour_bound:
+        unbound.add("armour_item_id")
+    guns_t = None if unresolved or "guns_item_id" in unbound else _selected_target_t(state, guns)
+    mounts_t = (None if unresolved or "mounts_item_id" in unbound
+                else _selected_target_t(state, mounts))
+    armour_t = (None if "armour_item_id" in unbound
+                else _selected_target_t(state, armour_targets))
+    total_t = (guns_t + mounts_t + armour_t
+               if None not in (guns_t, mounts_t, armour_t) else None)
+    return {"guns_t": guns_t, "mounts_t": mounts_t, "armour_t": armour_t, "total_t": total_t}
+
+
+def _battery_totals_readings(config, layout_readings, state, diagnostics):
+    """One whole-battery source estimate per declared layout, with its selected mirror."""
+    readings = []
+    layout_by_id = {reading.get("id"): reading for reading in layout_readings
+                    if isinstance(reading, dict)}
+    batteries_by_id = {battery["id"]: battery for battery in config["batteries"]
+                       if battery.get("id")}
+    for layout in config.get("battery_layouts") or []:
+        layout_reading = layout_by_id.get(layout.get("id"))
+        if not isinstance(layout_reading, dict):
+            continue
+        path = "$.concept_design.battery_layouts[%s]" % (layout.get("id"),)
+        try:
+            reading = battery_totals_kernel.evaluate(layout, config["batteries"],
+                                                     layout_reading, path)
+        except (ValueError, ArithmeticError) as error:
+            diagnostics.append(_diag("concept_design.battery_totals_unavailable", str(error),
+                                     path, blocking=False))
+            continue
+        reading["selected_values"] = _battery_selected_values(layout, batteries_by_id, state)
+        if reading["status"] == "unavailable" and _has_known_selected(reading["selected_values"]):
+            # The source estimate could not be closed, but the selected ledger
+            # actuals are independent of it. The record is partial rather than
+            # refused, so the known selected figures can still be compared; the
+            # source values stay null and the ledger is never written into them.
+            reading["status"] = "partial"
+        readings.append(reading)
+    return readings
+
+
+def _has_known_selected(selected_values):
+    """Whether any of a layout's four selected actual figures is known."""
+    return any(selected_values.get(key) is not None
+               for key in ("guns_t", "mounts_t", "armour_t", "total_t"))
+
+
+def _armour_totals_reading(config, state, diagnostics, fixed_readings, layout_readings):
+    """The declared-estimate and selected-actual armour totals for one project."""
+    summary = config.get("mass_summary") or {}
+    components = _armour_components(config, state, diagnostics, fixed_readings, layout_readings)
+    selected_roles = _armour_selected_roles(config, state)
+    path = "$.concept_design.mass_summary"
+    try:
+        return armour_totals_kernel.evaluate(
+            components, selected_roles, declared_complete=summary.get("armour_scope_complete"),
+            source=summary.get("source"), path=path)
+    except armour_totals_kernel.ArmourTotalsError as error:
+        diagnostics.extend(_diag(entry.get("code", "concept_design.armour_totals_invalid"),
+                                 entry["message"], entry.get("path", path), blocking=False)
+                           for entry in error.diagnostics)
+        return None
+
+
+def _cost_reading(config, state, diagnostics):
+    """The optional empirical cost reading, built from SELECTED masses only.
+
+    Nothing is adopted, nothing is proposed and no target is created: the reading
+    is a display value in the source's own historical currency labels. A proposed
+    or estimated mass, and another condition's mass, can never become the current
+    cost, so every input here is resolved from the selected ledger and the
+    declared balance roles.
+    """
+    declared = config.get("cost") or {}
+    path = "$.concept_design.cost"
+    blocked = []
+    resolved = _role_masses(config, state)
+    if resolved is None:
+        blocked.append(_diag(
+            "concept_design.cost_unavailable",
+            "the cost reading classifies the selected ledger through the declared balance "
+            "roles, and no balance section is declared; the reading is unavailable rather "
+            "than zero", path, blocking=False))
+        inputs = {name: None for name in cost_kernel.INPUT_FIELDS}
+    else:
+        unclassified = resolved["unclassified"]
+        notes = []
+        borne, _resolved = _selected_borne(config, state, notes)
+        if unclassified:
+            blocked.append(_diag(
+                "concept_design.cost_unavailable",
+                "classify every positive or unknown selected mass before reading a cost: %r is "
+                "unclassified and is never read as a zero cost" % (unclassified,), path,
+                blocking=False))
+        if borne is None:
+            blocked.append(_diag(
+                "concept_design.cost_borne_unavailable",
+                "the recovered cost reads the selected bare-gun borne weight; it is "
+                "unavailable here: %s" % ("; ".join(
+                    entry["message"] for entry in notes) or
+                    "no balance roles are declared"), path, blocking=False))
+        inputs = {
+            "displacement_t": config.get("target_displacement_t"),
+            "hull_year": config.get("hull_year"),
+            "machinery_mass_t": _selected_role_mass_t(resolved, "machinery"),
+            "ammunition_mass_t": _selected_role_mass_t(resolved, "ammunition"),
+            "fuel_mass_t": _selected_role_mass_t(resolved, "fuel"),
+            "borne_mass_t": None if borne is None else borne * kernels.LONG_TON_KG / 1000.0,
+        }
+    facts = {
+        "displacement_t": _declared_fact(inputs["displacement_t"],
+                                         "declared concept target displacement"),
+        "hull_year": _declared_fact(inputs["hull_year"], "declared concept hull year"),
+        "machinery_mass_t": _declared_fact(
+            inputs["machinery_mass_t"],
+            "selected ledger items mapped to the declared 'machinery' balance role"),
+        "ammunition_mass_t": _declared_fact(
+            inputs["ammunition_mass_t"],
+            "selected ledger items mapped to the declared 'ammunition' balance role"),
+        "fuel_mass_t": _declared_fact(
+            inputs["fuel_mass_t"],
+            "selected ledger items mapped to the declared 'fuel' balance role"),
+        "borne_mass_t": _declared_fact(
+            inputs["borne_mass_t"],
+            "selected bare-gun borne weight of the declared batteries, converted from the "
+            "recovered long tons to metric tonnes"),
+    }
+    result = cost_kernel.evaluate(facts, path)
+    result["source"] = declared.get("source")
+    result["note"] = ("an empirical historical reading in the source's own million-dollar and "
+                      "million-pound labels; it is not a modern price, a live exchange rate, "
+                      "an inflation-adjusted value or a budget, and it adopts nothing")
+    if blocked:
+        # An unclassified selected mass or an unbound guns-role item leaves the
+        # whole reading unavailable. The inputs it did read stay visible, so the
+        # reason is auditable, but no figure is offered.
+        result = dict(result, status="unavailable",
+                      values=dict.fromkeys(result["values"]))
+    for entry in result["diagnostics"] + blocked:
+        diagnostics.append(_diag(entry["code"], entry["message"], entry["path"],
+                                 blocking=False))
+    return result
+
+
+def _armour_review_reading(project, config, result):
+    hull = project.get('hull') or {}
+    return armour_review_kernel.evaluate(config.get('fixed_armour') or [], {
+        'length_m': hull.get('lwl_m'), 'draught_m': hull.get('draught_normal_m'),
+        'freeboard_m': config.get('freeboard_m'),
+        'room_hull_ratio': result.get('space', {}).get('hull_ratio'),
+        'composite_strength': result.get('strength', {}).get('composite'),
+    }, config['armour_review'])
+
+
 def evaluate(project, state, systems_summary):
     """Evaluate the adapted concept screen from the selected loading ledger.
 
@@ -1300,6 +2902,97 @@ def evaluate(project, state, systems_summary):
     result["values"]["target_displacement_t"] = config["target_displacement_t"]
     result["values"]["difference_t"] = (None if selected_total_t is None or config["target_displacement_t"] is None
                                          else config["target_displacement_t"] - selected_total_t)
+    # The layout readings are exposed before every early return below, so a
+    # project without a physical design hull or without a balance section still
+    # reports what its declared layout identity actually derives. A project that
+    # declares no layout keeps the previous result structure unchanged.
+    if config.get("battery_layouts"):
+        result["battery_layouts"] = _layout_readings(config, diagnostics)
+    layout_readings = result.get("battery_layouts") or []
+    # The optional component families this result declares, and the method version
+    # each one owns. A saved report or a saved comparison gates on these instead of
+    # on a global request identity, so a stale or mismatched component method can
+    # never be compared as a delta. Nothing here is declared when neither new
+    # section is: a project without fixed armour or cost keeps the previous result
+    # shape exactly, and the coordinator's own versions stay untouched.
+    methods = {}
+    if config.get("fixed_armour"):
+        methods["fixed_armour"] = fixed_armour_kernel.METHOD_VERSION
+    if config.get("armour_geometry") is not None:
+        methods["armour_geometry"] = armour_geometry_kernel.METHOD_VERSION
+    if config.get("battery_layouts"):
+        methods["layout"] = layout_kernel.METHOD_VERSION
+    if config.get("cost") is not None:
+        methods["cost"] = cost_kernel.METHOD_VERSION
+    if config.get("auxiliary_weapons"):
+        methods["auxiliary_weapons"] = auxiliary_kernel.METHOD_VERSION
+    if config.get('armour_review') is not None:
+        methods['armour_review'] = armour_review_kernel.METHOD_VERSION
+    # The mass-summary families are appended last, so a project that never enabled
+    # the section keeps exactly the methods map it already had. The whole-battery
+    # family is only named when there is a layout to produce its one row per layout.
+    if config.get("mass_summary") is not None:
+        if config.get("battery_layouts"):
+            methods["battery_totals"] = battery_totals_kernel.METHOD_VERSION
+        methods["armour_totals"] = armour_totals_kernel.METHOD_VERSION
+    # The whole-battery mount allocation is a family of its own, named whenever
+    # the section is declared -- even with no selected layout, so a saved report
+    # and a saved comparison can gate on its independent method version.
+    if config.get("battery_mass_allocation") is not None:
+        methods["battery_mass_allocation"] = allocation_kernel.METHOD_VERSION
+    if config.get("armour_defaults") is not None:
+        methods["armour_defaults"] = armour_defaults_kernel.METHOD_VERSION
+    if config.get("auxiliary_space") is not None:
+        methods["auxiliary_space"] = auxiliary_space_kernel.METHOD_VERSION
+    if methods:
+        result["methods"] = methods
+    # The fixed-armour and cost readings are exposed on the same footing, before
+    # every early return below, for the same reason. A project that declares no
+    # fixed region and no cost section keeps the previous result structure
+    # exactly: neither key is added at all.
+    if config.get("fixed_armour"):
+        result["fixed_armour"] = _fixed_armour_readings(project, config, state, diagnostics)
+    # The armour-panel geometry readings are exposed independently, on the same
+    # footing and before every early return below: an opted region reports its own
+    # complete or known-subtotal mass even when its old SPS reading is inactive or
+    # its geometry is unfinished.
+    if config.get("armour_geometry") is not None:
+        result["armour_geometry"] = _geometry_readings(config)
+    if config.get("auxiliary_weapons"):
+        result["auxiliary_weapons"] = _auxiliary_readings(config, diagnostics)
+    if config.get("cost") is not None:
+        result["cost"] = _cost_reading(config, state, diagnostics)
+    if config.get('armour_review') is not None:
+        result['armour_review'] = _armour_review_reading(project, config, result)
+    # The mass-summary readings are exposed here too, before every early return
+    # below: a project whose design hull is not physical yet still gets the
+    # whole-battery source estimate and the declared-versus-selected armour totals
+    # it declared. Neither key is added while the section is absent.
+    if config.get("mass_summary") is not None:
+        if config.get("battery_layouts"):
+            result["battery_totals"] = _battery_totals_readings(
+                config, layout_readings, state, diagnostics)
+        result["armour_totals"] = _armour_totals_reading(
+            config, state, diagnostics, result.get("fixed_armour") or [], layout_readings)
+    # The whole-battery mount allocation reading is exposed on the same footing
+    # and before every early return below: it reads no hull fact, so a project
+    # whose hull is not physical yet still gets its proportional split and its
+    # independent selected mirror. Nothing is added while the section is absent.
+    if config.get("battery_mass_allocation") is not None:
+        result["battery_mass_allocation"] = _allocation_readings(
+            config, layout_readings, state, diagnostics)
+    if config.get("armour_defaults") is not None:
+        result["armour_defaults"] = armour_defaults_kernel.evaluate(config["armour_defaults"], {
+            "length_m": _declared_fact(_hull_number(project, "lwl_m"), "canonical $.hull.lwl_m"),
+            "beam_m": _declared_fact(_hull_number(project, "beam_m"), "canonical $.hull.beam_m"),
+            "draught_m": _declared_fact(_hull_number(project, "draught_normal_m"), "canonical $.hull.draught_normal_m"),
+            "block_coeff": _declared_fact(_hull_number(project, "block_coeff"), "canonical $.hull.block_coeff"),
+            "freeboard_m": _declared_fact(config.get("freeboard_m"), "declared concept freeboard", True),
+        })
+    if config.get("auxiliary_space") is not None:
+        result["auxiliary_space"] = auxiliary_space_kernel.evaluate(
+            config.get("auxiliary_weapons") or [], _auxiliary_space_context(project, config, diagnostics),
+            config["auxiliary_space"])
     try:
         hull = hull_proxy(project, config)
     except ValueError as error:
@@ -1387,6 +3080,8 @@ def evaluate(project, state, systems_summary):
         result["strength"] = strength
     result.update(_performance(config, hull, result["power"], borne, resolved, demand,
                                actual_structure, strength, diagnostics))
+    if config.get('armour_review') is not None:
+        result['armour_review'] = _armour_review_reading(project, config, result)
     if selected_total_t is not None and selected_total_t > config["target_displacement_t"]:
         result.setdefault("design_warnings", []).append(dict(
             code="design_balance.overweight",

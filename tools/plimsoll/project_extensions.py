@@ -66,6 +66,11 @@ def _value(value, kind, path, diagnostics, nullable=True):
         return False
     if kind == "text":
         valid = isinstance(value, str) and bool(value.strip())
+    elif kind == "text_or_null":
+        valid = value is None or (isinstance(value, str) and bool(value.strip()))
+    elif kind == "id_list":
+        valid = (isinstance(value, list)
+                 and all(isinstance(item, str) and item.strip() for item in value))
     elif kind == "boolean":
         valid = isinstance(value, bool)
     else:
@@ -589,13 +594,22 @@ def _flooding_scenarios(value, item_ids, diagnostics):
             _flooding_openings(row["openings"], p + ".openings", diagnostics)
 
 
-# Stored acceptance inputs may carry text (a formula, a source location) and an
-# explicit boolean alongside the numeric ones. Each type is checked, not assumed.
+# Stored acceptance inputs may carry text (a formula, a source location, an
+# explicit boolean, the whole-battery allocation metadata and a nullable source
+# text) alongside the numeric ones. Each type is checked, not assumed.
 ACCEPTANCE_TEXT_INPUTS = frozenset({
     "count_field", "count_basis", "kernel", "source_location", "formula",
     "method_version", "source_sha256", "gun_type", "mount_type", "kind", "origin",
+    # The whole-battery mount allocation metadata an accepted allocation records,
+    # so a stored receipt names the cohort it was adopted with.
+    "battery_id", "layout_id", "target_id", "allocation_group_id", "allocation_policy",
+    "source_method_version",
 })
 ACCEPTANCE_BOOL_INPUTS = frozenset({"shared_cradle"})
+# A declaration may carry a null source text, and the allocation cohort names its
+# targets as an array of ids.
+ACCEPTANCE_NULLABLE_TEXT_INPUTS = frozenset({"declared_source"})
+ACCEPTANCE_ID_LIST_INPUTS = frozenset({"allocation_target_ids"})
 
 
 def validate_acceptance(record, condition_id, field, nominal, path):
@@ -614,7 +628,7 @@ def validate_acceptance(record, condition_id, field, nominal, path):
         _value(record.get(key), "text", path + "." + key, diagnostics, False)
     if "method" in record and record["method"] not in (
             "volume_density_mass", "plate_area_thickness_density_mass", "counted_unit_mass",
-            "counted_ammunition_mass", "empirical_estimate_v1"):
+            "counted_ammunition_mass", "empirical_estimate_v1", "armour_panels_mass_v1"):
         _diag(diagnostics, path + ".method", "unsupported accepted model method")
     for key in ("project_fingerprint", "input_fingerprint", "request_fingerprint"):
         _sha256(record.get(key), path + "." + key, diagnostics)
@@ -627,18 +641,75 @@ def validate_acceptance(record, condition_id, field, nominal, path):
     inputs, provenance = record.get("inputs"), record.get("input_provenance")
     if _object(inputs, path + ".inputs", diagnostics) and _object(provenance, path + ".input_provenance", diagnostics):
         _keys(provenance, set(inputs), path + ".input_provenance", diagnostics)
-        for key, value in inputs.items():
-            if key in ACCEPTANCE_TEXT_INPUTS or key.endswith(("_origin", "_field", "_basis")):
-                kind = "text"
-            elif key in ACCEPTANCE_BOOL_INPUTS:
-                kind = "boolean"
-            else:
-                kind = "nonnegative"
-            _value(value, kind, path + ".inputs." + str(key), diagnostics, False)
-            meta, mp = provenance.get(key), path + ".input_provenance." + str(key)
-            if _object(meta, mp, diagnostics):
-                _metadata(meta, mp, diagnostics, required=True)
+        if record.get("method") == "armour_panels_mass_v1":
+            _validate_armour_panels_receipt(inputs, provenance, path, diagnostics)
+        else:
+            for key, value in inputs.items():
+                if key in ACCEPTANCE_TEXT_INPUTS or key.endswith(("_origin", "_field", "_basis")):
+                    kind = "text"
+                elif key in ACCEPTANCE_NULLABLE_TEXT_INPUTS:
+                    kind = "text_or_null"
+                elif key in ACCEPTANCE_ID_LIST_INPUTS:
+                    kind = "id_list"
+                elif key in ACCEPTANCE_BOOL_INPUTS:
+                    kind = "boolean"
+                else:
+                    kind = "nonnegative"
+                _value(value, kind, path + ".inputs." + str(key), diagnostics, False)
+                meta, mp = provenance.get(key), path + ".input_provenance." + str(key)
+                if _object(meta, mp, diagnostics):
+                    _metadata(meta, mp, diagnostics, required=True)
     return diagnostics
+
+
+ARMOUR_PANELS_INPUTS = ("method_version", "region_kind", "geometry_source", "region")
+
+
+def _validate_armour_panels_receipt(inputs, provenance, path, diagnostics):
+    """Validate the nested typed region of an ``armour_panels_mass_v1`` receipt.
+
+    The four pinned inputs are checked exactly: the three scalars as text (with
+    per-input metadata) and the nested region through the pure panel kernel, so a
+    receipt cannot smuggle an opaque precomputed mass or a malformed declaration.
+    """
+    _keys(inputs, set(ARMOUR_PANELS_INPUTS), path + ".inputs", diagnostics)
+    for key in ("method_version", "region_kind", "geometry_source"):
+        if key in inputs:
+            _value(inputs[key], "text", path + ".inputs." + key, diagnostics, False)
+    for key in inputs:
+        meta, mp = provenance.get(key), path + ".input_provenance." + str(key)
+        if _object(meta, mp, diagnostics):
+            _metadata(meta, mp, diagnostics, required=True)
+    region = inputs.get("region")
+    if not _object(region, path + ".inputs.region", diagnostics):
+        return
+    try:
+        from . import armour_geometry
+    except ImportError:                                   # pragma: no cover - direct import
+        import armour_geometry
+    if inputs.get("method_version") != armour_geometry.METHOD_VERSION:
+        _diag(diagnostics, path + ".inputs.method_version",
+              "must name %r" % (armour_geometry.METHOD_VERSION,))
+    kind = inputs.get("region_kind")
+    source = inputs.get("geometry_source")
+    fixed_id = region.get("fixed_armour_id")
+    if not isinstance(fixed_id, str) or not fixed_id:
+        _diag(diagnostics, path + ".inputs.region.fixed_armour_id",
+              "a normalized region must name its fixed armour id")
+        return
+    try:
+        normalized = armour_geometry.normalize(
+            {"source": source, "regions": [region]},
+            [{"id": fixed_id, "kind": kind}], path + ".inputs.region")
+        evaluated = armour_geometry.evaluate(normalized["regions"][0], kind, source=source,
+                                             path=path + ".inputs.region")
+    except armour_geometry.ArmourGeometryError as error:
+        for entry in error.diagnostics:
+            _diag(diagnostics, entry.get("path", path + ".inputs.region"), entry["message"])
+        return
+    if not evaluated["adoptable"]:
+        _diag(diagnostics, path + ".inputs.region",
+              "the declared region is not adoptable; an opaque or unsourced mass cannot be adopted")
 
 
 def _condition_definitions(project, item_ids, diagnostics):
@@ -667,6 +738,136 @@ def _condition_definitions(project, item_ids, diagnostics):
         if condition.get("overrides") or condition.get("override_provenance"):
             _diag(diagnostics, path, "a subtraction definition cannot also supply overrides or override provenance")
         _metadata(definition, path, diagnostics, required=True)
+
+
+SHIP_DESIGN_SCHEMA = "plimsoll-ship-design-1"
+
+
+def _merge_ship_design(entries, diagnostics):
+    """Fold the native kernel's own diagnostics in without duplicating any."""
+    if not isinstance(entries, list):
+        return
+    seen = {(row.get("path"), row.get("message")) for row in diagnostics}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        severity = entry.get("severity", "error")
+        blocking = entry.get("blocking", severity == "error")
+        field = entry.get("path") or entry.get("field")
+        if isinstance(field, str) and field.startswith("$"):
+            location = field
+        elif isinstance(field, str) and field.strip():
+            location = "$.ship_design." + field
+        else:
+            location = "$.ship_design"
+        message = str(entry.get("message", "invalid native ship design declaration"))
+        code = str(entry.get("code", "invalid"))
+        code = "extension." + code if code.startswith("ship_design.") else "extension.ship_design_" + code
+        if (location, message) in seen:
+            continue
+        seen.add((location, message))
+        _diag(diagnostics, location, message, code, not blocking)
+
+
+def _ship_design_fallback(project, design, diagnostics):
+    """The two structural facts this extension can state without the kernel."""
+    if design is None:
+        return
+    path = "$.ship_design"
+    if not isinstance(design, dict):
+        _diag(diagnostics, path, "must be an object or null")
+        return
+    if design.get("schema") != SHIP_DESIGN_SCHEMA:
+        _diag(diagnostics, path + ".schema",
+              f"native ship design schema must be {SHIP_DESIGN_SCHEMA!r}",
+              "extension.ship_design_schema")
+    if project.get("sps_3b3_design") is not None:
+        _diag(diagnostics, path,
+              "a project cannot carry both a native ship design and a legacy compatibility "
+              "declaration; the legacy section must be removed explicitly to upgrade",
+              "extension.ship_design_source_conflict")
+    _diag(diagnostics, path,
+          "the native ship design kernel is unavailable; the declaration is preserved but "
+          "not validated against the hull projection or the managed mass scope",
+          "extension.ship_design_kernel_unavailable", True)
+
+
+def _ship_design(project, diagnostics):
+    """Validate the native authoritative declaration, purely and without recursion.
+
+    The native kernel's ``validate`` receives the whole project and owns every
+    declaration-internal rule: the schema, the simultaneous legacy/native refusal,
+    the owner condition, the binding scope, the shared SI hull projection and the
+    aggregate ownership. This extension never normalizes the project again, which
+    would recurse straight back through project validation. An explicit null
+    declaration is a *missing* declaration with no active overlay, so it is
+    validated as a project that simply has none rather than as a malformed one;
+    only the kernel's own availability still has a structural fallback.
+    """
+    design = project.get("ship_design")
+    try:
+        from . import _analysis_request as request_api
+    except ImportError:                               # pragma: no cover - direct import
+        import _analysis_request as request_api
+    module = request_api.kernel_module("ship_design")
+    if module is None or not hasattr(module, "validate"):
+        _ship_design_fallback(project, design, diagnostics)
+        return
+    target = project
+    if design is None and "ship_design" in project:
+        target = {key: value for key, value in project.items() if key != "ship_design"}
+    try:
+        entries = module.validate(target)
+    except Exception as error:                        # pragma: no cover - defensive
+        _diag(diagnostics, "$.ship_design", f"native ship design validation failed: {error}",
+              "extension.ship_design_error")
+        return
+    _merge_ship_design(entries, diagnostics)
+
+
+def _sps_compat_design(project, diagnostics):
+    """Validate the optional SpringSharp 3b3 compatibility declaration.
+
+    The declaration is optional and independent of the physical ledger. Only
+    structural errors from the kernel become project errors; source warnings stay
+    warnings and an unfilled field is a legal editable ``null``. When the
+    compatibility kernel is not installed the section is preserved with a
+    non-blocking notice instead of being rejected outright.
+    """
+    design = project.get("sps_3b3_design")
+    if design is None:
+        return
+    path = "$.sps_3b3_design"
+    if not isinstance(design, dict):
+        _diag(diagnostics, path, "must be an object or null")
+        return
+    try:
+        from . import _analysis_request as request_api
+        module = request_api.kernel_module("sps_compat")
+    except ImportError:                               # pragma: no cover - direct import
+        module = None
+    if module is None:
+        _diag(diagnostics, path,
+              "the SpringSharp 3b3 compatibility kernel is unavailable; the declaration "
+              "is preserved but not validated",
+              "extension.sps_kernel_unavailable", True)
+        return
+    try:
+        normalized = module.normalize(design)
+    except Exception as error:                        # pragma: no cover - defensive
+        _diag(diagnostics, path, f"compatibility validation failed: {error}",
+              "extension.sps_design_error")
+        return
+    for entry in normalized.get("diagnostics", []):
+        if not isinstance(entry, dict):
+            continue
+        severity = entry.get("severity", "error")
+        blocking = entry.get("blocking", severity == "error")
+        field = entry.get("field") or entry.get("path")
+        location = path + field[1:] if isinstance(field, str) and field.startswith("$") else path
+        _diag(diagnostics, location,
+              str(entry.get("message", "invalid compatibility declaration")),
+              "extension.sps_" + str(entry.get("code", "invalid")), not blocking)
 
 
 def validate_extensions(project, item_ids):
@@ -706,6 +907,8 @@ def validate_extensions(project, item_ids):
             concept_design.validate_config(project, item_ids)
         except concept_design.ConceptDesignError as error:
             diagnostics.extend(copy.deepcopy(error.diagnostics))
+    _ship_design(project, diagnostics)
+    _sps_compat_design(project, diagnostics)
     if "display_preferences" in project:
         prefs = project["display_preferences"]
         if _object(prefs, "$.display_preferences", diagnostics):

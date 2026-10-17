@@ -8,10 +8,10 @@ import copy
 
 try:
     from . import _analysis_request as requests
-    from . import loading, project_io, systems
+    from . import battery_mass_allocation, loading, project_io, systems
 except ImportError:
     import _analysis_request as requests
-    import loading, project_io, systems
+    import battery_mass_allocation, loading, project_io, systems
 
 EMPIRICAL_METHODS = {"empirical_estimate_v1"}
 
@@ -105,6 +105,117 @@ def kernels_source(model):
     return None
 
 
+def _allocation_cohort(proposal):
+    """The whole-battery allocation cohort a proposal belongs to, or ``None``.
+
+    The identity is read from the **recomputed** model's own inputs, never from
+    anything the client supplied: a caller cannot widen, split or rename a cohort
+    by editing the metadata it sends back.
+    """
+    model = proposal.get("model")
+    inputs = model.get("inputs") if isinstance(model, dict) else None
+    if not isinstance(inputs, dict):
+        return None
+    if inputs.get("method_version") != battery_mass_allocation.METHOD_VERSION:
+        return None
+    if inputs.get("allocation_policy") != battery_mass_allocation.POLICY:
+        return None
+    group = inputs.get("allocation_group_id")
+    if not isinstance(group, str) or not group:
+        return None
+    return group
+
+
+def _allocation_models_by_group(summary):
+    """Every recomputed allocation model, grouped by its cohort id.
+
+    The complete cohort is read from this snapshot's ``mass_models`` -- not from
+    ``update_proposals`` -- because an already-exact member produces no pending
+    proposal yet still belongs to the cohort and its target must not be rewritten
+    away from the recomputed allocation.
+    """
+    by_group = {}
+    for row in summary.get("systems", {}).values():
+        for model in row.get("mass_models", []):
+            inputs = model.get("inputs") if isinstance(model, dict) else None
+            if not isinstance(inputs, dict):
+                continue
+            if inputs.get("method_version") != battery_mass_allocation.METHOD_VERSION:
+                continue
+            if inputs.get("allocation_policy") != battery_mass_allocation.POLICY:
+                continue
+            group = inputs.get("allocation_group_id")
+            if not isinstance(group, str) or not group:
+                continue
+            by_group.setdefault(group, []).append(model)
+    return by_group
+
+
+def _reject_conflicting_cohort_alternatives(group, cohort_models, matched):
+    """Refuse a cohort target rewritten through another model in the same batch.
+
+    An already-exact member of a selected cohort carries no pending proposal, so a
+    pending-only check would let a caller submit an *alternative* proposal (an
+    ordinary physical model on the same target) alongside the still-pending
+    members and change the exact member away from the recomputed allocation --
+    which breaks the whole-battery conservation the cohort exists to preserve.
+    The complete recomputed cohort, its target set and its allocated masses are
+    read from the snapshot; an alternative for a cohort target is refused unless
+    it already names the recomputed allocation value.
+    """
+    if not cohort_models:
+        return
+    expected = {}
+    for model in cohort_models:
+        target = model.get("linked_weight_item_id")
+        if isinstance(target, str):
+            expected.setdefault(target, model.get("calculated_mass_t"))
+    for proposal in matched:
+        item_id = proposal.get("item_id")
+        if item_id not in expected or _allocation_cohort(proposal) == group:
+            continue
+        want = expected[item_id]
+        if want is None or proposal.get("proposed_mass_t") != want:
+            requests.reject(
+                "target %r belongs to allocation group %r, whose recomputed allocation is %r; "
+                "a batch that adopts this cohort may not rewrite the target to %r through "
+                "another model" % (item_id, group, want, proposal.get("proposed_mass_t")),
+                "$.proposals", "analysis.proposal_cohort_conflict")
+
+
+def _require_complete_allocation_cohorts(summary, matched):
+    """A submitted allocation member requires every still-pending member.
+
+    The cohort is recomputed here from the immutable snapshot. A batch that
+    carries one member of a still-pending allocation group is refused **before
+    any write**, so a proportional split can never be half-adopted and leave the
+    ledger summing to something the recovered source never said. A batch that
+    selects a cohort may also never rewrite one of its targets through another
+    model, even an already-exact target that has no pending proposal of its own.
+    """
+    submitted_groups = {}
+    for proposal in matched:
+        group = _allocation_cohort(proposal)
+        if group is not None:
+            submitted_groups.setdefault(group, set()).add(proposal["item_id"])
+    if not submitted_groups:
+        return
+    pending_groups = {}
+    for proposal in summary.get("update_proposals", []):
+        group = _allocation_cohort(proposal)
+        if group is not None:
+            pending_groups.setdefault(group, set()).add(proposal["item_id"])
+    complete = _allocation_models_by_group(summary)
+    for group, items in sorted(submitted_groups.items()):
+        missing = sorted(pending_groups.get(group, set()) - items)
+        if missing:
+            requests.reject(
+                "allocation group %r must be adopted as one cohort; the still-pending members "
+                "%r are missing from this batch" % (group, missing),
+                "$.proposals", "analysis.proposal_cohort_incomplete")
+        _reject_conflicting_cohort_alternatives(group, complete.get(group, []), matched)
+
+
 def apply_many(project, condition_id, proposals, *, current_request, target="selected_condition"):
     """Apply a reviewed batch of mass proposals to one selected condition."""
     if target != "selected_condition":
@@ -163,6 +274,10 @@ def apply_many(project, condition_id, proposals, *, current_request, target="sel
     verified = []
     changes = []
     updates = {}
+    # Match every submitted proposal against the recomputed snapshot first, then
+    # require the whole pending allocation cohort, and only then write. Nothing is
+    # mutated before the cohort is complete.
+    matched = []
     for index, entry in enumerate(submitted):
         matches = [p for p in actual["update_proposals"] if p["item_id"] == entry.get("item_id")
                    and p["source_system_id"] == entry.get("source_system_id")
@@ -170,7 +285,10 @@ def apply_many(project, condition_id, proposals, *, current_request, target="sel
         if len(matches) != 1 or entry != matches[0]:
             requests.reject("submitted proposal differs from the recomputed model and provenance",
                             "$.proposals[%d]" % index, "analysis.proposal_forged")
-        candidate = matches[0]
+        matched.append(matches[0])
+    _require_complete_allocation_cohorts(actual, matched)
+    for index, entry in enumerate(submitted):
+        candidate = matched[index]
         ambiguity = _ambiguity(actual, candidate)
         if ambiguity is not None:
             requests.reject("proposal %d is not uniquely owned: %s" % (index, ambiguity["message"]),

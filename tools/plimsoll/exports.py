@@ -207,10 +207,93 @@ def serialize_document(document: dict, format: str = "json") -> str:
     return _csv_text(checked)
 
 
+def _sps_kernel(name: str):
+    """Import one sibling SpringSharp 3b3 kernel, or ``None`` when absent.
+
+    The compatibility kernels are authored as bare siblings of this module; the
+    shared loader owns how that directory becomes importable.
+    """
+    try:
+        from . import _analysis_request
+    except ImportError:                                   # direct-module entrypoints
+        import _analysis_request
+    return _analysis_request.kernel_module(name)
+
+
+def _sps_saved_result(result: dict) -> dict:
+    """The immutable compatibility stage of one saved analysis result.
+
+    Every new export reads this and only this: the stored run's own
+    ``stages.sps_compat.data``. The current draft and the current project are
+    never consulted, so an edit cannot relabel an old report as current.
+    """
+    if not isinstance(result, dict) or result.get("schema") != "plimsoll-analysis-1":
+        raise ValueError("result must be a plimsoll-analysis-1 object")
+    stages = result.get("stages")
+    stage = stages.get("sps_compat") if isinstance(stages, dict) else None
+    data = stage.get("data") if isinstance(stage, dict) else None
+    if not isinstance(data, dict):
+        raise ValueError("run has no saved SpringSharp 3b3 compatibility result")
+    return data
+
+
+def _ship_design_saved_result(result: dict) -> dict | None:
+    """The immutable native ship design stage of one saved result, or ``None``.
+
+    A native run owns both its frozen report and its source declaration. Every
+    export reads this and only this: the current draft and the current project are
+    never consulted, so an edit cannot relabel an old report as current. A
+    ``partial`` stage is still usable: the spec keeps the basic report available
+    while the ledger is pending binding, so a stage that produced its own frozen
+    report or source declaration is accepted. Only a stage that never produced a
+    usable payload — failed, canceled, not requested or otherwise unavailable — is
+    refused, and a non-native run returns ``None`` so the caller can fall back to
+    the legacy compatibility stage.
+    """
+    if not isinstance(result, dict) or result.get("schema") != "plimsoll-analysis-1":
+        raise ValueError("result must be a plimsoll-analysis-1 object")
+    stages = result.get("stages")
+    stage = stages.get("ship_design") if isinstance(stages, dict) else None
+    if not isinstance(stage, dict) or stage.get("status") not in ("completed", "partial"):
+        return None
+    data = stage.get("data")
+    return data if isinstance(data, dict) else None
+
+
 def serialize_report(result: dict, format: str = "json") -> str:
-    """Serialize one already-computed ``plimsoll-analysis-1`` result."""
-    checked = _validate_result(result)
-    return serialize_document(checked, format=format)
+    """Serialize one already-computed ``plimsoll-analysis-1`` result.
+
+    ``json`` and ``csv`` describe the whole result exactly as before. ``txt``,
+    ``rtf``, ``ssr`` and ``sship`` prefer the stored native ``ship_design`` stage
+    and fall back to the stored ``sps_compat`` stage for old runs: both read only
+    the saved stage, never a recomputed or current draft.
+    """
+    if format in ("json", "csv"):
+        checked = _validate_result(result)
+        return serialize_document(checked, format=format)
+    if format in ("txt", "rtf", "ssr"):
+        module = _sps_kernel("sps_report")
+        if module is None or not hasattr(module, "serialize"):
+            raise ValueError("the SpringSharp 3b3 report serializer is not available")
+        native = _ship_design_saved_result(result)
+        if native is not None and isinstance(native.get("report"), dict):
+            return module.serialize(native["report"], format=format)
+        data = _sps_saved_result(result)
+        return module.serialize(data.get('report') or data, format=format)
+    if format == "sship":
+        native = _ship_design_saved_result(result)
+        if native is not None and isinstance(native.get("source_design"), dict):
+            design = native["source_design"]
+        else:
+            design = _sps_saved_result(result).get("design")
+        if not isinstance(design, dict):
+            raise ValueError("run has no saved SpringSharp 3b3 design declaration")
+        module = _sps_kernel("sps_file_io")
+        if module is None or not hasattr(module, "dumps"):
+            raise ValueError("the SpringSharp 3b3 file serializer is not available")
+        document = module.dumps(design)
+        return document.decode("utf-8") if isinstance(document, (bytes, bytearray)) else str(document)
+    raise ValueError(f"unsupported report format: {format!r}")
 
 
 def _write_text(text: str, path: str | Path) -> None:

@@ -1,0 +1,72 @@
+{
+  "schema": "plimsoll-mass-loop-coverage-increment-1",
+  "state": "accepted_bounded_increment",
+  "frozen_inventory_modified": false,
+  "equivalent_percentage": null,
+  "targets": [
+    {
+      "baseline_id": "guns.weights.mounts",
+      "family": "battery_mass_allocation",
+      "relation": "product_allocation_policy_and_explicit_adoption",
+      "method": "plimsoll-battery-mount-allocation-v1",
+      "source_method": "sps-3b3-battery-totals-v1",
+      "limit": "Proportional row-mount policy, not recovered original allocation; complete total also needs explicit existing gun/layout-armour proposals, no ammunition."
+    },
+    {
+      "baseline_id": "guns.weights.total",
+      "family": "battery_mass_allocation",
+      "relation": "product_allocation_policy_and_explicit_adoption",
+      "method": "plimsoll-battery-mount-allocation-v1",
+      "source_method": "sps-3b3-battery-totals-v1",
+      "limit": "Proportional row-mount policy, not recovered original allocation; complete total also needs explicit existing gun/layout-armour proposals, no ammunition."
+    },
+    {
+      "baseline_id": "guns.weights.guns",
+      "family": "whole_battery_adoption",
+      "relation": "existing_formula_exact_alignment_within_explicit_selected_scope",
+      "limit": "Existing formula unchanged; zero comparison tolerance only within opted whole-battery layouts, not higher physical precision."
+    },
+    {
+      "baseline_id": "guns.weights.armour",
+      "family": "whole_battery_adoption",
+      "relation": "existing_formula_exact_alignment_within_explicit_selected_scope",
+      "limit": "Existing formula unchanged; zero comparison tolerance only within opted whole-battery layouts, not higher physical precision."
+    },
+    {
+      "baseline_id": "armour.belts.main.weight",
+      "family": "armour_geometry",
+      "relation": "new_physical_method_explicit_alternative",
+      "method": "plimsoll-armour-panels-v1",
+      "limit": "Declared rectangular plates, segmented/layered, projected/developed width and sourced density. Replaces one existing target; not SPS numerical parity, curved geometry, CG or protection."
+    },
+    {
+      "baseline_id": "armour.belts.ends.weight",
+      "family": "armour_geometry",
+      "relation": "new_physical_method_explicit_alternative",
+      "method": "plimsoll-armour-panels-v1",
+      "limit": "Declared rectangular plates, segmented/layered, projected/developed width and sourced density. Replaces one existing target; not SPS numerical parity, curved geometry, CG or protection."
+    },
+    {
+      "baseline_id": "armour.belts.upper.weight",
+      "family": "armour_geometry",
+      "relation": "new_physical_method_explicit_alternative",
+      "method": "plimsoll-armour-panels-v1",
+      "limit": "Declared rectangular plates, segmented/layered, projected/developed width and sourced density. Replaces one existing target; not SPS numerical parity, curved geometry, CG or protection."
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.weight",
+      "family": "armour_geometry",
+      "relation": "new_physical_method_explicit_alternative",
+      "method": "plimsoll-armour-panels-v1",
+      "limit": "Declared rectangular plates, segmented/layered, projected/developed width and sourced density. Replaces one existing target; not SPS numerical parity, curved geometry, CG or protection."
+    },
+    {
+      "baseline_id": "armour.deck.total",
+      "family": "armour_geometry",
+      "relation": "new_physical_method_explicit_alternative",
+      "method": "plimsoll-armour-panels-v1",
+      "limit": "Declared rectangular plates, segmented/layered, projected/developed width and sourced density. Replaces one existing target; not SPS numerical parity, curved geometry, CG or protection."
+    }
+  ],
+  "acceptance": "delivery-mass-loop-2026-10-16.json"
+}

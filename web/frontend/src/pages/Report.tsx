@@ -165,7 +165,7 @@ function ReportBody({ result, runId, revision, compareResult, compareError, run,
     <div className="report-actions no-print">
       {onBack && <button className="text-button" data-audio="manual" onClick={onBack}>{w('report.back')}</button>}
       <div className="report-action-group">
-        {runId && <><a className="button button--secondary" href={api.exportUrl(runId, 'json')} download>{w('report.exportJson')}</a><a className="button button--secondary" href={api.exportUrl(runId, 'csv')} download>{w('report.exportCsv')}</a></>}
+        {runId && <><a className="button button--secondary" href={api.exportUrl(runId, 'json')} download={`plimsoll-${runId}.json`}>{w('report.exportJson')}</a><a className="button button--secondary" href={api.exportUrl(runId, 'csv')} download={`plimsoll-${runId}.csv`}>{w('report.exportCsv')}</a></>}
         <button className="button button--secondary" onClick={() => window.print()}>{w('report.print')}</button>
       </div>
     </div>

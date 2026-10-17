@@ -90,6 +90,16 @@ LIMITATIONS = (
     "a concept estimate; nothing is clamped, relabelled or reinterpreted.",
     "Positions 247..279 are writer padding: they are archived verbatim and are never "
     "read as parameters.",
+    "Each declared fixed armour region becomes its own independent unknown-mass target "
+    "and its own concept declaration. No armour mass is computed, adopted or deducted "
+    "by the import, and a region the source leaves entirely blank gets no target: an "
+    "empty saved region is not a declared zero armour. A saved value outside the "
+    "declaration's domain is archived with a diagnostic and its canonical field stays "
+    "unknown. The saved deck coverage selection is mapped as an index into the "
+    "recovered seven-entry table only, never as a covered plan area.",
+    "The empirical cost reading is never enabled by an import. It stays absent until a "
+    "user switches it on deliberately, and no cost section, balance role or balance "
+    "assumption is fabricated here.",
     "This is a bounded format migration, not whole-program parity: no claim of complete "
     "SpringSharp 3.0 behaviour, historical validation or research equivalence is made.",
 )

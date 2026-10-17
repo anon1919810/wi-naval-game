@@ -17,6 +17,27 @@ from .projects import RevisionConflict, owned_project
 
 ACTIVE = ("queued", "running")
 ANALYSIS_SCHEMA = "plimsoll-analysis-request-1"
+#: Every format the saved-run export route accepts. ``json``/``csv`` describe the
+#: whole immutable result exactly as before; ``txt``/``rtf``/``ssr``/``sship`` are
+#: the SpringSharp 3b3 compatibility exports and read only the stored
+#: ``sps_compat`` stage.
+EXPORT_FORMATS = ("json", "csv", "txt", "rtf", "ssr", "sship")
+_EXPORT_MEDIA = {
+    "json": "application/json",
+    "csv": "text/csv; charset=utf-8",
+    "txt": "text/plain; charset=utf-8",
+    "rtf": "application/rtf",
+    "ssr": "application/rtf",
+    "sship": "text/plain; charset=utf-8",
+}
+
+
+def export_media_type(format: str) -> str:
+    return _EXPORT_MEDIA.get(format, "text/plain; charset=utf-8")
+
+
+def export_filename(run_id: uuid.UUID, format: str) -> str:
+    return f"plimsoll-{run_id}.{format}"
 
 
 def expire_lost_runs(db: Session, owner_id: uuid.UUID | None = None) -> int:
@@ -136,8 +157,15 @@ def cancel_run(owner_id: uuid.UUID, run_id: uuid.UUID, db: Session) -> dict:
 
 def export_run(owner_id: uuid.UUID, run_id: uuid.UUID, format: str, db: Session) -> str:
     row = owned_run(db, owner_id, run_id)
-    if format not in {"json", "csv"}:
-        raise HTTPException(status_code=422, detail="format must be json or csv")
+    if format not in EXPORT_FORMATS:
+        raise HTTPException(status_code=422, detail="format must be one of " + ", ".join(EXPORT_FORMATS))
     if row.result is None:
         raise HTTPException(status_code=409, detail="run has no analysis result")
-    return exports.serialize_report(row.result, format=format)
+    try:
+        return exports.serialize_report(row.result, format=format)
+    except ValueError as error:
+        # A format the stored run cannot serve is a conflict with the resource,
+        # not a server fault: an SPS export of a run that never ran the
+        # compatibility stage is refused rather than recomputed.
+        raise HTTPException(status_code=409, detail={
+            "code": "run.export_unavailable", "message": str(error)}) from error

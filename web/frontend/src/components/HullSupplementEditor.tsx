@@ -5,6 +5,8 @@ import { DeclaredFact, Metric, ResultSection } from './FormResults';
 import { inputNumber, number, object, stageData } from './formModel';
 import { CHOICES, DIMENSION_KEYS } from './units';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
+import { useShipDesignCopy } from '../i18n/shipDesign';
+import { shipDesignOf } from './sps3b3Model';
 
 // `display_preferences` is a reading preference recorded in the project. It
 // converts presentation only: every declared input, the ledger, every stage
@@ -25,6 +27,8 @@ const IDENTITY_FIELDS = [
 
 export function HullSupplementEditor({ project, run, onChange }: { project: ProjectDocument; run: RunView | null; onChange: (project: ProjectDocument) => void }) {
   const w = useWorkspaceCopy();
+  const d = useShipDesignCopy();
+  const native = shipDesignOf(project) !== null;
   const metadata = object(project.metadata); const hull = project.hull; const facts = object(hull.design_facts);
   const preferences = object(project.display_preferences);
   const data = stageData(run, 'l0'); const hydro = stageData(run, 'hydrostatics');
@@ -34,11 +38,11 @@ export function HullSupplementEditor({ project, run, onChange }: { project: Proj
     if (value === 'project_default') delete next[key]; else next[key] = value;
     onChange({ ...project, display_preferences: next });
   }
-  return <div className="form-stack"><div className="form-card"><h3>{w('hull.identity.title')}</h3>
-    <label className="field-label">{w('hull.identity.name')}<input aria-label={w('hull.identity.nameAria')} value={project.name} onChange={e => onChange({ ...project, name: e.target.value })} /></label>
-    {IDENTITY_FIELDS.map(([key, labelKey, kind]) =>
+  return <div className="form-stack"><div className="form-card"><h3>{native ? d('shipDesign.projectName') : w('hull.identity.title')}</h3>
+    <label className="field-label">{native ? d('shipDesign.projectName') : w('hull.identity.name')}<input aria-label={native ? d('shipDesign.projectName') : w('hull.identity.nameAria')} value={project.name} onChange={e => onChange({ ...project, name: e.target.value })} /></label>
+    {!native && IDENTITY_FIELDS.map(([key, labelKey, kind]) =>
       <FactInput key={key} label={w(labelKey)} kind={kind} value={metadata[key]} onChange={value => onChange({ ...project, metadata: { ...metadata, [key]: value } })} />)}
-  </div><div className="form-card"><h3>{w('hull.design.title')}</h3><p>{w('hull.design.note')}</p>
+  </div>{!native && <div className="form-card"><h3>{w('hull.design.title')}</h3><p>{w('hull.design.note')}</p>
     <QuantityField label={w('hull.design.maxDraught')} ariaLabel={w('hull.design.maxDraughtAria')} value={number(hull.draught_deep_m)} dimension="length" kind="nonnegative"
       onChange={value => onChange({ ...project, hull: { ...hull, draught_deep_m: value } })} />
     {([['block_coeff_deep', 'hull.design.blockCoeffDeep', undefined], ['reference_displacement_normal_t', 'hull.design.displacementNormal', 'mass'],
@@ -46,7 +50,7 @@ export function HullSupplementEditor({ project, run, onChange }: { project: Proj
       <FactInput key={key} label={w(labelKey)} value={facts[key]} dimension={dimension}
         onChange={value => onChange({ ...project, hull: { ...hull, design_facts: { ...facts, [key]: value } } })} />)}
     <p className="form-hint">{w('hull.design.hint')}</p>
-  </div><div className="form-card"><h3>{w('hull.display.title')}</h3>
+  </div>}<div className="form-card"><h3>{w('hull.display.title')}</h3>
     <p>{w('hull.display.noteLead')}<strong>{w('hull.display.noteStrong')}</strong>{w('hull.display.noteTail')}</p>
     <details className="form-help"><summary>{w('hull.display.helpTitle')}</summary><p>{w('hull.display.helpNote')}</p></details>
     <div className="form-grid">{DIMENSION_KEYS.map(key => <label className="field-label" key={key}>{w('hull.display.unit', { dimension: w(PREFERENCE_LABELS[key]) })}

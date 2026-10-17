@@ -402,6 +402,11 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
     item_paths = {}
     group_rows = []
     required_group_empty = False
+    native = normalized.get("ship_design")
+    estimated_ids = {identifier for binding in native.get("mass_bindings", {}).values()
+        if isinstance(binding, dict) and binding.get("mode") == "estimated"
+        for identifier in binding.get("item_ids", [])
+    } if isinstance(native, dict) else set()
     for group_index, group in enumerate(normalized["weight_groups"]):
         group_items = []
         if group["required"] and not group["items"]:
@@ -447,14 +452,31 @@ def resolve_loading(project: dict, condition_id: str) -> dict:
                 if _source_unknown(metadata["source"]) or metadata["estimate"] is None:
                     diagnostics.append(_diagnostic("loading.override_provenance_unknown", "warning",
                         f"{override_path}.{field}", "override has unknown field provenance; base source is not inherited"))
+            # Native estimates replace mass only in their explicit design case.
+            # In particular a derived case must not inherit this overlay through
+            # its base: its pre-existing subtraction/override semantics survive.
+            design_mass = item.get("design_mass")
+            scoped = False
+            if isinstance(native, dict) and isinstance(design_mass, dict):
+                scoped = (native.get("condition_id") == condition_id
+                    and design_mass.get("condition_id") == condition_id
+                    and design_mass.get("owner") == "ship_design"
+                    and item["id"] in estimated_ids)
+            if scoped:
+                item["mass_t"] = design_mass["mass_t"]
+                if isinstance(item.get("uncertainty"), dict):
+                    item["uncertainty"].pop("mass_t", None)
+                field_provenance["mass_t"] = {
+                    "source": copy.deepcopy(design_mass.get("source")),
+                    "estimate": True, "origin": "ship_design"}
             estimates = [entry["estimate"] for entry in field_provenance.values()]
             item["estimate"] = True if True in estimates else None if None in estimates else False
-            if override:
+            if override or scoped:
                 item["source"] = {"fields": {field: copy.deepcopy(entry["source"])
                                              for field, entry in field_provenance.items()}}
             item["group_id"] = group["id"]
             item["group_label"] = group["label"]
-            item["overridden_fields"] = sorted(override)
+            item["overridden_fields"] = sorted(set(override) | ({"mass_t"} if scoped else set()))
             item["provenance"] = {
                 "source": copy.deepcopy(item["source"]),
                 "estimate": item["estimate"],

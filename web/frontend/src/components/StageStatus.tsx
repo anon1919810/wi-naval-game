@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { StageEnvelope, StageStatus as StageStatusCode } from '../types';
 import { DiagnosticAction, type GuidanceContext } from './DiagnosticAction';
+import { ConceptComponentReadings } from './ConceptComponentReadings';
+import { Sps3b3Readings } from './Sps3b3Readings';
 import { FloodingResults } from './FloodingResults';
 import { StabilityPlot } from './StabilityPlot';
 import { useUnits } from './UnitProvider';
@@ -18,11 +20,12 @@ import { useLanguage } from '../portfolio/LanguageProvider';
  */
 export const STAGE_ORDER = [
   'loading', 'systems', 'l0', 'geometry', 'equilibrium', 'hydrostatics', 'gz', 'deck',
-  'hydrostatic_curve', 'bonjean', 'resistance', 'propulsion', 'endurance', 'historical', 'flooding', 'design_balance',
+  'hydrostatic_curve', 'bonjean', 'resistance', 'propulsion', 'endurance', 'historical', 'flooding', 'design_balance', 'ship_design', 'sps_compat',
 ];
 
 /** A stage name in one language. An unknown key keeps its own name. */
 export function stageLabel(w: (key: WorkspaceKey) => string, name: string): string {
+  if (name==='sps_compat') return 'SpringSharp 3b3';
   return w(`stage.${name}` as WorkspaceKey);
 }
 
@@ -275,6 +278,20 @@ export function StageStatus({ name, stage, guidance }: {
         curve worth drawing. */}
     {name === 'gz' && delivered && <StabilityPlot stage={stage} />}
     {name === 'flooding' && stage.requested && stage.data && typeof record(stage.data).status === 'string' && <FloodingResults data={record(stage.data)} />}
+    {/* The concept screen's own optional component readings — fixed armour
+        regions, two-group layouts and the empirical cost — are nested results
+        that would otherwise exist only in the raw payload. They use the same
+        projection as the workbench, under this card's own gate: only a requested
+        envelope that completed may show them, so a failed or canceled parent
+        stage keeps its diagnostics and evidence instead of residual numbers. */}
+    {name === 'design_balance' && <ConceptComponentReadings data={stage.data} envelope={stage} policy="report" />}
+    {name === 'sps_compat' && stage.requested && delivered && <Sps3b3Readings data={stage.data} runId={guidance?.runId} />}
+    {/* A native ship-design run may legitimately finish partial while the ledger
+        still reports roles that need binding. The source report and its downloads
+        are immutable and complete in either case, so they are shown for a partial
+        envelope too — the binding work is a ledger note, never a missing report.
+        The ledger state is still shown as partial. */}
+    {name === 'ship_design' && stage.requested && (delivered || stage.status === 'partial') && <Sps3b3Readings data={stage.data} runId={guidance?.runId} variant="native" />}
     {detailCount > 0 && <details className="stage-diagnostics"><summary>{w('stage.diagnostics.summary', { count: detailCount })}</summary><div>{ordinary.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}</div>
       {repeats.map((item, index) => <DiagnosticLine key={`repeat-${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} repeat />)}</details>}
     {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">{w('stage.card.method', { value: Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(w, value, locale)}`).join(' / ') })}</p>}

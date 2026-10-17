@@ -1,0 +1,3042 @@
+{
+  "schema": "sps-additional-original-readings-1",
+  "relative_tolerance": 1e-05,
+  "source_binary_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+  "raw_vectors_sha256": {
+    "original-auxiliary-weapons-vectors.json": "6cefede227f70ab62777cb9ebc99bd6df3c49775db6e695402f94d995e9f7ffd",
+    "original-armour-review-vectors.json": "6fc7c070c20402ba92e4c36fc1fc346f9581604a2bd5ea35f6e0608818005847"
+  },
+  "auxiliary": [
+    {
+      "id": "A_torp_loc0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 0.922999,
+        "total_long_tons": 4.614995
+      }
+    },
+    {
+      "id": "A_torp_loc1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 1,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 3.691996,
+        "total_long_tons": 7.383992
+      }
+    },
+    {
+      "id": "A_torp_loc2",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 2,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 3.691996,
+        "total_long_tons": 7.383992
+      }
+    },
+    {
+      "id": "A_torp_loc3",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 3,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 0.922999,
+        "total_long_tons": 4.614995
+      }
+    },
+    {
+      "id": "A_torp_loc4",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 4,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 3.691996,
+        "total_long_tons": 7.383992
+      }
+    },
+    {
+      "id": "A_torp_loc5",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 5,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 3.691996,
+        "total_long_tons": 7.383992
+      }
+    },
+    {
+      "id": "A_torp_loc6",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 6,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 3.691996,
+        "total_long_tons": 7.383992
+      }
+    },
+    {
+      "id": "A_torp_loc7",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 7,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 3.691996,
+        "total_long_tons": 7.383992
+      }
+    },
+    {
+      "id": "A_torp_loc8",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 8,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 0.922999,
+        "total_long_tons": 4.614995
+      }
+    },
+    {
+      "id": "B_torp_loc0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "B_torp_loc1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 1,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "B_torp_loc2",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 2,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "B_torp_loc3",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 3,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "B_torp_loc4",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 4,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "B_torp_loc5",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 5,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "B_torp_loc6",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 6,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "B_torp_loc7",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 7,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "B_torp_loc8",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 8,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "C_torp_year1890",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1890
+      },
+      "outputs": {
+        "weapon_long_tons": 2.12704515,
+        "mount_long_tons": 0.5317613,
+        "total_long_tons": 2.65880632
+      }
+    },
+    {
+      "id": "C_torp_year1906",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1906
+      },
+      "outputs": {
+        "weapon_long_tons": 3.691996,
+        "mount_long_tons": 0.922999,
+        "total_long_tons": 4.614995
+      }
+    },
+    {
+      "id": "C_torp_year1907",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1907
+      },
+      "outputs": {
+        "weapon_long_tons": 3.84543586,
+        "mount_long_tons": 0.961358964,
+        "total_long_tons": 4.80679464
+      }
+    },
+    {
+      "id": "C_torp_year1912",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "C_torp_year1945",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1945
+      },
+      "outputs": {
+        "weapon_long_tons": 4.453436,
+        "mount_long_tons": 1.113359,
+        "total_long_tons": 5.566795
+      }
+    },
+    {
+      "id": "D_torp_count0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 0,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "D_torp_count1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 1,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.981358945,
+        "mount_long_tons": 0.245339736,
+        "total_long_tons": 1.22669864
+      }
+    },
+    {
+      "id": "D_torp_count4",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "D_torp_count12",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 12,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 11.7763071,
+        "mount_long_tons": 2.94407678,
+        "total_long_tons": 14.7203836
+      }
+    },
+    {
+      "id": "I_torp_zero_size",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 0.0,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "I_torp_zero_length",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 0.0
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 4,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "E_torp_loc0_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 12,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 1,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 1,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 4,
+        "location_index": 1,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc1_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 12,
+        "location_index": 1,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 2,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 1,
+        "location_index": 2,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 4,
+        "location_index": 2,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "E_torp_loc2_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 12,
+        "location_index": 2,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 3.92543578,
+        "total_long_tons": 7.85087156
+      }
+    },
+    {
+      "id": "F_mine_loc0",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 0,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 4.464286
+      }
+    },
+    {
+      "id": "F_mine_loc1",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "F_mine_loc2",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 2,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "F_mine_loc3",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 3,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "H1_mine_count0_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 0,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "H1_mine_count0_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 0,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.223214284,
+        "mount_long_tons": 0.223214284,
+        "total_long_tons": 0.446428567
+      }
+    },
+    {
+      "id": "H1_mine_count0_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 0,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.892857134,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 1.78571427
+      }
+    },
+    {
+      "id": "H1_mine_count0_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 0,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 2.67857146,
+        "mount_long_tons": 2.67857146,
+        "total_long_tons": 5.357143
+      }
+    },
+    {
+      "id": "H1_mine_count1_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 1,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.223214284,
+        "mount_long_tons": 0.223214284,
+        "total_long_tons": 0.446428567
+      }
+    },
+    {
+      "id": "H1_mine_count1_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 1,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.446428567,
+        "mount_long_tons": 0.446428567,
+        "total_long_tons": 0.892857134
+      }
+    },
+    {
+      "id": "H1_mine_count1_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 1,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.11607146,
+        "mount_long_tons": 1.11607146,
+        "total_long_tons": 2.232143
+      }
+    },
+    {
+      "id": "H1_mine_count1_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 1,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 2.90178561,
+        "mount_long_tons": 2.90178561,
+        "total_long_tons": 5.803571
+      }
+    },
+    {
+      "id": "H1_mine_count4_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 4,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.892857134,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 1.78571427
+      }
+    },
+    {
+      "id": "H1_mine_count4_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 4,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.11607146,
+        "mount_long_tons": 1.11607146,
+        "total_long_tons": 2.232143
+      }
+    },
+    {
+      "id": "H1_mine_count4_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 4,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 1.78571427,
+        "total_long_tons": 3.57142854
+      }
+    },
+    {
+      "id": "H1_mine_count4_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 4,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "H1_mine_count12_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 2.67857146,
+        "mount_long_tons": 2.67857146,
+        "total_long_tons": 5.357143
+      }
+    },
+    {
+      "id": "H1_mine_count12_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 2.90178561,
+        "mount_long_tons": 2.90178561,
+        "total_long_tons": 5.803571
+      }
+    },
+    {
+      "id": "H1_mine_count12_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "H1_mine_count12_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 5.357143,
+        "mount_long_tons": 5.357143,
+        "total_long_tons": 10.7142859
+      }
+    },
+    {
+      "id": "I_mine_zero_size",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 0.0
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "I_mine_zero_total",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 0,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "G_dc1_loc0",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 0,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.446428567,
+        "total_long_tons": 2.232143
+      }
+    },
+    {
+      "id": "G_dc1_loc1",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "G_dc1_loc2",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 2,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "G_dc1_loc3",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 3,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 17.8571434,
+        "total_long_tons": 19.6428585
+      }
+    },
+    {
+      "id": "H2_dc1_count0_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 0,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "H2_dc1_count0_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 0,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.111607142,
+        "mount_long_tons": 0.05580357,
+        "total_long_tons": 0.167410716
+      }
+    },
+    {
+      "id": "H2_dc1_count0_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 0,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.446428567,
+        "mount_long_tons": 0.223214284,
+        "total_long_tons": 0.669642866
+      }
+    },
+    {
+      "id": "H2_dc1_count0_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 0,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.33928573,
+        "mount_long_tons": 0.669642866,
+        "total_long_tons": 2.00892854
+      }
+    },
+    {
+      "id": "H2_dc1_count1_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 1,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.111607142,
+        "mount_long_tons": 0.05580357,
+        "total_long_tons": 0.167410716
+      }
+    },
+    {
+      "id": "H2_dc1_count1_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 1,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.223214284,
+        "mount_long_tons": 0.111607142,
+        "total_long_tons": 0.334821433
+      }
+    },
+    {
+      "id": "H2_dc1_count1_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 1,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.558035731,
+        "mount_long_tons": 0.279017866,
+        "total_long_tons": 0.8370536
+      }
+    },
+    {
+      "id": "H2_dc1_count1_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 1,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.45089281,
+        "mount_long_tons": 0.7254464,
+        "total_long_tons": 2.17633915
+      }
+    },
+    {
+      "id": "H2_dc1_count4_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 4,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.446428567,
+        "mount_long_tons": 0.223214284,
+        "total_long_tons": 0.669642866
+      }
+    },
+    {
+      "id": "H2_dc1_count4_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 4,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.558035731,
+        "mount_long_tons": 0.279017866,
+        "total_long_tons": 0.8370536
+      }
+    },
+    {
+      "id": "H2_dc1_count4_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 4,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0.892857134,
+        "mount_long_tons": 0.446428567,
+        "total_long_tons": 1.33928573
+      }
+    },
+    {
+      "id": "H2_dc1_count4_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 4,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "H2_dc1_count12_loads0",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.33928573,
+        "mount_long_tons": 0.669642866,
+        "total_long_tons": 2.00892854
+      }
+    },
+    {
+      "id": "H2_dc1_count12_loads1",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 1,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.45089281,
+        "mount_long_tons": 0.7254464,
+        "total_long_tons": 2.17633915
+      }
+    },
+    {
+      "id": "H2_dc1_count12_loads4",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "H2_dc1_count12_loads12",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 12,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 2.67857146,
+        "mount_long_tons": 1.33928573,
+        "total_long_tons": 4.017857
+      }
+    },
+    {
+      "id": "I_dc1_zero_size",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 0.0
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "I_dc1_zero_total",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 0,
+        "loads": 0,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 0,
+        "mount_long_tons": 0,
+        "total_long_tons": 0
+      }
+    },
+    {
+      "id": "K_torp2_same_inputs",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "K_dc2_same_inputs",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "J1_torp_scale0_canonical",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "J2_torp_scale1_same_canonical",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "J3_torp_fpcheck_metric_scale1",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "J4_torp_fpcheck_metric_scale0",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.92543578,
+        "mount_long_tons": 0.981358945,
+        "total_long_tons": 4.90679455
+      }
+    },
+    {
+      "id": "J5_mine_scale0_canonical",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "J6_mine_scale1_same_canonical",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142854,
+        "mount_long_tons": 3.57142854,
+        "total_long_tons": 7.142857
+      }
+    },
+    {
+      "id": "J7_mine_fpcheck_metric_scale1",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796003563052
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142568,
+        "mount_long_tons": 3.57142568,
+        "total_long_tons": 7.14285135
+      }
+    },
+    {
+      "id": "J8_mine_fpcheck_metric_scale0",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 226.796003563052
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 3.57142568,
+        "mount_long_tons": 3.57142568,
+        "total_long_tons": 7.14285135
+      }
+    },
+    {
+      "id": "J9_dc1_scale0_canonical",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "J10_dc1_scale1_same_canonical",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.3980925
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571427,
+        "mount_long_tons": 0.892857134,
+        "total_long_tons": 2.67857146
+      }
+    },
+    {
+      "id": "J11_dc1_fpcheck_metric_scale1",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.398001781526
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571284,
+        "mount_long_tons": 0.8928564,
+        "total_long_tons": 2.67856932
+      }
+    },
+    {
+      "id": "J12_dc1_fpcheck_metric_scale0",
+      "record": {
+        "id": "probe",
+        "kind": "depth_charge",
+        "count": 12,
+        "loads": 4,
+        "location_index": 1,
+        "unit_mass_kg": 113.398001781526
+      },
+      "context": {
+        "hull_year": 1912
+      },
+      "outputs": {
+        "weapon_long_tons": 1.78571284,
+        "mount_long_tons": 0.8928564,
+        "total_long_tons": 2.67856932
+      }
+    }
+  ],
+  "guarded": [
+    {
+      "id": "C_torp_year1800",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": 0,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1800
+      }
+    },
+    {
+      "id": "L_torp_no_location",
+      "record": {
+        "id": "probe",
+        "kind": "torpedo",
+        "count": 4,
+        "loads": 0,
+        "location_index": null,
+        "diameter_mm": 463.54999999999995,
+        "length_m": 6.096
+      },
+      "context": {
+        "hull_year": 1912
+      }
+    },
+    {
+      "id": "L_mine_no_location",
+      "record": {
+        "id": "probe",
+        "kind": "mine",
+        "count": 12,
+        "loads": 4,
+        "location_index": null,
+        "unit_mass_kg": 226.796185
+      },
+      "context": {
+        "hull_year": 1912
+      }
+    }
+  ],
+  "review": [
+    {
+      "id": "A_destroyer_-60_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 41.33088,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 10.277856,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "A_destroyer_-60_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 89.55024,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 10.277856,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "A_destroyer_-60_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 123.99264000000001,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 10.277856,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "A_destroyer_-30_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 41.33088,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 5.93649925728,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "A_destroyer_-30_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 89.55024,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 5.93649925728,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "A_destroyer_-30_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 123.99264000000001,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 5.93649925728,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "A_destroyer_0_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 41.33088,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 5.1419760000000005,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "A_destroyer_0_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 89.55024,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 5.1419760000000005,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "A_destroyer_0_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 123.99264000000001,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 5.1419760000000005,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "A_destroyer_30_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 41.33088,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 5.93649925728,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "A_destroyer_30_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 89.55024,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 5.93649925728,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "A_destroyer_30_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 123.99264000000001,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 5.93649925728,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "A_destroyer_60_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 41.33088,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 10.277856,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "A_destroyer_60_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 89.55024,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 10.277856,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "A_destroyer_60_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 123.99264000000001,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 137.7696,
+        "draught_m": 3.53568,
+        "freeboard_m": 1.6002
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 10.277856,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "B_cruiser_-60_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 56.692800000000005,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 17.684496000000003,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "B_cruiser_-60_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 122.8344,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 17.684496000000003,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "B_cruiser_-60_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 170.07840000000002,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 17.684496000000003,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "B_cruiser_-30_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 56.692800000000005,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 10.212725452079999,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "B_cruiser_-30_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 122.8344,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 10.212725452079999,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "B_cruiser_-30_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 170.07840000000002,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 10.212725452079999,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "B_cruiser_0_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 56.692800000000005,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 8.845296000000001,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "B_cruiser_0_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 122.8344,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 8.845296000000001,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "B_cruiser_0_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 170.07840000000002,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 8.845296000000001,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "B_cruiser_30_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 56.692800000000005,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 10.212725452079999,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "B_cruiser_30_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 122.8344,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 10.212725452079999,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "B_cruiser_30_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 170.07840000000002,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 10.212725452079999,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "B_cruiser_60_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 56.692800000000005,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 17.684496000000003,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "B_cruiser_60_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 122.8344,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 17.684496000000003,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "B_cruiser_60_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 170.07840000000002,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 188.976,
+        "draught_m": 6.5532,
+        "freeboard_m": 2.286
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 17.684496000000003,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "C_battleship_-60_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 62.1792,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 26.066496,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "C_battleship_-60_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 134.7216,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 26.066496,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "C_battleship_-60_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 186.5376,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": -60
+      },
+      "outputs": {
+        "maximum_height_m": 26.066496,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "C_battleship_-30_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 62.1792,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 15.052075560000002,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "C_battleship_-30_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 134.7216,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 15.052075560000002,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "C_battleship_-30_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 186.5376,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": -30
+      },
+      "outputs": {
+        "maximum_height_m": 15.052075560000002,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "C_battleship_0_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 62.1792,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 13.036296000000002,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "C_battleship_0_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 134.7216,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 13.036296000000002,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "C_battleship_0_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 186.5376,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 0
+      },
+      "outputs": {
+        "maximum_height_m": 13.036296000000002,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "C_battleship_30_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 62.1792,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 15.052075560000002,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "C_battleship_30_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 134.7216,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 15.052075560000002,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "C_battleship_30_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 186.5376,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 30
+      },
+      "outputs": {
+        "maximum_height_m": 15.052075560000002,
+        "normal_length_ratio": 1.38461542
+      }
+    },
+    {
+      "id": "C_battleship_60_0.3",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 62.1792,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 26.066496,
+        "normal_length_ratio": 0.4615385
+      }
+    },
+    {
+      "id": "C_battleship_60_0.65",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 134.7216,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 26.066496,
+        "normal_length_ratio": 1
+      }
+    },
+    {
+      "id": "C_battleship_60_0.9",
+      "record": {
+        "id": "main",
+        "kind": "belt_main",
+        "length_m": 186.5376,
+        "thickness_mm": 25.4,
+        "height_m": 1
+      },
+      "context": {
+        "length_m": 207.264,
+        "draught_m": 10.0584,
+        "freeboard_m": 2.9718
+      },
+      "config": {
+        "belt_inclination_deg": 60
+      },
+      "outputs": {
+        "maximum_height_m": 26.066496,
+        "normal_length_ratio": 1.38461542
+      }
+    }
+  ],
+  "minimum": [
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": 0.499
+      },
+      "expected": null
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": 0.5
+      },
+      "expected": 98.27056800000001
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": 1
+      },
+      "expected": 98.27056800000001
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": null
+      },
+      "expected": null
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": 0.499
+      },
+      "expected": null
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": 0.5
+      },
+      "expected": 98.27057
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": 1
+      },
+      "expected": 98.27057
+    },
+    {
+      "context": {
+        "length_m": 188.976,
+        "room_hull_ratio": 0.8,
+        "composite_strength": null
+      },
+      "expected": null
+    }
+  ]
+}

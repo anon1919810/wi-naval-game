@@ -353,16 +353,16 @@ describe('chapter index filter', () => {
 
   it('narrows the index to the chapters whose own words match, and gives it back', async () => {
     await open();
-    expect(index().length).toBe(11);
+    expect(index().length).toBe(12);
 
     fireEvent.change(field(), { target: { value: '稳性' } });
     expect(index()).toContain('浮态与稳性');
     expect(index()).not.toContain('概览');
     // The count is always what is actually on screen, whatever the word matched.
-    expect(screen.getByText(`匹配 ${index().length} / 11`)).toBeVisible();
+    expect(screen.getByText(`匹配 ${index().length} / 12`)).toBeVisible();
 
     fireEvent.click(screen.getByRole('button', { name: '清除章节筛选' }));
-    expect(index().length).toBe(11);
+    expect(index().length).toBe(12);
     expect(field()).toHaveValue('');
   });
 
@@ -370,7 +370,7 @@ describe('chapter index filter', () => {
     await open();
     fireEvent.change(field(), { target: { value: '武备' } });
     const narrowed = index().length;
-    expect(narrowed).toBeLessThan(11);
+    expect(narrowed).toBeLessThan(12);
     expect(index()).toContain('火炮武备');
 
     fireEvent.click(screen.getByRole('button', { name: '火炮武备' }));
@@ -393,7 +393,7 @@ describe('chapter index filter', () => {
 
     fireEvent.keyDown(input, { key: 'Escape' });
     expect(input).toHaveValue('');
-    expect(index().length).toBe(11);
+    expect(index().length).toBe(12);
   });
 
   it('says a word matches no chapter, and still offers the way back', async () => {
@@ -401,10 +401,10 @@ describe('chapter index filter', () => {
     fireEvent.change(field(), { target: { value: '不存在的章节' } });
     expect(index().length).toBe(0);
     expect(screen.getByText('没有匹配的章节')).toBeVisible();
-    expect(screen.getByText('匹配 0 / 11')).toBeVisible();
+    expect(screen.getByText('匹配 0 / 12')).toBeVisible();
 
     fireEvent.keyDown(field(), { key: 'Escape' });
-    expect(index().length).toBe(11);
+    expect(index().length).toBe(12);
     expect(screen.queryByText('没有匹配的章节')).toBeNull();
   });
 });

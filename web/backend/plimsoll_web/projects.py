@@ -137,6 +137,11 @@ def create_project(owner_id: uuid.UUID, template: str | None, name: str, db: Ses
     project_id = uuid.uuid4()
     if template is None:
         document = project_io.new_project(name, project_id=str(project_id))
+    elif template == "ship_design":
+        # The product's own default: a fresh native blank, produced by the pure
+        # initialization contract rather than a bundled file, plus the owned
+        # normal operating condition the ledger is based on.
+        document = _initialize_native(project_io.new_project(name, project_id=str(project_id)))
     else:
         filename = TEMPLATES.get(template)
         if filename is None:
@@ -152,6 +157,24 @@ def create_project(owner_id: uuid.UUID, template: str | None, name: str, db: Ses
     db.add_all((row, saved))
     db.commit()
     return _view(row, saved)
+
+
+def _initialize_native(document: dict) -> dict:
+    """Seed one fresh project as a native ship design through the web adapter.
+
+    A fresh native design is not a bundled template file: it is the core's own
+    native blank, produced by the pure initialization contract. The adapter owns
+    the kernel boundary, the shared body bound and the structured refusal shape,
+    so a project is never saved with a declaration the core would have refused. A
+    missing kernel surfaces as the adapter's structured 503 rather than a 500.
+    """
+    from . import ship_design as ship_design_adapter
+    reply = ship_design_adapter.initialize(document)
+    project = reply.get("project") if isinstance(reply, dict) else None
+    if not isinstance(project, dict):
+        raise HTTPException(status_code=503,
+                            detail="native ship design initialization is unavailable")
+    return project
 
 
 def list_projects(owner_id: uuid.UUID, db: Session) -> list[dict]:

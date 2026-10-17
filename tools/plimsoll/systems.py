@@ -130,6 +130,8 @@ def _calculated_mass(model: dict, system: dict, path: str) -> tuple[float, str]:
             f"mass_t = {count_basis} × rounds_per_gun × "
             "(projectile_mass_kg + charge_mass_kg) / 1000"
         )
+    if method == "armour_panels_mass_v1":
+        return _armour_panels_mass(inputs, f"{path}.inputs")
     if method == "empirical_estimate_v1":
         # A versioned concept estimate arrives in long tons because the recovered
         # methods are imperial. It is a model, never a ledger mass.
@@ -140,6 +142,54 @@ def _calculated_mass(model: dict, system: dict, path: str) -> tuple[float, str]:
             "(versioned empirical concept estimate, not a ledger mass)"
         )
     raise ValueError(f"{path}.method has unsupported value {method!r}")
+
+
+def _armour_panels_mass(inputs: dict, path: str) -> tuple[float, str]:
+    """Recompute the pure armour-panel geometry from its complete declaration.
+
+    This never trusts an opaque ``mass_t``: the nested normalized region is run
+    through the pure kernel again, its method version and eligible kind are
+    checked, and its adoption flag and complete mass are required. Extra inputs
+    are refused so a precomputed mass cannot ride alongside the declaration.
+    """
+    try:
+        from . import armour_geometry
+    except ImportError:                                   # pragma: no cover - direct import
+        import armour_geometry
+    expected = {"method_version", "region_kind", "geometry_source", "region"}
+    extra = sorted(set(inputs) - expected)
+    if extra:
+        raise ValueError(f"{path} has unsupported inputs {extra!r} for armour_panels_mass_v1")
+    if inputs.get("method_version") != armour_geometry.METHOD_VERSION:
+        raise ValueError(f"{path}.method_version must be {armour_geometry.METHOD_VERSION!r}")
+    kind = inputs.get("region_kind")
+    if kind not in armour_geometry.ELIGIBLE_KINDS:
+        raise ValueError(f"{path}.region_kind must be an eligible panel kind")
+    source = inputs.get("geometry_source")
+    if not isinstance(source, str) or not source.strip():
+        raise ValueError(f"{path}.geometry_source must be a non-empty string")
+    region = inputs.get("region")
+    if not isinstance(region, dict):
+        raise ValueError(f"{path}.region must be a normalized region object")
+    fixed_id = region.get("fixed_armour_id")
+    if not isinstance(fixed_id, str) or not fixed_id:
+        raise ValueError(f"{path}.region.fixed_armour_id must be a non-empty string")
+    try:
+        normalized = armour_geometry.normalize(
+            {"source": source, "regions": [region]},
+            [{"id": fixed_id, "kind": kind}],
+            path + ".region")
+        result = armour_geometry.evaluate(normalized["regions"][0], kind, source=source,
+                                          path=path + ".region")
+    except armour_geometry.ArmourGeometryError as error:
+        raise ValueError("; ".join(entry["message"] for entry in error.diagnostics))
+    if not result["adoptable"]:
+        raise ValueError(f"{path}.region is not adoptable; a complete sourced mass is required")
+    mass = result["values"].get("mass_t")
+    if mass is None or not math.isfinite(mass):
+        raise ValueError(f"{path}.region does not yield a known finite mass")
+    return mass, ("mass_t = recomputed from the declared rectangular armour plate geometry "
+                  "(plimsoll-armour-panels-v1)")
 
 
 def _system_leaves(systems: dict, prefix: str = "") -> list[tuple[str, dict]]:
@@ -164,6 +214,10 @@ def _generated_from_project(project: dict, state: dict) -> tuple:
     a configuration this stage cannot evaluate reports diagnostics rather than
     removing the existing physical models.
     """
+    if isinstance(project.get("ship_design"), dict):
+        # Native design owns the shared estimates. Old concept declarations
+        # remain project evidence, not another set of adoptable mass proposals.
+        return {}, []
     if not isinstance(project.get("concept_design"), dict):
         return {}, []
     try:
@@ -212,6 +266,10 @@ def summary(project: dict, state: dict, generated_models: dict | None = None) ->
 
     diagnostics = []
     diagnostics.extend(copy.deepcopy(concept_diagnostics))
+    native = project.get("ship_design")
+    native_targets = {identifier for binding in native.get("mass_bindings", {}).values()
+        if isinstance(binding, dict) for identifier in binding.get("item_ids", [])
+    } if isinstance(native, dict) else set()
     loading_diagnostics = copy.deepcopy(state.get("diagnostics", []))
     if not state.get("complete_mass", False):
         diagnostics.append(
@@ -427,6 +485,10 @@ def summary(project: dict, state: dict, generated_models: dict | None = None) ->
             if model.get("concept_component") == "fuel":
                 check["capacity_estimate_t"] = calculated * model["capacity_display_factor"]
             row["mass_models"].append(check)
+            if linked_id in native_targets:
+                check["adoption_allowed"] = False
+                check["adoption_reason"] = "ship_design_mass_authority"
+                continue
             # An unknown target is a legitimate proposal: the current mass and the
             # difference stay null and the review decides.
             if difference is None or abs(difference) > tolerance:

@@ -31,6 +31,15 @@ DEPENDENCIES = {
     "resistance": ["hydrostatics"], "propulsion": ["loading", "systems"],
     "endurance": ["propulsion"], "historical": ["loading"], "flooding": ["loading", "geometry"],
     "design_balance": ["loading", "systems"],
+    # The compatibility design is self-contained: it reads the optional
+    # sps_3b3_design declaration and nothing from the physical ledger, hull lines
+    # or centre of gravity, so it must never be gated by them.
+    "sps_compat": [],
+    # The native ship design stage is likewise self-contained: it reads the
+    # authoritative declaration and the managed mass ledger, never hull lines or a
+    # centre of gravity, so a fresh empty design is never gated by physical
+    # geometry it has not been given.
+    "ship_design": [],
 }
 # The adapted concept screen and the systems summary read selected masses, not a
 # physical result, so they still run when the loading ledger is incomplete or a CG
@@ -62,9 +71,14 @@ def _diagnostics(data, stage, prefix="$"):
                         row.setdefault("blocking", row.get("severity") == "error")
                         result.append(row)
             elif key == "warnings" and isinstance(value, list):
-                result.extend(dict(request_api.diagnostic("analysis.kernel_warning", str(text),
-                    f"{prefix}.warnings[{i}]", False), stage=stage,
-                    source_path=f"{prefix}.warnings[{i}]") for i, text in enumerate(value))
+                for i,item in enumerate(value):
+                    path=f'{prefix}.warnings[{i}]'
+                    if isinstance(item,dict):
+                        row=copy.deepcopy(item)
+                        row.setdefault('code','analysis.kernel_warning');row.setdefault('message','')
+                        row.setdefault('path',row.get('field',path));row.setdefault('severity','warning');row.setdefault('blocking',False)
+                    else:row=request_api.diagnostic('analysis.kernel_warning',str(item),path,False)
+                    row.update(stage=stage,source_path=row.get('source_path',path));result.append(row)
             else:
                 result.extend(_diagnostics(value, stage, f"{prefix}.{key}"))
     elif isinstance(data, list):
@@ -98,6 +112,113 @@ def _unavailable(envelope, stage, reason, code="analysis.unavailable", status="u
     envelope.update(status=status, reason=reason)
     envelope["diagnostics"].append(dict(request_api.diagnostic(code, reason, f"$.stages.{stage}"),
                                         stage=stage, source_path=f"$.stages.{stage}"))
+
+
+#: Compatibility stage status -> the coordinator's own stage vocabulary.
+_SPS_STAGE_STATUS = {"available": "completed", "completed": "completed", "ok": "completed",
+                     "partial": "partial", "unavailable": "unavailable"}
+
+
+def _sps_compat_result(snapshot):
+    """Run the SpringSharp 3b3 compatibility stage over the saved declaration.
+
+    The compatibility design is an entry point of its own. It reads only the
+    optional ``sps_3b3_design`` section — never the physical ledger, hull lines or
+    centre of gravity — so a design the original program completes is reported on
+    its own terms. A missing kernel or declaration is an honest structured
+    unavailability, not a failed project, and source warnings alone never demote a
+    complete design.
+    """
+    design = snapshot.get("sps_3b3_design")
+    if not isinstance(design, dict):
+        return {"status": "unavailable", "diagnostics": [request_api.diagnostic(
+            "analysis.sps_design_missing",
+            "the sps_compat stage requires an sps_3b3_design section",
+            "$.sps_3b3_design")]}
+    module = request_api.kernel_module("sps_compat")
+    if module is None:
+        return {"status": "unavailable", "diagnostics": [request_api.diagnostic(
+            "analysis.sps_module_unavailable",
+            "the SpringSharp 3b3 compatibility kernel is not available in this installation",
+            "$.sps_3b3_design")]}
+    try:
+        data = dict(module.compute(design))
+    except Exception as error:
+        return {"status": "unavailable", "diagnostics": [request_api.diagnostic(
+            "analysis.sps_kernel_error",
+            "the compatibility kernel failed: %s" % (error,),
+            "$.sps_3b3_design")]}
+    # The underlying method is an empirical source-compatibility calculation; the
+    # stage must not be read as a physical hydrostatics or CG claim.
+    data.setdefault("kind", "sps_3b3_empirical_compatibility")
+    report_module = request_api.kernel_module("sps_report")
+    if report_module is not None and hasattr(report_module, "build"):
+        try:
+            report = report_module.build(data)
+        except Exception as error:
+            data.setdefault("diagnostics", []).append(request_api.diagnostic(
+                "analysis.sps_report_error",
+                "the compatibility report could not be built: %s" % (error,),
+                "$.sps_3b3_design", False))
+        else:
+            if isinstance(report, dict):
+                data["report"] = report
+    return data
+
+
+def _sps_stage_status(data):
+    return _SPS_STAGE_STATUS.get(str(data.get("status")), "unavailable")
+
+
+#: Native stage status -> the coordinator's own stage vocabulary. The native
+#: kernel speaks the same words the compatibility stage does, so one map serves
+#: both; an unknown word is an honest unavailability rather than a silent pass.
+def _ship_design_stage_status(data):
+    return _SPS_STAGE_STATUS.get(str(data.get("status")), "unavailable")
+
+
+def _ship_design_result(snapshot, condition_id):
+    """Run the native ship design stage over the saved declaration.
+
+    The native declaration is the product's own entry point. It reads only the
+    ``ship_design`` section and the managed mass ledger — never hull lines or a
+    centre of gravity — so a fresh empty design is reported on its own terms: an
+    empirical screen plus the owner-condition ledger and balance, all computed by
+    the pure native kernel. The result carries the kernel's own structured
+    diagnostics and source identity unchanged; this function only records which
+    condition was *requested* here and which condition the declaration itself
+    *bases* its ledger on, so a caller can never mistake one for the other.
+    """
+    design = snapshot.get("ship_design")
+    if not isinstance(design, dict):
+        return {"status": "unavailable", "diagnostics": [request_api.diagnostic(
+            "analysis.ship_design_missing",
+            "the ship_design stage requires a ship_design declaration",
+            "$.ship_design")]}
+    module = request_api.kernel_module("ship_design")
+    if module is None:
+        return {"status": "unavailable", "diagnostics": [request_api.diagnostic(
+            "analysis.ship_design_module_unavailable",
+            "the native ship design kernel is not available in this installation",
+            "$.ship_design")]}
+    try:
+        computed = module.compute(snapshot, condition_id)
+    except Exception as error:
+        diagnostics = getattr(error, "diagnostics", None)
+        if isinstance(diagnostics, list) and diagnostics:
+            return {"status": "unavailable", "diagnostics": list(diagnostics)}
+        return {"status": "unavailable", "diagnostics": [request_api.diagnostic(
+            "analysis.ship_design_kernel_error",
+            "the native ship design kernel failed: %s" % (error,),
+            "$.ship_design")]}
+    data = dict(computed)
+    # The underlying method is an empirical native screen over the declared
+    # design; the stage must never be read as a physical hydrostatics or CG claim.
+    data.setdefault("kind", "native_ship_design")
+    data["requested_condition_id"] = condition_id
+    declared_basis = design.get("condition_id")
+    data["basis_condition_id"] = declared_basis if isinstance(declared_basis, str) else None
+    return data
 
 
 ROLL_ASSUMPTIONS = ["small-angle static estimate about the selected loading",
@@ -196,12 +317,8 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
         request_api.reject("cancel_check must be callable", "$.cancel_check")
     snapshot, request, fingerprint = request_api.normalize(project, condition_id, options)
     opts = request["options"]
-    try:
-        state = loading.resolve_loading(snapshot, condition_id)
-    except loading.LoadingRangeError as error:
-        request_api.reject(str(error), '$.weight_groups', 'loading.derived_out_of_range')
     requested = set(opts["stages"])
-    active = {"loading"}
+    active = set() if requested and requested <= {"sps_compat", "ship_design"} else {"loading"}
     def require(name):
         if name in active:
             return
@@ -210,6 +327,15 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
             require(dependency)
     for name in requested:
         require(name)
+    if 'loading' in active:
+        try:
+            state = loading.resolve_loading(snapshot, condition_id)
+        except loading.LoadingRangeError as error:
+            request_api.reject(str(error), '$.weight_groups', 'loading.derived_out_of_range')
+    else:
+        project_fingerprint=project_io.input_fingerprint(snapshot)
+        state={'project_fingerprint':project_fingerprint,
+               'input_fingerprint':loading._result_fingerprint(project_fingerprint,condition_id)}
     stages = {name: _envelope(name, name in requested) for name in request_api.STAGES}
     geometry = snapshot.get("geometry")
     marker = snapshot["opening_definition"]
@@ -319,10 +445,32 @@ def compute_project(project, condition_id, options=None, *, cancel_check=None):
                 mapped = {"invalid_input": "unavailable", "equilibrium_failure": "failed", "downflooding_event": "model_limit"}
                 _finish(envelope, name, data, mapped.get(data["status"], data["status"]))
             elif name == "design_balance":
+                if isinstance(snapshot.get("ship_design"), dict):
+                    # The native declaration owns the shared ledger, its estimated
+                    # masses and their adoption. Running the legacy concept screen
+                    # here would produce a second estimate and adoption authority
+                    # for the same targets, which the unified design forbids even
+                    # when a caller explicitly asks for this stage.
+                    _unavailable(envelope, name,
+                                 "the native ship design owns the ledger balance and estimated "
+                                 "masses; the legacy concept screen would be a second adoption "
+                                 "authority for the same targets and is not produced",
+                                 "analysis.design_balance_native_owned")
+                    continue
                 data = concept_design.evaluate(
                     snapshot, state, stages["systems"].get("data"))
                 _finish(envelope, name, data, data.get("status", "completed"),
                         applicable=data.get("status") != "not_configured")
+            elif name == "sps_compat":
+                data = _sps_compat_result(snapshot)
+                mapped = _sps_stage_status(data)
+                _finish(envelope, name, data, mapped, complete=(mapped == "completed"),
+                        applicable=(mapped != "unavailable"))
+            elif name == "ship_design":
+                data = _ship_design_result(snapshot, condition_id)
+                mapped = _ship_design_stage_status(data)
+                _finish(envelope, name, data, mapped, complete=(mapped == "completed"),
+                        applicable=(mapped != "unavailable"))
             else:
                 data, status = bindings.run(name, snapshot, state, opts, stages)
                 _finish(envelope, name, data, status)

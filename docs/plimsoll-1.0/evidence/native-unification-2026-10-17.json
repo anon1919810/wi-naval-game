@@ -1,0 +1,223 @@
+{
+  "schema": "plimsoll-native-unification-acceptance-1",
+  "status": "accepted_local_native_workflow_frozen_3b3_scope",
+  "recorded_at": "2026-10-17T07:18:42.702798+00:00",
+  "date": "2026-10-17",
+  "head": "7ce1cb9eb62045470b6fba338ad349dd2cc1574a",
+  "scope": {
+    "reference": "SpringSharpMono 3.0.3032.29945",
+    "original_exe_sha256": "82ecc3fedf76af222dd13ad68258f3ae92146e9fad7dc6a4a96f3270fccf71fc",
+    "source_inventory": "docs/plimsoll-1.0/evidence/sps3b3-functional-parity-2026-10-17.json",
+    "effective_fields": 222,
+    "operations": 26,
+    "source_readings": 118,
+    "report_categories": 12,
+    "source_method_basis": "前阶段原程序集整船、事件及报告核对继续作为冻结方法依据，未重复历史大矩阵"
+  },
+  "coverage": [
+    {
+      "id": "ordinary_entry",
+      "status": "accepted",
+      "effect": "新建与2.0/3.0原文件导入直接建立原生设计；普通章节入口，独立SPS模式移除"
+    },
+    {
+      "id": "single_design",
+      "status": "accepted",
+      "effect": "唯一ship_design，共享8个SI船体投影；跨章节编辑、队列及旧工程升级保护"
+    },
+    {
+      "id": "same_ledger",
+      "status": "accepted",
+      "effect": "21类源估重及可选其他载荷绑定真实台账；人工声明、改绑、未知和工况作用范围明确"
+    },
+    {
+      "id": "design_balance",
+      "status": "accepted",
+      "effect": "所选质量、经验估重、目标排水量与差额；基础设计无需型线或CG"
+    },
+    {
+      "id": "frozen_report",
+      "status": "accepted",
+      "effect": "保存运行冻结报告和台账；首页、对比与下载读取冻结结果；历史运行未改写"
+    },
+    {
+      "id": "interchange",
+      "status": "accepted",
+      "effect": "实际下载sship/TXT/RTF/SSR/JSON/CSV/PNG；原版文件重开及Windows富文本读取；JSON完整备份恢复"
+    },
+    {
+      "id": "physical_work",
+      "status": "accepted",
+      "effect": "原物理模板保留原表单；附加物理检查仍使用自身依据和有效性门限"
+    }
+  ],
+  "verification": {
+    "logs": {
+      "core_backend": {
+        "file": "native-python-final.log",
+        "passed": true
+      },
+      "review_fixes": {
+        "file": "native-review-fixes.log",
+        "passed": true
+      },
+      "workbench": {
+        "file": "frontend-final-tests.log",
+        "passed": true
+      },
+      "report_summary": {
+        "file": "native-report-summary-tests.log",
+        "passed": true
+      },
+      "build": {
+        "file": "frontend-build.log",
+        "passed": true
+      }
+    },
+    "note": "核心后端批次与审查后的定向复验存在重叠，不相加为功能数量；前端按相关文件和最后摘要增量验收",
+    "quick_run": "51b0a121-48a8-4cd2-ba2e-4d62854af58a",
+    "source_identity": {
+      "accepted": true,
+      "starting_files": 153,
+      "missing_starting_files": [],
+      "quick_identity_files": 77,
+      "quick_source_drift": [],
+      "unrelated_style_paths": [],
+      "starting_snapshot_preserved": true
+    },
+    "browser_checks": 28,
+    "original_live_readings": 162,
+    "original_reopen_checks": 384
+  },
+  "evidence_root": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\Plimsoll-native-unification-2026-10-17",
+  "evidence": {
+    "native-python-final.log": {
+      "bytes": 726,
+      "sha256": "e9cb03daf27f6103e249a29a9abace88911274af45289058f94023c86b8262be"
+    },
+    "native-review-fixes.log": {
+      "bytes": 101,
+      "sha256": "9dfe35a1a911abdf600170571c1aa69b62909cfb38b1612abbe10ecae36a3c68"
+    },
+    "frontend-final-tests.log": {
+      "bytes": 569,
+      "sha256": "df7c8d4b0e069c8c62bc03c101e39810e558e2898720a267c9e5aa148ce635de"
+    },
+    "native-report-summary-tests.log": {
+      "bytes": 566,
+      "sha256": "bda084cab321ab03005cbe2bf2018a508f41b5bb5eb87e839d49aa05d7ebf6d8"
+    },
+    "frontend-build.log": {
+      "bytes": 1107,
+      "sha256": "3da4558443d6e51178f236c3e140bd4c16155b732368bed8e6af429fc19779dd"
+    },
+    "browser-artifact-checks.json": {
+      "bytes": 4680,
+      "sha256": "26d30993d2e4f2276520b109d75865faaaed4626fda2583a87e0e40972877428"
+    },
+    "rebinding-acceptance.json": {
+      "bytes": 188,
+      "sha256": "333285941f5903a085422a0c480a834f7568832b1866e8cd93eabaf84f960e23"
+    },
+    "browser-original-live-checks.json": {
+      "bytes": 21922,
+      "sha256": "a14c5cc2eeae2c18d09dc61f50ae7d0b44e56493053c34897aa7a3dfb1503885"
+    },
+    "browser-original-roundtrip-checks.json": {
+      "bytes": 29396,
+      "sha256": "817edaf80923bf069339eeaa7f813ec1b8a53d3a388108490f419d459b15faf4"
+    },
+    "browser-windows-richtext-roundtrip.json": {
+      "bytes": 726,
+      "sha256": "d931c4f7ee56bd6de10f2e281702407e170029abfed90fcd14247dec07da2cce"
+    },
+    "final-preservation.json": {
+      "bytes": 215,
+      "sha256": "252618914e65bac5d555e4467ed8084556a0976f7cce115e2614fc69eeaeb056"
+    },
+    "core-quick-final.log": {
+      "bytes": 941,
+      "sha256": "ee1f44228a7eb51c4f62d35c75de3d2d0fd8db5737b32107e8e57ccafb52270e"
+    },
+    "browser-baseline.json": {
+      "bytes": 530918,
+      "sha256": "b7e0469a9cd9f203930a949d1f3f28b53abbb27a33ce6139b7e5db352e632ee5"
+    },
+    "browser-baseline-after.json": {
+      "bytes": 530957,
+      "sha256": "019daea2ab0091874a6104439e9fac2e1e3c25374091873ee5be52870baaa59e"
+    },
+    "browser-adopted.json": {
+      "bytes": 47560,
+      "sha256": "3ac14edf8816bd893dccb93b15663f55255c193ea9a8dcb57c87fa28f3d3303f"
+    },
+    "browser-reloaded.json": {
+      "bytes": 37348,
+      "sha256": "ef02d7a24696ea58265f0be8563c3cef3eb635232395807108097cba4ce7b496"
+    },
+    "browser-final-report.json": {
+      "bytes": 532547,
+      "sha256": "48dde6ef2aad8cc63cd4b2cc57abfe96c263950abe46f7b1e57527b78a8d3089"
+    },
+    "browser-comparison.json": {
+      "bytes": 540302,
+      "sha256": "235ba097e307438ca18d4b2957308dc5637aaeaf54f3d981207efb50c8a6d072"
+    },
+    "browser-downloads.json": {
+      "bytes": 7199,
+      "sha256": "1e8ad52c33fb12e70ded44de67d73c09eefae747693fb542f9a69731eb979ef0"
+    },
+    "browser-project-download.json": {
+      "bytes": 69,
+      "sha256": "84b59c879d28eeb317c0f5f4f8d7b8376a527e0fa005f4133a7f586182d37c27"
+    },
+    "browser-backup-restored.json": {
+      "bytes": 37227,
+      "sha256": "d8b00a783b4a0c963f4b541269835a604bf2c46a588f1075f969e24d29404a73"
+    },
+    "browser-report-restored.json": {
+      "bytes": 532452,
+      "sha256": "31a2258437977791d341a2eb796d27d25de015a36b9c172fb6f808accf629e4a"
+    },
+    "browser-report-download-names.json": {
+      "bytes": 256,
+      "sha256": "31d97d09934ee8e3a8b4e6116e1bbc325a2e232a721301894547489b21009331"
+    },
+    "browser-physical-regression.json": {
+      "bytes": 12771,
+      "sha256": "b6775b09d09a47ce5dfa8f291b2e6e823afc59d98dd39f144401bc2a776a8a74"
+    },
+    "browser-hull.png": {
+      "bytes": 124980,
+      "sha256": "d94f055dd5ec625e775d1700f1bf9aaa7dd327acac7bc3626ceaefb30c71d7b7"
+    },
+    "browser-weights.png": {
+      "bytes": 165673,
+      "sha256": "f72cffe092e41106fc01dc27f609a136d15155f62669ad399da5c83470a4af8b"
+    },
+    "browser-report-final.png": {
+      "bytes": 122562,
+      "sha256": "5363e4a376923b731bdf5e31144fcb76372e9c36e93ee3020c0092063c510232"
+    },
+    "cleanup.json": {
+      "bytes": 145,
+      "sha256": "8e0dbf6cb588e29083284307a8c8087d83f85dc28f8b1126acf7220671bb54f0"
+    }
+  },
+  "delivery": {
+    "local_only": true,
+    "committed": false,
+    "pushed": false,
+    "deployed": false,
+    "enhancements_started": false,
+    "owned_services_cleaned": true
+  },
+  "limits": [
+    "冻结本机3b3的主设计功能及受控输入验收，不是全部输入组合的逐位证明或实船校准。",
+    "保留原版Single精度、混合单位及事件缓存语义。",
+    "原sship重开按原版精度和加载事件重算，不能保存所有锁定、事件缓存和人工台账；完整状态使用项目JSON。",
+    "物理型线、CG、稳性和破损等增强分析仍要求自身输入与方法依据，不由源经验评分冒充。",
+    "未向实体打印机发送作业；构建保留现有大分块提示。"
+  ],
+  "environment_recovery": "临时服务/浏览器重启后，通过真实项目JSON导入恢复到新测试工作区并运行；未绕过产品鉴权。测试内存不足后限制并发；浏览器下载使用单反斜线Windows路径。"
+}

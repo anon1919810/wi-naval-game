@@ -1,4 +1,5 @@
 import { reportReadings, type ReportReading } from './resultReading';
+import { nativePrimaryReadings } from './nativeReportReadings';
 import { useUnits } from './UnitProvider';
 import { formatNumber } from './units';
 import { useWorkspaceCopy } from '../i18n/workspace';
@@ -8,19 +9,27 @@ import type { AnalysisResult } from '../types';
 /**
  * The report's first screen: what this saved run actually says.
  *
- * The six readings are projections of six saved paths, so a value is here only
- * because the run stored it: no number is recomputed, averaged or interpolated,
- * and a stage that did not deliver one keeps its reason instead of a zero or a
- * borrowed figure. A true zero is shown as a value, an unknown field as unknown.
+ * When the run requested the native ship design, the summary is that frozen
+ * result — its balance and its engine and performance readings — and the physical
+ * cards of stages the run never asked for are not printed at all. The physical
+ * readings of stages the run *did* ask for are still appended after them. Any
+ * other run keeps exactly the eight physical readings it always had.
  *
- * Dimensions follow the reader's unit choice on this page only. A range has no
- * convertible reader unit and stays in nmi; the stored snapshot, the
- * fingerprints and the exports are untouched by any of it.
+ * Every reading is a projection of a saved path, so a value is here only because
+ * the run stored it: no number is recomputed, averaged or interpolated, and a
+ * stage that did not deliver one keeps its reason instead of a zero or a borrowed
+ * figure. A true zero is shown as a value, an unknown field as unknown.
+ *
+ * Dimensions follow the reader's unit choice on this page only. A range, a source
+ * horsepower and the empirical stability score have no convertible reader unit
+ * and keep the unit the source saved; the stored snapshot, the fingerprints and
+ * the exports are untouched by any of it.
  */
 export function ReportReadings({ result }: { result: AnalysisResult }) {
   const { language } = useLanguage();
   const units = useUnits();
-  return <div className="report-readings">{reportReadings(result, language).map(reading =>
+  const readings = nativePrimaryReadings(result, language) ?? reportReadings(result, language);
+  return <div className="report-readings">{readings.map(reading =>
     <Reading key={reading.key} reading={reading} units={units} />)}</div>;
 }
 

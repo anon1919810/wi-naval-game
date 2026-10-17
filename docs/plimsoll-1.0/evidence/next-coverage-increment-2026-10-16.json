@@ -1,0 +1,99 @@
+{
+  "schema": "plimsoll-next-coverage-targets-1",
+  "state": "accepted_bounded_increment",
+  "frozen_inventory_modified": false,
+  "equivalent_percentage": null,
+  "targets": [
+    {
+      "baseline_id": "guns.weights.mounts",
+      "family": "battery_totals",
+      "relation": "whole_battery_source_numeric_segment",
+      "limit": "Read-only whole-battery source estimate; old per-row adoption remains adapted."
+    },
+    {
+      "baseline_id": "guns.weights.total",
+      "family": "battery_totals",
+      "relation": "whole_battery_source_numeric_segment",
+      "limit": "Guns + mounts + complete armour, no ammunition; actual targets separate."
+    },
+    {
+      "baseline_id": "armour.belts.total_weight",
+      "family": "armour_totals",
+      "relation": "source_three_belt_sum_and_selected_ledger",
+      "limit": "Main + ends + upper only; excludes bulkhead/bulge despite group title."
+    },
+    {
+      "baseline_id": "armour.total",
+      "family": "armour_totals",
+      "relation": "declared_scope_sum_and_selected_ledger",
+      "limit": "Complete scope explicitly declared; unknown entries block complete estimate, known subtotal distinct."
+    },
+    {
+      "baseline_id": "armour.settings.default_preset",
+      "family": "armour_defaults",
+      "relation": "raw_source_dimension_suggestion_workflow",
+      "limit": "Eight raw pre-N2 dimensions; not original display roundtrip or mass callback chain."
+    },
+    {
+      "baseline_id": "weapons.misc_weight.deck_space",
+      "family": "auxiliary_space",
+      "relation": "selected_torpedo_surface_source_segment",
+      "limit": "At most two explicitly chosen torpedo rows; known positive waterplane denominator."
+    },
+    {
+      "baseline_id": "weapons.misc_weight.hull_space",
+      "family": "auxiliary_space",
+      "relation": "selected_torpedo_volume_source_segment",
+      "limit": "At most two rows, explicit total bulged width, normal reference hull; not physical compartment occupancy."
+    },
+    {
+      "baseline_id": "armour.belts.main.length",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Canonical pre-N2 source suggestion; explicit selected draft copy only."
+    },
+    {
+      "baseline_id": "armour.belts.main.height",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Source side draught and feet-based square-root rule; partial dependency."
+    },
+    {
+      "baseline_id": "armour.belts.ends.length",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Source .02ft allowance; negative result unsupported, no clamp."
+    },
+    {
+      "baseline_id": "armour.belts.ends.height",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Same source default height as main, user chooses independently."
+    },
+    {
+      "baseline_id": "armour.belts.upper.length",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Same source central length, not a new area/plate geometry."
+    },
+    {
+      "baseline_id": "armour.belts.upper.height",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Source 8ft cap and freeboard; no thickness or ledger change."
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.length",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Source central length copied to explicitly chosen existing bulkhead record."
+    },
+    {
+      "baseline_id": "armour.belts.torpedo_bulkhead.height",
+      "family": "armour_defaults",
+      "relation": "source_default_dimension_suggestion",
+      "limit": "Source side draught, not normal draught; no protective-performance claim."
+    }
+  ],
+  "acceptance": "next-coverage-2026-10-16.json"
+}

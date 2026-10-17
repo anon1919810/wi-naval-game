@@ -42,6 +42,6 @@ describe('draft and read protection',()=>{
     const input=screen.getByRole('searchbox');fireEvent.change(input,{target:{value:'Hull'}});
     expect(screen.getByRole('button',{name:'船型与几何'})).toBeVisible();expect(select).not.toHaveBeenCalled();
     fireEvent.keyDown(input,{key:'Enter'});expect(select).toHaveBeenCalledWith('hull');
-    fireEvent.keyDown(input,{key:'Escape'});expect(input).toHaveValue('');expect(document.querySelectorAll('.nav-item')).toHaveLength(11);
+    fireEvent.keyDown(input,{key:'Escape'});expect(input).toHaveValue('');expect(document.querySelectorAll('.nav-item')).toHaveLength(12);
   });
 });

@@ -94,12 +94,12 @@ export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: str
     });
   }, [attempt]);
 
-  async function create(template: string | null, initialName: string) {
+  async function create(template: string | null, initialName: string, marker?: string) {
     if (creatingNow.current || importingNow.current) return;
     creatingNow.current = true;
     const ticket = ++createTicket.current;
     setCreateError('');
-    setCreating(template ?? 'blank');
+    setCreating(marker ?? template ?? 'blank');
     try {
       const saved = await api.createProject(template, initialName.trim());
       // The answer belongs to the page that asked, and only while it exists.
@@ -191,7 +191,7 @@ export function Library({ onOpen, onLab, anonymous = false }: { onOpen: (id: str
       <div className="template-grid">{templates.map((key, index) => <button className="template-card" key={key} onClick={() => create(key, storedTemplateName(key))} disabled={busy}>
         <span className="template-number">0{index + 1}</span><span className="template-identity"><strong>{w(`library.template.${key}.name` as WorkspaceKey)}</strong><span className="template-tag">{w(`library.template.${key}.tag` as WorkspaceKey)}</span></span><p>{w(`library.template.${key}.text` as WorkspaceKey)}</p><span className="template-action">{creating === key ? w('library.template.creating') : w('library.template.create')}</span>
       </button>)}</div>
-      <form className="blank-project" onSubmit={event => { event.preventDefault(); if (name.trim()) void create(null, name); }}>
+      <form className="blank-project" onSubmit={event => { event.preventDefault(); if (name.trim()) void create('ship_design', name, 'blank'); }}>
         <div><strong>{w('library.blank.title')}</strong><p>{w('library.blank.text')}</p></div>
         <label className="visually-hidden" htmlFor="blank-name">{w('library.blank.label')}</label><input id="blank-name" required value={name} onChange={event => setName(event.target.value)} placeholder={w('library.blank.label')} />
         <button className="button button--secondary" disabled={busy || !name.trim()} type="submit">{creating === 'blank' ? w('library.template.creating') : w('library.blank.create')}</button>
