@@ -6,7 +6,9 @@
 
 **本地验收完成 · 2026-10-17**：原生舰船设计将本机 SPS 3b3 的输入、自动估重、人工质量采纳、设计平衡和冻结报告整合到同一项目；原版工程可导入并重开。详见[原生设计流程与验收范围](docs/plimsoll-1.0/native-ship-design-2026-10-17.md)。此记录为部署前的本地验收状态。
 
-**最新发布 · 2026-10-15**：SPS 概念估重与设计平衡、装甲审阅采纳、`.sship` 迁移和液态玻璃已上线；最终静态版本 `e4ce74e`。核心 1726 项通过，原有项目和运行数据保留。[发布身份、验收与回滚](docs/formfield/release-sps-glass-2026-10-15.md)。
+**最新发布 · 2026-10-18**：原生舰船设计、统一估重台账与平衡、装甲和整炮组覆盖及 `.sship` 原生迁移已上线；运行版本 `34ee279`，原有项目和运行数据保留。[发布验收与回滚](docs/formfield/release-native-design-2026-10-18.md)。
+
+**历史发布 · 2026-10-15**：SPS 概念估重与设计平衡、装甲审阅采纳、`.sship` 迁移和液态玻璃已上线；最终静态版本 `e4ce74e`。核心 1726 项通过，原有项目和运行数据保留。[发布身份、验收与回滚](docs/formfield/release-sps-glass-2026-10-15.md)。
 
 Plimsoll 计算核心现状：[当前状态](docs/plimsoll-1.0/current-status.md) · [2026-10-10 核心复核与生产发布](docs/plimsoll-1.0/core-release-2026-10-10.md) · [2026-09-23 类 SPS 核心交接](docs/plimsoll-1.0/交接_类SPS计算核心_2026-09-23.md) · [Queen Mary 输入资料准备度](docs/plimsoll-1.0/queen-mary-input-readiness.md) · [原 2026-09-22 报告](docs/plimsoll-1.0/项目报告_Plimsoll计算核心_2026-09-22.md)。
 
