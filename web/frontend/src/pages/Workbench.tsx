@@ -1,5 +1,5 @@
 import { useCopyMessage } from '../i18n/useCopyMessage';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import * as api from '../api';
 import { outcome } from '../audio/feedback';
@@ -37,11 +37,13 @@ import { WorkbenchOverview } from '../components/WorkbenchOverview';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import { useConceptCopy } from '../i18n/concept';
 import { useShipDesignCopy } from '../i18n/shipDesign';
-import { Sps3b3Readings } from '../components/Sps3b3Readings';
 import {
   ShipDesignChapter, ShipDesignLedgerSection, ShipDesignOverview, useShipDesignHost,
 } from '../components/ShipDesignEditor';
 import { shipDesignEnabled, shipDesignOf, shipDesignRunOptions } from '../components/sps3b3Model';
+import { DesignFeedback } from '../components/DesignFeedback';
+import { useSavedDesignPreview } from '../components/useSavedDesignPreview';
+import type { DraftSide } from '../components/designFeedbackModel';
 import type { ProjectDocument, ProjectView, RunView, ShipDesign } from '../types';
 
 /** The anchor the concept screen keeps for a project that still declares one. */
@@ -314,6 +316,9 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   const [view, setView] = useState<ProjectView | null>(null);
   const [draft, setDraft] = useState<ProjectDocument | null>(null);
   const [chapter, setChapter] = useState<Chapter>('overview');
+  // One shared disclosure for the whole native editor: the changes panel is
+  // reachable from every chapter and rendered once, never duplicated per page.
+  const [showChanges, setShowChanges] = useState(false);
   const [traceOpen, setTraceOpen] = useState(traceDefaultsOpen);
   const [conditionId, setConditionId] = useState('');
   const [dirty, setDirty] = useState(false);
@@ -485,6 +490,25 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
   });
   hostBusyRef.current = host.busy;
   const hostBlocked = hostPending > 0 || host.busy;
+
+  /**
+   * The saved revision's own preview, read once per saved identity.
+   *
+   * The host previews the draft; this answers the other half of the comparison
+   * question — what the reader actually saved — without sending a command. It is
+   * keyed to the saved project and revision, so a save reads the new revision
+   * once and a project switch discards the old answer.
+   */
+  const saved = useSavedDesignPreview(view);
+  const savedSide = useMemo<DraftSide>(() => ({
+    result: saved.result, project: view?.project ?? null, state: saved.state,
+  }), [saved.result, saved.state, view]);
+  // A pending edit or an in-flight preview is not the draft: the readings are
+  // withheld until the queue settles, while the declared inputs below stay.
+  const draftSide = useMemo<DraftSide>(() => ({
+    result: host.nativePreview, project: draft,
+    state: host.state.error ? 'failed' : (hostPending > 0 || host.state.busy) ? 'pending' : 'ready',
+  }), [host.nativePreview, host.state.error, host.state.busy, hostPending, draft]);
 
   useEffect(() => {
     let active = true;
@@ -1206,10 +1230,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           <label>{w('editor.ledger.source')}<input value={source ?? ''} onChange={event => updateMass(groupIndex, itemIndex, 'source', event.target.value)} /></label>
         </TracedField></div>;
     })}</div></div>);
-  // The saved native stage of the selected run, read for the native report only
-  // when it is the request this page currently assembles.
-  const nativeStage = selectedRun && requestOptionsMatch(selectedRun, runOptions)
-    ? selectedRun.result?.stages?.ship_design?.data : undefined;
+  // The saved native stage of the selected run is no longer rendered here: the
+  // live overview states its own facts from the settled preview above.
   // Display units follow the edited draft. They change presentation only: the
   // saved revision, the request and every export stay canonical.
   const page = <div className="workbench-layout" data-trace={traceOpen ? 'open' : 'closed'}>
@@ -1237,6 +1259,12 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
             {operation && <span className="operation-live" role="status">{w(OPERATION_TEXT[operation])}</span>}
           </div>
           <div className="toolbar-actions">
+            {/* One compact entry to the comparison, on every native chapter: the
+                panel itself is rendered once below this bar, never per page. */}
+            {native && <button type="button" className="button button--secondary" aria-expanded={showChanges} aria-controls="design-changes"
+              onClick={() => setShowChanges(value => !value)}>
+              {showChanges ? w('workbench.changes.hide') : w('workbench.changes.show')}
+            </button>}
             {/* Each control names the operation it is actually waiting on. A save
                 in progress keeps the run control reading as a run, because it is
                 not one. A pending native edit blocks both, because a save or a
@@ -1261,6 +1289,15 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
         {/* Every blocking failure sits here, directly under the operation bar and
             above the chapter heading: request errors included, never folded away. */}
         <div className="workbench-alerts">
+          {/* The native queue's state is global, not chapter-local: an edit being
+              confirmed blocks save and run from anywhere, and a failure stays
+              visible after the reader moves to another chapter. */}
+          {native && hostPending > 0 && <p className="sps-pending" role="status">{d('shipDesign.pending', { count: hostPending })}</p>}
+          {native && host.state.error && <div className="notice notice--error" role="alert">
+            <span>{d('shipDesign.failed', { message: host.state.error })}</span>
+            <button type="button" className="button button--secondary" disabled={host.busy} onClick={host.retry}>{d('shipDesign.retry')}</button>
+          </div>}
+          {native && host.error && <div className="notice notice--error" role="alert">{d('shipDesign.failed', { message: host.error })}</div>}
           {runsState === 'failed' && <ReadFailure title={w('workbench.read.historyFailed')} detail={runsError}
             onRetry={() => setRunsAttempt(value => value + 1)} />}
           {resultState === 'failed' && <ReadFailure title={w('workbench.read.resultFailed')} detail={resultError}
@@ -1280,13 +1317,15 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           hand-edited JSON document survives the switch with its value, its focus
           and its selection. */}
       <div className="workbench-content" data-motion={chapterMotion}>
+        {showChanges && native && <div id="design-changes">
+          <DesignFeedback before={savedSide} after={draftSide} catalogue={host.catalogue} onRetry={saved.retry} onOpenChapter={next => goChapter(next as Chapter)} />
+        </div>}
         <ChapterHead chapter={chapter} name={draft.name} projectId={draft.id} revision={view.revision} proxy={draft.name.toLowerCase().includes('queen mary')} />
         {chapter === 'overview' && <>
           {/* The native design is always reachable: a project that declares none
               is offered a setup, and a project that only carried the old
               compatibility section is upgraded into a pending-save draft once. */}
-          <ShipDesignOverview host={host} disabled={busy} />
-          {nativeStage && <Sps3b3Readings data={nativeStage} runId={selectedRun?.id} variant="native" />}
+          <ShipDesignOverview host={host} disabled={busy} onOpenChapter={next => goChapter(next as Chapter)} />
           <WorkbenchOverview draft={draft} revision={view.revision} conditionId={conditionId}
             runs={runs} current={selectedRun} previous={historyOfSelected} requestStages={requestStages}
             requestError={runError} dirty={dirty || jsonEdited} historyState={runsState} resultState={resultState} previousState={historyCandidate?.id === currentResultId ? resultState : previousState} onRefreshRuns={() => setRunsAttempt(value => value + 1)} onChapter={goChapter} onRun={onRun} onNavigate={jumpTo} />
@@ -1324,7 +1363,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           : <section className="editor-section"><p className="section-intro">{d('shipDesign.setup.hint')}</p><ConceptDesignLink label={d('shipDesign.setup.fresh')} onOpen={() => goChapter('overview')} /></section>)}
         {chapter === 'guns' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.guns')} note={w('editor.group.guns.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p>
           {native
-            ? <ShipDesignChapter page="guns" host={host} disabled={busy} />
+            ? <ShipDesignChapter page="guns" host={host} disabled={busy}
+              baseline={saved.state === 'ready' ? saved.result : null} />
             : <><GunsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchBattery={patchBattery} /><ConceptDesignLink label={c('concept.enable')} onOpen={openConceptDesign} /></>}
           <ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.systems')} note={w('editor.json.systemsText')} label={w('editor.json.label')} /></section>}
         {chapter === 'weapons' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.weapons')} note={w('editor.group.weapons.note')} /><p className="section-intro">{chapterOf(chapter, w).purpose}</p>
@@ -1333,7 +1373,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
             : <WeaponsEditor weapons={getWeapons()} runs={visibleRuns} ledger={ledger} onPatchLeaf={patchWeapons} />}
           <ChapterJson w={w} text={jsonText} onEdit={editJson} edited={jsonEdited} onApply={applyJson} onDiscard={discardJson} error={jsonError} summary={w('editor.json.weapons')} note={w('editor.json.weaponsText')} label={w('editor.json.label')} /></section>}
         {chapter === 'armour' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.armour')} />
-          {native ? <ShipDesignChapter page="armour" host={host} disabled={busy} /> : <ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} />}</section>}
+          {native ? <ShipDesignChapter page="armour" host={host} disabled={busy}
+            baseline={saved.state === 'ready' ? saved.result : null} /> : <ArmourEditor project={draft} run={selectedRun} onChange={updateDraft} />}</section>}
         {chapter === 'propulsion' && <section className="editor-section"><InputGroup index="01" title={w('editor.group.propulsion')} />
           {native ? <ShipDesignChapter page="engine" host={host} disabled={busy} />
             : <><EnginesEditor project={draft} run={selectedRun} onChange={updateDraft} /><ConceptDesignLink label={c('concept.group.machinery')} onOpen={openConceptDesign} /></>}</section>}

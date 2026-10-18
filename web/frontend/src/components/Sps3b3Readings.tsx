@@ -3,6 +3,10 @@ import * as api from '../api';
 import { useSps3b3Copy } from '../i18n/sps3b3';
 import { useShipDesignCopy } from '../i18n/shipDesign';
 import { formatNumber } from './units';
+import { readFreeboardGeometry, profileX, profileY } from './freeboardProfileModel';
+import { ArmourDiagram } from './ArmourDiagram';
+import { ArmamentComposition } from './ArmamentComposition';
+import { VesselDesignOverview } from './VesselDesignOverview';
 import { nativeReadings, sps3b3ReportSections, sps3b3ReportText, sps3b3ResultOf } from './sps3b3Model';
 import type { ShipDesignResult, Sps3b3Result } from '../types';
 import '../styles/Sps3b3.css';
@@ -10,18 +14,10 @@ import '../styles/Sps3b3.css';
 export function SpsFreeboardProfile({result}:{result:Sps3b3Result|null}) {
   const svgRef=useRef<SVGSVGElement>(null),w=useSps3b3Copy();
   const [exportError,setExportError]=useState('');
-  const h=result?.hull,f=result?.freeboard;
-  if (!h || !f) return null;
-  const value=(o:Record<string,unknown>,key:string)=>typeof o[key]==='number' && Number.isFinite(o[key]) ? o[key] as number : null;
-  const length=value(h,'length'),fc=value(f,'fcLength'),fd=value(f,'fdLength'),qd=value(f,'qdLength');
-  const heights=['freeQDAft','freeQDFor','freeADAft','freeADFor','freeFDAft','freeFDFor','freeFCAft','freeFCFor'].map(k=>value(f,k));
-  if (!length || fc===null || fd===null || qd===null || heights.some(v=>v===null)) return null;
-  const bow=value(f,'lengthBow')??0,stern=Math.max(0,value(f,'lengthStern')??0);
-  const bowX=length+(heights[7] as number)*Math.tan(bow*Math.PI/180);
-  const xs=[-stern,length*qd,length*qd,length*(1-fc-fd),length*(1-fc-fd),length*(1-fc),length*(1-fc),bowX];
-  const low=Math.min(0,...xs),span=Math.max(length,...xs)-low;
-  const top=Math.max(1,...heights as number[]),bottom=Math.min(0,...heights as number[]);
-  const x=(v:number)=>30+(v-low)/span*940,y=(v:number)=>150-(v-bottom)/(top-bottom)*110;
+  const geometry=readFreeboardGeometry(result);
+  if (!geometry) return null;
+  const {xs,heights}=geometry;
+  const x=(v:number)=>profileX(geometry,v),y=(v:number)=>profileY(geometry,v);
   const savePicture=()=>{
     const svg=svgRef.current;if(!svg)return;
     const clone=svg.cloneNode(true) as SVGSVGElement;
@@ -38,7 +34,7 @@ export function SpsFreeboardProfile({result}:{result:Sps3b3Result|null}) {
     image.onerror=()=>{URL.revokeObjectURL(url);setExportError(w('sps.profile.error'));};image.src=url;
   };
   return <figure className="sps-profile"><svg ref={svgRef} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 180" role="img" aria-label="Freeboard profile / 干舷端点剖面">
-    <line x1={x(0)} x2={x(length)} y1={y(0)} y2={y(0)} stroke="currentColor" strokeDasharray="8 6" />
+    <line x1={x(0)} x2={x(geometry.length)} y1={y(0)} y2={y(0)} stroke="currentColor" strokeDasharray="8 6" />
     <polyline points={xs.map((v,i)=>`${x(v)},${y(heights[i] as number)}`).join(' ')} fill="none" stroke="currentColor" strokeWidth="3" />
     {xs.map((v,i)=><circle key={i} cx={x(v)} cy={y(heights[i] as number)} r="3" fill="currentColor"><title>{heights[i]?.toFixed(2)} ft</title></circle>)}
     <text x="30" y="175" fill="currentColor">Stern / 艉</text><text x="840" y="175" fill="currentColor">Bow / 艏</text>
@@ -88,6 +84,12 @@ export function Sps3b3Readings({data,runId,variant}:{data:unknown;runId?:string;
     </div>}
     {native && <p className="sps-hint">{d('shipDesign.formatHint')}</p>}
     {notice && <p role="status">{notice}</p>}
+    {native && <VesselDesignOverview result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && <ArmamentComposition result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && <ArmourDiagram result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     <SpsFreeboardProfile result={result} />
     {sections.length ? <div className="sps-report">{sections.map((s,i)=><section key={`${s.id}-${i}`}>
       {s.title && <h3>{s.title}</h3>}<pre>{s.lines.join('\n')}</pre>

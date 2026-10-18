@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as api from '../api';
 import { useShipDesignCopy, useShipDesignRoleLabel, type ShipDesignKey } from '../i18n/shipDesign';
 import { useSps3b3Copy } from '../i18n/sps3b3';
+import { useArmourDiagramCopy } from '../i18n/armourDiagram';
 import type {
   DesignReply, ProjectDocument, ShipDesign, ShipDesignLedgerEntry, ShipDesignResult,
   Sps3b3Design, Sps3b3Field,
@@ -21,6 +22,10 @@ import {
   TextControl, Toggle, pageUnitLabel,
 } from './Sps3b3Editor';
 import { SpsFreeboardProfile } from './Sps3b3Readings';
+import { ArmourDiagram, type ArmourDiagramState } from './ArmourDiagram';
+import { ArmamentComposition } from './ArmamentComposition';
+import { VesselDesignOverview, type VesselOverviewState } from './VesselDesignOverview';
+import { useVesselOverviewCopy } from '../i18n/vesselOverview';
 import { formatNumber } from './units';
 import {
   balanceOf, basisConditionId, bindingProblem, conditionLabel, effectiveItemMass, isUnresolved,
@@ -473,8 +478,9 @@ function driverValue(value: unknown, fallback: string): string {
 }
 
 /** The source fields of one chapter, in the ordinary page body. */
-export function ShipDesignFields({ page, host, disabled }: {
+export function ShipDesignFields({ page, host, disabled, revealField = null, revealSeq = 0 }: {
   page: string; host: ShipDesignHost; disabled: boolean;
+  revealField?: string | null; revealSeq?: number;
 }) {
   const w = useSps3b3Copy();
   const source = host.source;
@@ -489,31 +495,53 @@ export function ShipDesignFields({ page, host, disabled }: {
     <p className="sps-count">{w('sps.page.fieldCount', { count: groups.reduce((n, g) => n + g.fields.length, 0) })}</p>
     {groups.map(group => (
       <Sps3b3GroupView key={group.id} group={group} design={source} copy={w} disabled={disabled}
+        revealField={revealField} revealSeq={revealSeq}
         onCommand={host.submitCommand} onCommitField={host.commitField} />
     ))}
   </div>;
 }
 
 /**
- * One native chapter: its drivers, its source fields, its freeboard profile and
- * its own derived reading. There are no inner source-page tabs: the chapter *is*
- * the page.
+ * One native chapter: its drivers, its diagram, its source fields, its freeboard
+ * profile and its own derived reading. There are no inner source-page tabs: the
+ * chapter *is* the page.
+ *
+ * The armour chapter leads with its diagram above the existing fields, and the
+ * guns chapter leads with the armament composition: a region's or a battery's
+ * explicit Edit asks this chapter to reveal that source field, and the one token
+ * below opens the matching group and focuses the field after it mounts.
  */
-export function ShipDesignChapter({ page, host, disabled }: {
-  page: string; host: ShipDesignHost; disabled: boolean;
+export function ShipDesignChapter({ page, host, disabled, baseline }: {
+  page: string; host: ShipDesignHost; disabled: boolean; baseline?: unknown;
 }) {
   const w = useSps3b3Copy();
+  const a = useArmourDiagramCopy();
+  const v = useVesselOverviewCopy();
+  const [reveal, setReveal] = useState<{ field: string; seq: number } | null>(null);
+  const revealSeq = useRef(0);
   const source = host.source;
   if (!source) return null;
   const state = host.state;
   const unit = host.catalogue ? pageUnitLabel(host.catalogue, page, source) : null;
+  const diagramState: ArmourDiagramState = state.error || host.error
+    ? 'failed'
+    : (disabled || host.busy || state.pending > 0 ? 'pending' : 'ready');
+  const onEditField = (field: string): void => {
+    revealSeq.current += 1;
+    setReveal({ field, seq: revealSeq.current });
+  };
+  const armamentContext = host.project
+    ? v('vessel.context.draft', { revision: host.project.revision }) : null;
+  const contextLabel = host.project
+    ? `${host.project.name} · ${a('armour.context.draft', { revision: host.project.revision })}` : null;
   return <>
-    {state.error ? <div className="sps-error" role="alert">{w('sps.queue.failed', { message: state.error })}
-      <button type="button" onClick={host.retry}>Retry / 重试</button></div> : null}
-    {host.error ? <p className="sps-error" role="alert">{w('sps.error.generic', { message: host.error })}</p> : null}
-    {state.pending > 0 ? <p className="sps-pending" role="status">{w('sps.queue.pending', { count: state.pending })}</p> : null}
     <ShipDesignControls page={page} host={host} disabled={disabled} />
-    <ShipDesignFields page={page} host={host} disabled={disabled} />
+    {page === 'armour' ? <ArmourDiagram result={state.preview} baseline={baseline}
+      state={diagramState} contextLabel={contextLabel} onEditField={onEditField} /> : null}
+    {page === 'guns' ? <ArmamentComposition result={state.preview} baseline={baseline}
+      state={diagramState} contextLabel={armamentContext} onEditField={onEditField} /> : null}
+    <ShipDesignFields page={page} host={host} disabled={disabled}
+      revealField={reveal?.field ?? null} revealSeq={reveal?.seq ?? 0} />
     {page === 'freeboard' ? <SpsFreeboardProfile result={state.preview} /> : null}
     <PageReadings result={state.preview} page={page} unit={unit} copy={w}
       status={state.preview?.status ?? state.status} diagnostics={state.diagnostics}
@@ -522,13 +550,20 @@ export function ShipDesignChapter({ page, host, disabled }: {
 }
 
 /** The ordinary-overview block: setup when absent, design facts when present. */
-export function ShipDesignOverview({ host, disabled }: { host: ShipDesignHost; disabled: boolean }) {
+export function ShipDesignOverview({ host, disabled, onOpenChapter }: {
+  host: ShipDesignHost; disabled: boolean; onOpenChapter?: (chapter: string) => void;
+}) {
   const w = useSps3b3Copy();
   const d = useShipDesignCopy();
+  const v = useVesselOverviewCopy();
   if (!host.design) return <ShipDesignSetup host={host} disabled={disabled} />;
   const design = host.design;
   const locked = disabled || host.busy;
   const basis = conditionLabel(host.project, design.condition_id);
+  const state = host.state;
+  const overviewState: VesselOverviewState = state.error || host.error
+    ? 'failed'
+    : (disabled || host.busy || state.pending > 0 ? 'pending' : 'ready');
   return <section className="ship-design" aria-label={d('shipDesign.title')}>
     <header className="sps-head">
       <p className="sps-kicker">{d('shipDesign.kicker')}</p>
@@ -537,9 +572,12 @@ export function ShipDesignOverview({ host, disabled }: { host: ShipDesignHost; d
       <p className="sps-empirical">{d('shipDesign.empiricalNote')}</p>
     </header>
     {host.catalogError ? <p className="sps-error" role="alert">{w('sps.error.catalog')}</p> : null}
-    {host.error ? <p className="sps-error" role="alert">{d('shipDesign.failed', { message: host.error })}</p> : null}
     <p className="sps-hint">{d('shipDesign.condition')}: {basis ?? d('shipDesign.conditionUnset')}</p>
     <p className="sps-hint">{d('shipDesign.conditionHint')}</p>
+    {/* The one specification sheet, read from the settled preview: a pending or
+        failed edit withholds every fact here just as it does everywhere else. */}
+    <VesselDesignOverview result={state.preview} state={overviewState} onOpenChapter={onOpenChapter}
+      contextLabel={host.project ? `${host.project.name} · ${v('vessel.context.draft', { revision: host.project.revision })}` : null} />
     <div className="sps-meta">
       <label className="sps-text">
         <span>{d('shipDesign.source')}</span>
@@ -559,8 +597,6 @@ export function ShipDesignOverview({ host, disabled }: { host: ShipDesignHost; d
           onChange={event => { const file = event.target.files?.[0]; event.target.value = ''; if (file) host.importFile(file); }} />
       </label>
       <p className="sps-hint">{d('shipDesign.setup.importHint')}</p>
-      {host.busy ? <p className="sps-pending" role="status">{d('shipDesign.setup.pending')}</p> : null}
-      {host.state.pending > 0 ? <p className="sps-pending" role="status">{d('shipDesign.pending', { count: host.state.pending })}</p> : null}
     </div>
   </section>;
 }

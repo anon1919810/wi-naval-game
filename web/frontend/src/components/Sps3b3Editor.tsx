@@ -370,19 +370,38 @@ export function Sps3b3Editor({ project, onChange, onPendingChange, disabled = fa
  * queued source command in the editor, a native command in the ordinary
  * workbench — so this stays a presentation of the design, not a second editor.
  */
-export function Sps3b3GroupView({ group, design, copy, disabled, onCommand, onCommitField }: {
+export function Sps3b3GroupView({ group, design, copy, disabled, onCommand, onCommitField, revealField = null, revealSeq = 0 }: {
   group: Sps3b3Group; design: Sps3b3Design; disabled: boolean;
   copy: (key: Sps3b3Key, params?: CopyParams) => string;
   onCommand: (command: SpsCommand) => void;
   onCommitField: (field: Sps3b3Field, value: unknown) => void;
+  /** A source field this panel was asked to reveal; the group holding it opens and focuses it. */
+  revealField?: string | null;
+  /** A monotonic token, so the same field can be revealed again. */
+  revealSeq?: number;
 }) {
   const [open, setOpen] = useState(group.openByDefault);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const matches = Boolean(revealField) && group.fields.some(field => field.name === revealField);
+  useEffect(() => {
+    if (matches) setOpen(true);
+  }, [matches, revealField, revealSeq]);
+  useEffect(() => {
+    if (!matches || !open || !revealField) return;
+    const row = sectionRef.current?.querySelector<HTMLElement>(`[data-field="${revealField}"]`);
+    if (!row) return;
+    const focusable = row.matches('input,select,textarea,button')
+      ? row
+      : row.querySelector<HTMLElement>('input,select,textarea,button');
+    row.scrollIntoView?.({ block: 'center' });
+    focusable?.focus();
+  }, [matches, open, revealField, revealSeq]);
   const locked = Array.isArray(design.editing.locked_shell_groups)
     ? design.editing.locked_shell_groups
     : [];
   const shellLocked = group.index !== undefined && locked.includes(group.index);
   return (
-    <section className="sps-group">
+    <section className="sps-group" ref={sectionRef}>
       {group.collapsible ? (
         <button type="button" className="sps-group-head" aria-expanded={open}
           onClick={() => setOpen(prev => !prev)}>

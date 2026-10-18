@@ -13,6 +13,7 @@ import { StageIndex } from '../components/StageIndex';
 import { StageStatus, stageLabel, dataLabel } from '../components/StageStatus';
 import { compareReports, validReportIdentity } from '../components/reportComparison';
 import { UnitProvider, useUnits } from '../components/UnitProvider';
+import { FrozenDesignSummary } from '../components/DesignFeedback';
 import { useReportPrint } from '../components/useReportPrint';
 import { CHOICES, classifyKey, DIMENSION_KEYS, type DisplayPreferences } from '../components/units';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
@@ -234,6 +235,15 @@ function ReportBody({ result, runId, revision, compareResult, compareError, run,
                 <div><strong>{w('report.compare.current')}</strong><span>{w('workbench.save.revision', { revision: comparison.current.revision ?? w('units.unknown') })}</span>{comparison.current.runId && <span>{w('overview.result.run',{id:comparison.current.runId})}</span>}<span>{w('report.compare.condition', { id: comparison.current.condition })}</span><span>{w('report.compare.units', { value: JSON.stringify(result.units) })}</span><span>{w('report.compare.method', { value: JSON.stringify(result.method_versions) })}</span><code>{comparison.current.fingerprint}</code></div>
                 <div><strong>{w('report.compare.other')}</strong>{comparison.comparison.runId && <span>{w('overview.result.run',{id:comparison.comparison.runId})}</span>}<span>{w('workbench.save.revision', { revision: comparison.comparison.revision ?? w('units.unknown') })}</span><span>{w('report.compare.condition', { id: comparison.comparison.condition })}</span><span>{w('report.compare.units', { value: JSON.stringify(compareResult!.units) })}</span><span>{w('report.compare.method', { value: JSON.stringify(compareResult!.method_versions) })}</span><code>{comparison.comparison.fingerprint}</code></div>
               </div>
+              {/* The concise frozen native summary sits above the full readings and
+                  uses the same direction as the table beneath it (comparison −
+                  current), so the adjacent panels never show opposite signs. It
+                  reads only the two immutable results; no live preview is fetched. */}
+              <FrozenDesignSummary current={result} comparison={compareResult!}
+                currentValid={validReportIdentity({ result, run })}
+                comparisonValid={validReportIdentity({ result: compareResult!, run: compareRun })}
+                currentLabel={[w('report.compare.current'), comparison.current.runId ? w('overview.result.run', { id: comparison.current.runId }) : null, w('workbench.save.revision', { revision: comparison.current.revision ?? w('units.unknown') })].filter(Boolean).join(' · ')}
+                comparisonLabel={[w('report.compare.other'), comparison.comparison.runId ? w('overview.result.run', { id: comparison.comparison.runId }) : null, w('workbench.save.revision', { revision: comparison.comparison.revision ?? w('units.unknown') })].filter(Boolean).join(' · ')} />
               {/* A refusal that does not say what differs leaves the reader hunting
                   for it, so every fact that breaks the shared basis is named. */}
               {comparison.inputChanges.length > 0 && <ul className="comparison-changes">{comparison.inputChanges.map(change => <li key={change}>{change}</li>)}</ul>}

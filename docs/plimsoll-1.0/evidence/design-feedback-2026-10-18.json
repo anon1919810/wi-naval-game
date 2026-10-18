@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-18",
+  "status": "accepted_local_candidate",
+  "base_commit": "c59a47e3f3d1a234089353d543406ad8be10cd2d",
+  "production_runtime_unchanged": "34ee279e5528e6e1502ae2f3eb85e4c876664dec",
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "scope": [
+    "native draft vs saved feedback",
+    "frozen native comparison summary",
+    "pending and failure feedback",
+    "route loading"
+  ],
+  "browser": {
+    "accepted": true,
+    "nine_frozen_readings_match_payload": true,
+    "draft_and_frozen_directions_match": true,
+    "save_and_reload_reset_to_zero": true,
+    "pending_and_failed_readings_withheld": true,
+    "retry_restores_readings": true,
+    "deck_declared_plus_10t": true,
+    "per_side_source_units": true,
+    "chinese_keeps_frozen_readings": true,
+    "chunk_reload_reaches_network": true
+  },
+  "preservation": {
+    "accepted": true,
+    "core_backend_source_drift": [],
+    "source_commit": "c59a47e3f3d1a234089353d543406ad8be10cd2d",
+    "baseline_run": "bde6cfae-6746-43f2-9de7-96157b3fcef8",
+    "candidate_run": "0b3892d2-b6e4-4211-a494-e568e95403e5",
+    "project": "1bd401a4-c3f2-42e3-a79f-95810e31e64e",
+    "revisions": [
+      1,
+      2
+    ],
+    "old_run_unchanged": true,
+    "deck_declared_preserved": true,
+    "new_balance": {
+      "condition_id": "design-normal",
+      "basis_condition_id": "design-normal",
+      "selected_mass_t": 71934.15251525561,
+      "estimated_mass_t": 71924.15251564553,
+      "target_displacement_t": 71924.1508403957,
+      "difference_t": 10.00167485991551,
+      "needs_binding": [],
+      "complete": true
+    },
+    "changed_paths": [
+      "web/frontend/src/App.tsx",
+      "web/frontend/src/components/ShipDesignEditor.tsx",
+      "web/frontend/src/i18n/shell.ts",
+      "web/frontend/src/i18n/shipDesign.ts",
+      "web/frontend/src/i18n/workspace.ts",
+      "web/frontend/src/pages/Report.tsx",
+      "web/frontend/src/pages/Workbench.tsx",
+      "docs/superpowers/plans/2026-10-18-design-feedback.md",
+      "docs/superpowers/specs/2026-10-18-design-feedback-design.md",
+      "web/frontend/src/__tests__/design-feedback-ui.test.tsx",
+      "web/frontend/src/__tests__/design-feedback.test.ts",
+      "web/frontend/src/__tests__/workspace-lazy.test.tsx",
+      "web/frontend/src/components/DesignFeedback.tsx",
+      "web/frontend/src/components/designFeedbackModel.ts",
+      "web/frontend/src/components/reloadPage.ts",
+      "web/frontend/src/components/useDesignCatalogue.ts",
+      "web/frontend/src/components/useRouteModule.ts",
+      "web/frontend/src/components/useSavedDesignPreview.ts",
+      "web/frontend/src/i18n/designFeedback.ts",
+      "web/frontend/src/styles/designFeedback.css"
+    ]
+  },
+  "bundle": {
+    "accepted": true,
+    "baseline": {
+      "root": "App-Zn_4gU_q.js",
+      "static_closure": [
+        "App-Zn_4gU_q.js",
+        "index-CTUzU4W3.js"
+      ],
+      "raw_bytes": 1304125,
+      "gzip_bytes": 345097,
+      "note": "Static JS import closure from workspace App, includes shared eager imports, excludes dynamic pages until requested. This is byte cost, not measured loading time."
+    },
+    "current": {
+      "root": "App-DmkQmBAL.js",
+      "static_closure": [
+        "App-DmkQmBAL.js",
+        "index-DvHi7v4n.js",
+        "terms-DgsK_TSe.js"
+      ],
+      "raw_bytes": 693094,
+      "gzip_bytes": 203505
+    },
+    "raw_reduction_percent": 46.85371417617177,
+    "gzip_reduction_percent": 41.02962355511639,
+    "largest_chunks": [
+      {
+        "name": "Scene-DCLVozUS.js",
+        "bytes": 582369
+      },
+      {
+        "name": "App-DmkQmBAL.js",
+        "bytes": 336084
+      },
+      {
+        "name": "index-DvHi7v4n.js",
+        "bytes": 313616
+      },
+      {
+        "name": "Workbench-DtlS1xg9.js",
+        "bytes": 298685
+      },
+      {
+        "name": "resultReading-yhPBWT25.js",
+        "bytes": 262609
+      },
+      {
+        "name": "Page-D50mwFg0.js",
+        "bytes": 101059
+      },
+      {
+        "name": "terms-DgsK_TSe.js",
+        "bytes": 43394
+      },
+      {
+        "name": "Report-Dh31TJS-.js",
+        "bytes": 41924
+      }
+    ],
+    "note": "Static import closure measured by equal method; gzip compressed at equal setting. Loading time not benchmarked. Real browser resource receipt is a separate check."
+  },
+  "verification": {
+    "focused_frontend_and_impacted_existing_tests": "passed after repairing the two affected feedback files; unaffected passing files were not repeated",
+    "logs": [
+      "frontend-acceptance.log",
+      "frontend-fixes.log",
+      "frontend-build-delivery-final.log"
+    ],
+    "build": "passed",
+    "unchanged_python_suites": "not rerun",
+    "review": "Codex independently reviewed and repaired remaining concrete issues; worker report was not treated as acceptance",
+    "real_browser_api_worker": true,
+    "screenshots": [
+      "report-final-zh-desktop.png",
+      "report-zh-dark-390-final.png"
+    ],
+    "evidence_directory": "outputs/design-feedback-2026-10-18/"
+  },
+  "limits": [
+    "synthetic input, no real-ship calibration",
+    "byte reduction measured, load latency not benchmarked",
+    "no full input matrix rerun",
+    "existing Scene chunk warning remains",
+    "no public deployment acceptance this batch"
+  ]
+}

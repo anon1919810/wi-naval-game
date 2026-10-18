@@ -47,6 +47,7 @@ const EN = {
   'shipDesign.pending': '{count} ship-design edit(s) are still being confirmed. Saving and running stay blocked until they settle.',
   'shipDesign.blocked': 'Save and run are blocked while ship-design edits are still being confirmed.',
   'shipDesign.failed': 'A ship-design edit failed to confirm: {message}',
+  'shipDesign.retry': 'Retry the failed edit',
 
   'shipDesign.ledger.title': 'Weight and design balance',
   'shipDesign.ledger.positions': 'Item positions and sources',
@@ -139,6 +140,7 @@ const ZH: ShipDesignDictionary = {
   'shipDesign.pending': '还有 {count} 项舰船设计修改正在确认；在它们全部落定前，保存与运行保持禁用。',
   'shipDesign.blocked': '舰船设计修改仍在确认期间，保存与运行被禁用。',
   'shipDesign.failed': '一项舰船设计修改未能确认：{message}',
+  'shipDesign.retry': '重试失败的修改',
 
   'shipDesign.ledger.title': '重量与设计平衡',
   'shipDesign.ledger.positions': '条目位置与来源',

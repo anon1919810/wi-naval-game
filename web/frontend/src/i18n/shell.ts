@@ -43,6 +43,11 @@ const EN = {
   'shell.module.title': 'The workspace could not be loaded',
   'shell.module.note': 'Reload the page to restore the workspace. The existing browser workspace is kept, and you can return to the public pages first.',
   'shell.module.reload': 'Reload the page',
+
+  /* ---- a route chunk that failed to arrive, rendered by the eager shell ----- */
+  'shell.route.failedTitle': 'This page could not be loaded',
+  'shell.route.failedNote': 'The part of the tool this page needs did not arrive. Reloading fetches it again; your address and this browser\'s workspace session are kept.',
+  'shell.route.reload': 'Reload the page',
   'shell.toolReturn': '↖ Y’s Formfield',
 
   /* ---- the document title on a tool route, set by the eager shell ----------- */
@@ -71,6 +76,10 @@ const ZH: ShellDictionary = {
   'shell.module.title': '工作空间未能加载',
   'shell.module.note': '请重新载入页面以恢复工作空间。现有浏览器工作区会保留，也可以先返回公共页面。',
   'shell.module.reload': '重新载入页面',
+
+  'shell.route.failedTitle': '此页面未能加载',
+  'shell.route.failedNote': '此页面所需的那部分工具没有到达。重新载入页面会重新获取它；地址和本浏览器的工作空间会话都会保留。',
+  'shell.route.reload': '重新载入页面',
   'shell.toolReturn': '↖ Y’s Formfield',
 
   'doc.title.app': 'Plimsoll · 舰船计算工作台',

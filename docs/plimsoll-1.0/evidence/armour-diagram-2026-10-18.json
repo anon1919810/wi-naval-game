@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-18",
+  "status": "accepted_local_candidate",
+  "base_commit": "c59a47e3f3d1a234089353d543406ad8be10cd2d",
+  "committed": false,
+  "pushed": false,
+  "deployed": false,
+  "scope": [
+    "native armour schematic",
+    "existing editor reveal and focus",
+    "saved baseline region changes",
+    "frozen run/report view",
+    "self-contained SVG and PNG"
+  ],
+  "acceptance": {
+    "accepted": true,
+    "real_browser_api_worker": true,
+    "keyboard_focus_and_editor_reveal": true,
+    "pending_failure_withholding_and_retry": true,
+    "changed_roles_before_save": [
+      "belt_main",
+      "deck"
+    ],
+    "save_reload_reset": true,
+    "declared_deck": {
+      "mode": "declared",
+      "item_ids": [
+        "sd-deck"
+      ],
+      "estimate_t": 1173.2741420950097,
+      "selected_mass_t": 1183.2741420950097
+    },
+    "balance": {
+      "condition_id": "design-normal",
+      "basis_condition_id": "design-normal",
+      "selected_mass_t": 21120.53972858855,
+      "estimated_mass_t": 21110.53972858855,
+      "target_displacement_t": 21110.539583401056,
+      "difference_t": 10.000145187492308,
+      "needs_binding": [],
+      "complete": true
+    },
+    "frozen_old_and_new_runs_unchanged_after_revision_3": true,
+    "mobile": [
+      {
+        "receipt": "browser-zh-dark-mobile",
+        "viewport": 390,
+        "page": 375,
+        "state": "frozen",
+        "width": 262,
+        "scroll": 900,
+        "svgWidth": 900,
+        "overflow": []
+      },
+      {
+        "receipt": "browser-workbench-mobile",
+        "viewport": 390,
+        "page": 375,
+        "state": "ready",
+        "width": 306,
+        "scroll": 900,
+        "svgWidth": 900,
+        "overflow": []
+      }
+    ],
+    "exports": [
+      {
+        "language": "final-english",
+        "svg_bytes": 13264,
+        "png_bytes": 380632,
+        "png_dimensions": [
+          1600,
+          2607
+        ],
+        "svg_sha256": "6b4c03f49c22fac75a55c90edb3a1db0a0356c218a346b9d0580c68d5dffd3d6",
+        "png_sha256": "7c426ff270b98569f892dcc07914e7c01dd80953776c7179134d83aa67053c8f",
+        "xml_valid": true,
+        "all_roles": true
+      },
+      {
+        "language": "final-chinese",
+        "svg_bytes": 12239,
+        "png_bytes": 491803,
+        "png_dimensions": [
+          1600,
+          2373
+        ],
+        "svg_sha256": "a2f0c4962d026f8dcedaaea7758aab8f7d28a8fc79406a8b8d55f67c0bfd8263",
+        "png_sha256": "732a5fbe6ea24bf0865e7d5aa4c84d9239f96fdc4154e76d9700aefc3e12cbd1",
+        "xml_valid": true,
+        "all_roles": true
+      }
+    ],
+    "input": "controlled synthetic acceptance input; no historical calibration",
+    "logs": {
+      "impacted_frontend": "91 passed in 8 files",
+      "post_export_fix": "29 passed in serializer file; one new XML regression",
+      "build": "passed; existing Scene chunk warning remains"
+    }
+  },
+  "preservation": {
+    "accepted": true,
+    "core_backend_hash_drift": [],
+    "prior_feature_preserved": true,
+    "old_frozen_run_unchanged": true,
+    "base_commit": "c59a47e3f3d1a234089353d543406ad8be10cd2d",
+    "starting_dirty_paths": 25,
+    "increment_modified_paths": [
+      "web/frontend/src/components/ShipDesignEditor.tsx",
+      "web/frontend/src/components/Sps3b3Editor.tsx",
+      "web/frontend/src/components/Sps3b3Readings.tsx",
+      "web/frontend/src/pages/Workbench.tsx",
+      "docs/superpowers/plans/2026-10-18-armour-diagram.md"
+    ],
+    "baseline_run": "3fbaf6f1-499e-46d0-92e9-faabcde7fb9d",
+    "candidate_run": "ec3a374a-76a3-4aa4-a097-3492ed370e56"
+  },
+  "bundle": {
+    "accepted": true,
+    "before": {
+      "root": "App-DmkQmBAL.js",
+      "static_closure": [
+        "App-DmkQmBAL.js",
+        "index-DvHi7v4n.js",
+        "terms-DgsK_TSe.js"
+      ],
+      "raw_bytes": 693094,
+      "gzip_bytes": 203505
+    },
+    "current": {
+      "static_closure": [
+        "App-Pw5IawLh.js",
+        "index-1tNgwogw.js",
+        "terms-DgsK_TSe.js"
+      ],
+      "raw_bytes": 693094,
+      "gzip_bytes": 203504
+    },
+    "note": "Static import byte closure; no load latency benchmark."
+  },
+  "verification_logs": [
+    "acceptance-tests.log",
+    "export-xml-red.log",
+    "export-xml-green.log",
+    "export-final.log",
+    "acceptance-build.log"
+  ],
+  "evidence_directory": "outputs/armour-diagram-2026-10-18/",
+  "limits": [
+    "synthetic input; no real-ship calibration",
+    "schematic centring is not installation position",
+    "no real waterplane/protected area or automatic armour placement",
+    "unchanged Python/backend matrices not rerun",
+    "existing Scene chunk warning remains",
+    "no public deployment acceptance this batch"
+  ]
+}

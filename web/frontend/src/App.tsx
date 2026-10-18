@@ -1,13 +1,12 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import * as api from './api';
 import { ReadFailure, ReadPending } from './components/ReadPending';
+import { useRouteModule } from './components/useRouteModule';
+import { reloadPage } from './components/reloadPage';
 import { clearLeaveGuard, pushHash, setLeaveGuard } from './leaveGuard';
 import { Library } from './pages/Library';
 import { Login } from './pages/Login';
-import { ReportPage } from './pages/Report';
-import { Run } from './pages/Run';
-import { Workbench } from './pages/Workbench';
 import { isAppHash } from './portfolio/routes';
 import { runTransition } from './portfolio/transitions';
 import { useLanguage } from './portfolio/LanguageProvider';
@@ -20,6 +19,41 @@ import type { AuthMode, Theme, UserSession } from './types';
 // fails to arrive still finds these styles present.
 
 const DamageLabPage = lazy(() => import('./damageLab/Page'));
+
+// The heavy pages are their own chunks, fetched only when their route is
+// entered, so the project library can be read without the editors, the run
+// reader and the report. Each loader is a module-scope constant, so a re-render
+// for a language or theme change never re-runs the import and never remounts the
+// page on screen.
+const loadWorkbench = () => import('./pages/Workbench');
+const loadRun = () => import('./pages/Run');
+const loadReport = () => import('./pages/Report');
+
+/**
+ * One route's chunk, rendered through {@link useRouteModule}.
+ *
+ * The shell stays mounted around it, so the header, the session and the address
+ * are untouched while a page arrives or fails. The recovery is an explicit page
+ * reload, not a second import of the same URL: a failed module fetch can be
+ * answered from Chromium's own record without ever reaching the network again,
+ * so an in-place retry would silently do nothing. A reload re-requests the chunk
+ * and keeps the hash route and this browser's workspace session, and the failed
+ * page has never mounted, so no draft is lost.
+ *
+ * Exported so the route chunk's own loading and recovery can be exercised
+ * directly, with a loader the test controls.
+ */
+export function RouteChunk<T>({ load, object, children }: { load: () => Promise<T>; object: string; children: (module: T) => ReactNode }) {
+  const c = useShellCopy();
+  const state = useRouteModule(load);
+  if (state.status === 'ready') return <>{children(state.module)}</>;
+  if (state.status === 'error') return <div className="page-pad">
+    <ReadFailure title={c('shell.route.failedTitle')} detail={c('shell.route.failedNote')}
+      onRetry={reloadPage} retryLabel={c('shell.route.reload')} />
+  </div>;
+  return <div className="page-pad"><ReadPending scope="workspace" object={object} /></div>;
+}
+
 type Route = { kind: 'library' } | { kind: 'project'; id: string } | { kind: 'run'; id: string } | { kind: 'report'; id: string } | { kind: 'lab'; id: string };
 
 /** Where the reader is, in the shell's own words. Read from the route alone. */
@@ -326,10 +360,16 @@ const ANONYMOUS_DEFAULT_LABELS: ReadonlySet<string> = new Set([
     {message && <div className="connection-note" role="alert">{message}<button onClick={() => setReason(null)} aria-label={w('shell.dismiss')}>×</button></div>}
     <div className="app-route" data-motion={routeMotion ?? undefined}>
       {route.kind === 'library' && <Library onOpen={id => navigate(`/projects/${id}`)} onLab={id => navigate(`/damage-lab/${id}`)} anonymous={anonymous} />}
-      {route.kind === 'project' && <Workbench key={route.id} projectId={route.id} onDirtyChange={reportDirty}
-        onBack={() => navigate('/projects')} onRun={id => navigate(`/runs/${id}`)} onLab={() => navigate(`/damage-lab/${route.id}`)} />}
-      {route.kind === 'run' && <Run key={route.id} runId={route.id} onBack={id => navigate(`/projects/${id}`)} onReport={() => navigate(`/reports/${route.id}`)} />}
-      {route.kind === 'report' && <ReportPage key={route.id} runId={route.id} onBack={() => navigate(`/runs/${route.id}`)} />}
+      {route.kind === 'project' && <RouteChunk load={loadWorkbench} object={w('shell.place.project')}>
+        {module => <module.Workbench key={route.id} projectId={route.id} onDirtyChange={reportDirty}
+          onBack={() => navigate('/projects')} onRun={id => navigate(`/runs/${id}`)} onLab={() => navigate(`/damage-lab/${route.id}`)} />}
+      </RouteChunk>}
+      {route.kind === 'run' && <RouteChunk load={loadRun} object={w('shell.place.run')}>
+        {module => <module.Run key={route.id} runId={route.id} onBack={id => navigate(`/projects/${id}`)} onReport={() => navigate(`/reports/${route.id}`)} />}
+      </RouteChunk>}
+      {route.kind === 'report' && <RouteChunk load={loadReport} object={w('shell.place.report')}>
+        {module => <module.ReportPage key={route.id} runId={route.id} onBack={() => navigate(`/runs/${route.id}`)} />}
+      </RouteChunk>}
       {route.kind === 'lab' && <Suspense fallback={<div className="page-pad"><ReadPending scope="workspace" object={w('shell.place.lab')} /></div>}><DamageLabPage key={route.id} projectId={route.id} onBack={() => navigate('/projects')} onProject={id => navigate(`/damage-lab/${id}`)} /></Suspense>}
     </div>
   </div>;

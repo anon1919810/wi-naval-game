@@ -1,5 +1,7 @@
 # 《敌前转向》（Gefahrwend）· 一战舰船游戏资产
 
+**网站发布候选 · 2026-10-19**：原生草稿改动反馈、装甲图、五炮组构成图和舰船设计总览已完成本地验收，用户已授权本次提交部署。冻结报告、配置比较和中英文图片下载贯通；实现及边界见[最新交付](docs/plimsoll-1.0/vessel-overview-2026-10-18.md)。实际上线身份另记发布记录。
+
 > 项目名取自 1916 年日德兰海战中舍尔的敌前转向（*Gefechtskehrtwendung*）——三次 180° 转向让公海舰队从英军战列线前脱险。
 > 配套的自研舰船设计计算器叫 **[Plimsoll](docs/plimsoll-1.0/current-status.md)**（载重线）。[类 SPS 计算核心](docs/plimsoll-1.0/current-core-scope.md)已完成本阶段验收；网站首版见[本地运行与交接](docs/plimsoll-1.0/web-local-operations.md)。2026-10-04 生产部署与公网验收均已完成，站点地址 **[https://www.ydm-xjx.com.cn](https://www.ydm-xjx.com.cn)**，原 IP 入口继续可用。生产以匿名模式运行，无邮箱登录。
 > 命名约定：**平台用历史意象命名，模块用方法命名**（`plimsoll.bonjean` / `.stability` / `.damage`）。

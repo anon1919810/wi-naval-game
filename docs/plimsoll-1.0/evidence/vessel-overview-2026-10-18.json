@@ -1,0 +1,135 @@
+{
+  "accepted": true,
+  "base_run": "e6040373-650d-4340-b860-22a870966a2e",
+  "candidate_run": "97a525af-e6d3-4c80-b482-e7244009e35d",
+  "project_id": "d42284af-3ee4-4bba-902c-042ff87517ba",
+  "later_revision": 3,
+  "checks": [
+    "six chapter links",
+    "keyboard focus and field reveal",
+    "failed preview and retry",
+    "distinct same-count mount choices",
+    "source estimates separate from manual ledger",
+    "saved baseline reset",
+    "frozen comparison direction and categorical labels",
+    "390px overview and internally scrolling diagrams",
+    "EN/ZH actual downloads and pixels",
+    "armour selection/edit/download smoke",
+    "later revision preserves both frozen APIs and armament text"
+  ],
+  "independent_test_acceptance": {
+    "impacted_cases": 167,
+    "first_batch_passed": 166,
+    "first_batch_failed": 1,
+    "cause": "old page-wide test query matched newly added duplicate column headers",
+    "fix": "scope assertions to the intended reading table and changed-input row",
+    "fix_specific_cases_passed": 8,
+    "production_logic_changed_after_batch": false,
+    "later_copy_only_change": "name barrel and mount counts in overview"
+  },
+  "exports": [
+    {
+      "tag": "final-english",
+      "svg_bytes": 19633,
+      "png_bytes": 596594,
+      "png_size": [
+        1600,
+        3510
+      ],
+      "svg_sha256": "1cd46190af8e87c6eba3258c1797e3cc340620c13b7c0efda34a6bb88f3cc3b2",
+      "png_sha256": "50e6a08dd9d96cd454f4ee34e8e08fadee4053debe896823c84e0cbf30378d6b"
+    },
+    {
+      "tag": "final-chinese",
+      "svg_bytes": 18123,
+      "png_bytes": 833649,
+      "png_size": [
+        1600,
+        3253
+      ],
+      "svg_sha256": "18f0d4386be79566df5fff377f16aa5bd63b8cefe4685ad308ac76a21a2aa793",
+      "png_sha256": "119ab4864a26275a5ec6b778c4cefd89d6843fcee8c9a4877db161c11f38fe7f"
+    },
+    {
+      "tag": "armour-smoke",
+      "svg_bytes": 12519,
+      "png_bytes": 490441,
+      "png_size": [
+        1600,
+        2350
+      ],
+      "svg_sha256": "3685ee6bf9b1368c11651ede3e832dd39fad827dba4326d6c8f552717dd8f0f2",
+      "png_sha256": "097a8935d90df7954f5fdd00605f137c9099035f39add4a9d4f20ff169dce74b"
+    }
+  ],
+  "limits": [
+    "synthetic acceptance only; no historical accuracy claim",
+    "frontend increment only; no new physics or backend export format",
+    "not committed, pushed or deployed",
+    "headless browser without WebGL"
+  ],
+  "files_preserved": true,
+  "date": "2026-10-18",
+  "scope": "native armament composition, vessel overview and frozen configuration comparison",
+  "source_protection": {
+    "accepted": true,
+    "base_commit": "c59a47e3f3d1a234089353d543406ad8be10cd2d",
+    "starting_dirty_paths": 37,
+    "core_and_backend_unchanged": true,
+    "prior_two_batches_preserved": true,
+    "increment_modified_paths": [
+      "web/frontend/src/__tests__/design-feedback-ui.test.tsx",
+      "web/frontend/src/components/DesignFeedback.tsx",
+      "web/frontend/src/components/designFeedbackModel.ts",
+      "docs/plimsoll-1.0/current-status.md",
+      "web/frontend/src/components/ShipDesignEditor.tsx",
+      "web/frontend/src/components/Sps3b3Readings.tsx",
+      "web/frontend/src/pages/Workbench.tsx"
+    ]
+  },
+  "lazy_library_boundary": {
+    "accepted": true,
+    "before": {
+      "static_closure": [
+        "App-Pw5IawLh.js",
+        "index-1tNgwogw.js",
+        "terms-DgsK_TSe.js"
+      ],
+      "raw_bytes": 693094,
+      "gzip_bytes": 203504
+    },
+    "current": {
+      "static_closure": [
+        "App-DbiLeJHv.js",
+        "index-BBx0nH0h.js",
+        "terms-DgsK_TSe.js"
+      ],
+      "raw_bytes": 693094,
+      "gzip_bytes": 203501
+    },
+    "note": "Static import byte closure; no load latency benchmark."
+  },
+  "evidence_root": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\vessel-overview-2026-10-18",
+  "implementation_model": "opencode/deepseek-v4.1-flash-free",
+  "delivery": "local only; no staging, commit, push or deployment",
+  "logs": {
+    "worker-focused.log": {
+      "sha256": "7f681e7fc1fc44903347ee8c45c69897741aecf1b851939e927354080d85b057"
+    },
+    "worker-build.log": {
+      "sha256": "2b008c41c72d73017996ee1a1cc54ae2960c1262da6f2d6dbe3289f5868b1db9"
+    },
+    "independent-tests.log": {
+      "sha256": "bec09cae171837a04b2a70337d9b2020596a5ea68b85d950db98e95cf35ea532"
+    },
+    "independent-fix-specific.log": {
+      "sha256": "eea6d0edcf275cf5e1f82d105cafe0b60a1528dca894034e25cf10efd5d19ddd"
+    },
+    "independent-build.log": {
+      "sha256": "cd16198287f2c077a473d4ff3e6f5367f42ad51af3e83c862757bfade385fc03"
+    },
+    "independent-copy-build.log": {
+      "sha256": "e520c68c7c9492c81a8cb201857997329b8862021e5ba81132cd802b12c4bd8e"
+    }
+  }
+}
