@@ -24,6 +24,7 @@ import {
 import { SpsFreeboardProfile } from './Sps3b3Readings';
 import { ArmourDiagram, type ArmourDiagramState } from './ArmourDiagram';
 import { ArmamentComposition } from './ArmamentComposition';
+import { PropulsionReadings, PerformanceReadings } from './PropulsionPerformanceReadings';
 import { VesselDesignOverview, type VesselOverviewState } from './VesselDesignOverview';
 import { useVesselOverviewCopy } from '../i18n/vesselOverview';
 import { formatNumber } from './units';
@@ -511,8 +512,9 @@ export function ShipDesignFields({ page, host, disabled, revealField = null, rev
  * explicit Edit asks this chapter to reveal that source field, and the one token
  * below opens the matching group and focuses the field after it mounts.
  */
-export function ShipDesignChapter({ page, host, disabled, baseline }: {
+export function ShipDesignChapter({ page, host, disabled, baseline, onOpenChapter }: {
   page: string; host: ShipDesignHost; disabled: boolean; baseline?: unknown;
+  onOpenChapter?: (chapter: string) => void;
 }) {
   const w = useSps3b3Copy();
   const a = useArmourDiagramCopy();
@@ -540,6 +542,14 @@ export function ShipDesignChapter({ page, host, disabled, baseline }: {
       state={diagramState} contextLabel={contextLabel} onEditField={onEditField} /> : null}
     {page === 'guns' ? <ArmamentComposition result={state.preview} baseline={baseline}
       state={diagramState} contextLabel={armamentContext} onEditField={onEditField} /> : null}
+    {/* The propulsion chapter leads with its declared chain, source facts and
+        whole-ship roles; the performance chapter leads with its three groups and
+        source flags. Both read the settled preview and reveal a real field; only
+        the performance reader also opens a related chapter. */}
+    {page === 'engine' ? <PropulsionReadings result={state.preview}
+      state={diagramState} contextLabel={armamentContext} onEditField={onEditField} /> : null}
+    {page === 'performance' ? <PerformanceReadings result={state.preview}
+      state={diagramState} contextLabel={armamentContext} onEditField={onEditField} onOpenChapter={onOpenChapter} /> : null}
     <ShipDesignFields page={page} host={host} disabled={disabled}
       revealField={reveal?.field ?? null} revealSeq={reveal?.seq ?? 0} />
     {page === 'freeboard' ? <SpsFreeboardProfile result={state.preview} /> : null}

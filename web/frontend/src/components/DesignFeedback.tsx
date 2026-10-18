@@ -19,7 +19,7 @@ import type { AnalysisResult, ProjectDocument } from '../types';
 /**
  * The draft feedback panel, and the report's frozen native summary.
  *
- * Both surfaces print the same body: a direction stated in words, the nine
+ * Both surfaces print the same body: a direction stated in words, the sixteen
  * readings with their own units, the changed declared inputs and the changed
  * ledger roles. The workbench variant names its two sides Saved and Draft and
  * offers a retry when the saved revision could not be read; the report variant
@@ -268,8 +268,11 @@ function ConfigChangesTable({ rows, currentLabel, comparisonLabel }: {
   const text = (row: ConfigRow, side: 'before' | 'after'): string => {
     if (row.kind === 'number') {
       const value = side === 'before' ? row.before : row.after;
-      return value === null || value === undefined
-        ? c('vessel.unknown') : units.text(value, row.dimension ?? 'length', row.storedUnit);
+      if (value === null || value === undefined) return c('vessel.unknown');
+      // A canonical row keeps the source's own unit and is never converted; an
+      // empty canonical is a plain count with no unit at all.
+      if (row.canonical !== undefined) return row.canonical ? `${formatNumber(value)} ${row.canonical}` : formatNumber(value);
+      return units.text(value, row.dimension ?? 'length', row.storedUnit);
     }
     const literal = side === 'before' ? row.beforeText : row.afterText;
     return literal === '' ? c('vessel.unknown') : literal;
@@ -278,6 +281,10 @@ function ConfigChangesTable({ rows, currentLabel, comparisonLabel }: {
     if (row.kind !== 'number' || row.before == null || row.after == null) return null;
     const value = row.after - row.before;
     const sign = value > 0 ? '+' : value < 0 ? '−' : '';
+    if (row.canonical !== undefined) {
+      const magnitude = row.canonical ? `${formatNumber(Math.abs(value))} ${row.canonical}` : formatNumber(Math.abs(value));
+      return `${sign}${magnitude}`;
+    }
     return `${sign}${units.text(Math.abs(value), row.dimension ?? 'length', row.storedUnit)}`;
   };
   const unchanged = (row: ConfigRow): boolean => row.kind === 'number'

@@ -1,0 +1,111 @@
+/*
+ * The propulsion and performance readers' own scoped style.
+ *
+ * The two chapters reuse the overview's own vocabulary — a bordered sheet, a
+ * small uppercase kicker, a two-column fact grid that collapses to one column on
+ * a narrow screen — so the ordinary chapters stay visually one product. Only the
+ * reading furniture lives here: the declaration chain, the fact grid, the lock
+ * block, the ledger roles, the source flags and the related-input row.
+ */
+
+.propulsion-readings,
+.performance-readings {
+  contain: inline-size;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.propulsion-head {
+  margin-bottom: .75rem;
+}
+
+.propulsion-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-size: .72rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.propulsion-head h3 {
+  margin: .15rem 0;
+}
+
+.propulsion-intro,
+.propulsion-hint {
+  margin: .35rem 0 0;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.propulsion-block {
+  padding: .6rem .75rem;
+  margin-bottom: .5rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.propulsion-block h4 {
+  margin: 0 0 .3rem;
+}
+
+.propulsion-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: .3rem .9rem;
+  margin: .5rem 0 0;
+}
+
+.propulsion-fact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .3rem .6rem;
+  padding-bottom: .2rem;
+  border-bottom: 1px dashed var(--line);
+}
+
+.propulsion-fact dt {
+  color: var(--muted);
+}
+
+.propulsion-fact dd {
+  margin: 0;
+  text-align: right;
+}
+
+.propulsion-unbound {
+  display: block;
+  color: var(--muted);
+}
+
+.propulsion-edit {
+  display: block;
+  margin-left: auto;
+  font-size: .78rem;
+}
+
+.propulsion-related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin: .4rem 0;
+}
+
+@media (max-width: 430px) {
+  .propulsion-readings,
+  .performance-readings {
+    padding: .6rem;
+  }
+
+  .propulsion-facts {
+    grid-template-columns: 1fr;
+  }
+}

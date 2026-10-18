@@ -7,8 +7,10 @@ import { readFreeboardGeometry, profileX, profileY } from './freeboardProfileMod
 import { ArmourDiagram } from './ArmourDiagram';
 import { ArmamentComposition } from './ArmamentComposition';
 import { VesselDesignOverview } from './VesselDesignOverview';
+import { PropulsionReadings, PerformanceReadings } from './PropulsionPerformanceReadings';
+import { propulsionEnvelopeGate } from './propulsionPerformanceModel';
 import { nativeReadings, sps3b3ReportSections, sps3b3ReportText, sps3b3ResultOf } from './sps3b3Model';
-import type { ShipDesignResult, Sps3b3Result } from '../types';
+import type { ShipDesignResult, Sps3b3Result, StageEnvelope } from '../types';
 import '../styles/Sps3b3.css';
 
 export function SpsFreeboardProfile({result}:{result:Sps3b3Result|null}) {
@@ -41,12 +43,18 @@ export function SpsFreeboardProfile({result}:{result:Sps3b3Result|null}) {
   </svg><figcaption>Freeboard endpoints · 水线与八个干舷端点（示意）</figcaption><button className="sps-button no-print" onClick={savePicture}>{w('sps.profile.save')}</button>{exportError && <p role="alert">{exportError}</p>}</figure>;
 }
 
-export function Sps3b3Readings({data,runId,variant}:{data:unknown;runId?:string;variant?:'native'}) {
+export function Sps3b3Readings({data,runId,variant,envelope}:{data:unknown;runId?:string;variant?:'native';envelope?:StageEnvelope}) {
   const w=useSps3b3Copy(),d=useShipDesignCopy(),result=sps3b3ResultOf(data);
   const [notice,setNotice]=useState('');
   if (!result) return null;
   const title=variant==='native'?w('sps.readings.nativeTitle'):w('sps.readings.title');
   const native=variant==='native'?result as ShipDesignResult:null;
+  // The new readers are the only ones that read the parent envelope: a standalone
+  // frozen reading validates its own schema, method and status, while a report
+  // mount must also have requested the stage, finished, and agreed with any
+  // declared kernel identity. A residual value under a failed or mismatched
+  // envelope therefore reveals nothing.
+  const frozenGate=native!==null && propulsionEnvelopeGate(envelope,native);
   const balance=native?.balance;
   const tonnes=(value:unknown)=>typeof value==='number' && Number.isFinite(value)?`${formatNumber(value)} t`:'—';
   const sections=sps3b3ReportSections(result),text=sps3b3ReportText(result);
@@ -89,6 +97,10 @@ export function Sps3b3Readings({data,runId,variant}:{data:unknown;runId?:string;
     {native && <ArmamentComposition result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {native && <ArmourDiagram result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && frozenGate && <PropulsionReadings result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && frozenGate && <PerformanceReadings result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     <SpsFreeboardProfile result={result} />
     {sections.length ? <div className="sps-report">{sections.map((s,i)=><section key={`${s.id}-${i}`}>

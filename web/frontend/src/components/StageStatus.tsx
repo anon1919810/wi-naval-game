@@ -291,7 +291,7 @@ export function StageStatus({ name, stage, guidance }: {
         are immutable and complete in either case, so they are shown for a partial
         envelope too — the binding work is a ledger note, never a missing report.
         The ledger state is still shown as partial. */}
-    {name === 'ship_design' && stage.requested && (delivered || stage.status === 'partial') && <Sps3b3Readings data={stage.data} runId={guidance?.runId} variant="native" />}
+    {name === 'ship_design' && stage.requested && (delivered || stage.status === 'partial') && <Sps3b3Readings data={stage.data} runId={guidance?.runId} variant="native" envelope={stage} />}
     {detailCount > 0 && <details className="stage-diagnostics"><summary>{w('stage.diagnostics.summary', { count: detailCount })}</summary><div>{ordinary.map((item, index) => <DiagnosticLine key={`${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} />)}</div>
       {repeats.map((item, index) => <DiagnosticLine key={`repeat-${item.code ?? ''}-${index}`} item={item} guidance={guidance ?? null} repeat />)}</details>}
     {Object.keys(stage.method_versions).length > 0 && <p className="stage-method">{w('stage.card.method', { value: Object.entries(stage.method_versions).map(([key, value]) => `${key}: ${display(w, value, locale)}`).join(' / ') })}</p>}

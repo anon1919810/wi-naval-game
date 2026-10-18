@@ -10,7 +10,7 @@ import type { AnalysisResult, ProjectDocument, ShipDesignResult, StageEnvelope }
 
 /**
  * The draft feedback panel and the frozen summary, read the way a reader meets
- * them: a stated direction, the nine readings with their own units, the changed
+ * them: a stated direction, the sixteen readings with their own units, the changed
  * inputs behind a disclosure, and a recoverable saved read.
  */
 
@@ -173,5 +173,20 @@ describe('the frozen native summary', () => {
     const empty = render(<FrozenDesignSummary current={analysis(null)} comparison={analysis(null)}
       currentLabel="Current" comparisonLabel="Comparison" />);
     expect(empty.container).toBeEmptyDOMElement();
+  });
+
+  it('shows no reading table or config when a completed parent stage carries an unreadable residual payload', () => {
+    render(<FrozenDesignSummary
+      current={analysis(native())}
+      comparison={analysis(native({ status: 'unavailable' }))}
+      currentLabel="Current" comparisonLabel="Comparison"
+      catalogue={catalogue(beamField())} />);
+    // The stage completed and was requested, so the summary states the payload's
+    // own status as the reason rather than the stage envelope.
+    expect(screen.getByText(en('feedback.frozen.status'))).toBeVisible();
+    // A residual number under an unreadable status yields no reading table and no
+    // configuration table.
+    expect(screen.queryByRole('table')).toBeNull();
+    expect(document.querySelector('[data-config-changes]')).toBeNull();
   });
 });

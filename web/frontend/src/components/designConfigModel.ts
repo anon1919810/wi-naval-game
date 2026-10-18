@@ -43,6 +43,12 @@ export interface ConfigRow {
   /** The reader dimension the numeric value converts through, and its stored unit. */
   dimension?: 'length' | 'speed';
   storedUnit?: string;
+  /**
+   * The source's own unit for a numeric row the reader never converts, printed
+   * as saved. An empty string is a plain count with no unit at all. A row with a
+   * canonical unit carries no `dimension`, so the two are never both present.
+   */
+  canonical?: string;
 }
 
 function numberAt(source: Record<string, unknown> | null, key: string): number | null {
@@ -95,6 +101,42 @@ function enumText(table: VesselLabelTable, source: Record<string, unknown> | nul
   const raw = source?.[key];
   const index = typeof raw === 'number' && Number.isInteger(raw) ? raw : null;
   return vesselLabel(language, table, index) ?? vesselOverviewCopy(language, 'vessel.unknown');
+}
+
+/** The result's own `design.editing` block, or null when it is not a record. */
+function editingOf(result: ShipDesignResult): Record<string, unknown> | null {
+  const design = section(result, 'design');
+  return isRecord(design?.editing) ? design.editing : null;
+}
+
+/**
+ * The declared power lock, strictly: true says locked, false says unlocked and a
+ * missing or non-boolean flag says the declaration itself is not saved. A missing
+ * flag is never printed as the explicit unlocked wording.
+ */
+function lockText(editing: Record<string, unknown> | null, language: SiteLanguage): string {
+  const flag = editing?.power_locked;
+  if (typeof flag !== 'boolean') return vesselOverviewCopy(language, 'vessel.config.lock.undeclared');
+  return flag
+    ? vesselOverviewCopy(language, 'vessel.config.lock.locked')
+    : vesselOverviewCopy(language, 'vessel.config.lock.unlocked');
+}
+
+/**
+ * The locked power and bunker target, in the source's own horsepower and long
+ * tons, only while the lock is declared true. An unlocked or undeclared lock has
+ * no target in force, so the row says unknown rather than borrowing a residual
+ * number; a declared lock that omits one value shows unknown for that value
+ * alone and never a zero.
+ */
+function lockTargetText(editing: Record<string, unknown> | null, language: SiteLanguage): string {
+  if (editing?.power_locked !== true) return '';
+  const unknown = vesselOverviewCopy(language, 'vessel.unknown');
+  const powerHp = numberAt(editing, 'power_hp');
+  const bunkerLt = numberAt(editing, 'locked_bunker_lt');
+  const power = powerHp === null ? unknown : `${formatNumber(powerHp)} source hp`;
+  const bunker = bunkerLt === null ? unknown : `${formatNumber(bunkerLt)} LT`;
+  return `${power} · ${bunker}`;
 }
 
 /**
@@ -156,6 +198,16 @@ export function configChangeRows(current: ShipDesignResult, comparison: ShipDesi
       beforeText: '', afterText: '',
     });
   }
+  rows.push({
+    key: 'propulsion.range', group: 'propulsion', label: 'vessel.fact.range', kind: 'number', canonical: 'nmi',
+    before: numberAt(currentEngine, 'range'), after: numberAt(comparisonEngine, 'range'),
+    beforeText: '', afterText: '',
+  });
+  rows.push({
+    key: 'propulsion.screws', group: 'propulsion', label: 'vessel.fact.screws', kind: 'number', canonical: '',
+    before: numberAt(currentEngine, 'screws'), after: numberAt(comparisonEngine, 'screws'),
+    beforeText: '', afterText: '',
+  });
   for (const [key, label, size, table] of [
     ['fuelArray', 'vessel.fact.fuel', 5, 'fuel'],
     ['engineArray', 'vessel.fact.engine', 3, 'engine'],
@@ -167,6 +219,16 @@ export function configChangeRows(current: ShipDesignResult, comparison: ShipDesi
       afterText: flagsText(comparisonEngine, key, size, table, language),
     });
   }
+  const currentEditing = editingOf(current);
+  const comparisonEditing = editingOf(comparison);
+  rows.push({
+    key: 'propulsion.powerLock', group: 'propulsion', label: 'vessel.fact.powerLock', kind: 'categorical',
+    beforeText: lockText(currentEditing, language), afterText: lockText(comparisonEditing, language),
+  });
+  rows.push({
+    key: 'propulsion.lockTarget', group: 'propulsion', label: 'vessel.fact.lockTarget', kind: 'categorical',
+    beforeText: lockTargetText(currentEditing, language), afterText: lockTargetText(comparisonEditing, language),
+  });
 
   return rows;
 }

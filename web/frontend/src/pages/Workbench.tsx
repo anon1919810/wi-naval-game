@@ -1384,7 +1384,7 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
         {chapter === 'performance' && native && <section className="editor-section">
           {/* The native performance fields lead the chapter and carry no group
               number of their own; the physical request and its results follow. */}
-          <ShipDesignChapter page="performance" host={host} disabled={busy} />
+          <ShipDesignChapter page="performance" host={host} disabled={busy} onOpenChapter={next => goChapter(next as Chapter)} />
           {/* Additional physical checks are request tasks, not a data mode: they
               add the ordinary physical stages on top of the native design stage
               for this run only, and they never change the declaration. */}

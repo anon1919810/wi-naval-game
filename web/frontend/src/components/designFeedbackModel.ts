@@ -12,7 +12,7 @@ import type { AnalysisResult, ProjectDocument, ShipDesign, ShipDesignResult } fr
  *
  * This module is pure. It reads only the values it is handed — a governed
  * project document, a native result, or a frozen analysis result — and it never
- * calls the preview endpoint, a formula or a converter. The nine readings are
+ * calls the preview endpoint, a formula or a converter. The sixteen readings are
  * exactly the saved paths the native report already prints; the changed inputs
  * are the recovered register names the declaration stores; the changed roles are
  * the ledger's own rows. Nothing here derives a number.
@@ -52,14 +52,16 @@ interface ReadingSpec {
 }
 
 /**
- * The nine readings, in one fixed order, all read from a saved native result.
+ * The sixteen readings, in one fixed order, all read from a saved native result.
  *
- * The recovered horsepower, the range, the empirical stability screen and the
- * relative hull strength have no convertible reader unit, so they keep the unit
- * the source saved. The stability score states its own name. The hull strength is
- * the composite figure and only that one: falling back to the longitudinal or
- * cross-sectional strength would subtract two different quantities and call the
- * answer a change. When the composite is absent the reading is unknown.
+ * The recovered horsepower, the range, the empirical stability screen, the
+ * source empirical height and the relative hull strengths have no convertible
+ * reader unit, so they keep the unit the source saved. The stability score and
+ * the three strength terms state their own name. The hull strength is the
+ * composite figure and each of the cross-sectional and longitudinal figures
+ * stands on its own: subtracting the composite from a component, or one
+ * component from the other, would subtract two different quantities and call the
+ * answer a change. When any one is absent its reading is unknown.
  */
 const READING_SPECS: ReadonlyArray<ReadingSpec> = [
   { key: 'balance.selected_mass_t', label: 'feedback.reading.selectedMass',
@@ -72,14 +74,28 @@ const READING_SPECS: ReadonlyArray<ReadingSpec> = [
     section: 'balance', fields: ['difference_t'], dimension: 'mass', storedUnit: 't' },
   { key: 'engine.speedMax', label: 'feedback.reading.speedMax',
     section: 'engine', fields: ['speedMax'], dimension: 'speed', storedUnit: 'kn' },
+  { key: 'engine.speedCruise', label: 'feedback.reading.speedCruise',
+    section: 'engine', fields: ['speedCruise'], dimension: 'speed', storedUnit: 'kn' },
   { key: 'engine.hpMax', label: 'feedback.reading.powerMax',
     section: 'engine', fields: ['hpMax'], canonicalUnit: 'source hp' },
+  { key: 'engine.hpCruise', label: 'feedback.reading.powerCruise',
+    section: 'engine', fields: ['hpCruise'], canonicalUnit: 'source hp' },
   { key: 'engine.range', label: 'feedback.reading.range',
     section: 'engine', fields: ['range'], canonicalUnit: 'nmi' },
   { key: 'performance.stability', label: 'feedback.reading.stability',
     section: 'performance', fields: ['stability'], canonicalUnit: 'empirical score' },
+  { key: 'performance.metacentre', label: 'feedback.reading.metacentre',
+    section: 'performance', fields: ['metacentre'], canonicalUnit: 'ft' },
+  { key: 'performance.rollPeriod', label: 'feedback.reading.rollPeriod',
+    section: 'performance', fields: ['rollPeriod'], canonicalUnit: 's' },
   { key: 'performance.strength', label: 'feedback.reading.hullStrength',
     section: 'performance', fields: ['strengthComp'], canonicalUnit: 'empirical score' },
+  { key: 'performance.strengthCross', label: 'feedback.reading.hullStrengthCross',
+    section: 'performance', fields: ['strengthCross'], canonicalUnit: 'empirical score' },
+  { key: 'performance.strengthLong', label: 'feedback.reading.hullStrengthLong',
+    section: 'performance', fields: ['strengthLong'], canonicalUnit: 'empirical score' },
+  { key: 'performance.seakeeping', label: 'feedback.reading.seakeeping',
+    section: 'performance', fields: ['seakeeping'], canonicalUnit: 'empirical score' },
 ];
 
 /** Which side of the comparison a native result came from. */
@@ -119,7 +135,7 @@ export interface FeedbackLabels {
   role?: (role: string) => string;
 }
 
-/** One of the nine readings, on both sides. */
+/** One of the sixteen readings, on both sides. */
 export interface FeedbackReading {
   key: string;
   label: string;
@@ -172,7 +188,7 @@ export interface ChangedRole {
 
 /**
  * The whole comparison: whether numbers may be shown, why not when they may not,
- * the nine readings, the changed inputs and the changed roles, and any scope
+ * the sixteen readings, the changed inputs and the changed roles, and any scope
  * note the comparison needs (the report's optional physical stages).
  */
 export interface DesignFeedback {
@@ -323,9 +339,21 @@ function changedRoles(before: ShipDesignResult, after: ShipDesignResult, labels:
 const supportedSchema = (value: unknown): boolean => value === SHIP_DESIGN_RESULT_SCHEMA;
 const supportedMethod = (value: unknown): boolean => value === SHIP_DESIGN_METHOD_VERSION;
 
+/**
+ * Whether a native payload's own status word permits its numbers to be quoted.
+ *
+ * The one reader the two comparison surfaces share: the saved native result
+ * declares `available` or `partial`, and only those may be subtracted. A
+ * residual payload under `unavailable`, a failed word or a missing one is
+ * unreadable even when its schema and method are intact, so a leftover number
+ * can never be quoted as a reading. `partial` is positive: its reconciled values
+ * are still read.
+ */
+const readableStatus = (value: unknown): boolean => value === 'available' || value === 'partial';
+
 function isNative(result: ShipDesignResult | null): result is ShipDesignResult {
   const raw = result as Raw | null;
-  return !!raw && supportedSchema(raw.schema) && supportedMethod(raw.method_version);
+  return !!raw && supportedSchema(raw.schema) && supportedMethod(raw.method_version) && readableStatus(raw.status);
 }
 
 /** A settled side's readable native result, or null when it is absent or foreign. */
@@ -333,11 +361,19 @@ function nativeDraft(side: DraftSide): ShipDesignResult | null {
   return side.state === 'ready' && isNative(side.result) ? side.result : null;
 }
 
-/** Why a single result is not a supported native reading, in the panel's words. */
+/**
+ * Why a single result is not a supported native reading, in the panel's words.
+ *
+ * The three checks are reported in the order they are read: a foreign shape, a
+ * foreign method and — when both are intact — a status whose own word forbids
+ * quoting the residual numbers. A status refusal is never reported as a method
+ * refusal.
+ */
 function resultProblem(result: ShipDesignResult | null): DesignFeedbackKey {
-  return supportedSchema((result as Raw | null)?.schema)
-    ? 'feedback.incompatible.method'
-    : 'feedback.incompatible.schema';
+  const raw = result as Raw | null;
+  if (!supportedSchema(raw?.schema)) return 'feedback.incompatible.schema';
+  if (!supportedMethod(raw?.method_version)) return 'feedback.incompatible.method';
+  return 'feedback.incompatible.status';
 }
 
 interface NativeIdentity { schema: unknown; method: unknown; basis: string | null }
@@ -475,13 +511,15 @@ function frozenRead(result: AnalysisResult): FrozenRead {
   const project = snapshot && typeof snapshot === 'object' && !Array.isArray(snapshot) ? snapshot as ProjectDocument : null;
   const revision = typeof result.input_snapshot?.revision === 'number' ? result.input_snapshot.revision : null;
   const native = data && data.schema === SHIP_DESIGN_RESULT_SCHEMA && data.method_version === SHIP_DESIGN_METHOD_VERSION
+    && readableStatus((data as Raw).status)
     ? data as ShipDesignResult : null;
 
   let problem: DesignFeedbackKey | null = null;
   if (requested && statement) {
     if (!native) {
-      problem = data?.schema === SHIP_DESIGN_RESULT_SCHEMA
-        ? 'feedback.frozen.method' : 'feedback.frozen.schema';
+      if (data?.schema !== SHIP_DESIGN_RESULT_SCHEMA) problem = 'feedback.frozen.schema';
+      else if (data?.method_version !== SHIP_DESIGN_METHOD_VERSION) problem = 'feedback.frozen.method';
+      else problem = 'feedback.frozen.status';
     } else {
       const kernel = object(stage.method_versions).kernel;
       const snapshotId = typeof (snapshot as Raw | null)?.id === 'string' ? (snapshot as Raw).id as string : null;
@@ -578,5 +616,5 @@ export function designFingerprint(project: ProjectDocument | null | undefined): 
   return design ? JSON.stringify(canonical(project)) : '';
 }
 
-/** The reading specs, for a test that needs to prove the nine paths are read. */
+/** The reading specs, for a test that needs to prove the sixteen paths are read. */
 export const FEEDBACK_READING_KEYS: readonly string[] = READING_SPECS.map(spec => spec.key);

@@ -9,7 +9,7 @@ import type { AnalysisResult, ProjectDocument, ShipDesign, ShipDesignResult, Sta
 /**
  * The draft feedback readers, before any of them are put on screen.
  *
- * These tests pin the four rules the panel depends on: the nine readings are the
+ * These tests pin the four rules the panel depends on: the sixteen readings are the
  * saved paths read on both sides with a draft − saved difference; absent stays
  * absent rather than becoming a zero; a schema, method or basis mismatch withholds
  * every number; and the frozen report summary reads only the two saved results and
@@ -52,7 +52,7 @@ const reading = (feedback: ReturnType<typeof compareDraft>, key: string) => feed
 /* --------------------------------------------------------------- readings */
 
 describe('draft readings', () => {
-  it('reads the nine saved paths and subtracts the saved revision from the draft', () => {
+  it('reads the sixteen saved paths and subtracts the saved revision from the draft', () => {
     const saved = native();
     const draft = structuredClone(saved);
     draft.balance!.selected_mass_t = 1120;
@@ -66,7 +66,9 @@ describe('draft readings', () => {
 
     expect(FEEDBACK_READING_KEYS).toEqual([
       'balance.selected_mass_t', 'balance.estimated_mass_t', 'balance.target_displacement_t', 'balance.difference_t',
-      'engine.speedMax', 'engine.hpMax', 'engine.range', 'performance.stability', 'performance.strength',
+      'engine.speedMax', 'engine.speedCruise', 'engine.hpMax', 'engine.hpCruise', 'engine.range',
+      'performance.stability', 'performance.metacentre', 'performance.rollPeriod',
+      'performance.strength', 'performance.strengthCross', 'performance.strengthLong', 'performance.seakeeping',
     ]);
     expect(feedback.comparable).toBe(true);
     expect(reading(feedback, 'balance.selected_mass_t')).toMatchObject({
@@ -141,6 +143,37 @@ describe('draft readings', () => {
     const schema = compareDraft(side({ result: saved }), side({ result: otherSchema }), 'en', {});
     expect(schema.comparable).toBe(false);
     expect(schema.warnings.join(' ')).toContain('result shape');
+  });
+
+  it('withholds the readings when either side declares an unreadable status, and keeps partial readable', () => {
+    const saved = native();
+    const unavailable = structuredClone(saved);
+    unavailable.status = 'unavailable';
+    // A residual payload a status forbids quoting must not be subtracted, and the
+    // refusal must name the status rather than the intact schema/method.
+    const rejected = compareDraft(side({ result: saved }), side({ result: unavailable }), 'en', {});
+    expect(rejected.comparable).toBe(false);
+    expect(rejected.readings).toEqual([]);
+    expect(rejected.roles).toEqual([]);
+    expect(rejected.warnings.join(' ')).toContain('does not declare a readable status');
+    expect(rejected.warnings.join(' ')).not.toContain('native design method');
+
+    const leftRejected = compareDraft(side({ result: unavailable }), side({ result: saved }), 'en', {});
+    expect(leftRejected.comparable).toBe(false);
+    expect(leftRejected.warnings.join(' ')).toContain('does not declare a readable status');
+
+    // A missing status is unreadable too.
+    const noStatus = structuredClone(saved);
+    delete (noStatus as { status?: unknown }).status;
+    expect(compareDraft(side({ result: saved }), side({ result: noStatus }), 'en', {}).comparable).toBe(false);
+
+    // A partial result is still readable and still compared.
+    const partial = structuredClone(saved);
+    partial.status = 'partial';
+    partial.balance!.selected_mass_t = 1100;
+    const kept = compareDraft(side({ result: saved }), side({ result: partial }), 'en', {});
+    expect(kept.comparable).toBe(true);
+    expect(reading(kept, 'balance.selected_mass_t').delta).toBe(100);
   });
 
   it('treats an unestablished method, basis or project identity as no match at all', () => {
@@ -334,6 +367,24 @@ describe('frozen report summary', () => {
     const feedback = compareFrozen(current, mismatched, 'en', {})!;
     expect(feedback.comparable).toBe(false);
     expect(feedback.warnings.join(' ')).toContain('kernel identity');
+  });
+
+  it('withholds a frozen side whose residual payload status is unreadable, and keeps partial readable', () => {
+    const current = analysis(native());
+    // The parent stage completes, so the refusal is the payload's own status
+    // word rather than the stage envelope.
+    const unavailable = analysis(native({ status: 'unavailable' }));
+    const rejected = compareFrozen(current, unavailable, 'en', {})!;
+    expect(rejected.comparable).toBe(false);
+    expect(rejected.readings).toEqual([]);
+    expect(rejected.roles).toEqual([]);
+    expect(rejected.warnings.join(' ')).toContain('does not declare a readable status');
+
+    const partial = analysis(native({ status: 'partial',
+      balance: { selected_mass_t: 1050, estimated_mass_t: 990, target_displacement_t: 1060, difference_t: -4 } }));
+    const kept = compareFrozen(current, partial, 'en', {})!;
+    expect(kept.comparable).toBe(true);
+    expect(reading(kept, 'balance.selected_mass_t').delta).toBe(50);
   });
 
   it('refuses a run whose snapshot or project identity disagrees', () => {

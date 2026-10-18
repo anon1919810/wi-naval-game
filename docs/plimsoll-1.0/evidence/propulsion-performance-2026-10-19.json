@@ -1,0 +1,67 @@
+{
+  "accepted": true,
+  "date": "2026-10-19",
+  "base_commit": "b24c73adbe26db47cad2c0fa83b394d136ce8e41",
+  "deployed": false,
+  "validation": {
+    "initial_cluster": {
+      "files": 10,
+      "passed": 140
+    },
+    "status_fix_recheck": {
+      "files": 2,
+      "passed": 33,
+      "new_cases": 3
+    },
+    "final_build": "passed",
+    "review": "one P2 confirmed and fixed; final diff independently read"
+  },
+  "browser": {
+    "origin": "http://127.0.0.1:8041",
+    "project_id": "aef96ca1-f2fa-4cf2-98e0-5a64a13724cd",
+    "revisions": [
+      1,
+      2,
+      3
+    ],
+    "runs": [
+      "fde5b647-65d4-45ba-b76e-7fbdd37c0650",
+      "f4381829-edd5-4a0a-8bd0-cdfbd665b2e1"
+    ],
+    "manual_machinery_t": 6000,
+    "range_nmi": 7500,
+    "trim": 50,
+    "power_lock": true,
+    "focus": [
+      "range_nm",
+      "trim"
+    ],
+    "pending_failed_retry": true,
+    "saved_reloaded": true,
+    "related_chapter": "hull",
+    "frozen_no_preview_calls": true,
+    "frozen_comparison_direction": "comparison minus current",
+    "EN_ZH": true,
+    "mobile_390": true,
+    "visual_inspection": "three mobile viewport screenshots and final performance viewport inspected"
+  },
+  "preservation": {
+    "core_backend_deploy_source_files": 292,
+    "source_hashes_unchanged": true,
+    "baseline_revision_and_run_unchanged": true,
+    "database_counts": {
+      "projects": 1,
+      "project_revisions": 3,
+      "calculation_runs": 2
+    },
+    "active_runs": 0
+  },
+  "limitations": [
+    "Synthetic declarations, no real-ship accuracy claim",
+    "No new physics or real power curve",
+    "Native print-dialog and print pagination not exercised",
+    "Large Scene chunk warning retained",
+    "No unchanged Python/backend full matrix rerun"
+  ],
+  "source_evidence": "Current task outputs/propulsion-performance-2026-10-19/acceptance.json includes frontend source hashes, API/browser receipts and verification logs."
+}

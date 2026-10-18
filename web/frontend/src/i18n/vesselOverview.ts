@@ -61,6 +61,9 @@ const EN = {
   'vessel.fact.fuel': 'Fuel',
   'vessel.fact.engine': 'Engines',
   'vessel.fact.drive': 'Drive',
+  'vessel.fact.screws': 'Shafts',
+  'vessel.fact.powerLock': 'Power lock',
+  'vessel.fact.lockTarget': 'Locked power and bunker',
   'vessel.fact.propulsionNote': 'Power is the source horsepower, shown as saved and never relabelled. Fuel, engine and drive are the declared selections, never guessed.',
   'vessel.fact.balanceSelected': 'Selected mass',
   'vessel.fact.balanceEstimate': 'Estimated mass',
@@ -177,6 +180,9 @@ const EN = {
   'vessel.config.unavailable': 'not declared',
   'vessel.config.unchanged': 'unchanged',
   'vessel.config.categorical': 'labels only, no numeric difference',
+  'vessel.config.lock.locked': 'locked to a declared value',
+  'vessel.config.lock.unlocked': 'not locked',
+  'vessel.config.lock.undeclared': 'lock not declared',
   'vessel.config.note': 'Categorical rows are printed as before / after labels; only a physical quantity carries a numeric difference.',
 } as const;
 
@@ -228,6 +234,9 @@ const ZH: VesselOverviewDictionary = {
   'vessel.fact.fuel': '燃料',
   'vessel.fact.engine': '主机',
   'vessel.fact.drive': '传动',
+  'vessel.fact.screws': '轴数',
+  'vessel.fact.powerLock': '功率锁定',
+  'vessel.fact.lockTarget': '锁定功率与载煤燃油',
   'vessel.fact.propulsionNote': '功率为来源马力，按原样显示，绝不改称。燃料、主机与传动均为已声明的选择，绝不臆测。',
   'vessel.fact.balanceSelected': '选取质量',
   'vessel.fact.balanceEstimate': '估算质量',
@@ -344,6 +353,9 @@ const ZH: VesselOverviewDictionary = {
   'vessel.config.unavailable': '未声明',
   'vessel.config.unchanged': '无变化',
   'vessel.config.categorical': '仅为标签，无数值差值',
+  'vessel.config.lock.locked': '锁定为声明值',
+  'vessel.config.lock.unlocked': '未锁定',
+  'vessel.config.lock.undeclared': '未声明锁定',
   'vessel.config.note': '分类行以“前 / 后”标签呈现；只有物理量才带数值差值。',
 };
 
