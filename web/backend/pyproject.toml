@@ -25,3 +25,6 @@ include = ["plimsoll_web*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# The web package and the calculation core are siblings: the suite must run
+# without a hand-set PYTHONPATH from either the repo root or this directory.
+pythonpath = [".", "../../tools"]

@@ -2,6 +2,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { effectiveItemMass, isUnresolved, sameGovernedSlice } from '../components/shipDesign';
 import { Sps3b3Readings } from '../components/Sps3b3Readings';
+import { SHIP_DESIGN_METHOD_VERSION, SHIP_DESIGN_RESULT_SCHEMA } from '../components/sps3b3Model';
 import type { ProjectDocument } from '../types';
 
 afterEach(cleanup);
@@ -35,13 +36,34 @@ it('does not call an unused optional payload role a pending binding', () => {
   expect(isUnresolved({ role: 'other', mode: null, item_ids: [], estimate_t: 0, selected_mass_t: 0 })).toBe(false);
 });
 
-it('shows the saved native balance alongside its frozen source report', () => {
-  render(<Sps3b3Readings variant="native" data={{ schema: 'plimsoll-ship-design-result-1', status: 'available',
-    basis_condition_id: 'normal', balance: { selected_mass_t: 1111, estimated_mass_t: 1000,
-      target_displacement_t: 1000, difference_t: 111 },
-    report: { text: 'Frozen source', sections: [{ id: 'source', title: 'Source', lines: ['Frozen source'] }] } }} />);
+/** One frozen native reply; the ledger may be withheld to prove no residual leaks. */
+const nativeReply = (withLedger: boolean) => ({
+  schema: SHIP_DESIGN_RESULT_SCHEMA, method_version: SHIP_DESIGN_METHOD_VERSION,
+  status: 'available', basis_condition_id: 'normal',
+  balance: { selected_mass_t: 1111, estimated_mass_t: 1000, target_displacement_t: 1000, difference_t: 111 },
+  ...(withLedger ? {
+    ledger: { complete: true, basis_condition_id: 'normal',
+      selected_mass_t: 1111, estimated_mass_t: 1000, target_displacement_t: 1000, difference_t: 111,
+      roles: { machinery: { mode: 'declared', estimate_t: 1000, selected_mass_t: 1111, item_ids: ['a'] } } },
+  } : {}),
+  report: { text: 'Frozen source', sections: [{ id: 'source', title: 'Source', lines: ['Frozen source'] }] },
+});
+
+it('reads the saved native balance through the weight reading instead of a duplicate block', () => {
+  const { container } = render(<Sps3b3Readings variant="native" data={nativeReply(true)} />);
   expect(screen.getByText('Frozen source')).toBeVisible();
-  expect(screen.getByText('1,111 t')).toBeVisible();
-  expect(screen.getByText('111 t')).toBeVisible();
+  // The authoritative four totals now live in the managed weight reading.
+  expect(container.querySelector('.ship-design-balance')).toBeNull();
+  expect(container.querySelector('[data-weight-balance-row="selected"] dd')?.textContent ?? '').toMatch(/1,111/);
+  expect(container.querySelector('[data-weight-balance-row="difference"] dd')?.textContent ?? '').toMatch(/111/);
   expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+});
+
+it('keeps a balance that has no readable ledger off the sheet', () => {
+  const { container } = render(<Sps3b3Readings variant="native" data={nativeReply(false)} />);
+  expect(screen.getByText('Frozen source')).toBeVisible();
+  const reading = container.querySelector('[data-weight-breakdown]');
+  expect(reading?.getAttribute('data-state')).toBe('unavailable');
+  // The raw audit may still quote the payload; the reading itself must not.
+  expect(reading?.textContent ?? '').not.toMatch(/1,111/);
 });
