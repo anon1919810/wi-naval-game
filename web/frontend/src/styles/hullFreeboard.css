@@ -1,0 +1,223 @@
+.hull-readings,
+.freeboard-profile {
+  /* Keep the readable drawing width out of the report grid's minimum sizing. */
+  contain: inline-size;
+  min-width: 0;
+  max-width: 100%;
+  display: grid;
+  gap: 1rem;
+  margin: 0 0 1.25rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.hull-head,
+.freeboard-head {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.hull-kicker,
+.freeboard-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.hull-head h3,
+.freeboard-head h3,
+.hull-block h4,
+.freeboard-list h4,
+.freeboard-panel h4 {
+  margin: 0;
+}
+
+.hull-intro,
+.freeboard-intro,
+.hull-hint,
+.freeboard-hint,
+.freeboard-lock,
+.freeboard-pinned,
+.freeboard-state,
+.hull-state {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.hull-block {
+  display: grid;
+  gap: 0.45rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--line);
+}
+
+.hull-facts,
+.freeboard-panel-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.4rem 1.2rem;
+  margin: 0;
+}
+
+.hull-fact,
+.freeboard-panel-facts > div {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+  padding: 0.25rem 0;
+  border-bottom: 1px dotted var(--line);
+}
+
+.hull-fact dt,
+.freeboard-panel-facts dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hull-fact dd,
+.freeboard-panel-facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.hull-fact--changed dd {
+  color: var(--error);
+}
+
+.hull-readings .text-button,
+.hull-reveal {
+  margin-inline-start: 0.45rem;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+
+.hull-readings .text-button:hover,
+.hull-reveal:hover {
+  color: var(--accent-hover);
+}
+
+.freeboard-canvas {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: var(--surface);
+}
+
+.freeboard-canvas svg {
+  display: block;
+  min-width: 34rem;
+  width: 100%;
+  height: auto;
+}
+
+.freeboard-canvas [data-freeboard-point][role="button"] {
+  cursor: pointer;
+}
+
+.freeboard-canvas [data-freeboard-point][role="button"]:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.freeboard-lock {
+  color: var(--ink);
+  padding: 0.5rem 0.65rem;
+  border-inline-start: 3px solid var(--error);
+  background: var(--error-soft);
+}
+
+.freeboard-list {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.freeboard-endpoint {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0 0.25rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.freeboard-endpoint--changed {
+  color: var(--error);
+}
+
+.freeboard-select {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.35rem 0.25rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.freeboard-select[aria-pressed="true"] {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-soft);
+}
+
+.freeboard-panel {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.freeboard-panel-facts {
+  grid-template-columns: 1fr;
+}
+
+.freeboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.freeboard-error {
+  margin: 0;
+  color: var(--error);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 640px) {
+  .hull-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .hull-readings,
+  .freeboard-profile {
+    padding: 0.75rem;
+  }
+
+  .freeboard-endpoint,
+  .freeboard-select {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

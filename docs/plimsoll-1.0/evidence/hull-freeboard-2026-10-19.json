@@ -1,0 +1,171 @@
+{
+  "accepted": true,
+  "date": "2026-10-19",
+  "base": "cc194c2dedc8b23823f70624f7b4b0dbe9bdf475",
+  "state": "local candidate; not committed, pushed or deployed",
+  "checks": {
+    "head_unchanged_local_candidate": true,
+    "scope_frontend_and_docs_only": true,
+    "core_backend_deploy_unchanged": true,
+    "two_planning_documents_preserved": true,
+    "independent_related_cluster_11_files_185_tests": true,
+    "final_copy_build_passed": true,
+    "two_real_worker_runs_completed": true,
+    "old_run_result_and_snapshot_preserved": true,
+    "distinct_saved_revisions": true,
+    "preview_pending": true,
+    "preview_failed": true,
+    "preview_ready": true,
+    "hull_reveal_focused_real_field": true,
+    "endpoint_reveal_focused_real_field": true,
+    "keyboard_coincident_identity_focus_preserved": true,
+    "locked_FD_has_reason_and_no_edit": true,
+    "preset_under_lock_preserves_snapshot_heights": true,
+    "save_refresh_clears_highlights": true,
+    "save_and_reload_preserve_revision_document": true,
+    "both_endpoint_edits_persist": true,
+    "hull_edit_and_own_driver_lock_persist": true,
+    "declared_6000t_retained_r1": true,
+    "declared_6000t_retained_r2": true,
+    "bow_angle_unit_deg": true,
+    "display_unit_accessibility_matches": true,
+    "Chinese_QD_AD_labels_match_original_fields": true,
+    "390px_interactive_no_page_overflow": true,
+    "interactive_SVG_text_layout": true,
+    "390px_hull_no_page_overflow": true,
+    "hull_SVG_text_layout": true,
+    "390px_frozen_no_page_overflow": true,
+    "frozen_SVG_text_layout": true,
+    "diagram_scroll_is_internal": true,
+    "dark_mode_selected_panel_contrast": true,
+    "frozen_en_no_preview_requests": true,
+    "frozen_en_read_only": true,
+    "frozen_zh_no_preview_requests": true,
+    "frozen_zh_read_only": true,
+    "frozen_old_no_preview_requests": true,
+    "frozen_old_read_only": true,
+    "comparison_direction_and_lengths": true,
+    "comparison_own_declarations_and_LT": true,
+    "sixteen_summary_readings_retained": true,
+    "en_SVG_eight_identities": true,
+    "en_SVG_identity_units_all_values": true,
+    "en_frozen_SVG_static_white": true,
+    "en_PNG_written": true,
+    "zh_SVG_eight_identities": true,
+    "zh_SVG_identity_units_all_values": true,
+    "zh_frozen_SVG_static_white": true,
+    "zh_PNG_written": true,
+    "SQLite_one_project_two_revisions_two_runs_idle": true,
+    "original_saved_revision_preserved": true,
+    "prior_release_accepted_and_still_current": true,
+    "published_branch_preserved": true
+  },
+  "source_sha256": {
+    "web/frontend/src/components/DesignFeedback.tsx": "1ab011245f9bb5aef8406bd5d2f1eb9a2078ab247fe0f81cd29a37789ad0e4a1",
+    "web/frontend/src/components/ShipDesignEditor.tsx": "9b5c714f38679637f328c199fa3500a37498a67a311208c806168bfcf54d7bb4",
+    "web/frontend/src/components/Sps3b3Readings.tsx": "93db1b314333721889f97bbabaca9e6fd606d86a0926d043d83f44c3f0070162",
+    "web/frontend/src/components/designConfigModel.ts": "632d8d7a8565de55bf8b1a27b62a9b7537034fbef9911ca2715e030c97bc47f7",
+    "web/frontend/src/components/sps3b3Model.ts": "57ecef3406150847fe90cacf305c4e8d6cd82fe08d502a27c151ad8d8904da99",
+    "web/frontend/src/i18n/vesselOverview.ts": "e059321541a836ea4196722b427e856b36ff3f6ad80193c402c3962060bb40a4",
+    "web/frontend/src/pages/Workbench.tsx": "19e4b544792f5aefb28013de422594087a1dc00bdbcebddcbb066b147bc047dd",
+    "web/frontend/src/__tests__/hull-freeboard.test.tsx": "fece78d23a6265fb7a2c3e29c0179b3d64762bffa2ad45cfc10ad8c4632c918a",
+    "web/frontend/src/components/HullFreeboardReadings.tsx": "b9384c19d38e7e7a5c33586fef5176ce53c69ca654908d262975161b01ae44ea",
+    "web/frontend/src/components/freeboardProfileSvg.ts": "1c583b8a4acdd2e4357c5d148c6ef7171cfc7444c267eec9dea33ee476e2891c",
+    "web/frontend/src/components/hullFreeboardModel.ts": "a19b183f5a753fa417874f27404d81536f1753686e2b320522bec771d32879dc",
+    "web/frontend/src/i18n/hullFreeboard.ts": "e62909b5c97010cfba63979a80905c32858c1bdfd19e0d05ba943bbba27ad8c7",
+    "web/frontend/src/styles/hullFreeboard.css": "5e5fa753efbc2425a7f405f494e443a4138b4be9db4a31b90f1f65ba26d679ad"
+  },
+  "untouched_core_backend_deploy_files": 292,
+  "browser": {
+    "project": "1f283e1a-c23b-43d2-b257-e69685b6d444",
+    "runs": [
+      "e9ab8bd2-638b-419c-ac45-0b12054d0a74",
+      "d2d30bc2-5b6a-4ae8-b712-78859124b1a8"
+    ],
+    "revisions": [
+      1,
+      2
+    ],
+    "sqlite_counts": {
+      "projects": 1,
+      "project_revisions": 2,
+      "calculation_runs": 2
+    },
+    "active_runs": 0,
+    "dark_contrast": {
+      "freeboard-profile": 15.702431275845507,
+      "freeboard-select": 11.969004544571883,
+      "freeboard-panel": 14.944046756767658
+    },
+    "images": {
+      "en": {
+        "svg": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\hull-freeboard-2026-10-19\\downloads\\en\\plimsoll-design-normal.svg",
+        "svg_sha256": "26db509817d1dbf6502cfc8c6ec0acb0295f42cbb59bc6ec704ca14f57296653",
+        "png": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\hull-freeboard-2026-10-19\\downloads\\en\\plimsoll-design-normal.png",
+        "png_sha256": "aee6a106ef5be7d2b9be7b1fb168a7fe61ed4f39e1794a25cbff9ff43aaf20c2",
+        "png_dimensions": [
+          1600,
+          1250
+        ],
+        "visually_inspected": true
+      },
+      "zh": {
+        "svg": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\hull-freeboard-2026-10-19\\downloads\\zh-final\\plimsoll-design-normal.svg",
+        "svg_sha256": "0f0244b5f24474b29b0bdd789e03a7b95017130abdc40501385a6c1169f9e8f2",
+        "png": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\hull-freeboard-2026-10-19\\downloads\\zh-final\\plimsoll-design-normal.png",
+        "png_sha256": "af7b438bc06bd7ed691ca37a8add4b2786cda6c8bedfc03b31e961d2e44b2e4d",
+        "png_dimensions": [
+          1600,
+          1203
+        ],
+        "visually_inspected": true
+      }
+    }
+  },
+  "verification": {
+    "related_files": 11,
+    "related_tests": 185,
+    "new_tests": 30,
+    "test_exit": 0,
+    "build_exit": 0,
+    "copy_change_after_cluster": "Only twelve Chinese labels in two dictionaries were aligned with existing source fields; final build and affected browser/export checks passed; the unchanged cluster was not repeated."
+  },
+  "review": {
+    "P1": 0,
+    "P2_found": 2,
+    "P2_fixed": [
+      "dark selected row/panel contrast",
+      "accessible endpoint quantities follow display units"
+    ],
+    "other_fixes": [
+      "chart bounds and wrapped header",
+      "unconditional bow deg label",
+      "Chinese QD/AD names match source inputs"
+    ]
+  },
+  "prior_release_receipt": "C:\\Users\\杨睿\\Documents\\Codex\\2026-10-14\\reverse-engineer-anything\\outputs\\release-propulsion-2026-10-19\\release-acceptance.json",
+  "limitations": [
+    "Synthetic data verifies interface/data contracts, not historical-ship accuracy or every input combination.",
+    "Existing Scene chunk warning remains; no core/backend full-suite repetition.",
+    "No second deployment."
+  ],
+  "cleanup": {
+    "browser_pid": 20980,
+    "isolated_database_retained": true,
+    "harness_pid": 27216,
+    "harness_closed": true,
+    "browser_closed": true
+  },
+  "handoff": {
+    "path": "C:\\Users\\杨睿\\Documents\\Codex\\2026-09-17\\shi\\work\\plimsoll-1.0\\docs\\plimsoll-1.0\\hull-freeboard-2026-10-19.md",
+    "link_targets_checked": 8,
+    "visual_sha256": {
+      "hull-zh-390.png": "50a0fa760285011175ecb95179ee98fa3bab061c951171dbaaef6edde1d5f0e7",
+      "interactive-zh-390.png": "ec93f2f9e90beac8bc47aec23e90c0ee3ac1e35506d33f11c8edc5e334bd227b",
+      "profile-en.png": "aee6a106ef5be7d2b9be7b1fb168a7fe61ed4f39e1794a25cbff9ff43aaf20c2",
+      "profile-en.svg": "26db509817d1dbf6502cfc8c6ec0acb0295f42cbb59bc6ec704ca14f57296653",
+      "profile-zh.png": "af7b438bc06bd7ed691ca37a8add4b2786cda6c8bedfc03b31e961d2e44b2e4d",
+      "profile-zh.svg": "0f0244b5f24474b29b0bdd789e03a7b95017130abdc40501385a6c1169f9e8f2"
+    }
+  }
+}

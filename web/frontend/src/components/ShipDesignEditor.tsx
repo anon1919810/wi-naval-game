@@ -21,8 +21,8 @@ import {
   Choice, DriverGroup, NotesField, PageReadings, SourceField, Sps3b3GroupView, TAB_LABEL,
   TextControl, Toggle, pageUnitLabel,
 } from './Sps3b3Editor';
-import { SpsFreeboardProfile } from './Sps3b3Readings';
 import { ArmourDiagram, type ArmourDiagramState } from './ArmourDiagram';
+import { HullReadings, NativeFreeboardProfile } from './HullFreeboardReadings';
 import { ArmamentComposition } from './ArmamentComposition';
 import { PropulsionReadings, PerformanceReadings } from './PropulsionPerformanceReadings';
 import { VesselDesignOverview, type VesselOverviewState } from './VesselDesignOverview';
@@ -550,9 +550,12 @@ export function ShipDesignChapter({ page, host, disabled, baseline, onOpenChapte
       state={diagramState} contextLabel={armamentContext} onEditField={onEditField} /> : null}
     {page === 'performance' ? <PerformanceReadings result={state.preview}
       state={diagramState} contextLabel={armamentContext} onEditField={onEditField} onOpenChapter={onOpenChapter} /> : null}
+    {page === 'hull' ? <HullReadings result={state.preview} baseline={baseline}
+      state={diagramState} contextLabel={armamentContext} onEditField={onEditField} /> : null}
+    {page === 'freeboard' ? <NativeFreeboardProfile result={state.preview} baseline={baseline}
+      state={diagramState} contextLabel={armamentContext} onEditField={onEditField} /> : null}
     <ShipDesignFields page={page} host={host} disabled={disabled}
       revealField={reveal?.field ?? null} revealSeq={reveal?.seq ?? 0} />
-    {page === 'freeboard' ? <SpsFreeboardProfile result={state.preview} /> : null}
     <PageReadings result={state.preview} page={page} unit={unit} copy={w}
       status={state.preview?.status ?? state.status} diagnostics={state.diagnostics}
       pending={state.pending} busy={state.busy} />

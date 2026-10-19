@@ -264,7 +264,7 @@ function ConfigChangesTable({ rows, currentLabel, comparisonLabel }: {
 }) {
   const c = useVesselOverviewCopy();
   const units = useUnits();
-  const groups: ConfigGroup[] = ['battery', 'hull', 'armour', 'propulsion'];
+  const groups: ConfigGroup[] = ['battery', 'hull', 'freeboard', 'armour', 'propulsion'];
   const text = (row: ConfigRow, side: 'before' | 'after'): string => {
     if (row.kind === 'number') {
       const value = side === 'before' ? row.before : row.after;

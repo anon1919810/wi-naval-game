@@ -346,6 +346,10 @@ export function isScaleField(catalogue: Sps3b3Catalogue, field: Sps3b3Field): bo
  * label choice, not a conversion, and it never rewrites a stored value.
  */
 export function resolvedUnit(field: Sps3b3Field, design: Sps3b3Design | null): string | null {
+  // The recovered catalogue files the bow angle with the hull page's scaled
+  // length fields, but the source reads it in degrees and never scales it. The
+  // name is authoritative here, whatever scale metadata the catalogue carries.
+  if (field.name === 'freeboard_length_bow') return 'deg';
   if (!field.scale_ref || !field.unit_choices || field.unit_choices.length < 2) {
     return field.unit_resolved ?? field.unit;
   }

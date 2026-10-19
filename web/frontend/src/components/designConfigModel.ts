@@ -22,7 +22,7 @@ import type { ShipDesignResult } from '../types';
  * overview and composition use; a value the table does not name stays unknown.
  */
 
-export type ConfigGroup = 'battery' | 'hull' | 'armour' | 'propulsion';
+export type ConfigGroup = 'battery' | 'hull' | 'freeboard' | 'armour' | 'propulsion';
 export type ConfigKind = 'categorical' | 'number' | 'thickness';
 
 export interface ConfigRow {
@@ -139,6 +139,29 @@ function lockTargetText(editing: Record<string, unknown> | null, language: SiteL
   return `${power} · ${bunker}`;
 }
 
+/** One declared length or displacement driver, exactly as its result saves it. */
+function driverText(editing: Record<string, unknown> | null, key: string, kind: 'length' | 'displacement',
+  language: SiteLanguage): string {
+  const raw = editing?.[key];
+  const w = (choice: string): string => vesselOverviewCopy(language, choice as VesselOverviewKey);
+  if (kind === 'length') {
+    if (raw === 'waterline') return w('vessel.config.driver.waterline');
+    if (raw === 'overall') return w('vessel.config.driver.overall');
+  } else {
+    if (raw === 'block') return w('vessel.config.driver.block');
+    if (raw === 'displacement') return w('vessel.config.driver.displacement');
+  }
+  return vesselOverviewCopy(language, 'vessel.config.notDeclared');
+}
+
+/** The depth-lock declaration: true, false and unknown stay three distinct words. */
+function depthLockText(editing: Record<string, unknown> | null, language: SiteLanguage): string {
+  const flag = editing?.depth_locked;
+  if (flag === true) return vesselOverviewCopy(language, 'vessel.config.depth.locked');
+  if (flag === false) return vesselOverviewCopy(language, 'vessel.config.depth.unlocked');
+  return vesselOverviewCopy(language, 'vessel.config.notDeclared');
+}
+
 /**
  * The configuration rows, current → comparison, with no invented numeric delta.
  *
@@ -169,6 +192,70 @@ export function configChangeRows(current: ShipDesignResult, comparison: ShipDesi
     rows.push({
       key: `hull.${key}`, group: 'hull', label, kind: 'number', dimension: 'length', storedUnit: 'ft',
       before: numberAt(currentHull, key), after: numberAt(comparisonHull, key),
+      beforeText: '', afterText: '',
+    });
+  }
+  rows.push({
+    key: 'hull.lengthOA', group: 'hull', label: 'vessel.fact.lengthOA', kind: 'number',
+    dimension: 'length', storedUnit: 'ft',
+    before: numberAt(currentHull, 'lengthOA'), after: numberAt(comparisonHull, 'lengthOA'),
+    beforeText: '', afterText: '',
+  });
+  rows.push({
+    key: 'hull.block', group: 'hull', label: 'vessel.fact.block', kind: 'number', canonical: '',
+    before: numberAt(currentHull, 'block'), after: numberAt(comparisonHull, 'block'),
+    beforeText: '', afterText: '',
+  });
+  rows.push({
+    key: 'hull.displacement', group: 'hull', label: 'vessel.fact.displacement', kind: 'number', canonical: 'LT',
+    before: numberAt(currentHull, 'displacement'), after: numberAt(comparisonHull, 'displacement'),
+    beforeText: '', afterText: '',
+  });
+  const currentHullEditing = editingOf(current);
+  const comparisonHullEditing = editingOf(comparison);
+  rows.push({
+    key: 'hull.lengthDriver', group: 'hull', label: 'vessel.fact.lengthDriver', kind: 'categorical',
+    beforeText: driverText(currentHullEditing, 'length_driver', 'length', language),
+    afterText: driverText(comparisonHullEditing, 'length_driver', 'length', language),
+  });
+  rows.push({
+    key: 'hull.displacementDriver', group: 'hull', label: 'vessel.fact.displacementDriver', kind: 'categorical',
+    beforeText: driverText(currentHullEditing, 'displacement_driver', 'displacement', language),
+    afterText: driverText(comparisonHullEditing, 'displacement_driver', 'displacement', language),
+  });
+  rows.push({
+    key: 'hull.depthLock', group: 'hull', label: 'vessel.fact.depthLock', kind: 'categorical',
+    beforeText: depthLockText(currentHullEditing, language),
+    afterText: depthLockText(comparisonHullEditing, language),
+  });
+
+  const currentFreeboard = section(current, 'freeboard');
+  const comparisonFreeboard = section(comparison, 'freeboard');
+  for (const [key, label] of [
+    ['freeQDAft', 'vessel.fact.freeQDAft'], ['freeQDFor', 'vessel.fact.freeQDFor'],
+    ['freeADAft', 'vessel.fact.freeADAft'], ['freeADFor', 'vessel.fact.freeADFor'],
+    ['freeFDAft', 'vessel.fact.freeFDAft'], ['freeFDFor', 'vessel.fact.freeFDFor'],
+    ['freeFCAft', 'vessel.fact.freeFCAft'], ['freeFCFor', 'vessel.fact.freeFCFor'],
+  ] as const) {
+    rows.push({
+      key: `freeboard.${key}`, group: 'freeboard', label, kind: 'number',
+      dimension: 'length', storedUnit: 'ft',
+      before: numberAt(currentFreeboard, key), after: numberAt(comparisonFreeboard, key),
+      beforeText: '', afterText: '',
+    });
+  }
+  for (const [key, label] of [
+    ['fcLength', 'vessel.fact.fcLength'], ['fdLength', 'vessel.fact.fdLength'],
+    ['adLength', 'vessel.fact.adLength'], ['qdLength', 'vessel.fact.qdLength'],
+  ] as const) {
+    const before = numberAt(currentFreeboard, key);
+    const after = numberAt(comparisonFreeboard, key);
+    // The source stores these as 0–1 fractions; the comparison states them as
+    // percentages without changing the saved value or inventing a conversion.
+    rows.push({
+      key: `freeboard.${key}`, group: 'freeboard', label, kind: 'number', canonical: '%',
+      before: before === null ? null : before * 100,
+      after: after === null ? null : after * 100,
       beforeText: '', afterText: '',
     });
   }

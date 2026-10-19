@@ -1336,7 +1336,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
               // The native declaration owns the overlapping principal dimensions;
               // the recovered field form is never shown beside it. A plain
               // physical project keeps its own form.
-              ? <ShipDesignChapter page="hull" host={host} disabled={busy} />
+              ? <ShipDesignChapter page="hull" host={host} disabled={busy}
+                baseline={saved.state === 'ready' ? saved.result : null} />
               : <><p className="section-intro">{w('editor.hull.intro')}</p>
                 <div className="field-grid">{HULL_FIELDS.map(field => { const alternate = 'alternate' in field ? field.alternate : undefined; const key = alternate && !(field.key in hull) ? alternate : field.key; const issue = fieldErrors.find(item => item.path.includes(`hull.${key}`) || item.path.includes(`hull['${key}']`));
                   // A main dimension carries no per-field source of its own; only
@@ -1356,7 +1357,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
           <section className="editor-section"><InputGroup index="02" title={w('editor.group.hullSupplement')} /><HullSupplementEditor project={draft} run={selectedRun} onChange={updateDraft} /></section>
         </>}
         {chapter === 'freeboard' && (native
-          ? <section className="editor-section"><ShipDesignChapter page="freeboard" host={host} disabled={busy} /></section>
+          ? <section className="editor-section"><ShipDesignChapter page="freeboard" host={host} disabled={busy}
+            baseline={saved.state === 'ready' ? saved.result : null} /></section>
           // A plain physical project has no native freeboard to edit; the design
           // is started from the overview, where the setup lives. It is never left
           // as a blank chapter.

@@ -9,6 +9,7 @@ import { ArmamentComposition } from './ArmamentComposition';
 import { VesselDesignOverview } from './VesselDesignOverview';
 import { PropulsionReadings, PerformanceReadings } from './PropulsionPerformanceReadings';
 import { propulsionEnvelopeGate } from './propulsionPerformanceModel';
+import { HullReadings, NativeFreeboardProfile } from './HullFreeboardReadings';
 import { nativeReadings, sps3b3ReportSections, sps3b3ReportText, sps3b3ResultOf } from './sps3b3Model';
 import type { ShipDesignResult, Sps3b3Result, StageEnvelope } from '../types';
 import '../styles/Sps3b3.css';
@@ -94,15 +95,19 @@ export function Sps3b3Readings({data,runId,variant,envelope}:{data:unknown;runId
     {notice && <p role="status">{notice}</p>}
     {native && <VesselDesignOverview result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && frozenGate && <HullReadings result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {native && <ArmamentComposition result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {native && <ArmourDiagram result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && frozenGate && <NativeFreeboardProfile result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {native && frozenGate && <PropulsionReadings result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {native && frozenGate && <PerformanceReadings result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
-    <SpsFreeboardProfile result={result} />
+    {!native && <SpsFreeboardProfile result={result} />}
     {sections.length ? <div className="sps-report">{sections.map((s,i)=><section key={`${s.id}-${i}`}>
       {s.title && <h3>{s.title}</h3>}<pre>{s.lines.join('\n')}</pre>
     </section>)}</div> : <p>{w('sps.readings.reportMissing')}</p>}
