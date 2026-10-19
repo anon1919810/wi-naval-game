@@ -35,6 +35,8 @@ web/backend/.venv/Scripts/python.exe -B -m pytest tools/plimsoll/tests -q
 
 **任一红灯不得进入发布。** 相关簇仍可用于快速迭代，但发布前的最后一道必须是全量。
 
+全量套件本身也要能稳定复跑：`leave-guard.test.tsx` 的装配用例等懒加载的工作台章节导航只用了 `findByRole` 的 1 秒默认等待，机器一忙就会红。已改为 5 秒并连跑三次确认稳定——基线不稳定的等于没有基线。
+
 ## 本轮修掉的那条红灯
 
 `native-design-projection` 原本断言「原生结果旁边仍显示旧 balance 区块」，而上一轮已把该区块改为

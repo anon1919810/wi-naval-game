@@ -247,7 +247,9 @@ describe('the guard in the assembled application', () => {
   async function openDirtyProject() {
     window.location.hash = '#/projects/p1';
     render(<App returnHref="#/work" />);
-    fireEvent.click(await screen.findByRole('button', { name: '船型与几何' }));
+    // The chapter navigation arrives with the lazily loaded workbench chunk; on a
+    // busy machine that takes longer than the one-second default.
+    fireEvent.click(await screen.findByRole('button', { name: '船型与几何' }, { timeout: 5000 }));
     const length = await screen.findByLabelText('船长');
     fireEvent.change(length, { target: { value: '91' } });
     await screen.findByText('未保存修改');
