@@ -1,0 +1,354 @@
+/* The managed weight breakdown: its bar chart, its group list and its frozen
+   role comparison. Theme tokens only; no new font, no global site change. */
+
+.weight-breakdown,
+.weight-comparison {
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.weight-head {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.weight-head h3 {
+  margin: 0;
+}
+
+.weight-kicker {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weight-intro,
+.weight-hint,
+.weight-role-note,
+.weight-state {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.weight-block {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.weight-block h4 {
+  margin: 0;
+}
+
+.weight-balance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+
+.weight-balance > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.28rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-balance dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.weight-balance dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.weight-groups,
+.weight-roles,
+.weight-role-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.weight-group {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.weight-group-select,
+.weight-group-static {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+
+.weight-group-select {
+  cursor: pointer;
+}
+
+.weight-group--active .weight-group-select {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.weight-group-quiet {
+  color: var(--muted);
+}
+
+.weight-group-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-group-incomplete {
+  color: var(--warning);
+}
+
+.weight-changed {
+  color: var(--error);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.weight-chart-legend {
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.weight-legend--estimate::before,
+.weight-legend--selected::before {
+  content: '';
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-inline-end: 0.3rem;
+  border-radius: 2px;
+  vertical-align: -0.05rem;
+}
+
+.weight-legend--estimate::before { background: var(--muted); }
+.weight-legend--selected::before { background: var(--accent); }
+
+.weight-chart-group {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.weight-chart-group h5 {
+  margin: 0.3rem 0 0;
+}
+
+.weight-chart-role {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.3rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+
+.weight-chart-role .weight-role-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.weight-bar-row {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) 6rem;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.weight-bar-legend,
+.weight-bar-value {
+  color: var(--muted);
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+.weight-bar-value {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-track {
+  position: relative;
+  display: block;
+  height: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.25rem;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+
+.weight-zero {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.weight-bar {
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  border-radius: 0.15rem;
+  min-width: 2px;
+}
+
+.weight-bar--estimate { background: var(--muted); }
+.weight-bar--selected { background: var(--accent); }
+
+.weight-bar-unknown {
+  position: absolute;
+  inset-inline-start: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.weight-role {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.4rem 0.35rem;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+
+.weight-role--changed,
+.weight-group--changed {
+  border-inline-start: 3px solid var(--error);
+  padding-inline-start: 0.45rem;
+}
+
+.weight-role-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.9rem;
+}
+
+.weight-role-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.weight-role-mode,
+.weight-role-conflict {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.weight-role-conflict {
+  color: var(--error);
+}
+
+.weight-role-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.2rem 1rem;
+  margin: 0;
+}
+
+.weight-role-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-role-facts dt {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.weight-role-facts dd {
+  margin: 0;
+}
+
+.weight-reveal {
+  justify-self: start;
+}
+
+.weight-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.weight-comparison-table th,
+.weight-comparison-table td {
+  border: 1px solid var(--line);
+  padding: 0.3rem 0.4rem;
+  text-align: start;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.weight-comparison-group th {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.weight-comparison-side,
+.weight-comparison-delta {
+  display: grid;
+  gap: 0.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.weight-comparison-absent {
+  color: var(--muted);
+}
+
+.weight-comparison-categorical {
+  color: var(--error);
+}
+
+.weight-comparison td {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .weight-bar-row {
+    grid-template-columns: 6rem minmax(0, 1fr) 4.5rem;
+  }
+
+  .weight-comparison-table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+  }
+}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import * as api from '../api';
+import { WeightBreakdownReadings } from './WeightBreakdownReadings';
 import { useShipDesignCopy, useShipDesignRoleLabel, type ShipDesignKey } from '../i18n/shipDesign';
 import { useSps3b3Copy } from '../i18n/sps3b3';
 import { useArmourDiagramCopy } from '../i18n/armourDiagram';
@@ -29,7 +30,7 @@ import { VesselDesignOverview, type VesselOverviewState } from './VesselDesignOv
 import { useVesselOverviewCopy } from '../i18n/vesselOverview';
 import { formatNumber } from './units';
 import {
-  balanceOf, basisConditionId, bindingProblem, conditionLabel, effectiveItemMass, isUnresolved,
+  bindingProblem, conditionLabel, effectiveItemMass, isUnresolved,
   ledgerComplete, ledgerEntries, needsBinding, projectItemIds, projectSettledReply, sameGovernedSlice,
   unresolvedEntries,
 } from './shipDesign';
@@ -651,55 +652,78 @@ function ShipDesignSetup({ host, disabled }: { host: ShipDesignHost; disabled: b
  * role is bound in declared mode, so an estimated mass is never overwritten as
  * if it were the reader's own.
  */
-export function ShipDesignLedgerSection({ host, disabled }: { host: ShipDesignHost; disabled: boolean }) {
+export function ShipDesignLedgerSection({ host, disabled, baseline }: {
+  host: ShipDesignHost; disabled: boolean; baseline?: unknown;
+}) {
   const d = useShipDesignCopy();
   const role = useShipDesignRoleLabel();
+  const sectionRef = useRef<HTMLElement>(null);
   const preview = host.nativePreview;
   const entries = ledgerEntries(preview);
-  const balance = balanceOf(preview);
-  const basis = conditionLabel(host.project, basisConditionId(preview));
   const unbound = needsBinding(preview);
   const unresolved = unresolvedEntries(entries).length;
-  const locked = disabled || host.busy;
-  return <section className="ship-design-ledger" aria-label={d('shipDesign.ledger.title')}>
+  const queue = host.state;
+  // The same error-first, full host state the chapters use: a queue error or a
+  // setup error is failed; a disabled, busy or still-pending host is pending.
+  const state = queue.error || host.error ? 'failed' as const
+    : disabled || host.busy || queue.pending > 0 || host.pending > 0 ? 'pending' as const
+    : 'ready' as const;
+  const locked = disabled || host.busy || queue.pending > 0;
+  // The role reveal is an explicit request: it opens the existing binding
+  // disclosure and focuses the real control inside it. It writes nothing.
+  const revealRole = useCallback((target: string) => {
+    const root = sectionRef.current;
+    if (!root) return;
+    const bindings = root.querySelector<HTMLDetailsElement>('details.sps-bindings');
+    if (bindings) bindings.open = true;
+    const articles = Array.from(root.querySelectorAll<HTMLElement>('article.sps-ledger-role'));
+    const article = articles.find(node => node.dataset.role === target) ?? null;
+    if (!article) return;
+    // Focus an actual role control that is really operable, not a disabled one.
+    const control = Array.from(article.querySelectorAll<HTMLElement>('input, select, button'))
+      .find(node => !node.hasAttribute('disabled')) ?? null;
+    article.scrollIntoView?.({ block: 'nearest' });
+    control?.focus();
+  }, []);
+  return <section className="ship-design-ledger" ref={sectionRef} aria-label={d('shipDesign.ledger.title')}>
     <header className="sps-head">
       <h3>{d('shipDesign.ledger.title')}</h3>
       <p className="sps-note">{d('shipDesign.ledger.intro')}</p>
     </header>
-    {balance ? <dl className="sps-readings" aria-label={d('shipDesign.balance.title')}>
-      <div className="sps-reading"><dt>{d('shipDesign.ledger.selected')}</dt><dd>{renderTonnes(balance.selected_mass_t)}</dd></div>
-      <div className="sps-reading"><dt>{d('shipDesign.ledger.estimate')}</dt><dd>{renderTonnes(balance.estimated_mass_t)}</dd></div>
-      <div className="sps-reading"><dt>{d('shipDesign.ledger.target')}</dt><dd>{renderTonnes(balance.target_displacement_t)}</dd></div>
-      <div className="sps-reading"><dt>{d('shipDesign.ledger.difference')}</dt><dd>{renderTonnes(balance.difference_t)}</dd></div>
-      <div className="sps-reading"><dt>{d('shipDesign.balance.basis', { condition: '' }).trim()}</dt><dd>{basis ?? d('shipDesign.conditionUnset')}</dd></div>
-    </dl> : null}
-    {entries.length === 0 ? <p className="sps-hint">{d('shipDesign.ledger.none')}</p> : null}
-    {preview && entries.length > 0 ? <p className="sps-hint">
-      {ledgerComplete(preview) ? d('shipDesign.ledger.complete') : d('shipDesign.ledger.unresolved', { count: unresolved })}</p> : null}
-    {/* The unbound *items* come from the ledger's own `needs_binding` list, never
-        from an empty per-role target: the optional `other` classification carries
-        no source estimate and is not itself a missing binding. */}
-    {unbound.length > 0 ? <p className="sps-hint">{d('shipDesign.ledger.unboundItems', { items: unbound.join(', ') })}</p> : null}
-    {entries.length > 0 ? <>
-      <table className="sps-ledger-table">
-        <caption className="sps-hint">{d('shipDesign.ledger.roleTable')}</caption>
-        <thead><tr>
-          <th scope="col">{d('shipDesign.ledger.role')}</th>
-          <th scope="col">{d('shipDesign.ledger.mode')}</th>
-          <th scope="col">{d('shipDesign.ledger.estimate')}</th>
-          <th scope="col">{d('shipDesign.ledger.selected')}</th>
-          <th scope="col">{d('shipDesign.ledger.items')}</th>
-        </tr></thead>
-        <tbody>
-          {entries.map(entry => <tr key={entry.role} data-role={entry.role} data-mode={entry.mode ?? 'none'}>
-            <th scope="row">{role(entry.role)}</th>
-            <td>{modeLabel(d, entry.mode, entry.role)}</td>
-            <td>{renderTonnes(entry.estimate_t)}</td>
-            <td>{renderTonnes(entry.selected_mass_t)}</td>
-            <td>{(entry.item_ids ?? []).join(', ') || '—'}</td>
-          </tr>)}
-        </tbody>
-      </table>
+    <WeightBreakdownReadings result={preview} baseline={baseline} state={state} onEditRole={revealRole} />
+    {/* A pending or failed edit hides the table too: the preview it would print
+        is stale, and an unknown reading must not be diluted by residual rows. */}
+    {state === 'ready' ? <>
+      {entries.length === 0 ? <p className="sps-hint">{d('shipDesign.ledger.none')}</p> : null}
+      {preview && entries.length > 0 ? <p className="sps-hint">
+        {ledgerComplete(preview) ? d('shipDesign.ledger.complete') : d('shipDesign.ledger.unresolved', { count: unresolved })}</p> : null}
+      {/* The unbound *items* come from the ledger's own `needs_binding` list, never
+          from an empty per-role target: the optional `other` classification carries
+          no source estimate and is not itself a missing binding. */}
+      {unbound.length > 0 ? <p className="sps-hint">{d('shipDesign.ledger.unboundItems', { items: unbound.join(', ') })}</p> : null}
+      {/* The saved original ledger table stays reachable for audit: the reading
+          above explains it, and this table is the raw rows it explains. */}
+      {entries.length > 0 ? <>
+        <table className="sps-ledger-table">
+          <caption className="sps-hint">{d('shipDesign.ledger.roleTable')}</caption>
+          <thead><tr>
+            <th scope="col">{d('shipDesign.ledger.role')}</th>
+            <th scope="col">{d('shipDesign.ledger.mode')}</th>
+            <th scope="col">{d('shipDesign.ledger.estimate')}</th>
+            <th scope="col">{d('shipDesign.ledger.selected')}</th>
+            <th scope="col">{d('shipDesign.ledger.items')}</th>
+          </tr></thead>
+          <tbody>
+            {entries.map(entry => <tr key={entry.role} data-role={entry.role} data-mode={entry.mode ?? 'none'}>
+              <th scope="row">{role(entry.role)}</th>
+              <td>{modeLabel(d, entry.mode, entry.role)}</td>
+              <td>{renderTonnes(entry.estimate_t)}</td>
+              <td>{renderTonnes(entry.selected_mass_t)}</td>
+              <td>{(entry.item_ids ?? []).join(', ') || '—'}</td>
+            </tr>)}
+          </tbody>
+        </table>
+      </> : null}
     </> : null}
     {/* Binding is an explicit command per role, so the forms stay collapsed to
         one disclosure rather than exposing every candidate item at once. */}

@@ -135,6 +135,11 @@ export function ArmamentComposition({
       <button type="button" className="sps-button" onClick={() => download('png')}>{w('armament.export.png')}</button>
       {exportError ? <p className="vessel-error" role="alert">{exportError}</p> : null}
     </div>
+    {/* Paper only: the tall serialized drawing is not shrunk to an illegible
+        strip. The same saved batteries are printed as a structured reading. */}
+    {state === 'frozen' ? <div className="print-only-structured" data-armament-print>
+      {armament.banks.map(bank => <BankPanel key={bank.bank} bank={bank} armament={armament} frozen />)}
+    </div> : null}
   </section>;
 }
 

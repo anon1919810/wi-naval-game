@@ -54,7 +54,7 @@ export function SourceInspector({ result, deferred = false, onOpen }: {
           two long input fingerprints fold. */}
       <dt>{w('audit.fingerprint')}</dt><dd><code>{result.request_fingerprint}</code></dd>
     </dl>
-    <details className="report-audit-fold"><summary>{w('audit.fold.identities')}</summary>
+    <details className="report-audit-fold print-secondary"><summary>{w('audit.fold.identities')}</summary>
       <dl className="report-audit-facts">
         <dt>{w('audit.projectFingerprint')}</dt><dd><code>{result.project_fingerprint}</code></dd>
         <dt>{w('audit.conditionFingerprint')}</dt><dd><code>{result.input_fingerprint}</code></dd>
@@ -62,16 +62,16 @@ export function SourceInspector({ result, deferred = false, onOpen }: {
         <dt>{w('audit.condition')}</dt><dd><code>{result.condition_id}</code></dd>
       </dl>
     </details>
-    <details className="report-audit-fold"><summary>{w('audit.fold.sources')}</summary>
+    <details className="report-audit-fold print-secondary"><summary>{w('audit.fold.sources')}</summary>
       <pre>{JSON.stringify(result.sources, null, 2)}</pre>
     </details>
-    <details className="report-audit-fold"><summary>{w('audit.fold.methods')}</summary>
+    <details className="report-audit-fold print-secondary"><summary>{w('audit.fold.methods')}</summary>
       <pre>{JSON.stringify(result.method_versions, null, 2)}</pre>
     </details>
     {/* The walk is deferred on purpose: it reads the saved payload, which is
         large. The summary is always there so a reader can ask for it, and the
         content is mounted when they open it or when the report is printed. */}
-    <details className="report-audit-fold report-provenance"
+    <details className="report-audit-fold report-provenance print-secondary"
       onToggle={event => { if (event.currentTarget.open) onOpen?.(); }}>
       <summary>{deferred ? w('audit.fold.provenance', { groups: groups.length, paths }) : w('audit.fold.provenanceLazy')}</summary>
       {deferred && (groups.length === 0

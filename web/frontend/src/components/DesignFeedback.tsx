@@ -4,6 +4,7 @@ import { chapterOf, type Chapter } from './ProjectNav';
 import { useUnits } from './UnitProvider';
 import { compareDraft, compareFrozen, frozenNativeSides, requestsNativeDesign, type ChangedInput, type ChangedRole, type DesignFeedback as Feedback, type DraftSide, type FeedbackLabels } from './designFeedbackModel';
 import { configChangeRows, configGroupLabel, type ConfigGroup, type ConfigRow } from './designConfigModel';
+import { WeightRoleComparison } from './WeightRoleComparison';
 import { resolvedUnit, shipDesignOf, sourceViewOfShipDesign, type Sps3b3Catalogue } from './sps3b3Model';
 import { useDesignCatalogue } from './useDesignCatalogue';
 import { formatNumber } from './units';
@@ -121,8 +122,14 @@ export function FrozenDesignSummary({ current, comparison, currentLabel, compari
     ? configChangeRows(pair.current.result, pair.comparison.result, language) : null,
     [pair, language]);
   if (!feedback) return null;
-  return <FeedbackBody feedback={feedback} variant="frozen" configRows={configRows}
-    currentLabel={currentLabel} comparisonLabel={comparisonLabel} />;
+  return <>
+    <FeedbackBody feedback={feedback} variant="frozen" configRows={configRows}
+      showRoles={!pair.comparable}
+      currentLabel={currentLabel} comparisonLabel={comparisonLabel} />
+    {pair.comparable && pair.current.result && pair.comparison.result
+      ? <WeightRoleComparison current={pair.current.result} comparison={pair.comparison.result}
+        currentLabel={currentLabel} comparisonLabel={comparisonLabel} /> : null}
+  </>;
 }
 
 /** Every visible value a reading cell can hold, in one reader's units. */
@@ -160,13 +167,15 @@ interface BodyProps {
   variant: 'draft' | 'frozen';
   /** The frozen configuration rows, or null when the pair may not be quoted. */
   configRows?: ConfigRow[] | null;
+  /** Whether to print the changed-role list; the full union table replaces it. */
+  showRoles?: boolean;
   currentLabel?: string;
   comparisonLabel?: string;
   onRetry?: () => void;
   onOpenChapter?: (chapter: string) => void;
 }
 
-function FeedbackBody({ feedback, variant, configRows, currentLabel, comparisonLabel, onRetry, onOpenChapter }: BodyProps) {
+function FeedbackBody({ feedback, variant, configRows, showRoles = true, currentLabel, comparisonLabel, onRetry, onOpenChapter }: BodyProps) {
   const d = useDesignFeedbackCopy();
   const w = useWorkspaceCopy();
   const units = useUnits();
@@ -235,7 +244,7 @@ function FeedbackBody({ feedback, variant, configRows, currentLabel, comparisonL
     </div>
 
     <div className="design-feedback-block">
-      {feedback.roles.length === 0
+      {!showRoles ? null : feedback.roles.length === 0
         ? <p className="design-feedback-empty">{d('feedback.roles.none')}</p>
         : <details open={feedback.roles.length <= VISIBLE_ROLES}>
           <summary>{d('feedback.roles.count', { count: feedback.roles.length })}</summary>

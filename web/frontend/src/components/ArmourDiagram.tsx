@@ -141,6 +141,11 @@ export function ArmourDiagram({
       <button type="button" className="sps-button" onClick={() => download('png')}>{w('armour.export.png')}</button>
       {exportError ? <p className="armour-diagram-error" role="alert">{exportError}</p> : null}
     </div>
+    {/* Paper only: the tall serialized drawing is not shrunk to an illegible
+        strip. The same saved regions are printed as a structured reading. */}
+    {state === 'frozen' ? <div className="print-only-structured" data-armour-print>
+      {roles.map(role => <RegionPanel key={role} diagram={diagram} role={role} frozen />)}
+    </div> : null}
   </section>;
 }
 

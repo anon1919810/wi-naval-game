@@ -3,7 +3,11 @@ import { renderZh as render, zhCopy } from './locale';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Report } from '../pages/Report';
+import { Sps3b3Readings } from '../components/Sps3b3Readings';
+import { UnitProvider } from '../components/UnitProvider';
 import { estimateLabel, provenanceGroups } from '../components/sourceAudit';
+import { CANONICAL_PREFERENCES } from '../components/units';
+import { weightBreakdownCopy } from '../i18n/weightBreakdown';
 import type { AnalysisResult, StageEnvelope } from '../types';
 
 /**
@@ -76,6 +80,45 @@ const appendix = () => document.querySelector('.report-provenance') as HTMLDetai
 const rawData = () => document.querySelector('.stage-raw-data') as HTMLDetailsElement;
 const print = () => act(() => { window.dispatchEvent(new Event('beforeprint')); });
 const done = () => act(() => { window.dispatchEvent(new Event('afterprint')); });
+
+const designCopy = (key: Parameters<typeof weightBreakdownCopy>[1]) => weightBreakdownCopy('zh-CN', key);
+
+/** The saved native design a readable report carries: ledger, balance and text. */
+const NATIVE_DESIGN = {
+  schema: 'plimsoll-ship-design-result-1',
+  method_version: 'ship-design-native-v1',
+  status: 'available',
+  basis_condition_id: 'normal',
+  ledger: {
+    complete: true,
+    selected_mass_t: 8012,
+    estimated_mass_t: 8000,
+    target_displacement_t: 9000,
+    difference_t: -988,
+    roles: {
+      structure: { estimate_t: 2000, selected_mass_t: 2000, mode: 'estimated', item_ids: ['hull.structure'] },
+      machinery: { estimate_t: 6000, selected_mass_t: 6000, mode: 'estimated', item_ids: ['engine.machinery'] },
+      other: {},
+    },
+  },
+  balance: { selected_mass_t: 8012, estimated_mass_t: 8000, target_displacement_t: 9000, difference_t: -988 },
+  report: {
+    sections: [{ id: 'saved', title: 'Saved native report', lines: ['the original saved native text'] }],
+    text: 'the original saved native text',
+  },
+  provenance: { source: 'saved native run' },
+  hull: { loa_m: 213.4 },
+  engine: { power_kw: 12000 },
+  performance: { speed_kn: 18 },
+};
+
+function nativePrintableResult(): AnalysisResult {
+  const result = printableResult();
+  const stage = envelope('completed', true, NATIVE_DESIGN as unknown as StageEnvelope['data']);
+  stage.method_versions = { kernel: 'ship-design-native-v1' };
+  result.stages.ship_design = stage;
+  return result;
+}
 
 beforeEach(() => {
   vi.spyOn(window, 'addEventListener');
@@ -246,5 +289,116 @@ describe('provenance of one saved result', () => {
     const other = printableResult();
     other.input_snapshot.hull.loa_m = 214;
     expect(provenanceGroups(other).length).toBe(groups.length);
+  });
+});
+
+describe('the report print scope', () => {
+  it('defaults a readable native report to the design scope and leaves the duplicate paper material off', () => {
+    render(<Report result={nativePrintableResult()} runId="run-9" />);
+    const page = document.querySelector('.report-page') as HTMLElement;
+    expect(page.dataset.printScope).toBe('design');
+    expect(screen.getByRole('radio', { name: designCopy('print.scope.design') })).toBeChecked();
+    expect(screen.getByRole('radio', { name: designCopy('print.scope.full') })).not.toBeChecked();
+
+    // The screen stays complete: the original text, the native audit and the
+    // appendix are all still mounted and readable.
+    expect(document.querySelector('.sps-report')!.textContent).toContain('the original saved native text');
+    expect(document.querySelector('.sps-native')).not.toBeNull();
+    expect(appendix()).not.toBeNull();
+    // The design paper still carries its own identity, including the request
+    // fingerprint in the always-visible audit facts.
+    const identity = document.querySelector('[data-report-identity]') as HTMLElement;
+    expect(document.querySelector('.report-audit-facts')!.textContent).toContain('request-fingerprint-0123456789');
+    expect(identity.textContent).toContain('ship-design-native-v1');
+    // The duplicate material is explicitly marked for the design sheet.
+    for (const selector of ['.sps-report', '.sps-native', '.report-provenance']) {
+      expect(document.querySelector(selector)!.classList.contains('print-secondary')).toBe(true);
+    }
+
+    print();
+    // A design sheet never walks or mounts the source appendix or the native key
+    // audit, and the original text is not expanded for it.
+    expect(document.querySelectorAll('.report-audit-group')).toHaveLength(0);
+    expect(appendix().hasAttribute('open')).toBe(false);
+    expect(document.querySelector('.sps-native')!.hasAttribute('open')).toBe(false);
+    // Not even a nested section of the hidden native audit is opened: the walk is
+    // ancestor-aware, so the whole hidden region stays shut.
+    expect(document.querySelectorAll('.sps-native details[open]')).toHaveLength(0);
+    done();
+    expect(document.querySelectorAll('details[open]')).toHaveLength(0);
+  });
+
+  it('prints the source appendix and the original text only in the full scope', () => {
+    render(<Report result={nativePrintableResult()} runId="run-9" />);
+    fireEvent.click(screen.getByRole('radio', { name: designCopy('print.scope.full') }));
+    expect((document.querySelector('.report-page') as HTMLElement).dataset.printScope).toBe('full');
+    expect(screen.getByText(designCopy('print.scope.fullHint'))).toBeVisible();
+
+    print();
+    expect(appendix().hasAttribute('open')).toBe(true);
+    expect(document.querySelectorAll('.report-audit-group').length).toBeGreaterThan(0);
+    expect(document.querySelector('.sps-native')!.hasAttribute('open')).toBe(true);
+    // In the full scope the saved native audit really opens, including its nested
+    // per-section disclosures the Sps3b3 stylesheet would otherwise hide.
+    expect(document.querySelectorAll('.sps-native details[open]').length).toBeGreaterThan(0);
+    done();
+
+    // The same screen states return, exactly as the full scope always promised.
+    expect(appendix().hasAttribute('open')).toBe(false);
+    expect(document.querySelector('.sps-native')!.hasAttribute('open')).toBe(false);
+    expect(document.querySelectorAll('.sps-native details[open]')).toHaveLength(0);
+  });
+
+  it('defaults a kernel-mismatched native stage to the full scope and keeps its source material', () => {
+    const mismatched = nativePrintableResult();
+    mismatched.stages.ship_design.method_versions = { kernel: 'other-kernel' };
+    render(<Report result={mismatched} runId="run-9" />);
+    expect((document.querySelector('.report-page') as HTMLElement).dataset.printScope).toBe('full');
+    // No readable native replacement, so the source text and native audit are not
+    // marked as duplicates and stay on the sheet.
+    for (const selector of ['.sps-report', '.sps-native']) {
+      expect(document.querySelector(selector)!.classList.contains('print-secondary')).toBe(false);
+    }
+  });
+
+  it('keeps a compatibility stage main report on the sheet, unmarked', () => {
+    const compat = {
+      schema: 'plimsoll-sps3b3-result-1', status: 'available',
+      report: { sections: [{ id: 's', title: 'Compat', lines: ['compat text'] }], text: 'compat text' },
+      provenance: { source: 'compat' },
+    };
+    render(<UnitProvider preferences={CANONICAL_PREFERENCES}>
+      <Sps3b3Readings data={compat} />
+    </UnitProvider>);
+    expect(document.querySelector('.sps-report')!.textContent).toContain('compat text');
+    for (const selector of ['.sps-report', '.sps-native']) {
+      expect(document.querySelector(selector)!.classList.contains('print-secondary')).toBe(false);
+    }
+  });
+
+  it('defaults a report without a readable native design to the full scope', () => {
+    render(<Report result={printableResult()} runId="run-9" />);
+    expect((document.querySelector('.report-page') as HTMLElement).dataset.printScope).toBe('full');
+    expect(screen.getByRole('radio', { name: designCopy('print.scope.full') })).toBeChecked();
+  });
+
+  it('keeps the reader s disclosure across scope switches and repeated prints', () => {
+    render(<Report result={nativePrintableResult()} runId="run-9" />);
+    const readerOpened = detailsBySummary('假设与适用性');
+    act(() => { readerOpened.open = true; });
+    fireEvent(readerOpened, new Event('toggle'));
+
+    print(); done();
+    expect(readerOpened.hasAttribute('open')).toBe(true);
+
+    fireEvent.click(screen.getByRole('radio', { name: designCopy('print.scope.full') }));
+    print(); done();
+    expect(readerOpened.hasAttribute('open')).toBe(true);
+
+    fireEvent.click(screen.getByRole('radio', { name: designCopy('print.scope.design') }));
+    print(); done();
+    expect(readerOpened.hasAttribute('open')).toBe(true);
+    // The design print never opened the appendix behind the reader's back.
+    expect(appendix().hasAttribute('open')).toBe(false);
   });
 });

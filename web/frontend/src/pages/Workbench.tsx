@@ -1413,7 +1413,8 @@ export function Workbench({ projectId, onBack, onRun, onDirtyChange, onLab }: {
               follow, folded away: they are the position and source facts that sit
               underneath the core's managed mass. */}
           <section className="editor-section"><InputGroup index="01" title={w('editor.group.ledger')} note={w('editor.ledger.groups', { count: draft.weight_groups.length })} />
-            <ShipDesignLedgerSection host={host} disabled={busy} /></section>
+            <ShipDesignLedgerSection host={host} disabled={busy}
+              baseline={saved.state === 'ready' ? saved.result : null} /></section>
           <section className="editor-section" id={LEDGER_SECTION} tabIndex={-1}>
             <details className="advanced-json"><summary>{d('shipDesign.ledger.positions')}</summary>
               <p className="section-intro">{d('shipDesign.ledger.positionsHint')}</p>

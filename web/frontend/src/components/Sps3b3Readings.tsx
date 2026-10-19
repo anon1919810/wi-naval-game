@@ -10,6 +10,7 @@ import { VesselDesignOverview } from './VesselDesignOverview';
 import { PropulsionReadings, PerformanceReadings } from './PropulsionPerformanceReadings';
 import { propulsionEnvelopeGate } from './propulsionPerformanceModel';
 import { HullReadings, NativeFreeboardProfile } from './HullFreeboardReadings';
+import { WeightBreakdownReadings } from './WeightBreakdownReadings';
 import { nativeReadings, sps3b3ReportSections, sps3b3ReportText, sps3b3ResultOf } from './sps3b3Model';
 import type { ShipDesignResult, Sps3b3Result, StageEnvelope } from '../types';
 import '../styles/Sps3b3.css';
@@ -56,6 +57,11 @@ export function Sps3b3Readings({data,runId,variant,envelope}:{data:unknown;runId
   // declared kernel identity. A residual value under a failed or mismatched
   // envelope therefore reveals nothing.
   const frozenGate=native!==null && propulsionEnvelopeGate(envelope,native);
+  // Only a full readable native replacement makes the original text, the native
+  // key audit and the provenance a duplicate. A compatibility stage — or a
+  // native stage whose envelope did not deliver a readable result — is itself the
+  // main report, so its source material must stay on the design sheet too.
+  const nativeDuplicate=native!==null && frozenGate;
   const balance=native?.balance;
   const tonnes=(value:unknown)=>typeof value==='number' && Number.isFinite(value)?`${formatNumber(value)} t`:'—';
   const sections=sps3b3ReportSections(result),text=sps3b3ReportText(result);
@@ -74,16 +80,15 @@ export function Sps3b3Readings({data,runId,variant,envelope}:{data:unknown;runId
   return <section className="sps-saved" aria-label={title}>
     <h2>{title}</h2>
     <p>{w('sps.readings.status',{status:result.status??'—'})}</p>
-    {balance && <section className="ship-design-balance" aria-label={d('shipDesign.balance.title')}>
+    {balance && !native && <section className="ship-design-balance" aria-label={d('shipDesign.balance.title')}>
       <h3>{d('shipDesign.balance.title')}</h3>
-      <p>{d('shipDesign.balance.basis',{condition:native?.basis_condition_id??'—'})}</p>
+      <p>{d('shipDesign.balance.basis',{condition:'—'})}</p>
       <dl className="sps-readings">
         <div className="sps-reading"><dt>{d('shipDesign.ledger.selected')}</dt><dd>{tonnes(balance.selected_mass_t)}</dd></div>
         <div className="sps-reading"><dt>{d('shipDesign.ledger.estimate')}</dt><dd>{tonnes(balance.estimated_mass_t)}</dd></div>
         <div className="sps-reading"><dt>{d('shipDesign.ledger.target')}</dt><dd>{tonnes(balance.target_displacement_t)}</dd></div>
         <div className="sps-reading"><dt>{d('shipDesign.ledger.difference')}</dt><dd>{tonnes(balance.difference_t)}</dd></div>
       </dl>
-      {!!native?.ledger?.needs_binding?.length && <p>{d('shipDesign.ledger.unboundItems',{items:native.ledger.needs_binding.join(', ')})}</p>}
       <p className="sps-hint">{d('shipDesign.empiricalNote')}</p>
     </section>}
     {runId && <div className="sps-row no-print">
@@ -94,6 +99,8 @@ export function Sps3b3Readings({data,runId,variant,envelope}:{data:unknown;runId
     {native && <p className="sps-hint">{d('shipDesign.formatHint')}</p>}
     {notice && <p role="status">{notice}</p>}
     {native && <VesselDesignOverview result={native} state="frozen"
+      contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
+    {native && frozenGate && <WeightBreakdownReadings result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {native && frozenGate && <HullReadings result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
@@ -108,14 +115,14 @@ export function Sps3b3Readings({data,runId,variant,envelope}:{data:unknown;runId
     {native && frozenGate && <PerformanceReadings result={native} state="frozen"
       contextLabel={native.basis_condition_id ?? null} runId={runId ?? null} />}
     {!native && <SpsFreeboardProfile result={result} />}
-    {sections.length ? <div className="sps-report">{sections.map((s,i)=><section key={`${s.id}-${i}`}>
+    {sections.length ? <div className={nativeDuplicate?'sps-report print-secondary':'sps-report'}>{sections.map((s,i)=><section key={`${s.id}-${i}`}>
       {s.title && <h3>{s.title}</h3>}<pre>{s.lines.join('\n')}</pre>
     </section>)}</div> : <p>{w('sps.readings.reportMissing')}</p>}
-    <details className="sps-native"><summary>{w('sps.readings.native')}</summary>
+    <details className={nativeDuplicate?'sps-native print-secondary':'sps-native'}><summary>{w('sps.readings.native')}</summary>
       {['hull','freeboard','guns','auxiliary','armour','engine','performance'].map(section=><details key={section}><summary>{section}</summary>
         <dl className="sps-readings">{nativeReadings(result,section).filter(row=>typeof row.value!=='object' || row.value===null).map(row=><div className="sps-reading" key={row.key}><dt>{row.key}</dt><dd>{row.value===null?'—':String(row.value)}</dd></div>)}</dl>
       </details>)}
     </details>
-    <details><summary>{w('sps.readings.origin')}</summary><pre>{JSON.stringify(result.provenance,null,2)}</pre></details>
+    <details className={nativeDuplicate?'print-secondary':undefined}><summary>{w('sps.readings.origin')}</summary><pre>{JSON.stringify(result.provenance,null,2)}</pre></details>
   </section>;
 }

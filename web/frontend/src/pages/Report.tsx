@@ -14,10 +14,14 @@ import { StageStatus, stageLabel, dataLabel } from '../components/StageStatus';
 import { compareReports, validReportIdentity } from '../components/reportComparison';
 import { UnitProvider, useUnits } from '../components/UnitProvider';
 import { FrozenDesignSummary } from '../components/DesignFeedback';
-import { useReportPrint } from '../components/useReportPrint';
+import { useReportPrint, type ReportPrintScope } from '../components/useReportPrint';
+import { SHIP_DESIGN_METHOD_VERSION, SHIP_DESIGN_RESULT_SCHEMA, SHIP_DESIGN_STAGE } from '../components/sps3b3Model';
+import { propulsionEnvelopeGate } from '../components/propulsionPerformanceModel';
+import { useWeightBreakdownCopy } from '../i18n/weightBreakdown';
 import { CHOICES, classifyKey, DIMENSION_KEYS, type DisplayPreferences } from '../components/units';
 import { useWorkspaceCopy, type WorkspaceKey } from '../i18n/workspace';
 import type { AnalysisResult, RunView, StageEnvelope } from '../types';
+import '../styles/reportPrint.css';
 
 /** The whole workspace lookup, for the plain functions this page also calls. */
 type Copy = (key: WorkspaceKey, params?: any) => string;
@@ -115,6 +119,78 @@ function triState(w: Copy, value: boolean | null | undefined): string {
   return value === true ? w('report.tri.yes') : value === false ? w('report.tri.no') : w('report.tri.unknown');
 }
 
+/**
+ * The scope this report prints at, chosen from what the result itself carries.
+ *
+ * A readable native design result — the supported schema and method, with an
+ * available or partial status — defaults to the design scope: its own summary,
+ * diagnostics and requested physical stages, without the duplicate original
+ * text, the native key audit or the source appendix. Anything else defaults to
+ * the full scope, so a report that always printed in full still does.
+ */
+export function defaultPrintScope(result: AnalysisResult): ReportPrintScope {
+  const stage = result.stages?.[SHIP_DESIGN_STAGE];
+  if (!stage || stage.requested !== true) return 'full';
+  if (stage.status !== 'completed' && stage.status !== 'partial') return 'full';
+  const data = stage.data;
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return 'full';
+  const record = data as Record<string, unknown>;
+  // The same envelope gate the readers use: a failed, unrequested or
+  // kernel-mismatched stage never opens the design scope, so its fallback
+  // source content is never mistaken for a duplicate.
+  if (!propulsionEnvelopeGate(stage, record)) return 'full';
+  return record.schema === SHIP_DESIGN_RESULT_SCHEMA
+    && record.method_version === SHIP_DESIGN_METHOD_VERSION
+    && (record.status === 'available' || record.status === 'partial') ? 'design' : 'full';
+}
+
+/**
+ * The local print scope. It is a view of this page only: it changes what the
+ * sheet carries, never the saved result, the snapshot, the exports or a project.
+ */
+function ReportScopeControl({ scope, onChange }: { scope: ReportPrintScope; onChange: (next: ReportPrintScope) => void }) {
+  const p = useWeightBreakdownCopy();
+  return <div className="report-scope no-print">
+    <fieldset>
+      <legend>{p('print.scope.kicker')}</legend>
+      <label>
+        <input type="radio" name="report-print-scope" value="design" checked={scope === 'design'}
+          onChange={() => onChange('design')} />
+        {p('print.scope.design')}
+      </label>
+      <label>
+        <input type="radio" name="report-print-scope" value="full" checked={scope === 'full'}
+          onChange={() => onChange('full')} />
+        {p('print.scope.full')}
+      </label>
+      <p className="report-scope-hint">{scope === 'design' ? p('print.scope.designHint') : p('print.scope.fullHint')}</p>
+    </fieldset>
+    <span className="report-scope-pdf">{p('print.scope.pdf')}</span>
+    <p className="report-scope-note">{p('print.scope.note')}</p>
+  </div>;
+}
+
+/** The small paper identity: the method, request, run, revision and basis. */
+function ReportIdentityStrip({ result, runId, revision }: { result: AnalysisResult; runId?: string; revision?: number }) {
+  const p = useWeightBreakdownCopy();
+  const unset = p('print.identity.unset');
+  const methods = result.method_versions && Object.keys(result.method_versions).length > 0
+    ? JSON.stringify(result.method_versions) : unset;
+  const designData = result.stages?.[SHIP_DESIGN_STAGE]?.data;
+  const designMethod = designData && typeof designData === 'object' && !Array.isArray(designData)
+    && typeof (designData as Record<string, unknown>).method_version === 'string'
+    ? (designData as Record<string, unknown>).method_version as string : null;
+  return <p className="report-identity-strip" data-report-identity>
+    <span className="report-identity-kicker">{p('print.identity.kicker')}</span>
+    <span>{p('print.identity.method', { value: methods })}</span>
+    {designMethod && defaultPrintScope(result) === 'design'
+      ? <span>{p('print.identity.designMethod', { value: designMethod })}</span> : null}
+    <span>{p('print.identity.run', { value: runId ?? unset })}</span>
+    <span>{p('print.identity.revision', { value: revision ?? result.input_snapshot?.revision ?? unset })}</span>
+    <span>{p('print.identity.basis', { value: result.condition_id || unset })}</span>
+  </p>;
+}
+
 export function Report({ result, runId, revision, compareResult, compareError, run, compareRun, onBack }: {
   result: AnalysisResult; runId?: string; revision?: number; compareResult?: AnalysisResult;
   compareError?: string; run?: RunView; compareRun?: RunView; onBack?: () => void;
@@ -141,7 +217,15 @@ function ReportBody({ result, runId, revision, compareResult, compareError, run,
   // disclosure it sits in returns to the state the reader left it in.
   const [auditMounted, setAuditMounted] = useState(false);
   const mountAudit = useCallback(() => setAuditMounted(true), []);
-  useReportPrint(host, { mount: () => flushSync(() => setAuditMounted(true)) });
+  // The paper scope is this page's own view. It defaults from the saved result
+  // and is remembered per rendered result, so a switch and a print never touch
+  // the stored snapshot or the project.
+  const [scope, setScope] = useState<ReportPrintScope>(() => defaultPrintScope(result));
+  const scopeRef = useRef(scope);
+  scopeRef.current = scope;
+  // In the design scope the source appendix is not opened for paper, so it is
+  // never mounted by a print either; the reader can still open it on screen.
+  useReportPrint(host, { mount: () => { if (scopeRef.current === 'full') flushSync(() => setAuditMounted(true)); } }, scope);
   const stages = useMemo(() => requestedStages(result), [result]);
   // The comparison is derived on every render and writes nothing back: both
   // snapshots, their fingerprints and the exports stay exactly as saved.
@@ -162,7 +246,7 @@ function ReportBody({ result, runId, revision, compareResult, compareError, run,
     ? { projectId: result.project_id, runId, conditionId: result.condition_id, snapshot }
     : null;
 
-  return <div className="report-page page-pad" ref={host}>
+  return <div className="report-page page-pad" ref={host} data-print-scope={scope}>
     <div className="report-actions no-print">
       {onBack && <button className="text-button" data-audio="manual" onClick={onBack}>{w('report.back')}</button>}
       <div className="report-action-group">
@@ -186,6 +270,7 @@ function ReportBody({ result, runId, revision, compareResult, compareError, run,
         <span>{w('report.fact', { label: w('report.historical') })}{triState(w, result.validity.historical_validated)}</span>
       </div>
       <p className="report-caveat">{w('report.caveat')}</p>
+      <ReportIdentityStrip result={result} runId={runId} revision={revision} />
       {/* Reading order for a report nobody has read before: status, then
           diagnostics, then the identity the numbers belong to, then the values.
           Screen-only, so it never joins the printed record. */}
@@ -199,6 +284,7 @@ function ReportBody({ result, runId, revision, compareResult, compareError, run,
           <li><strong>{w('report.firstUse.5.title')}</strong>{w('report.firstUse.5.text')}</li>
         </ol>
       </details>
+      <ReportScopeControl scope={scope} onChange={setScope} />
       <ReportUnitControls override={override} onChange={onOverrideChange} />
     </header>
 

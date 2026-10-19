@@ -1,0 +1,179 @@
+/* Report-only print scope and paper layout.
+ *
+ * The reader's local scope choice affects the paper only; the screen, the saved
+ * snapshot and the downloads stay complete. Both scopes share one physical page
+ * setup here, and the design scope simply leaves the duplicate original text,
+ * native key audit and source appendix off the sheet. Nothing in this file
+ * changes a non-report surface. */
+
+.report-scope {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.report-scope fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.9rem;
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+}
+
+.report-scope legend {
+  padding: 0 0.35rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.report-scope label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+}
+
+.report-scope-hint,
+.report-scope-note {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.report-scope-pdf {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.report-identity-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+/* The method and request values are long unbroken tokens: every item wraps
+   inside the strip instead of widening the page on a narrow screen. */
+.report-identity-strip > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* The structured reading of the two long diagrams exists for paper only; the
+   screen keeps the complete interactive and downloadable drawing. */
+.print-only-structured {
+  display: none;
+}
+
+@media print {
+  /* A4 portrait with a stated margin. This is the report's own page setup; the
+     application never prints itself as a differently sized sheet. */
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
+  .report-page {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* The design scope leaves the duplicate original text, the native key audit
+     and the source appendix off the paper. The full scope keeps them, exactly
+     as the report always printed them. The marker is the same one the print
+     lifecycle reads, so the screen state and the paper agree. */
+  .report-page[data-print-scope='design'] .print-secondary {
+    display: none !important;
+  }
+
+  /* Every diagram enters the sheet at its own aspect ratio: no fixed minimum
+     width forces a clipped SVG, and no whole-report scaling is needed to make
+     the text readable. The wide, short freeboard profile fills the column. */
+  .report-page .freeboard-canvas svg {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* The two long serialized drawings (armament 960×2092, armour 960×1536) have
+     no legible A4 scale: squeezed into one sheet their own labels print at 3–4 pt.
+     Paper therefore carries the structured reading of the same saved batteries and
+     bands instead, and the drawing keeps its complete screen and download form. */
+  .report-page :is(.armour-diagram-canvas, .armament-canvas) {
+    display: none !important;
+  }
+
+  /* A structured, report-only reading of the same pure data. It is hidden on
+     screen; the complete screen and download SVG are untouched. Each reading owns
+     its own sheets. */
+  .report-page .print-only-structured {
+    display: block;
+  }
+
+  .report-page .print-only-structured :is(h4, h5) {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* The saved native audit and original text stay on the full sheet, overriding
+     the Sps3b3 print stylesheet's blanket hiding of saved disclosures. The
+     design scope's own rule above still wins because it is marked important. */
+  .report-page .sps-saved details {
+    display: block;
+  }
+
+  /* Editing, download and navigation furniture never reaches paper. */
+  .report-page :is(.freeboard-actions, .armament-actions, .armour-diagram-actions,
+    .report-actions, .report-units, .report-compare-control, .no-print) {
+    display: none !important;
+  }
+
+  /* Scroll wrappers print unbounded, and long tables keep their header row. */
+  .report-page :is(.weight-comparison-table, .stage-table, .comparison-table, .weight-track) {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .report-page .weight-comparison-table {
+    width: 100%;
+    display: table;
+  }
+
+  .report-page thead {
+    display: table-header-group;
+  }
+
+  .report-page :is(th, td, .weight-role, .weight-chart-role) {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .report-page :is(h1, h2, h3, h4, h5, .section-heading, .weight-head) {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .report-page .weight-bar-row {
+    break-inside: avoid;
+  }
+
+  .report-page .weight-track,
+  .report-page .weight-zero,
+  .report-page .weight-bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
