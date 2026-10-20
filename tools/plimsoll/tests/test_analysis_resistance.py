@@ -3,10 +3,12 @@ import copy
 from pathlib import Path
 import sys
 import unittest
+import unittest.mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import analysis
 import geometry_analysis
+import resistance
 from test_analysis import box_project
 
 TABLE_SHA = "e9dc5141235ad9a0ddc1c1de70ab33d28f7aac86f75953663c969ad3fd124d93"
@@ -34,6 +36,29 @@ def selected_project(method="taylor_gertler_source_axis_strict"):
         friction_method="schoenherr_implicit_ittc_0.242", interpolation_method="taylor_gertler_source_axis_strict",
         speed_conversion_method="international_knot_exact")]
     return project
+
+
+class ResistanceCoverageTests(unittest.TestCase):
+    def test_a_speed_the_kernel_cannot_cover_is_a_named_gap(self):
+        """The kernel may drop a speed; the stage must still name it."""
+        project = selected_project()
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12, 40]))
+        real = resistance.speed_power_curve
+
+        def only_first_speed(*args, **kwargs):
+            curve = real(*args, **kwargs)
+            curve["rows"] = [row for row in curve["rows"] if row["speed_kn"] == 12]
+            return curve
+
+        with unittest.mock.patch.object(resistance, "speed_power_curve", only_first_speed):
+            result = analysis.compute_project(project, "normal", options)
+        rows = result["stages"]["resistance"]["data"]["rows"]
+        self.assertEqual([row["speed_kn"] for row in rows], [12, 40])
+        gap = rows[1]
+        self.assertFalse(gap["complete"])
+        self.assertIsNone(gap["total_resistance_kn"])
+        self.assertIsNone(gap["kernel_row"])
+        self.assertEqual([d["code"] for d in gap["diagnostics"]], ["taylor.speed_unavailable"])
 
 
 class SelectedResistanceTests(unittest.TestCase):
