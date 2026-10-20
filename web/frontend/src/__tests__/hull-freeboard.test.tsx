@@ -272,6 +272,15 @@ describe('interactive freeboard profile', () => {
     expect(onEditField).not.toHaveBeenCalled();
   });
 
+  it('states the four declared fractions on paper instead of the unreadable panel', () => {
+    ready(<NativeFreeboardProfile result={native()} state="ready" />);
+    const block = document.querySelector('[data-freeboard-print]');
+    expect(block).not.toBeNull();
+    const rows = Array.from(block!.querySelectorAll('[data-freeboard-fraction]'));
+    expect(rows).toHaveLength(4);
+    for (const row of rows) expect((row.querySelector('dd')?.textContent ?? '').trim()).not.toBe('');
+  });
+
   it('selects a point from the drawing by keyboard and keeps the focused node alive', () => {
     ready(<NativeFreeboardProfile result={native()} state="ready" />);
     const group = document.querySelector('[data-freeboard-point="freeFDAft"]') as SVGGElement;

@@ -116,9 +116,16 @@
     display: none !important;
   }
 
+  /* The freeboard panel is a 960-unit serialized drawing whose own labels are
+     eight units tall: on paper it lands near 4 pt. The sheet states its four
+     declared fractions as text instead, and the drawing keeps its screen and
+     download form. */
+  .report-page .freeboard-canvas {
+    display: none !important;
+  }
+
   /* A structured, report-only reading of the same pure data. It is hidden on
-     screen; the complete screen and download SVG are untouched. Each reading owns
-     its own sheets. */
+     screen; the complete screen and download SVG are untouched. */
   .report-page .print-only-structured {
     display: block;
   }

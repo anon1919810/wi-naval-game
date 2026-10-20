@@ -255,6 +255,22 @@ export function NativeFreeboardProfile({
       // This is this repository's own serializer output: fixed tags and escaped text.
       dangerouslySetInnerHTML={{ __html: svg }} />
 
+    {/* Paper only: the serialized panel carries 8-unit type at a 960-unit width, so
+        on an A4 sheet its own labels land near 4 pt. The sheet states the same
+        declared fractions as text; the screen and the SVG/PNG downloads keep the
+        complete drawing. */}
+    <div className="print-only-structured" data-freeboard-print>
+      <h4>{p('freeboard.fraction.title')}</h4>
+      <dl className="sps-readings">
+        {reading.freeboard.fractions.map(item => <div className="sps-reading" key={item.key}
+          data-freeboard-fraction={item.key} data-changed={item.changed ? 'true' : undefined}>
+          <dt>{p(item.label)}</dt>
+          <dd>{item.value === null ? unknown : units.text(item.value, 'length', 'ft')}
+            {item.percent === null ? '' : ` · ${formatNumber(item.percent)} %`}</dd>
+        </div>)}
+      </dl>
+    </div>
+
     {reading.hull.drivers.depthLocked === true ? <p className="freeboard-lock" data-freeboard-lock>{p('freeboard.lock')}</p> : null}
 
     <div className="freeboard-list" role={interactive ? 'group' : undefined} aria-label={p('freeboard.select.list')}>
