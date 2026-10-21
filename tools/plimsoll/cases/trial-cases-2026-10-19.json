@@ -14,7 +14,7 @@
       "trial_shp": 27018,
       "provenance": "trial_record",
       "source": "Royal Navy trials, 9 October 1906, as transcribed by Wikipedia (HMS Dreadnought (1906))",
-      "expected_error_pct": 9.9,
+      "expected_error_pct": 9.93,
       "note": "The 146-case reference set lists this hull at Cb 0.61; a form-derived Cb near 0.54 would give +7.7 % instead, so the block coefficient is itself a source of a couple of points."
     },
     {
@@ -25,10 +25,11 @@
       "displacement_lt": 42000,
       "block_coeff": 0.56,
       "trial_speed_kt": 32.07,
-      "trial_shp": 150000,
-      "provenance": "trial_record_lower_bound",
-      "source": "1920 full-power trials, quoted as 'over 150,000 shp' by naval-encyclopedia; the figure is a lower bound so the recorded error is a lower bound too",
-      "expected_error_pct": 25.8
+      "trial_shp": 151280,
+      "provenance": "trial_record",
+      "source": "1920 full power trial at 42,200 t: 151,280 shp for 32.07 kn (three-hour full power trial averaged 150,473 shp at 31.79 kn); transcribed from the Hood Association / trial summary records",
+      "expected_error_pct": 24.73,
+      "note": "The full power trial gives 151,280 shp at 32.07 kn on 42,200 t; a three-hour full power trial averaged 150,473 shp at 31.79 kn. The earlier record used 'over 150,000 shp', a lower bound; this replaces it with the measured figure."
     }
   ]
 }
