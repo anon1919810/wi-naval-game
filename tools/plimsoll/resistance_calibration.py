@@ -11,6 +11,8 @@ See docs/plimsoll-1.0/resistance-benchmark-2026-10-19.md for the full study.
 
 from __future__ import annotations
 
+from . import resistance_blend
+
 TAYLOR_ORIGINAL = "taylor_gertler_source_axis_strict"
 BLENDED = "blended_taylor_holtrop_v1"
 
@@ -92,3 +94,36 @@ def apply_calibration(power_hp, method, ship_type):
     return dict(power_hp=float(power_hp) * factor, factor=factor, ship_type=ship_type,
                 method=method, sample=record["sample"], loocv_mape=record["loocv_mape"],
                 source="docs/plimsoll-1.0/resistance-benchmark-2026-10-19.md")
+
+
+# Supersedes the per-type table above for the trial-measured data. On the 29
+# provenance-checked trial cases a global factor makes the error worse
+# (11.17 % against 11.08 %) and so does a factor outside the fast-large cluster
+# (10.21 against 9.58), while inside it a single level correction takes the error
+# from 15.03 % to 9.16 % out of sample. The cluster rule is shared with the blend
+# so the two cannot drift apart.
+CLUSTER_FACTOR = 0.851
+CLUSTER_SAMPLE = 8
+CLUSTER_LOOCV_MAE = 9.16
+CLUSTER_UNCORRECTED_MAE = 15.03
+CLUSTER_SOURCE = "docs/plimsoll-1.0/resistance-methods-and-data-2026-10-21.md section 19"
+
+
+def cluster_factor(block_coeff, length_m, froude):
+    """Level correction for the fast-large cluster, faded in by the shared rule.
+
+    The correction is a level bias, not a shape error: inside the cluster a single
+    constant beats switching to Holtrop (7.01 % against 9.61 % on the
+    battlecruisers). Applying it through the same smooth share as the blend keeps
+    it continuous and keeps the one without a factor untouched.
+    """
+    share = resistance_blend.holtrop_share_cluster(block_coeff, length_m, froude)
+    # Normalise the share to [0, 1] first: without that the fade would stop short
+    # of the measured factor even for a hull sitting deep inside the cluster.
+    span = resistance_blend.CLUSTER_SPAN
+    outside = resistance_blend.CLUSTER_OUTSIDE_SHARE
+    weight = max(0.0, min(1.0, (share - outside) / span))
+    factor = 1.0 + weight * (CLUSTER_FACTOR - 1.0)
+    return dict(factor=factor, cluster_share=share, cluster_weight=weight, applied=weight > 0.5,
+                sample=CLUSTER_SAMPLE, loocv_mae=CLUSTER_LOOCV_MAE,
+                uncorrected_mae=CLUSTER_UNCORRECTED_MAE, source=CLUSTER_SOURCE)
