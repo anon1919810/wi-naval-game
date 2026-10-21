@@ -1,0 +1,78 @@
+{
+  "schema": "plimsoll-trial-cases-2",
+  "generated": "2026-10-21",
+  "note": "Five warships with measured trial power and speed, harvested or transcribed with the figure's own provenance. Lengths are between perpendiculars: using the length overall instead moved Hood's error by ten points, so the basis is recorded per case.",
+  "units": "SI in the file (m, t, shp, kn); the kernel converts once at the boundary",
+  "cases": [
+    {
+      "name": "HMS Dreadnought (1906)",
+      "lbp_m": 149.4,
+      "beam_m": 25.02,
+      "draught_m": 9.03,
+      "displacement_t": 18411.0,
+      "block_coeff": 0.5321,
+      "trial_shp": 27018.0,
+      "trial_speed_kt": 21.6,
+      "predicted_hp": 29524,
+      "error_pct": 9.27,
+      "provenance": "trial_record",
+      "source": "RN trials 9 Oct 1906: 21.6 kn from 27,018 shp (Wikipedia prose, trial sentence); LBP 490 ft, LOA 527 ft"
+    },
+    {
+      "name": "HMS Hood (1920)",
+      "lbp_m": 257.1,
+      "beam_m": 31.75,
+      "draught_m": 9.75,
+      "displacement_t": 47429.0,
+      "block_coeff": 0.5814,
+      "trial_shp": 151280.0,
+      "trial_speed_kt": 32.07,
+      "predicted_hp": 204641,
+      "error_pct": 35.27,
+      "provenance": "trial_record",
+      "source": "1920 full power trial, 42,200 t: 151,280 shp at 32.07 kn (Wikipedia prose, trial sentence)"
+    },
+    {
+      "name": "HMS Repulse (1916)",
+      "lbp_m": 228.7,
+      "beam_m": 27.48,
+      "draught_m": 8.23,
+      "displacement_t": 27636.0,
+      "block_coeff": 0.5213,
+      "trial_shp": 118913.0,
+      "trial_speed_kt": 31.73,
+      "predicted_hp": 142764,
+      "error_pct": 20.06,
+      "provenance": "trial_record",
+      "source": "1916 trials: 118,913 shp at 31.73 kn (Wikipedia prose, trial sentence)"
+    },
+    {
+      "name": "HMS Renown (1916)",
+      "lbp_m": 228.7,
+      "beam_m": 27.48,
+      "draught_m": 8.23,
+      "displacement_t": 27636.0,
+      "block_coeff": 0.5213,
+      "trial_shp": 126000.0,
+      "trial_speed_kt": 32.58,
+      "predicted_hp": 158665,
+      "error_pct": 25.92,
+      "provenance": "trial_record",
+      "source": "1916 trials: 126,000 shp at 32.58 kn (Wikipedia prose, trial sentence)"
+    },
+    {
+      "name": "Bismarck (1940)",
+      "lbp_m": 241.6,
+      "beam_m": 36.0,
+      "draught_m": 9.3,
+      "displacement_t": 41700.0,
+      "block_coeff": 0.503,
+      "trial_shp": 150170.0,
+      "trial_speed_kt": 30.1,
+      "predicted_hp": 149528,
+      "error_pct": -0.43,
+      "provenance": "trial_record",
+      "source": "kbismarck.com testing record: the plant designed for 138,000 hp and 29 kn 'actually obtained 150,170 hp and 30.1 knots'"
+    }
+  ]
+}
