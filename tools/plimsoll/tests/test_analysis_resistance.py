@@ -292,5 +292,35 @@ class TargetModeTests(unittest.TestCase):
         self.assertNotIn("calibration.mode_conflict", [d["code"] for d in data["diagnostics"]])
 
 
+class ComparisonTargetTests(unittest.TestCase):
+    def project(self, kind="design", shp=20000.0, speed=12.0, source="builder contract"):
+        project = selected_project()
+        scenario = project["resistance_scenarios"][0]
+        scenario["target"] = dict(kind=kind, shp=shp, speed_kn=speed, source=source)
+        return project
+
+    def test_the_deviation_is_reported_and_named(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(self.project(), "normal", options)
+        row = result["stages"]["resistance"]["data"]["rows"][0]
+        comparison = row["comparison"]
+        self.assertEqual(comparison["kind"], "design")
+        self.assertEqual(comparison["target_shp"], 20000.0)
+        self.assertAlmostEqual(comparison["deviation_pct"],
+                               100 * (comparison["modelled_shaft_hp"] - 20000.0) / 20000.0, places=1)
+        self.assertTrue(any("design target" in note
+                            for note in result["stages"]["resistance"]["data"]["assumptions"]))
+
+    def test_a_target_at_another_speed_is_not_silently_compared(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[10]))
+        result = analysis.compute_project(self.project(speed=12.0), "normal", options)
+        self.assertNotIn("comparison", result["stages"]["resistance"]["data"]["rows"][0])
+
+    def test_a_scenario_without_a_target_produces_no_comparison(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(selected_project(), "normal", options)
+        self.assertNotIn("comparison", result["stages"]["resistance"]["data"]["rows"][0])
+
+
 if __name__ == "__main__":
     unittest.main()

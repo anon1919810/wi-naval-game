@@ -191,6 +191,7 @@ def compute(project, state, options, stages):
         if blended_method:
             _blend_with_holtrop(data, scenario, project, values, coefficients, beam, draft, plane, length)
         _apply_recorded_calibration(data, scenario, project)
+        _attach_comparison(data, scenario, request["speeds_kn"])
     else:
         aft, fore = inputs.pop("x_aft_perpendicular_m"), inputs.pop("x_fore_perpendicular_m")
         # The declared spacing must be the selected waterline itself. A scenario
@@ -445,3 +446,28 @@ def _apply_design_factor(data):
         data["assumptions"].append(
             "design-mode factor %.4f applied to rated-value targets (sample %d, LOOCV %.2f%% against %.2f%% uncorrected)"
             % (out["factor"], out["sample"], out["loocv_mape"], out["uncorrected_mape"]))
+
+def _attach_comparison(data, scenario, requested_speeds):
+    """State the deviation against the user-supplied target, and say which kind it is.
+
+    A rated figure and a measured one differ by about 13 % on the same ship, so a
+    bare percentage is not a result: it is a result only once the kind of target
+    is named next to it.
+    """
+    target = scenario.get("target")
+    if not isinstance(target, dict):
+        return
+    speed = target.get("speed_kn")
+    if not isinstance(speed, (int, float)):
+        return
+    for row in data["rows"]:
+        power = row.get("effective_power_kw")
+        if power is None or abs(row["speed_kn"] - speed) > 1e-9:
+            continue
+        shaft = power / 0.7457
+        row["comparison"] = dict(kind=target["kind"], target_shp=target["shp"],
+            modelled_shaft_hp=round(shaft, 1), deviation_pct=round(100 * (shaft - target["shp"]) / target["shp"], 2),
+            source=target.get("source"))
+        data["assumptions"].append(
+            "deviation reported against the supplied %s target of %.0f shp at %.3f kn"
+            % (target["kind"], target["shp"], speed))
