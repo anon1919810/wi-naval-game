@@ -204,6 +204,43 @@
         "error_pct": -0.43,
         "commit": "409be70"
       }
+    },
+    {
+      "id": "fuso-1915",
+      "name": "Fusō",
+      "navy": "Imperial Japanese Navy",
+      "ship_type": "battleship",
+      "year": 1915,
+      "hull": {
+        "length_m": 192.1,
+        "length_basis": "lbp",
+        "beam_m": 28.7,
+        "draught_m": 8.7,
+        "displacement_t": 29801,
+        "block_coeff": 0.606,
+        "block_coeff_basis": "standard displacement over LBP*B*T"
+      },
+      "trial": {
+        "shp": 46500,
+        "speed_kt": 23.0,
+        "kind": "full_power",
+        "date": "1915",
+        "load_note": "trial displacement not stated in the source; standard load used"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/Japanese_battleship_Fus%C5%8D",
+        "retrieved": "2026-10-21",
+        "quote": "The ship exceeded her design speed of 22.5 kn during her sea trials, reaching 23 kn at 46,500 shp"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the sentence names the sea trial and the achieved speed, and the 46,500 shp belongs to the achieved run rather than to the design rating quoted just before it"
+      },
+      "model": {
+        "predicted_hp": 47757,
+        "error_pct": 2.7,
+        "commit": "3dfd3b2"
+      }
     }
   ]
 }
