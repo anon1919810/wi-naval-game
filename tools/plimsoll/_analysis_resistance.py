@@ -193,24 +193,12 @@ def compute(project, state, options, stages):
         _apply_recorded_calibration(data, scenario)
     else:
         aft, fore = inputs.pop("x_aft_perpendicular_m"), inputs.pop("x_fore_perpendicular_m")
-        declared = fore - aft
-        stations = (((project.get("geometry") or {}).get("offsets") or {}).get("stations") or [])
-        support = None
-        if stations:
-            xs = [row[0] for row in stations if isinstance(row, (list, tuple)) and row]
-            if xs:
-                support = max(xs) - min(xs)
-        if math.isclose(declared, length, rel_tol=1e-10, abs_tol=1e-10):
-            pass
-        elif support is not None and math.isclose(declared, support, rel_tol=1e-10, abs_tol=1e-10):
-            # A fixture may author perpendiculars across the whole station support
-            # while the selected waterline is shorter. The declared spacing is then
-            # the reference length, and saying so is better than refusing the run.
-            data["diagnostics"].append(diagnostic("analysis.perpendiculars_follow_station_support",
-                "declared perpendiculars span the station support (%.6f m) rather than the selected waterline (%.6f m); the request uses the declared spacing"
-                % (support, length), "$.options.resistance", False))
-        else:
-            return _unavailable(data, "declared perpendicular length does not match the selected waterline length or the station support")
+        # The declared spacing must be the selected waterline itself. A scenario
+        # authored against the station support instead is a different length, and
+        # accepting it would silently compute at a length the caller did not mean:
+        # the project keeps a separate scenario per condition for exactly this.
+        if not math.isclose(fore-aft, length, rel_tol=1e-10, abs_tol=1e-10):
+            return _unavailable(data, "declared perpendicular length does not match selected station-support length")
         tf, ta = plane["waterline_d_m"]+plane["p"]*fore-project["geometry"]["keel_offset_m"], plane["waterline_d_m"]+plane["p"]*aft-project["geometry"]["keel_offset_m"]
         mean_draft = (tf+ta)/2
         if min(tf, ta) <= 0:
@@ -292,6 +280,11 @@ def _blend_with_holtrop(data, scenario, project, values, coefficients, beam, dra
                 "$.options.resistance", True))
             return
     aft, fore = inputs.get("x_aft_perpendicular_m"), inputs.get("x_fore_perpendicular_m")
+    if aft is not None and fore is not None and not math.isclose(fore-aft, length, rel_tol=1e-10, abs_tol=1e-10):
+        data["diagnostics"].append(diagnostic("blend.perpendiculars_mismatch",
+            "holtrop_inputs span %.6f m but the selected waterline is %.6f m; the blend is refused rather than computed at another length"
+            % (fore-aft, length), "$.options.resistance", True))
+        return
     if aft is None or fore is None:
         data["diagnostics"].append(diagnostic("blend.missing_perpendiculars",
             "holtrop_inputs must declare x_aft_perpendicular_m and x_fore_perpendicular_m",
