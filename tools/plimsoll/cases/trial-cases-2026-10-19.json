@@ -1,7 +1,7 @@
 {
   "schema": "plimsoll-trial-cases-1",
   "recorded": "2026-10-19",
-  "note": "Two warships whose sea-trial power and speed are transcribed from a published record. The set is deliberately tiny: it exists to pin the model's error against measured trials, not to fit anything.",
+  "note": "Three warships whose sea-trial power and speed are transcribed from a published record. The set stays tiny on purpose: it pins the model's error against measured trials, it is not a fitting set.",
   "cases": [
     {
       "name": "HMS Dreadnought (1906)",
@@ -30,6 +30,20 @@
       "source": "1920 full power trial at 42,200 t: 151,280 shp for 32.07 kn (three-hour full power trial averaged 150,473 shp at 31.79 kn); transcribed from the Hood Association / trial summary records",
       "expected_error_pct": 24.73,
       "note": "The full power trial gives 151,280 shp at 32.07 kn on 42,200 t; a three-hour full power trial averaged 150,473 shp at 31.79 kn. The earlier record used 'over 150,000 shp', a lower bound; this replaces it with the measured figure."
+    },
+    {
+      "name": "Bismarck (1940)",
+      "length_ft": 823,
+      "beam_ft": 118,
+      "draught_ft": 30.5,
+      "displacement_lt": 45000,
+      "block_coeff": 0.56,
+      "trial_speed_kt": 30.1,
+      "trial_shp": 150170,
+      "provenance": "trial_record",
+      "source": "kbismarck.com testing-period record: the plant designed for 138,000 hp and 29 knots 'actually obtained 150,170 hp and 30.1 knots'",
+      "expected_error_pct": 6.35,
+      "note": "The 146-case reference set lists this ship at 138,000 hp / 30.0 kn, i.e. design power against a speed between design and trial; scoring against the trial figure moves the error from +14.2 % to +6.4 %."
     }
   ]
 }
