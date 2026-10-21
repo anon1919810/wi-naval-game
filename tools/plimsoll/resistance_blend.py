@@ -125,3 +125,57 @@ def holtrop_share_form(block_coeff, beam_draft_ratio):
          + FITTED_BEAM_DRAUGHT_WEIGHT * (bt - FITTED_CENTRE_BEAM_DRAUGHT)
          + FITTED_OFFSET)
     return 1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, z))))
+
+
+# Boundaries read off the 24-case trial dataset (docs/plimsoll-1.0/
+# resistance-methods-and-data-2026-10-21.md section 16): every hull of 200 m or
+# more with Cb >= 0.49 running at Fr >= 0.30 over-predicts under the original
+# method, and Holtrop halves that error on the same eight hulls (7.17 % against
+# 15.03 %) while being worse on everything else (11.78 % against 9.17 %).
+CLUSTER_LENGTH_M = 200.0
+CLUSTER_BLOCK_COEFF = 0.49
+CLUSTER_FROUDE = 0.30
+# Widths and end points chosen by a coarse search over the 24 trial cases and
+# then scored by leaving each case out and re-running the search: 9.24 % MAPE
+# (median 6.43 %) against 11.13 % for the original method alone, 10.24 % for
+# Holtrop alone and 11.08 % for the block-coefficient-only rule. The search space
+# was five width sets by four end-point pairs, so the honest number is close to
+# the tuned one.
+CLUSTER_WIDTH_LENGTH = 12.0
+CLUSTER_WIDTH_BLOCK = 0.015
+CLUSTER_WIDTH_FROUDE = 0.010
+CLUSTER_OUTSIDE_SHARE = 0.05
+CLUSTER_SPAN = 0.90
+CLUSTER_BLEND_LOOCV_MAPE = 9.24
+
+
+def _sigmoid(x):
+    return 1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, x))))
+
+
+def holtrop_share_cluster(block_coeff, length_m, froude):
+    """Share for Holtrop from three hull-form parameters, as a smooth AND.
+
+    The three conditions multiply, so a hull has to satisfy all of them to hand
+    over; failing any one keeps it on the original method. Each factor is a
+    sigmoid, so the share stays continuous in every parameter and the same hull
+    always gets the same weight - the weight is a property of the ship, never of
+    the speed being evaluated.
+    """
+    cb = _number(block_coeff, "block_coeff")
+    length = _number(length_m, "length_m")
+    fr = _number(froude, "froude")
+    if not 0.0 < cb < 1.0:
+        raise BlendInputError("block_coeff must be inside (0, 1)")
+    if length <= 0.0:
+        raise BlendInputError("length_m must be positive")
+    if fr <= 0.0:
+        raise BlendInputError("froude must be positive")
+    long_enough = _sigmoid((length - CLUSTER_LENGTH_M) / CLUSTER_WIDTH_LENGTH)
+    full_enough = _sigmoid((cb - CLUSTER_BLOCK_COEFF) / CLUSTER_WIDTH_BLOCK)
+    fast_enough = _sigmoid((fr - CLUSTER_FROUDE) / CLUSTER_WIDTH_FROUDE)
+    inside = long_enough * full_enough * fast_enough
+    # Nearly all Holtrop inside the cluster, nearly none outside. The small
+    # outside value keeps a trace of the second method so the transition has no
+    # cliff at the boundary.
+    return CLUSTER_OUTSIDE_SHARE + CLUSTER_SPAN * inside

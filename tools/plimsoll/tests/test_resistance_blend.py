@@ -72,5 +72,44 @@ class FittedFormShareTests(unittest.TestCase):
                 blend.holtrop_share_form(cb, bt)
 
 
+class ClusterShareTests(unittest.TestCase):
+    def test_a_hull_inside_the_cluster_almost_hands_over(self):
+        for name, args in (("Hood", (0.517, 257.0, 0.329)), ("Queen Mary", (0.539, 213.0, 0.319)),
+                           ("Lion", (0.551, 205.7, 0.316))):
+            share = blend.holtrop_share_cluster(*args)
+            self.assertGreater(share, 0.50, name)
+
+    def test_a_battlecruiser_just_under_the_length_line_stays_out(self):
+        """Invincible is a battlecruiser but only 171 m long; the rule is about the
+        cluster, not the label, so she must not be swept in with Hood and Lion."""
+        self.assertLess(blend.holtrop_share_cluster(0.519, 171.0, 0.335), 0.35)
+
+    def test_a_hull_outside_the_cluster_stays_on_the_original_method(self):
+        for name, args in (("light cruiser", (0.565, 128.0, 0.422)), ("Furious", (0.396, 240.0, 0.305)),
+                           ("slow battleship", (0.532, 149.0, 0.290))):
+            share = blend.holtrop_share_cluster(*args)
+            self.assertLess(share, 0.20, name)
+
+    def test_the_share_rises_with_length_block_and_froude(self):
+        base = blend.holtrop_share_cluster(0.50, 200.0, 0.30)
+        self.assertGreater(blend.holtrop_share_cluster(0.50, 240.0, 0.30), base)
+        self.assertGreater(blend.holtrop_share_cluster(0.55, 200.0, 0.30), base)
+        self.assertGreater(blend.holtrop_share_cluster(0.50, 200.0, 0.34), base)
+
+    def test_the_share_moves_smoothly_in_every_parameter(self):
+        base = blend.holtrop_share_cluster(0.52, 205.0, 0.315)
+        self.assertLess(abs(blend.holtrop_share_cluster(0.52, 206.0, 0.315) - base), 0.05)
+        self.assertLess(abs(blend.holtrop_share_cluster(0.521, 205.0, 0.315) - base), 0.05)
+        self.assertLess(abs(blend.holtrop_share_cluster(0.52, 205.0, 0.316) - base), 0.06)
+
+    def test_the_measured_gain_is_recorded_next_to_the_function(self):
+        self.assertAlmostEqual(blend.CLUSTER_BLEND_LOOCV_MAPE, 9.24)
+
+    def test_parameters_outside_their_domain_are_refused(self):
+        for args in ((0.0, 200.0, 0.30), (0.5, 0.0, 0.30), (0.5, 200.0, 0.0), (None, 200.0, 0.3)):
+            with self.assertRaises(blend.BlendInputError):
+                blend.holtrop_share_cluster(*args)
+
+
 if __name__ == "__main__":
     unittest.main()
