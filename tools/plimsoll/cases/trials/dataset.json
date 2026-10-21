@@ -1,0 +1,209 @@
+{
+  "schema": "plimsoll-trial-dataset-1",
+  "generated": "2026-10-21",
+  "units": "SI in this file (m, t, shp, kn); the legacy kernel converts once at the boundary",
+  "note": "Measured sea-trial power and speed for warships, each with its own provenance. The set is an asset, not a fitting set: every figure carries a source, a trial kind and the load condition it was taken at, because mixing those moved one ship's error by thirteen points.",
+  "fields": {
+    "hull": "length_m with length_basis (lbp|loa), beam_m, draught_m, displacement_t, block_coeff with its basis",
+    "trial": "shp, speed_kt, kind (full_power|measured_mile|three_hour|acceptance), date, load_note",
+    "source": "url, retrieved, quote — the sentence the figure came from",
+    "verification": "status (hand_checked|gated_auto), notes",
+    "model": "predicted_hp, error_pct, commit — the plimsoll result this datum pins"
+  },
+  "cases": [
+    {
+      "id": "hms-dreadnought-1906",
+      "name": "HMS Dreadnought",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1906,
+      "hull": {
+        "length_m": 149.4,
+        "length_basis": "lbp",
+        "beam_m": 25.02,
+        "draught_m": 9.03,
+        "displacement_t": 18411,
+        "block_coeff": 0.5321,
+        "block_coeff_basis": "displacement/(LBP*B*T)/1.025"
+      },
+      "trial": {
+        "shp": 27018,
+        "speed_kt": 21.6,
+        "kind": "full_power",
+        "date": "1906-10-09",
+        "load_note": "as-built normal load; draught nearer deep load than the 26.5 ft normal figure"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Dreadnought_(1906)",
+        "retrieved": "2026-10-21",
+        "quote": "the ship reached 21.6 knots from 27,018 shp during her sea trials on 9 October 1906"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "also recorded by Parsons as 24,712 hp at 21.25 kn; 27,018 is the trial-record figure used here"
+      },
+      "model": {
+        "predicted_hp": 29524,
+        "error_pct": 9.27,
+        "commit": "409be70"
+      },
+      "sensitivity_pct": {
+        "draught 9.03 m (as filed)": 9.27,
+        "draught 8.08 m (26.5 ft normal)": 12.26
+      }
+    },
+    {
+      "id": "hms-hood-1920",
+      "name": "HMS Hood",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1920,
+      "hull": {
+        "length_m": 257.1,
+        "length_basis": "lbp",
+        "beam_m": 31.75,
+        "draught_m": 9.75,
+        "displacement_t": 42200,
+        "block_coeff": 0.517,
+        "block_coeff_basis": "trial displacement over LBP*B*T with the deep-load draught"
+      },
+      "trial": {
+        "shp": 151280,
+        "speed_kt": 32.07,
+        "kind": "full_power",
+        "date": "1920",
+        "load_note": "trial at 42,200 t on the Arran mile; draught is the deep-load figure"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Hood",
+        "retrieved": "2026-10-21",
+        "quote": "during sea trials in 1920, Hood's turbines provided 151,280 shp, which allowed her to reach 32.07 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "a three-hour full power trial averaged 150,473 shp at 31.79 kn; this case uses the full-power run"
+      },
+      "model": {
+        "predicted_hp": 185244,
+        "error_pct": 22.45,
+        "commit": "409be70"
+      },
+      "sensitivity_pct": {
+        "deep displacement 47,429 t + deep draught": 35.27,
+        "trial displacement 42,200 t + deep draught": 22.45,
+        "trial displacement + 8.90 m draught": 25.59
+      }
+    },
+    {
+      "id": "hms-repulse-1916",
+      "name": "HMS Repulse",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1916,
+      "hull": {
+        "length_m": 228.7,
+        "length_basis": "lbp",
+        "beam_m": 27.48,
+        "draught_m": 8.23,
+        "displacement_t": 27636,
+        "block_coeff": 0.5213,
+        "block_coeff_basis": "normal displacement over LBP*B*T"
+      },
+      "trial": {
+        "shp": 118913,
+        "speed_kt": 31.73,
+        "kind": "full_power",
+        "date": "1916",
+        "load_note": "trial displacement not stated in the source; normal load used"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Repulse_(1916)",
+        "retrieved": "2026-10-21",
+        "quote": "during trials in 1916, Repulse's turbines provided 118,913 shp"
+      },
+      "verification": {
+        "status": "gated_auto",
+        "notes": "figure selected by the clause-level trial gate"
+      },
+      "model": {
+        "predicted_hp": 142764,
+        "error_pct": 20.06,
+        "commit": "409be70"
+      }
+    },
+    {
+      "id": "hms-renown-1916",
+      "name": "HMS Renown",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1916,
+      "hull": {
+        "length_m": 228.7,
+        "length_basis": "lbp",
+        "beam_m": 27.48,
+        "draught_m": 8.23,
+        "displacement_t": 27636,
+        "block_coeff": 0.5213,
+        "block_coeff_basis": "normal displacement over LBP*B*T"
+      },
+      "trial": {
+        "shp": 126000,
+        "speed_kt": 32.58,
+        "kind": "full_power",
+        "date": "1916",
+        "load_note": "trial displacement not stated in the source; normal load used"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Renown_(1916)",
+        "retrieved": "2026-10-21",
+        "quote": "during trials in 1916, Renown's turbines provided 126,000 shp"
+      },
+      "verification": {
+        "status": "gated_auto",
+        "notes": "figure selected by the clause-level trial gate"
+      },
+      "model": {
+        "predicted_hp": 158665,
+        "error_pct": 25.92,
+        "commit": "409be70"
+      }
+    },
+    {
+      "id": "bismarck-1940",
+      "name": "Bismarck",
+      "navy": "Kriegsmarine",
+      "ship_type": "battleship",
+      "year": 1940,
+      "hull": {
+        "length_m": 241.6,
+        "length_basis": "lbp",
+        "beam_m": 36,
+        "draught_m": 9.3,
+        "displacement_t": 41700,
+        "block_coeff": 0.503,
+        "block_coeff_basis": "standard displacement over LBP*B*T"
+      },
+      "trial": {
+        "shp": 150170,
+        "speed_kt": 30.1,
+        "kind": "acceptance",
+        "date": "1940",
+        "load_note": "acceptance trial; plant designed for 138,000 hp and 29 kn"
+      },
+      "source": {
+        "url": "https://www.kbismarck.com/testi.html",
+        "retrieved": "2026-10-21",
+        "quote": "The propulsion plant originally designed to reach 138,000 hp and 29 knots actually obtained 150,170 hp and 30.1 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "German acceptance record transcribed by kbismarck.com"
+      },
+      "model": {
+        "predicted_hp": 149528,
+        "error_pct": -0.43,
+        "commit": "409be70"
+      }
+    }
+  ]
+}
