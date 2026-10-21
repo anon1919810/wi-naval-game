@@ -107,6 +107,10 @@ def apply_calibration(power_hp, method, ship_type):
 # so the two cannot drift apart.
 CLUSTER_FACTOR = 0.851
 CLUSTER_SAMPLE = 8
+# Bootstrap 95 % interval on the mean trial error (2000 resamples, seed 20261021):
+# the point estimate 0.851 sits inside it, and the width is why this is offered as
+# a range in the product rather than as a fixed number.
+CLUSTER_FACTOR_CI = (0.792, 0.921)
 CLUSTER_LOOCV_MAE = 9.16
 CLUSTER_UNCORRECTED_MAE = 15.03
 CLUSTER_SOURCE = "docs/plimsoll-1.0/resistance-methods-and-data-2026-10-21.md section 19"
@@ -127,7 +131,7 @@ def cluster_factor(block_coeff, length_m, froude):
     outside = resistance_blend.CLUSTER_OUTSIDE_SHARE
     weight = max(0.0, min(1.0, (share - outside) / span))
     factor = 1.0 + weight * (CLUSTER_FACTOR - 1.0)
-    return dict(factor=factor, cluster_share=share, cluster_weight=weight, applied=weight > 0.5,
+    return dict(factor=factor, factor_ci=CLUSTER_FACTOR_CI, cluster_share=share, cluster_weight=weight, applied=weight > 0.5,
                 sample=CLUSTER_SAMPLE, loocv_mae=CLUSTER_LOOCV_MAE,
                 uncorrected_mae=CLUSTER_UNCORRECTED_MAE, source=CLUSTER_SOURCE)
 
@@ -139,6 +143,7 @@ def cluster_factor(block_coeff, length_m, froude):
 # factor is harmful because the errors change sign with hull form.
 DESIGN_FACTOR = 0.8079
 DESIGN_SAMPLE = 27
+DESIGN_FACTOR_CI = (0.790, 0.872)
 DESIGN_LOOCV_MAPE = 10.56
 DESIGN_UNCORRECTED_MAPE = 23.04
 DESIGN_SOURCE = "docs/plimsoll-1.0/resistance-methods-and-data-2026-10-21.md section 23"
@@ -146,5 +151,5 @@ DESIGN_SOURCE = "docs/plimsoll-1.0/resistance-methods-and-data-2026-10-21.md sec
 
 def design_factor():
     """The single level correction for a rated-value target."""
-    return dict(factor=DESIGN_FACTOR, sample=DESIGN_SAMPLE, loocv_mape=DESIGN_LOOCV_MAPE,
+    return dict(factor=DESIGN_FACTOR, factor_ci=DESIGN_FACTOR_CI, sample=DESIGN_SAMPLE, loocv_mape=DESIGN_LOOCV_MAPE,
                 uncorrected_mape=DESIGN_UNCORRECTED_MAPE, source=DESIGN_SOURCE)

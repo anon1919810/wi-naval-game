@@ -71,5 +71,19 @@ class ClusterFactorTests(unittest.TestCase):
         self.assertIn("resistance-methods-and-data", out["source"])
 
 
+class FactorIntervalTests(unittest.TestCase):
+    def test_both_factors_carry_a_bootstrap_interval_around_the_point_estimate(self):
+        for name, factor, ci in (("cluster", cal.CLUSTER_FACTOR, cal.CLUSTER_FACTOR_CI),
+                                 ("design", cal.DESIGN_FACTOR, cal.DESIGN_FACTOR_CI)):
+            low, high = ci
+            self.assertLess(low, factor, name)
+            self.assertGreater(high, factor, name)
+            self.assertLess(high - low, 0.20, name + ": an interval wider than a fifth of the factor is not usable")
+
+    def test_the_interval_travels_with_the_returned_record(self):
+        self.assertEqual(cal.cluster_factor(0.55, 260.0, 0.35)["factor_ci"], cal.CLUSTER_FACTOR_CI)
+        self.assertEqual(cal.design_factor()["factor_ci"], cal.DESIGN_FACTOR_CI)
+
+
 if __name__ == "__main__":
     unittest.main()
