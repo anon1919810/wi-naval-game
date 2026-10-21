@@ -272,7 +272,7 @@
       },
       "verification": {
         "status": "hand_checked",
-        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run"
+        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run | cross-check: worldwar1.co.uk gives 30,112 shp at 21.05 kn for the same trial"
       },
       "model": {
         "predicted_hp": 28885,
@@ -310,7 +310,7 @@
       },
       "verification": {
         "status": "hand_checked",
-        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run"
+        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run | cross-check: worldwar1.co.uk gives 32,277 shp at 21.88 kn (identical power, slightly different speed)"
       },
       "model": {
         "predicted_hp": 32035,
@@ -924,6 +924,196 @@
         "predicted_hp": 59087,
         "error_pct": 20.47,
         "commit": "1876247"
+      }
+    },
+    {
+      "id": "hms-iron-duke-1912",
+      "name": "HMS Iron Duke",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1912,
+      "hull": {
+        "length_m": 187.2,
+        "length_basis": "lbp",
+        "beam_m": 27.46,
+        "draught_m": 9.98,
+        "displacement_t": 26519,
+        "block_coeff": 0.504,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "waterline length from the class page; overall is given separately"
+      },
+      "trial": {
+        "shp": 30040,
+        "speed_kt": 21.6,
+        "kind": "full_power",
+        "date": "1912",
+        "load_note": "load displacement 26,100 long tons; 32 ft 9 in is the deep draught"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battleship/hms-iron-duke.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Iron Duke 30,040 shp = 21.6 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: trial line printed separately from the design rating"
+      },
+      "model": {
+        "predicted_hp": 33955,
+        "error_pct": 13.03,
+        "commit": "1c1b173"
+      }
+    },
+    {
+      "id": "hms-king-george-v-1911",
+      "name": "HMS King George V",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1911,
+      "hull": {
+        "length_m": 179.7,
+        "length_basis": "lbp",
+        "beam_m": 27.15,
+        "draught_m": 8.74,
+        "displacement_t": 25828,
+        "block_coeff": 0.591,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "waterline length from the class page; overall is given separately"
+      },
+      "trial": {
+        "shp": 33022,
+        "speed_kt": 22.373,
+        "kind": "full_power",
+        "date": "1911",
+        "load_note": "load displacement 25,420 long tons"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battleship/hms-king-george-v.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: King George V 33,022 shp = 22.373 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: trial line printed separately from the design rating"
+      },
+      "model": {
+        "predicted_hp": 39852,
+        "error_pct": 20.68,
+        "commit": "1c1b173"
+      }
+    },
+    {
+      "id": "hms-neptune-1909",
+      "name": "HMS Neptune",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1909,
+      "hull": {
+        "length_m": 164.9,
+        "length_basis": "lbp",
+        "beam_m": 25.93,
+        "draught_m": 8.69,
+        "displacement_t": 19996,
+        "block_coeff": 0.525,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "waterline length from the class page; overall is given separately"
+      },
+      "trial": {
+        "shp": 25531,
+        "speed_kt": 21.29,
+        "kind": "full_power",
+        "date": "1909",
+        "load_note": "load displacement 19,680 long tons; the page names no sister ship for this run"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battleship/hms-neptune.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: 25,531 shp = 21.29 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: trial line printed separately from the design rating"
+      },
+      "model": {
+        "predicted_hp": 28308,
+        "error_pct": 10.88,
+        "commit": "1c1b173"
+      }
+    },
+    {
+      "id": "hms-agincourt-1913",
+      "name": "HMS Agincourt",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1913,
+      "hull": {
+        "length_m": 203.6,
+        "length_basis": "lbp",
+        "beam_m": 27.13,
+        "draught_m": 9.09,
+        "displacement_t": 25190,
+        "block_coeff": 0.489,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "waterline length from the class page; overall is given separately"
+      },
+      "trial": {
+        "shp": 40129,
+        "speed_kt": 22.42,
+        "kind": "full_power",
+        "date": "1913",
+        "load_note": "light displacement 24,792 long tons; 29 ft 10 in is the mean deep draught"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battleship/hms-agincourt.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: 40,129 shp = 22.42 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: trial line printed separately from the design rating"
+      },
+      "model": {
+        "predicted_hp": 36807,
+        "error_pct": -8.28,
+        "commit": "1c1b173"
+      }
+    },
+    {
+      "id": "hms-canada-1913",
+      "name": "HMS Canada",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1913,
+      "hull": {
+        "length_m": 199.6,
+        "length_basis": "lbp",
+        "beam_m": 28.04,
+        "draught_m": 8.99,
+        "displacement_t": 27401,
+        "block_coeff": 0.531,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "waterline length from the class page; overall is given separately"
+      },
+      "trial": {
+        "shp": 52682,
+        "speed_kt": 24.3,
+        "kind": "full_power",
+        "date": "1913",
+        "load_note": "light displacement 26,968 long tons"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battleship/hms-canada.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: 52,682 shp = 24.3 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: trial line printed separately from the design rating"
+      },
+      "model": {
+        "predicted_hp": 53497,
+        "error_pct": 1.55,
+        "commit": "1c1b173"
       }
     }
   ]
