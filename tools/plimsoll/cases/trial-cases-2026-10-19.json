@@ -1,0 +1,34 @@
+{
+  "schema": "plimsoll-trial-cases-1",
+  "recorded": "2026-10-19",
+  "note": "Two warships whose sea-trial power and speed are transcribed from a published record. The set is deliberately tiny: it exists to pin the model's error against measured trials, not to fit anything.",
+  "cases": [
+    {
+      "name": "HMS Dreadnought (1906)",
+      "length_ft": 527,
+      "beam_ft": 82,
+      "draught_ft": 26.5,
+      "displacement_lt": 18200,
+      "block_coeff": 0.61,
+      "trial_speed_kt": 21.6,
+      "trial_shp": 27018,
+      "provenance": "trial_record",
+      "source": "Royal Navy trials, 9 October 1906, as transcribed by Wikipedia (HMS Dreadnought (1906))",
+      "expected_error_pct": 9.9,
+      "note": "The 146-case reference set lists this hull at Cb 0.61; a form-derived Cb near 0.54 would give +7.7 % instead, so the block coefficient is itself a source of a couple of points."
+    },
+    {
+      "name": "HMS Hood (1920)",
+      "length_ft": 860,
+      "beam_ft": 104.2,
+      "draught_ft": 32,
+      "displacement_lt": 42000,
+      "block_coeff": 0.56,
+      "trial_speed_kt": 32.07,
+      "trial_shp": 150000,
+      "provenance": "trial_record_lower_bound",
+      "source": "1920 full-power trials, quoted as 'over 150,000 shp' by naval-encyclopedia; the figure is a lower bound so the recorded error is a lower bound too",
+      "expected_error_pct": 25.8
+    }
+  ]
+}
