@@ -190,7 +190,7 @@ def compute(project, state, options, stages):
         data["rows"].sort(key=lambda row: row["speed_kn"])
         if blended_method:
             _blend_with_holtrop(data, scenario, project, values, coefficients, beam, draft, plane, length)
-        _apply_recorded_calibration(data, scenario)
+        _apply_recorded_calibration(data, scenario, project)
     else:
         aft, fore = inputs.pop("x_aft_perpendicular_m"), inputs.pop("x_fore_perpendicular_m")
         # The declared spacing must be the selected waterline itself. A scenario
@@ -334,7 +334,7 @@ def _blend_with_holtrop(data, scenario, project, values, coefficients, beam, dra
     data["assumptions"].append("blended resistance: Holtrop share from the declared block coefficient, applied to total resistance; QPC still applies to the blended effective power")
 
 
-def _apply_recorded_calibration(data, scenario):
+def _apply_recorded_calibration(data, scenario, project=None):
     """Scale the power by a recorded, auditable per-type factor.
 
     The factor and its sample live in resistance_calibration, not here: a reader
@@ -344,6 +344,9 @@ def _apply_recorded_calibration(data, scenario):
     """
     record = scenario.get("calibration")
     if record is None:
+        return
+    if isinstance(record, dict) and record.get("mode") == "cluster":
+        _apply_cluster_correction(data, scenario, record, project)
         return
     if not isinstance(record, dict) or "method" not in record or "ship_type" not in record:
         data["diagnostics"].append(diagnostic("calibration.malformed",
@@ -369,3 +372,43 @@ def _apply_recorded_calibration(data, scenario):
     except resistance_calibration.CalibrationError as error:
         data["diagnostics"].append(diagnostic("calibration.refused",
             "no recorded factor applies: %s" % error, "$.options.resistance", True))
+
+
+def _apply_cluster_correction(data, scenario, record, project=None):
+    """Scale the power by the cluster level correction, faded in by hull form.
+
+    The correction is a property of the ship, so it is computed once from the
+    declared design point and applied to every speed: a per-speed correction would
+    bend the power curve, which is exactly what a level bias must not do.
+    """
+    design_speed = record.get("design_speed_kn", scenario.get("design_speed_kn"))
+    if not isinstance(design_speed, (int, float)) or design_speed <= 0:
+        data["diagnostics"].append(diagnostic("calibration.missing_design_speed",
+            "the cluster correction needs design_speed_kn: the factor is a property of the ship",
+            "$.options.resistance", True))
+        return
+    effective = data.get("effective_inputs") or {}
+    length = effective.get("lwl_m")
+    declared = (project or {}).get("hull", {}).get("block_coeff") if isinstance(project, dict) else None
+    block = declared if isinstance(declared, (int, float)) else None
+    if length is None or block is None:
+        data["diagnostics"].append(diagnostic("calibration.missing_form",
+            "the cluster correction needs the waterline length and a block coefficient",
+            "$.options.resistance", True))
+        return
+    froude = (0.514444 * design_speed) / ((9.81 * length) ** 0.5)
+    out = resistance_calibration.cluster_factor(block, length, froude)
+    applied = []
+    for row in data["rows"]:
+        power = row.get("effective_power_kw")
+        if power is None:
+            continue
+        row["effective_power_kw"] = power * out["factor"]
+        row["calibration"] = dict(mode="cluster", factor=out["factor"], cluster_share=out["cluster_share"],
+            cluster_weight=out["cluster_weight"], sample=out["sample"], loocv_mae=out["loocv_mae"],
+            uncorrected_mae=out["uncorrected_mae"], source=out["source"])
+        applied.append(out["factor"])
+    if applied:
+        data["assumptions"].append(
+            "cluster correction applied: factor %.3f (share %.3f, sample %d, LOOCV %.2f%% against %.2f%% uncorrected)"
+            % (out["factor"], out["cluster_share"], out["sample"], out["loocv_mae"], out["uncorrected_mae"]))

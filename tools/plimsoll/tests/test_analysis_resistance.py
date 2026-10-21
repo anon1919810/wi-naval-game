@@ -217,5 +217,47 @@ class BlendRuleTests(unittest.TestCase):
         self.assertIsNotNone(row["blend"])
 
 
+class ClusterCorrectionTests(unittest.TestCase):
+    def project(self, design_speed=28.5, declared_cb=0.55):
+        project = selected_project()
+        project.setdefault("hull", {})["block_coeff"] = declared_cb
+        scenario = project["resistance_scenarios"][0]
+        scenario["calibration"] = dict(mode="cluster")
+        if design_speed is not None:
+            scenario["calibration"]["design_speed_kn"] = design_speed
+        return project
+
+    def test_the_correction_is_one_factor_for_the_whole_curve(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[10, 12, 14]))
+        result = analysis.compute_project(self.project(), "normal", options)
+        rows = result["stages"]["resistance"]["data"]["rows"]
+        factors = {round(row["calibration"]["factor"], 9) for row in rows if row.get("calibration")}
+        self.assertEqual(len(factors), 1, factors)
+        self.assertLess(list(factors)[0], 1.0)
+        self.assertTrue(any("cluster correction applied" in note
+                            for note in result["stages"]["resistance"]["data"]["assumptions"]))
+
+    def test_a_hull_outside_the_cluster_is_left_alone(self):
+        project = self.project(design_speed=21.0, declared_cb=0.40)
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(project, "normal", options)
+        row = result["stages"]["resistance"]["data"]["rows"][0]
+        self.assertAlmostEqual(row["calibration"]["factor"], 1.0, delta=0.02)
+
+    def test_the_correction_without_a_design_speed_is_refused(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(self.project(design_speed=None), "normal", options)
+        codes = [d["code"] for d in result["stages"]["resistance"]["data"]["diagnostics"]]
+        self.assertIn("calibration.missing_design_speed", codes)
+
+    def test_without_a_declared_block_coefficient_it_is_refused(self):
+        project = self.project()
+        project["hull"].pop("block_coeff", None)
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(project, "normal", options)
+        codes = [d["code"] for d in result["stages"]["resistance"]["data"]["diagnostics"]]
+        self.assertIn("calibration.missing_form", codes)
+
+
 if __name__ == "__main__":
     unittest.main()

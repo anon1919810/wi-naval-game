@@ -683,3 +683,34 @@ factor  = 1 + weight · (0.851 − 1)
 - 阻力/校准相关测试 **29 例通过**；
 - 数据集 n=29；
 - `cluster_factor` 尚未接进阻力阶段（阶段里仍需显式声明），下一轮接入并复核。
+
+
+---
+
+## 21. 第 11 轮：把集群校正接进阻力阶段
+
+### 接线方式
+
+场景里声明即可：
+
+```json
+"calibration": { "mode": "cluster", "design_speed_kn": 28.5 }
+```
+
+- 因子用**设计点**算一次，整条曲线共用一个值（测试断言：曲线上因子唯一）；
+- 每次调用返回 `sample / loocv_mae / uncorrected_mae / source`；
+- 缺 `design_speed_kn` → 阻断级 `calibration.missing_design_speed`；
+- 缺 `hull.block_coeff` → 阻断级 `calibration.missing_form`（不猜船型，也就不会误用校正）；
+- 集群外的船因子自动趋近 1.0（测试用 Cb 0.40 / 21 kn 的船验证）。
+
+### 顺手修掉一个双路径导入问题
+
+`resistance_calibration` 里 `from . import resistance_blend` 在测试直接以顶层模块导入时会炸
+（`attempted relative import with no known parent package`）。改成 try/except 双路径，
+与 `_analysis_resistance` 的既有做法一致。这个错误一次让 15 个用例变红 —— 说明测试网是有效的。
+
+### 现状
+
+- 阻力/校准/混合相关测试 **44 例通过**；
+- 全量核心套件已在后台重跑（上一轮 2,634 passed + 4,852 subtests / 719 s），结果下一轮报；
+- 数据集 n=29。

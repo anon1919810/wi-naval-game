@@ -11,7 +11,10 @@ See docs/plimsoll-1.0/resistance-benchmark-2026-10-19.md for the full study.
 
 from __future__ import annotations
 
-from . import resistance_blend
+try:
+    from . import resistance_blend
+except ImportError:  # imported as a top-level module by the test harness
+    import resistance_blend
 
 TAYLOR_ORIGINAL = "taylor_gertler_source_axis_strict"
 BLENDED = "blended_taylor_holtrop_v1"
