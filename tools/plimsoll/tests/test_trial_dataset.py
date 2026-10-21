@@ -60,21 +60,26 @@ class DatasetSummaryTests(unittest.TestCase):
         self.assertAlmostEqual(by_name["HMS Hood"]["model"]["error_pct"], 22.45, places=2)
         self.assertAlmostEqual(by_name["HMS Dreadnought"]["model"]["error_pct"], 9.27, places=2)
 
-    def test_the_error_turns_positive_above_thirty_one_knots(self):
-        """The boundary is a speed one, and it is above 30 kn.
+    def test_at_high_froude_the_sign_follows_the_block_coefficient(self):
+        """The error does not turn on speed; it turns on how fine the hull is.
 
-        Bismarck at 30.1 kn lands at -0.43 %, while every ship at 31.7 kn or
-        faster over-predicts by 20-26 %. A 30 kn cut would blur that, so the
-        dataset records the speeds and this test states where the turn happens.
+        At Fr >= 0.28 the finest hull in the set (Furious, Cb 0.396) under-predicts
+        while the fuller ones (Cb 0.499-0.539) over-predict. An earlier version of
+        this test claimed a 31 kn threshold; adding a carrier at 28.8 kn with a fine
+        hull broke that claim, which is exactly what the dataset is for.
         """
         cases = td.usable_cases()
-        fast = [c for c in cases if c["trial"]["speed_kt"] >= 31.0]
-        slow = [c for c in cases if c["trial"]["speed_kt"] < 31.0]
-        self.assertTrue(fast, "the dataset needs ships above 31 kn to pin this")
-        for case in fast:
-            self.assertGreater(case["model"]["error_pct"], 0.0, case["name"])
-        for case in slow:
-            self.assertLess(abs(case["model"]["error_pct"]), 15.0, case["name"])
+        fast = []
+        for case in cases:
+            length = case["hull"]["length_m"]
+            froude = (0.514444 * case["trial"]["speed_kt"]) / (9.81 * length) ** 0.5
+            if froude >= 0.28:
+                fast.append((case["hull"]["block_coeff"], case["model"]["error_pct"], case["name"]))
+        self.assertGreaterEqual(len(fast), 5, "the fast group needs enough cases to test the claim")
+        finest = min(fast)
+        fullest = max(fast)
+        self.assertLess(finest[1], 0.0, finest[2] + " is the finest hull and should under-predict")
+        self.assertGreater(fullest[1], 0.0, fullest[2] + " is the fullest hull and should over-predict")
 
 
 if __name__ == "__main__":

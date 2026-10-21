@@ -469,6 +469,120 @@
         "error_pct": 2.04,
         "commit": "55eb181"
       }
+    },
+    {
+      "id": "hms-tiger-1913",
+      "name": "HMS Tiger",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1913,
+      "hull": {
+        "length_m": 212.7,
+        "length_basis": "lbp",
+        "beam_m": 27.58,
+        "draught_m": 9.75,
+        "displacement_t": 29262,
+        "block_coeff": 0.499,
+        "block_coeff_basis": "normal displacement over waterline length * B * T / 1.025",
+        "length_note": "the source gives 697 ft 9 in waterline and 704 ft overall; the waterline length is the resistance length"
+      },
+      "trial": {
+        "shp": 104635,
+        "speed_kt": 29.07,
+        "kind": "full_power",
+        "date": "1913",
+        "load_note": "normal displacement 28,800 long tons; the quoted draught is the load draught (32 ft)"
+      },
+      "source": {
+        "url": "http://www.worldwar1.co.uk/battlecruiser/hms-tiger.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: 104,635 shp = 29.07 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the trial line sits under the design rating 85,000 shp / 28 kn, and the achieved speed exceeds the design by a knot"
+      },
+      "model": {
+        "predicted_hp": 106951,
+        "error_pct": 2.21,
+        "commit": "030d662"
+      }
+    },
+    {
+      "id": "hms-queen-mary-1912",
+      "name": "HMS Queen Mary",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1912,
+      "hull": {
+        "length_m": 212.8,
+        "length_basis": "lbp",
+        "beam_m": 27.13,
+        "draught_m": 8.53,
+        "displacement_t": 27210,
+        "block_coeff": 0.539,
+        "block_coeff_basis": "normal displacement over waterline length * B * T / 1.025",
+        "length_note": "waterline length 698 ft used; 703 ft 6 in is the overall figure"
+      },
+      "trial": {
+        "shp": 83350,
+        "speed_kt": 28.348,
+        "kind": "full_power",
+        "date": "1912",
+        "load_note": "normal displacement 26,780 long tons"
+      },
+      "source": {
+        "url": "http://www.worldwar1.co.uk/battlecruiser/hms-queen-mary.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: 83,350 shp = 28.348 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: trial line recorded separately from the design line 75,000 shp / 27.5 kn"
+      },
+      "model": {
+        "predicted_hp": 94202,
+        "error_pct": 13.02,
+        "commit": "030d662"
+      }
+    },
+    {
+      "id": "hms-furious-1917",
+      "name": "HMS Furious",
+      "navy": "Royal Navy",
+      "ship_type": "carrier",
+      "year": 1932,
+      "hull": {
+        "length_m": 239.8,
+        "length_basis": "lbp",
+        "beam_m": 26.82,
+        "draught_m": 7.59,
+        "displacement_t": 19826,
+        "block_coeff": 0.396,
+        "block_coeff_basis": "normal displacement over waterline length * B * T / 1.025",
+        "length_note": "overall length as a carrier; the 1932 trial is post-conversion, so this is a carrier datum, not the battlecruiser's"
+      },
+      "trial": {
+        "shp": 89745,
+        "speed_kt": 28.8,
+        "kind": "full_power",
+        "date": "1932",
+        "load_note": "normal displacement 19,513 long tons"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Furious_(47)",
+        "retrieved": "2026-10-21",
+        "quote": "Upon completion, she ran a full-power trial on 16 February 1932 where her maximum speed was 28.8 kn from a total of 89,745 shp"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: full-power trial after the flight-deck conversion"
+      },
+      "model": {
+        "predicted_hp": 74784,
+        "error_pct": -16.67,
+        "commit": "030d662"
+      }
     }
   ]
 }
