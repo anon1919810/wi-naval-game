@@ -583,6 +583,158 @@
         "error_pct": -16.67,
         "commit": "030d662"
       }
+    },
+    {
+      "id": "hms-caroline-1914",
+      "name": "HMS Caroline",
+      "navy": "Royal Navy",
+      "ship_type": "cruiser",
+      "year": 1914,
+      "hull": {
+        "length_m": 128.0,
+        "length_basis": "lbp",
+        "beam_m": 12.65,
+        "draught_m": 4.5,
+        "displacement_t": 4219,
+        "block_coeff": 0.565,
+        "block_coeff_basis": "given displacement over LBP*B*T/1.025",
+        "length_note": "the source gives 420 ft between perpendiculars and 446 ft overall; the perpendicular figure is used"
+      },
+      "trial": {
+        "shp": 41020,
+        "speed_kt": 29.07,
+        "kind": "full_power",
+        "date": "1914",
+        "load_note": "load displacement 4,219 long tons as given on the page"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/light-cruiser/hms-Caroline.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Caroline 41,020 shp = 29.07 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the trial line is printed separately from the design rating, and the ship that ran it is named"
+      },
+      "model": {
+        "predicted_hp": 39628,
+        "error_pct": -3.39,
+        "commit": "71aa189"
+      }
+    },
+    {
+      "id": "hms-ceres-1917",
+      "name": "HMS Ceres",
+      "navy": "Royal Navy",
+      "ship_type": "cruiser",
+      "year": 1917,
+      "hull": {
+        "length_m": 129.5,
+        "length_basis": "lbp",
+        "beam_m": 13.23,
+        "draught_m": 4.47,
+        "displacement_t": 4190,
+        "block_coeff": 0.533,
+        "block_coeff_basis": "given displacement over LBP*B*T/1.025",
+        "length_note": "425 ft between perpendiculars from the class page; overall is 450 ft 3 in"
+      },
+      "trial": {
+        "shp": 39425,
+        "speed_kt": 29.11,
+        "kind": "full_power",
+        "date": "1917",
+        "load_note": "normal displacement 4,190 long tons as given on the page"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/light-cruiser/hms-Ceres.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Ceres 39,425 shp = 29.11 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the trial line is printed separately from the design rating, and the ship that ran it is named"
+      },
+      "model": {
+        "predicted_hp": 39068,
+        "error_pct": -0.91,
+        "commit": "71aa189"
+      }
+    },
+    {
+      "id": "hms-cassandra-1916",
+      "name": "HMS Cassandra",
+      "navy": "Royal Navy",
+      "ship_type": "cruiser",
+      "year": 1916,
+      "hull": {
+        "length_m": 129.5,
+        "length_basis": "lbp",
+        "beam_m": 13.03,
+        "draught_m": 4.5,
+        "displacement_t": 4180,
+        "block_coeff": 0.537,
+        "block_coeff_basis": "given displacement over LBP*B*T/1.025",
+        "length_note": "the Caledon class page lists the trial run of Cassandra; the class dimensions are used"
+      },
+      "trial": {
+        "shp": 40750,
+        "speed_kt": 29.11,
+        "kind": "full_power",
+        "date": "1916",
+        "load_note": "standard displacement 4,180 long tons as given on the class page"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/light-cruiser/hms-Caledon.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Cassandra 40,750 shp = 29.11 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the trial line is printed separately from the design rating, and the ship that ran it is named"
+      },
+      "model": {
+        "predicted_hp": 38982,
+        "error_pct": -4.34,
+        "commit": "71aa189"
+      }
+    },
+    {
+      "id": "hms-delhi-1918",
+      "name": "HMS Delhi",
+      "navy": "Royal Navy",
+      "ship_type": "cruiser",
+      "year": 1918,
+      "hull": {
+        "length_m": 135.6,
+        "length_basis": "lbp",
+        "beam_m": 14.1,
+        "draught_m": 4.42,
+        "displacement_t": 4850,
+        "block_coeff": 0.56,
+        "block_coeff_basis": "given displacement over LBP*B*T/1.025",
+        "length_note": "the Danae class page lists the trial run of Delhi; the class dimensions are used"
+      },
+      "trial": {
+        "shp": 41208,
+        "speed_kt": 28.6,
+        "kind": "full_power",
+        "date": "1918",
+        "load_note": "standard displacement 4,850 long tons as given on the class page"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/light-cruiser/hms-Danae.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Delhi 41,208 shp = 28.6 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the trial line is printed separately from the design rating, and the ship that ran it is named"
+      },
+      "model": {
+        "predicted_hp": 39629,
+        "error_pct": -3.83,
+        "commit": "71aa189"
+      }
     }
   ]
 }

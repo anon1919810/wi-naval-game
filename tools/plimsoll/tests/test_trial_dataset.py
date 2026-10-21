@@ -60,26 +60,25 @@ class DatasetSummaryTests(unittest.TestCase):
         self.assertAlmostEqual(by_name["HMS Hood"]["model"]["error_pct"], 22.45, places=2)
         self.assertAlmostEqual(by_name["HMS Dreadnought"]["model"]["error_pct"], 9.27, places=2)
 
-    def test_at_high_froude_the_sign_follows_the_block_coefficient(self):
-        """The error does not turn on speed; it turns on how fine the hull is.
+    def test_no_single_form_parameter_explains_the_sign(self):
+        """Documented with n=19: neither Froude number nor block coefficient does it.
 
-        At Fr >= 0.28 the finest hull in the set (Furious, Cb 0.396) under-predicts
-        while the fuller ones (Cb 0.499-0.539) over-predict. An earlier version of
-        this test claimed a 31 kn threshold; adding a carrier at 28.8 kn with a fine
-        hull broke that claim, which is exactly what the dataset is for.
+        Battlecruisers at Fr 0.31-0.33 over-predict 2-26 %, light cruisers at Fr
+        0.40-0.42 under-predict 1-4 %, and ships inside the same block-coefficient
+        band land on both sides of zero. Two earlier hypotheses (a 31 kn threshold,
+        then the block coefficient) were falsified by new data; this test keeps the
+        dataset honest about that rather than encoding a third guess.
         """
         cases = td.usable_cases()
-        fast = []
-        for case in cases:
-            length = case["hull"]["length_m"]
-            froude = (0.514444 * case["trial"]["speed_kt"]) / (9.81 * length) ** 0.5
-            if froude >= 0.28:
-                fast.append((case["hull"]["block_coeff"], case["model"]["error_pct"], case["name"]))
-        self.assertGreaterEqual(len(fast), 5, "the fast group needs enough cases to test the claim")
-        finest = min(fast)
-        fullest = max(fast)
-        self.assertLess(finest[1], 0.0, finest[2] + " is the finest hull and should under-predict")
-        self.assertGreater(fullest[1], 0.0, fullest[2] + " is the fullest hull and should over-predict")
+        over = [c for c in cases if c["model"]["error_pct"] > 10]
+        under = [c for c in cases if c["model"]["error_pct"] < -5]
+        self.assertGreaterEqual(len(over), 4, "the dataset must keep its over-predicting cases")
+        self.assertGreaterEqual(len(under), 2, "and its under-predicting ones")
+        band = [c for c in cases if 0.50 <= c["hull"]["block_coeff"] < 0.55]
+        signs = {c["model"]["error_pct"] > 0 for c in band}
+        self.assertEqual(signs, {True, False},
+                         "the central block-coefficient band must contain both signs, or the "
+                         "claim that Cb sets the sign would stand")
 
 
 if __name__ == "__main__":
