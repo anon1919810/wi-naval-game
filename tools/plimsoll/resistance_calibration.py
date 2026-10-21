@@ -63,6 +63,24 @@ def factor_for(method, ship_type):
         raise CalibrationError("ship type %r is outside the fitted set for %s" % (ship_type, method))
 
 
+def scale_value(value, method, ship_type):
+    """Scale any non-negative magnitude and return the audit record.
+
+    Calibration is a pure multiplier, so the caller keeps its own unit. This is
+    the entry point a stage uses; apply_calibration stays as the hp-named
+    convenience for callers that already speak in horsepower.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise CalibrationError("value must be a number")
+    if value < 0:
+        raise CalibrationError("value must not be negative")
+    record = calibration_for(method)
+    factor = factor_for(method, ship_type)
+    return dict(value=float(value) * factor, factor=factor, ship_type=ship_type, method=method,
+                sample=record["sample"], loocv_mape=record["loocv_mape"],
+                source="docs/plimsoll-1.0/resistance-benchmark-2026-10-19.md")
+
+
 def apply_calibration(power_hp, method, ship_type):
     """Scale one power by the recorded factor and return the audit record."""
     if isinstance(power_hp, bool) or not isinstance(power_hp, (int, float)):

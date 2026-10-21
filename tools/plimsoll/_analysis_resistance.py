@@ -7,12 +7,13 @@ import math
 from pathlib import Path
 
 try:
-    from . import resistance, holtrop, resistance_blend, units
+    from . import resistance, holtrop, resistance_blend, resistance_calibration, units
     from ._analysis_request import diagnostic
 except ImportError:
     import resistance
     import holtrop
     import resistance_blend
+    import resistance_calibration
     import units
     from _analysis_request import diagnostic
 
@@ -189,6 +190,7 @@ def compute(project, state, options, stages):
         data["rows"].sort(key=lambda row: row["speed_kn"])
         if blended_method:
             _blend_with_holtrop(data, scenario, project, values, coefficients, beam, draft, plane, length)
+        _apply_recorded_calibration(data, scenario)
     else:
         aft, fore = inputs.pop("x_aft_perpendicular_m"), inputs.pop("x_fore_perpendicular_m")
         declared = fore - aft
@@ -323,3 +325,40 @@ def _blend_with_holtrop(data, scenario, project, values, coefficients, beam, dra
             components["holtrop_kn"] = holtrop_kn
             components["holtrop_share"] = mixed["holtrop_share"]
     data["assumptions"].append("blended resistance: Holtrop share from the declared block coefficient, applied to total resistance; QPC still applies to the blended effective power")
+
+
+def _apply_recorded_calibration(data, scenario):
+    """Scale the power by a recorded, auditable per-type factor.
+
+    The factor and its sample live in resistance_calibration, not here: a reader
+    of the result must be able to see which fit produced the number and how well
+    that fit did out of sample. An unfitted ship type is refused with a blocking
+    diagnostic and the power is left uncalibrated.
+    """
+    record = scenario.get("calibration")
+    if record is None:
+        return
+    if not isinstance(record, dict) or "method" not in record or "ship_type" not in record:
+        data["diagnostics"].append(diagnostic("calibration.malformed",
+            "calibration needs both method and ship_type",
+            "$.options.resistance", True))
+        return
+    try:
+        applied = []
+        for row in data["rows"]:
+            power = row.get("effective_power_kw")
+            if power is None:
+                continue
+            out = resistance_calibration.scale_value(power, record["method"], record["ship_type"])
+            row["effective_power_kw"] = out["value"]
+            row["calibration"] = dict(factor=out["factor"], ship_type=out["ship_type"],
+                method=out["method"], sample=out["sample"], loocv_mape=out["loocv_mape"],
+                source=out["source"])
+            applied.append(out["factor"])
+        if applied:
+            data["assumptions"].append(
+                "power scaled by the recorded %s/%s factor %s (sample %s, nested LOOCV %.2f%%)" % (
+                    record["method"], record["ship_type"], applied[0], out["sample"], out["loocv_mape"]))
+    except resistance_calibration.CalibrationError as error:
+        data["diagnostics"].append(diagnostic("calibration.refused",
+            "no recorded factor applies: %s" % error, "$.options.resistance", True))

@@ -61,6 +61,41 @@ class ResistanceCoverageTests(unittest.TestCase):
         self.assertEqual([d["code"] for d in gap["diagnostics"]], ["taylor.speed_unavailable"])
 
 
+class RecordedCalibrationTests(unittest.TestCase):
+    def scenario_project(self, ship_type):
+        project = selected_project()
+        project.setdefault("hull", {})["block_coeff"] = 0.50
+        scenario = project["resistance_scenarios"][0]
+        scenario["calibration"] = dict(method="taylor_gertler_source_axis_strict", ship_type=ship_type)
+        return project
+
+    def test_a_recorded_factor_scales_the_power_and_attaches_its_provenance(self):
+        project = self.scenario_project("battleship")
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        plain = analysis.compute_project(self.scenario_project_copy(), "normal", options)
+        calibrated = analysis.compute_project(project, "normal", options)
+        before = plain["stages"]["resistance"]["data"]["rows"][0]["effective_power_kw"]
+        row = calibrated["stages"]["resistance"]["data"]["rows"][0]
+        self.assertAlmostEqual(row["effective_power_kw"], before * 0.923, places=6)
+        self.assertEqual(row["calibration"]["factor"], 0.923)
+        self.assertEqual(row["calibration"]["sample"], 146)
+        self.assertIn("resistance-benchmark", row["calibration"]["source"])
+
+    def scenario_project_copy(self):
+        project = selected_project()
+        project.setdefault("hull", {})["block_coeff"] = 0.50
+        return project
+
+    def test_an_unfitted_ship_type_is_refused_and_leaves_the_power_uncalibrated(self):
+        project = self.scenario_project("submarine")
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(project, "normal", options)
+        data = result["stages"]["resistance"]["data"]
+        codes = [d["code"] for d in data["diagnostics"]]
+        self.assertIn("calibration.refused", codes)
+        self.assertIsNone(data["rows"][0].get("calibration"))
+
+
 class BlendedResistanceTests(unittest.TestCase):
     def blended_project(self, with_inputs=True):
         project = selected_project()
