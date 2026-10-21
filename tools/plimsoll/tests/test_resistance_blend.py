@@ -51,5 +51,26 @@ class BlendResistanceTests(unittest.TestCase):
             blend.blend_resistance(-1.0, 1200.0, 0.50)
 
 
+class FittedFormShareTests(unittest.TestCase):
+    def test_the_fitted_share_is_bounded(self):
+        for cb in (0.35, 0.45, 0.50, 0.56, 0.65):
+            for bt in (2.5, 3.0, 3.5, 4.5):
+                self.assertTrue(0.0 <= blend.holtrop_share_form(cb, bt) <= 1.0)
+
+    def test_a_fuller_hull_and_a_beamer_hull_both_move_toward_taylor(self):
+        self.assertGreater(blend.holtrop_share_form(0.45, 3.0), blend.holtrop_share_form(0.56, 3.0))
+        self.assertGreater(blend.holtrop_share_form(0.52, 3.0), blend.holtrop_share_form(0.52, 4.2))
+
+    def test_the_fitted_share_is_continuous_in_both_parameters(self):
+        base = blend.holtrop_share_form(0.52, 3.4)
+        self.assertLess(abs(blend.holtrop_share_form(0.521, 3.4) - base), 0.03)
+        self.assertLess(abs(blend.holtrop_share_form(0.52, 3.41) - base), 0.02)
+
+    def test_a_parameter_outside_its_domain_is_rejected(self):
+        for cb, bt in ((0.0, 3.0), (1.0, 3.0), (0.5, 0.0), (0.5, -1.0), (None, 3.0), (0.5, "3")):
+            with self.assertRaises(blend.BlendInputError):
+                blend.holtrop_share_form(cb, bt)
+
+
 if __name__ == "__main__":
     unittest.main()

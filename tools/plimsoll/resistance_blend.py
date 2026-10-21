@@ -93,3 +93,35 @@ def blend_resistance(taylor_kn, holtrop_kn, block_coeff) -> dict:
                     reason="only the Holtrop family covers this speed")
     return dict(total_resistance_kn=(1.0 - share) * taylor + share * holtrop,
                 holtrop_share=share, blended=True, reason=None)
+
+
+# Coefficients fitted 2026-10-19 on the 146-case set by a coarse grid search over
+# a linear form score, scored with a nested leave-one-out refit. The search put
+# the whole weight on the block coefficient and the beam/draught ratio: the
+# length-displacement ratio and the Froude number contributed nothing measurable.
+# Signed so that a fuller hull and a beamier hull both move toward Taylor-Gertler.
+FITTED_CENTRE_BLOCK_COEFF = 0.50
+FITTED_CENTRE_BEAM_DRAUGHT = 3.0
+FITTED_BLOCK_WEIGHT = -20.0
+FITTED_BEAM_DRAUGHT_WEIGHT = -1.0
+FITTED_OFFSET = 1.0
+
+
+def holtrop_share_form(block_coeff, beam_draft_ratio):
+    """The fitted two-parameter share, kept as an option next to the default rule.
+
+    Nested leave-one-out on the 146 cases: 11.51 % against 11.86 % for the
+    block-coefficient-only rule. A third of a point does not justify replacing a
+    rule whose direction matches the per-class evidence, so this stays available
+    rather than becoming the default.
+    """
+    cb = _number(block_coeff, "block_coeff")
+    bt = _number(beam_draft_ratio, "beam_draft_ratio")
+    if not 0.0 < cb < 1.0:
+        raise BlendInputError("block_coeff must be inside (0, 1)")
+    if bt <= 0.0:
+        raise BlendInputError("beam_draft_ratio must be positive")
+    z = (FITTED_BLOCK_WEIGHT * (cb - FITTED_CENTRE_BLOCK_COEFF)
+         + FITTED_BEAM_DRAUGHT_WEIGHT * (bt - FITTED_CENTRE_BEAM_DRAUGHT)
+         + FITTED_OFFSET)
+    return 1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, z))))
