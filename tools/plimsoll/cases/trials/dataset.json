@@ -241,6 +241,120 @@
         "error_pct": 2.7,
         "commit": "3dfd3b2"
       }
+    },
+    {
+      "id": "hms-orion-1910",
+      "name": "HMS Orion",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1910,
+      "hull": {
+        "length_m": 177.1,
+        "length_basis": "loa",
+        "beam_m": 26.97,
+        "draught_m": 9.53,
+        "displacement_t": 21922,
+        "block_coeff": 0.47,
+        "block_coeff_basis": "normal displacement over LOA*B*T/1.025",
+        "length_note": "the source gives 581 ft overall and no perpendicular figure, so the resistance length is the overall length; that is roughly 2 % optimistic"
+      },
+      "trial": {
+        "shp": 30552,
+        "speed_kt": 21.3,
+        "kind": "full_power",
+        "date": "1910",
+        "load_note": "normal load as stated in the infobox"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Orion_(1910)",
+        "retrieved": "2026-10-21",
+        "quote": "During her sea trials in September 1911, Orion reached a maximum speed of 21.3 kn from 30,552 shp"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run"
+      },
+      "model": {
+        "predicted_hp": 28885,
+        "error_pct": -5.46,
+        "commit": "ec5b2bf"
+      }
+    },
+    {
+      "id": "hms-monarch-1911",
+      "name": "HMS Monarch",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1911,
+      "hull": {
+        "length_m": 177.1,
+        "length_basis": "loa",
+        "beam_m": 26.97,
+        "draught_m": 9.53,
+        "displacement_t": 21922,
+        "block_coeff": 0.47,
+        "block_coeff_basis": "normal displacement over LOA*B*T/1.025",
+        "length_note": "same class as Orion: overall length only, no perpendicular figure in the source"
+      },
+      "trial": {
+        "shp": 32277,
+        "speed_kt": 21.9,
+        "kind": "full_power",
+        "date": "1911",
+        "load_note": "normal load as stated in the infobox"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Monarch_(1911)",
+        "retrieved": "2026-10-21",
+        "quote": "During her sea trials on 9 December 1911, Monarch reached a maximum speed of 21.9 kn from 32,277 shp"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run"
+      },
+      "model": {
+        "predicted_hp": 32035,
+        "error_pct": -0.75,
+        "commit": "ec5b2bf"
+      }
+    },
+    {
+      "id": "ise-1917",
+      "name": "Ise",
+      "navy": "Imperial Japanese Navy",
+      "ship_type": "battleship",
+      "year": 1917,
+      "hull": {
+        "length_m": 208.18,
+        "length_basis": "loa",
+        "beam_m": 28.65,
+        "draught_m": 8.93,
+        "displacement_t": 29980,
+        "block_coeff": 0.549,
+        "block_coeff_basis": "normal displacement over LOA*B*T/1.025",
+        "length_note": "the source labels 208.18 m as overall; the later 25.3 kn / 81,050 shp run belongs to the reconstructed ship and is not used"
+      },
+      "trial": {
+        "shp": 56498,
+        "speed_kt": 23.6,
+        "kind": "full_power",
+        "date": "1917",
+        "load_note": "normal load as stated in the infobox"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/Japanese_battleship_Ise",
+        "retrieved": "2026-10-21",
+        "quote": "Ise reached 23.6 kn from 56,498 shp during her sea trials"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the sentence names the sea trial, the achieved speed and the power of that run"
+      },
+      "model": {
+        "predicted_hp": 50316,
+        "error_pct": -10.94,
+        "commit": "ec5b2bf"
+      }
     }
   ]
 }
