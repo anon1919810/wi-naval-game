@@ -342,8 +342,17 @@ def _apply_recorded_calibration(data, scenario, project=None):
     that fit did out of sample. An unfitted ship type is refused with a blocking
     diagnostic and the power is left uncalibrated.
     """
+    target_mode = scenario.get("target_mode", "trial")
     record = scenario.get("calibration")
+    if isinstance(record, dict) and record.get("mode") == "design":
+        _apply_design_factor(data)
+        return
     if record is None:
+        return
+    if target_mode == "design":
+        data["diagnostics"].append(diagnostic("calibration.mode_conflict",
+            "a hull-form correction fitted on measured trials must not be applied to a rated-value target: it would double-count the rated-to-trial ladder",
+            "$.options.resistance", True))
         return
     if isinstance(record, dict) and record.get("mode") == "cluster":
         _apply_cluster_correction(data, scenario, record, project)
@@ -412,3 +421,27 @@ def _apply_cluster_correction(data, scenario, record, project=None):
         data["assumptions"].append(
             "cluster correction applied: factor %.3f (share %.3f, sample %d, LOOCV %.2f%% against %.2f%% uncorrected)"
             % (out["factor"], out["cluster_share"], out["sample"], out["loocv_mae"], out["uncorrected_mae"]))
+
+
+def _apply_design_factor(data):
+    """Scale the power to a rated-value target with one recorded factor.
+
+    In design mode the bias is a pure level shift, so a single factor is the
+    right instrument. Applying a hull-form correction here instead would
+    double-count the rated-to-trial ladder, so this path is deliberately flat.
+    """
+    out = resistance_calibration.design_factor()
+    applied = 0
+    for row in data["rows"]:
+        power = row.get("effective_power_kw")
+        if power is None:
+            continue
+        row["effective_power_kw"] = power * out["factor"]
+        row["calibration"] = dict(mode="design", factor=out["factor"], sample=out["sample"],
+            loocv_mape=out["loocv_mape"], uncorrected_mape=out["uncorrected_mape"],
+            source=out["source"])
+        applied += 1
+    if applied:
+        data["assumptions"].append(
+            "design-mode factor %.4f applied to rated-value targets (sample %d, LOOCV %.2f%% against %.2f%% uncorrected)"
+            % (out["factor"], out["sample"], out["loocv_mape"], out["uncorrected_mape"]))

@@ -130,3 +130,21 @@ def cluster_factor(block_coeff, length_m, froude):
     return dict(factor=factor, cluster_share=share, cluster_weight=weight, applied=weight > 0.5,
                 sample=CLUSTER_SAMPLE, loocv_mae=CLUSTER_LOOCV_MAE,
                 uncorrected_mae=CLUSTER_UNCORRECTED_MAE, source=CLUSTER_SOURCE)
+
+
+# Fitted on the 27 cases that carry both a rated and a measured figure. In design
+# mode the error is a pure level shift: the model sits 8-50 % above the rated
+# value on every ship, so one factor takes the error from 23.04 % to 10.56 %
+# (nested leave-one-out). This is the opposite of trial mode, where a global
+# factor is harmful because the errors change sign with hull form.
+DESIGN_FACTOR = 0.8079
+DESIGN_SAMPLE = 27
+DESIGN_LOOCV_MAPE = 10.56
+DESIGN_UNCORRECTED_MAPE = 23.04
+DESIGN_SOURCE = "docs/plimsoll-1.0/resistance-methods-and-data-2026-10-21.md section 23"
+
+
+def design_factor():
+    """The single level correction for a rated-value target."""
+    return dict(factor=DESIGN_FACTOR, sample=DESIGN_SAMPLE, loocv_mape=DESIGN_LOOCV_MAPE,
+                uncorrected_mape=DESIGN_UNCORRECTED_MAPE, source=DESIGN_SOURCE)

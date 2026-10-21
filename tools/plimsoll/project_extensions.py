@@ -349,7 +349,7 @@ def _resistance(rows, diagnostics):
     for row, p in _rows(rows, "$.resistance_scenarios", diagnostics, 201):
         _keys(row, {"id", "method", "source", "estimate", "attitude_policy", "inputs", "input_provenance",
                     "qpc", "qpc_sensitivity", "table_id", "table_sha256", "friction_method",
-                    "interpolation_method", "speed_conversion_method", "holtrop_inputs", "calibration", "blend_rule", "design_speed_kn"}, p, diagnostics)
+                    "interpolation_method", "speed_conversion_method", "holtrop_inputs", "calibration", "blend_rule", "design_speed_kn", "target_mode"}, p, diagnostics)
         _metadata(row, p, diagnostics, required=True)
         method = row.get("method")
         if method not in ("holtrop_mennen_1982", "taylor_gertler_source_axis_strict",
@@ -362,6 +362,8 @@ def _resistance(rows, diagnostics):
                               ("speed_conversion_method", "international_knot_exact")):
             if key in row and row[key] != expected:
                 _diag(diagnostics, p + "." + key, "unsupported canonical method selection")
+        if "target_mode" in row and row["target_mode"] not in ("design", "trial"):
+            _diag(diagnostics, p + ".target_mode", "target_mode must be design or trial")
         if "blend_rule" in row and row["blend_rule"] not in ("block_coeff", "cluster"):
             _diag(diagnostics, p + ".blend_rule", "blend_rule must be block_coeff or cluster")
         if "design_speed_kn" in row:

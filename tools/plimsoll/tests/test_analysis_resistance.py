@@ -259,5 +259,38 @@ class ClusterCorrectionTests(unittest.TestCase):
         self.assertIn("calibration.missing_form", codes)
 
 
+class TargetModeTests(unittest.TestCase):
+    def project(self, calibration, target_mode=None):
+        project = selected_project()
+        project.setdefault("hull", {})["block_coeff"] = 0.55
+        scenario = project["resistance_scenarios"][0]
+        scenario["calibration"] = calibration
+        if target_mode:
+            scenario["target_mode"] = target_mode
+        return project
+
+    def run_speeds(self, project, speeds=(12,)):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=list(speeds)))
+        return analysis.compute_project(project, "normal", options)["stages"]["resistance"]["data"]
+
+    def test_design_mode_applies_one_flat_factor(self):
+        data = self.run_speeds(self.project(dict(mode="design"), "design"), [10, 12, 14])
+        factors = {round(row["calibration"]["factor"], 6) for row in data["rows"] if row.get("calibration")}
+        self.assertEqual(len(factors), 1, factors)
+        self.assertAlmostEqual(list(factors)[0], 0.8079, places=4)
+        self.assertTrue(any("design-mode factor" in note for note in data["assumptions"]))
+
+    def test_a_trial_fitted_correction_is_refused_on_a_rated_target(self):
+        data = self.run_speeds(self.project(dict(mode="cluster", design_speed_kn=28.5), "design"))
+        codes = [d["code"] for d in data["diagnostics"]]
+        self.assertIn("calibration.mode_conflict", codes)
+        self.assertIsNone(data["rows"][0].get("calibration"))
+
+    def test_without_a_target_mode_the_old_behaviour_holds(self):
+        data = self.run_speeds(self.project(dict(mode="cluster", design_speed_kn=28.5)))
+        self.assertIsNotNone(data["rows"][0].get("calibration"))
+        self.assertNotIn("calibration.mode_conflict", [d["code"] for d in data["diagnostics"]])
+
+
 if __name__ == "__main__":
     unittest.main()
