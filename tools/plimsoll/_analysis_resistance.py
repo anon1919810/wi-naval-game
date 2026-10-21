@@ -7,10 +7,13 @@ import math
 from pathlib import Path
 
 try:
-    from . import resistance, holtrop, units
+    from . import resistance, holtrop, resistance_blend, units
     from ._analysis_request import diagnostic
 except ImportError:
-    import resistance, holtrop, units
+    import resistance
+    import holtrop
+    import resistance_blend
+    import units
     from _analysis_request import diagnostic
 
 TABLE_ID = "taylor-gertler-molland-a3"
@@ -128,7 +131,8 @@ def compute(project, state, options, stages):
     data["input_provenance"] = copy.deepcopy(scenario.get("input_provenance", {}))
     data["derived_input_provenance"] = dict(source_path="$.stages.hydrostatics.data", estimate=True,
         input_fingerprint=state["input_fingerprint"], geometry_source=copy.deepcopy(project["geometry"].get("source")))
-    taylor = scenario["method"] == "taylor_gertler_source_axis_strict"
+    blended_method = scenario["method"] == "blended_taylor_holtrop_v1"
+    taylor = scenario["method"] == "taylor_gertler_source_axis_strict" or blended_method
     required = ({"delta_cf", "density_kg_m3", "kinematic_viscosity_m2_s"} if taylor else
         {"c_stern", "bulb_area_m2", "transom_area_m2", "appendages", "bow_thruster", "additional_roughness_delta_ca",
          "density_kg_m3", "gravity_m_s2", "kinematic_viscosity_m2_s", "x_aft_perpendicular_m", "x_fore_perpendicular_m"})
@@ -183,6 +187,8 @@ def compute(project, state, options, stages):
                 components=dict(friction_kn=None, wave_kn=None, wave_fraction_pct=None,
                     wave_definition="Taylor residual resistance; includes non-friction residual effects")))
         data["rows"].sort(key=lambda row: row["speed_kn"])
+        if blended_method:
+            _blend_with_holtrop(data, scenario, project, values, coefficients, beam, draft, plane, length)
     else:
         aft, fore = inputs.pop("x_aft_perpendicular_m"), inputs.pop("x_fore_perpendicular_m")
         declared = fore - aft
@@ -249,3 +255,71 @@ def compute(project, state, options, stages):
     data["validity"] = dict(complete=complete, numerical_convergence=None,
         model_applicable=data["primary_result"], historical_validated=None)
     return data, "completed" if complete else "model_limit"
+
+
+def _blend_with_holtrop(data, scenario, project, values, coefficients, beam, draft, plane, length):
+    """Cross-check every Taylor row against Holtrop and blend on hull form.
+
+    The two families are complementary over the historical record, so the answer
+    is a weighted pair rather than one method. A speed one family cannot reach is
+    kept with blended=False and a named reason: the surviving number is never
+    presented as agreement between two models.
+    """
+    inputs = scenario.get("holtrop_inputs")
+    if not isinstance(inputs, dict):
+        data["diagnostics"].append(diagnostic("blend.missing_inputs",
+            "a blended scenario needs holtrop_inputs alongside the Taylor inputs",
+            "$.options.resistance", True))
+        return
+    # The declared block coefficient is the ship's own statement when it exists;
+    # otherwise the measured displacement ratio at the selected plane is used and
+    # said so, because the share must never be guessed silently.
+    declared = (project.get("hull") or {}).get("block_coeff")
+    try:
+        cb = float(declared)
+        data["assumptions"].append("blend share uses the declared hull.block_coeff")
+    except (TypeError, ValueError):
+        try:
+            cb = float(values["volume_m3"]) / (length * beam * draft)
+            data["diagnostics"].append(diagnostic("blend.form_from_measurement",
+                "no declared hull.block_coeff; the blend share uses the measured displacement ratio %.6f" % cb,
+                "$.options.resistance", False))
+        except (KeyError, TypeError, ValueError, ZeroDivisionError):
+            data["diagnostics"].append(diagnostic("blend.missing_form",
+                "the blended share needs a block coefficient, declared or measurable",
+                "$.options.resistance", True))
+            return
+    aft, fore = inputs.get("x_aft_perpendicular_m"), inputs.get("x_fore_perpendicular_m")
+    if aft is None or fore is None:
+        data["diagnostics"].append(diagnostic("blend.missing_perpendiculars",
+            "holtrop_inputs must declare x_aft_perpendicular_m and x_fore_perpendicular_m",
+            "$.options.resistance", True))
+        return
+    effective = dict(inputs, lwl_m=length, beam_m=beam, draft_fore_m=draft, draft_aft_m=draft,
+        displacement_volume_m3=values["volume_m3"], midship_coeff=coefficients["cm"],
+        waterplane_coeff=values["awp_projected_xy_m2"] / (length * beam),
+        lcb_percent_lwl=100 * (values["lcb_m"] - (aft + fore) / 2) / length,
+        wetted_surface_m2=data["effective_inputs"].get("s_m2"))
+    effective.pop("x_aft_perpendicular_m", None)
+    effective.pop("x_fore_perpendicular_m", None)
+    for row in data["rows"]:
+        taylor_kn = row.get("total_resistance_kn")
+        holtrop_kn = None
+        try:
+            holtrop_out = holtrop.compute({**effective, "speed_kn": row["speed_kn"]})["values"]
+            holtrop_kn = holtrop_out["total_resistance_kn"]
+        except Exception as error:  # a hull the kernel cannot reach stays Taylor-only
+            data["diagnostics"].append(diagnostic("blend.holtrop_unavailable",
+                "Holtrop did not cover %.3f kn: %s" % (row["speed_kn"], str(error)[:120]),
+                "$.options.resistance", False))
+        mixed = resistance_blend.blend_resistance(taylor_kn, holtrop_kn, cb)
+        row["blend"] = dict(holtrop_share=mixed["holtrop_share"], blended=mixed["blended"],
+                            reason=mixed["reason"], taylor_resistance_kn=taylor_kn,
+                            holtrop_resistance_kn=holtrop_kn)
+        if mixed["total_resistance_kn"] is not None:
+            row["total_resistance_kn"] = mixed["total_resistance_kn"]
+            row["effective_power_kw"] = mixed["total_resistance_kn"] * row["speed_kn"] * 0.514444
+            components = row.setdefault("components", {})
+            components["holtrop_kn"] = holtrop_kn
+            components["holtrop_share"] = mixed["holtrop_share"]
+    data["assumptions"].append("blended resistance: Holtrop share from the declared block coefficient, applied to total resistance; QPC still applies to the blended effective power")

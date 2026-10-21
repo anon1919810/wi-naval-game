@@ -349,10 +349,11 @@ def _resistance(rows, diagnostics):
     for row, p in _rows(rows, "$.resistance_scenarios", diagnostics, 201):
         _keys(row, {"id", "method", "source", "estimate", "attitude_policy", "inputs", "input_provenance",
                     "qpc", "qpc_sensitivity", "table_id", "table_sha256", "friction_method",
-                    "interpolation_method", "speed_conversion_method"}, p, diagnostics)
+                    "interpolation_method", "speed_conversion_method", "holtrop_inputs"}, p, diagnostics)
         _metadata(row, p, diagnostics, required=True)
         method = row.get("method")
-        if method not in ("holtrop_mennen_1982", "taylor_gertler_source_axis_strict"):
+        if method not in ("holtrop_mennen_1982", "taylor_gertler_source_axis_strict",
+                          "blended_taylor_holtrop_v1"):
             _diag(diagnostics, p + ".method", "explicit supported resistance method required")
         if row.get("attitude_policy") not in ("strict_upright", "selected_plane_longitudinal_trim_proxy_v1"):
             _diag(diagnostics, p + ".attitude_policy", "explicit supported attitude policy required")

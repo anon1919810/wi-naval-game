@@ -61,6 +61,42 @@ class ResistanceCoverageTests(unittest.TestCase):
         self.assertEqual([d["code"] for d in gap["diagnostics"]], ["taylor.speed_unavailable"])
 
 
+class BlendedResistanceTests(unittest.TestCase):
+    def blended_project(self, with_inputs=True):
+        project = selected_project()
+        scenario = project["resistance_scenarios"][0]
+        scenario["method"] = "blended_taylor_holtrop_v1"
+        project.setdefault("hull", {})["block_coeff"] = 0.50
+        if with_inputs:
+            scenario["holtrop_inputs"] = dict(
+                c_stern=0, bulb_area_m2=0, transom_area_m2=0, appendages=[],
+                bow_thruster={"present": False}, additional_roughness_delta_ca=0,
+                density_kg_m3=1025, gravity_m_s2=9.81, kinematic_viscosity_m2_s=1.19e-6,
+                x_aft_perpendicular_m=-50, x_fore_perpendicular_m=50)
+        return project
+
+    def test_a_blended_row_carries_both_families_and_one_blend(self):
+        project = self.blended_project()
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(project, "normal", options)
+        row = result["stages"]["resistance"]["data"]["rows"][0]
+        blend = row["blend"]
+        self.assertAlmostEqual(blend["holtrop_share"], 0.5)
+        self.assertTrue(blend["blended"])
+        self.assertIsNotNone(blend["taylor_resistance_kn"])
+        self.assertIsNotNone(blend["holtrop_resistance_kn"])
+        low, high = sorted((blend["taylor_resistance_kn"], blend["holtrop_resistance_kn"]))
+        self.assertGreaterEqual(row["total_resistance_kn"], low - 1e-9)
+        self.assertLessEqual(row["total_resistance_kn"], high + 1e-9)
+
+    def test_a_blended_scenario_without_holtrop_inputs_is_named(self):
+        project = self.blended_project(with_inputs=False)
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(project, "normal", options)
+        codes = [d["code"] for d in result["stages"]["resistance"]["data"]["diagnostics"]]
+        self.assertIn("blend.missing_inputs", codes)
+
+
 class SelectedResistanceTests(unittest.TestCase):
     def test_taylor_proxy_keeps_actual_trim_volume_and_exact_power_conversion(self):
         project = selected_project()
