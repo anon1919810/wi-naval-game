@@ -355,6 +355,120 @@
         "error_pct": -10.94,
         "commit": "ec5b2bf"
       }
+    },
+    {
+      "id": "hms-colossus-1910",
+      "name": "HMS Colossus",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1910,
+      "hull": {
+        "length_m": 163.0,
+        "length_basis": "loa",
+        "beam_m": 26.42,
+        "draught_m": 8.23,
+        "displacement_t": 20351,
+        "block_coeff": 0.56,
+        "block_coeff_basis": "normal displacement over LOA*B*T/1.025",
+        "length_note": "overall length only; the run was made in a moderate storm, so the achieved power is above the calm-water requirement"
+      },
+      "trial": {
+        "shp": 29296,
+        "speed_kt": 21.6,
+        "kind": "three_hour",
+        "date": "1910",
+        "load_note": "the source does not state the trial displacement; normal load used"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Colossus_(1910)",
+        "retrieved": "2026-10-21",
+        "quote": "During her full-power, eight-hour sea trials on 30 March 1911, she reached a top speed of 21.6 kn from 29,296 shp in a moderate storm"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: an eight-hour full-power trial in a storm, so this is a weather-limited datum"
+      },
+      "model": {
+        "predicted_hp": 30877,
+        "error_pct": 5.4,
+        "commit": "55eb181"
+      }
+    },
+    {
+      "id": "hyuga-1917",
+      "name": "Hyūga",
+      "navy": "Imperial Japanese Navy",
+      "ship_type": "battleship",
+      "year": 1917,
+      "hull": {
+        "length_m": 204.0,
+        "length_basis": "loa",
+        "beam_m": 28.65,
+        "draught_m": 8.93,
+        "displacement_t": 30461,
+        "block_coeff": 0.569,
+        "block_coeff_basis": "normal displacement over LOA*B*T/1.025",
+        "length_note": "the source labels the length as overall; the 1930s reconstruction figures are not used"
+      },
+      "trial": {
+        "shp": 63211,
+        "speed_kt": 24.0,
+        "kind": "full_power",
+        "date": "1917",
+        "load_note": "standard load as stated in the infobox"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/Japanese_battleship_Hy%C5%ABga",
+        "retrieved": "2026-10-21",
+        "quote": "Hyūga reached 24 kn from 63,211 shp during her sea trials"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: as-built trial, reconstruction runs excluded"
+      },
+      "model": {
+        "predicted_hp": 54887,
+        "error_pct": -13.17,
+        "commit": "55eb181"
+      }
+    },
+    {
+      "id": "hms-conqueror-1911",
+      "name": "HMS Conqueror",
+      "navy": "Royal Navy",
+      "ship_type": "battleship",
+      "year": 1911,
+      "hull": {
+        "length_m": 173.5,
+        "length_basis": "loa",
+        "beam_m": 26.97,
+        "draught_m": 9.53,
+        "displacement_t": 22274,
+        "block_coeff": 0.487,
+        "block_coeff_basis": "normal displacement over LOA*B*T/1.025",
+        "length_note": "overall length only; no perpendicular figure in the source"
+      },
+      "trial": {
+        "shp": 33198,
+        "speed_kt": 22.1,
+        "kind": "full_power",
+        "date": "1911",
+        "load_note": "normal load as stated in the infobox"
+      },
+      "source": {
+        "url": "https://en.wikipedia.org/wiki/HMS_Conqueror_(1911)",
+        "retrieved": "2026-10-21",
+        "quote": "During her sea trials on 7 June 1912, Conqueror reached a maximum speed of 22.1 kn from 33,198 shp"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the sentence names the trial, the achieved speed and the power of that run"
+      },
+      "model": {
+        "predicted_hp": 33877,
+        "error_pct": 2.04,
+        "commit": "55eb181"
+      }
     }
   ]
 }

@@ -111,7 +111,7 @@ def summary(cases=None):
     """
     rows = cases if cases is not None else usable_cases()
     errors = [record["model"]["error_pct"] for record in rows]
-    out = dict(overall=_stats(errors), by_type={}, by_speed={}, by_block={})
+    out = dict(overall=_stats(errors), by_type={}, by_speed={}, by_block={}, by_fr={}, by_basis={})
     for record in rows:
         out["by_type"].setdefault(record["ship_type"], []).append(record["model"]["error_pct"])
         speed = record["trial"]["speed_kt"]
@@ -120,6 +120,15 @@ def summary(cases=None):
         cb = record["hull"]["block_coeff"]
         cband = "Cb>=0.55" if cb >= 0.55 else ("0.50<=Cb<0.55" if cb >= 0.50 else "Cb<0.50")
         out["by_block"].setdefault(cband, []).append(record["model"]["error_pct"])
-    for group in ("by_type", "by_speed", "by_block"):
+        # Froude number is the variable the resistance tables are indexed by in
+        # practice, so the error is split on it as well as on the block
+        # coefficient: a constant correction cannot fit a curve that changes
+        # sign across it.
+        length = record["hull"]["length_m"]
+        froude = (0.514444 * record["trial"]["speed_kt"]) / (9.81 * length) ** 0.5
+        fband = "Fr>=0.28" if froude >= 0.28 else ("0.24<=Fr<0.28" if froude >= 0.24 else "Fr<0.24")
+        out["by_fr"].setdefault(fband, []).append(record["model"]["error_pct"])
+        out["by_basis"].setdefault(record["hull"]["length_basis"], []).append(record["model"]["error_pct"])
+    for group in ("by_type", "by_speed", "by_block", "by_fr", "by_basis"):
         out[group] = {key: _stats(value) for key, value in sorted(out[group].items())}
     return out
