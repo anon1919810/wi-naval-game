@@ -59,3 +59,19 @@
 - 全量核心套件：**2,634 passed + 4,852 subtests passed**（719 s，exit 0）
 - 阻力相关簇：94 用例 + 121 subtests
 - 分支 `feature/plimsoll-1.0`，工作树干净
+
+
+---
+
+## 七、第 10 轮复核（逐条回读，不凭记忆）
+
+| 复核项 | 证据 |
+|---|---|
+| 四个新文件存在 | `resistance_blend.py` 5.6 kb、`resistance_calibration.py` 3.9 kb、`cases/trial-cases-2026-10-19.json` 1.4 kb、三份对应测试 |
+| 阶段接入 | `_analysis_resistance.py:135` 混合方法判定、`:192` 混合调用、`:193` 校准调用、`:201` 严格垂线拒绝、`:284` 混合垂线守卫 |
+| 场景校验 | `project_extensions.py:352` 放行 `holtrop_inputs`/`calibration`、`:356` 放行 `blended_taylor_holtrop_v1` |
+| 新增测试 | blend 12 例、calibration 6 例、trial 3 例，与阻力主簇合计 **75 passed** |
+| 全量核心套件 | **2,634 passed + 4,852 subtests passed**（719 s，exit 0） |
+| 仓库 | `f27e1ba`，工作树干净 |
+
+**未推送**：本地比远端 `ssh/feature/plimsoll-1.0` 领先 **20 个提交**，包含本目标的全部 9 次提交。
