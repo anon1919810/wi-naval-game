@@ -50,6 +50,12 @@
       "sensitivity_pct": {
         "draught 9.03 m (as filed)": 9.27,
         "draught 8.08 m (26.5 ft normal)": 12.26
+      },
+      "rated": {
+        "shp": 23000.0,
+        "speed_kt": 21.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Dreadnought_(1906)",
+        "quote": "rated at 23000 shp |lk=on}}, were intended to give a maximum speed of 21 knots"
       }
     },
     {
@@ -92,6 +98,12 @@
         "deep displacement 47,429 t + deep draught": 35.27,
         "trial displacement 42,200 t + deep draught": 22.45,
         "trial displacement + 8.90 m draught": 25.59
+      },
+      "rated": {
+        "shp": 144000.0,
+        "speed_kt": 31.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Hood",
+        "quote": "designed to produce 144000 shp |lk=on}}, which would propel the ship at 31 kn"
       }
     },
     {
@@ -129,6 +141,12 @@
         "predicted_hp": 142764,
         "error_pct": 20.06,
         "commit": "409be70"
+      },
+      "rated": {
+        "shp": 112000.0,
+        "speed_kt": 32.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Repulse_(1916)",
+        "quote": "designed to produce 112000 shp |lk=in}}, which would propel the ship at 32 kn"
       }
     },
     {
@@ -166,6 +184,12 @@
         "predicted_hp": 158665,
         "error_pct": 25.92,
         "commit": "409be70"
+      },
+      "rated": {
+        "shp": 112000.0,
+        "speed_kt": 32.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Renown_(1916)",
+        "quote": "designed to produce 112000 shp |lk=in}}, which would propel the ship at 32 kn"
       }
     },
     {
@@ -203,6 +227,12 @@
         "predicted_hp": 149528,
         "error_pct": -0.43,
         "commit": "409be70"
+      },
+      "rated": {
+        "shp": 138000.0,
+        "speed_kt": 29.0,
+        "source": "https://www.kbismarck.com/testi.html",
+        "quote": "The propulsion plant originally designed to reach 138,000 hp and 29 knots"
       }
     },
     {
@@ -278,6 +308,12 @@
         "predicted_hp": 28885,
         "error_pct": -5.46,
         "commit": "ec5b2bf"
+      },
+      "rated": {
+        "shp": 27000.0,
+        "speed_kt": 21.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Orion_(1910)",
+        "quote": "rated at 27000 shp |lk=in}} and were intended to give the battleships a speed of 21 kn"
       }
     },
     {
@@ -316,6 +352,12 @@
         "predicted_hp": 32035,
         "error_pct": -0.75,
         "commit": "ec5b2bf"
+      },
+      "rated": {
+        "shp": 27000.0,
+        "speed_kt": 21.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Monarch_(1911)",
+        "quote": "rated at 27000 shp |lk=in}} and were intended to give the battleships a speed of 21 kn"
       }
     },
     {
@@ -354,6 +396,12 @@
         "predicted_hp": 50316,
         "error_pct": -10.94,
         "commit": "ec5b2bf"
+      },
+      "rated": {
+        "shp": 45000.0,
+        "speed_kt": 23.0,
+        "source": "https://en.wikipedia.org/wiki/Japanese_battleship_Ise",
+        "quote": "designed to produce a total of 45000 shp |lk=on}} and give the ships a speed of 23 kn"
       }
     },
     {
@@ -392,6 +440,12 @@
         "predicted_hp": 30877,
         "error_pct": 5.4,
         "commit": "55eb181"
+      },
+      "rated": {
+        "shp": 25000.0,
+        "speed_kt": 21.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Colossus_(1910)",
+        "quote": "rated at 25000 shp |lk=in|abbr=on}} and were intended to give the ship a maximum speed of 21 kn"
       }
     },
     {
@@ -430,6 +484,12 @@
         "predicted_hp": 54887,
         "error_pct": -13.17,
         "commit": "55eb181"
+      },
+      "rated": {
+        "shp": 45000.0,
+        "speed_kt": 23.0,
+        "source": "https://en.wikipedia.org/wiki/Japanese_battleship_Hy%C5%ABga",
+        "quote": "designed to produce a total of 45000 shp |lk=on}} and give the ships a speed of 23 kn"
       }
     },
     {
@@ -468,6 +528,12 @@
         "predicted_hp": 33877,
         "error_pct": 2.04,
         "commit": "55eb181"
+      },
+      "rated": {
+        "shp": 27000.0,
+        "speed_kt": 21.0,
+        "source": "https://en.wikipedia.org/wiki/HMS_Conqueror_(1911)",
+        "quote": "rated at 27000 shp |lk=in}} and were intended to give the battleships a speed of 21 kn"
       }
     },
     {
@@ -506,6 +572,12 @@
         "predicted_hp": 106951,
         "error_pct": 2.21,
         "commit": "030d662"
+      },
+      "rated": {
+        "shp": 85000.0,
+        "speed_kt": 28.0,
+        "source": "http://www.worldwar1.co.uk/battlecruiser/hms-tiger.html",
+        "quote": "Propulsion: 4 shaft Brown-Curtis turbines, 85,000 shp, 28 knots"
       }
     },
     {
@@ -544,6 +616,12 @@
         "predicted_hp": 94202,
         "error_pct": 13.02,
         "commit": "030d662"
+      },
+      "rated": {
+        "shp": 75000.0,
+        "speed_kt": 27.5,
+        "source": "http://www.worldwar1.co.uk/battlecruiser/hms-queen-mary.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 75,000 shp, 27.5 knots"
       }
     },
     {
@@ -620,6 +698,12 @@
         "predicted_hp": 39628,
         "error_pct": -3.39,
         "commit": "71aa189"
+      },
+      "rated": {
+        "shp": 40000.0,
+        "speed_kt": 28.5,
+        "source": "https://www.worldwar1.co.uk/light-cruiser/hms-Caroline.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 40,000 shp, 28.5 knots"
       }
     },
     {
@@ -658,6 +742,12 @@
         "predicted_hp": 39068,
         "error_pct": -0.91,
         "commit": "71aa189"
+      },
+      "rated": {
+        "shp": 40000.0,
+        "speed_kt": 29.0,
+        "source": "https://www.worldwar1.co.uk/light-cruiser/hms-Ceres.html",
+        "quote": "Propulsion: 2 shaft Parsons/Brown-Curtis turbines, 40,000 shp, 29 knots"
       }
     },
     {
@@ -696,6 +786,12 @@
         "predicted_hp": 38982,
         "error_pct": -4.34,
         "commit": "71aa189"
+      },
+      "rated": {
+        "shp": 40000.0,
+        "speed_kt": 29.0,
+        "source": "https://www.worldwar1.co.uk/light-cruiser/hms-Caledon.html",
+        "quote": "Propulsion: 2 shaft Parsons turbines, 40,000 shp, 29kts"
       }
     },
     {
@@ -734,6 +830,12 @@
         "predicted_hp": 39629,
         "error_pct": -3.83,
         "commit": "71aa189"
+      },
+      "rated": {
+        "shp": 40000.0,
+        "speed_kt": 29.0,
+        "source": "https://www.worldwar1.co.uk/light-cruiser/hms-Danae.html",
+        "quote": "Propulsion: 2 shaft Parsons/Brown-Curtis turbines, 40,000 shp, 29 knots"
       }
     },
     {
@@ -772,6 +874,12 @@
         "predicted_hp": 85878,
         "error_pct": 12.82,
         "commit": "1876247"
+      },
+      "rated": {
+        "shp": 70000.0,
+        "speed_kt": 27.0,
+        "source": "https://www.worldwar1.co.uk/battlecruiser/hms-lion.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 70,000 shp, 27 knots"
       }
     },
     {
@@ -810,6 +918,12 @@
         "predicted_hp": 97199,
         "error_pct": 23.34,
         "commit": "1876247"
+      },
+      "rated": {
+        "shp": 70000.0,
+        "speed_kt": 27.0,
+        "source": "https://www.worldwar1.co.uk/battlecruiser/hms-lion.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 70,000 shp, 27 knots"
       }
     },
     {
@@ -848,6 +962,12 @@
         "predicted_hp": 61348,
         "error_pct": 31.93,
         "commit": "1876247"
+      },
+      "rated": {
+        "shp": 41000.0,
+        "speed_kt": 25.0,
+        "source": "https://www.worldwar1.co.uk/battlecruiser/hms-invincible.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 41,000 shp, 25 knots"
       }
     },
     {
@@ -886,6 +1006,12 @@
         "predicted_hp": 63696,
         "error_pct": 15.52,
         "commit": "1876247"
+      },
+      "rated": {
+        "shp": 44000.0,
+        "speed_kt": 25.0,
+        "source": "https://www.worldwar1.co.uk/battlecruiser/hms-indefatigable.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 44,000 shp, 25kts"
       }
     },
     {
@@ -924,6 +1050,12 @@
         "predicted_hp": 59087,
         "error_pct": 20.47,
         "commit": "1876247"
+      },
+      "rated": {
+        "shp": 44000.0,
+        "speed_kt": 25.0,
+        "source": "https://www.worldwar1.co.uk/battlecruiser/hms-indefatigable.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 44,000 shp, 25kts"
       }
     },
     {
@@ -962,6 +1094,12 @@
         "predicted_hp": 33955,
         "error_pct": 13.03,
         "commit": "1c1b173"
+      },
+      "rated": {
+        "shp": 29000.0,
+        "speed_kt": 21.0,
+        "source": "https://www.worldwar1.co.uk/battleship/hms-iron-duke.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 29,000 shp, 21kts"
       }
     },
     {
@@ -1000,6 +1138,12 @@
         "predicted_hp": 39852,
         "error_pct": 20.68,
         "commit": "1c1b173"
+      },
+      "rated": {
+        "shp": 27000.0,
+        "speed_kt": 21.0,
+        "source": "https://www.worldwar1.co.uk/battleship/hms-king-george-v.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 27,000 shp, 21kts"
       }
     },
     {
@@ -1038,6 +1182,12 @@
         "predicted_hp": 28308,
         "error_pct": 10.88,
         "commit": "1c1b173"
+      },
+      "rated": {
+        "shp": 25000.0,
+        "speed_kt": 21.0,
+        "source": "https://www.worldwar1.co.uk/battleship/hms-neptune.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 25,000 shp, 21kts"
       }
     },
     {
@@ -1076,6 +1226,12 @@
         "predicted_hp": 36807,
         "error_pct": -8.28,
         "commit": "1c1b173"
+      },
+      "rated": {
+        "shp": 34000.0,
+        "speed_kt": 22.0,
+        "source": "https://www.worldwar1.co.uk/battleship/hms-agincourt.html",
+        "quote": "Propulsion: 4 shaft Parsons turbines, 34,000 shp, 22kts"
       }
     },
     {
@@ -1114,6 +1270,12 @@
         "predicted_hp": 53497,
         "error_pct": 1.55,
         "commit": "1c1b173"
+      },
+      "rated": {
+        "shp": 37000.0,
+        "speed_kt": 22.0,
+        "source": "https://www.worldwar1.co.uk/battleship/hms-canada.html",
+        "quote": "Propulsion: 4 shaft Parsons/Brown Curtis turbines, 37,000 shp, 22kts"
       }
     }
   ]

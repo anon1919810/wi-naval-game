@@ -73,6 +73,16 @@ def validate(record):
         problems.append("source.url must be a link")
     if not str(source.get("quote", "")).strip():
         problems.append("source.quote must carry the sentence the figure came from")
+    rated = record.get("rated")
+    if rated is not None:
+        if not isinstance(rated, dict):
+            problems.append("rated must be an object when present")
+        else:
+            for key in ("shp", "speed_kt"):
+                if not isinstance(rated.get(key), (int, float)) or rated[key] <= 0:
+                    problems.append("rated.%s must be a positive number" % key)
+            if not str(rated.get("source", "")).startswith("http"):
+                problems.append("rated.source must be a link")
     if verify.get("status") not in VERIFICATION:
         problems.append("verification.status must say hand_checked or gated_auto")
     return problems
@@ -132,3 +142,28 @@ def summary(cases=None):
     for group in ("by_type", "by_speed", "by_block", "by_fr", "by_basis"):
         out[group] = {key: _stats(value) for key, value in sorted(out[group].items())}
     return out
+
+
+def rated_ladder(cases=None):
+    """How far the rated (design) figures sit above the measured trial figures.
+
+    Users bring rated values, not trials, so every correction fitted on trials is
+    offset by this ladder when applied to a user number. Reporting it explicitly is
+    the only way to keep the two modes from being confused for one another.
+    """
+    rows = cases if cases is not None else usable_cases()
+    power_ratios, speed_deltas, paired = [], [], []
+    for record in rows:
+        rated = record.get("rated")
+        if not rated:
+            continue
+        power_ratios.append(record["trial"]["shp"] / rated["shp"])
+        speed_deltas.append(100.0 * (record["trial"]["speed_kt"] / rated["speed_kt"] - 1.0))
+        paired.append(record["name"])
+    if not paired:
+        return dict(n=0)
+    return dict(n=len(paired), ships=paired,
+                power_ratio=dict(median=statistics.median(power_ratios),
+                                 low=min(power_ratios), high=max(power_ratios)),
+                speed_delta_pct=dict(median=statistics.median(speed_deltas),
+                                     low=min(speed_deltas), high=max(speed_deltas)))

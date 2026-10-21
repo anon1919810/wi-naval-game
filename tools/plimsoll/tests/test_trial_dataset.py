@@ -119,5 +119,33 @@ class DatasetSummaryTests(unittest.TestCase):
             self.assertLess(abs(error), 5.0, name + " is a small hull at high Froude and should be close")
 
 
+class RatedLadderTests(unittest.TestCase):
+    def setUp(self):
+        self.data = td.load()
+
+    def test_most_cases_carry_a_rated_value_next_to_the_trial_one(self):
+        cases = td.usable_cases()
+        with_rated = [c for c in cases if c.get("rated")]
+        self.assertGreaterEqual(len(with_rated), 20, "the ladder needs enough pairs to mean anything")
+        for case in with_rated:
+            self.assertTrue(str(case["rated"]["source"]).startswith("http"), case["name"])
+
+    def test_the_ladder_says_trials_run_above_rated(self):
+        ladder = td.rated_ladder()
+        self.assertGreater(ladder["n"], 20)
+        self.assertGreater(ladder["power_ratio"]["median"], 1.0)
+        self.assertGreater(ladder["speed_delta_pct"]["median"], 0.0)
+
+    def test_a_rated_block_without_a_source_is_refused(self):
+        record = copy.deepcopy(self.data["cases"][0])
+        record["rated"] = dict(shp=1000.0, speed_kt=10.0, source="somewhere")
+        self.assertTrue(any("rated.source" in p for p in td.validate(record)))
+
+    def test_a_rated_block_with_a_missing_field_is_refused(self):
+        record = copy.deepcopy(self.data["cases"][0])
+        record["rated"] = dict(shp=1000.0, source="https://example.com")
+        self.assertTrue(any("rated.speed_kt" in p for p in td.validate(record)))
+
+
 if __name__ == "__main__":
     unittest.main()
