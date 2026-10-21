@@ -177,5 +177,45 @@ class SelectedResistanceTests(unittest.TestCase):
         self.assertFalse(row["primary_result"])
 
 
+class BlendRuleTests(unittest.TestCase):
+    def project(self, rule, design_speed=28.5):
+        project = selected_project()
+        scenario = project["resistance_scenarios"][0]
+        scenario["method"] = "blended_taylor_holtrop_v1"
+        scenario["holtrop_inputs"] = dict(
+            c_stern=0, bulb_area_m2=0, transom_area_m2=0, appendages=[],
+            bow_thruster={"present": False}, additional_roughness_delta_ca=0,
+            density_kg_m3=1025, gravity_m_s2=9.81, kinematic_viscosity_m2_s=1.19e-6,
+            x_aft_perpendicular_m=-50, x_fore_perpendicular_m=50)
+        if rule:
+            scenario["blend_rule"] = rule
+        if design_speed is not None:
+            scenario["design_speed_kn"] = design_speed
+        return project
+
+    def test_the_cluster_rule_gives_one_weight_computed_from_the_design_point(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[10, 12, 14]))
+        result = analysis.compute_project(self.project("cluster"), "normal", options)
+        rows = result["stages"]["resistance"]["data"]["rows"]
+        shares = {round(row["blend"]["holtrop_share"], 9) for row in rows if row.get("blend")}
+        # one weight for the whole curve: the rule reads the hull, never the speed
+        self.assertEqual(len(shares), 1, shares)
+        self.assertTrue(any("blend_rule=cluster" in note
+                            for note in result["stages"]["resistance"]["data"]["assumptions"]))
+
+    def test_the_cluster_rule_without_a_design_speed_is_refused(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(self.project("cluster", design_speed=None), "normal", options)
+        codes = [d["code"] for d in result["stages"]["resistance"]["data"]["diagnostics"]]
+        self.assertIn("blend.missing_design_speed", codes)
+
+    def test_without_a_rule_the_block_coefficient_rule_still_applies(self):
+        options = dict(stages=["resistance"], resistance=dict(scenario_id="trial", speeds_kn=[12]))
+        result = analysis.compute_project(self.project(None), "normal", options)
+        row = result["stages"]["resistance"]["data"]["rows"][0]
+        self.assertNotIn("blend_rule=cluster", str(result["stages"]["resistance"]["data"]["assumptions"]))
+        self.assertIsNotNone(row["blend"])
+
+
 if __name__ == "__main__":
     unittest.main()

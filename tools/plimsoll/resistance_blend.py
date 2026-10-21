@@ -68,14 +68,19 @@ def holtrop_share(block_coeff) -> float:
     return 1.0 / (1.0 + math.exp(z))
 
 
-def blend_resistance(taylor_kn, holtrop_kn, block_coeff) -> dict:
+def blend_resistance(taylor_kn, holtrop_kn, block_coeff=None, share=None) -> dict:
     """Blend one speed total resistance and say how it was blended.
 
     A side that could not be computed is named rather than silently replaced:
     the surviving side is reported with its own weight and blended=False, so a
     caller cannot mistake it for agreement between two models.
     """
-    share = holtrop_share(block_coeff)
+    if share is None:
+        share = holtrop_share(block_coeff)
+    else:
+        share = _number(share, "share")
+        if not 0.0 <= share <= 1.0:
+            raise BlendInputError("share must lie in [0, 1]")
     taylor = None if taylor_kn is None else _number(taylor_kn, "taylor_kn")
     holtrop = None if holtrop_kn is None else _number(holtrop_kn, "holtrop_kn")
     if taylor is not None and taylor < 0.0:

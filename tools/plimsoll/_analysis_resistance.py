@@ -297,6 +297,20 @@ def _blend_with_holtrop(data, scenario, project, values, coefficients, beam, dra
         wetted_surface_m2=data["effective_inputs"].get("s_m2"))
     effective.pop("x_aft_perpendicular_m", None)
     effective.pop("x_fore_perpendicular_m", None)
+    rule = scenario.get("blend_rule", "block_coeff")
+    design_share = None
+    if rule == "cluster":
+        design_speed = scenario.get("design_speed_kn")
+        if not isinstance(design_speed, (int, float)) or design_speed <= 0:
+            data["diagnostics"].append(diagnostic("blend.missing_design_speed",
+                "the cluster blend rule needs design_speed_kn: the weight is a property of the ship, not of the speed being evaluated",
+                "$.options.resistance", True))
+            return
+        froude = (0.514444 * design_speed) / ((9.81 * length) ** 0.5)
+        design_share = resistance_blend.holtrop_share_cluster(cb, length, froude)
+        data["assumptions"].append(
+            "blend_rule=cluster: Holtrop share %.3f from Cb %.3f, length %.1f m and the design Froude number %.3f"
+            % (design_share, cb, length, froude))
     for row in data["rows"]:
         taylor_kn = row.get("total_resistance_kn")
         holtrop_kn = None
@@ -307,7 +321,7 @@ def _blend_with_holtrop(data, scenario, project, values, coefficients, beam, dra
             data["diagnostics"].append(diagnostic("blend.holtrop_unavailable",
                 "Holtrop did not cover %.3f kn: %s" % (row["speed_kn"], str(error)[:120]),
                 "$.options.resistance", False))
-        mixed = resistance_blend.blend_resistance(taylor_kn, holtrop_kn, cb)
+        mixed = resistance_blend.blend_resistance(taylor_kn, holtrop_kn, cb) if design_share is None else resistance_blend.blend_resistance(taylor_kn, holtrop_kn, share=design_share)
         row["blend"] = dict(holtrop_share=mixed["holtrop_share"], blended=mixed["blended"],
                             reason=mixed["reason"], taylor_resistance_kn=taylor_kn,
                             holtrop_resistance_kn=holtrop_kn)
