@@ -123,7 +123,7 @@
       },
       "verification": {
         "status": "gated_auto",
-        "notes": "figure selected by the clause-level trial gate"
+        "notes": "figure selected by the clause-level trial gate | cross-check: worldwar1.co.uk gives 119,025 shp at the same speed"
       },
       "model": {
         "predicted_hp": 142764,
@@ -160,7 +160,7 @@
       },
       "verification": {
         "status": "gated_auto",
-        "notes": "figure selected by the clause-level trial gate"
+        "notes": "figure selected by the clause-level trial gate | cross-check: worldwar1.co.uk gives 126,300 shp at the same speed"
       },
       "model": {
         "predicted_hp": 158665,
@@ -734,6 +734,196 @@
         "predicted_hp": 39629,
         "error_pct": -3.83,
         "commit": "71aa189"
+      }
+    },
+    {
+      "id": "hms-lion-1910",
+      "name": "HMS Lion",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1910,
+      "hull": {
+        "length_m": 205.7,
+        "length_basis": "lbp",
+        "beam_m": 27.0,
+        "draught_m": 8.53,
+        "displacement_t": 26773,
+        "block_coeff": 0.551,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "675 ft waterline used; overall is 700 ft"
+      },
+      "trial": {
+        "shp": 76120,
+        "speed_kt": 27.62,
+        "kind": "full_power",
+        "date": "1910",
+        "load_note": "normal displacement 26,350 long tons; 30,084 deep"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battlecruiser/hms-lion.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Lion 76,120 shp = 27.62 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the class page prints each sister's trial result under the design rating; Lion is the ship this record describes"
+      },
+      "model": {
+        "predicted_hp": 85878,
+        "error_pct": 12.82,
+        "commit": "1876247"
+      }
+    },
+    {
+      "id": "hms-princess-royal-1911",
+      "name": "HMS Princess Royal",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1911,
+      "hull": {
+        "length_m": 205.7,
+        "length_basis": "lbp",
+        "beam_m": 27.0,
+        "draught_m": 8.53,
+        "displacement_t": 26773,
+        "block_coeff": 0.551,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "class page: Lion-class dimensions used for her sister's trial run"
+      },
+      "trial": {
+        "shp": 78803,
+        "speed_kt": 28.5,
+        "kind": "full_power",
+        "date": "1911",
+        "load_note": "normal displacement 26,350 long tons (class figure)"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battlecruiser/hms-lion.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Lion 76,120 shp = 27.62 knots Princess Royal 78,803 shp = 28.5 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the class page prints each sister's trial result under the design rating; Princess Royal is the ship this record describes"
+      },
+      "model": {
+        "predicted_hp": 97199,
+        "error_pct": 23.34,
+        "commit": "1876247"
+      }
+    },
+    {
+      "id": "hms-invincible-1907",
+      "name": "HMS Invincible",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1907,
+      "hull": {
+        "length_m": 170.7,
+        "length_basis": "lbp",
+        "beam_m": 24.0,
+        "draught_m": 8.13,
+        "displacement_t": 17700,
+        "block_coeff": 0.519,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "560 ft waterline used; overall is 567 ft"
+      },
+      "trial": {
+        "shp": 46500,
+        "speed_kt": 26.64,
+        "kind": "full_power",
+        "date": "1907",
+        "load_note": "load displacement 17,420 long tons"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battlecruiser/hms-invincible.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Invincible 46,500 shp = 26.64 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the class page prints each sister's trial result under the design rating; Invincible is the ship this record describes"
+      },
+      "model": {
+        "predicted_hp": 61348,
+        "error_pct": 31.93,
+        "commit": "1876247"
+      }
+    },
+    {
+      "id": "hms-indefatigable-1909",
+      "name": "HMS Indefatigable",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1909,
+      "hull": {
+        "length_m": 179.2,
+        "length_basis": "lbp",
+        "beam_m": 24.33,
+        "draught_m": 9.14,
+        "displacement_t": 19051,
+        "block_coeff": 0.466,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "588 ft waterline used; overall is 590 ft"
+      },
+      "trial": {
+        "shp": 55140,
+        "speed_kt": 26.89,
+        "kind": "full_power",
+        "date": "1909",
+        "load_note": "load displacement 18,750 long tons"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battlecruiser/hms-indefatigable.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Indefatigable 55,140 shp = 26.89 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the class page prints each sister's trial result under the design rating; Indefatigable is the ship this record describes"
+      },
+      "model": {
+        "predicted_hp": 63696,
+        "error_pct": 15.52,
+        "commit": "1876247"
+      }
+    },
+    {
+      "id": "hms-new-zealand-1911",
+      "name": "HMS New Zealand",
+      "navy": "Royal Navy",
+      "ship_type": "battlecruiser",
+      "year": 1911,
+      "hull": {
+        "length_m": 179.2,
+        "length_basis": "lbp",
+        "beam_m": 24.33,
+        "draught_m": 9.14,
+        "displacement_t": 19051,
+        "block_coeff": 0.466,
+        "block_coeff_basis": "given displacement over waterline length * B * T / 1.025",
+        "length_note": "Indefatigable-class dimensions used for her sister's trial run"
+      },
+      "trial": {
+        "shp": 49048,
+        "speed_kt": 26.38,
+        "kind": "full_power",
+        "date": "1911",
+        "load_note": "load displacement 18,750 long tons (class figure)"
+      },
+      "source": {
+        "url": "https://www.worldwar1.co.uk/battlecruiser/hms-indefatigable.html",
+        "retrieved": "2026-10-21",
+        "quote": "Trials: Indefatigable 55,140 shp = 26.89 knots New Zealand 49,048 shp = 26.38 knots"
+      },
+      "verification": {
+        "status": "hand_checked",
+        "notes": "read by the agent: the class page prints each sister's trial result under the design rating; New Zealand is the ship this record describes"
+      },
+      "model": {
+        "predicted_hp": 59087,
+        "error_pct": 20.47,
+        "commit": "1876247"
       }
     }
   ]

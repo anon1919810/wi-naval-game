@@ -81,5 +81,43 @@ class DatasetSummaryTests(unittest.TestCase):
                          "claim that Cb sets the sign would stand")
 
 
+    def test_large_hulls_at_high_froude_are_the_over_predicting_cluster(self):
+        """A three-way condition, not a single parameter, separates the cluster.
+
+        Every hull of 200 m or more with Cb >= 0.49 running at Fr >= 0.30
+        over-predicts, while a hull of the same length and speed but fine form
+        (Furious, Cb 0.396) under-predicts and light cruisers of 130 m at Fr 0.42
+        are within 5 %. That is the shape of a wave-resistance hump that moves with
+        length rather than a property of a single coefficient.
+
+        Provisional: it rests on seven cases. It is written as a test so that the
+        next records added will break it loudly if it is wrong.
+        """
+        cases = td.usable_cases()
+        cluster, fine, short = [], [], []
+        for case in cases:
+            hull, trial, error = case["hull"], case["trial"], case["model"]["error_pct"]
+            froude = (0.514444 * trial["speed_kt"]) / (9.81 * hull["length_m"]) ** 0.5
+            if hull["length_m"] >= 200 and hull["block_coeff"] >= 0.49 and froude >= 0.30:
+                cluster.append((case["name"], error))
+            elif hull["length_m"] >= 200 and froude >= 0.30:
+                fine.append((case["name"], error))
+            elif hull["length_m"] < 150 and froude >= 0.40:
+                short.append((case["name"], error))
+        strong = [(n, e) for n, e in cluster if e > 2.0]
+        self.assertGreaterEqual(len(strong), 6,
+                                "the cluster should hold at least six clear over-predictions")
+        # Bismarck qualifies on all three parameters and lands at zero: the one
+        # documented exception, kept visible instead of being excluded by a
+        # threshold that was tuned after seeing it.
+        exceptions = [(n, e) for n, e in cluster if abs(e) <= 2.0]
+        self.assertEqual([n for n, _ in exceptions], ["Bismarck"],
+                         "if another hull joins the exception list the rule has broken and the test must say so")
+        for name, error in fine:
+            self.assertLess(error, 0.0, name + " is the fine-form counter-example")
+        for name, error in short:
+            self.assertLess(abs(error), 5.0, name + " is a small hull at high Froude and should be close")
+
+
 if __name__ == "__main__":
     unittest.main()
